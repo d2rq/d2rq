@@ -1,5 +1,5 @@
 /*
- * $Id: ValueSource.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: ValueSource.java,v 1.2 2004/08/04 19:55:33 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -7,10 +7,30 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Represents a source of strings that are in some way created from a
- * database record. Typically used by a {@link NodeMaker}
- * to retrieve node values.
- *
+ * Describes a set of strings that are obtained in some way
+ * from one or more database columns.
+ * <p>
+ * Typical implementations are {@link Column} (describing the set
+ * of strings contained in one database column), {@link Pattern}
+ * (describing the set of strings that is obtained by sticking
+ * the values of several database fields into a string pattern),
+ * and {@link BlankNodeIdentifier} (similar).
+ * <p>
+ * There are several other ValueSources that modify the behaviour
+ * of another underlying ValueSource, implementing the Decorator
+ * pattern. This includes {@link TranslationTable}.TranslatingValueSource
+ * (translates values using a translation table or translation class)
+ * and the various value restrictions (@link RegexRestriction et. al.).
+ * <p>
+ * ValueSources are used by {@link NodeMaker}s. A node maker
+ * wraps the strings into Jena nodes, thus creating a description
+ * of a set of RDF nodes.
+ * <p>
+ * TODO: Better name for ValueSource: ValueSetDescription?
+ * 
+ * <p>History:
+ * <br>2004-08-02: Initial version.
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
  */
 interface ValueSource {

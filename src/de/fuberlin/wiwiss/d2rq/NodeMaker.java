@@ -9,23 +9,43 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 
 /**
- * NodeMakers create Nodes from database result rows. The actual mapping from
- * the database result to a value happens within a {@link ValueSource}. A
- * NodeMaker is responsible for creating a Node instance from that value.
- *
- * A node can be created from:
+ * NodeMakers represent the nodes of the virtual RDF graph created by
+ * D2RQ. One NodeMaker instance describes a set of nodes that are
+ * created from a common data source, for example a database column.
+ * NodeMakers
+ * <ul>
+ * <li>can return the database column(s) that the node set is based on
+ *   ({@link #getColumns}),</li>
+ * <li>can check if a concrete node could be in the node set
+ *   without querying the DB ({@link #couldFit}),</li>
+ * <li>can check what database column
+ *   values correspond to a concrete node ({@link #getColumnValues}),</li>
+ * <li>and build a concrete node from a database result row
+ *   ({@link #getNode}).</li>
+ * </ul>
+ * <p>
+ * Most of the actual work is done by a chain of {@link ValueSource}
+ * instances that lie below the NodeMaker. The NodeMaker only wraps
+ * and unwraps the String values (URIs, literals and blank node IDs)
+ * into/from Jena Node instances.
+ * </p>
+ * NodeMakers are used by {@link PropertyBridge}s as their subjects,
+ * predicates and objects.
+ * </p>
+ * There are implementations for the different types of RDF nodes:
+ * {@link UriMaker}, {@link LiteralMaker} and {@link BlankNodeMaker}.
+ * A special implementation is the {@link FixedNodeMaker}, which
+ * is a single-element node set.
+ * <p>
+ * TODO: Better name for NodeMaker: NodeSetDescription?
  * 
- * 1. A fixed value (URI/Literal)
- * 2. The value of a column in the database (URI/Literal)
- * 3. A pattern which includes one or more columns from the database (URI/Literal)
- * 4. One or more columns values that are used for the bNodeID (bNode)
+ * <p>History:<br>
+ * 06-16-2004: Initial version of this class.
+ * 08-04-2004: Added couldFit, getColumns and getColumnValues
  * 
- * <BR>History: 06-16-2004   : Initial version of this class.
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
- * @see de.fuberlin.wiwiss.d2rq.UriMaker
- * @see de.fuberlin.wiwiss.d2rq.LiteralMaker
- * @see de.fuberlin.wiwiss.d2rq.BlankNodeMaker
+ * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 interface NodeMaker {
 
