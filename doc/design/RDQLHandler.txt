@@ -15,6 +15,9 @@ a QueryPlan is something that can instanciate several QueryEngines
 that means, it can be called multiple times with executeBindings()
 a QueryEngine can only
 
+For SQL optimization it is necessary to know how RDF-variables that translate to @@pattern and other cases can 
+shared in the SELECT query
+
 public class RDQLHandler {
 	RDQLQuery query; // we could assume that a previous processing stage filters unifying variables such as ?x = ?y.
     List disjunctions; // for each triple the set of property-bridges equivalent combined queries (a set equals a QueryCombiner)
@@ -23,7 +26,7 @@ public class RDQLHandler {
 	void algorithm() {
 		collectPropertyBridgesForTriples(); // -> setsOfPossiblePropertyBridges
 		addTypeAssertionsToQuery();
-		disjunctions=getDisjunctions(); 
+		makeDisjunctions(); 
 		conjunctions=getCompatibleConjunctions(disjunctions); // can be returned by an iterator
 		conjunctionResultIterator(); // pulls answers from database
 		for each result 
@@ -38,7 +41,7 @@ public class RDQLHandler {
 			intersect with intersection of ranges
 	}
 
-	void getDisjunctions() {
+	void makeDisjunctions() {
 		foreach triple t in query 
 		  tc = tripleToQueryCombiner(t);
 		  renameColumns(); // two triples generally have nothing in common so rename tables
@@ -60,26 +63,6 @@ public class RDQLHandler {
 		replace all instances of Tr2_Papers with Tr1_Papers
 	}
 			
-	void tripleToQueryCombiner(Triple t) {
-		// stolen from GraphD2RQ.find() and modified
-		// a queryCombiner holds a condensed information of all applicable propertyBridges for a single Triple t
-		QueryCombiner combiner = new QueryCombiner();
-		QueryContext context = new QueryContext();
-		Iterator it = this.propertyBridges.iterator();
-		while (it.hasNext()) {
-			PropertyBridge bridge = (PropertyBridge) it.next();
-			if (!bridge.couldFit(t, context)) {
-				continue;
-			}
-			if (Logger.instance().debugEnabled()) {
-				Logger.instance().debug("--------------------------------------------");
-				Logger.instance().debug("Using property bridge: " + bridge);
-			}
-			combiner.add(new TripleQuery(bridge,
-										 t.getSubject(), t.getPredicate(), t.getObject()));
-		}
-		return combiner;
-	}
 }
 
 public class RDQLQuery {

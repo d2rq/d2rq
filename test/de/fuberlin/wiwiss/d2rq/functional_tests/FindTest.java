@@ -1,5 +1,5 @@
 /*
- * $Id: FindTest.java,v 1.2 2004/08/11 15:06:30 cyganiak Exp $
+ * $Id: FindTest.java,v 1.3 2005/03/02 13:03:47 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -34,16 +34,7 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * 
  * @author Richard Cyganiak <richard@cyganiak.de>
  */
-public class FindTest extends TestCase {
-	private final static String D2RQMap = "file:doc/manual/ISWC-d2rq.n3";
-	private final static String NS = "http://annotation.semanticweb.org/iswc/iswc.daml#";
-	private final static RDFDatatype xsdString =
-			TypeMapper.getInstance().getSafeTypeByName("http://www.w3.org/2001/XMLSchema#string");
-	private final static RDFDatatype xsdYear =
-			TypeMapper.getInstance().getSafeTypeByName("http://www.w3.org/2001/XMLSchema#gYear");
-
-	private GraphD2RQ graph;
-	private Set resultTriples; 
+public class FindTest extends FindTestFramework {
     
 	/**
 	 * Constructor for FindTest.
@@ -51,15 +42,6 @@ public class FindTest extends TestCase {
 	 */
 	public FindTest(String arg0) {
 		super(arg0);
-	}
-
-	protected void setUp() throws Exception {
-		this.graph = new GraphD2RQ(D2RQMap);
-//		this.graph.enableDebug();
-	}
-
-	protected void tearDown() throws Exception {
-		this.graph.close();
 	}
 
 	public void testListTypeStatements() {
@@ -286,35 +268,5 @@ public class FindTest extends TestCase {
 		find(Node.ANY, Node.ANY, Node.createURI("http://www.conference.org/conf02004/paper#Paper1"));
 //		dump();
 		assertTripleCount(2);
-	}
-
-	private void find(Node s, Node p, Node o) {
-		this.resultTriples = new HashSet();
-		ExtendedIterator it = this.graph.find(s, p, o);
-		while (it.hasNext()) {
-			this.resultTriples.add(it.next());
-		}
-	}
-	
-	void dump() {
-		int count = 1;
-		Iterator it = this.resultTriples.iterator();
-		while (it.hasNext()) {
-			System.out.println("Result Triple " + count + ": " + it.next());
-			count++;
-		}
-		System.out.println();
-	}
-
-	private void assertTripleCount(int count) {
-		assertEquals(count, this.resultTriples.size());
-	}
-	
-	private void assertTriple(Node s, Node p, Node o) {
-		assertTrue(this.resultTriples.contains(new Triple(s, p, o)));
-	}
-	
-	private void assertNoTriple(Node s, Node p, Node o) {
-		assertFalse(this.resultTriples.contains(new Triple(s, p, o)));
 	}
 }

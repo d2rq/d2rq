@@ -1,5 +1,5 @@
 /*
- * $Id: RDQLTest.java,v 1.2 2005/02/23 21:36:42 garbers Exp $
+ * $Id: RDQLTest.java,v 1.3 2005/03/02 13:03:48 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -227,7 +227,7 @@ private ModelD2RQ model;
 		return true;
 	}
 	
-	void dump() {
+	protected void dump() {
 		Iterator it = this.results.iterator();
 		int count = 1;
 		while (it.hasNext()) {

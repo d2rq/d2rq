@@ -14,5 +14,10 @@ In order to run the test, you have to
 2. Change the datsource configuration in the mapping file 
    doc/manual/ISWC-d2rq.n3 to connect to your database.
 
+If you want to create your own test cases, you may want to subclass FindTestFramework
+or RDQLTestFramework and do 
+  TestFramework.setD2RQMap(mappingFile);
+  TestFramework.setNS(namespace);
 ----------------------------------------
 Chris, 08-12-2004
+Joerg, 01-03-2005

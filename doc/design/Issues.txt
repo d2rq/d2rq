@@ -1,0 +1,63 @@
+Validity of processing different PropertyBridges together in queries:
+In case of OR: o.k.
+In "find" some Property-Bridges are combinable, because the property-value is a variable,
+the select term gets bigger and the different selected fields are divided afterwards.
+
+In case of AND: not in general.
+Example:
+RDQL Pattern: (?x p1 v1) , (?x p2 v2)
+- where p1 translates to Table.Col1 and p2 translates to Table.Col2 and ?x to Table.X. 
+- if we do not now anything about Table.X must be translated to
+  SELECT P1.X FROM Table AS P1 , Table AS P2
+  WHERE (P1.X = P2.X) AND (P1.Col1 = v1) AND (P2.Col2 = v2)
+- if we know that P1.X is Key in Table, we could express more efficiently:
+  SELECT X FROM Table 
+  WHERE (Table.Col1 = v1) AND (Table.Col2 = v2)
+Anyhow we could expect that a good database engine will optimize the first select statement when
+it has the Key information in its database scheme.
+
+
+in find: bridge.couldFit(t, context)
+-> bridge.uriMatchPolicy.couldFitSubjectInContext(context)
+
+does "find (?x p ?x)" work in version 0.2 ?
+this is the only case where a variable can be shared.
+
+jena.graph.query.Pattern usable or konficts with D2RQ?
+
+Can we assume that the jena framework just passes sets of triples, that are connected?
+This seems reasonable, since the results of two unconnected triple sets can be freely combined.
+
+What is better: map different database columns to same RDF-Property or distinguish them and join them
+in a succeeding rdfs step, e.g. (db:authorName rdfs:subtypeOf dc:author)
+
+jg: changed following d2rq code:
+Column: now more time efficient. needed for column analysis in SQL-alias situations (Table AS Alias)
+SQLStatementMaker: extended to cope with alias situations
+
+Possible Tradoffs:
+==================
+if bandwidth from database to jena is limited then filtering on DB side is a must. 
+-> just send conjunctions
+If number of database queries (= # process switches) must be reduced, we can send disjunctive SELECTS
+to database and filter on the client (d2rq) side.
+-> do s.th like QueryCombiner
+Probably best: send only conjunctions with as much conditions as possible.
+
+Naming of Classes:
+==================
+Classes that are seen from the Jena side and correspond to Jena interfaces have D2RQ prefix or suffix.
+GraphD2RQ and ModelD2RQ hav suffixes. That shows they are to be instanciated, whereas
+D2RQCapabilities etc. (prefix) are instanciated from within the D2RQ framework.
+
+
+I am not sure, if Jena.PatternStage.nest() can work, because the domain only gets copied 
+after a full pattern match. But as I understand, p.match has side effects on domain.
+So a domain.copy() should happen in the while loop before p.match()!
+
+TripleResultSet could simply be reused and made more efficient, if cachedTriple is cachedTripleList
+(same length as tripleMakers) instead.
+
+Node-Constraints
+================
+ask Richard, how we should use QueryContext in the case of shared variables

@@ -90,3 +90,20 @@ C. Things to override:
 
 D2RQPatternStage extends PatternStage extends Stage
 D2RQPatternStage(Graph graph, Mapping map, ExpressionSet constraints, Triple[] triples) 
+
+
+
+Matching Variables:
+===================
+occours in Pattern.match (which in turn occours in PatternStage)
+jena.graph.query.Element
+	protected int index; // probably the index in domain.
+    public abstract boolean match( Domain d, Node x );
+Subclass Bind:
+    match(d,x) changes Domain at index
+Subclass Bound"
+    match(d,x) checks x against d.get(index)
+Subclass Fixed:
+    protected Node fixed;
+	match(d,x) checks x against fixed
+	
