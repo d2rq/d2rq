@@ -29,7 +29,7 @@ class PropertyBridge {
 	private Set joins;
 	private Set conditions = new HashSet(1);
 	private URIMatchPolicy uriMatchPolicy = new URIMatchPolicy();
-	private boolean mayContainDuplicates = false;
+	private boolean mightContainDuplicates = false;
 
 	public PropertyBridge(Node id, Node property, NodeMaker subjectMaker, NodeMaker objectMaker, Database database, Set joins) {
 		this.id = id;
@@ -72,12 +72,12 @@ class PropertyBridge {
 		return this.uriMatchPolicy.getEvaluationPriority();
 	}
 
-	public void setMayContainDuplicates(boolean mayContainDuplicates) {
-		this.mayContainDuplicates = mayContainDuplicates;
+	public void setMightContainDuplicates(boolean mayContainDuplicates) {
+		this.mightContainDuplicates = mayContainDuplicates;
 	}
 
-	public boolean mayContainDuplicates() {
-		return this.mayContainDuplicates;
+	public boolean mightContainDuplicates() {
+		return this.mightContainDuplicates;
 	}
 	/**
 	 * Checks if a given triple could match this bridge without

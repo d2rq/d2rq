@@ -1,5 +1,5 @@
 /*
- * $Id: QueryCombiner.java,v 1.2 2004/08/04 18:26:31 cyganiak Exp $
+ * $Id: QueryCombiner.java,v 1.3 2004/08/05 08:10:53 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -68,7 +68,7 @@ class QueryCombiner {
 		result.addConditions(first.getConditions());
 		result.addSelectColumns(first.getSelectColumns());
 		result.addColumnRenames(first.getReplacedColumns());
-		result.setEliminateDuplicates(first.mayContainDuplicates());
+		result.setEliminateDuplicates(first.mightContainDuplicates());
 		while (it.hasNext()) {
 			TripleQuery query = (TripleQuery) it.next();
 			result.addSelectColumns(query.getSelectColumns());

@@ -1,5 +1,5 @@
 /*
- * $Id: TripleQuery.java,v 1.2 2004/08/04 18:26:31 cyganiak Exp $
+ * $Id: TripleQuery.java,v 1.3 2004/08/05 08:10:53 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -99,8 +99,8 @@ class TripleQuery {
 		return this.bridge.getDatabase();
 	}
 
-	public boolean mayContainDuplicates() {
-		return this.bridge.mayContainDuplicates();
+	public boolean mightContainDuplicates() {
+		return this.bridge.mightContainDuplicates();
 	}
 
 	/**
@@ -126,7 +126,7 @@ class TripleQuery {
 		if (!getDatabase().equals(other.getDatabase())) {
 			return false;
 		}
-		if (this.bridge.mayContainDuplicates() || other.bridge.mayContainDuplicates()) {
+		if (this.bridge.mightContainDuplicates() || other.bridge.mightContainDuplicates()) {
 			return false;
 		}
 		if (!getJoins().equals(other.getJoins())) {
