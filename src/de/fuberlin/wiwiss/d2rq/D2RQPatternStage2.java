@@ -1,5 +1,5 @@
 //
-// /  D2RQPatternStage.java
+//  D2RQPatternStage.java
 //  d2rq-map
 //
 //  Created by Joerg Garbers on 25.02.05.
@@ -18,6 +18,15 @@ import com.hp.hpl.jena.graph.query.Pipe;
 import com.hp.hpl.jena.graph.query.ValuatorSet;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
+/**
+ * Instances of this {@link com.hp.hpl.jena.graph.query.Stage} are created by {@link D2RQQueryHandler} to handle 
+ * a set of query triples that by D2RQ-mapping refer to the same database.
+ * 
+ * @author jg
+ * @since V0.3
+ * @see CombinedPatternStage
+ * @see PatternQueryCombiner
+ */
 public class D2RQPatternStage2 extends CombinedPatternStage {
     // TODO keep just one instance of PatternQueryCombiner and update Property Bridges
     // only when updated with previous stage (see varInfo.boundDomainIndexToShared)
@@ -38,6 +47,13 @@ public class D2RQPatternStage2 extends CombinedPatternStage {
 		D2RQPatternStage2.this.constraints = constraints;
 	}
 
+	/**
+	 * Sets up {@link PatternQueryCombiner} and returns its resultTriplesIterator.
+	 * Passes stage information to the PatternQueryCombiner.
+	 * @param triples 
+	 * @return an iterator. Each result is a possible and full instanciation of
+	 * triples according to D2RQ. 
+	 */
 	protected ClosableIterator resultIteratorForTriplePattern(Triple[] triples) {
 		PatternQueryCombiner combiner = new PatternQueryCombiner(graph,
 				varInfo, constraints, triples); // pass map?

@@ -26,9 +26,10 @@ import com.hp.hpl.jena.graph.*;
  */
 class D2RQResultIterator extends NiceIterator implements ExtendedIterator {
 
-    /** All TripleResultSets for this D2RQResultIterator
-	* There can be serveral because query results can be stored in several tables (e.g. rdf:type)
-	*/
+    /** 
+     * All TripleResultSets for this D2RQResultIterator.
+	 * There can be serveral because query results can be stored in several tables (e.g. rdf:type)
+	 */
     private ArrayList tripleResultSets;
 
     /** Iterator over all TripleResultSets  */

@@ -8,18 +8,38 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 
+/**
+ * Holds constraint information for a variable node.
+ * In a query a variable node is either a result value, or a shared variable
+ * or both. If it is a shared variable, we collect into a NodeConstraint 
+ * all constraining information that we know about the different node positions
+ * from the {@link PropertyBridge}s.
+ * 
+ * @author jg
+ * @since V0.3
+ */
 public class NodeConstraint {
+	/** true means: satisfiable. */
     public boolean possible=true;
+    /** a flag that shows, if constraint information was added. */
     boolean infoAdded = false;
 
+    /** if not null, we allready know the value of the variable, but still have to check for 
+     * other occourences. */
     public Node fixedNode;
+    /** What is the type, an URI, a blank node or a literal? */
     public int nodeType=NotFixedNodeType;
+    /** A literalMaker can be matched against another literalMaker. 
+     * Both literals must produce the same language or XSD-Type. */
     public LiteralMaker literalMaker; // used by LiteralMaker only
 
     // ValueSource constraints
-    protected Set conditions=new HashSet(); // valueSource condition Strings (SQL)
-    protected Set columns=new HashSet(); // set of columns that equal with this node
-    protected Set patterns=new HashSet(); // all patterns to be matched against
+    /** valueSource condition Strings (SQL) */
+    protected Set conditions=new HashSet(); 
+    /** set of columns that are equal with this node */
+    protected Set columns=new HashSet(); 
+    /** all patterns to be matched against */
+    protected Set patterns=new HashSet(); 
     // protected Map columnToEqualColumns=new HashMap(); // column -> set of equal columns (may be inferred by patterns)
     // protected Map columnToDataType=new HashMap(); // column -> Database.ColumnType (Integer)
     // protected Map patternToEqualPatterns=new HashMap(); // pattern 
@@ -31,6 +51,10 @@ public class NodeConstraint {
     public static final int UriNodeType = 2;
     public static final int LiteralNodeType = 3;    
     
+    /** 
+     * We see a literal NodeMaker.
+     * @param m
+     */
     public void matchLiteralMaker(LiteralMaker m) {
         if (!possible)
             return;
@@ -41,6 +65,10 @@ public class NodeConstraint {
         }
     }
 
+    /** 
+     * We see a fixed NodeMaker.
+     * @param node
+     */
     public void matchFixedNode(Node node) {
         if (!possible)
             return;
@@ -54,6 +82,11 @@ public class NodeConstraint {
         possible = fixedNode.equals(node);
     }
  
+    /**
+     * We see a NodeMaker, that produces nodes of type 
+     * BlankNodeType, UriNodeType or LiteralNodeType. 
+     * @param t
+     */
     public void matchNodeType(int t) {
         if (!possible)
             return;
@@ -65,12 +98,23 @@ public class NodeConstraint {
         possible = (nodeType == t);
     }
     
+    /** 
+     * Constraints given on Nodes that are equal to Columns
+     * can be directly translated to Column constraints.
+     * NodeMakers with an attached {@link ValueSource} call this.
+     * @param c
+     */
     public void matchValueSource(Column c) {
         if (!possible)
             return;
         columns.add(c);
     }
     
+    /** 
+     * Pattern-Constraints can be translated to column constraints.
+     * NodeMakers with an attached {@link ValueSource} call this.
+     * @param p
+     */
     public void matchValueSource(Pattern p) {
         if (!possible)
             return;
@@ -104,6 +148,12 @@ public class NodeConstraint {
         conditionsAddEqual(c1.getQualifiedName(),c2.getQualifiedName());
     }
     
+    /** 
+     * Adds a textual equivalence condition to <code>conditions</code>.
+     * We avoid adding both "x=y" and "y=x" by sorting the arguments <code>n1</code> and <code>n2</code> first.
+     * @param n1
+     * @param n2
+     */
     public void conditionsAddEqual(String n1, String n2) {
         int cmp=n1.compareTo(n2);
         if (cmp==0)
@@ -116,6 +166,12 @@ public class NodeConstraint {
         conditions.add(n1 + "=" + n2);
     }
     
+    /** 
+     * The collected constraints are created as SQL constraints.
+     * @param sql the statment maker that gets the constraints. 
+     * It knows about {@link Alias}es and correct quoting of values for integer/string
+     * database columns.
+     */
     public void addConstraintsToSQL(SQLStatementMaker sql) {
         String value=null;
         String firstCol=null;

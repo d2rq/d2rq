@@ -1,5 +1,5 @@
 /*
- * $Id: Alias.java,v 1.3 2005/03/07 17:38:44 garbers Exp $
+ * $Id: Alias.java,v 1.4 2005/03/14 07:02:27 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -8,20 +8,22 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * Represents an SQL join between two tables, spanning one or more columns.
- *
- * <p>History:<br>
- * 08-03-2004: Initial version of this class.<br>
+ * An Alias represents an SQL alias for a physical database table. 
+ * The <code>sqlExpression</code> is of the form <code>databaseTable AS aliasTable</code>
  * 
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Joerg Garbers
+ * @since 0.3
  */
-
 class Alias {
 	private final String databaseTable;
 	private final String aliasTable;
 	private final String sqlExpression;
 	
+	/**
+	 * Class constructor in memorizable <code>databaseTable AS aliasTable</code> form.
+	 * @param databaseTable
+	 * @param aliasTable
+	 */
 	public Alias (String databaseTable, String aliasTable) {
 		this.databaseTable=databaseTable;
 		this.aliasTable=aliasTable;
@@ -50,6 +52,13 @@ class Alias {
 
 
 	// TODO: use PatternMatcher
+	/**
+	 * Builds an Alias object from a textual SQL alias expression.
+	 * Currently we use simple String functions to extract the parts from an expression like
+	 * "Table AS Alias". All characters are deliberately converted to upper case.
+	 * @param aliasExpression the string to create the Alias from
+	 * @return the created Alias instance.
+	 */
 	private static Alias buildAlias(String aliasExpression) { 
 		boolean illegal=false;
 		String upper=aliasExpression.toUpperCase();
@@ -71,12 +80,14 @@ class Alias {
 	}
 	
 	/**
-	 * Builds a Map of Alias objects from a list of alias statement
-	 * strings.
-	 * @param joinConditions a collection of strings
-	 * @return a set of Join instances
+	 * Builds a Map of Alias objects from a list of alias expressions.
+	 * Each expression is converted to an Alias instance. The instance is put into
+	 * the map as the value of its aliasTable name.
+	 * 
+	 * @param aliasStatements a Collection of strings
+	 * @return the Map
+	 * @see #buildAlias(String)
 	 */	
-	
 	public static HashMap buildAliases(Collection aliasStatements) {
 		HashMap result = new HashMap(2);
 		Iterator it = aliasStatements.iterator();

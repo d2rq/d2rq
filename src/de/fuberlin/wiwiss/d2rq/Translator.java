@@ -1,5 +1,5 @@
 /*
- * $Id: Translator.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: Translator.java,v 1.3 2005/03/14 07:02:27 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -47,7 +47,7 @@ public interface Translator {
 	public String toRDFValue(String dbValue);
 	
 	/**
-	 * Translates a value that comes from an RDF source (i.e. query)
+	 * Translates a value that comes from an RDF source (for example a query)
 	 * to a database value. The mapping must be unique.
 	 *  
 	 * @param rdfValue a value coming from an RDF source
