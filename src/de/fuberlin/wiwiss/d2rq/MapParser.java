@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: MapParser.java,v 1.2 2004/08/02 23:13:59 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -235,7 +235,7 @@ class MapParser {
 		}
 		String pattern = findZeroOrOneLiteral(node, D2RQ.pattern);
 		if (pattern != null) {
-			if (valueSource == null) {
+			if (valueSource != null) {
 				Logger.instance().error("Cannot combine d2rq:column and d2rq:pattern on PropertyBridge " + node);
 				return;
 			}
