@@ -65,9 +65,11 @@ class TripleResultSet {
 		return this.chachedTriple != null;
 	}
 
-    /** Returns the next triple.
+    /**
+     * Returns the next triple.
      * If there are no more triple makers for the current row of the result set
      * then the next row is cached and the triple makers iterator is reset.
+     * @return The next triple, or null if no more triples.
      */
 	public Triple next() {
 		if (!hasTripleMakers()) {
@@ -116,6 +118,9 @@ class TripleResultSet {
     }
 
 	public void close() {
+	    if (this.resultSet == null) {
+	        return;
+	    }
 		try {
 			this.resultSet.close();
 			this.resultSet = null;
