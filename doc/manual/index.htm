@@ -202,9 +202,11 @@ P.footer {
 <HR title="Separator for header">
 </DIV>
 <H2><A id=abstract name=abstract></A>Abstract</H2>
-<P>This document describes D2RQ, a declarative mapping language for treating non-RDF 
-  relational databases as virtual RDF graphs within the Jena Semantic Web development 
-  toolkit.</P>
+<P>As Semantic Web technologies are getting mature, there is a growing need for 
+  RDF applications to access the content of huge, live, non-RDF, legacy databases 
+  without having to replicate the whole database into RDF. This document describes 
+  D2RQ, a declarative mapping language for treating non-RDF relational databases 
+  as virtual RDF graphs within the Jena Semantic Web development toolkit.</P>
 <DIV class=status>
   <P>    <!-- End Status-Of-This-Document Text -->
 </P>
@@ -242,18 +244,19 @@ P.footer {
 <H1><A id=introduction name=introduction>1. Introduction</A></H1>
 <P>This document describes D2RQ, a declarative mapping language for treating non-RDF, 
   relational databases as virtual, read-only RDF graphs within the Jena toolkit 
-  [<a href="#jena">Jena</a>]. </P>
+  [<a href="#jena">Jena</a>]. D2RQ offers a flexible access mechanism to the content 
+  of huge, non-RDF databases without having to replicate the database into RDF. 
+  Thus, it allows the integration of legazy databases into the data access architecture 
+  currently standardized by the W3C Data Access Working Group [<a href="#DAWG">DAWG</a>].</P>
 <p>Using D2RQ you can:</p>
 <ul>
-  <li>access information in a non-RDF database using the Jena model API.</li>
   <li>query a non-RDF database using RDQL [<a href="#rdql">RDQL</a>] or find(spo).</li>
-  <li>do RDFS and OWL inferencing over the content of a non-RDF database using 
-    the Jena ontology API.</li>
   <li>publish the content of a non-RDF database on the Semantic Web using the 
     Joseki RDF server [<a href="#joseki">Joseki</a>].</li>
+  <li>access information in a non-RDF database using the Jena model API.</li>
+  <li>do RDFS and OWL inferencing over the content of a non-RDF database using 
+    the Jena ontology API.</li>
 </ul>
-<p>The goal of D2RQ is to expose the content of huge, live, non-RDF databases 
-  to the Semantic Web without having to replicate the database into RDF.</p>
 <p>D2RQ is implemented as a Jena graph, the basic information representation object 
   within the Jena framework. A D2RQ graph wraps one or more local relational databases 
   into a virtual, read-only RDF graph. It rewrites Jena API calls, find() and 
@@ -432,19 +435,13 @@ that create the same URIs or blank node IDs.</P>
 <P>&nbsp;</P>
 
 <h2><a name="classmap"></a>3.2 ClassMap</h2>
-<P>A <strong>d2rq:ClassMap</strong> represents a class or a group of similar classes of an OWL 
-  ontology or RDFS schema. A class map defines how instances of the class are 
-  identified. Instances can be identified using URIrefs or blank nodes. URIrefs 
-  can be created with d2rq:uriColumn and d2rq:uriPattern. Blank nodes are created 
-  with d2rq:bNodeIdColumns. A ClassMap has a set of d2rq:PropertyBridges and is 
-  connected to a d2rq:Database which represents the database where instance data 
-  is stored.</P>
-<p>Every ClassMap is based on one or several database columns&#8212;those
-  in uriColumn, uriPattern or bNodeIdColumns. If these columns might contain
-  multiple identical rows (that is, your database schema is not fully
-  normalized), then you must add a d2rq:containsDuplicates statement to
-  the ClassMap, or some queries will give unexpected results.</p>
-
+<P>A <strong>d2rq:ClassMap</strong> represents a class or a group of similar classes 
+  of an OWL ontology or RDFS schema. A class map defines how instances of the 
+  class are identified. Instances can be identified using URIrefs or blank nodes. 
+  URIrefs can be created with d2rq:uriColumn and d2rq:uriPattern. Blank nodes 
+  are created with d2rq:bNodeIdColumns. A ClassMap has a set of d2rq:PropertyBridges 
+  and is connected to a d2rq:Database which represents the database where instance 
+  data is stored.</P>
 <P><strong>Properties</strong></P>
 <table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
   <tr> 
@@ -484,9 +481,10 @@ that create the same URIs or blank node IDs.</P>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:translateWith</strong></td>
-    <td valign="top">Assigns a <a href="#translationtable">d2rq:TranslationTable</a> 
-      to the class map. Values from the d2rq:uriColumn or d2rq:uriPattern will 
-      be translated by the table before a resource is generated.</td>
+    <td valign="top">Assigns a d2rq:TranslationTable to the class map. Values 
+      from the d2rq:uriColumn or d2rq:uriPattern will be translated by the table 
+      before a resource is generated. See <a href="#translationtable">section 
+      3.5</a> for details.</td>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:dataStorage</strong></td>
@@ -494,13 +492,12 @@ that create the same URIs or blank node IDs.</P>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:containsDuplicates</strong></td>
-    <td valign="top">Must be specified on class maps whose columns (d2rq:uriColumn,
-      columns used in d2rq:uriPattern, d2rq:bNodeIdColumns) might contain duplicate rows.
-      In other words, if SELECT DISTINCT on those columns returns a different number
-      of rows from SELECT, or if the database schema is not fully normalized. The
-      only allowed value of the property is "true". Adding this property to class
-      maps which do <em>not</em> contain duplicate values degrades performance, but
-      results should still be correct.</td>
+    <td valign="top"> Must be specified if a class map uses information from tables 
+      that are not fully normalized. If the d2rq:containsDuplicates property value 
+      is set to "true", then D2RQ adds a DISTINCT clause to all queries using 
+      this classMap. &quot;False&quot; is the default value, which doesn't have 
+      to be explicitly declared. Adding this property to class maps based on normalized 
+      database tables degrades query performance, but doesn't affect query results.</td>
   </tr>
   <tr>
     <td valign="top"><strong>d2rq:additionalProperty</strong></td>
@@ -538,9 +535,9 @@ db1:InProceedingsClassMap rdf:type d2rq:ClassMap ;
     d2rq:dataStorage db1:Database1 .</pre>
 </DIV>
 <DIV class="trigOuter trigInner"> </DIV>
-<P>The d2rq:class property is used to state that all resources generated by the
-  d2rq:ClassMap are instances of an RDFS or OWL class. D2RQ automatically 
-  adds a correspondig rdf:type AdditionalProperty to the ClassMap.</P>
+<P>The d2rq:class property is used to state that all resources generated by the 
+  d2rq:ClassMap are instances of an RDFS or OWL class. D2RQ automatically creates 
+  the necessary rdf:type triples.</P>
 <P>&nbsp;</P>
 <P><strong>Example: ClassMap where instances are identified using blank nodes</strong></P>
 <DIV class="trigOuter trigInner"> 
@@ -574,9 +571,9 @@ db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
       d2rq:belongsToClassMap db1:PersonsClassMap .</pre>
   </DIV>
 <P>Here, the class of each person is obtained by prefixing the values of the Persons.Type 
-  column with an ontology namespace. If the class names were not the same as the 
-  values of the Type column (say, numeric type codes), then a <a href="#translationtable">TranslationTable</a> 
-  could be used.</P>
+  column with an ontology namespace. If the class names within the ontology can't 
+  be constructed directly from values of the Persons.Type column, then a <a href="#translationtable">TranslationTable</a> 
+  could be used for aligning class names and database values.</P>
 <P>&nbsp;</P>
   
 <h2><a name="propertybridge"></a>3.3 Property Bridges</h2>
@@ -623,30 +620,30 @@ db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:translateWith</strong></td>
-    <td valign="top">Assigns a <a href="#translationtable">d2rq:TranslationTable</a>
-      to the property bridge. Values from the d2rq:column or d2rq:pattern 
-      will be translated by the table.</td>
+    <td valign="top">Assigns a d2rq:TranslationTable to the property bridge. Values 
+      from the d2rq:column or d2rq:pattern will be translated by the table. See 
+      section <a href="#translationtable">TranslationTables</a> for details.</td>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:valueMaxLength</strong></td>
-    <td valign="top">Asserts that all values of this bridge
-      are not longer than a number of characters. This allows
-      D2RQ to speed up queries.</td>
+    <td valign="top">Asserts that all values of this bridge are not longer than 
+      a number of characters. This allows D2RQ to speed up queries. See section 
+      <a href="#hint">Performance Optimization</a> for details.</td>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:valueContains</strong></td>
-    <td valign="top">Asserts that all values of this bridge
-      always contain a given string. This allows D2RQ to
-      speed up queries. Most useful in conjunction with
-       d2rq:column.</td>
+    <td valign="top">Asserts that all values of this bridge always contain a given 
+      string. This allows D2RQ to speed up queries. Most useful in conjunction 
+      with d2rq:column. See section <a href="#hint">Performance Optimization</a> 
+      for details.</td>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:valueRegex</strong></td>
-    <td valign="top">Asserts that all values of this bridge
-      match a given <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regular expression</a>.
-      This allows D2RQ to speed up queries. Most useful in conjunction
-      with d2rq:column on columns whose values
-      are very different from other columns in the database.</td>
+    <td valign="top">Asserts that all values of this bridge match a given <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regular 
+      expression</a>. This allows D2RQ to speed up queries. Most useful in conjunction 
+      with d2rq:column on columns whose values are very different from other columns 
+      in the database. See section <a href="#hint">Performance Optimization</a> 
+      for details.</td>
   </tr>
 </table>
 
@@ -728,12 +725,12 @@ db1:inProceedingsAbstract rdf:type d2rq:DatatypePropertyBridge ;
   <pre>:authorName rdf:type rdf:Property .
 
 db1:authorNameBridge rdf:type d2rq:DatatypePropertyBridge ;
-            d2rq:belongsToClassMap db1:Papers ;</pre>
+            d2rq:belongsToClassMap db1:Papers ;
             d2rq:property :authorName ;
             d2rq:column &quot;Persons.Name&quot;;
             d2rq:join &quot;Papers.PaperID = Rel_Person_Paper.PaperID&quot; ;
             d2rq:join &quot;Rel_Person_Paper.PersonID = Persons.PerID&quot; ;
-            d2rq:datatype xsd:string .
+            d2rq:datatype xsd:string .</pre>
 </DIV>
 <p>This property bridge adds the names of authors to papers. 
   If a paper has several authors, then several authorName properties are added. 
@@ -799,7 +796,7 @@ db1:conferenceBridge rdf:type d2rq:ObjectPropertyBridge ;
 <p>&nbsp;</p>
 <h2><a name="additionalproperty"></a>3.4 AdditionalProperty</h2>
 <p>A <strong>d2rq:AdditionalProperty</strong> can be used to add a fixed statement 
-  to all instances generated by one class map. The statement is added to the result 
+  to all instances generated by a class map. The statement is added to the result 
   sets, if patterns like (ANY, ANY, ANY), (URI, ANY, ANY) or (URI, additionalPropertyName, 
   ANY) are used. The d2rq:additionalProperty property is used to link from the 
   class map to the d2rq:AdditionalProperty definition.</p>
@@ -815,8 +812,6 @@ db1:conferenceBridge rdf:type d2rq:ObjectPropertyBridge ;
     <td valign="top">The value to be used as the object of all fixed statements.</td>
   </tr>
 </table>
-<p>The subjects of the statements are the instances generated from the class map.</p>
-
 <P><strong>Example:</strong></P>
 <DIV class="trigOuter trigInner">
   <pre>db1:PersonsClassMap rdf:type d2rq:ClassMap;
@@ -831,48 +826,11 @@ db1:SeeAlsoStatement rdf:type d2rq:AdditionalProperty;
 <p>&nbsp;</p>
 
 <h2><a name="translationtable"></a>3.5 Translation Tables</h2>
-<p>A <strong>d2rq:TranslationTable</strong> is an additional layer between
-  the database and the RDF world. It translates back and forth between
-  values taken from the database and RDF URIs or literals. A translation
-  table can be attached to a class map or a property bridge using the
-  d2rq:translateWith property.</p>
-<p>TranslationTables can be used only for mappings that are unique
-  in both directions (1:1).</p>
-
-<p><strong>Example: Translating color codes</strong></p>
-<p>A typical application are database columns containing type codes and
-  similar enumerated values. A translation table can be used to turn them into
-  RDF resources. In this example, the column ShinyObject.Color contains
-  a color code: "R" for red, "G" for green etc. These codes must be
-  translated into RDF resources: :red, :green etc.</p>
-<div class="trigOuter trigInner">
-  <pre>:red rdf:type :Color;
-:green rdf:type :Color;
-# ... more colors omitted ...
-:blue rdf:type :Color;
-
-db1:ColorBridge rdf:type d2rq:ObjectPropertyBridge;
-        d2rq:belongsToClassMap db1:ShinyObjectMap;
-        d2rq:property :color;
-        d2rq:column "ShinyObject.Color";
-        d2rq:translateWith db1:ColorTable.
-
-db1:ColorTable rdf:type d2rq:TranslationTable;
-        d2rq:translation [ d2rq:dbValue "R"; d2rq:rdfValue :red; ];
-        d2rq:translation [ d2rq:dbValue "G"; d2rq:rdfValue :green; ];
-        # ... more translations omitted ...
-        d2rq:translation [ d2rq:dbValue "B"; d2rq:rdfValue :blue; ].</pre>
-</div>
-<p>The d2rq:translateWith statement tells D2RQ to look up database
-  values in the db1:ColorTable. There, a translation is given for
-  each possible value. If the database contains
-  values not in the translation table, D2RQ will not generate a :color statement
-  for that :ShinyObject instance.</p>
-<p>Note that the type of node created by the translation is determined
-  by the type of the bridge, not by the node type of the rdfValues.
-  db1:ColorBridge is a d2rq:ObjectPropertyBridge. Thus, the translation will create
-  resources. Had it been a d2rq:DatatypePropertyBridge, literals would be created.</p>
-
+<p>A <strong>d2rq:TranslationTable</strong> is an additional layer between the 
+  database and the RDF world. It translates back and forth between values taken 
+  from the database and RDF URIs or literals. A translation table can be attached 
+  to a class map or a property bridge using the d2rq:translateWith property. TranslationTables 
+  can be used only for mappings that are unique in both directions (1:1).</p>
 <P><strong>Properties</strong></P>
 <table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
   <tr> 
@@ -888,12 +846,11 @@ db1:ColorTable rdf:type d2rq:TranslationTable;
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:javaClass</strong></td>
-    <td valign="top">The qualified name of a Java class that performs the
-      mapping. The class must implement the
-      <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/javadoc/de/fuberlin/wiwiss/d2rq/Translator.html">Translator</a>
-      interface. Custom Translators might be useful for encoding and decoding
-      values, but are limited to 1:1 translations. Further information can be
-      found in the Javadocs.</td>
+    <td valign="top">The qualified name of a Java class that performs the mapping. 
+      The class must implement the <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/javadoc/de/fuberlin/wiwiss/d2rq/Translator.html">Translator</a> 
+      interface. Custom Translators might be useful for encoding and decoding 
+      values, but are limited to 1:1 translations. Further datails can be found 
+      in the D2RQ javadocs.</td>
   </tr>
 </table>
 <p>&nbsp;</p>
@@ -914,18 +871,49 @@ db1:ColorTable rdf:type d2rq:TranslationTable;
     <td valign="top">A translation of that value to be used in RDF constructs.</td>
   </tr>
 </table>
+<br><p><strong>Example: Translating color codes</strong></p>
+<p>A typical application are database columns containing type codes or similar 
+  enumerated values. A translation table can be used to turn them into RDF resources. 
+  In this example, the column ShinyObject.Color contains a color code: "R" for 
+  red, "G" for green etc. These codes must be translated into RDF resources: :red, 
+  :green etc.</p>
+<div class="trigOuter trigInner"> 
+  <pre>:red rdf:type :Color;
+:green rdf:type :Color;
+# ... more colors omitted ...
+:blue rdf:type :Color;
+
+db1:ColorBridge rdf:type d2rq:ObjectPropertyBridge;
+        d2rq:belongsToClassMap db1:ShinyObjectMap;
+        d2rq:property :color;
+        d2rq:column "ShinyObject.Color";
+        d2rq:translateWith db1:ColorTable.
+
+db1:ColorTable rdf:type d2rq:TranslationTable;
+        d2rq:translation [ d2rq:dbValue "R"; d2rq:rdfValue :red; ];
+        d2rq:translation [ d2rq:dbValue "G"; d2rq:rdfValue :green; ];
+        # ... more translations omitted ...
+        d2rq:translation [ d2rq:dbValue "B"; d2rq:rdfValue :blue; ].</pre>
+</div>
+<p>The d2rq:translateWith statement tells D2RQ to look up database values in the 
+  db1:ColorTable. There, a translation must be given for each possible value. 
+  If the database contains values which are not in the translation table, D2RQ 
+  will not generate a :color statement for that :ShinyObject instance.</p>
+<p>Note that the type of the resulting node is determined by the type of the bridge 
+  and not by the node type of the rdfValues. db1:ColorBridge is a d2rq:ObjectPropertyBridge. 
+  Thus, the translation will create resources. If it would be a d2rq:DatatypePropertyBridge 
+  then literals would be created.</p>
+
 <p>&nbsp;</p>
 <h2><a name="conditional" id="conditional"></a>3.6 Conditional Mappings</h2>
-<p>Sometimes you have to filter your data before publishing it to RDF. Parts
-  might be confidential, or might not match the semantics of the RDF vocabulary
-  that you use. These cases are easy to deal with if those parts are
-  in their own tables and columns. Just don't write class maps and property bridges
-  for them. But what if some <em>rows</em> are to be published, and some not?</p>
+<p>Sometimes only certain information from a database should be accessible, because 
+  parts of the database might be confidential or outdated. Using <strong>d2rq:condition</strong> 
+  you can specify conditions, which must be satisfied by all accessible data.</p>
 
-<p>That's where <strong>d2rq:condition</strong> is useful. You can use this property
-  on class maps and property bridges. The value of the property is an SQL WHERE
-  clause. If the condition evaluates to FALSE for a database row, then no triples
-  will be generated from that row.</p>
+<p> You can use d2rq:condition on class map and property bridge level. The d2rq:condition 
+  value is added as an additional SQL WHERE clause to all queries generated using 
+  the class map or property bridge. If the condition evaluates to FALSE for a 
+  SQL result set row, then no triples will be generated from that row.</p>
 
 <p><strong>Example: Using d2rq:condition on a d2rq:ClassMap</strong></p>
 <div class="trigOuter trigInner">
@@ -935,20 +923,16 @@ db1:ColorTable rdf:type d2rq:TranslationTable;
             d2rq:condition "Papers.Publish = 1";
             d2rq:dataStorage db1:Database1.</pre>
 </div>
-<p>Only those papers with a value of 1 in the Papers.Publish column will be
-accessible in the virtual RDF graph. All other papers are ignored, as if
-their rows were not present in the Papers table.
-
-<p><strong>Example: Filtering zero-length strings</strong></p>
-<p>Usually, the special value NULL is used in a database to indicate that some
-  field has no value, or that the value is unknown. In some databases, however,
-  a zero-length string ("") is
-  used instead. D2RQ is smart enough not to generate RDF statements from
-  NULL values, but it doesn't recognize zero-length strings and will generate
-  statements like <tt>:Person123 :firstName "".</tt> if the person's first name
-  is not known.</p>
-<p>To suppress these statements, a d2rq:condition can be added to the property
-  bridge:</p>
+<p>Only those papers with a value of 1 in the Papers.Publish column will be accessible. 
+  All other papers are ignored.</p>
+<p><strong>Example: Filtering zero-length strings</strong>
+<p>Usually, the special value NULL is used in a database to indicate that some 
+  field has no value, or that the value is unknown. Some databases, however, are 
+  using a zero-length string ("") instead. D2RQ doesn't generate RDF statements 
+  from NULL values, but it doesn't recognize zero-length strings and will generate 
+  statements like <tt>:Person123 :firstName "".</tt> if the person's first name 
+  is a zero-length string. In oder to suppress these statements, a d2rq:condition 
+  can be added to the property bridge:</p>
 <div class="trigOuter trigInner">
   <pre>db1:PersonsClassFirstName rdf:type d2rq:DatatypePropertyBridge;
             d2rq:property :firstName;
@@ -956,7 +940,7 @@ their rows were not present in the Papers table.
             d2rq:belongsToClassMap db1:PersonsClassMap;
             d2rq:condition "Persons.FirstName <> ''".</pre>
 </div>
-
+<br>
 <p><strong>Example: Relationship type codes</strong></p>
 <p>Imagine a table Rel_Paper_Topic that associates rows from a Papers table
   with rows from a Topics table. The Rel_Paper_Topic table contains a
@@ -989,8 +973,8 @@ db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
 <p>&nbsp;</p>
 
 <h2><a name="hint" id="hint"></a>3.7 Performance Optimization using Hint Properties</h2>
-<p>This section covers some properties that can be added to d2rq:PropertyBridge instances
-  to speed up queries: d2rq:valueMaxLength, d2rq:valueRegex and d2rq:valueContains.</p>
+<p>This section covers hint properties that can be added to property bridges in 
+  order to speed up queries: d2rq:valueMaxLength, d2rq:valueRegex and d2rq:valueContains.</p>
 
 <p><strong>Example: Providing a maximum length</strong></p>
 <div class="trigOuter trigInner">
@@ -1000,11 +984,10 @@ db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
             d2rq:belongsToClassMap db1:PersonsClassMap;
             d2rq:valueMaxLength "15".</pre>
 </div>
-<p>Let us assume that the database field Persons.FirstName was limited to 15 characters
-  by the database schema designer. The d2rq:valueMaxLength property can be used to tell
-  D2RQ about that restriction. The statement asserts that no value in that column is
-  longer than 15 characters.
-
+<p>The d2rq:valueMaxLength property can be used to tell D2RQ that the length of 
+  Persons.FirstName values is limited to 15 characters. Using this information, 
+  D2RQ doesn't have to look in the database anymore to figure out, that a given 
+  FirstName which is longer than 15 characters isn't fitting. 
 <p><strong>Example: Providing a regular expression</strong></p>
 <div class="trigOuter trigInner">
   <pre>db1:inProceedingsYear rdf:type d2rq:DatatypePropertyBridge;
@@ -1014,36 +997,26 @@ db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
             d2rq:datatype xsd:gYear;
             d2rq:valueRegex "^[0-9]{4}$".</pre>
 </div>
-<p>Here, the d2rq:valueRegex property is used to provide a
-  <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regular
-  expression</a> for the Papers.Year column. The statement asserts that all values
-  match the regular expression (or are NULL). The expression <tt>^[0-9]{4}$</tt> matches
-  every four-digit number.</p>
+<p>Here, the d2rq:valueRegex property is used to provide a <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regular 
+  expression</a> for the Papers.Year column. The statement asserts that all values 
+  match the regular expression (or are NULL). The expression <tt>^[0-9]{4}$</tt> 
+  matches every four-digit number. If you don't want to use the full regular expression 
+  machinery, you can use d2rq:valueContains to assert that all values generated 
+  by the property bridge contain a certain phrase.</p>
 
-<p>If you don't want to use the full regular expression machinery, you can use
-  d2rq:valueContains to assert that all values generated by the property bridge contain
-  a certain phrase.</p>
+<p>You are geting the largest performance gain by providing hints for property 
+  bridges which are using d2rq:column. You should define hints on columns of large 
+  tables and on columns that are not indexed by the database. These are the cases 
+  where a well-placed optimization hint can result in an order-of-magnitude improvement 
+  for some queries. Don't bother to provide hints for property bridges based on 
+  d2rq:pattern. These can be optimized very well without hints.</p>
 
-<p>If you provide these hints, you help D2RQ to execute queries faster. In the example
-  above, if a query searches for a literal that is 20 characters long, D2RQ knows that
-  it doesn't have to look in the Persons.FirstName column because all of its values are
-  shorter than 20 characters.</p>
-
-<p>You can get the largest gain by providing hints for property bridges based
-  on d2rq:column whose values are shorter than the average string in your database,
-  or whose values are all matched by a fairly specific regular expression. You should
-  focus your efforts on columns in the largest tables, and on columns that have no
-  database index structure. These are the cases where a well-placed optimization hint
-  can result in an order-of-magnitude improvement for some queries. Don't bother to provide
-  hints for property bridges based on d2rq:pattern. These can be optimized very well
-  without hints.</p>
-
-<p>Please keep in mind that these properties are not intended for filtering
-  of unwanted database values. They are only performance hints. Values that do not
-  fulfill the criteria
-  could still appear in query results under certain circumstances. To filter values,
-  use d2rq:condition or a <a href="#translationtable">translation table</a> with a
-  custom Java class that returns <tt>null</tt> for unwanted database values.</p>
+<p>Please keep in mind that hint properties are not intended for filtering of 
+  unwanted database values. They are only performance hints. Values that do not 
+  fulfill the criteria will still appear in query results if find patterns like 
+  (URI, ANY, ANY) are used. In oder to filter values, use <a href="#conditional">d2rq:condition</a> 
+  or a <a href="#translationtable">translation table</a> with a custom Java class 
+  that returns <tt>null</tt> for unwanted database values.</p>
 <p>&nbsp;</p>
 
 <HR title="Separator for header">
@@ -1161,7 +1134,12 @@ QueryResultsFormatter fmt = new QueryResultsFormatter(results) ;<br>PrintWriter 
   <DT>&nbsp; 
   <DT><A id=ref-rdf-syntax name=ref-rdf-syntax></A>[RDF-SYNTAX] 
   <DD><CITE>RDF/XML Syntax Specification (Revised)</CITE>, Beckett D. (Editor), 
-    W3C Recommendation, <a href="http://www.w3.org/TR/rdf-syntax-grammar/" target="_blank">http://www.w3.org/TR/rdf-syntax-grammar/</a></DD>
+    W3C Recommendation, <a href="http://www.w3.org/TR/rdf-syntax-grammar/" target="_blank">http://www.w3.org/TR/rdf-syntax-grammar/</a> 
+  </DD>
+  <DT>
+  <DT><A id=DAWG name=DAWG></A>[DAWG] 
+  <DD><CITE>W3C Data Access Working Group</CITE> Website: <a href="http://www.w3.org/2001/sw/DataAccess/" target="_blank">http://www.w3.org/2001/sw/DataAccess/</a> 
+  </DD>
   <DT> 
 </DL>
 <DL>

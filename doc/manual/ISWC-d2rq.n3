@@ -17,6 +17,8 @@
 
 # -----------------------------------------------
 # About this document
+# -----------------------------------------------
+
 <> rdfs:comment     "This files describes the D2RQ mappings from the ISWC ontolgy to a local database." ;
    dc:creator       "Chris Bizer" ;
    dc:creator       "Richard Cyganiak" ;
@@ -24,14 +26,19 @@
    dc:publisher     "" ;
    dc:title         "" ;
    dc:description   "" ;
-   dc:date          "2004-06-10" ;
+   dc:date          "2004-08-10" ;
    dc:format        "RDF" ;
    dc:identifier    <> ;
    .
 
+# History
+# 2004-08-10: Updated with D2RQ V0.2 features
+# 2004-06-14: Initial version of this document
+
 
 # -----------------------------------------------
 # Databases
+# -----------------------------------------------
 
 db1:Database1 rdf:type d2rq:Database;
 
@@ -67,6 +74,7 @@ db1:Database1 rdf:type d2rq:Database;
 #  Date text,
 #  Location text
 #) TYPE=MyISAM;
+# -----------------------------------------------
 
 db1:Conference rdf:type d2rq:ClassMap;
             d2rq:class :Conference;
@@ -112,6 +120,8 @@ db1:date    rdf:type d2rq:DatatypePropertyBridge ;
 #  TopicName text,
 #  URI text
 #) TYPE=MyISAM;
+# -----------------------------------------------
+
 
 db1:Topic rdf:type d2rq:ClassMap;
           d2rq:class :Topic;
@@ -137,6 +147,8 @@ db1:topicName rdf:type d2rq:DatatypePropertyBridge ;
 #  Conference int(11) default NULL,
 #  Publish int(11) default 1
 #) TYPE=MyISAM;
+# -----------------------------------------------
+
 
 db1:InProceedings rdf:type d2rq:ClassMap;
             d2rq:class :InProceedings;
@@ -212,6 +224,8 @@ db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
 #  URI text,
 #  Photo text
 #) TYPE=MyISAM;
+# -----------------------------------------------
+
             
 db1:PersonsClassMap rdf:type d2rq:ClassMap;
             d2rq:class :Person;

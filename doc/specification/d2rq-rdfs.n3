@@ -6,20 +6,24 @@
 
 # -----------------------------------------------
 #
-# D2RQ Language Specification V0.1
+# D2RQ Language Specification V0.2
 #
 # -----------------------------------------------
 
 <> rdfs:comment     "Database to RDF Query Vocabulary" ;
    dc:creator       "Chris Bizer" ;
+   dc:creator       "Richard Cyganiak" ;
    dc:subject       "" ;
    dc:publisher     "" ;
    dc:title         "" ;
    dc:description   "" ;
-   dc:date          "2004-06-16" ;
+   dc:date          "2004-08-10" ;
    dc:format        "RDF" ;
    dc:identifier    <> ;
    .
+
+# See D2RQ Users Manual for detailed explanations and examples:
+# http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/
 
 
 # D2RQ Namespace
@@ -93,6 +97,9 @@
 :additionalProperty rdf:type rdf:Property ;
              	rdfs:domain :ClassMap ;
              	rdfs:range  :AdditionalProperty
+             	.
+:containsDuplicates rdf:type rdf:Property ;
+             	rdfs:domain :ClassMap
              	.
 
 # -----------------------------------------------
