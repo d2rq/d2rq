@@ -1,24 +1,63 @@
+/*
+  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
+
 package de.fuberlin.wiwiss.d2rq.helpers;
 
 import java.util.Iterator;
 
-public class ConjunctionIterator implements Iterator { // iterates over the
-	// conjunctions of a
-	// disjunctive normal
-	// form
-	protected final Object[][] disjunctiveTerms; // a conjunction over n
-
-	protected static boolean createTypedArrays = false;
-
-	// disjunctive Terms (conjunctive
-	// normal form)
-	protected Class termType;
-
-	protected IndexArray nextIndexArray; // points to 0,0,0... after initialization
-
+/** 
+ * Iterates over the elements of a cross product of a set of sets.
+ * In logical terms: given a conjunction of <code>disjunctiveTerms</code> in disjunctive
+ * normal form (a_1_1 \/ ... \/ a_1_M1) /\ .... /\ (a_n_1 \/ ... \/ a_n_Mn)
+ * we want to multiplicate it out into conjunctive normal form
+ * (a_1_1 /\ ... /\ a_n_1) \/ .... \/ (a_1_M1 /\ ... /\ a_n_Mn).
+ * We can expect to get M1 * ... * Mn factors {@link #estimatedNumberOfResults).
+ * 
+ * @author jgarbers
+ *
+ */
+public class ConjunctionIterator implements Iterator { 
+    
+    /**
+     * the number of disjunctions.
+     */
 	protected final int n;
 
-	protected Object[] resultStore; // optional
+    /** 
+     * the disjunctions. Type: Object [n][].
+     */
+	protected final Object[][] disjunctiveTerms; 
+
+	/**
+	 * Flag to allow/disallow use of reflexion API.
+	 * <code>true</code> is more convenient but may in some cases violate the
+	 * security constraints of the code.
+	 */
+	protected static boolean createTypedArrays = false;
+
+	/**
+	 * Java type of a single Term a_i_j.
+	 */
+	protected Class termType;
+
+	/**
+	 * the indices point to the terms in <code>disjunctiveTerms</code> that 
+	 * build the next conjunction in conjunctive normal form.
+	 */
+	protected IndexArray nextIndexArray; // points to 0,0,0... after initialization
+
+	/** 
+	 * optionally a resultStore can be given.
+	 * This has two advantages: 
+	 * 1) it avoids the allocation of a new array in each iteration
+	 * 2) it can have the correct array type used for later processing
+	 *    and this way avoids casting.
+	 * Disadvantage: the array is overridden each time next() is called.
+	 * So be very careful with 'storing' iterator results! 
+	 */
+	protected Object[] resultStore; 
+	
 	protected boolean resultStoreIsInitialized;
 	
 	protected int estimatedNumberOfResults;
@@ -115,7 +154,12 @@ public class ConjunctionIterator implements Iterator { // iterates over the
 		return estimatedNumberOfResults;
 	}
 	
-	
+	/** 
+	 * Get all conjunctions.
+	 * @param disjunctiveTerms see above
+	 * @param resultStore optional, of size [estimatedNumberOfResults][n]
+	 * @return array of size [estimatedNumberOfResults][n]
+	 */
 	public static Object[][] allConjunctions(Object[][] disjunctiveTerms, Object[][] resultStore) {
 		ConjunctionIterator it=new ConjunctionIterator(disjunctiveTerms,null);
 		int dim1=it.getEstimatedNumberOfResults();

@@ -1,10 +1,7 @@
-//
-//  D2RQPatternStage.java
-//  d2rq-map
-//
-//  Created by Joerg Garbers on 25.02.05.
-//  Copyright 2005 Joerg Garbers. All rights reserved.
-//
+/*
+  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
+
 package de.fuberlin.wiwiss.d2rq;
 
 import com.hp.hpl.jena.graph.Graph;
@@ -18,6 +15,13 @@ import com.hp.hpl.jena.graph.query.Pipe;
 import com.hp.hpl.jena.graph.query.ValuatorSet;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
+/** 
+ * Version of PatternStage for D2RQ that directly relies on {@link PatternStage}.
+ * Created by Joerg Garbers on 25.02.05.
+ * 
+ * @author jgarbers
+ * @see D2RQPatternStage2
+ */
 public class D2RQPatternStage extends PatternStage { // jg: reference PatternStage and QueryCombiner
 
 	private GraphD2RQ graph;
@@ -36,9 +40,10 @@ public class D2RQPatternStage extends PatternStage { // jg: reference PatternSta
 		D2RQPatternStage.this.constraints = constraints;
 	}
 
-	// overridden from PatternStage (includes elements from run() and nest())
-protected void run( Pipe source, Pipe sink )
-{
+/**
+ * overridden from PatternStage (includes elements from run() and nest())
+ */	
+protected void run( Pipe source, Pipe sink ) {
 	while (stillOpen && source.hasNext()) {
 		Domain inputDomain=source.get();
 		int tripleCount=compiled.length;

@@ -1,3 +1,7 @@
+/*
+  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
+
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.HashMap;
@@ -10,11 +14,20 @@ import com.hp.hpl.jena.graph.Node;
 import de.fuberlin.wiwiss.d2rq.helpers.VariableBindings;
 import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 
+/** 
+ * Handles variable node constraints for a TripleQuery conjunction.
+ * Assumption: Bound variables in conjunction allready have been bound.
+ * This code could as well be kept in PatternQueryCombiner.
+ * 
+ * @author jgarbers
+ *
+ */
 class ConstraintHandler {
     public boolean possible=true;
     VariableBindings bindings;
     TripleQuery[] conjunction;
-    Map variableToConstraint=new HashMap(); // Node (variable) -> NodeConstraint
+    /** Mapping between a variable (Node) and its NodeConstraints. */
+    Map variableToConstraint=new HashMap(); 
     
     public void setVariableBindings(VariableBindings bindings) {
         this.bindings=bindings;
@@ -23,6 +36,12 @@ class ConstraintHandler {
     public void setTripleQueryConjunction(TripleQuery[] conjunction) {
         this.conjunction=conjunction;
     }
+    
+    /** 
+     * Creates Node constraints for all shared Bind variables.
+     * Iterates over the positions, where shared Bind variables occour
+     * until no more constraint information is derived.
+     */
     public void makeConstraints() {
         Iterator it=bindings.sharedBindVariables.iterator();
         while (possible && it.hasNext()) {
@@ -44,7 +63,11 @@ class ConstraintHandler {
         }
     }
     
-    
+    /**
+     * Creates SQL code for the node constraints.
+     * @param sql contains both the places where to store expressions 
+     * and the methods, how to format them.
+     */
     public void addConstraintsToSQL(SQLStatementMaker sql) {
         Iterator it=variableToConstraint.values().iterator();
         while (it.hasNext()) {

@@ -1,5 +1,15 @@
+/*
+  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
+
 package de.fuberlin.wiwiss.d2rq.helpers;
 
+/** 
+ * Helper class for storing the index of a node within a query.
+ * 
+ * @author jgarbers
+ *
+ */
 public class VariableIndex implements Comparable {
 	public int tripleNr; // >=0
 

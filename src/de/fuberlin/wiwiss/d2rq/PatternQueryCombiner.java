@@ -1,6 +1,7 @@
 /*
- * $Id: PatternQueryCombiner.java,v 1.3 2005/03/08 14:10:48 garbers Exp $
- */
+  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
+
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.ArrayList;
@@ -27,57 +28,54 @@ import de.fuberlin.wiwiss.d2rq.helpers.IndexArray;
 import de.fuberlin.wiwiss.d2rq.helpers.VariableBindings;
 
 
-// Contract: after Constructor
-//           tirst call setup()
-//           then  call resultTriplesIterator()
-
-// assume: all PropertyBridges refer to same database
-class PatternQueryCombiner { // jg. reference: QueryCombiner
-	private boolean possible=true; // flag. false shows contradiction.
+/** 
+ * Handles a triple pattern query on a D2RQ mapped database.
+ * (Current)Assumption: all PropertyBridges refer to same database.
+ * Contract: after Constructor, first call setup() 
+ * then  call resultTriplesIterator().
+ * <p>
+ * This class does not need to know anything about D2RQPatternStage, except
+ * it's {@link VariableBinding} semantics.
+ * <p>
+ * It seems that some of the information computed here could be reused in successive
+ * calls from D2RQPatternStage2. On the other hand, lots of preprocessing is
+ * useless, if there are (Bound) variables for predicates.
+ * 
+ * @author jgarbers
+ * @see QueryCombiner
+ */
+class PatternQueryCombiner {
+    /** if false then contradiction, no SQL query necessary. */
+	private boolean possible=true; 
 	protected Database database;
 	protected GraphD2RQ graph;
-	protected Triple [] triples;
+	protected Triple [] triples; // nodes are ANY or fixed
 	protected int tripleCount;
 
-	VariableBindings bindings;
-	//	protected Set variables; // set of Node
-	//	protected Set sharedVariables; // set of Node
+	VariableBindings bindings; // includes variables and sharedVariables
 	
-//	protected TablePrefixer[][] prefixers;
-	protected ArrayList[] bridges; // holds for each triple its a priory
-										  // appliable bridges
-	protected int[] bridgesCounts; // holds for each triple its number of
-								   // bridges resp. tripleQueries
-	protected TripleQuery[][] tripleQueries; // holds for each triple its
-											 // disjunctive SQL-TripleQuery
-											 // Objects
-//	protected ArrayList conjunctions = new ArrayList(10);
+	/** holds for each triple its 'a priory' appliable bridges */
+	protected ArrayList[] bridges; 
+	
+	/** holds for each triple its number of bridges or tripleQueries */
+	protected int[] bridgesCounts; 
+								  
+	/** holds for each triple its disjunctive SQL-TripleQuery Objects */
+	protected TripleQuery[][] tripleQueries; 
 	
 public PatternQueryCombiner( GraphD2RQ graph, VariableBindings bindings, ExpressionSet constraints, Triple [] triples ) {
 	this.graph=graph;
 	this.bindings=bindings;
 	tripleCount=triples.length;
-	this.triples=triples; // new Triple[tripleCount]; // we put the more
-						  // instanciated triples here in run()
+	this.triples=triples; 
 }	
-
-void makeStores() {
-	if (!possible)
-		return;
-	//variables=new HashSet();
-	//sharedVariables=new HashSet();
-	bridges=new ArrayList[tripleCount];
-	tripleQueries=new TripleQuery[tripleCount][];
-	bridgesCounts=new int[tripleCount];
-}
 
 void setup() {
 	if (!possible)
 		return;
 	makeStores();
-	makeVariables();
 	makePropertyBridges(); // -> setsOfPossiblePropertyBridges
-	reducePropertyBridges();
+	// reducePropertyBridges();
 	makeTripleQueries();
 	database=((PropertyBridge)bridges[0].get(0)).getDatabase();
 	// makeCompatibleConjunctions(); // can be returned by an iterator
@@ -90,13 +88,24 @@ void setup() {
 								 //		push into iterator
 }
 
-void makeVariables() {
+/** allocates arrays */
+void makeStores() {
 	if (!possible)
 		return;
-	// VariableBindings.triplesFindVariablesAndShared(variables,sharedVariables);
+	bridges=new ArrayList[tripleCount];
+	bridgesCounts=new int[tripleCount];
+	tripleQueries=new TripleQuery[tripleCount][];
 }
 
-
+/** 
+ * Creates copies of the property bridges that could fit the <code>triples</code>.
+ * Two triples that are combined with AND generally have nothing in common,
+ * so we create individual instances of the bridges and systematically rename 
+ * their tables. We prefix each Table with "T<n>_ where <n> is the index of the
+ *  triple in the overall query.
+ * 
+ * @see TablePrefixer 
+ */
 void makePropertyBridges() {
 	if (!possible)
 		return;
@@ -114,14 +123,14 @@ void makePropertyBridges() {
 			PropertyBridge p=(PropertyBridge)prefixer.prefix(tBridges.get(j));
 			p.setTablePrefixer(prefixer);
 			tBridges.set(j,p);
-			// renameColumns(); // two triples generally have nothing in common
-			// so rename tables
-			// e.g. with "Tr<n>_ where <n> is the number of the triple in the
-			// over all query
 		}
 	}
 }
 
+/** 
+ * Creates a {@link TripleQuery} for each {@link PropertyBridge}.
+ * As a side effect we also set <code>bridgesCounts</code>.
+ */
 void makeTripleQueries() {
 	if (!possible)
 		return;
@@ -142,8 +151,7 @@ void reducePropertyBridges() {
 		return;
 	// TODO: 1. compute for each triple the weakest condition wrt. all its propertyBridges
 	// TODO: 2. check if the conjunction of all weakest conditions is fulfillable (possible)
-	// use bridge.couldFit(Triple,queryContext) ?
-	// use sharedVariables to constrain involved Nodes
+	// some of it is in NodeConstraint!
 	// use addTypeAssertions()
 }
 
@@ -178,27 +186,25 @@ void reducePropertyBridges() {
 //	//		replace all instances of Tr2_Papers with Tr1_Papers
 //}
 
-// Pull in iterator
-// 
 
 private SQLStatementMaker getSQL(TripleQuery[] conjunction) {
 	boolean possible=true;
 	Database db=conjunction[0].getDatabase();
-	SQLStatementMaker result=new SQLStatementMaker(db);
-	result.setEliminateDuplicates(true);	
+	SQLStatementMaker sql=new SQLStatementMaker(db);
+	sql.setEliminateDuplicates(db.correctlyHandlesDistinct());	
 	
 	for (int i=0; (i<conjunction.length) && possible; i++) {
 		TripleQuery t=conjunction[i];
-		result.addAliasMap(t.getPropertyBridge().getAliases());
-		result.addSelectColumns(t.getSelectColumns());
-		result.addJoins(t.getJoins());
-		result.addColumnValues(t.getColumnValues());
+		sql.addAliasMap(t.getPropertyBridge().getAliases());
+		sql.addSelectColumns(t.getSelectColumns());
+		sql.addJoins(t.getJoins());
+		sql.addColumnValues(t.getColumnValues());
 		// addConditions should be last, because checks if a textual token is likely to 
 		// be a table based on previously in select, join and column values seen tables
-		result.addConditions(t.getConditions()); 
-		result.addColumnRenames(t.getReplacedColumns()); // ?
+		sql.addConditions(t.getConditions()); 
+		sql.addColumnRenames(t.getReplacedColumns()); // ?
 	}
-	return result;
+	return sql;
 }
 
 public ClosableIterator resultTriplesIterator() {
@@ -207,15 +213,24 @@ public ClosableIterator resultTriplesIterator() {
 	return result;
 }
 
+/** 
+ * Iterator for PatternQueryCombiner results.
+ * @author jgarbers
+ *
+ */
 private class PQCResultIterator extends NiceIterator implements ClosableIterator {
-	protected TripleQuery[] conjunction; // next conjunction to be processed
-	protected TablePrefixer[] prefixerConjunction;
-	protected ConjunctionIterator conjunctionsIterator;
-//	protected ConjunctionIterator prefixerConjunctionIterator;
+
+    /** Iterator for TripleQuery conjunctions */
+    protected ConjunctionIterator conjunctionsIterator;
+    /** next TripleQuery conjunction to be processed */
+	protected TripleQuery[] conjunction; 
+	/** iterator helper */
 	protected Triple[] prefetchedResult=null;
+	/** iterator helper */
 	protected boolean didPrefetch=false;
-	CombinedTripleResultSet resultSet=null; // iterator that returns triple
-											// arrays for database rows
+	/** iterator that returns triple arrays for database rows */
+	CombinedTripleResultSet resultSet=null; 
+											
 
 	public PQCResultIterator() { // or maybe pass conjunctionsIterator as
 								 // argument
@@ -223,7 +238,6 @@ private class PQCResultIterator extends NiceIterator implements ClosableIterator
 			return;
 		conjunction=new TripleQuery[tripleCount];
 		conjunctionsIterator= new ConjunctionIterator((Object[][]) tripleQueries, conjunction);
-//		prefixerConjunctionIterator = new ConjunctionIterator((Object[][]) prefixers, prefixerConjunction);
 	}
 	
 	public boolean hasNext() {
@@ -248,6 +262,14 @@ private class PQCResultIterator extends NiceIterator implements ClosableIterator
 		return ret;
 	}
 	
+	/**
+	 * Tries to prefetch a <code>prefetchedResult</code>.
+	 * There are two resources to draw from:
+	 * 1. another row from the current SQL query (resultSet)
+	 * 2. a new SQL query can be started
+	 * Only those TripleQuery conjunctions are considered that may have
+	 * solutions in terms of NodeConstraints on shared variables.
+	 */
 	protected void prefetch() {
 		prefetchedResult=null;
 		while (true) {
@@ -274,20 +296,21 @@ private class PQCResultIterator extends NiceIterator implements ClosableIterator
 		} // enless while loop
 	}
 
-	/* (non-Javadoc)
+	/* 
+	 * Closes query to database.
 	 * @see com.hp.hpl.jena.util.iterator.ClosableIterator#close()
 	 */
 	public void close() {
-		// TODO Auto-generated method stub
-		
+		if (resultSet!=null)
+		    resultSet.close();
 	}
 
-	/* (non-Javadoc)
+	/* 
+	 * Not supported.
 	 * @see java.util.Iterator#remove()
 	 */
 	public void remove() {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 } // class PQCResultIterator
 

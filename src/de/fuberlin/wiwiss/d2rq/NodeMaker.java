@@ -1,5 +1,6 @@
- /*
+/*
   (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
+  (c) Copyright 2005 Bizer, Cyganiak, Garbers
 */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -22,6 +23,8 @@ import com.hp.hpl.jena.graph.Node;
  *   values correspond to a concrete node ({@link #getColumnValues}),</li>
  * <li>and build a concrete node from a database result row
  *   ({@link #getNode}).</li>
+ * <li>Since V0.3 a NodeMaker also adds constraint information to a 
+ * {@link NodeConstraint} ({@link #matchConstraint}).</li>
  * </ul>
  * <p>
  * Most of the actual work is done by a chain of {@link ValueSource}
@@ -42,13 +45,22 @@ import com.hp.hpl.jena.graph.Node;
  * <p>History:<br>
  * 06-16-2004: Initial version.<br>
  * 08-04-2004: Added couldFit, getColumns and getColumnValues<br>
+ * 11-03-2005: Added matchConstraint<br>
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Joerg Garbers
+ * @version V0.3
  */
 interface NodeMaker extends Cloneable { 
     
+    /** 
+     * Adds constraint information to a {@link NodeConstraint}.
+     * In a RDQL query a shared variable generally corresponds to different
+     * NodeMakers.
+     * @param c
+     * @see NodeConstraint
+     */
     void matchConstraint(NodeConstraint c);
     
 	/**

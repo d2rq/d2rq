@@ -1,6 +1,7 @@
 /*
- * $Id: Alias.java,v 1.4 2005/03/14 07:02:27 garbers Exp $
- */
+  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
+
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.Collection;
@@ -51,7 +52,6 @@ class Alias {
 	}
 
 
-	// TODO: use PatternMatcher
 	/**
 	 * Builds an Alias object from a textual SQL alias expression.
 	 * Currently we use simple String functions to extract the parts from an expression like
@@ -60,6 +60,7 @@ class Alias {
 	 * @return the created Alias instance.
 	 */
 	private static Alias buildAlias(String aliasExpression) { 
+		// TODO: use PatternMatcher
 		boolean illegal=false;
 		String upper=aliasExpression.toUpperCase();
 		int index = upper.indexOf(asConstructor); 

@@ -188,6 +188,19 @@ class Database {
        }
     }
     
+    public static boolean databaseMayUseDistict=false;
+
+    /** 
+     * Some Databases do not handle large entries correctly.
+     * For example MSAccess cuts strings larger than 256 bytes when queried
+     * with the DISTINCT keyword.
+     * TODO We would need some assertions about a database or specific columns.
+     * @return databaseMayUseDistict 
+     */
+    public boolean correctlyHandlesDistinct() {
+        return databaseMayUseDistict;
+    }
+    
     public String toString() {
     	  return super.toString() + "(" + 
 		  (odbc!=null ? odbc : "") + 

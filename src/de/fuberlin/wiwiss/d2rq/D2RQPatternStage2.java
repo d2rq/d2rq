@@ -1,10 +1,7 @@
-//
-//  D2RQPatternStage.java
-//  d2rq-map
-//
-//  Created by Joerg Garbers on 25.02.05.
-//  Copyright 2005 Joerg Garbers. All rights reserved.
-//
+/*
+  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
+
 package de.fuberlin.wiwiss.d2rq;
 
 import com.hp.hpl.jena.graph.Graph;
@@ -21,6 +18,7 @@ import com.hp.hpl.jena.util.iterator.ClosableIterator;
 /**
  * Instances of this {@link com.hp.hpl.jena.graph.query.Stage} are created by {@link D2RQQueryHandler} to handle 
  * a set of query triples that by D2RQ-mapping refer to the same database.
+ * Created by Joerg Garbers on 25.02.05.
  * 
  * @author jg
  * @since V0.3

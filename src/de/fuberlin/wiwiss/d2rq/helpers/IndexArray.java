@@ -1,11 +1,15 @@
+/*
+  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
 package de.fuberlin.wiwiss.d2rq.helpers;
 
 /**
  * An IndexArray is an array of (wrapped) counters. 
+ * It can be used like an iterator.
  */
 public class IndexArray {
 
-	public final int n;
+	public final int n; // number of counters
 	public final int[] ranges;
 	public int[] counters;
 	public int idx; // last index changed by next() or prev() operation (or n, if restart)
