@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.functional_tests;
+package de.fuberlin.wiwiss.d2rq;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,6 +9,7 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
 
 /**
  * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.GraphD2RQ}.

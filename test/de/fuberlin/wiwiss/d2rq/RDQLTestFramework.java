@@ -1,8 +1,11 @@
 /*
- * $Id: RDQLTestFramework.java,v 1.2 2005/03/07 10:08:48 garbers Exp $
+ * $Id: RDQLTestFramework.java,v 1.1 2005/03/07 17:39:53 garbers Exp $
  */
-package de.fuberlin.wiwiss.d2rq.functional_tests;
+package de.fuberlin.wiwiss.d2rq;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,7 +23,9 @@ import com.hp.hpl.jena.rdql.ResultBinding.ResultBindingIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.InfoD2RQ;
+import de.fuberlin.wiwiss.d2rq.Logger;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
 
 /**
  * Functional tests that exercise a ModelD2RQ by running RDQL queries against it. 
@@ -63,24 +68,41 @@ public class RDQLTestFramework extends TestFramework {
 			InfoD2RQ startInst, firstInst, simpleHandler, d2rqHandler;
 			startInst=InfoD2RQ.instance();
 			
+			Logger.instance().debug("using SimpleQueryHandler ...");
 			GraphD2RQ.setUsingD2RQQueryHandler(false);
 			super.runTest();
 			Set first=results;
 			firstInst=InfoD2RQ.instance();
 			simpleHandler=firstInst.minus(startInst);
 				
+			Logger.instance().debug("using D2RQQueryHandler ...");
 			GraphD2RQ.setUsingD2RQQueryHandler(true);
 			super.runTest();
 			Set second=results;
 			d2rqHandler=InfoD2RQ.instanceMinus(firstInst);
 			
-			Set firstMap, secondMap;
-			firstMap=resultBindingsToMaps(first);
-			secondMap=resultBindingsToMaps(second);
-			assertEquals(firstMap,secondMap);
+			Set firstMaps, secondMaps;
+			firstMaps=resultBindingsToMaps(first);
+			secondMaps=resultBindingsToMaps(second);
 			System.out.println("D2RQQueryHandler vs. SimpleQueryHandler = " + 
 					d2rqHandler.sqlPerformanceString() + " : " + simpleHandler.sqlPerformanceString() +
 					" (duration - SQL queries/rows/fields)");
+			if (!firstMaps.equals(secondMaps)) {
+			    System.out.println("D2RQQueryHandler vs. SimpleQueryHandler different results (" +
+			            firstMaps.size() + ":" + secondMaps.size() + ")");
+			    String firstPrinted=printObject(firstMaps);
+			    String secondPrinted=printObject(secondMaps);
+			    if (firstPrinted.equals(secondPrinted)) {
+			        System.out.println("... but printed the same.");
+			    } else {
+			        System.out.println("first Result:");
+			        System.out.println(firstPrinted);
+			        System.out.println("----------------");
+			        System.out.println("second Result:");
+			        System.out.println(secondPrinted);
+			    }
+			}
+			assertEquals(firstMaps,secondMaps);
 //			if (firstMap.equals(secondMap)) {
 //				System.out.println("RDQL same : D2RQQueryHandler returns same results as SimpleQueryHandler");
 //			} else {
@@ -96,7 +118,58 @@ public class RDQLTestFramework extends TestFramework {
 		}
 		GraphD2RQ.setUsingD2RQQueryHandler(oldState);
 	}
+	
+	
+	private String printObject(Object obj) {
+        if (obj instanceof Collection) {
+            return printCollection((Collection)obj);
+        } if (obj instanceof Map) {
+            return printMap((Map)obj);
+        } else {
+            return obj.toString();
+        }
+	}
+	
+	private String printArray(String[] a) {
+	    StringBuffer b=new StringBuffer("[");
+	    for (int i=0; i< a.length; i++) {
+	        if (i>0)
+	            b.append(",");
+	        b.append(a[i]);
+	    }
+	    b.append("]\n");
+	    return b.toString();
+	}
+	
+	private String printCollection(Collection c) {
+	    String a[]=new String[c.size()];
+	    Iterator it=c.iterator();
+	    int i=0;
+	    while (it.hasNext()) {
+	        Object obj=it.next();
+	        a[i]=printObject(obj);
+	        i++;
+	    }
+	    Arrays.sort(a);
+	    return printArray(a);
+	}
 
+	private String printMap(Map m) {
+	    String a[]=new String[m.size()];
+	    Iterator it=m.entrySet().iterator();
+	    Object[] side=new Object[2];
+	    String[] res=new String[2];
+	    int i=0;
+	    while (it.hasNext()) {
+	        Map.Entry e=(Map.Entry)it.next();
+	        a[i]=printObject(e.getKey()) + " = " + printObject(e.getValue());
+	        i++;
+	    }
+	    Arrays.sort(a);
+	    return printArray(a);
+	}
+
+	
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		this.model.close();

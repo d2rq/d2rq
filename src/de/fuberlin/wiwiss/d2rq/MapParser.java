@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.10 2005/03/07 10:07:53 garbers Exp $
+ * $Id: MapParser.java,v 1.11 2005/03/07 17:38:44 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -95,16 +95,24 @@ class MapParser {
 		}
 	}
 	
+	private static Map d2rqColumnTypeToDatabaseColumnType;
+	
 	private void buildDatabase(Node node) {
 		String odbcDSN = findZeroOrOneLiteral(node, D2RQ.odbcDSN);
 		String jdbcDSN = findZeroOrOneLiteral(node, D2RQ.jdbcDSN);
 		String jdbcDriver = findZeroOrOneLiteral(node, D2RQ.jdbcDriver);
 		String username = findZeroOrOneLiteral(node, D2RQ.username);
 		String password = findZeroOrOneLiteral(node, D2RQ.password);
+		if (d2rqColumnTypeToDatabaseColumnType==null) {
+		    d2rqColumnTypeToDatabaseColumnType=new HashMap();
+		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.textColumn,Database.textColumn);
+		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.numericColumn,Database.numericColumn);
+		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.dateColumn,Database.dateColumn);		    
+		}
 		Map columnTypes = new HashMap();
-		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.textColumn));
-		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.numericColumn));
-		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.dateColumn));
+		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.textColumn, d2rqColumnTypeToDatabaseColumnType));
+		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.numericColumn, d2rqColumnTypeToDatabaseColumnType));
+		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.dateColumn, d2rqColumnTypeToDatabaseColumnType));
 		if (jdbcDSN != null && jdbcDriver == null || jdbcDSN == null && jdbcDriver != null) {
 			Logger.instance().error("d2rq:jdbcDSN and d2rq:jdbcDriver must be used together");
 		}
@@ -348,10 +356,12 @@ class MapParser {
 					" must be either d2rq:DatatypePropertyBridge or d2rq:ObjectPropertyBridge");
 			return;
 		}
+		Map aliasMap=Alias.buildAliases(findLiterals(node,D2RQ.alias));
+		Set joins=Join.buildJoins(findLiterals(node, D2RQ.join));
 		PropertyBridge bridge = createPropertyBridge(node,
 				resourceMaker, new FixedNodeMaker(property), objectMaker,
-				Join.buildJoins(findLiterals(node, D2RQ.join)), 
-				Alias.buildAliases(findLiterals(node,D2RQ.alias)));
+				joins, 
+				aliasMap);
 		bridge.addConditions(findLiterals(node, D2RQ.condition));
 		assertHasColumnTypes(objectMaker, getDatabase(resourceMaker));
 	}
@@ -575,6 +585,10 @@ class MapParser {
 	}
 
 	private Map findLiteralsAsMap(Node subject, Node predicate) {
+	    return findLiteralsAsMap(subject, predicate, null);
+	}
+
+	private Map findLiteralsAsMap(Node subject, Node predicate, Map predicateToObjectMap) {
 		Map result = new HashMap();
 		ExtendedIterator itColText = this.graph.find(subject, predicate, Node.ANY);
 		while (itColText.hasNext()) {
@@ -584,7 +598,11 @@ class MapParser {
 						" for " + subject + " (\"" + t.getObject() + "\")");
 				continue;
 			}
-			result.put(t.getObject().getLiteral().getLexicalForm(), predicate);
+			Object value=(predicateToObjectMap==null)? predicate : predicateToObjectMap.get(predicate);
+//			if (value==null) {
+//			    throw new RuntimeException("Unmapped database type " + predicate);
+//			}
+			result.put(t.getObject().getLiteral().getLexicalForm(), value);
 		}
 		return result;
 	}

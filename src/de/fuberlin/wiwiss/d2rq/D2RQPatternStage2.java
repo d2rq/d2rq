@@ -19,6 +19,8 @@ import com.hp.hpl.jena.graph.query.ValuatorSet;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
 public class D2RQPatternStage2 extends CombinedPatternStage {
+    // TODO keep just one instance of PatternQueryCombiner and update Property Bridges
+    // only when updated with previous stage (see varInfo.boundDomainIndexToShared)
 
 	private GraphD2RQ graph;
 

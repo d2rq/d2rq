@@ -3,7 +3,6 @@
 */
 package de.fuberlin.wiwiss.d2rq;
 
-import com.hp.hpl.jena.graph.*;
 import java.sql.*;
 import java.util.*;
 
@@ -35,6 +34,16 @@ class Database {
     private String databaseUsername;
     private String databasePassword;
     private Connection con;
+    
+    public static final int invalidColumnType=-1;
+    public static final int noColumnType = 0;
+    public static final int numericColumnType = 1;
+    public static final int textColumnType = 2;
+    public static final int dateColumnType = 3;
+    public static final Integer numericColumn = new Integer(1);
+    public static final Integer textColumn = new Integer(2);
+    public static final Integer dateColumn = new Integer(3);
+
 
     public Database(String odbc, String jdbc, String jdbcDriver, String databaseUsername, String databasePassword, Map columnTypes) {
         this.odbc = odbc;
@@ -121,12 +130,19 @@ class Database {
         return this.databasePassword;
     }
 
+    public int getColumnType(String qualifiedColumnName) {
+        Integer t=(Integer)this.columnTypes.get(qualifiedColumnName);
+        if (t==null)
+            return Database.noColumnType;
+		return t.intValue();
+    }
+    
     /**
      * Returns the columnType for a given database column.
      * @return Node columnType D2RQ.textColumn or D2RQ.numericColumn or D2RQ.dateColumn
      */
-    public Node getColumnType(Column column) {
-		return (Node) this.columnTypes.get(column.getQualifiedName());
+    public int getColumnType(Column column) {
+        return getColumnType(column.getQualifiedName());
 	}
 
     /**
@@ -134,7 +150,7 @@ class Database {
      * @param column a database column
      */
 	public void assertHasType(Column column) {
-		if (getColumnType(column) == null) {
+		if (getColumnType(column) == Database.noColumnType) {
 			Logger.instance().error("The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
 		}
     }

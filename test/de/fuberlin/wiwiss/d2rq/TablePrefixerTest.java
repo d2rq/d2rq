@@ -7,7 +7,6 @@ package de.fuberlin.wiwiss.d2rq;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.fuberlin.wiwiss.d2rq.functional_tests.FindTestFramework;
 import junit.framework.TestCase;
 
 /**

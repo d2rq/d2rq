@@ -1,5 +1,5 @@
 /*
- * $Id: FindTest.java,v 1.3 2005/03/02 13:03:47 garbers Exp $
+ * $Id: FindTest.java,v 1.4 2005/03/07 17:38:33 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -17,6 +17,7 @@ import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import de.fuberlin.wiwiss.d2rq.FindTestFramework;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
 /**

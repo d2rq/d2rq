@@ -197,6 +197,7 @@ public abstract class CombinedPatternStage extends Stage {
 	}
 	
 	public void updateTriplesWithDomain(Domain inputDomain) {
+	    // TODO can be more efficientm, just check varInfo.boundDomainIndexToShared
 		int tripleCount = compiled.length;
 		// Triple[] triples = new Triple[tripleCount];
 		for (int index = 0; index < tripleCount; index++) {

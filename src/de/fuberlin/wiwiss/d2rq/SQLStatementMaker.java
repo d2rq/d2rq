@@ -139,8 +139,9 @@ class SQLStatementMaker {
      * @param value the value the column must have
      */
 	public void addColumnValue(Column column, String value) {
+	    String databaseColumn=column.getQualifiedName(aliasMap);
 		String whereClause = column.getQualifiedName() + "=" +
-				getQuotedColumnValue(value, this.database.getColumnType(column)); 
+				getQuotedColumnValue(value, this.database.getColumnType(databaseColumn)); 
 		if (this.sqlWhere.contains(whereClause)) {
 			return;
 		}
@@ -219,8 +220,8 @@ class SQLStatementMaker {
 		return this.columnNameNumber;
 	}
 
-	private static String getQuotedColumnValue(String value, Node columnType) {
-		if (D2RQ.numericColumn.equals(columnType)) {
+	private static String getQuotedColumnValue(String value, int columnType) {
+		if (Database.numericColumnType==columnType) {
 			// convert to number and back to String to avoid SQL injection
 			try {
 				return Integer.toString(Integer.parseInt(value));
@@ -231,7 +232,7 @@ class SQLStatementMaker {
 					return "NULL";
 				}
 			}
-		} else if (D2RQ.dateColumn.equals(columnType)) {
+		} else if (Database.dateColumnType==columnType) {
 			return "#" + value + "#";
 		}
 		return "'" + SQLStatementMaker.escape(value) + "'";

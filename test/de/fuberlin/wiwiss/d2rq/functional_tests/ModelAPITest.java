@@ -1,5 +1,5 @@
 /*
- * $Id: ModelAPITest.java,v 1.2 2005/03/07 10:08:47 garbers Exp $
+ * $Id: ModelAPITest.java,v 1.3 2005/03/07 17:38:42 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -12,6 +12,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.TestFramework;
 
 /**
  * Functional tests that exercise a ModelD2RQ by calling Model API functions. For

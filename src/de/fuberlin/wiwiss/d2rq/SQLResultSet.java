@@ -31,7 +31,6 @@ class SQLResultSet {
     protected Database database;
     protected ResultSet resultSet = null;
     protected String sql;
-    protected boolean rsForward = false;
     protected int numCols = 0;
 
 	public SQLResultSet(String SQL, Map columnNameNumberMap, Database db) {

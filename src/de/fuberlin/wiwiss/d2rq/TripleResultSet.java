@@ -24,6 +24,7 @@ class TripleResultSet extends SQLResultSet {
 	/** List of tripleMakers that are used on every row of the result set. */
     private ArrayList tripleMakers = new ArrayList();
     private Iterator tripleMakerIterator;
+    protected boolean rsForward = false;
 
 	/**
 	 * The chached triple. A value of null means there is no triple

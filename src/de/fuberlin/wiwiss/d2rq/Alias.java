@@ -1,14 +1,11 @@
 /*
- * $Id: Alias.java,v 1.2 2005/03/07 10:07:53 garbers Exp $
+ * $Id: Alias.java,v 1.3 2005/03/07 17:38:44 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Represents an SQL join between two tables, spanning one or more columns.

@@ -36,7 +36,7 @@ public class VariableBindings {
 	public Set sharedBindIndices = new HashSet(); // set of their indices
 	
 	// returns the (newly created) varIndexSet as a convenience
-	public Set mapToSharedPut(Map map, Object key, VariableIndex varIndexMember) {
+	protected Set mapToSharedPut(Map map, Object key, VariableIndex varIndexMember) {
 		Set varIndexSet=(Set) map.get(key);
 		if (varIndexSet==null) {
 		   varIndexSet=new HashSet();
@@ -70,7 +70,7 @@ public class VariableBindings {
 	}
 	
 	// currently not used
-	public static void triplesFindVariablesAndShared(Triple[] triples, Collection variables, Collection sharedVariables) {
+	private static void triplesFindVariablesAndShared(Triple[] triples, Collection variables, Collection sharedVariables) {
 		for (int i=0; i<triples.length; i++) {
 			Triple t=triples[i];
 			for (int j=0; j<3; j++) {

@@ -1,13 +1,15 @@
 /*
- * $Id: TestFramework.java,v 1.2 2005/03/07 10:08:48 garbers Exp $
+ * $Id: TestFramework.java,v 1.1 2005/03/07 17:39:54 garbers Exp $
  */
-package de.fuberlin.wiwiss.d2rq.functional_tests;
+package de.fuberlin.wiwiss.d2rq;
 
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
+
+import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
 
 /**
  * Functional tests that exercise a ModelD2RQ by running RDQL queries against it. 
@@ -25,7 +27,7 @@ import com.hp.hpl.jena.datatypes.TypeMapper;
  * @author Richard Cyganiak <richard@cyganiak.de>
  */
 public class TestFramework extends TestCase {
-	public static String D2RQMap = "file:srcMac/jgISWC-d2rq.n3"; // "file:doc/manual/ISWC-d2rq.n3";
+	public static String D2RQMap = "file:doc/manual/ISWC-d2rq.n3"; // "file:srcMac/jgISWC-d2rq.n3"; 
 	protected static String NS = "http://annotation.semanticweb.org/iswc/iswc.daml#";
 	protected final static RDFDatatype xsdString =
 			TypeMapper.getInstance().getSafeTypeByName("http://www.w3.org/2001/XMLSchema#string");

@@ -1,5 +1,5 @@
 /*
- * $Id: Column.java,v 1.4 2005/03/07 10:07:54 garbers Exp $
+ * $Id: Column.java,v 1.5 2005/03/07 17:38:44 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -22,6 +22,10 @@ class Column implements ValueSource, Prefixable {
 	private String tableName;
 	private final String columnName;
 
+	public static String appendTableColumn(String t, String c) {
+	    return t + "." + c;
+	}
+	
 	public Object clone() throws CloneNotSupportedException {return super.clone();}
 	public void prefixTables(TablePrefixer prefixer) {
 		String oldTable=tableName;
@@ -58,6 +62,18 @@ class Column implements ValueSource, Prefixable {
 	public String getQualifiedName() {
 		return this.qualifiedName;
 	}
+	
+	public String getQualifiedName(Map aliasMap) {
+	    if (aliasMap==null)
+	        return qualifiedName;
+	    Alias alias=(Alias)aliasMap.get(tableName);
+	    if (alias==null)
+	        return qualifiedName;
+	    String databaseTable=alias.databaseTable();
+	    String databaseColumn=appendTableColumn(databaseTable,columnName);
+		return databaseColumn;
+	}
+
 
 	/**
 	 * Extracts the database column name from a tablename.columnname

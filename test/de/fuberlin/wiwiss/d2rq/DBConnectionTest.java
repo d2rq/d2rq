@@ -19,7 +19,6 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.fuberlin.wiwiss.d2rq.Database;
 import de.fuberlin.wiwiss.d2rq.MapParser;
-import de.fuberlin.wiwiss.d2rq.functional_tests.TestFramework;
 
 
 /**
