@@ -56,6 +56,7 @@ class D2RQ {
     public static final Node ObjectPropertyBridge = Node.createURI(uri + "ObjectPropertyBridge");
     public static final Node column = Node.createURI(uri + "column");
     public static final Node join = Node.createURI(uri + "join");
+    public static final Node alias = Node.createURI(uri + "alias"); // jg
     public static final Node pattern = Node.createURI(uri + "pattern");
     public static final Node belongsToClassMap = Node.createURI(uri + "belongsToClassMap");
     public static final Node refersToClassMap = Node.createURI(uri + "refersToClassMap");

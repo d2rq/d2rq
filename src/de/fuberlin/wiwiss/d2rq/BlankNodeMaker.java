@@ -18,9 +18,15 @@ import com.hp.hpl.jena.rdf.model.AnonId;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class BlankNodeMaker implements NodeMaker {
+class BlankNodeMaker implements NodeMaker, Prefixable {
 	private ValueSource valueSource;
 	private String id;
+	
+	public Object clone() throws CloneNotSupportedException {return super.clone();}
+	public void prefixTables(TablePrefixer prefixer) {
+		valueSource=prefixer.prefixValueSource(valueSource);
+	}
+
 	
 	public BlankNodeMaker(String id, ValueSource valueSource) {
 		this.valueSource = valueSource;

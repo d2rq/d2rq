@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.8 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: MapParser.java,v 1.9 2005/03/02 09:23:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -346,15 +346,18 @@ class MapParser {
 		}
 		PropertyBridge bridge = createPropertyBridge(node,
 				resourceMaker, new FixedNodeMaker(property), objectMaker,
-				Join.buildJoins(findLiterals(node, D2RQ.join)));
+				Join.buildJoins(findLiterals(node, D2RQ.join)), 
+				Alias.buildAliases(findLiterals(node,D2RQ.alias)));
 		bridge.addConditions(findLiterals(node, D2RQ.condition));
 		assertHasColumnTypes(objectMaker, getDatabase(resourceMaker));
 	}
 
-	private PropertyBridge createPropertyBridge(Node node, NodeMaker subjects, NodeMaker predicates, NodeMaker objects, Set joins) {
+	private PropertyBridge createPropertyBridge(Node node, 
+	        NodeMaker subjects, NodeMaker predicates, NodeMaker objects, 
+	        Set joins, Map aliasses) {
 		PropertyBridge bridge = new PropertyBridge(node,
 				subjects, predicates, objects,
-				getDatabase(subjects), joins);
+				getDatabase(subjects), joins, aliasses);
 		// TODO: duplicates handling should be factored out (maybe into seperate class for all relational algebra stuff?)
 		boolean sUnique = this.uniqueNodeMakers.contains(subjects);
 		boolean pUnique = this.uniqueNodeMakers.contains(predicates);
@@ -445,7 +448,7 @@ class MapParser {
 					classMap,
 					new FixedNodeMaker(findOneNode(t.getObject(), D2RQ.propertyName)),
 					new FixedNodeMaker(findOneNode(t.getObject(), D2RQ.propertyValue)),
-					new HashSet(0));
+					new HashSet(0), new HashMap(0));
 		}
 	}
 
@@ -473,7 +476,7 @@ class MapParser {
 				classMap,
 				new FixedNodeMaker(RDF.Nodes.type),
 				new FixedNodeMaker(rdfsClass),
-				new HashSet(0));
+				new HashSet(0), new HashMap(0));
 	}
 
 	private Resource getResourceFromNode(Node node) {

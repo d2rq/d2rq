@@ -1,5 +1,5 @@
 /*
- * $Id: Column.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: Column.java,v 1.3 2005/03/02 09:23:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -17,19 +17,37 @@ import java.util.Set;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class Column implements ValueSource {
+class Column implements ValueSource, Prefixable {
 	private String qualifiedName;
+	private String tableName;
+	private final String columnName;
+
+	public Object clone() throws CloneNotSupportedException {return super.clone();}
+	public void prefixTables(TablePrefixer prefixer) {
+		tableName=prefixer.prefixTable(tableName);
+		qualifiedName=tableName + "." + columnName;
+	}
 
 	/**
 	 * Constructs a new Column from a fully qualified column name
 	 * @param qualifiedName the column's name, for example <tt>Table.Column</tt>
 	 */
 	public Column(String qualifiedName) {
-		if (qualifiedName.indexOf('.') == -1) {
+		int idx=qualifiedName.indexOf('.');
+		if (idx == -1) {
 			Logger.instance().error("\"" + qualifiedName + "\" is not in \"table.column\" notation");
 		}
 		this.qualifiedName = qualifiedName;
+		this.tableName = qualifiedName.substring(0, idx);
+		this.columnName =  qualifiedName.substring(idx+1);
 	}
+
+	public Column(String tableName, String colName) {
+		this.qualifiedName=tableName + "." + colName;
+		this.tableName=tableName;
+		this.columnName=colName;
+	}
+	
 
 	/**
 	 * Returns the column name in <tt>Table.Column</tt> form
@@ -45,8 +63,9 @@ class Column implements ValueSource {
 	 * @return database column name.
 	 */
 	public String getColumnName() {
-		int dotIndex = this.qualifiedName.indexOf(".");
-		return this.qualifiedName.substring(dotIndex + 1);
+		return this.columnName;
+//		int dotIndex = this.qualifiedName.indexOf(".");
+//		return this.qualifiedName.substring(dotIndex + 1);
 	}
 
 	/**
@@ -54,8 +73,9 @@ class Column implements ValueSource {
 	 * @return database table name.
 	 */
 	public String getTableName() {
-		int dotIndex = this.qualifiedName.indexOf(".");
-		return this.qualifiedName.substring(0, dotIndex);
+		return this.tableName;
+//		int dotIndex = this.qualifiedName.indexOf(".");
+//		return this.qualifiedName.substring(0, dotIndex);
 	}
 
 	/* (non-Javadoc)

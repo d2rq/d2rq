@@ -27,12 +27,16 @@ class SQLStatementMaker {
 	private final static String escapeReplacement = "\\\\$1";
 	private Database database;
 	private List sqlSelect = new ArrayList(10);
-	private List sqlFrom = new ArrayList(5);
+//	private List sqlFrom = new ArrayList(5); // -> referedTables, aliasMap
 	private List sqlWhere = new ArrayList(15);
 	/** Maps column names from the database to columns numbers in the result set. */
 	private Map columnNameNumber = new HashMap(10);
 	private int selectColumnCount = 0;
 	private boolean eliminateDuplicates = false;
+	
+	// see SQLStatementMaker.sqlFromExpression(referredTables,aliasMap)
+	protected Map aliasMap=new HashMap(1); // from String (aliased Table) to Alias
+	protected Collection referedTables = new HashSet(5); // Strings in their alias forms	
 
 	public SQLStatementMaker(Database database) {
 		this.database = database;
@@ -54,14 +58,15 @@ class SQLStatementMaker {
 				result.append(", ");
 			}
 		}
-		result.append(" FROM ");
-		it = this.sqlFrom.iterator();
-		while (it.hasNext()) {
-			result.append(it.next());
-			if (it.hasNext()) {
-				result.append(", ");
-			}
-		}
+		result.append(sqlFromExpression(referedTables,aliasMap));
+//		result.append(" FROM ");
+//		it = this.sqlFrom.iterator();
+//		while (it.hasNext()) {
+//			result.append(it.next());
+//			if (it.hasNext()) {
+//				result.append(", ");
+//			}
+//		}
 		it = this.sqlWhere.iterator();
 		if (it.hasNext()) {
 			result.append(" WHERE ");
@@ -72,25 +77,44 @@ class SQLStatementMaker {
 				}
 			}
 		}
+		result.append(";");
 		return result.toString();
 	}
+	
 
+	private void referTable(String tableName) {
+		if (!referedTables.contains(tableName)) {
+			referedTables.add(tableName);
+		}
+	}
+	private void referColumn(Column c) {
+		String tableName=c.getTableName();
+		referTable(tableName);
+	}
+
+	private void referColumns(Collection columns) {
+		Iterator it = columns.iterator();
+		while (it.hasNext()) {
+			referColumn((Column) it.next());
+		}
+	}
+
+	
+	
 	/**
 	 * Adds a column to the SELECT part of the query.
 	 * @param column the column
 	 */
 	public void addSelectColumn(Column column) {
-		if (this.sqlSelect.contains(column.getQualifiedName())) {
+		String qualName=column.getQualifiedName();
+		if (this.sqlSelect.contains(qualName)) {
 			return;
 		}
-		this.sqlSelect.add(column.getQualifiedName());
+		this.sqlSelect.add(qualName);
 		this.selectColumnCount++;
-		this.columnNameNumber.put(column.getQualifiedName(),
-				new Integer(this.selectColumnCount));
-		if (this.sqlFrom.contains(column.getTableName())) {
-			return;
-		}
-		this.sqlFrom.add(column.getTableName());
+		this.columnNameNumber.put(qualName,
+				new Integer(this.selectColumnCount));		
+		referColumn(column); // jg
 	}
 
     /**
@@ -112,16 +136,13 @@ class SQLStatementMaker {
      * @param value the value the column must have
      */
 	public void addColumnValue(Column column, String value) {
-    		String whereClause = column.getQualifiedName() + "=" +
-				getQuotedColumnValue(value, this.database.getColumnType(column));
+		String whereClause = column.getQualifiedName() + "=" +
+				getQuotedColumnValue(value, this.database.getColumnType(column)); 
 		if (this.sqlWhere.contains(whereClause)) {
 			return;
 		}
 		this.sqlWhere.add(whereClause);
-		if (this.sqlFrom.contains(column.getTableName())) {
-			return;
-		}
-		this.sqlFrom.add(column.getTableName());
+		referColumn(column);
 	}
 
 	/**
@@ -138,7 +159,7 @@ class SQLStatementMaker {
 			addColumnValue(column, value);
 		}	
 	}
-
+	
 	/**
 	 * Adds multiple WHERE clauses to the query.
 	 * @param conditions a set of Strings containing SQL WHERE clauses
@@ -146,7 +167,7 @@ class SQLStatementMaker {
 	public void addConditions(Set conditions) {
 		Iterator it = conditions.iterator();
 		while (it.hasNext()) {
-			String condition = (String) it.next();
+			String condition = (String) it.next(); 
 			if (this.sqlWhere.contains(condition)) {
 				continue;
 			}
@@ -158,16 +179,13 @@ class SQLStatementMaker {
 		Iterator it = joins.iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			if (this.sqlWhere.contains(join.toString())) {
+			String expression=join.sqlExpression();
+			if (this.sqlWhere.contains(expression)) {
 				continue;
 			}
-			this.sqlWhere.add(join.toString());
-			if (!this.sqlFrom.contains(join.getFirstTable())) {
-				this.sqlFrom.add(join.getFirstTable());
-			}
-			if (!this.sqlFrom.contains(join.getSecondTable())) {
-				this.sqlFrom.add(join.getSecondTable());
-			}
+			this.sqlWhere.add(expression);
+			referTable(join.getFirstTable());
+			referTable(join.getSecondTable());
         }
     }
 
@@ -175,7 +193,7 @@ class SQLStatementMaker {
 	 * Make columns accessible through their old, pre-renaming names.
 	 * @param renamedColumns
 	 */
-	public void addColumnRenames(Map renamedColumns) {
+	public void addColumnRenames(Map renamedColumns) { 
 		Iterator it = renamedColumns.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
@@ -224,4 +242,30 @@ class SQLStatementMaker {
 		return SQLStatementMaker.escapePattern.matcher(s).
 				replaceAll(SQLStatementMaker.escapeReplacement);
 	}
+	
+	// jg
+	public static String sqlFromExpression(Collection referedTables, Map aliasMap) {
+		StringBuffer result = new StringBuffer();
+		Iterator it=referedTables.iterator();
+		int i=0;
+		while (it.hasNext()) {			
+			if (i > 0) {
+				result.append(" , ");
+			}
+			String tableName=(String)it.next();
+			String expression=tableName;
+			if (aliasMap!=null) {
+				Alias mapVal=(Alias)aliasMap.get(tableName);
+				
+				if (mapVal!=null) {
+					expression=mapVal.sqlExpression();
+				} 
+			}
+			result.append(expression);
+			i++;
+		}
+		return result.toString();
+	}
+
+	
 }

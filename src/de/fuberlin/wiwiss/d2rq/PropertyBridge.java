@@ -4,6 +4,7 @@
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
@@ -25,25 +26,48 @@ import com.hp.hpl.jena.graph.Triple;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class PropertyBridge {
+class PropertyBridge implements Prefixable {
 	private Node id;
 	private NodeMaker subjectMaker;
 	private NodeMaker predicateMaker;
 	private NodeMaker objectMaker; 
 	private Database database;
-	private Set joins = new HashSet(2);
+	private Map aliases; // = new HashMap(1);
+	private Set joins; // = new HashSet(2);
 	private Set conditions = new HashSet(1);
 	private URIMatchPolicy uriMatchPolicy = new URIMatchPolicy();
 	private boolean mightContainDuplicates = false;
+	private TablePrefixer tablePrefixer; // use this to store PropertyBridge instaciation info
 
-	public PropertyBridge(Node id, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker, Database database, Set joins) {
+	public PropertyBridge(Node id, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker, Database database, Set joins, Map aliases) {
 		this.id = id;
 		this.subjectMaker = subjectMaker;
 		this.predicateMaker = predicateMaker;
 		this.objectMaker = objectMaker;
 		this.database = database;
 		this.joins = joins;
+		this.aliases = aliases;
 	}
+	
+	public Object clone() throws CloneNotSupportedException {return super.clone();}
+	public void prefixTables(TablePrefixer prefixer) {
+		Map m=prefixer.getAliasMap();
+		prefixer.setAliasMap(aliases); // aliases Map is changed during prefixing
+		subjectMaker=prefixer.prefixNodeMaker(subjectMaker);
+		predicateMaker=prefixer.prefixNodeMaker(predicateMaker);
+		objectMaker=prefixer.prefixNodeMaker(objectMaker);
+		joins=prefixer.prefixSet(joins);		
+		conditions=prefixer.prefixConditions(conditions);	
+		prefixer.setAliasMap(m);
+	}
+
+	public TablePrefixer getTablePrefixer() {
+		return tablePrefixer;
+	}
+	public void setTablePrefixer(TablePrefixer tablePrefixer) {
+		this.tablePrefixer = tablePrefixer;
+	}
+
 
 	/**
 	 * Adds SQL WHERE conditions that must evaluate to TRUE for a given

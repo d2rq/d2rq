@@ -47,7 +47,7 @@ import com.hp.hpl.jena.graph.Node;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-interface NodeMaker {
+interface NodeMaker extends Cloneable { 
 
 	/**
 	 * Checks if a node could fit this NodeMaker without querying the

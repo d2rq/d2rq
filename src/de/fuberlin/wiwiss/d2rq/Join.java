@@ -1,5 +1,5 @@
 /*
- * $Id: Join.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: Join.java,v 1.3 2005/03/02 09:23:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -19,13 +19,23 @@ import java.util.Set;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class Join {
+class Join implements Prefixable {
 	private Set fromColumns = new HashSet(2);
 	private Set toColumns = new HashSet(2);
 	private Map otherSide = new HashMap(4);
 	private String fromTable = null;
 	private String toTable = null;
+	
+	public Object clone() throws CloneNotSupportedException {return super.clone();}
+	public void prefixTables(TablePrefixer prefixer) {
+		fromColumns=prefixer.prefixSet(fromColumns);
+		toColumns=prefixer.prefixSet(toColumns);
+		otherSide=prefixer.prefixColumnColumnMap(otherSide);
+		fromTable=prefixer.prefixTable(fromTable);
+		toTable=prefixer.prefixTable(toTable);		
+	}
 
+	
 	public void addCondition(String joinCondition) {
 		Column col1 = Join.getColumn(joinCondition, true);
 		Column col2 = Join.getColumn(joinCondition, false);
@@ -94,6 +104,7 @@ class Join {
 		}
 		return return1 ? new Column(col1) : new Column(col2);
 	}
+
 	
 	/**
 	 * Builds a list of Join objects from a list of join condition
@@ -127,9 +138,9 @@ class Join {
 		return result;
 	}
 	
-	public String toString() {
+	public String sqlExpression() {
 		Object[] from = this.fromColumns.toArray();
-		Object[] to = this.toColumns.toArray();
+		// jg was Object[] to = this.toColumns.toArray();
 		StringBuffer result = new StringBuffer();
 		for (int i = 0; i < from.length; i++) {
 			if (i > 0) {
@@ -137,8 +148,13 @@ class Join {
 			}
 			result.append(from[i].toString());
 			result.append("=");
-			result.append(to[i].toString());
+			result.append(otherSide.get(from[i]).toString()); // jg was to[i]
 		}
 		return result.toString();
+		
 	}
+	public String toString() { // jg: was dubious! Sets do not 
+		return sqlExpression();
+	}
+		
 }

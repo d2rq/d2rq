@@ -1,5 +1,5 @@
 /*
- * $Id: MaxLengthRestriction.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: MaxLengthRestriction.java,v 1.3 2005/03/02 09:23:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -17,9 +17,15 @@ import java.util.Set;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class MaxLengthRestriction implements ValueSource {
+class MaxLengthRestriction implements ValueSource, Prefixable {
 	private ValueSource valueSource;
 	private int maxLength;
+	
+	public Object clone() throws CloneNotSupportedException {return super.clone();}
+	public void prefixTables(TablePrefixer prefixer) {
+		valueSource=prefixer.prefixValueSource(valueSource);
+	}
+
 
 	public MaxLengthRestriction(ValueSource valueSource, int maxLength) {
 		this.valueSource = valueSource;

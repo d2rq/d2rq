@@ -1,5 +1,5 @@
 /*
- * $Id: Pattern.java,v 1.3 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: Pattern.java,v 1.4 2005/03/02 09:23:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -24,12 +24,18 @@ import java.util.Set;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class Pattern implements ValueSource {
+class Pattern implements ValueSource, Prefixable {
 	private String pattern;
 	private String firstLiteralPart = null;
 	private List columns = new ArrayList(3);
 	private List literalParts = new ArrayList(3);
 	private Set columnsAsSet;
+
+	public Object clone() throws CloneNotSupportedException {return super.clone();}
+	public void prefixTables(TablePrefixer prefixer) {
+		columns=(List)prefixer.prefixCollection(columns);
+		columnsAsSet=(Set)prefixer.prefixCollection(columnsAsSet);
+	}
 
 	/**
 	 * Constructs a new Pattern instance from a pattern syntax string

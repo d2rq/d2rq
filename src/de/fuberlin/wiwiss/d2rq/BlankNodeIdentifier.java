@@ -1,5 +1,5 @@
 /*
- * $Id: BlankNodeIdentifier.java,v 1.3 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: BlankNodeIdentifier.java,v 1.4 2005/03/02 09:23:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -26,10 +26,15 @@ import java.util.StringTokenizer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class BlankNodeIdentifier implements ValueSource {
+class BlankNodeIdentifier implements ValueSource, Prefixable {
 	private String classMapID;
 	private Set identifierColumns = new HashSet(3);
 	
+	public Object clone() throws CloneNotSupportedException {return super.clone();}
+	public void prefixTables(TablePrefixer prefixer) {
+		identifierColumns=prefixer.prefixSet(identifierColumns);
+	}
+
 	/**
 	 * Constructs a new blank node identifier.
 	 * @param columns a comma-seperated list of column names uniquely
@@ -44,6 +49,7 @@ class BlankNodeIdentifier implements ValueSource {
 			this.identifierColumns.add(new Column(tokenizer.nextToken()));
 		}
 	}
+
 
 	public boolean couldFit(String anonID) {
 		int index = anonID.indexOf(D2RQ.deliminator);

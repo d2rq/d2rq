@@ -117,7 +117,12 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * @see com.hp.hpl.jena.graph.Graph#queryHandler
 	 */
 	public QueryHandler queryHandler() {
+		// jg: it would be more efficient to have just one instance per graph
+		// on the other hand: new instance guaraties that all information with handler
+		// is up to date.
+		checkOpen();
 		return new SimpleQueryHandler(this);
+		// return new D2RQQueryHandler(this);
 	}
 
 	/**
@@ -163,4 +168,27 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		}
 		return combiner.getResultIterator();
     }
+	
+	static PropertyBridge[] emptyPropertyBridgeArray=new PropertyBridge[0];
+	
+	// used by D2RQPatternStage
+	public ArrayList propertyBridgesForTriple(Triple t) { // PropertyBridge[]
+		QueryContext context = new QueryContext();
+		Iterator it = this.propertyBridges.iterator();
+		ArrayList list=new ArrayList(2);
+		while (it.hasNext()) {
+			PropertyBridge bridge = (PropertyBridge) it.next();
+			if (!bridge.couldFit(t, context)) {
+				continue;
+			}
+			if (Logger.instance().debugEnabled()) {
+				Logger.instance().debug("--------------------------------------------");
+				Logger.instance().debug("Using property bridge: " + bridge + " for triple " + t );
+			}
+			list.add(bridge);
+		}
+		return list;
+		// return (PropertyBridge[]) list.toArray(emptyPropertyBridgeArray);
+	}	
+	
 }

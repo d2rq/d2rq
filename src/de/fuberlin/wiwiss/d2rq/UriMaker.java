@@ -19,9 +19,14 @@ import com.hp.hpl.jena.graph.*;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class UriMaker implements NodeMaker {
+class UriMaker implements NodeMaker, Prefixable {
 	private ValueSource valueSource;
 	private String id;
+
+	public Object clone() throws CloneNotSupportedException {return super.clone();}
+	public void prefixTables(TablePrefixer prefixer) {
+		valueSource=prefixer.prefixValueSource(valueSource);
+	}
 
 	public UriMaker(String id, ValueSource valueSource) {
 		this.valueSource = valueSource;

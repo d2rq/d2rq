@@ -1,5 +1,5 @@
 /*
- * $Id: ContainsRestriction.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: ContainsRestriction.java,v 1.3 2005/03/02 09:23:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -17,9 +17,14 @@ import java.util.Set;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class ContainsRestriction implements ValueSource {
+class ContainsRestriction implements ValueSource, Prefixable {
 	private ValueSource valueSource;
 	private String containedValue;
+	
+	public Object clone() throws CloneNotSupportedException {return super.clone();}
+	public void prefixTables(TablePrefixer prefixer) {
+		valueSource=prefixer.prefixValueSource(valueSource);
+	}
 
 	public ContainsRestriction(ValueSource valueSource, String containedValue) {
 		this.valueSource = valueSource;

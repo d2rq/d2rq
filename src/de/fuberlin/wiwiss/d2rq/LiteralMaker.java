@@ -20,11 +20,17 @@ import com.hp.hpl.jena.datatypes.*;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class LiteralMaker implements NodeMaker {
+class LiteralMaker implements NodeMaker, Prefixable {
 	private ValueSource valueSource;
 	private RDFDatatype datatype;
 	private String lang;
 	private String id;
+	
+	public Object clone() throws CloneNotSupportedException {return super.clone();}
+	public void prefixTables(TablePrefixer prefixer) {
+		valueSource=prefixer.prefixValueSource(valueSource);
+	}
+
 
 	public LiteralMaker(String id, ValueSource valueSource, RDFDatatype datatype, String lang) {
 		this.valueSource = valueSource;
