@@ -72,7 +72,6 @@ class SQLStatementMaker {
 				}
 			}
 		}
-		result.append(";");
 		return result.toString();
 	}
 

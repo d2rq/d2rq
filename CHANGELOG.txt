@@ -1,3 +1,9 @@
+Changes since v0.2
+------------------
+
+* remove ";" from end of SQL queries to make Oracle happy
+
+
 Changes since v0.1
 ------------------
 
