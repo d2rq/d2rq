@@ -1,5 +1,5 @@
 /*
- * $Id: Alias.java,v 1.1 2005/03/02 09:23:53 garbers Exp $
+ * $Id: Alias.java,v 1.2 2005/03/07 10:07:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -42,7 +42,7 @@ class Alias {
 	}
 
 	public String toString() { 
-		return sqlExpression;
+		return super.toString()+"("+sqlExpression+")";
 	}
 
 	public static String asConstructor = " AS ";

@@ -1,5 +1,5 @@
 /*
- * $Id: AllTests.java,v 1.3 2005/01/24 23:18:19 cyganiak Exp $
+ * $Id: AllTests.java,v 1.4 2005/03/07 10:08:47 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -28,6 +28,7 @@ public class AllTests {
         suite.addTestSuite(SQLStatementMakerTest.class);
         suite.addTestSuite(CSVParserTest.class);
         suite.addTestSuite(ResultIteratorTest.class);
+        suite.addTestSuite(TablePrefixer.class);
         //$JUnit-END$
         suite.addTest(de.fuberlin.wiwiss.d2rq.functional_tests.AllTests.suite());
         return suite;

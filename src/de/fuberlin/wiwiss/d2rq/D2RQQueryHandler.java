@@ -39,8 +39,13 @@ public class D2RQQueryHandler extends SimpleQueryHandler implements QueryHandler
 		doFastpath = true;
     }     
    
+    public static boolean runVersion2=true;
+    
     public Stage patternStage( Mapping map, ExpressionSet constraints, Triple [] t )
     { 
-        return new D2RQPatternStage( graph, map, constraints, t ); // jg see PatternStage for overriding
+    		if (runVersion2) 
+    			return new D2RQPatternStage2( graph, map, constraints, t );
+    		else 
+    			return new D2RQPatternStage( graph, map, constraints, t ); // jg see PatternStage for overriding
     }
 }

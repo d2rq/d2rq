@@ -73,6 +73,7 @@ class CombinedTripleResultSet extends SQLResultSet {
 					done=false;
 					break;
 				}
+				results[i]=triple; // jg 5.3.
 			}
 		} while (!done);
 		return results;

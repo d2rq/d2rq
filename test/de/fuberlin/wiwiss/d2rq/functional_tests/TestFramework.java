@@ -1,25 +1,13 @@
 /*
- * $Id: TestFramework.java,v 1.1 2005/03/02 13:03:48 garbers Exp $
+ * $Id: TestFramework.java,v 1.2 2005/03/07 10:08:48 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
-
 import junit.framework.TestCase;
+import junit.framework.TestResult;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
-import com.hp.hpl.jena.rdql.Query;
-import com.hp.hpl.jena.rdql.QueryEngine;
-import com.hp.hpl.jena.rdql.QueryResults;
-import com.hp.hpl.jena.rdql.ResultBinding;
-import com.hp.hpl.jena.rdql.ResultBinding.ResultBindingIterator;
-
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 
 /**
  * Functional tests that exercise a ModelD2RQ by running RDQL queries against it. 
@@ -37,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * @author Richard Cyganiak <richard@cyganiak.de>
  */
 public class TestFramework extends TestCase {
-	protected static String D2RQMap = "file:doc/manual/ISWC-d2rq.n3";
+	public static String D2RQMap = "file:srcMac/jgISWC-d2rq.n3"; // "file:doc/manual/ISWC-d2rq.n3";
 	protected static String NS = "http://annotation.semanticweb.org/iswc/iswc.daml#";
 	protected final static RDFDatatype xsdString =
 			TypeMapper.getInstance().getSafeTypeByName("http://www.w3.org/2001/XMLSchema#string");
@@ -59,7 +47,20 @@ public class TestFramework extends TestCase {
 	}
 	
 	public TestFramework(String arg0) {
-		super(arg0);
+		super(arg0); // called for each method in a TestCase class (as suite)
 	}
 
+	public void run(TestResult result) {
+		super.run(result); // calls setUp, runTest and tearDown
+	}
+	protected void setUp() throws Exception {
+		super.setUp();
+	}
+	protected void runTest() throws Throwable {
+		super.runTest();
+	}
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		// set Breakpoint here
+	}
 }

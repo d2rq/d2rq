@@ -1,5 +1,5 @@
 /*
- * $Id: ModelAPITest.java,v 1.1 2004/08/11 15:06:30 cyganiak Exp $
+ * $Id: ModelAPITest.java,v 1.2 2005/03/07 10:08:47 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -21,9 +21,7 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  *
  * @author Richard Cyganiak <richard@cyganiak.de>
  */
-public class ModelAPITest extends TestCase {
-	private final static String D2RQMap = "file:doc/manual/ISWC-d2rq.n3";
-	private final static String NS = "http://annotation.semanticweb.org/iswc/iswc.daml#";
+public class ModelAPITest extends TestFramework {
 	private ModelD2RQ model;
 
 	public ModelAPITest(String arg0) {

@@ -1,5 +1,5 @@
 /*
- * $Id: Pattern.java,v 1.4 2005/03/02 09:23:53 garbers Exp $
+ * $Id: Pattern.java,v 1.5 2005/03/07 10:07:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -33,8 +33,12 @@ class Pattern implements ValueSource, Prefixable {
 
 	public Object clone() throws CloneNotSupportedException {return super.clone();}
 	public void prefixTables(TablePrefixer prefixer) {
+		List old=columns;
 		columns=(List)prefixer.prefixCollection(columns);
-		columnsAsSet=(Set)prefixer.prefixCollection(columnsAsSet);
+		if (old!=columns) {
+			columnsAsSet=new HashSet(columns);
+			pattern=reconstructPattern();
+		}
 	}
 
 	/**
@@ -133,9 +137,21 @@ class Pattern implements ValueSource, Prefixable {
 			if (row[fieldNumber.intValue()] == null) {
 				return null;
 			}
-			result.append(row[fieldNumber.intValue()]);
+			result.append(row[fieldNumber.intValue()]);				
 			result.append(this.literalParts.get(index));
 			index++;
+		}
+		return result.toString();
+	}
+	
+	public String reconstructPattern() {
+		StringBuffer result = new StringBuffer(this.firstLiteralPart);
+		result.append(D2RQ.deliminator);
+		for (int i=0;i<columns.size(); i++) {
+			Column column = (Column) columns.get(i);
+			result.append(column.getQualifiedName());
+			result.append(D2RQ.deliminator);
+			result.append(literalParts.get(i));
 		}
 		return result.toString();
 	}

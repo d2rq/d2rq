@@ -27,15 +27,15 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  */
 public class FindTestFramework extends TestFramework {
 
+	protected GraphD2RQ graph;
+	protected Set resultTriples; 
+
 	/**
 	 * @param arg0
 	 */
 	public FindTestFramework(String arg0) {
 		super(arg0);
 	}
-
-	protected GraphD2RQ graph;
-	protected Set resultTriples; 
 
 	protected void setUp() throws Exception {
 		this.graph = new GraphD2RQ(D2RQMap);

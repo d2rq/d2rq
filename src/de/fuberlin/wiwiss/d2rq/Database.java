@@ -171,4 +171,11 @@ class Database {
             ex.printStackTrace();
        }
     }
+    
+    public String toString() {
+    	  return super.toString() + "(" + 
+		  (odbc!=null ? odbc : "") + 
+		  (jdbc!=null ? jdbc : "") +
+		   ")";
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: Join.java,v 1.3 2005/03/02 09:23:53 garbers Exp $
+ * $Id: Join.java,v 1.4 2005/03/07 10:07:54 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -22,21 +22,40 @@ import java.util.Set;
 class Join implements Prefixable {
 	private Set fromColumns = new HashSet(2);
 	private Set toColumns = new HashSet(2);
-	private Map otherSide = new HashMap(4);
+	private Map otherSide = new HashMap(4); 
 	private String fromTable = null;
 	private String toTable = null;
+	private String sqlExpression=null; // cached value
 	
 	public Object clone() throws CloneNotSupportedException {return super.clone();}
 	public void prefixTables(TablePrefixer prefixer) {
-		fromColumns=prefixer.prefixSet(fromColumns);
-		toColumns=prefixer.prefixSet(toColumns);
-		otherSide=prefixer.prefixColumnColumnMap(otherSide);
 		fromTable=prefixer.prefixTable(fromTable);
-		toTable=prefixer.prefixTable(toTable);		
+		toTable=prefixer.prefixTable(toTable);	
+		if (!prefixer.mayChangeID()) {
+			return;
+		}
+		sqlExpression=null;
+		Set columnsToPrefix=otherSide.keySet(); // contains both fromColumns and toColumns
+		Map oldNewMap= new HashMap(columnsToPrefix.size());
+		prefixer.prefixCollectionIntoCollectionAndMap(columnsToPrefix,null,oldNewMap);
+		fromColumns=(Set) TablePrefixer.createCollectionFromCollectionWithMap(fromColumns,oldNewMap);
+		toColumns=(Set) TablePrefixer.createCollectionFromCollectionWithMap(toColumns,oldNewMap);
+		Map newOther = new HashMap(fromColumns.size()+toColumns.size());
+		Iterator it=otherSide.entrySet().iterator();
+		while (it.hasNext()){
+			Map.Entry oldEntry=(Map.Entry)it.next();
+			Column oldFromColumn=(Column) oldEntry.getKey();
+			Column oldToColumn=(Column)oldEntry.getValue();
+			Column fromColumn=(Column)oldNewMap.get(oldFromColumn);
+			Column toColumn=(Column)oldNewMap.get(oldToColumn);
+			newOther.put(fromColumn,toColumn); // pair (toColumn,fromColumn) will be seen in another iteration
+		}
+		otherSide=newOther;
 	}
 
 	
 	public void addCondition(String joinCondition) {
+		sqlExpression=null;
 		Column col1 = Join.getColumn(joinCondition, true);
 		Column col2 = Join.getColumn(joinCondition, false);
 		if (this.fromTable == null) {
@@ -137,8 +156,16 @@ class Join implements Prefixable {
 		}
 		return result;
 	}
+	public static Join buildJoin(String condition) {
+		Join join = new Join();
+		join.addCondition(condition);
+		return join;
+	}
+	
 	
 	public String sqlExpression() {
+		if (sqlExpression!=null) 
+			return sqlExpression;
 		Object[] from = this.fromColumns.toArray();
 		// jg was Object[] to = this.toColumns.toArray();
 		StringBuffer result = new StringBuffer();
@@ -146,15 +173,15 @@ class Join implements Prefixable {
 			if (i > 0) {
 				result.append(" AND ");
 			}
-			result.append(from[i].toString());
+			result.append(((Column)from[i]).getQualifiedName());
 			result.append("=");
-			result.append(otherSide.get(from[i]).toString()); // jg was to[i]
+			result.append(((Column)otherSide.get(from[i])).getQualifiedName()); // jg was to[i]
 		}
-		return result.toString();
-		
+		sqlExpression=result.toString();
+		return sqlExpression;
 	}
 	public String toString() { // jg: was dubious! Sets do not 
-		return sqlExpression();
+		return super.toString() + "(" + sqlExpression() + "";
 	}
 		
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.9 2005/03/02 09:23:53 garbers Exp $
+ * $Id: MapParser.java,v 1.10 2005/03/07 10:07:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -71,6 +71,10 @@ class MapParser {
 		addRDFTypePropertyBridges();
 	}
 
+	public Collection getDatabases() {
+		return this.databases.values();
+	}
+	
 	public Collection getClassMaps() {
 		return this.classMaps.values();
 	}

@@ -22,6 +22,7 @@ class TablePrefixer {
 	protected Set referedTables = new HashSet(5); // Strings in their alias forms	
 	protected Map prefixedAliasMap; // is created during prefixing
 	
+	
 	// use without tablePrefixing
 	public TablePrefixer() {
 	}
@@ -31,6 +32,13 @@ class TablePrefixer {
 	public TablePrefixer(int tripleNumber) {
 		this.setTablePrefixToTripleNumber(tripleNumber);
 	}
+	
+	public boolean mayChangeID() {
+		return tablePrefix!=null;
+	}
+//	public boolean didChangeID() {
+//		return didChangeID;
+//	}
 	
 	// istance variable access methods
 	// sets up tablePrefix including prefixSeparator and initializes prefixedAliasMap
@@ -63,17 +71,30 @@ class TablePrefixer {
 	}
 	//  prefixing methods
 
-	protected String prefixString(String table) {
+	public static boolean mayPrefixPrefixedString=true; // set in runtime variables to false during testing!
+	public static int prefixStringContinuation=2; // see 
+	
+	public String prefixString(String table) {
 		if (tablePrefix==null)
 			return table;
-		else 
-			return tablePrefix + prefixSeparator + table;
+		else if (mayPrefixPrefixedString || !table.startsWith(tablePrefix))
+			return tablePrefix + table;
+		else {
+			String msg="String "+table+" already prefixed and TablePrefixer.mayPrefixPrefixedString is false.";
+			if ((prefixStringContinuation & 2) != 0)
+				System.out.println(msg);
+			if ((prefixStringContinuation & 4) != 0)	
+				throw new RuntimeException(msg);
+			if ((prefixStringContinuation & 1) != 0)	
+				return tablePrefix + table;
+			return table; // case wrongContinuation==0
+		}
 	}
-	protected String unprefixString(String table) {
+	public String unprefixString(String table) {
 		if (tablePrefix==null)
 			return table;
 		if (table.startsWith(tablePrefix))
-			return table.substring(tablePrefixLength+1);
+			return table.substring(tablePrefixLength);
 		return null;
 	}
 	public Map unprefixedColumnNameNumberMap(Map columnNameNumber) {
@@ -92,24 +113,26 @@ class TablePrefixer {
 		return result;
 	}				
 	
-	protected static java.util.regex.Pattern pat = java.util.regex.Pattern.compile("\\p{Alnum}");
+	protected static java.util.regex.Pattern allowedTablePattern = java.util.regex.Pattern.compile("\\w+");
 
 	// the following code may fail, if there are strings in the expressions, that match with table names
 	protected String replaceTablesInExpression(String expression) {
 		if (tablePrefix==null)
 			return expression;
-		java.util.regex.Matcher m = pat.matcher(expression);
+		int expressionLength=expression.length();
+		java.util.regex.Matcher m = allowedTablePattern.matcher(expression);
 		StringBuffer sb = new StringBuffer();
 		while (m.find()) {
 			int start=m.start();
 			String alphanum=m.group();
 			boolean prevIsDot = (start>0) && ('.' == expression.charAt(start-1));
 			if (!prevIsDot) {
-				String replacement=substituteIfTable(alphanum);
-				m.appendReplacement(sb, replacement);
-			} else {
-				m.appendReplacement(sb, alphanum);				
-			}
+				int end=m.end();
+				boolean nextIsDot = (end<expressionLength) && ('.' == expression.charAt(end));
+				if (nextIsDot) 
+					alphanum=substituteIfTable(alphanum);
+			} 
+			m.appendReplacement(sb, alphanum);				
 		}
 		m.appendTail(sb);
 		return sb.toString();
@@ -157,12 +180,11 @@ class TablePrefixer {
 		return prefixedTable;
 	}
 	
-	// this polymorphism is used in handling NodeMaker and ValueSource classes
-	// some of which do not implemnet Prefixable
-	public Object prefixIfPrefixable(Prefixable obj) {
-		return prefixPrefixable(obj);
-	}
-	public Object prefixIfPrefixable(Object obj) {	
+	// this is used in handling NodeMaker and ValueSource classes
+	// some of which do not implement Prefixable
+	public Object prefixIfPrefixable(Object obj) {
+		if (obj instanceof Prefixable)
+			return prefixPrefixable((Prefixable)obj);
 		return obj;
 	}
 	
@@ -183,9 +205,6 @@ class TablePrefixer {
 		throw new RuntimeException("unrecognized argument " + obj.toString() + "to TablePrefixer.prefix().");
 	}
 	
-	public Object prefix(Prefixable obj) {
-		return prefixPrefixable(obj);
-	}
 	// useful, if Prefixable is known.
 	public Prefixable prefixPrefixable(Prefixable obj) {
 		if (tablePrefix==null) {
@@ -199,43 +218,34 @@ class TablePrefixer {
 		} catch (Exception e) {
 			x=e;
 		}
-		if (x!=null) {
+		if (x==null) {
 			clon.prefixTables(this);
 			return clon;		
 		} else
 			throw new RuntimeException(x);
 	}
 		
-	public Object prefix(NodeMaker obj) {
-		return prefixIfPrefixable(obj);
-	}
 	public NodeMaker prefixNodeMaker(NodeMaker obj) {
 		return (NodeMaker)prefixIfPrefixable(obj);
 	}
 	
-	public Object prefix(ValueSource obj) {
-		return prefixIfPrefixable(obj);
-	}
 	public ValueSource prefixValueSource(ValueSource obj) {
 		return (ValueSource)prefixIfPrefixable(obj);
 	}
 	
 	// helper method
-	private Collection prefixCollectionIntoCollection(Collection collection, Collection results) {
+	// both results and map may be null
+	public Collection prefixCollectionIntoCollectionAndMap(Collection collection, Collection results, Map map) {
 		Iterator it=collection.iterator();
 		while (it.hasNext()){
 			Object entry=it.next();
-			results.add(prefix(entry));
+			Object result=prefix(entry);
+			if (results!=null)
+				results.add(result);
+			if (map!=null)
+				map.put(entry,result);
 		}
 		return results;
-	}
-	private Collection prefixCollectionEntries(Collection collection) {
-		Iterator it=collection.iterator();
-		while (it.hasNext()){
-			Object entry=it.next();
-			prefix(entry); // dont care about result
-		}
-		return collection;
 	}
 	
 	private static Class[] intParameterTypes=new Class[]{int.class};
@@ -246,29 +256,51 @@ class TablePrefixer {
 	}
 	// construct a collection instance of same class as collection
 	public Collection prefixCollection(Collection collection) {
-		if (tablePrefix==null) {
-			return prefixCollectionEntries(collection);
-		}
-		Class cls=collection.getClass();
-		Object inst=null;
+		return prefixCollectionAndMap(collection,null);
+	}
+	
+	public static Collection newEmptyCollection(Collection oldType) {
+		Class cls=oldType.getClass();
+		Collection inst=null;
 		// Constructor cons=cls.getDeclaredConstructor(intParameterTypes);
 		try {
-		   inst=cls.newInstance();
+		   inst=(Collection)cls.newInstance();
 		} catch (Exception e) {
-			throw new RuntimeException("TablePrefixer: class "+cls+" has no () constructor!");
+			throw new RuntimeException("TablePrefixer: class "+cls+" has no () constructor or is no collection");
 		}
-		return prefixCollectionIntoCollection(collection,(Collection)inst);
+		return inst;
+	}
+	
+	// put previous and result into map while prefixing a collection
+	public Collection prefixCollectionAndMap(Collection collection, Map map) {
+		if (tablePrefix==null) {
+			prefixCollectionIntoCollectionAndMap(collection, null, map);
+			return collection;
+		}
+		Collection inst=newEmptyCollection(collection);
+		return prefixCollectionIntoCollectionAndMap(collection,(Collection)inst,map);		
 	}
 
+	public static Collection createCollectionFromCollectionWithMap(Collection collection, Map map) {
+		Collection results=newEmptyCollection(collection);
+		Iterator it=collection.iterator();
+		while (it.hasNext()){
+			Object entry=it.next();
+			Object result=map.get(entry);
+			results.add(result);
+		}
+		return results;
+	}
+
+	
 	// produces HashSets
 	public Set prefixSet(Set collection) {
 		if (tablePrefix==null) {
-			return (Set) prefixCollectionEntries(collection);
+			prefixCollectionIntoCollectionAndMap(collection,null,null);
+			return collection;
 		}
-		return (Set)prefixCollectionIntoCollection(collection,new HashSet(collection.size()));
+		return (Set)prefixCollectionIntoCollectionAndMap(collection,new HashSet(collection.size()),null);
 	}
-
-
 
 	public Object prefix(String obj) {
 		return prefixTable(obj);
@@ -289,6 +321,12 @@ class TablePrefixer {
 	}
 	public Join prefixJoin(Join join) {
 		return (Join)prefixPrefixable(join);
+	}
+	public Object prefix(PropertyBridge obj) {
+		return prefixPrefixable(obj);
+	}
+	public PropertyBridge prefixPropertyBridge(PropertyBridge propertyBridge) {
+		return (PropertyBridge)prefixPrefixable(propertyBridge);
 	}
 
 	// convenience Methods (remove!)

@@ -58,8 +58,8 @@ class SQLStatementMaker {
 				result.append(", ");
 			}
 		}
+		result.append(" FROM ");
 		result.append(sqlFromExpression(referedTables,aliasMap));
-//		result.append(" FROM ");
 //		it = this.sqlFrom.iterator();
 //		while (it.hasNext()) {
 //			result.append(it.next());
@@ -81,7 +81,10 @@ class SQLStatementMaker {
 		return result.toString();
 	}
 	
-
+	public void addAliasMap(Map m) {
+		aliasMap.putAll(m);
+	}
+	
 	private void referTable(String tableName) {
 		if (!referedTables.contains(tableName)) {
 			referedTables.add(tableName);
@@ -244,7 +247,7 @@ class SQLStatementMaker {
 	}
 	
 	// jg
-	public static String sqlFromExpression(Collection referedTables, Map aliasMap) {
+	private static String sqlFromExpression(Collection referedTables, Map aliasMap) {
 		StringBuffer result = new StringBuffer();
 		Iterator it=referedTables.iterator();
 		int i=0;

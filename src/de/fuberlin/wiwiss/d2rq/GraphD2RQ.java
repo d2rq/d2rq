@@ -40,6 +40,8 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
  * @see de.fuberlin.wiwiss.d2rq.D2RQCapabilities
  */
 public class GraphD2RQ extends GraphBase implements Graph {
+	static private boolean usingD2RQQueryHandler=false;
+	
 //	private final ReificationStyle style;
 //	private boolean closed = false;
 	private Capabilities capabilities = null;
@@ -47,6 +49,18 @@ public class GraphD2RQ extends GraphBase implements Graph {
     /** Collection of all PropertyBridges definded in the mapping file */
 	private List propertyBridges;
 
+	public static boolean isUsingD2RQQueryHandler() {
+		return usingD2RQQueryHandler;
+	}
+	public static void setUsingD2RQQueryHandler(boolean usingD2RQQueryHandler) {
+		GraphD2RQ.usingD2RQQueryHandler = usingD2RQQueryHandler;
+	}
+	
+	public List getPropertyBridges() {
+		return propertyBridges;
+	}
+
+	
 	/**
 	 * Creates a new D2RQ graph from a D2RQ mapping file in Notation 3 syntax.
 	 * @param mapURL the URL where the mapping file is located
@@ -121,8 +135,9 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		// on the other hand: new instance guaraties that all information with handler
 		// is up to date.
 		checkOpen();
+		if (usingD2RQQueryHandler) 
+			return new D2RQQueryHandler(this);
 		return new SimpleQueryHandler(this);
-		// return new D2RQQueryHandler(this);
 	}
 
 	/**

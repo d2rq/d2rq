@@ -47,6 +47,7 @@ class SQLResultSet {
             Logger.instance().debug("--------------------------------------------");
         }
         try {
+        		InfoD2RQ.totalNumberOfExecutedSQLQueries++;
 			Connection con = this.database.getConnnection();
 			// Create and execute SQL statement
 			java.sql.Statement stmt = con.createStatement();
@@ -78,6 +79,8 @@ class SQLResultSet {
 				this.resultSet.close();
 				return null;
 			}
+			InfoD2RQ.totalNumberOfReturnedRows++;
+			InfoD2RQ.totalNumberOfReturnedFields+=this.numCols;
 			String[] result = new String[this.numCols + 1];
 			for (int i = 1; i <= this.numCols; i++) {
 				result[i] = this.resultSet.getString(i);

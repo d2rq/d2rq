@@ -53,14 +53,20 @@ class PropertyBridge implements Prefixable {
 	public void prefixTables(TablePrefixer prefixer) {
 		Map m=prefixer.getAliasMap();
 		prefixer.setAliasMap(aliases); // aliases Map is changed during prefixing
+		// do also set up new PrefixedAliasMap here if (prefixer.mayChangeID()) ?
 		subjectMaker=prefixer.prefixNodeMaker(subjectMaker);
 		predicateMaker=prefixer.prefixNodeMaker(predicateMaker);
 		objectMaker=prefixer.prefixNodeMaker(objectMaker);
 		joins=prefixer.prefixSet(joins);		
-		conditions=prefixer.prefixConditions(conditions);	
+		conditions=prefixer.prefixConditions(conditions);
+		if (prefixer.mayChangeID())
+			aliases=prefixer.getPrefixedAliasMap();
 		prefixer.setAliasMap(m);
 	}
 
+	public Map getAliases() {
+		return aliases;
+	}
 	public TablePrefixer getTablePrefixer() {
 		return tablePrefixer;
 	}
@@ -150,6 +156,6 @@ class PropertyBridge implements Prefixable {
 	}
 
 	public String toString() {
-		return this.id.toString();
+		return super.toString() + "(" + this.id.toString() + ")";
 	}
 }

@@ -4,12 +4,23 @@
  */
 package de.fuberlin.wiwiss.d2rq;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collection;
+import java.util.Iterator;
+
 import junit.framework.TestCase;
-import java.net.URL;
-import java.sql.*;
-import sun.jdbc.odbc.*;
-import java.awt.event.*;
-import java.awt.*;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+
+import de.fuberlin.wiwiss.d2rq.Database;
+import de.fuberlin.wiwiss.d2rq.MapParser;
+import de.fuberlin.wiwiss.d2rq.functional_tests.TestFramework;
+
 
 /**
  * @author jgarbers
@@ -19,43 +30,107 @@ import java.awt.*;
  */
 public class DBConnectionTest extends TestCase {
 
-    public DBConnectionTest() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	private Model mapModel;
 
-    public DBConnectionTest(String arg0) {
-        super(arg0);
-        // TODO Auto-generated constructor stub
-    }
+	private MapParser parser;
 
-    public void testConnection() {
-        Connection c;
-        String name = "x";
-        String pass = "y";
-        String url = "jdbc:odbc:IswcDB";
-        // String query = "select PaperID from Papers";
-        String query = "SELECT 1 FROM Papers WHERE Papers.Year=2002 AND Papers.PaperID = 2 AND Papers.Publish = 1";
-        String query_results = "";
-        int col;
-        int pos;
-        try {
-            System.out.println("connecting to the " + name + " data source...");
-            Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
-            //          c = DriverManager.getConnection(url, name, pass);
-            c = DriverManager.getConnection(url);
-            Statement s = c.createStatement();
-            ResultSet rs = s.executeQuery(query);
-            col = (rs.getMetaData()).getColumnCount();
-            while (rs.next()) {
-                for (pos = 1; pos <= col; pos++) {
-                    query_results += rs.getString(pos) + " ";
-                }
-            } // end while
-            System.out.println(query_results);
-        } //end try
-        catch (Exception x) {
-            x.printStackTrace();
-        }
-    }
+	private Collection databases;
+
+	private String simplestQuery;
+
+	public DBConnectionTest() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public DBConnectionTest(String arg0) {
+		super(arg0);
+		// TODO Auto-generated constructor stub
+	}
+
+	protected void setUp() throws Exception {
+		mapModel = ModelFactory.createDefaultModel();
+		mapModel.read(TestFramework.D2RQMap, "N3");
+		parser = new MapParser(mapModel);
+		parser.parse();
+		databases = parser.getDatabases();
+		simplestQuery = "SELECT 1;";
+	}
+
+	protected void tearDown() throws Exception {
+		mapModel.close();
+	}
+
+	public void testConnections() {
+		Iterator it = databases.iterator();
+		while (it.hasNext()) {
+			Database db = (Database) it.next();
+			System.out.println("Testing Database " + db.toString());
+			Connection c = db.getConnnection();
+			String result = performQuery(c, simplestQuery);
+			assertEquals(result, "1");
+		}
+	}
+
+	private static String performQuery(Connection c, String theQuery) {
+		String query_results = "";
+		Statement s;
+		ResultSet rs;
+		try {
+			s = c.createStatement();
+			rs = s.executeQuery(theQuery);
+			int col = (rs.getMetaData()).getColumnCount();
+			while (rs.next()) {
+				for (int pos = 1; pos <= col; pos++) {
+					if (pos>1)
+						query_results+=" ";
+					query_results += rs.getString(pos);
+				}
+			} // end while
+		} catch (SQLException e) {
+			query_results = null;
+		}
+		return query_results;
+	}
+
+	// without declarations in 
+	public void testManuallyConfiguredConnection() {
+		int configure = 1;
+		String driverClass;
+		String url;
+		String name;
+		String pass;
+		// String query = simplestQuery;
+		// String query = "select PaperID from Papers";
+		String query = "SELECT Papers.PaperID, Papers.Year FROM Papers WHERE Papers.Year=2002 AND Papers.PaperID = 2 AND Papers.Publish = 1;";
+
+		if (configure == 1) {
+			driverClass = "com.mysql.jdbc.Driver";
+			url = "jdbc:mysql:///iswc";
+			name = ""; //  "@localhost";
+			pass = ""; // "";
+		} else if (configure == 2) {
+			driverClass = "sun.jdbc.odbc.JdbcOdbcDriver";
+			url = "jdbc:odbc:IswcDB";
+			name = "x";
+			pass = "y";
+		} else
+			return;
+
+		Connection c=null;
+		try {
+			System.out.println("connecting to the " + url + " data source...");
+			Class.forName(driverClass);
+			if (configure == 1)
+				c = DriverManager.getConnection(url, name, pass);
+			else if (configure == 2)
+				c = DriverManager.getConnection(url);
+			String query_results = performQuery(c, query);
+			assertEquals(query_results,"2 2002");
+			c.close();
+		} //end try
+		catch (Exception x) {
+			x.printStackTrace();
+		}
+	}
 }

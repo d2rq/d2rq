@@ -1,5 +1,5 @@
 /*
- * $Id: TripleQuery.java,v 1.5 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: TripleQuery.java,v 1.6 2005/03/07 10:07:54 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -91,6 +91,9 @@ class TripleQuery {
 		}
 	}
 	
+	public PropertyBridge getPropertyBridge() {
+		return bridge;
+	}
 	public Set getJoins() {
 		return this.joins;
 	}

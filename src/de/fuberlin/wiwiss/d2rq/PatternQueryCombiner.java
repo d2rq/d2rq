@@ -1,5 +1,5 @@
 /*
- * $Id: PatternQueryCombiner.java,v 1.1 2005/03/02 09:23:53 garbers Exp $
+ * $Id: PatternQueryCombiner.java,v 1.2 2005/03/07 10:07:54 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -24,6 +24,7 @@ import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.helpers.ConjunctionIterator;
 import de.fuberlin.wiwiss.d2rq.helpers.IndexArray;
+import de.fuberlin.wiwiss.d2rq.helpers.VariableBindings;
 
 
 // Contract: after Constructor
@@ -37,8 +38,11 @@ class PatternQueryCombiner { // jg. reference: QueryCombiner
 	protected GraphD2RQ graph;
 	protected Triple [] triples;
 	protected int tripleCount;
-	protected Set variables; // set of Node
-	protected Set sharedVariables; // set of Node
+
+	VariableBindings bindings;
+	//	protected Set variables; // set of Node
+	//	protected Set sharedVariables; // set of Node
+	
 //	protected TablePrefixer[][] prefixers;
 	protected ArrayList[] bridges; // holds for each triple its a priory
 										  // appliable bridges
@@ -49,7 +53,7 @@ class PatternQueryCombiner { // jg. reference: QueryCombiner
 											 // Objects
 //	protected ArrayList conjunctions = new ArrayList(10);
 	
-public PatternQueryCombiner( GraphD2RQ graph, Mapping map, ExpressionSet constraints, Triple [] triples ) {
+public PatternQueryCombiner( GraphD2RQ graph, VariableBindings bindings, ExpressionSet constraints, Triple [] triples ) {
 	this.graph=graph;
 	// jg: maybe use the compiled patterns, that super produces?
 	tripleCount=triples.length;
@@ -60,8 +64,8 @@ public PatternQueryCombiner( GraphD2RQ graph, Mapping map, ExpressionSet constra
 void makeStores() {
 	if (!possible)
 		return;
-	variables=new HashSet();
-	sharedVariables=new HashSet();
+	//variables=new HashSet();
+	//sharedVariables=new HashSet();
 	bridges=new ArrayList[tripleCount];
 	tripleQueries=new TripleQuery[tripleCount][];
 	bridgesCounts=new int[tripleCount];
@@ -89,22 +93,7 @@ void setup() {
 void makeVariables() {
 	if (!possible)
 		return;
-	for (int i=0; i<tripleCount; i++) {
-		Triple t=triples[i];
-		for (int j=0; j<3; j++) {
-			Node n=null;
-			switch (j) {
-			case 0: n=t.getSubject(); break;
-			case 1: n=t.getPredicate(); break;
-			case 2: n=t.getObject(); break;
-			}
-			if (variables.contains(n)) {
-				sharedVariables.add(n);
-			} else {
-				variables.add(n);
-			}
-		}
-	}
+	// VariableBindings.triplesFindVariablesAndShared(variables,sharedVariables);
 }
 
 
@@ -192,7 +181,7 @@ void reducePropertyBridges() {
 // Pull in iterator
 // 
 
-private SQLStatementMaker getSQL(TripleQuery[] conjunction, TablePrefixer[] prefixerConjunction) {
+private SQLStatementMaker getSQL(TripleQuery[] conjunction) {
 	boolean possible=true;
 	Database db=conjunction[0].getDatabase();
 	SQLStatementMaker result=new SQLStatementMaker(db);
@@ -200,6 +189,7 @@ private SQLStatementMaker getSQL(TripleQuery[] conjunction, TablePrefixer[] pref
 	
 	for (int i=0; (i<conjunction.length) && possible; i++) {
 		TripleQuery t=conjunction[i];
+		result.addAliasMap(t.getPropertyBridge().getAliases());
 		result.addSelectColumns(t.getSelectColumns());
 		result.addJoins(t.getJoins());
 		result.addColumnValues(t.getColumnValues());
@@ -213,7 +203,7 @@ private SQLStatementMaker getSQL(TripleQuery[] conjunction, TablePrefixer[] pref
 
 public ClosableIterator resultTriplesIterator() {
 	PQCResultIterator result = new PQCResultIterator();
-	// TODO 
+	// TODO ?
 	return result;
 }
 
@@ -268,7 +258,7 @@ private class PQCResultIterator extends NiceIterator implements ClosableIterator
 			if (!conjunctionsIterator.hasNext())
 				return;
 			conjunctionsIterator.next();
-			SQLStatementMaker sql=getSQL(conjunction, prefixerConjunction);
+			SQLStatementMaker sql=getSQL(conjunction);
 			resultSet = new 
 				CombinedTripleResultSet(sql.getSQLStatement(),
 											sql.getColumnNameNumberMap(),

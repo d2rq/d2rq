@@ -1,5 +1,5 @@
 /*
- * $Id: Column.java,v 1.3 2005/03/02 09:23:53 garbers Exp $
+ * $Id: Column.java,v 1.4 2005/03/07 10:07:54 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -24,8 +24,10 @@ class Column implements ValueSource, Prefixable {
 
 	public Object clone() throws CloneNotSupportedException {return super.clone();}
 	public void prefixTables(TablePrefixer prefixer) {
+		String oldTable=tableName;
 		tableName=prefixer.prefixTable(tableName);
-		qualifiedName=tableName + "." + columnName;
+		if (oldTable!=tableName)
+			qualifiedName=tableName + "." + columnName;
 	}
 
 	/**
@@ -119,7 +121,7 @@ class Column implements ValueSource, Prefixable {
 	}
 	
 	public String toString() {
-		return this.qualifiedName;
+		return super.toString()+ "(" + this.qualifiedName + ")";
 	}
 	
 	/**
