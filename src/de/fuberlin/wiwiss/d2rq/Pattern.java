@@ -1,5 +1,5 @@
 /*
- * $Id: Pattern.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: Pattern.java,v 1.2 2004/08/03 12:44:33 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -13,7 +13,11 @@ import java.util.Set;
 /**
  * A pattern that combines one or more database columns into a String. Often
  * used as an UriPattern for generating URIs from a column's primary key.
- *
+ * <p>
+ * (Note: The implementation makes some assumptions about the Column
+ * class to keep the code simple and fast. This means Pattern may not
+ * work with some hypothetical subclasses of Column.)
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
  */
 class Pattern implements ValueSource {

@@ -37,11 +37,11 @@ public class TestGraphD2RQ {
             System.out.println("--------------------------------------------");
 
             // Test Selector
-            //int test = 19;
+            //int test = 20;
             boolean outputResults = true;
 
             // Loop over all tests
-            for (int test=1; test < 20; test++) {
+            for (int test=1; test <= 20; test++) {
 
             System.out.println("");
             System.out.println("");
@@ -183,21 +183,12 @@ public class TestGraphD2RQ {
             }
 
             /////////////////////////////////////////////////////
-            // Test: bNode(http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@3), iswc:name, ANY
+            // Test: bNode(http://www.example.org/dbserver01/db01#Topic@@3), iswc:name, ANY
             /////////////////////////////////////////////////////
             if (test == 13) {
-            	subject = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@3"));
+            	subject = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3"));
             	predicate = Node.createURI("http://annotation.semanticweb.org/iswc/iswc.daml#name");
             	object = Node.ANY;
-            }
-
-            /////////////////////////////////////////////////////
-            // Test: ANY, iswc:topic, bNode(http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@3)
-            /////////////////////////////////////////////////////
-            if (test == 13) {
-            	subject = Node.ANY;
-            	predicate = Node.createURI("http://annotation.semanticweb.org/iswc/iswc.daml#topic");
-            	object = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@3"));
             }
 
             /////////////////////////////////////////////////////
@@ -214,7 +205,7 @@ public class TestGraphD2RQ {
             /////////////////////////////////////////////////////
             if (test == 15) {
                 //subject = Node.createURI("http://www.conference.org/conf02004/paper#Paper2");
-            	subject = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@3"));
+            	subject = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3"));
             	predicate = Node.ANY;
             	object = Node.ANY;
             }
@@ -224,7 +215,7 @@ public class TestGraphD2RQ {
             /////////////////////////////////////////////////////
             if (test == 16) {
                 subject = Node.createURI("http://www.conference.org/conf02004/paper#Paper2");
-            	//subject = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@3"));
+            	//subject = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3"));
             	predicate = Node.ANY;
                 RDFDatatype dtYear = TypeMapper.getInstance().getSafeTypeByName("http://www.w3.org/2001/XMLSchema#gYear");
             	object = Node.createLiteral("2002", null, dtYear);
@@ -236,7 +227,7 @@ public class TestGraphD2RQ {
             if (test == 17) {
             	subject = Node.ANY;
             	predicate = Node.ANY;
-            	object = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@3"));
+            	object = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3"));
             }
 
             /////////////////////////////////////////////////////
@@ -250,7 +241,7 @@ public class TestGraphD2RQ {
             }
 
             /////////////////////////////////////////////////////
-            // Test: ANY, ANY, bNode(http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@3)
+            // Test: ANY, ANY, bNode(http://www.example.org/dbserver01/db01#Topic@@3)
             /////////////////////////////////////////////////////
             if (test == 19) {
             	subject = Node.ANY;
@@ -260,6 +251,15 @@ public class TestGraphD2RQ {
                 object = Node.createURI("http://www.conference.org/conf02004/paper#Paper1");
 
 
+            }
+
+            /////////////////////////////////////////////////////
+            // Test: ANY, iswc:topic, bNode(http://www.example.org/dbserver01/db01#Topic@@3)
+            /////////////////////////////////////////////////////
+            if (test == 20) {
+            	subject = Node.ANY;
+            	predicate = Node.createURI("http://annotation.semanticweb.org/iswc/iswc.daml#topic");
+            	object = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3"));
             }
 
            if (outputResults) {

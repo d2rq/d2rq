@@ -183,7 +183,16 @@ class SQLStatementMaker {
 
 	private static String getQuotedColumnValue(String value, Node columnType) {
 		if (D2RQ.numericColumn.equals(columnType)) {
-			return value;
+			// convert to number and back to String to avoid SQL injection
+			try {
+				return Integer.toString(Integer.parseInt(value));
+			} catch (NumberFormatException nfex) {
+				try {
+					return Double.toString(Double.parseDouble(value));
+				} catch (NumberFormatException nfex2) {
+					return "NULL";
+				}
+			}
 		} else if (D2RQ.dateColumn.equals(columnType)) {
 			return "#" + value + "#";
 		}
