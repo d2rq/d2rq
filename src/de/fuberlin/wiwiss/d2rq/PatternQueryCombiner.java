@@ -51,6 +51,7 @@ class PatternQueryCombiner {
 	protected GraphD2RQ graph;
 	protected Triple [] triples; // nodes are ANY or fixed
 	protected int tripleCount;
+	protected ExpressionSet constraints; // RDQL-Constraints
 
 	VariableBindings bindings; // includes variables and sharedVariables
 	
@@ -68,6 +69,7 @@ public PatternQueryCombiner( GraphD2RQ graph, VariableBindings bindings, Express
 	this.bindings=bindings;
 	tripleCount=triples.length;
 	this.triples=triples; 
+	this.constraints=constraints;
 }	
 
 void setup() {
@@ -283,6 +285,7 @@ private class PQCResultIterator extends NiceIterator implements ClosableIterator
 			ConstraintHandler ch=new ConstraintHandler();
 			ch.setVariableBindings(bindings);
 			ch.setTripleQueryConjunction(conjunction);
+			ch.setRDQLConstraints(constraints);
 			ch.makeConstraints();
 			if (!ch.possible)
 			    continue;

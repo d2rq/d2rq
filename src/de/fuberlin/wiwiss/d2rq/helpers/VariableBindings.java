@@ -8,6 +8,7 @@ package de.fuberlin.wiwiss.d2rq.helpers;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +31,14 @@ public class VariableBindings {
      * variable Nodes in given triples
      */
 	public Set variables = new HashSet(); 
+
+	/**
+	 * variables nodes bound in a previous stage.
+	 * variableIndex -> set of VariableIndex.
+	 * Optimized for variable lookup in RDQL conditions.
+	 * @see #bindVariableToShared
+	 */
+	public Map boundVariableToShared = new HashMap(); 
 
 	/** 
 	 * variable positions bound in previous stages. 
@@ -68,7 +77,7 @@ public class VariableBindings {
 	 * Looks up <code>key</code> in a object to varIndexSet map, adds
 	 * <code>varIndexMember</code> to the set or creates it.
 	 * Helper method.
-	 * @param map one of: boundDomainIndexToShared, bindVariableToShared, bindVariableIndexToShared
+	 * @param map one of: boundVariableToShared, boundDomainIndexToShared, bindVariableToShared, bindVariableIndexToShared
 	 * @param key
 	 * @param varIndexMember
 	 * @return the (newly created) varIndexSet as a convenience
@@ -112,13 +121,26 @@ public class VariableBindings {
 		Set varIndexSet=(Set)bindVariableToShared.get(node);
 		if (varIndexSet==null) {	
 			Integer domainIndexObject=new Integer(domainIndex);
-			mapToSharedPut(boundDomainIndexToShared,domainIndexObject,varIndex);
+			varIndexSet=mapToSharedPut(boundVariableToShared,domainIndexObject,varIndex);
+			boundDomainIndexToShared.put(domainIndexObject,varIndexSet);
+			// mapToSharedPut(boundDomainIndexToShared,domainIndexObject,varIndex);
 		} else {
 			sharedBindVariables.add(node);
 			varIndexSet.add(varIndex);
 			sharedBindIndices.add(varIndex);
 			bindVariableIndexToShared.put(varIndex,varIndexSet);
 		}
+	}
+	
+	public Map variableNameToNodeMap() {
+	    Map m=new HashMap();
+	    Iterator it=variables.iterator();
+	    while (it.hasNext()) {
+	        Node n=(Node)it.next();
+	        String name=n.getName();
+	        m.put(name,n);
+	    }
+	    return m;
 	}
 	
 	// currently not used

@@ -1,5 +1,5 @@
 /*
- * $Id: RDQLTest.java,v 1.5 2005/03/07 17:38:42 garbers Exp $
+ * $Id: RDQLTest.java,v 1.6 2005/04/04 19:14:43 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -19,10 +19,9 @@ import com.hp.hpl.jena.rdql.Query;
 import com.hp.hpl.jena.rdql.QueryEngine;
 import com.hp.hpl.jena.rdql.QueryResults;
 import com.hp.hpl.jena.rdql.ResultBinding;
-import com.hp.hpl.jena.rdql.ResultBinding.ResultBindingIterator;
-
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
+
 
 /**
  * Functional tests that exercise a ModelD2RQ by running RDQL queries against it. 

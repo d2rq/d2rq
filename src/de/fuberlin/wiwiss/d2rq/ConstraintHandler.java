@@ -5,11 +5,14 @@
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.query.Expression;
+import com.hp.hpl.jena.graph.query.ExpressionSet;
 
 import de.fuberlin.wiwiss.d2rq.helpers.VariableBindings;
 import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
@@ -24,10 +27,12 @@ import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
  */
 class ConstraintHandler {
     public boolean possible=true;
-    VariableBindings bindings;
+    public VariableBindings bindings;
     TripleQuery[] conjunction;
     /** Mapping between a variable (Node) and its NodeConstraints. */
     Map variableToConstraint=new HashMap(); 
+    ExpressionSet rdqlConstraints;
+    RDQLExpressionTranslator rdqlTranslator;
     
     public void setVariableBindings(VariableBindings bindings) {
         this.bindings=bindings;
@@ -35,6 +40,10 @@ class ConstraintHandler {
     
     public void setTripleQueryConjunction(TripleQuery[] conjunction) {
         this.conjunction=conjunction;
+    }
+    
+    public void setRDQLConstraints(ExpressionSet rdqlConstraints) {
+        this.rdqlConstraints=rdqlConstraints;
     }
     
     /** 
@@ -62,7 +71,7 @@ class ConstraintHandler {
             variableToConstraint.put(node,c);
         }
     }
-    
+        
     /**
      * Creates SQL code for the node constraints.
      * @param sql contains both the places where to store expressions 
@@ -74,8 +83,31 @@ class ConstraintHandler {
             NodeConstraint c=(NodeConstraint)it.next();
             c.addConstraintsToSQL(sql);
         }
+        // TODO addRDQLConstraints(sql);
     }
     
+    void addRDQLConstraints(SQLStatementMaker sql) {
+        if (rdqlTranslator==null)
+            rdqlTranslator=new RDQLExpressionTranslator(this);
+        Set s=new HashSet();
+        Iterator it=rdqlConstraints.iterator();
+        while (possible && it.hasNext()) {
+            Expression e=(Expression)it.next();
+            StringBuffer str=rdqlTranslator.translate(e);
+            if (str!=null)
+                s.add(str.toString());
+        }
+        sql.addConditions(s);
+    }
+    
+ /*   String rdqlConstraint(SQLStatementMaker sql, Expression e) {
+        StringBuffer b=rdqlTranslator.translate(e);
+        
+        // default: do nothing
+    }
+    */
+    // TODO other cases ;-)
+    // see RDQLExpressionTranslator
 }
 
 

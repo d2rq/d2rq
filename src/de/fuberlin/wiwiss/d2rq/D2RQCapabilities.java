@@ -23,6 +23,7 @@ class D2RQCapabilities implements Capabilities
     public boolean deleteAllowed( boolean every ) { return false; }
     public boolean canBeEmpty() { return true; }
     public boolean iteratorRemoveAllowed() { return false; }
+    public boolean findContractSafe() { return false; } // TODO check semantic of this in Jena 2.2.
     }
 
 

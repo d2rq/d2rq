@@ -20,13 +20,18 @@ import com.hp.hpl.jena.rdql.Query;
 import com.hp.hpl.jena.rdql.QueryEngine;
 import com.hp.hpl.jena.rdql.QueryResults;
 import com.hp.hpl.jena.rdql.ResultBinding;
-import com.hp.hpl.jena.rdql.ResultBinding.ResultBindingIterator;
+
+//for Jena2.1:
+//import com.hp.hpl.jena.rdql.ResultBinding.ResultBindingIterator;
+//for Jena2.2:
+import com.hp.hpl.jena.rdql.ResultBindingIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.InfoD2RQ;
 import de.fuberlin.wiwiss.d2rq.Logger;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
+import de.fuberlin.wiwiss.d2rq.helpers.JenaCompatibility;
 
 /**
  * Functional tests that exercise a ModelD2RQ by running RDQL queries against it. 
@@ -244,8 +249,8 @@ public class RDQLTestFramework extends TestFramework {
 		ResultBindingIterator it=b.iterator();
 		while (it.hasNext()) {
 			it.next();
-			String var=it.varName();
-			Object val=it.value();
+		    String var=JenaCompatibility.resultBindingIteratorVarName(it);
+		    Object val=JenaCompatibility.resultBindingIteratorValue(it,b);
 			String strVal=val.toString();
 			int size=strVal.length();
 			if (size>250)
@@ -301,10 +306,13 @@ public class RDQLTestFramework extends TestFramework {
 			ResultBinding binding = (ResultBinding) it.next();
 			ResultBindingIterator it2 = binding.iterator();
 			while (it2.hasNext()) {
-				it2.next();
-				logger.debug("    " + it2.varName() + " => " + it2.value());
+			    it2.next();
+			    String varName=JenaCompatibility.resultBindingIteratorVarName(it2);
+			    Object val=JenaCompatibility.resultBindingIteratorValue(it2,binding);
+				logger.debug("    " + varName + " => " + val); 
 			}
 			count++;
 		}
 	}
-}
+		
+ }
