@@ -48,7 +48,9 @@ import com.hp.hpl.jena.graph.Node;
  * @version V0.2
  */
 interface NodeMaker extends Cloneable { 
-
+    
+    void matchConstraint(NodeConstraint c);
+    
 	/**
 	 * Checks if a node could fit this NodeMaker without querying the
 	 * database.

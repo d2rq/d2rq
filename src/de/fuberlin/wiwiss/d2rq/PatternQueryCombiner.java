@@ -1,5 +1,5 @@
 /*
- * $Id: PatternQueryCombiner.java,v 1.2 2005/03/07 10:07:54 garbers Exp $
+ * $Id: PatternQueryCombiner.java,v 1.3 2005/03/08 14:10:48 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -55,7 +55,7 @@ class PatternQueryCombiner { // jg. reference: QueryCombiner
 	
 public PatternQueryCombiner( GraphD2RQ graph, VariableBindings bindings, ExpressionSet constraints, Triple [] triples ) {
 	this.graph=graph;
-	// jg: maybe use the compiled patterns, that super produces?
+	this.bindings=bindings;
 	tripleCount=triples.length;
 	this.triples=triples; // new Triple[tripleCount]; // we put the more
 						  // instanciated triples here in run()
@@ -258,7 +258,14 @@ private class PQCResultIterator extends NiceIterator implements ClosableIterator
 			if (!conjunctionsIterator.hasNext())
 				return;
 			conjunctionsIterator.next();
+			ConstraintHandler ch=new ConstraintHandler();
+			ch.setVariableBindings(bindings);
+			ch.setTripleQueryConjunction(conjunction);
+			ch.makeConstraints();
+			if (!ch.possible)
+			    continue;
 			SQLStatementMaker sql=getSQL(conjunction);
+			ch.addConstraintsToSQL(sql);
 			resultSet = new 
 				CombinedTripleResultSet(sql.getSQLStatement(),
 											sql.getColumnNameNumberMap(),

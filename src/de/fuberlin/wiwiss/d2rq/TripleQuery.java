@@ -1,5 +1,5 @@
 /*
- * $Id: TripleQuery.java,v 1.6 2005/03/07 10:07:54 garbers Exp $
+ * $Id: TripleQuery.java,v 1.7 2005/03/08 14:10:48 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -89,6 +89,17 @@ class TripleQuery {
 		} else if (!this.columnValues.isEmpty()) {
 			this.aTable = ((Column) this.columnValues.keySet().iterator().next()).getTableName();
 		}
+	}
+	
+	public NodeMaker getNodeMaker(int i) {
+	    if (i==0) {
+	        return subjectMaker;
+	    } else if (i==1) {
+	        return predicateMaker;
+	    } else if (i==2) {
+	        return objectMaker;
+	    } else 
+	        return null;
 	}
 	
 	public PropertyBridge getPropertyBridge() {

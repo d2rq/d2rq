@@ -27,7 +27,13 @@ class UriMaker implements NodeMaker, Prefixable {
 	public void prefixTables(TablePrefixer prefixer) {
 		valueSource=prefixer.prefixValueSource(valueSource);
 	}
+	
+	public void matchConstraint(NodeConstraint c) {
+        c.matchNodeType(NodeConstraint.UriNodeType);
+        c.matchValueSource(valueSource);
+	}       
 
+	
 	public UriMaker(String id, ValueSource valueSource) {
 		this.valueSource = valueSource;
 		this.id = id;

@@ -1,5 +1,5 @@
 /*
- * $Id: FixedNodeMaker.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: FixedNodeMaker.java,v 1.3 2005/03/08 14:10:48 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -21,6 +21,10 @@ import com.hp.hpl.jena.graph.Node;
  */
 class FixedNodeMaker implements NodeMaker {
 	private Node fixedNode;
+
+    public void matchConstraint(NodeConstraint c) {
+        c.matchFixedNode(fixedNode);
+    }
 
 	public FixedNodeMaker(Node fixedNode) {
 		this.fixedNode = fixedNode;

@@ -31,7 +31,20 @@ class LiteralMaker implements NodeMaker, Prefixable {
 		valueSource=prefixer.prefixValueSource(valueSource);
 	}
 
+    public void matchConstraint(NodeConstraint c) {
+        c.matchNodeType(NodeConstraint.LiteralNodeType);
+        c.matchLiteralMaker(this);  
+        c.matchValueSource(valueSource);
+    }
 
+    // jg
+    public boolean matchesOtherLiteralMaker(LiteralMaker other) {
+        boolean b1,b2,b3;
+        b1=(datatype==null && other.datatype==null) || datatype.equals(other.datatype);
+        b2=(lang==null && other.lang==null) || lang.equals(other.lang);        	
+        return b1 && b2;
+    }        	
+    
 	public LiteralMaker(String id, ValueSource valueSource, RDFDatatype datatype, String lang) {
 		this.valueSource = valueSource;
 		this.datatype = datatype;

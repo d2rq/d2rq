@@ -26,7 +26,11 @@ class BlankNodeMaker implements NodeMaker, Prefixable {
 	public void prefixTables(TablePrefixer prefixer) {
 		valueSource=prefixer.prefixValueSource(valueSource);
 	}
-
+	
+	public void matchConstraint(NodeConstraint c) {
+        c.matchNodeType(NodeConstraint.BlankNodeType);
+        c.matchValueSource(valueSource);
+	}       
 	
 	public BlankNodeMaker(String id, ValueSource valueSource) {
 		this.valueSource = valueSource;
