@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.3 2004/08/03 17:19:04 cyganiak Exp $
+ * $Id: MapParser.java,v 1.4 2004/08/03 17:36:10 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -128,32 +128,40 @@ class MapParser {
 		if (this.classMaps.containsKey(node)) {
 			return;
 		}
-		NodeMaker resourceMaker = null;
 		String pattern = findZeroOrOneLiteral(node, D2RQ.uriPattern);
-		if (pattern != null) {
-			resourceMaker = new UriMaker(node.toString(), new Pattern(pattern));
-		}
 		String columnName = findZeroOrOneLiteral(node, D2RQ.uriColumn);
-		if (columnName != null) {
-			if (resourceMaker != null) {
+		String bNodeColumns = findZeroOrOneLiteral(node, D2RQ.bNodeIdColumns);
+		ValueSource valueSource = null;
+		if (pattern != null) {
+			valueSource = new Pattern(pattern);
+		} else if (columnName != null) {
+			if (valueSource != null) {
 				Logger.instance().error("Cannot combine d2rq:uriPattern and d2rq:uriColumn on " + node);
 				return;
 			}
-			resourceMaker = new UriMaker(node.toString(), new Column(columnName));
-		}
-		String columns = findZeroOrOneLiteral(node, D2RQ.bNodeIdColumns);
-		if (columns != null) {
-			if (resourceMaker != null) {
+			valueSource = new Column(columnName);
+		} else if (bNodeColumns != null) {
+			if (valueSource != null) {
 				Logger.instance().error("Cannot combine d2rq:uri* and d2rq:bNodeIdColumns on " + node);
 				return;
 			}
-			resourceMaker = new BlankNodeMaker(node.toString(), new BlankNodeIdentifier(columns, node.toString()));
-		}
-		if (resourceMaker == null) {
+			valueSource = new BlankNodeIdentifier(bNodeColumns, node.toString());
+		} else {
 			Logger.instance().error("The classMap " + node +
 					" needs a d2rq:uriColumn, d2rq:uriPattern or d2rq:bNodeIdColumns");
-			return;
+			return;			
 		}
+		Node translateWith = findZeroOrOneNode(node, D2RQ.translateWith);
+		if (translateWith != null) {
+			TranslationTable table = getTranslationTable(translateWith);
+			if (table == null) {
+				Logger.instance().error("Unknown d2rq:translateWith in " + node);
+			}
+			valueSource = table.getTranslatingValueSource(valueSource);
+		}
+		NodeMaker resourceMaker = (bNodeColumns != null) ?
+				(NodeMaker) new BlankNodeMaker(node.toString(), valueSource) :
+				(NodeMaker) new UriMaker(node.toString(), valueSource);
 		assertHasColumnTypes(resourceMaker, db);
 		this.classMaps.put(node, resourceMaker);
 		this.resourcesDatabasesMap.put(resourceMaker, db);
