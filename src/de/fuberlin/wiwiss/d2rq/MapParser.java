@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.6 2004/08/05 08:10:53 cyganiak Exp $
+ * $Id: MapParser.java,v 1.7 2004/08/09 19:39:45 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -38,9 +38,9 @@ class MapParser {
 	private Map propertyBridges = new HashMap();
 	private Map resourcesConditionsMap = new HashMap();
 	private Map resourcesDatabasesMap = new HashMap();
-	private Set columnNodeMakers = new HashSet();
-	private Set patternNodeMakers = new HashSet();
-	private Set nodeMakersWithDuplicates = new HashSet();
+	private Set columnResourceMakers = new HashSet();
+	private Set patternResourceMakers = new HashSet();
+	private Set uniqueNodeMakers = new HashSet();
 	private PrefixMapping prefixes;
 
 	/**
@@ -167,18 +167,18 @@ class MapParser {
 		this.classMaps.put(node, resourceMaker);
 		this.resourcesDatabasesMap.put(resourceMaker, db);
 		if (pattern != null) {
-			this.patternNodeMakers.add(resourceMaker);
+			this.patternResourceMakers.add(resourceMaker);
 		}
 		if (columnName != null) {
-			this.columnNodeMakers.add(resourceMaker);
+			this.columnResourceMakers.add(resourceMaker);
 		}
-		if (isNonNormalizedClassMap(node)) {
-			this.nodeMakersWithDuplicates.add(resourceMaker);
+		if (!containsDuplicates(node)) {
+			this.uniqueNodeMakers.add(resourceMaker);
 		}
 		this.resourcesConditionsMap.put(resourceMaker, findLiterals(node, D2RQ.condition));
 	}
 
-	private boolean isNonNormalizedClassMap(Node node) {
+	private boolean containsDuplicates(Node node) {
 		String containsDuplicates = findZeroOrOneLiteral(node, D2RQ.containsDuplicates);
 		if ("true".equals(containsDuplicates)) {
 			return true;
@@ -273,10 +273,6 @@ class MapParser {
 			}
 			valueSource = new Pattern(pattern);
 		}
-		Set joins = Join.buildJoins(findLiterals(node, D2RQ.join));
-		if (!joins.isEmpty()) {
-			inferColumnTypesFromJoins(joins, resourceMaker);
-		}
 		String valueRegex = findZeroOrOneLiteral(node, D2RQ.valueRegex);
 		if (valueRegex != null) {
 			valueSource = new RegexRestriction(valueSource, valueRegex);
@@ -303,8 +299,6 @@ class MapParser {
 			}
 			valueSource = table.getTranslatingValueSource(valueSource);
 		}
-		URIMatchPolicy policy = new URIMatchPolicy();
-		boolean objectIsResource = false;
 		NodeMaker objectMaker;
 		if (this.graph.contains(node, RDF.Nodes.type, D2RQ.DatatypePropertyBridge)) {
 			if (valueSource == null) {
@@ -317,7 +311,6 @@ class MapParser {
 					null : TypeMapper.getInstance().getSafeTypeByName(dataType);
 			objectMaker = new LiteralMaker(node.toString(), valueSource, rdfDatatype, lang);
 		} else if (this.graph.contains(node, RDF.Nodes.type, D2RQ.ObjectPropertyBridge)) {
-			objectIsResource = true;
 			Node refersTo = findZeroOrOneNode(node, D2RQ.refersToClassMap);
 			if (refersTo == null) {
 				if (valueSource == null) {
@@ -325,6 +318,12 @@ class MapParser {
 					return;
 				}
 				objectMaker = new UriMaker(node.toString(), valueSource);
+				if (pattern != null) {
+					this.patternResourceMakers.add(objectMaker);
+				}
+				if (columnName != null) {
+					this.columnResourceMakers.add(objectMaker);
+				}
 			} else {
 				objectMaker = (NodeMaker) this.classMaps.get(refersTo);
 				if (objectMaker == null) {
@@ -341,26 +340,48 @@ class MapParser {
 					" must be either d2rq:DatatypePropertyBridge or d2rq:ObjectPropertyBridge");
 			return;
 		}
+		PropertyBridge bridge = createPropertyBridge(node,
+				resourceMaker, new FixedNodeMaker(property), objectMaker,
+				Join.buildJoins(findLiterals(node, D2RQ.join)));
+		bridge.addConditions(findLiterals(node, D2RQ.condition));
 		assertHasColumnTypes(objectMaker, getDatabase(resourceMaker));
-		PropertyBridge bridge = new PropertyBridge(node, property, resourceMaker, objectMaker, getDatabase(resourceMaker), joins);
-		this.propertyBridges.put(node, bridge);
-		if (pattern != null) {
-			this.patternNodeMakers.add(objectMaker);
+	}
+
+	private PropertyBridge createPropertyBridge(Node node, NodeMaker subjects, NodeMaker predicates, NodeMaker objects, Set joins) {
+		PropertyBridge bridge = new PropertyBridge(node,
+				subjects, predicates, objects,
+				getDatabase(subjects), joins);
+		// TODO: duplicates handling should be factored out (maybe into seperate class for all relational algebra stuff?)
+		boolean sUnique = this.uniqueNodeMakers.contains(subjects);
+		boolean pUnique = this.uniqueNodeMakers.contains(predicates);
+		boolean oUnique = this.uniqueNodeMakers.contains(objects);
+		boolean oneOrMoreUnique = sUnique || pUnique || oUnique;
+		boolean allUnique = sUnique && pUnique && oUnique;
+		boolean containsNoDuplicates = (allUnique && joins.size() <= 1) ||
+				(oneOrMoreUnique && joins.isEmpty());
+		bridge.setMightContainDuplicates(!containsNoDuplicates);
+		bridge.addConditions((Set) this.resourcesConditionsMap.get(subjects));
+		bridge.addConditions((Set) this.resourcesConditionsMap.get(predicates));
+		bridge.addConditions((Set) this.resourcesConditionsMap.get(objects));
+		if (!joins.isEmpty()) {
+			inferColumnTypesFromJoins(joins, subjects);
 		}
-		if (columnName != null) {
-			this.columnNodeMakers.add(objectMaker);
+		URIMatchPolicy policy = new URIMatchPolicy();
+		if (this.columnResourceMakers.contains(subjects)) {
+			policy.setSubjectBasedOnURIColumn(true);
 		}
-		setURIMatchPolicyForSubject(policy, resourceMaker);
-		if (objectIsResource) {
-			setURIMatchPolicyForObject(policy, objectMaker);
-			bridge.addConditions((Set) this.resourcesConditionsMap.get(objectMaker));
+		if (this.patternResourceMakers.contains(subjects)) {
+			policy.setSubjectBasedOnURIPattern(true);
+		}
+		if (this.columnResourceMakers.contains(objects)) {
+			policy.setObjectBasedOnURIColumn(true);
+		}
+		if (this.patternResourceMakers.contains(objects)) {
+			policy.setObjectBasedOnURIPattern(true);
 		}
 		bridge.setURIMatchPolicy(policy);
-		bridge.setMightContainDuplicates(
-				this.nodeMakersWithDuplicates.contains(resourceMaker) &&
-				this.nodeMakersWithDuplicates.contains(objectMaker));
-		bridge.addConditions(findLiterals(node, D2RQ.condition));
-		bridge.addConditions((Set) this.resourcesConditionsMap.get(resourceMaker));
+		this.propertyBridges.put(node, bridge);
+		return bridge;
 	}
 
 	private void inferColumnTypesFromJoins(Collection joins, NodeMaker resourceMaker) {
@@ -373,24 +394,6 @@ class MapParser {
 
 	private Database getDatabase(NodeMaker resourceMaker) {
 		return (Database) this.resourcesDatabasesMap.get(resourceMaker);
-	}
-
-	private void setURIMatchPolicyForSubject(URIMatchPolicy policy, NodeMaker resourceMaker) {
-		if (this.columnNodeMakers.contains(resourceMaker)) {
-			policy.setSubjectBasedOnURIColumn(true);
-		}
-		if (this.patternNodeMakers.contains(resourceMaker)) {
-			policy.setSubjectBasedOnURIPattern(true);
-		}
-	}
-
-	private void setURIMatchPolicyForObject(URIMatchPolicy policy, NodeMaker resourceMaker) {
-		if (this.columnNodeMakers.contains(resourceMaker)) {
-			policy.setObjectBasedOnURIColumn(true);
-		}
-		if (this.patternNodeMakers.contains(resourceMaker)) {
-			policy.setObjectBasedOnURIPattern(true);
-		}
 	}
 
 	private Node findPropertyForBridge(Node bridge) {
@@ -433,16 +436,13 @@ class MapParser {
 						t.getSubject() + " as they are allowed only on d2rq:ClassMaps");
 				continue;
 			}
-			buildAdditionalProperty(t.getObject(), classMap);
+			createPropertyBridge(
+					t.getObject(),
+					classMap,
+					new FixedNodeMaker(findOneNode(t.getObject(), D2RQ.propertyName)),
+					new FixedNodeMaker(findOneNode(t.getObject(), D2RQ.propertyValue)),
+					new HashSet(0));
 		}
-	}
-
-	private void buildAdditionalProperty(Node node, NodeMaker classMap) {
-		Node propertyName = findOneNode(node, D2RQ.propertyName);
-		Node propertyValue = findOneNode(node, D2RQ.propertyValue);
-		NodeMaker objectMaker = new FixedNodeMaker(propertyValue);
-		PropertyBridge bridge = new PropertyBridge(node, propertyName, classMap, objectMaker, getDatabase(classMap));
-		this.propertyBridges.put(node, bridge);
 	}
 
 	private void addRDFTypePropertyBridges() {
@@ -465,9 +465,11 @@ class MapParser {
 					rdfsClass + ", is no d2rq:ClassMap");
 			return;
 		}
-		Node bridgeNode = Node.createAnon();
-		PropertyBridge bridge = new PropertyBridge(bridgeNode, RDF.Nodes.type, classMap, new FixedNodeMaker(rdfsClass), getDatabase(classMap));
-		this.propertyBridges.put(bridgeNode, bridge);
+		createPropertyBridge(Node.createAnon(), 
+				classMap,
+				new FixedNodeMaker(RDF.Nodes.type),
+				new FixedNodeMaker(rdfsClass),
+				new HashSet(0));
 	}
 
 	private Resource getResourceFromNode(Node node) {

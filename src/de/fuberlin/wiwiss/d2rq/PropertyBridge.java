@@ -26,22 +26,18 @@ class PropertyBridge {
 	private NodeMaker predicateMaker;
 	private NodeMaker objectMaker; 
 	private Database database;
-	private Set joins;
+	private Set joins = new HashSet(2);
 	private Set conditions = new HashSet(1);
 	private URIMatchPolicy uriMatchPolicy = new URIMatchPolicy();
 	private boolean mightContainDuplicates = false;
 
-	public PropertyBridge(Node id, Node property, NodeMaker subjectMaker, NodeMaker objectMaker, Database database, Set joins) {
+	public PropertyBridge(Node id, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker, Database database, Set joins) {
 		this.id = id;
 		this.subjectMaker = subjectMaker;
-		this.predicateMaker = new FixedNodeMaker(property);
+		this.predicateMaker = predicateMaker;
 		this.objectMaker = objectMaker;
 		this.database = database;
 		this.joins = joins;
-	}
-
-	public PropertyBridge(Node id, Node property, NodeMaker subjectMaker, NodeMaker objectMaker, Database database) {
-		this(id, property, subjectMaker, objectMaker, database, new HashSet(0));
 	}
 
 	/**
@@ -72,8 +68,8 @@ class PropertyBridge {
 		return this.uriMatchPolicy.getEvaluationPriority();
 	}
 
-	public void setMightContainDuplicates(boolean mayContainDuplicates) {
-		this.mightContainDuplicates = mayContainDuplicates;
+	public void setMightContainDuplicates(boolean mightContainDuplicates) {
+		this.mightContainDuplicates = mightContainDuplicates;
 	}
 
 	public boolean mightContainDuplicates() {

@@ -1,5 +1,5 @@
 /*
- * $Id: TripleQuery.java,v 1.3 2004/08/05 08:10:53 cyganiak Exp $
+ * $Id: TripleQuery.java,v 1.4 2004/08/09 19:39:45 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -40,6 +40,7 @@ class TripleQuery {
 	private Set subjectColumns;
 	private Set objectColumns;
 	private NodeMaker subjectMaker;
+	private NodeMaker predicateMaker;
 	private NodeMaker objectMaker;
 	private Map replacedColumns = new HashMap(4);
 
@@ -49,7 +50,7 @@ class TripleQuery {
 	 * @param subject the subject node, may be {{Node.ANY}}
 	 * @param object the object node, may be {{Node.ANY}}
 	 */
-	public TripleQuery(PropertyBridge bridge, Node subject, Node object) {
+	public TripleQuery(PropertyBridge bridge, Node subject, Node predicate, Node object) {
 		this.bridge = bridge;
 		this.subjectColumns = bridge.getSubjectMaker().getColumns();
 		this.objectColumns = bridge.getObjectMaker().getColumns();
@@ -60,6 +61,13 @@ class TripleQuery {
 		} else {
 			this.selectColumns.addAll(bridge.getSubjectMaker().getColumns());
 			this.subjectMaker = bridge.getSubjectMaker();
+		}
+		if (predicate.isConcrete()) {
+			this.columnValues.putAll(bridge.getPredicateMaker().getColumnValues(predicate));
+			this.predicateMaker = new FixedNodeMaker(predicate);
+		} else {
+			this.selectColumns.addAll(bridge.getPredicateMaker().getColumns());
+			this.predicateMaker = bridge.getPredicateMaker();
 		}
 		if (object.isConcrete()) {
 			this.columnValues.putAll(bridge.getObjectMaker().getColumnValues(object));
@@ -165,7 +173,7 @@ class TripleQuery {
 	 */
 	public Triple makeTriple(String[] row, Map columnNameNumberMap) {
 		Node s = this.subjectMaker.getNode(row, columnNameNumberMap );
-		Node p = this.bridge.getPredicateMaker().getNode(row, columnNameNumberMap);
+		Node p = this.predicateMaker.getNode(row, columnNameNumberMap);
 		Node o = this.objectMaker.getNode(row, columnNameNumberMap);
 		if (s == null || p == null || o == null) {
 			return null;

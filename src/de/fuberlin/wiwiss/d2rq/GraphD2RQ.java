@@ -156,7 +156,8 @@ public class GraphD2RQ extends GraphBase implements Graph {
 				Logger.instance().debug("--------------------------------------------");
 				Logger.instance().debug("Using property bridge: " + bridge);
 			}
-			combiner.add(new TripleQuery(bridge, t.getSubject(), t.getObject()));
+			combiner.add(new TripleQuery(bridge,
+					t.getSubject(), t.getPredicate(), t.getObject()));
 		}
 		return combiner.getResultIterator();
     }
