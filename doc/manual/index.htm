@@ -185,7 +185,7 @@ P.footer {
 <DL>
   <DT>This Version: 
     <DD><A 
-  href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20040615/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20040615/</A> 
+  href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20040804/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20040804/</A> 
     <DT>Latest Version: 
     <DD><A 
   href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/</A>
@@ -220,6 +220,9 @@ P.footer {
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.3. <a href="#propertybridge">d2rq:PropertyBridge</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.4. <a href="#additionalproperty">d2rq:AdditionalProperty</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.5. <a href="#translationtable">d2rq:TranslationTable</a> 
+    <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.6 <a href="#condtional">Conditional Mappings</a>
+    <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.7 <a href="#hint">Performance Optimization using 
+      Hint Properties</a>
     <LI>4. <a href="#usingD2RQ">Using D2RQ within Jena</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.1. <a href="#usingmodel">Using D2RQ with the 
       Jena model API</a> 
@@ -473,10 +476,9 @@ that create the same URIs or blank node IDs.</P>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:translateWith</strong></td>
-    <td valign="top">Assigns a <a href="#translationtable">d2rq:TranslationTable</a>
-      to the class map. Values from the d2rq:uriColumn, d2rq:uriPattern or
-      d2rq:bNodeIdColumns will be translated by the table before a resource
-      is generated.</td>
+    <td valign="top">Assigns a <a href="#translationtable">d2rq:TranslationTable</a> 
+      to the class map. Values from the d2rq:uriColumn or d2rq:uriPattern will 
+      be translated by the table before a resource is generated.</td>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:dataStorage</strong></td>
@@ -491,18 +493,19 @@ that create the same URIs or blank node IDs.</P>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:condition</strong></td>
-    <td valign="top">Specifies an SQL WHERE condition. An instance of this class
-      will only be generated for database rows that satisfy the condition.
-      Conditions can be used to hide parts of the database from D2RQ, e.g. 
-      deny access only data which is older or newer than a certain data.</td>
+    <td valign="top">Specifies an SQL WHERE condition. An instance of this class 
+      will only be generated for database rows that satisfy the condition. Conditions 
+      can be used to hide parts of the database from D2RQ, e.g. deny access to 
+      data which is older or newer than a certain date. See section <a href="#condtional">Conditional 
+      Mappings</a> for details.</td>
   </tr>
 </table>
 <P><strong>ClassMap property:</strong></P>
 <table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
   <tr> 
     <td valign="top"><strong>d2rq:classMap</strong></td>
-    <td>Inverse of d2rq:class and unnecessary if d2rq:class is used. Specifies that a
-        d2rq:classMap is used to create instances of an OWL or RDF-S class.</td>
+    <td>Inverse of d2rq:class and unnecessary if d2rq:class is used. Specifies 
+      that a d2rq:classMap is used to create instances of an OWL or RDF-S class.</td>
   </tr>
 </table>
 <P>&nbsp;</P>
@@ -552,12 +555,12 @@ db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
       d2rq:pattern &quot;http://annotation.semanticweb.org/iswc/iswc.daml#@@Persons.Type@@&quot; ; 
       d2rq:belongsToClassMap db1:PersonsClassMap .</pre>
   </DIV>
-<P>Here, the class of each person is obtained by prefixing the values of the Persons.Type
-  column with an ontology namespace. If the class names were not the same as the values
-  of the Type column (say, numeric type codes), then a
-  <a href="#translationtable">TranslationTable</a> could be used.</P>
-  
+<P>Here, the class of each person is obtained by prefixing the values of the Persons.Type 
+  column with an ontology namespace. If the class names were not the same as the 
+  values of the Type column (say, numeric type codes), then a <a href="#translationtable">TranslationTable</a> 
+  could be used.</P>
 <P>&nbsp;</P>
+  
 <h2><a name="propertybridge"></a>3.3 Property Bridges</h2>
 <P>Property Bridges relate database table columns to RDF properties. They are 
   used to construct URIs, blank nodes and literals from database values and to 
@@ -566,11 +569,10 @@ db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
 <ul>
   <li>Datatype Property Bridges, which are used to construct literals from database 
     values and</li>
-  <li>Object Property Bridges, which are used to construct URIs from database
+  <li>Object Property Bridges, which are used to construct URIs from database 
     values and to refer to instances of other class maps.</li>
 </ul>
 
-<P>&nbsp;</P>
 <p><strong>Common properties</strong></p>
 
 <table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
@@ -595,10 +597,11 @@ db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:condition</strong></td>
-    <td valign="top">Specifies an SQL WHERE condition. The bridge will only
-      generate a statement if the condition holds. A common usage is to
-      suppress triples with empty literal values:<br>
-      <tt>d2rq:condition &quot;Table.Column <> ''&quot;</tt></td>
+    <td valign="top">Specifies an SQL WHERE condition. The bridge will only generate 
+      a statement if the condition holds. A common usage is to suppress triples 
+      with empty literal values: <tt>d2rq:condition &quot;Table.Column <> ''&quot;</tt>. 
+      See section <a href="#condtional">Conditional Mappings</a> for details. 
+      </td>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:translateWith</strong></td>
@@ -629,7 +632,18 @@ db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
   </tr>
 </table>
 
-<P>&nbsp;</P>
+<P><strong>PropertyBridge property:</strong></P>
+<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
+  <tr> 
+    <td valign="top"><strong>d2rq:propertyBridge</strong></td>
+    <td> Inverse of d2rq:property and not needed if d2rq:property is used. The 
+      d2rq:propertyBridge property specifies which property bridge is used for 
+      an RDF property. If the same RDF property is used by several RDF classes, 
+      then several property bridges are used to relate the RDF property to the 
+      different class maps.</td>
+  </tr>
+</table>
+<h3>&nbsp;</h3>
 <P><strong>Example</strong></P>
 <DIV class="trigOuter trigInner"> 
   <pre>:title rdf:type rdf:Property .
@@ -760,29 +774,17 @@ db1:conferenceBridge rdf:type d2rq:ObjectPropertyBridge ;
             d2rq:refersToClassMap db1:Conference ;
             d2rq:join &quot;Papers.Conference = Conferences.ConfID&quot; .</pre>
 </DIV>
-<p>There is a 1:n relation between conferences and papers, which 
-  is expressed by the d2rq:join property. The :conference property
-  refers to instances of the class map db1:Conference. D2RQ uses the uriPattern 
-  of this class map to construct the property values.</DIV>
+<p>There is a 1:n relation between conferences and papers, which is expressed 
+  by the d2rq:join property. The :conference property refers to instances of the 
+  class map db1:Conference. D2RQ uses the uriPattern of this class map to construct 
+  the property values.</DIV> 
 <p>&nbsp;</p>
-
-<h3>3.3.3 d2rq:propertyBridge</h3>
-<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
-  <tr>
-    <td valign="top"><strong>d2rq:propertyBridge</strong></td>
-    <td>Inverse of d2rq:property and not needed if d2rq:property is used.
-      The d2rq:propertyBridge property specifies which property bridge is used 
-      for an RDF property. If the same RDF property is used by several RDF classes, 
-      then several property bridges are used to relate the RDF property to the 
-      different class maps. </td>
-  </tr>
-</table>
-<P>&nbsp;</P>
-
 <h2><a name="additionalproperty"></a>3.4 AdditionalProperty</h2>
-<p>A <strong>d2rq:AdditionalProperty</strong> can be used to add a fixed statement
-  to all instances generated by one class map. The d2rq:additionalProperty property
-  is used to link from the class map to the d2rq:AdditionalProperty definition.</p>
+<p>A <strong>d2rq:AdditionalProperty</strong> can be used to add a fixed statement 
+  to all instances generated by one class map. The statement is added to the result 
+  sets, if patterns like (ANY, ANY, ANY), (URI, ANY, ANY) or (URI, additionalPropertyName, 
+  ANY) are used. The d2rq:additionalProperty property is used to link from the 
+  class map to the d2rq:AdditionalProperty definition.</p>
 <P><strong>Properties</strong></P>
 <table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
   <tr> 
@@ -878,7 +880,7 @@ db1:ColorTable rdf:type d2rq:TranslationTable;
 </table>
 <p>&nbsp;</p>
 
-<h2><a name="translation"></a>3.5.1 Translation</h2>
+<h3><a name="translation"></a>3.5.1 Translation</h3>
 <p>A <strong>d2rq:Translation</strong> is a single entry in a
   d2rq:TranslationTable.
   
@@ -894,6 +896,14 @@ db1:ColorTable rdf:type d2rq:TranslationTable;
     <td valign="top">A translation of that value to be used in RDF constructs.</td>
   </tr>
 </table>
+<p>&nbsp;</p>
+<h2><a name="&lt;/tt&gt;" id="&lt;/tt&gt;"></a>3.6 Conditional Mappings</h2>
+<p>You can ..... <font color="#FF0000"><strong>Todo zwei Beispiele, eins auf ClassMap 
+  und eins auf PropertyBridge Ebene</strong></font></p>
+<p>&nbsp;</p>
+<h2><a name="hint" id="hint"></a>3.7 Performance Optimization using Hint Properties</h2>
+<p>You can ..... <font color="#FF0000"><strong>Todo valueRegex, valueMaxLenght 
+  valueContains beschreiben</strong></font></p>
 <p>&nbsp;</p>
 
 <HR title="Separator for header">
