@@ -1,0 +1,779 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--DAML Language, University of Karlsruhe-->
+<!--Version from: Mon Apr 15 16:51:40 GMT+02:00 2002-->
+
+<rdf:RDF 
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+ xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+ xmlns:daml="http://www.daml.org/2001/03/daml+oil#" 
+ xmlns="http://annotation.semanticweb.org/iswc/iswc.daml#"
+>
+    
+    <daml:Ontology rdf:about="">
+	<daml:versionInfo>$Id: iswc.daml.xml,v 1.1 2004/06/22 17:23:40 bizer Exp $</daml:versionInfo> 
+	  <rdfs:comment>
+	    ISWC Ontology
+	  </rdfs:comment>
+     <daml:imports rdf:resource="http://www.daml.org/2001/03/daml+oil"/>
+    </daml:Ontology>
+
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Algorithm">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Application">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Application_Domain">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Event">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#date"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#eventTitle"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#location"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Conference">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Event"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Tutorial">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Event"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Workshop">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Event"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Formal_Language">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Method">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Organization">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#address"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#country"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#has_affiliate"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Person"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#location"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Association">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Organization"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Department">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Organization"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Enterprise">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Organization"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Institute">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Organization"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Research_Funding_Institution">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Organization"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#University">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Organization"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Person">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#address"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#email"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#fax"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#first_Name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#has_affiliation"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Organization"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#homepage"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#involved_in_project"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Project"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#last_Name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#middle_Initial"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#phone"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#photo"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#research_topics"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Topic"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Employee">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Person"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Faculty_Member">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Person"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Associate_Professor">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Faculty_Member"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Full_Professor">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Faculty_Member"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Lecturer">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Faculty_Member"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Researcher">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Person"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Student">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Person"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#PhDStudent">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Student"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Project">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#funding_by"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Organization"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#is_about"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Topic"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#organizations_involved"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Organization"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#persons_involved"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Person"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#project_title"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Publication">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#title"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#year"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#author"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Person"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#topic"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Topic"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#algorithm"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Algorithm"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#application"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Application"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#application_domain"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Application_Domain"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#formal_language"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Formal_Language"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#method"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Method"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#tool"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Tool"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Book">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Publication"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#InProceedings">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Publication"/>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#conference"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Conference"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Proceedings">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Publication"/>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#conference"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Conference"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Report">
+        <rdfs:subClassOf rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Publication"/>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Tool">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:Class rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Topic">
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#name"/>
+                <daml:toClass rdf:resource="http://www.w3.org/2000/10/XMLSchema#string"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <daml:Restriction>
+                <daml:onProperty rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#hasSubtopic"/>
+                <daml:toClass rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Topic"/>
+            </daml:Restriction>
+        </rdfs:subClassOf>
+    </daml:Class>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#location"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#last_Name"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#photo"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#involved_in_project"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#method"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#tool"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#author"/>
+
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#topic"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#project_title"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#address"/>
+
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#country"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#phone"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#application"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#first_Name"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#year"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#has_affiliation"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#application_domain"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#persons_involved"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#email"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#middle_Initial"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#has_affiliate"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#research_topics"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#homepage"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#conference"/>
+
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#algorithm"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#is_about"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#funding_by"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#fax"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#date"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#eventTitle"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#organizations_involved"/>
+    
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#formal_language"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#title"/>
+    
+    <daml:DatatypeProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#name"/>
+
+    <daml:ObjectProperty rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#hasSubtopic"/>
+      
+    <Formal_Language rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#XML">
+        <name>
+            XML
+        </name>
+    </Formal_Language>
+    <Formal_Language rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#RDF">
+        <name>
+            RDF
+        </name>
+    </Formal_Language>
+    <Formal_Language rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#RDFS">
+        <name>
+            RDFS
+        </name>
+    </Formal_Language>
+    <Formal_Language rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#DAML_OIL">
+        <name>
+            DAML/OIL
+        </name>
+    </Formal_Language>
+    <Formal_Language rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#OXML">
+        <name>
+            OXML
+        </name>
+    </Formal_Language>
+    <Formal_Language rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#KAON">
+        <name>
+            KAON
+        </name>
+    </Formal_Language>
+    <Formal_Language rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Java">
+        <name>
+            Java
+        </name>
+    </Formal_Language>
+    <Formal_Language rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#C">
+        <name>
+            C
+        </name>
+    </Formal_Language>
+    <Formal_Language rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#SQL">
+        <name>
+            SQL
+        </name>
+    </Formal_Language>
+
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Data_Mining">
+	<name>
+	 	Data Mining
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Text_Mining">
+	<name>
+	Text Mining
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Ontology_Engineering">
+	<name>
+	Ontology Engineering
+	</name>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Ontology_Learning"/>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Representation_Languages">
+	<name>
+	Knowledge Representation Languages
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Agent_Systems">
+	<name>
+	Agent Systems
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Information_Extraction">
+	<name>
+	Information Extraction
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Discovery">
+	<name>
+	Knowledge Discovery
+	</name>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Data_Mining"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Information_Retrieval"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Query_Languages"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Text_Mining"/>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Representation_And_Reasoning">
+	<name>
+	Knowledge Representation and Reasoning
+	</name>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Representation_Languages"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Ontology_Engineering"/>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Artificial_Intelligence">
+	<name>
+	Artificial Intelligence
+	</name>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Agent_Systems"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Agents"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Information_Extraction"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Discovery"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Representation_And_Reasoning"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Machine_Learning"/>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Modeling">
+	<name>
+	Modeling
+	</name>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Ontology_Engineering"/>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Ontology_Learning">
+	<name>
+	Ontology Learning
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Portals">
+	<name>
+	Knowledge Portals
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Semantic_Web_Iinfrastructure">
+	<name>
+	Semantic Web Infrastructure
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Semantic_Annotation">
+	<name>
+	Semantic Annotation
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Management">
+	<name>
+	Knowledge Management
+	</name>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Management_Methodology"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Systems"/>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Management_Methodology">
+	<name>
+	Knowledge Management Methodology
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Systems">
+	<name>
+	Knowledge Systems
+	</name>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Development_of_Knowledge_Management_Systems"/>      
+	<hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Ontology-based_Knowledge_Management_Systems"/>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Development_of_Knowledge_Management_Systems">
+	<name>
+	Development of Knowledge Management Systems
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Ontology-based_Knowledge_Management_Systems">
+	<name>
+	Ontology-based Knowledge Management Systems
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Semantic_Web">
+	<name>
+	Semantic Web
+	</name>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Portals"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Semantic_Annotation"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Semantic_Web_Iinfrastructure"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Semantic_Web_Languages"/>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Web_Services">
+	<name>
+	Web Services
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Information_Retrieval">
+	<name>
+	Information Retrieval
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Network_Infrastructure">
+	<name>
+	Network Infrastructure
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Machine_Learning">
+	<name>
+	Machine Learning
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Knowledge_Reasoning">
+	<name>
+	Knowledge Reasoning
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#World_Wide_Web">
+	<name>
+	World Wide Web
+	</name>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Semantic_Web"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Web_Services"/>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#e-Business">
+	<name>
+	e-Business
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Business_Engineering">
+	<name>
+	Business Engineering
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Agents">
+	<name>
+	Agents
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Matching">
+	<name>
+	Matching
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Information_Systems">
+	<name>
+	Information Systems
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Logic">
+	<name>
+	Logic
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Databases">
+	<name>
+	Databases
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Human_Computer_Interaction">
+	<name>
+	Human Computer Interaction (HCI)
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Query_Languages">
+	<name>
+	Query Languages
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Semantic_Web_Languages">
+	<name>
+	Semantic Web Languages
+	</name>
+    </Topic>
+    <Topic rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#Office_Information_Systems">
+	<name>
+	Office Information Systems
+	</name>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Business_Engineering"/>
+      <hasSubtopic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Information_Systems"/>
+    </Topic>
+
+    <University rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#University_of_Karlsruhe"/>
+    <Institute rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#AIFB">
+        <location>
+            Karlsruhe
+        </location>
+        <name>
+            AIFB
+        </name>
+    </Institute>
+    <Conference rdf:about="http://annotation.semanticweb.org/iswc/iswc.daml#ISWC_2002">
+	<date>
+	June 9-12, 2002
+	</date>
+	<eventTitle>
+	International Semantic Web Conference 2002
+	</eventTitle>
+	<location>
+	Sardinia
+	</location>
+    </Conference>	
+
+    <InProceedings rdf:about="http://annotation.semanticweb.org/iswc/Towards_Semantic_Web_Mining.html#TowardsSemanticWebMining">
+        <conference rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#ISWC_2002"/>
+        <formal_language rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Java"/>
+        <title>
+            Towards Semantic Web Mining
+        </title>
+        <topic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Data_Mining"/>
+        <topic rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Semantic_Web"/>
+        <year>
+            2002
+        </year>
+    </InProceedings>
+
+</rdf:RDF>
+

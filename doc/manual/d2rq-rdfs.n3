@@ -1,0 +1,228 @@
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc:         <http://purl.org/dc/elements/1.1/> .
+@prefix dtype:      <http://www.w3.org/2001/XMLSchema#> . 
+
+# -----------------------------------------------
+#
+# D2RQ Language Specification V0.1
+#
+# -----------------------------------------------
+
+<> rdfs:comment     "Database to RDF Query Vocabulary" ;
+   dc:creator       "Chris Bizer" ;
+   dc:subject       "" ;
+   dc:publisher     "" ;
+   dc:title         "" ;
+   dc:description   "" ;
+   dc:date          "2004-06-16" ;
+   dc:format        "RDF" ;
+   dc:identifier    <> ;
+   .
+
+
+# D2RQ Namespace
+@prefix :       <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+
+
+# -----------------------------------------------
+# Database
+# -----------------------------------------------
+
+:Database 	rdf:type rdfs:Class ;
+    		rdfs:comment "Represents a database" 
+    		.
+
+:odbcDSN    	rdf:type rdf:Property ;
+	   	rdfs:domain :Database
+            	.
+:jdbcDriver 	rdf:type rdf:Property ;
+            	rdfs:domain :Database
+            	.
+:jdbcDSN    	rdf:type rdf:Property ;
+            	rdfs:domain :Database
+            	.
+:username   	rdf:type rdf:Property ;
+            	rdfs:domain :Database
+            	.
+:password   	rdf:type rdf:Property ;
+            	rdfs:domain :Database
+            	.
+:numericColumn  rdf:type rdf:Property ;
+                rdfs:domain :Database
+                .
+:textColumn     rdf:type rdf:Property ;
+                rdfs:domain :Database
+                .
+:dateColumn     rdf:type rdf:Property ;
+                rdfs:domain :Database
+                .
+
+
+# -----------------------------------------------
+# Class Map
+# -----------------------------------------------
+
+:ClassMap 	rdf:type rdfs:Class ;
+    		rdfs:comment "Maps a class in the ontology to its relational representation in a specific database." 
+    		.
+
+:uriPattern  	rdf:type rdf:Property ;
+             	rdfs:comment "Pattern used for URI construction and reversing."; 
+             	rdfs:domain :ClassMap
+             	.
+:uriColumn   	rdf:type rdf:Property ;
+             	rdfs:comment "Database column which contains object URIs.";
+             	rdfs:domain :ClassMap
+             	.
+:bNodeIdColumns	rdf:type rdf:Property ;
+             	rdfs:comment "Database column or columns which contain the primary key information about an which is identified by an bNode in RDF.";
+             	rdfs:domain :ClassMap
+             	.
+:dataStorage 	rdf:type rdf:Property ;
+             	rdfs:domain :ClassMap ;
+             	rdfs:range  :Database
+             	.
+# Not implemented in yet
+# :additionalProperty rdf:type rdf:Property ;
+#             	rdfs:domain :ClassMap ;
+#             	rdfs:range  :AdditionalProperty
+#             	.
+# :uriConstructionClass   rdf:type rdf:Property ;
+#             	rdfs:comment "Open interface to use spezialized Java classes for URI construction and reversing."; 
+#             	rdfs:domain :ClassMap
+#             	.
+# :additionalWhereCondition rdf:type rdf:Property ;
+#             	rdfs:comment "Additional SQL WHERE condition, which is added to all SQL statements for this classMap. Can be used to implement database access control restrictions."; 
+#             	rdfs:domain :ClassMap
+#             	.
+ 
+            
+# -----------------------------------------------
+# Class Map Property
+# -----------------------------------------------
+
+:classMap        rdf:type rdf:Property ;
+                 rdfs:comment "Used to link RDFS or OWL classes to d2r:classMaps." ;
+                 rdfs:domain rdfs:Resource;
+                 rdfs:range  :ClassMap   
+                 .
+
+
+# -----------------------------------------------
+# Property Bridge
+# -----------------------------------------------
+
+:PropertyBridge rdf:type rdfs:Class ;
+             	rdfs:comment "Abstract Superclass of DatatypePropertyBridge and ObjectPropertyBridge" 
+             	.
+
+:column      	rdf:type rdf:Property ;
+             	rdfs:domain :PropertyBridge
+             	.
+:join        	rdf:type rdf:Property ;
+             	rdfs:domain :PropertyBridge 
+             	.
+:pattern     	rdf:type rdf:Property ;
+             	rdfs:domain :PropertyBridge
+             	.
+:belongsToClassMap rdf:type rdf:Property ;
+             	rdfs:domain :PropertyBridge ;
+             	rdfs:range  :ClassMap
+             	.
+# Not implemented in yet
+#:translateWith rdf:type rdf:Property ;
+#             	rdfs:domain :PropertyBridge ;
+#             	rdfs:range  :TranslationTable
+#             	.
+
+
+# -----------------------------------------------
+# Datatype Property Bridge
+# -----------------------------------------------
+
+:DatatypePropertyBridge rdf:type rdfs:Class ;
+             	rdfs:subClassOf :PropertyBridge ;
+             	rdfs:comment "Maps a datatype property to a column in a specific database." 
+             	.
+:datatype    	rdf:type rdf:Property ;
+             	rdfs:domain :DatatypePropertyBridge
+             	.
+:lang        	rdf:type rdf:Property ;
+             	rdfs:domain :DatatypePropertyBridge
+             	.
+
+
+# -----------------------------------------------
+# Object Property Bridge
+# -----------------------------------------------
+
+:ObjectPropertyBridge rdf:type rdfs:Class ;
+             	rdfs:subClassOf :PropertyBridge ;
+             	rdfs:comment "Maps a object property to a column in a specific database." 
+             	.
+
+:refersToClassMap rdf:type rdf:Property ;
+             	rdfs:domain :ObjectPropertyBridge ;
+             	rdfs:comment "Has to be used if a join refers to a different classMap."; 
+             	rdfs:range  :ClassMap
+             	.
+
+# -----------------------------------------------
+# Property Bridge Property
+# -----------------------------------------------
+
+:propertyBridge  rdf:type rdf:Property ;
+                 rdfs:comment "Used for linking RDFS properties to D2R property bridges." ;
+                 rdfs:domain rdfs:Resource;
+                 rdfs:range  :PropertyBridge   
+                 .
+
+
+# Not implemented in yet
+# -----------------------------------------------
+# Additional Property Definition
+# -----------------------------------------------
+#
+#:AdditionalProperty rdf:type rdfs:Class ;
+#    		rdfs:comment "Adds an additonal property to a class if D2R Map is used for DB exports, not DB queries." 
+#    		.
+#
+#:propertyName rdf:type rdf:Property ;
+#            	rdfs:domain :AdditionalProperty
+#            	.
+#:propertyValue rdf:type rdf:Property ;
+#            	rdfs:domain :AdditionalProperty
+#            	.            
+#                       
+#
+# -----------------------------------------------
+# Translation Table
+# -----------------------------------------------
+#
+#:TranslationTable rdf:type rdfs:Class ;
+#             	rdfs:comment "Lookup table for translations used in the mapping process." 
+#             	.
+#:translation 	rdf:type rdf:Property ;
+#             	rdfs:domain :TranslationTable;
+#             	rdfs:range  :Translation
+#             	.
+#:href rdf:type rdf:Property ;
+#             	rdfs:domain :TranslationTable;
+#             	rdfs:comment "Link to a translation table in an external CSV file."
+#             	.
+#:dbTable     	rdf:type rdf:Property ;
+#             	rdfs:domain :TranslationTable;
+#             	rdfs:comment "Link to a translation table in the database."
+#             	.
+#             
+#             
+#:Translation 	rdf:type rdfs:Class ;
+#             	rdfs:comment "Translation Key/Value Pair." 
+#             	.
+#:databaseValue rdf:type rdf:Property ;
+#             	rdfs:domain :Translation
+#             	.
+#:rdfValue	rdf:type rdf:Property ;
+#             	rdfs:domain :Translation
+#             	.

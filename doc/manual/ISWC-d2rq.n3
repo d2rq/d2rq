@@ -1,0 +1,305 @@
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+
+@prefix dc:         <http://purl.org/dc/elements/1.1/> .
+@prefix dctype:     <http://purl.org/dc/dcmitype/> .
+@prefix dtype:      <http://www.w3.org/2001/XMLSchema#> . 
+
+# D2RQ Namespace  
+@prefix d2rq:        <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+
+# Namespace of the ontology
+@prefix  :           <http://annotation.semanticweb.org/iswc/iswc.daml#> .
+
+# Namespace of the database
+@prefix db1:       <http://www.example.org/dbserver01/db01#> .
+
+# -----------------------------------------------
+# About this document
+<> rdfs:comment     "This files describes the D2RQ mappings from the ISWC ontolgy to a local database." ;
+   dc:creator       "Chris Bizer" ;
+   dc:subject       "" ;
+   dc:publisher     "" ;
+   dc:title         "" ;
+   dc:description   "" ;
+   dc:date          "2004-06-10" ;
+   dc:format        "RDF" ;
+   dc:identifier    <> ;
+   .
+
+
+# -----------------------------------------------
+# Databases
+
+db1:Database1 rdf:type d2rq:Database;
+
+        d2rq:odbcDSN "IswcDB";
+
+        d2rq:numericColumn "Conferences.ConfID";
+        d2rq:textColumn "Conferences.URI";
+        d2rq:textColumn "Conferences.Name";
+        d2rq:textColumn "Conferences.Location";
+        d2rq:dateColumn "Conferences.Date";
+        d2rq:numericColumn "Topics.TopicID";
+        d2rq:textColumn "Topics.TopicName";
+        d2rq:textColumn "Papers.URI";
+        d2rq:numericColumn "Papers.PaperID";
+        d2rq:textColumn "Papers.Title";
+        d2rq:textColumn "Papers.Abstract";
+        d2rq:numericColumn "Papers.Year";
+        d2rq:numericColumn "Papers.Conference";
+        d2rq:textColumn "Persons.URI";
+        d2rq:textColumn "Persons.FirstName";
+        d2rq:textColumn "Persons.LastName";
+        d2rq:textColumn "Persons.Email"
+        .
+
+# -----------------------------------------------
+# Conferences table
+#
+# CREATE TABLE Conferences (
+#  ConfID int(11) default NULL,
+#  Name text,
+#  URI text,
+#  Date text,
+#  Location text
+#) TYPE=MyISAM;
+
+:Conference rdf:type rdfs:Class ;
+            rdfs:comment "Class Conference" ;
+            d2rq:classMap db1:Conference
+            .
+db1:Conference rdf:type d2rq:ClassMap;
+            d2rq:uriPattern "http://conferences.org/comp/confno@@Conferences.ConfID@@";
+            d2rq:dataStorage db1:Database1;
+            d2rq:additionalProperty db1:ConferenceSeeAlso
+            .
+db1:ConferenceSeeAlso rdf:type d2rq:AdditionalProperty; 
+            d2rq:propertyName rdf:seeAlso;
+            d2rq:propertyValue <http://annotation.semanticweb.org/iswc/iswc.daml>     
+            .    
+# sameAs is also used with the InProceedings class                    
+owl:sameAs  d2rq:propertyBridge db1:conferenceSameAs
+            .
+db1:conferenceSameAs rdf:type d2rq:ObjectPropertyBridge ;
+            d2rq:column "Conferences.URI" ;             
+            d2rq:belongsToClassMap db1:Conference
+            .
+:eventTitle rdf:type rdf:Property ;
+            d2rq:propertyBridge db1:eventTitle        
+            .
+db1:eventTitle rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:column "Conferences.Name" ; 
+            d2rq:belongsToClassMap db1:Conference ;
+            d2rq:lang "en"; 
+            d2rq:datatype dtype:string
+            .
+:location   rdf:type rdf:Property ;
+            d2rq:propertyBridge db1:location        
+            .
+db1:location rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:column "Conferences.Location" ; 
+            d2rq:belongsToClassMap db1:Conference ;
+            d2rq:lang "en"; 
+            d2rq:datatype dtype:string
+            .            
+:date       rdf:type rdf:Property ;
+            d2rq:propertyBridge db1:date        
+            .
+db1:date    rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:column "Conferences.Date" ; 
+            d2rq:belongsToClassMap db1:Conference ;
+            d2rq:datatype dtype:date
+            .            
+
+# -----------------------------------------------
+# Topics table
+#
+#CREATE TABLE Topics (
+#  TopicID int(11) default NULL,
+#  TopicName text,
+#  URI text
+#) TYPE=MyISAM;
+
+:Topic rdf:type rdfs:Class ;
+           rdfs:comment "Class Topic" ;
+           d2rq:classMap db1:Topic
+           .
+
+db1:Topic rdf:type d2rq:ClassMap;
+          d2rq:bNodeIdColumns "Topics.TopicID";
+          d2rq:dataStorage db1:Database1
+          .
+
+:name     rdf:type rdf:Property ;
+          d2rq:propertyBridge db1:topicName        
+          .
+db1:topicName rdf:type d2rq:DatatypePropertyBridge ;
+          d2rq:column "Topics.TopicName" ; 
+          d2rq:belongsToClassMap db1:Topic ;
+          d2rq:datatype dtype:string
+          .
+
+# -----------------------------------------------
+# Papers table
+#
+#CREATE TABLE Papers (
+#  PaperID int(11) default NULL,
+#  Title text,
+#  Abstract mediumtext,
+#  URI text,
+#  Year text,
+#  Conference int(11) default NULL
+#) TYPE=MyISAM;
+
+:InProceedings rdf:type rdfs:Class ;
+            rdfs:comment "Class papers in proceedings" ;
+            d2rq:classMap db1:InProceedings
+            .
+db1:InProceedings rdf:type d2rq:ClassMap;
+            d2rq:uriPattern "http://www.conference.org/conf02004/paper#Paper@@Papers.PaperID@@" ;
+            d2rq:dataStorage db1:Database1;
+            .
+       
+# sameAs is also used with the Conference class
+owl:sameAs  d2rq:propertyBridge db1:inProceedingsSameAs
+            .
+db1:inProceedingsSameAs rdf:type d2rq:ObjectPropertyBridge ;
+            d2rq:column "Papers.URI" ;             
+            d2rq:belongsToClassMap db1:InProceedings
+            .
+       
+:title      rdf:type rdf:Property ;
+            d2rq:propertyBridge db1:inProceedingsTitle        
+            .
+db1:inProceedingsTitle rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:pattern "Titel of the Paper: @@Papers.Title@@" ; 
+            d2rq:belongsToClassMap db1:InProceedings ;
+            d2rq:lang "en"
+            .
+            
+:abstract   rdf:type rdf:Property ;
+            d2rq:propertyBridge db1:inProceedingsAbstract        
+            .
+db1:inProceedingsAbstract rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:column "Papers.Abstract" ; 
+            d2rq:belongsToClassMap db1:InProceedings ;
+            d2rq:lang "en"
+            .
+             
+:year       rdf:type rdf:Property ;
+            d2rq:propertyBridge db1:inProceedingsYear        
+            .
+db1:inProceedingsYear rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:column "Papers.Year" ; 
+            d2rq:belongsToClassMap db1:InProceedings ;
+            d2rq:datatype dtype:gYear
+            .
+
+:conference rdf:type rdf:Property ;
+            rdfs:domain :InProceedings ;
+            rdfs:range  :Conference ;
+            d2rq:propertyBridge db1:inProceedingsConference
+            .
+db1:inProceedingsConference rdf:type d2rq:ObjectPropertyBridge ;
+            d2rq:join "Papers.Conference = Conferences.ConfID" ;              
+            d2rq:belongsToClassMap db1:InProceedings;
+            d2rq:refersToClassMap db1:Conference
+            .            
+
+:author     rdf:type rdf:Property ;
+            rdfs:domain :InProceedings ;
+            d2rq:propertyBridge db1:inProceedingsAuthor
+            .
+db1:inProceedingsAuthor rdf:type d2rq:ObjectPropertyBridge ;
+            d2rq:join "Papers.PaperID = Rel_Person_Paper.PaperID" ;
+            d2rq:join "Rel_Person_Paper.PersonID = Persons.PerID" ;  
+            d2rq:belongsToClassMap db1:InProceedings;
+            d2rq:refersToClassMap db1:PersonsClassMap
+            .                 
+
+:topic      rdf:type rdf:Property ;
+            rdfs:domain :InProceedings ;
+            rdfs:range  :Topic ;
+            d2rq:propertyBridge db1:inProceedingsTopic
+            .
+db1:inProceedingsTopic rdf:type d2rq:ObjectPropertyBridge ;
+            d2rq:join "Papers.PaperID = Rel_Paper_Topic.PaperID" ;
+            d2rq:join "Rel_Paper_Topic.TopicID = Topics.TopicID" ;  
+            d2rq:belongsToClassMap db1:InProceedings;
+            d2rq:refersToClassMap db1:Topic
+            .  
+
+# -----------------------------------------------
+# Persons Map
+#
+#
+#CREATE TABLE Persons (
+#  PersonID int(11) default NULL,
+#  FirstName text,
+#  LastName text,
+#  Address text,
+#  Email text,
+#  Homepage text,
+#  Phone text,
+#  URI text,
+#  Photo text
+#) TYPE=MyISAM;
+            
+:Person rdf:type rdfs:Class;
+            d2rq:classMap db1:PersonsClassMap.
+
+db1:PersonsClassMap rdf:type d2rq:ClassMap;
+            d2rq:uriColumn "Persons.URI";
+            d2rq:dataStorage db1:Database1;
+            .
+
+:firstName rdf:type rdf:Property ;
+            d2rq:propertyBridge db1:PersonsClassFirstName        
+            .          
+db1:PersonsClassFirstName rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:column "Persons.FirstName" ; 
+            d2rq:belongsToClassMap db1:PersonsClassMap ;
+            d2rq:datatype dtype:string
+            .
+            
+:lastName rdf:type rdf:Property ;
+            d2rq:propertyBridge db1:PersonsClassLastName        
+            .            
+db1:PersonsClassLastName rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:column "Persons.LastName" ; 
+            d2rq:belongsToClassMap db1:PersonsClassMap ;
+            d2rq:datatype dtype:string
+            .
+:eMail      rdf:type rdf:Property ;
+            d2rq:propertyBridge db1:PersonsClassEmail        
+            .            
+db1:PersonsClassEmail rdf:type d2rq:ObjectPropertyBridge ;
+            d2rq:pattern "mailto:@@Persons.Email@@" ; 
+            d2rq:belongsToClassMap db1:PersonsClassMap 
+            .                        
+
+:research_topic rdf:type rdf:Property ;
+            rdfs:range  :Topic ;
+            d2rq:propertyBridge db1:PersonsClassTopic
+            .
+db1:PersonsClassTopic rdf:type d2rq:ObjectPropertyBridge ;
+            d2rq:join "Persons.PerID = Rel_Person_Topic.PersonID" ;
+            d2rq:join "Rel_Person_Topic.TopicID = Topics.TopicID" ;  
+            d2rq:belongsToClassMap db1:PersonsClassMap;
+            d2rq:refersToClassMap db1:Topic
+            .           
+
+:author_of  rdf:type rdf:Property ;
+            rdfs:range  :InProceedings ;
+            d2rq:propertyBridge db1:PersonsClassPaper
+            .
+db1:PersonsClassPaper rdf:type d2rq:ObjectPropertyBridge ;
+            d2rq:join "Persons.PerID = Rel_Person_Paper.PersonID" ;
+            d2rq:join "Rel_Person_Paper.PaperID = Papers.PaperID" ;  
+            d2rq:belongsToClassMap db1:PersonsClassMap;
+            d2rq:refersToClassMap db1:InProceedings
+            .              
+
+ 
