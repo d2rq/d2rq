@@ -1,5 +1,5 @@
 /*
- * $Id: FindTest.java,v 1.1 2004/08/10 23:14:14 cyganiak Exp $
+ * $Id: FindTest.java,v 1.2 2004/08/11 15:06:30 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -21,10 +21,7 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
 /**
  * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.GraphD2RQ}.
- * Runs different find queries against the ISWC database, using the example map
- * provided with the D2RQ manual. To run the test, you must have either the MySQL or the
- * MS Access version accessible. Maybe you must adapt the connection information at the
- * beginning of the map file to fit your database server.
+ * For notes on running the tests, see {@link AllTests}.
  * 
  * Each test method runs one or more find queries and automatically compares the actual
  * results to the expected results. For some tests, only the number of returned triples
