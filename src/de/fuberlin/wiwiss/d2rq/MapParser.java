@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.4 2004/08/03 17:36:10 cyganiak Exp $
+ * $Id: MapParser.java,v 1.5 2004/08/04 18:26:31 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -40,6 +40,7 @@ class MapParser {
 	private Map resourcesDatabasesMap = new HashMap();
 	private Set columnNodeMakers = new HashSet();
 	private Set patternNodeMakers = new HashSet();
+	private Set nonNormalizedClassMaps = new HashSet();
 	private PrefixMapping prefixes;
 
 	/**
@@ -171,7 +172,20 @@ class MapParser {
 		if (columnName != null) {
 			this.columnNodeMakers.add(resourceMaker);
 		}
+		if (isNonNormalizedClassMap(node)) {
+			this.nonNormalizedClassMaps.add(resourceMaker);
+		}
 		this.resourcesConditionsMap.put(resourceMaker, findLiterals(node, D2RQ.condition));
+	}
+
+	private boolean isNonNormalizedClassMap(Node node) {
+		String containsDuplicates = findZeroOrOneLiteral(node, D2RQ.containsDuplicates);
+		if ("true".equals(containsDuplicates)) {
+			return true;
+		} else if (containsDuplicates != null) {
+			Logger.instance().error("Illegal value '" + containsDuplicates + "' for d2rq:containsDuplicates on " + node);
+		}
+		return false;
 	}
 
 	private void assertHasColumnTypes(NodeMaker nodeMaker, Database db) {
@@ -342,6 +356,9 @@ class MapParser {
 			bridge.addConditions((Set) this.resourcesConditionsMap.get(objectMaker));
 		}
 		bridge.setURIMatchPolicy(policy);
+		bridge.setMayContainDuplicates(
+				this.nonNormalizedClassMaps.contains(resourceMaker) ||
+				this.nonNormalizedClassMaps.contains(objectMaker));
 		bridge.addConditions(findLiterals(node, D2RQ.condition));
 		bridge.addConditions((Set) this.resourcesConditionsMap.get(resourceMaker));
 	}

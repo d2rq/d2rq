@@ -44,6 +44,7 @@ class D2RQ {
     public static final Node uriColumn = Node.createURI(uri + "uriColumn");
     public static final Node bNodeIdColumns = Node.createURI(uri + "bNodeIdColumns");
     public static final Node dataStorage = Node.createURI(uri + "dataStorage");
+    public static final Node containsDuplicates = Node.createURI(uri + "containsDuplicates");
     public static final Node classMap = Node.createURI(uri + "classMap");
     public static final Node class_ = Node.createURI(uri + "class");
     

@@ -27,13 +27,17 @@ class SQLStatementMaker {
 	/** Maps column names from the database to columns numbers in the result set. */
 	private Map columnNameNumber = new HashMap(10);
 	private int selectColumnCount = 0;
+	private boolean eliminateDuplicates = false;
 
 	public SQLStatementMaker(Database database) {
 		this.database = database;
 	}
 
 	public String getSQLStatement() {
-		StringBuffer result = new StringBuffer("SELECT DISTINCT ");
+		StringBuffer result = new StringBuffer("SELECT ");
+		if (this.eliminateDuplicates) {
+			result.append("DISTINCT ");
+		}
 		Iterator it = this.sqlSelect.iterator();
 		if (!it.hasNext()) {
 			result.append("1");
@@ -175,6 +179,15 @@ class SQLStatementMaker {
 			String newName = ((Column) entry.getValue()).getQualifiedName();
 			this.columnNameNumber.put(oldName, this.columnNameNumber.get(newName));
 		}
+	}
+
+	/**
+	 * Sets if the SQL statement should eliminate duplicate rows
+	 * ("SELECT DISTINCT").
+	 * @param eliminateDuplicates enable DISTINCT?
+	 */
+	public void setEliminateDuplicates(boolean eliminateDuplicates) {
+		this.eliminateDuplicates = eliminateDuplicates;
 	}
 
 	public Map getColumnNameNumberMap() {

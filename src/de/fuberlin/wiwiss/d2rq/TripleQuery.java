@@ -1,5 +1,5 @@
 /*
- * $Id: TripleQuery.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: TripleQuery.java,v 1.2 2004/08/04 18:26:31 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -32,16 +32,14 @@ import com.hp.hpl.jena.graph.Triple;
  * @author Richard Cyganiak <richard@cyganiak.de>
  */
 class TripleQuery {
-	private Database database;
+	private PropertyBridge bridge;
 	private Set joins = new HashSet(2);
-	private Set conditions = new HashSet(1);
 	private Map columnValues = new HashMap();
 	private Set selectColumns = new HashSet();
 	private String aTable;
 	private Set subjectColumns;
 	private Set objectColumns;
 	private NodeMaker subjectMaker;
-	private NodeMaker predicateMaker;
 	private NodeMaker objectMaker;
 	private Map replacedColumns = new HashMap(4);
 
@@ -52,11 +50,9 @@ class TripleQuery {
 	 * @param object the object node, may be {{Node.ANY}}
 	 */
 	public TripleQuery(PropertyBridge bridge, Node subject, Node object) {
-		this.database = bridge.getDatabase();
-		this.predicateMaker = bridge.getPredicateMaker();
+		this.bridge = bridge;
 		this.subjectColumns = bridge.getSubjectMaker().getColumns();
 		this.objectColumns = bridge.getObjectMaker().getColumns();
-		this.conditions = bridge.getConditions();
 	
 		if (subject.isConcrete()) {
 			this.columnValues.putAll(bridge.getSubjectMaker().getColumnValues(subject));
@@ -88,7 +84,7 @@ class TripleQuery {
 	}
 	
 	public Set getConditions() {
-		return this.conditions;
+		return this.bridge.getConditions();
 	}
 
 	public Map getColumnValues() {
@@ -100,7 +96,11 @@ class TripleQuery {
 	}
 
 	public Database getDatabase() {
-		return this.database;
+		return this.bridge.getDatabase();
+	}
+
+	public boolean mayContainDuplicates() {
+		return this.bridge.mayContainDuplicates();
 	}
 
 	/**
@@ -124,6 +124,9 @@ class TripleQuery {
 	 */
 	public boolean isCombinable(TripleQuery other) {
 		if (!getDatabase().equals(other.getDatabase())) {
+			return false;
+		}
+		if (this.bridge.mayContainDuplicates() || other.bridge.mayContainDuplicates()) {
 			return false;
 		}
 		if (!getJoins().equals(other.getJoins())) {
@@ -162,7 +165,7 @@ class TripleQuery {
 	 */
 	public Triple makeTriple(String[] row, Map columnNameNumberMap) {
 		Node s = this.subjectMaker.getNode(row, columnNameNumberMap );
-		Node p = this.predicateMaker.getNode(row, columnNameNumberMap);
+		Node p = this.bridge.getPredicateMaker().getNode(row, columnNameNumberMap);
 		Node o = this.objectMaker.getNode(row, columnNameNumberMap);
 		if (s == null || p == null || o == null) {
 			return null;
@@ -171,7 +174,7 @@ class TripleQuery {
 	}
 
 	private void removeOptionalJoins() {
-		if (!this.conditions.isEmpty()) {
+		if (!this.bridge.getConditions().isEmpty()) {
 			return;
 		}
 		Iterator it = getAllJoinTables().iterator();
