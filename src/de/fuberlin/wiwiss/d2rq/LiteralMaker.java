@@ -1,89 +1,98 @@
 /*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-*/
+ (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
+ */
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.*;
+
 import com.hp.hpl.jena.graph.*;
+import com.hp.hpl.jena.graph.impl.LiteralLabel;
 import com.hp.hpl.jena.datatypes.*;
 
 /**
  * LiteralMakers transform attribute values from a result set into literals.
- * They are used within TripleMakers.
  *
  * <BR>History: 06-21-2004   : Initial version of this class.
  * @author Chris Bizer chris@bizer.de
  * @version V0.1
- *
- * @see de.fuberlin.wiwiss.d2rq.TripleMaker
  */
-public class LiteralMaker extends NodeMaker {
+class LiteralMaker implements NodeMaker {
+	private ValueSource valueSource;
+	private RDFDatatype datatype;
+	private String lang;
+	private String id;
 
-    protected String nodeColumn;
-    protected String nodePattern;
-    protected RDFDatatype datatype;
-    protected String lang;
+	public LiteralMaker(String id, ValueSource valueSource, RDFDatatype datatype, String lang) {
+		this.valueSource = valueSource;
+		this.datatype = datatype;
+		this.lang = lang;
+		this.id = id;
+	}
 
-    protected LiteralMaker(Node fixednode, String column, String pattern, RDFDatatype litDatatype, String litLang) {
-         fixedNode = fixednode;
-         nodeColumn = column;
-         nodePattern = pattern;
-         datatype = litDatatype;
-         lang = litLang;
-    }
+	/* (non-Javadoc)
+	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#couldFit(com.hp.hpl.jena.graph.Node)
+	 */
+	public boolean couldFit(Node node) {
+		if (node.equals(Node.ANY)) {
+			return true;
+		}
+		if (!node.isLiteral()) {
+			return false;
+		}
+		LiteralLabel label = node.getLiteral();
+		if (!areCompatibleDatatypes(this.datatype, label.getDatatype())) {
+			return false;
+		}
+		String nodeLang = label.language();
+		if ("".equals(nodeLang)) {
+			nodeLang = null;
+		}
+		if (!areCompatibleLanguages(this.lang, nodeLang)) {
+			return false;
+		}
+		return this.valueSource.couldFit(label.getLexicalForm());
+	}
 
-    /** Creates a new literal node based on the current row of the result set
-     * and the mapping of database column names to elements of the array.
-     * Returns null if a NULL value was retrieved from the database.
-    */
-    protected Node getNode(String[] currentRow, HashMap columnNameNumberMap) {
-        Node resultNode;
-        if (fixedNode != null) {
-            // Case: Fixed Node
-            resultNode = fixedNode;
-        } else if  (nodePattern != null) {
-            // Case: Pattern
-  		    String result = "";
-			int startPosition = 0;
-			int endPosition = 0;
-			try {
-				if (nodePattern.indexOf("@@") == -1) { result = nodePattern; }
-                else {
-					while (startPosition < nodePattern.length() && nodePattern.indexOf(D2RQ.deliminator, startPosition) != -1) {
-						endPosition = startPosition;
-						startPosition = nodePattern.indexOf(D2RQ.deliminator, startPosition);
-						// get Text
-						if (endPosition < startPosition)
-							result += nodePattern.substring(endPosition, startPosition);
-						startPosition = startPosition + D2RQ.deliminator.length();
-						endPosition = nodePattern.indexOf(D2RQ.deliminator, startPosition);
-						// get field
-						String fieldname = nodePattern.substring(startPosition, endPosition).trim();
-                        //String fnameShort = D2RQUtil.getColumnName(fieldname);
-                        int fieldNumber = Integer.parseInt((String) columnNameNumberMap.get(fieldname));
-                        if (currentRow[fieldNumber] == null) {
-		    				return null;
-		    			}
-						result += currentRow[fieldNumber];
-						startPosition = endPosition + D2RQ.deliminator.length();
-					}
-					if (endPosition + D2RQ.deliminator.length() < nodePattern.length())
-						result += nodePattern.substring(startPosition, nodePattern.length());
-			   }
-            }
-			catch (java.lang.Throwable ex) {
-				System.err.println("Error: There was a problem while parsing the pattern" + nodePattern + ".");
-            }
-            resultNode = Node.createLiteral(result, lang, datatype);
-        } else {
-            // Case: Column
-            int fieldNumber = Integer.parseInt((String) columnNameNumberMap.get(nodeColumn));
-            String result = currentRow[fieldNumber];
-            if (result == null) {
-				return null;
-			}
-            resultNode = Node.createLiteral(result,  lang, datatype);
-        }
-        return resultNode;
-    }
+	/* (non-Javadoc)
+	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getColumns()
+	 */
+	public Set getColumns() {
+		return this.valueSource.getColumns();
+	}
+
+	/* (non-Javadoc)
+	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getColumnValues(com.hp.hpl.jena.graph.Node)
+	 */
+	public Map getColumnValues(Node node) {
+		return this.valueSource.getColumnValues(node.getLiteral().getLexicalForm());
+	}
+
+	/* (non-Javadoc)
+	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getNode(java.lang.String[], java.util.Map)
+	 */
+	public Node getNode(String[] row, Map columnNameNumberMap) {
+		String value = this.valueSource.getValue(row, columnNameNumberMap);
+		if (value == null) {
+			return null;
+		}
+		return Node.createLiteral(value, this.lang, this.datatype);
+	}
+
+	private boolean areCompatibleDatatypes(RDFDatatype dt1, RDFDatatype dt2) {
+		if (dt1 == null) {
+			return dt2 == null;
+		}
+		return dt1.equals(dt2);
+	}
+
+	private boolean areCompatibleLanguages(String lang1, String lang2) {
+		if (lang1 == null) {
+			return lang2 == null;
+		}
+		return lang1.equals(lang2);
+	}
+	
+	public String toString() {
+		return "LiteralMaker@" + this.id;
+	}
 }

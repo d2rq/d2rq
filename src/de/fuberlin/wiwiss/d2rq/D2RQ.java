@@ -13,10 +13,10 @@ import com.hp.hpl.jena.graph.*;
  * @author Chris Bizer chris@bizer.de
  * @version V0.1
  */
-public class D2RQ {
+class D2RQ {
 
     /** D2RQnNamespace */
-    protected static final String uri ="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#";
+    public static final String uri = "http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#";
 
     /** Deliminator used in patterns and bNode ids */
     public static final String deliminator = "@@";
@@ -45,7 +45,8 @@ public class D2RQ {
     public static final Node bNodeIdColumns = Node.createURI(uri + "bNodeIdColumns");
     public static final Node dataStorage = Node.createURI(uri + "dataStorage");
     public static final Node classMap = Node.createURI(uri + "classMap");
-
+    public static final Node class_ = Node.createURI(uri + "class");
+    
     // PropertyBridge
     public static final Node DatatypePropertyBridge = Node.createURI(uri + "DatatypePropertyBridge");
     public static final Node ObjectPropertyBridge = Node.createURI(uri + "ObjectPropertyBridge");
@@ -56,6 +57,28 @@ public class D2RQ {
     public static final Node refersToClassMap = Node.createURI(uri + "refersToClassMap");
     public static final Node datatype = Node.createURI(uri + "datatype");
     public static final Node lang = Node.createURI(uri + "lang");
+    public static final Node translateWith = Node.createURI(uri + "translateWith");
+    public static final Node valueMaxLength = Node.createURI(uri + "valueMaxLength");
+    public static final Node valueContains = Node.createURI(uri + "valueContains");
+    public static final Node valueRegex = Node.createURI(uri + "valueRegex");
     public static final Node propertyBridge = Node.createURI(uri + "propertyBridge");
+    public static final Node property = Node.createURI(uri + "property");
 
+    // ClassMap and PropertyBridge
+    public static final Node condition = Node.createURI(uri + "condition");
+
+    // AdditionalProperty
+    public static final Node AdditionalProperty = Node.createURI(uri + "AdditionalProperty");
+    public static final Node additionalProperty = Node.createURI(uri + "additionalProperty");
+    public static final Node propertyName = Node.createURI(uri + "propertyName");
+    public static final Node propertyValue = Node.createURI(uri + "propertyValue");
+
+    // TranslationTable
+    public static final Node TranslationTable = Node.createURI(uri + "TranslationTable");
+    public static final Node href = Node.createURI(uri + "href");
+    public static final Node javaClass = Node.createURI(uri + "javaClass");
+    public static final Node translation = Node.createURI(uri + "translation");
+    public static final Node Translation = Node.createURI(uri + "Translation");
+    public static final Node databaseValue = Node.createURI(uri + "databaseValue");
+    public static final Node rdfValue = Node.createURI(uri + "rdfValue");
 }

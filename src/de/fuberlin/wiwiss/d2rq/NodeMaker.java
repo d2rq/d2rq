@@ -3,13 +3,15 @@
 */
 package de.fuberlin.wiwiss.d2rq;
 
+import java.util.Map;
+import java.util.Set;
+
 import com.hp.hpl.jena.graph.Node;
-import java.util.HashMap;
 
 /**
- * Abstract class of all node makers.
- * NodeMakers transform attribute values from a result set into nodes.
- * They are used within TripleMakers.
+ * NodeMakers create Nodes from database result rows. The actual mapping from
+ * the database result to a value happens within a {@link ValueSource}. A
+ * NodeMaker is responsible for creating a Node instance from that value.
  *
  * A node can be created from:
  * 
@@ -21,20 +23,45 @@ import java.util.HashMap;
  * <BR>History: 06-16-2004   : Initial version of this class.
  * @author Chris Bizer chris@bizer.de
  * @version V0.1
- *
- * @see de.fuberlin.wiwiss.d2rq.TripleMaker
  * @see de.fuberlin.wiwiss.d2rq.UriMaker
  * @see de.fuberlin.wiwiss.d2rq.LiteralMaker
  * @see de.fuberlin.wiwiss.d2rq.BlankNodeMaker
  */
-public abstract class NodeMaker {
+interface NodeMaker {
 
-    /** Fixed value which is returned by getNode(). */
-    protected Node fixedNode;
+	/**
+	 * Checks if a node could fit this NodeMaker without querying the
+	 * database.
+	 */
+	boolean couldFit(Node node);
 
-    /** Creates a new node based on the information in the current row array
-     * and the mapping of database column names to the elements of this array.
-     * Overloaded in the subclasses of NodeMaker.
-    */
-    protected abstract Node getNode(String[] currentRow, HashMap columnNameNumberMap);
+	/**
+	 * Returns a map of database fields and values corresponding
+	 * to the argument node.
+	 *  
+	 * <p>For example, a NodeMaker that corresponds directly
+	 * to a single DB column would return a single-entry map with that
+	 * column as the key, and the DB value corresponding to the
+	 * node as the value.
+	 * @param node a concrete, non-<tt>null</tt> RDF node 
+	 * @return a map with {@link Column} keys, and string values.
+	 */
+	Map getColumnValues(Node node);
+
+	/**
+	 * Returns a set of all columns containing data necessary
+	 * for this NodeMaker to build its nodes.
+	 * @return a set of {Column}s
+	 */
+	Set getColumns();
+
+	/**
+	 * Creates a new Node from a database result row.
+	 * @param row a database result row
+	 * @param columnNameNumberMap a map from <tt>Table.Column</tt> style column names
+	 * 							to Integers representing indices within the row array
+	 * @return a node created from the row, or <tt>null</tt> if a <tt>NULL</tt> value
+	 *			was encountered in a required field.
+	 */
+	Node getNode(String[] row, Map columnNameNumberMap);
 }

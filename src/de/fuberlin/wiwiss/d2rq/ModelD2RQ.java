@@ -21,18 +21,41 @@ import com.hp.hpl.jena.enhanced.*;
  */
 public class ModelD2RQ extends ModelCom implements Model {
 
-    /**  Make a non-RDF database-based model
-     *  @param mappingFileName filename of the D2RQ map to be used for this model
-     */
-    public ModelD2RQ(String mappingFileName)
-        { super( new GraphD2RQ(mappingFileName), BuiltinPersonalities.model ); }
+	/** 
+	 * Create a non-RDF database-based model. The model is created
+	 * from a D2RQ map that must be provided in N3 notation.
+	 * @param mapURL URL of the D2RQ map to be used for this model
+	 */
+	public ModelD2RQ(String mapURL) {
+		super(new GraphD2RQ(mapURL), BuiltinPersonalities.model);
+	}
 
-    /**  Make a non-RDF database-based model
-     *  @param mappingFileName filename of the D2RQ map to be used for this model
-     * @param parameter parameter for D2RQ
-     */
-    public ModelD2RQ(String mappingFileName, String parameter)
-        { super( new GraphD2RQ(mappingFileName, parameter), BuiltinPersonalities.model ); }
+	/** 
+	 * Create a non-RDF database-based model. The model is created
+	 * from a D2RQ map that may be in "RDF/XML", "N-TRIPLES" or "N3"
+	 * format.
+	 * @param mapURL URL of the D2RQ map to be used for this model
+	 * @param serializationFormat the format of the map
+	 */
+	public ModelD2RQ(String mapURL, String serializationFormat) {
+		super(new GraphD2RQ(mapURL, serializationFormat), BuiltinPersonalities.model);
+	}
+
+	/** 
+	 * Create a non-RDF database-based model. The model is created
+	 * from a D2RQ map that is provided as a Jena model.
+	 * @param mapModel a Jena model containing the D2RQ map
+	 */
+	public ModelD2RQ(Model mapModel) {
+		super(new GraphD2RQ(mapModel), BuiltinPersonalities.model);
+	}
+
+	/**
+	 * Enables D2RQ debug messages.
+	 */
+	public void enableDebug() {
+		((GraphD2RQ) getGraph()).enableDebug();
+	}
 }
 
 

@@ -14,7 +14,7 @@ import java.util.*;
  * @author Chris Bizer chris@bizer.de
  * @version V0.1
  */
-public class Database {
+class Database {
 
     /** Flag that the database connection has been established */
     private boolean connectedToDatabase = false;
@@ -22,7 +22,7 @@ public class Database {
     /** Types of all columns used from this database.
      * Possible values are d2rq:numericColumn, d2rq:textColumn and d2rq:dateColumn.
     */
-    private HashMap columnTypes;
+    private Map columnTypes;
 
     private String odbc;
     private String jdbc;
@@ -31,7 +31,7 @@ public class Database {
     private String databasePassword;
     private Connection con;
 
-    public Database(String odbc, String jdbc, String jdbcDriver, String databaseUsername, String databasePassword, HashMap  columnTypes) {
+    public Database(String odbc, String jdbc, String jdbcDriver, String databaseUsername, String databasePassword, Map columnTypes) {
         this.odbc = odbc;
         this.jdbc =  jdbc;
         this.jdbcDriver = jdbcDriver;
@@ -44,9 +44,9 @@ public class Database {
      * Returns a connection to this database.
      * @return connection
      */
-    protected Connection getConnnection() {
-        if(!connectedToDatabase) {
-            this.connectToDatabase();
+    public Connection getConnnection() {
+    		if(!this.connectedToDatabase) {
+    			connectToDatabase();
         }
         return this.con;
     }
@@ -56,7 +56,7 @@ public class Database {
      * Returns the ODBC data source name.
      * @return odbcDSN
      */
-    protected String getOdbc() {
+    public String getOdbc() {
         return this.odbc;
     }
 
@@ -64,7 +64,7 @@ public class Database {
      * Returns the JDBC data source name.
      * @return jdbcDSN
      */
-    protected String getJdbc() {
+    public String getJdbc() {
         return this.jdbc;
     }
 
@@ -72,7 +72,7 @@ public class Database {
      * Returns the JDBC driver.
      * @return jdbcDriver
      */
-    protected String getJdbcDriver() {
+    public String getJdbcDriver() {
         return this.jdbcDriver;
     }
 
@@ -80,7 +80,7 @@ public class Database {
      * Returns the database username.
      * @return username
      */
-    protected String getDatabaseUsername() {
+    public String getDatabaseUsername() {
         return this.databaseUsername;
     }
 
@@ -88,7 +88,7 @@ public class Database {
      * Returns the database password.
      * @return password
      */
-    protected String getDatabasePassword() {
+    public String getDatabasePassword() {
         return this.databasePassword;
     }
 
@@ -96,13 +96,13 @@ public class Database {
      * Returns the columnType for a given database column.
      * @return Node columnType D2RQ.textColumn or D2RQ.numericColumn or D2RQ.dateColumn
      */
-    protected Node getColumnType(String column) {
-        Node type = (Node) this.columnTypes.get(column);
-        if (type == null) {
-        		System.err.println("D2RQ Error: The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
-        }
-        return type;
-    }
+    public Node getColumnType(Column column) {
+		Node type = (Node) this.columnTypes.get(column.getQualifiedName());
+//		if (type == null) {
+//			Logger.instance().warning("The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
+//		}
+		return type;
+	}
 
     private void connectToDatabase() {
        try {
@@ -116,19 +116,21 @@ public class Database {
                 if (this.jdbcDriver != null) {
                     Class.forName(this.jdbcDriver);
                 } else {
-                    throw new D2RQException("Could not connect to database because of missing JDBC driver.");
+                    Logger.instance().error("Could not connect to database because of missing JDBC driver.");
+                    return;
                 }
             }
             if (url != "") {
                 if (this.getDatabaseUsername() != null && this.getDatabasePassword() != null) {
-                    con = DriverManager.getConnection(url, this.getDatabaseUsername(), this.getDatabasePassword());
+                		this.con = DriverManager.getConnection(url, this.getDatabaseUsername(), this.getDatabasePassword());
                 } else {
-                    con = DriverManager.getConnection(url);
+                		this.con = DriverManager.getConnection(url);
                 }
             } else {
-                throw new D2RQException("Could not connect to database because of missing URL.");
+                Logger.instance().error("Could not connect to database because of missing URL.");
+                return;
             }
-            connectedToDatabase = true;
+            this.connectedToDatabase = true;
        }  catch (Exception ex) {
             System.err.println(ex.getMessage());
             ex.printStackTrace();

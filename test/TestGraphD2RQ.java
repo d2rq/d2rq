@@ -1,13 +1,16 @@
 /*
   (c) Copyright 2004, Chris Bizer, Freie Universitaet Berlin
 */
-import de.fuberlin.wiwiss.d2rq.*;
-import java.util.*;
-import com.hp.hpl.jena.graph.*;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.TypeMapper;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.datatypes.*;
-import com.hp.hpl.jena.rdf.model.AnonId;
+
+import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
 /**
  * Test Class for GraphD2RQ
@@ -16,7 +19,7 @@ import com.hp.hpl.jena.rdf.model.AnonId;
  * @version V0.1
  */
 public class TestGraphD2RQ {
-    private final static String D2RQMap = "C:/D2RQ/maps/ISWC-d2r.n3";
+    private final static String D2RQMap = "file:///C:/D2RQ/maps/ISWC-d2r.n3";
     static GraphD2RQ d2rqGraph;
 
     public static void main(String[] args) {
@@ -26,7 +29,7 @@ public class TestGraphD2RQ {
             System.out.println("--------------------------------------------");
             try{
                d2rqGraph = new GraphD2RQ(D2RQMap);
-               // d2rqGraph = new GraphD2RQ(D2RQMap, "DEBUG");
+               // d2rqGraph.enableDebug();
             } catch  (D2RQException ex) {
                System.out.println(ex.toString());
             }
@@ -117,19 +120,19 @@ public class TestGraphD2RQ {
             // Test: Reverse Pattern
             /////////////////////////////////////////////////////
             if (test == 50) {
-            	String pattern = "http://www.example.org/dbserver01/db01#Paper@@Papers.PaperID@@-@@Persons.PersonID@@-@@Conferences.ConfID@@.rdf";
-                String value = "http://www.example.org/dbserver01/db01#Paper1111-2222222-333.rdf";
-                HashMap result = D2RQUtil.ReverseValueWithPattern(value, pattern);
-                if (result.isEmpty()) { System.out.println("Empty results set!"); }
-                else {
-				 	Iterator it = result.keySet().iterator();
-                    while (it.hasNext()) {
-                       String key = (String) it.next();
-                       String resultvalue = (String) result.get(key);
-                       System.out.println("Key:" + key + " Value: " + resultvalue);
-                    }
-                }
-                outputResults = false;
+//            	String pattern = "http://www.example.org/dbserver01/db01#Paper@@Papers.PaperID@@-@@Persons.PersonID@@-@@Conferences.ConfID@@.rdf";
+//                String value = "http://www.example.org/dbserver01/db01#Paper1111-2222222-333.rdf";
+//                Map result = new Pattern(pattern).getColumnValues(value);
+//                if (result.isEmpty()) { System.out.println("Empty results set!"); }
+//                else {
+//				 	Iterator it = result.keySet().iterator();
+//                    while (it.hasNext()) {
+//                       Column key = (Column) it.next();
+//                       String resultvalue = (String) result.get(key);
+//                       System.out.println("Key:" + key + " Value: " + resultvalue);
+//                    }
+//                }
+//                outputResults = false;
             }
 
             /////////////////////////////////////////////////////

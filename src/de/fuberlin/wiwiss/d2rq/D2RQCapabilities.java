@@ -14,7 +14,7 @@ import com.hp.hpl.jena.graph.Capabilities;
  * @version V0.1
  */
 
-public class D2RQCapabilities implements Capabilities
+class D2RQCapabilities implements Capabilities
     {
     public boolean sizeAccurate() { return true; }
     public boolean addAllowed() { return addAllowed( false ); }

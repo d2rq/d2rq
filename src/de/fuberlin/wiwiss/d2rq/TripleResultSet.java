@@ -14,157 +14,128 @@ import java.util.*;
  * @author Chris Bizer chris@bizer.de
  * @version V0.1
  */
-public class TripleResultSet {
+class TripleResultSet {
 
 	/** List of tripleMakers that are used on every row of the result set. */
-    protected ArrayList tripleMakers;
-    protected Iterator tripleMakerIterator;
+    private ArrayList tripleMakers = new ArrayList();
+    private Iterator tripleMakerIterator;
 	/** The name used for the default graph. */
-    protected HashMap columnNameNumberMap;
+    private Map columnNameNumberMap;
 	/** Flag that the record set has already been created. */
-    protected boolean queryHasBeenExecuted = false;
+    private boolean queryHasBeenExecuted = false;
     /** Array with the data from the current row of the resordset. */
-    protected String[] currentRow;
-    /** Caches the triple which have allready been delivered in order to eliminate dublicates. */
-    protected HashSet deliveredTriples;
+    private String[] currentRow;
 
-    /** Flag that a triple has been chached. */
-    protected boolean hasTripleChached = false;
-    /** The chached triple.
-     * A triple gets chached by hasNext() and if delivered afterwards by next()
-    */
-    protected Triple chachedTriple;
+	/**
+	 * The chached triple. A value of null means there is no triple
+	 * in the cache. A triple gets chached by hasNext() and is
+	 * delivered afterwards by next().
+	 */
+    private Triple chachedTriple;
 
+    private Database database;
+    private ResultSet resultSet = null;
+    private String sql;
+    private boolean rsForward = false;
+    private int numCols = 0;
 
-    protected Database database;
-    protected ResultSet resultSet = null;
-    protected String sql;
-    protected boolean rsForward = false;
-    protected int numCols = 0;
-    protected boolean debug = false;
-
-
-    protected TripleResultSet(String SQL, HashMap columnNameNumberMap, Database db, boolean debug) {
-         sql = SQL;
-         database = db;
-         this.columnNameNumberMap = columnNameNumberMap;
-         this.debug = debug;
-         
-         tripleMakers = new ArrayList();
-         deliveredTriples = new HashSet();
+	public TripleResultSet(String SQL, Map columnNameNumberMap, Database db) {
+		this.sql = SQL;
+		this.database = db;
+		this.columnNameNumberMap = columnNameNumberMap;
     }
 
-    protected void addTripleMaker(TripleMaker tripMaker) {
-        tripleMakers.add(tripMaker);
-    }
+	public void addTripleMaker(TripleQuery tripMaker) {
+    		this.tripleMakers.add(tripMaker);
+	}
 
-    protected void addTripleMaker(NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker) {
-        TripleMaker tripMaker = new TripleMaker(subjectMaker, predicateMaker, objectMaker);
-        addTripleMaker(tripMaker);
-    }
-
-    protected boolean hasTripleMakers() {
-    		return tripleMakers.size() > 0;
-    }
-
-    /** Checks if there are more triples. */
-    protected boolean hasNext() {
-    	if (hasTripleChached) {
-    		return true;
+	public boolean hasTripleMakers() {
+		return this.tripleMakers.size() > 0;
     	}
-    	Triple test = next();
-        if (test == null) {
-        	return false;
-        }
-        hasTripleChached = true;
-        chachedTriple = test;
-        return true;
-    }
+
+	public boolean hasNext() {
+		if (this.chachedTriple == null) {
+			this.chachedTriple = next();
+		}
+		return this.chachedTriple != null;
+	}
 
     /** Returns the next triple.
      * If there are no more triple makers for the current row of the result set
      * then the next row is cached and the triple makers iterator is reset.
      */
-    protected Triple next() {
-    	if (!hasTripleMakers()) {
-    		return null;
-    	}
-		if (hasTripleChached) {
-			hasTripleChached = false;
-			return chachedTriple;
+	public Triple next() {
+		if (!hasTripleMakers()) {
+			return null;
 		}
-        if (!queryHasBeenExecuted) {
-            executeSQLQuery();
-        }
-		if (rsForward && !tripleMakerIterator.hasNext()) {
-			rsForward = false;
+		if (this.chachedTriple != null) {
+			Triple t = this.chachedTriple;
+			this.chachedTriple = null;
+			return t;
 		}
-		if (!rsForward) {
-			try {
-		        if (!resultSet.next()) {
-					resultSet.close();
-					queryHasBeenExecuted = false;
-					rsForward = false;
-					return null;        	
-				}
-				cacheCurrentRow();
-				tripleMakerIterator = tripleMakers.iterator();
-				rsForward = true;
-			} catch (SQLException ex) {
-				System.err.println(ex.getMessage());
-				ex.printStackTrace();
+		if (!this.queryHasBeenExecuted) {
+			executeSQLQuery();
+			this.queryHasBeenExecuted = true;
+		}
+		if (this.rsForward && !this.tripleMakerIterator.hasNext()) {
+			this.rsForward = false;
+		}
+		if (!this.rsForward) {
+			this.currentRow = nextRow();
+			if (this.currentRow == null) {
+				return null;
 			}
+			this.tripleMakerIterator = this.tripleMakers.iterator();
+			this.rsForward = true;
 		}
-		TripleMaker tripMaker = (TripleMaker) tripleMakerIterator.next();
-		Triple triple = tripMaker.makeTriple(currentRow, columnNameNumberMap);
-		if (triple == null || deliveredTriples.contains(triple.toString())) {
-			triple = next();
-		} else {
-			deliveredTriples.add(triple.toString());
-		}
-		return triple;
+		TripleQuery tripMaker = (TripleQuery) this.tripleMakerIterator.next();
+		Triple triple = tripMaker.makeTriple(this.currentRow, this.columnNameNumberMap);
+		return (triple != null) ? triple : next();
     }
 
-    protected void executeSQLQuery() {
-		if (debug) {
-            System.out.println("--------------------------------------------");
-            System.out.println("SQL statement executed: " + sql);
-            System.out.println("--------------------------------------------");
+    private void executeSQLQuery() {
+		if (Logger.instance().debugEnabled()) {
+            Logger.instance().debug("--------------------------------------------");
+            Logger.instance().debug("SQL statement executed: " + this.sql);
+            Logger.instance().debug("--------------------------------------------");
         }
         try {
 			Connection con = this.database.getConnnection();
 			// Create and execute SQL statement
 			java.sql.Statement stmt = con.createStatement();
-			this.resultSet = stmt.executeQuery(sql);
+			this.resultSet = stmt.executeQuery(this.sql);
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
-			this.queryHasBeenExecuted = true;
         } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
-            ex.printStackTrace();
+            Logger.instance().error(ex.getMessage());
         }
     }
 
-    protected void close() {
-        try {
-		  this.resultSet.close();
-		  this.resultSet = null;
-	    } catch (SQLException ex) {
-            // System.err.println(ex.getMessage());
-            // ex.printStackTrace();
+	public void close() {
+		try {
+			this.resultSet.close();
+			this.resultSet = null;
+		} catch (SQLException ex) {
+			// System.err.println(ex.getMessage());
+			// ex.printStackTrace();
 		}
-        queryHasBeenExecuted = false;
-    }
+		this.queryHasBeenExecuted = false;
+	}
 
-    /** Caches the current row from the result set in an array which is passed to the triple makers */
-    protected void cacheCurrentRow() {
-        currentRow = new String[20];
-        try {
-			for (int i = 1; i <= numCols; i++) {
-				currentRow[i] = resultSet.getString(i);
+	/** Gets the current row from the result set in an array which is passed to the triple makers */
+	private String[] nextRow() {
+		try {
+			if (!this.resultSet.next()) {
+				this.resultSet.close();
+				return null;
 			}
-        } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
-            ex.printStackTrace();
-        }
-    }
+			String[] result = new String[this.numCols + 1];
+			for (int i = 1; i <= this.numCols; i++) {
+				result[i] = this.resultSet.getString(i);
+			}
+			return result;
+		} catch (SQLException ex) {
+			Logger.instance().error(ex.getMessage());
+			return null;
+		}
+	}
 }

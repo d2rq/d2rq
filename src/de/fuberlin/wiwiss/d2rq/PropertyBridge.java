@@ -3,66 +3,120 @@
 */
 package de.fuberlin.wiwiss.d2rq;
 
-import com.hp.hpl.jena.graph.*;
+import java.util.HashSet;
+import java.util.Set;
 
-/** Abstract superclass of all property bridges.
- * Subclassed by ObjectPropertyBridge, DatatypePropertyBridge
- * and RDFTypePropertyBridge.
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
+
+/**
+ * A respresentation of a d2rq:PropertyBridge, responsible for
+ * creating a set of virtual triples. The predicate is fixed,
+ * subjects and objects come from one of the various {@link NodeMaker}s.
  *
+ * TODO: Rename to TripleSet?
+ * 
  * <BR>History: 06-03-2004   : Initial version of this class.
  * @author Chris Bizer chris@bizer.de
  * @version V0.1
- *
- * @see de.fuberlin.wiwiss.d2rq.RDFTypePropertyBridge
- * @see de.fuberlin.wiwiss.d2rq.DatatypePropertyBridge
- * @see de.fuberlin.wiwiss.d2rq.ObjectPropertyBridge
  */
-abstract public class PropertyBridge {
+class PropertyBridge {
+	private Node id;
+	private NodeMaker subjectMaker;
+	private NodeMaker predicateMaker;
+	private NodeMaker objectMaker; 
+	private Database database;
+	private Set joins;
+	private Set conditions = new HashSet(1);
+	private URIMatchPolicy uriMatchPolicy = new URIMatchPolicy();
 
-    /** Id of the PropertyBridge from the mapping file. */
-    protected Node id;
-    protected ClassMap belongsToClassMap;
-    protected GraphD2RQ d2rqGraph;
-    /** URI of the RDF predicate */
-    protected Node property;
+	public PropertyBridge(Node id, Node property, NodeMaker subjectMaker, NodeMaker objectMaker, Database database, Set joins) {
+		this.id = id;
+		this.subjectMaker = subjectMaker;
+		this.predicateMaker = new FixedNodeMaker(property);
+		this.objectMaker = objectMaker;
+		this.database = database;
+		this.joins = joins;
+	}
 
-    protected ClassMap getClassMap() { return belongsToClassMap; }
-    protected Node getProperty() { return property; }
-    protected Node getId() { return id; }
+	public PropertyBridge(Node id, Node property, NodeMaker subjectMaker, NodeMaker objectMaker, Database database) {
+		this(id, property, subjectMaker, objectMaker, database, new HashSet(0));
+	}
 
-    /** Checks if a given node could fit the triple subject without querying the database */
-    protected boolean nodeCouldFitSubject(Node node) {
-          return belongsToClassMap.nodeCouldBeInstanceId(node);
-    }
+	/**
+	 * Adds SQL WHERE conditions that must evaluate to TRUE for a given
+	 * database row or the bridge will not generate a triple.
+	 * @param whereConditions a set of Strings
+	 */
+	public void addConditions(Set whereConditions) {
+		if (whereConditions != null) {
+			this.conditions.addAll(whereConditions);
+		}
+	}
 
-    /** Checks if a given node could fit the triple predicate */
-    protected boolean nodeCouldFitPredicate(Node node) {
-        if (node.equals(Node.ANY)) return true;
-        return node.equals(property);
-    }
+	/**
+	 * Returns the SQL WHERE conditions that must hold for a given
+	 * database row or the bridge will not generate a triple.
+	 * @return a set of Strings
+	 */
+	public Set getConditions() {
+		return this.conditions;
+	}
 
-    /** Checks if a given node could fit the triple predicate.
-      * This method is overloaded by the subclasses.
-      */
-    protected abstract boolean nodeCouldFitObject(Node node);
+	public void setURIMatchPolicy(URIMatchPolicy policy) {
+		this.uriMatchPolicy = policy;
+	}
 
-    /** Creates a node maker for the subject of this bridge
-      * and adds the nessesary SELECT clauses to the SQLStatementMaker.
-      * Node node is a condition a given by the query or Node.ANY.
-      */
-    protected NodeMaker getSubjectMaker(Node node, SQLStatementMaker sqlMaker) {
-       return belongsToClassMap.getInstanceIdMaker(node, sqlMaker);
-    }
+	public int getEvaluationPriority() {
+		return this.uriMatchPolicy.getEvaluationPriority();
+	}
 
-    /** Creates a node maker for the predicate of this bridge */
-    protected NodeMaker getPredicateMaker() {
-       return new UriMaker(property, null, null);
-    }
+	/**
+	 * Checks if a given triple could match this bridge without
+	 * querying the database.
+	 */
+	public boolean couldFit(Triple t, QueryContext context) {
+		if (!this.subjectMaker.couldFit(t.getSubject()) ||
+				!this.predicateMaker.couldFit(t.getPredicate()) ||
+				!this.objectMaker.couldFit(t.getObject())) {
+			return false;
+		}
+		if (t.getSubject().isConcrete()) {
+			if (!this.uriMatchPolicy.couldFitSubjectInContext(context)) {
+				return false;
+			}
+			this.uriMatchPolicy.updateContextAfterSubjectMatch(context);
+		}
+		if (t.getObject().isConcrete()) {
+			if (!this.uriMatchPolicy.couldFitObjectInContext(context)) {
+				return false;
+			}
+			this.uriMatchPolicy.updateContextAfterObjectMatch(context);
+		}
+		return true;
+	}
 
-    /** Creates a node maker for the object of this bridge
-      * and adds the nessesary SELECT and WHERE clauses to the SQLStatementMaker.
-      * Node node is a condition a given by the query or Node.ANY.
-      * This method is overloaded by the subclasses.
-      */
-    protected abstract NodeMaker getObjectMaker(Node node, SQLStatementMaker sqlMaker);
+	public Database getDatabase() {
+		return this.database;
+	}
+
+	public NodeMaker getSubjectMaker() {
+		return this.subjectMaker;
+	}
+
+	public NodeMaker getPredicateMaker() {
+		return this.predicateMaker;
+	}
+
+	public NodeMaker getObjectMaker() {
+		return this.objectMaker;
+	}
+    
+	public Set getJoins() {
+		return this.joins;
+	}
+
+	public String toString() {
+		return this.id.toString();
+	}
 }
