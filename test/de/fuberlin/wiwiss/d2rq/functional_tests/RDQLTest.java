@@ -1,5 +1,5 @@
 /*
- * $Id: RDQLTest.java,v 1.1 2004/08/11 15:06:30 cyganiak Exp $
+ * $Id: RDQLTest.java,v 1.2 2005/02/23 21:36:42 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -98,6 +98,24 @@ private ModelD2RQ model;
 	public void testRDQLGetAuthorsAndEmails() {
 		rdql("SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), " +
 								"(?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y)");
+//		dump();
+		Map aResult = new HashMap();
+
+		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper1"));
+		aResult.put("y", this.model.createResource("mailto:gil@isi.edu"));
+		assertResult(aResult);
+
+		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper1"));
+		aResult.put("y", this.model.createResource("mailto:varunr@isi.edu"));
+		assertResult(aResult);
+
+		assertResultCount(7);
+	}
+
+	public void testRDQLGetAuthorsAndEmailsWithCondition() {
+		rdql("SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), " +
+								"(?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y)" +
+								" AND ! (?x eq ?z)");
 //		dump();
 		Map aResult = new HashMap();
 

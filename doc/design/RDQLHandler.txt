@@ -1,0 +1,132 @@
+//
+//  RDQLHandler.java
+//  XCode
+//
+//  Created by Joerg Garbers on 20.01.05.
+//  Copyright 2005 Joerg Garbers. All rights reserved.
+//
+
+// Classes that participate in the query handler in Jena: (all constructors add Graph access)
+QueryHandler - SimpleQueryHandler
+BindingQueryPlan - SimpleQueryPlan
+Stage - PatternStage
+
+a QueryPlan is something that can instanciate several QueryEngines 
+that means, it can be called multiple times with executeBindings()
+a QueryEngine can only
+
+public class RDQLHandler {
+	RDQLQuery query; // we could assume that a previous processing stage filters unifying variables such as ?x = ?y.
+    List disjunctions; // for each triple the set of property-bridges equivalent combined queries (a set equals a QueryCombiner)
+	List conjunctions; // 
+	
+	void algorithm() {
+		collectPropertyBridgesForTriples(); // -> setsOfPossiblePropertyBridges
+		addTypeAssertionsToQuery();
+		disjunctions=getDisjunctions(); 
+		conjunctions=getCompatibleConjunctions(disjunctions); // can be returned by an iterator
+		conjunctionResultIterator(); // pulls answers from database
+		for each result 
+			get query variables from the triple-disjunctions
+			check conditions that are not checked by SQL (stage)
+		    push into iterator
+	}
+	
+	void addTypeAssertionsToQuery() {
+		for each variable ?x
+			build the intersection of all possible involved property domains where ?x is subject
+			intersect with intersection of ranges
+	}
+
+	void getDisjunctions() {
+		foreach triple t in query 
+		  tc = tripleToQueryCombiner(t);
+		  renameColumns(); // two triples generally have nothing in common so rename tables
+		  // e.g. with "Tr<n>_ where <n> is the number of the triple in the over all query
+	}
+	
+	Set getCompatibleConjunctions(Set disjunctions) {
+		conjunctions = multiplicate out disjunctions;
+		for each conjunction
+		  remove if set of possible types for variables is empty
+	      remove if there are contradictions in conditions and/or variables
+		  simplifyConjunctions(); 
+	}
+	
+	void simplifyConjunctions() {
+		if two factors in a conjunction refer to the same rows then simplify.
+		this means:  set of table keys are the same
+		e.g. Tr1_Papers.PaperID = Tr2_Papers.PaperID   
+		replace all instances of Tr2_Papers with Tr1_Papers
+	}
+			
+	void tripleToQueryCombiner(Triple t) {
+		// stolen from GraphD2RQ.find() and modified
+		// a queryCombiner holds a condensed information of all applicable propertyBridges for a single Triple t
+		QueryCombiner combiner = new QueryCombiner();
+		QueryContext context = new QueryContext();
+		Iterator it = this.propertyBridges.iterator();
+		while (it.hasNext()) {
+			PropertyBridge bridge = (PropertyBridge) it.next();
+			if (!bridge.couldFit(t, context)) {
+				continue;
+			}
+			if (Logger.instance().debugEnabled()) {
+				Logger.instance().debug("--------------------------------------------");
+				Logger.instance().debug("Using property bridge: " + bridge);
+			}
+			combiner.add(new TripleQuery(bridge,
+										 t.getSubject(), t.getPredicate(), t.getObject()));
+		}
+		return combiner;
+	}
+}
+
+public class RDQLQuery {
+	List triples;
+	List setsOfPossiblePropertyBridges; // corresponds to triples
+	Set variables;
+	Set conditions; // inter-variable conditions, e.g. "A = B + C"
+}
+
+public class Variable {
+	String name;
+	int 
+	Set identicalVariables;
+	Set constraints; 
+	alternatives ?
+	boolean addConstraint(Constraint c); // will return false, if constraint is not compatible
+}
+
+// We have different sets of Variables: 
+// 1. query variables: ?x, ?y,...
+// 2. variables local to each combined query resp. QueryCombiner:   Table.Column
+// 3. renamed variables: x_Table.Column
+// For each set of Variables we have bindings and constraints some of which
+// a. can be propagated to the next level
+// b. can not be propagated and must be checked when reconstructing the upper level variables from the lower levels.
+
+
+public class Constraint { 
+	// x operation value
+	String operation;
+	String rhsValue;
+	// use reflexion to implement:
+	Method m;
+	Object target; // call target.m(valueToCheck)
+}
+
+public Conjunction {
+	// we really should introduce a class for a list of SQL-Queries that are compatible
+	// (entries in QueryCombiner.compatibleQueries)
+	List listOfSuchEntriy;
+}
+
+public class Utilities {
+	
+	Map propertyToSetOfBridges; // property -> set of bridges that build this property
+	Map propertyToSetOfDomains; // domains from those bridges
+	Map propertyToSetOfRanges;  // ranges from those bridges
+	Map propertyToSetOfDomainRangePairs; // property -> {(dom,range),...}
+	
+}
