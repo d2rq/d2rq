@@ -15,7 +15,7 @@ import com.hp.hpl.jena.rdql.*;
  */
 public class TestModelD2RQ {
 
-    private final static String D2RQMap = "file:///C:/D2RQ/maps/ISWC-d2rq.n3";
+    private final static String D2RQMap = "file:doc/manual/ISWC-d2rq.n3";
     static ModelD2RQ d2rqModel;
 
     public static void main(String[] args) {
