@@ -437,6 +437,12 @@ that create the same URIs or blank node IDs.</P>
   with d2rq:bNodeIdColumns. A ClassMap has a set of d2rq:PropertyBridges and is 
   connected to a d2rq:Database which represents the database where instance data 
   is stored.</P>
+<p>Every ClassMap is based on one or several database columns&#8212;those
+  in uriColumn, uriPattern or bNodeIdColumns. If these columns may contain
+  multiple identical rows (that is, your database schema is not fully
+  normalized), then you must add a d2rq:containsDuplicates statement to
+  the ClassMap, or some queries will give unexpected results.</p>
+
 <P><strong>Properties</strong></P>
 <table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
   <tr> 
@@ -483,6 +489,16 @@ that create the same URIs or blank node IDs.</P>
   <tr> 
     <td valign="top"><strong>d2rq:dataStorage</strong></td>
     <td valign="top">Reference to a d2rq:Database where the instance data is stored.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><strong>d2rq:containsDuplicates</strong></td>
+    <td valign="top">Must be specified on class maps whose columns (d2rq:uriColumn,
+      columns used in d2rq:uriPattern, d2rq:bNodeIdColumns) contain duplicate rows.
+      In other words, if SELECT DISTINCT on those columns returns a different number
+      of rows from SELECT, or if the database schema is not fully normalized. The
+      only allowed value of the property is "true". Adding this property to class
+      maps which do <em>not</em> contain duplicate values degrades performance, but
+      results should still be correct.</td>
   </tr>
   <tr>
     <td valign="top"><strong>d2rq:additionalProperty</strong></td>
