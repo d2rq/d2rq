@@ -4,13 +4,7 @@
 import de.fuberlin.wiwiss.d2rq.*;
 
 import java.io.*;
-import java.util.*;
 import com.hp.hpl.jena.rdf.model.* ;
-import com.hp.hpl.jena.graph.*;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
-import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.datatypes.*;
-import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdql.*;
 
 /**
@@ -40,7 +34,7 @@ public class TestModelD2RQ {
 
             // Test Selector
             // int test = 7;
-            boolean outputResults = true;
+            // boolean outputResults = true;
 
             // Loop over all tests
             for (int test=1; test < 8; test++) {

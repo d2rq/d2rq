@@ -2,7 +2,6 @@
   (c) Copyright 2004, Chris Bizer, Freie Universitaet Berlin
 */
 import de.fuberlin.wiwiss.d2rq.*;
-import java.io.*;
 import java.util.*;
 import com.hp.hpl.jena.graph.*;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
@@ -102,7 +101,6 @@ public class TestGraphD2RQ {
             if (test == 6) {
             	subject = Node.ANY;
             	predicate = Node.createURI("http://annotation.semanticweb.org/iswc/iswc.daml#name");
-            	RDFDatatype dt = TypeMapper.getInstance().getSafeTypeByName("http://www.w3.org/2001/XMLSchema#string");
                 object = Node.createLiteral("E-Business", null, null);
             }
 
@@ -124,7 +122,7 @@ public class TestGraphD2RQ {
                 HashMap result = D2RQUtil.ReverseValueWithPattern(value, pattern);
                 if (result.isEmpty()) { System.out.println("Empty results set!"); }
                 else {
-				 	Iterator it = ((Set) result.keySet()).iterator();
+				 	Iterator it = result.keySet().iterator();
                     while (it.hasNext()) {
                        String key = (String) it.next();
                        String resultvalue = (String) result.get(key);
