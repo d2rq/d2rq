@@ -4,11 +4,6 @@
 package de.fuberlin.wiwiss.d2rq;
 
 import com.hp.hpl.jena.graph.*;
-import com.hp.hpl.jena.rdf.model.AnonId;
-import java.util.HashSet;
-import java.util.StringTokenizer;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /** Abstract superclass of all property bridges.
  * Subclassed by ObjectPropertyBridge, DatatypePropertyBridge
@@ -43,19 +38,13 @@ abstract public class PropertyBridge {
     /** Checks if a given node could fit the triple predicate */
     protected boolean nodeCouldFitPredicate(Node node) {
         if (node.equals(Node.ANY)) return true;
-        if (node.equals(property)) {
-			return true;
-        } else {
-            return false;
-        }
+        return node.equals(property);
     }
 
     /** Checks if a given node could fit the triple predicate.
       * This method is overloaded by the subclasses.
       */
-    protected boolean nodeCouldFitObject(Node node) {
-        return true;
-    }
+    protected abstract boolean nodeCouldFitObject(Node node);
 
     /** Creates a node maker for the subject of this bridge
       * and adds the nessesary SELECT clauses to the SQLStatementMaker.
@@ -75,7 +64,5 @@ abstract public class PropertyBridge {
       * Node node is a condition a given by the query or Node.ANY.
       * This method is overloaded by the subclasses.
       */
-    protected NodeMaker getObjectMaker(Node node, SQLStatementMaker sqlMaker) {
-       return null;
-    }
+    protected abstract NodeMaker getObjectMaker(Node node, SQLStatementMaker sqlMaker);
 }

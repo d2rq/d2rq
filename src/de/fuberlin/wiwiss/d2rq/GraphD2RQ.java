@@ -9,7 +9,6 @@ import com.hp.hpl.jena.graph.impl.*;
 import com.hp.hpl.jena.graph.query.*;
 import com.hp.hpl.jena.shared.*;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
-import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.rdf.model.* ;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.datatypes.*;
@@ -139,7 +138,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
              Triple trip = (Triple) itColDate.next();
              columnTypes.put(trip.getObject().toString(), D2RQ.dateColumn);
          }
-         Database db = new Database(database.getSubject(), odbcDSN, jdbcDSN, jdbcDriver, username, password, columnTypes);
+         Database db = new Database(odbcDSN, jdbcDSN, jdbcDriver, username, password, columnTypes);
 
          // Create all ClassMaps for this database
          ExtendedIterator itClassMaps = d2rqMap.find(Node.ANY, D2RQ.dataStorage, database.getSubject());
@@ -233,7 +232,8 @@ public class GraphD2RQ extends GraphBase implements Graph {
 					 it = d2rqMap.find(bridge, D2RQ.lang, Node.ANY);
 					 String lang = null;
 					 if (it.hasNext()) {
-						lang = ((Node)((Triple) it.next()).getObject()).toString(); }
+					 	lang = ((Triple) it.next()).getObject().toString();
+					 }
 					 bridgeObj = new DatatypePropertyBridge(bridge, property, column, pattern, rdfDatatype, lang, classMapObj, refersTo, joins, this);
                  } else {
                      // ObjectPropertyBridge

@@ -16,9 +16,6 @@ import java.util.*;
  */
 public class Database {
 
-    /** URI or bNodeId of the classMap from the mapping file. */
-    private Node id;
-
     /** Flag that the database connection has been established */
     private boolean connectedToDatabase = false;
 
@@ -34,8 +31,7 @@ public class Database {
     private String databasePassword;
     private Connection con;
 
-     public Database(Node id, String odbc, String jdbc, String jdbcDriver, String databaseUsername, String databasePassword, HashMap  columnTypes) {
-        this.id = id;
+    public Database(String odbc, String jdbc, String jdbcDriver, String databaseUsername, String databasePassword, HashMap  columnTypes) {
         this.odbc = odbc;
         this.jdbc =  jdbc;
         this.jdbcDriver = jdbcDriver;
@@ -102,12 +98,10 @@ public class Database {
      */
     protected Node getColumnType(String column) {
         Node type = (Node) this.columnTypes.get(column);
-        if (type != null) {
-            return type ;
-        } else {
-            System.err.println("D2RQ Error: The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
-            return type;
+        if (type == null) {
+        		System.err.println("D2RQ Error: The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
         }
+        return type;
     }
 
     private void connectToDatabase() {

@@ -102,8 +102,8 @@ public class DatatypePropertyBridge extends PropertyBridge  {
 			// Object created with pattern
 			Iterator columns = D2RQUtil.getColumnsfromPattern(pattern).iterator();
 			while (columns.hasNext()) {
-				String column = (String) columns.next();
-				sqlMaker.addSelectColumn(column);
+				String patternColumn = (String) columns.next();
+				sqlMaker.addSelectColumn(patternColumn);
 			}
 			nodeMaker = new LiteralMaker(null, null, pattern, datatype, lang);
 		}
@@ -118,7 +118,7 @@ public class DatatypePropertyBridge extends PropertyBridge  {
 			  if (pattern != null) {
 					// Write pattern column names and values to WHERE clause
 					HashMap columnsWithValues = D2RQUtil.ReverseValueWithPattern(label.getLexicalForm(), pattern);
-					Iterator colIt = ((Set) columnsWithValues.keySet()).iterator();
+					Iterator colIt = columnsWithValues.keySet().iterator();
 					while (colIt.hasNext()) {
 					   String key = (String) colIt.next();
 					   String resultvalue = (String) columnsWithValues.get(key);

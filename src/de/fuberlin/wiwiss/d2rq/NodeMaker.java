@@ -36,7 +36,5 @@ public abstract class NodeMaker {
      * and the mapping of database column names to the elements of this array.
      * Overloaded in the subclasses of NodeMaker.
     */
-    protected Node getNode(String[] currentRow, HashMap columnNameNumberMap) {
-        return null;
-    }
+    protected abstract Node getNode(String[] currentRow, HashMap columnNameNumberMap);
 }

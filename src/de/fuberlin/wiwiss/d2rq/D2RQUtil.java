@@ -49,7 +49,7 @@ public class D2RQUtil {
 
     /**
      * Extracts the database column name from a tablename.columnname combination.
-     * @param  tablename.columnname combination seperated by a '.'
+     * @param fName tablename.columnname combination seperated by a '.'
      * @return database column name.
      */
     protected static String getColumnName(String fName) {
@@ -64,7 +64,7 @@ public class D2RQUtil {
 
     /**
      * Extracts the database table name from a tablename.columnname combination.
-     * @param  tablename.columnname combination seperated by a '.'
+     * @param fName tablename.columnname combination seperated by a '.'
      * @return database table name.
      */
     protected static String getTableName(String fName) {
@@ -80,8 +80,6 @@ public class D2RQUtil {
  /**
      * Parses an D2R pattern. Translates the placeholders in an D2R pattern with values from the database.
      * @param  pattern Pattern to be translated.
-     * @param  delininator Deliminator to identifiy placeholders (Standard: @@)
-     * @param  tuple Hashmap with values used for replacement.
      * @return String with placeholders replaced.
      */
     protected static HashSet getColumnsfromPattern(String pattern) {
@@ -109,11 +107,7 @@ public class D2RQUtil {
      */
      public static boolean valueCanFitPattern(String value, String pattern) {
 		 HashMap map = ReverseValueWithPattern(value, pattern);
-         if (map.isEmpty()) {
-            return false;
-         } else {
-            return true;
-         }
+         return !map.isEmpty();
      }
 
     /**
@@ -148,9 +142,8 @@ public class D2RQUtil {
 							// Text in pattern doesn't fit text in value
 							resultMap.clear();
 							return resultMap;
-						} else {
-							valueVarStartPosition = valueEndPosition + patternStartPosition - patternEndPosition;
 						}
+						valueVarStartPosition = valueEndPosition + patternStartPosition - patternEndPosition;
                     } else {
                        // Position in pattern is bigger than value lenth
 							resultMap.clear();

@@ -64,11 +64,7 @@ public class TripleResultSet {
     }
 
     protected boolean hasTripleMakers() {
-       if (tripleMakers.size() > 0) {
-           return true;
-       } else {
-           return false;
-       }
+    		return tripleMakers.size() > 0;
     }
 
     /** Checks if there are more triples. */
@@ -163,7 +159,6 @@ public class TripleResultSet {
     protected void cacheCurrentRow() {
         currentRow = new String[20];
         try {
-			int numCols = resultSet.getMetaData().getColumnCount();
 			for (int i = 1; i <= numCols; i++) {
 				currentRow[i] = resultSet.getString(i);
 			}

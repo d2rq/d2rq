@@ -3,10 +3,7 @@
 */
 package de.fuberlin.wiwiss.d2rq;
 
-import com.hp.hpl.jena.graph.*;
 import java.util.*;
-import java.io.*;
-//import java.sql.*;
 
 /** SQLStatementMakers collect SELECT and WHERE elements and deliver a corresponding SQL statement.
  * They are used within TripleResultSets.

@@ -4,7 +4,6 @@
 package de.fuberlin.wiwiss.d2rq;
 
 import com.hp.hpl.jena.graph.*;
-import com.hp.hpl.jena.rdf.model.AnonId;
 import java.util.*;
 
 /**
@@ -88,7 +87,7 @@ public class ClassMap {
 			 if (uriPattern != null) {
 				// Write pattern column names and values to WHERE clause
 				HashMap columnsWithValues = D2RQUtil.ReverseValueWithPattern(node.getURI(), uriPattern);
-				Iterator colIt = ((Set) columnsWithValues.keySet()).iterator();
+				Iterator colIt = columnsWithValues.keySet().iterator();
 				while (colIt.hasNext()) {
 				   String key = (String) colIt.next();
 				   String resultvalue = (String) columnsWithValues.get(key);
@@ -101,11 +100,11 @@ public class ClassMap {
 				sqlMaker.addWhereClause(whereClause);
 			} else if (bNodeIdColumns != null) {
 				// Write bNode id columns to WHERE clause
-				String bNodeID = ((AnonId) node.getBlankNodeId()).toString();
+				String bNodeID = node.getBlankNodeId().toString();
 				StringTokenizer tokenizer = new StringTokenizer(bNodeID, D2RQ.deliminator);
-                Iterator bNodeColumnsIt = bNodeIdColumns.iterator();
-                // Skip classMap name
-                String classMapName = tokenizer.nextToken();
+				Iterator bNodeColumnsIt = bNodeIdColumns.iterator();
+				// Skip classMap name
+				tokenizer.nextToken();
 				while (bNodeColumnsIt.hasNext()) {
 					String columnName = (String) bNodeColumnsIt.next();
 					String columnValue = tokenizer.nextToken();
@@ -127,26 +126,18 @@ public class ClassMap {
         // Check if bNode could fit
         if (node.isBlank() && bNodeIdColumns != null) {
 
-            String bNodeID = ((AnonId) node.getBlankNodeId()).toString();
+            String bNodeID = node.getBlankNodeId().toString();
             // Check if given bNode was created by D2RQ
 			if (bNodeID.indexOf(D2RQ.deliminator) == -1) {
 					return false;
 			}
 			StringTokenizer tokenizer = new StringTokenizer(bNodeID, D2RQ.deliminator);
 			// Check if given bNode was created by this class map
-			if (!((String) id.toString()).equals(tokenizer.nextToken())){
-				   return false;
-			} else {
-                   return true;
-            }
+			return id.toString().equals(tokenizer.nextToken());
 
-        // Check if URI could fit uri pattern
+		// Check if URI could fit uri pattern
         } else if (node.isURI() && uriPattern != null) {
-             if (D2RQUtil.valueCanFitPattern(node.getURI(), uriPattern)) {
-                return true;
-             } else {
-                return false;
-             }
+            return D2RQUtil.valueCanFitPattern(node.getURI(), uriPattern);
 
         // All URIs could fit the uriColumn
         } else if (node.isURI() && uriColumn != null) {

@@ -28,11 +28,7 @@ public class RDFTypePropertyBridge extends PropertyBridge  {
     /** Checks if a given node could fit the triple object without looking into the database */
     protected boolean nodeCouldFitObject(Node node) {
         if (node.equals(Node.ANY)) return true;
-        if (node.equals(rdfsClass)) {
-			return true;
-        } else {
-            return false;
-        }
+        return node.equals(rdfsClass);
     }
     /** Creates a node maker for the object of this bridge.
       */
