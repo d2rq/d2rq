@@ -1,0 +1,23 @@
+Changes since v0.1
+------------------
+
+* security fix: SQL injection vulnerability fixed
+* bugfix: issue with missing statements when using joins and NULL values
+* improved map consistency checking and better error messages
+* GraphD2RQ and ModelD2RQ can also be initialised from RDF/XML map file
+* GraphD2RQ and ModelD2RQ can also be initialised from Jena map model
+* d2rq:class added; alternative to d2rq:classMap
+* d2rq:property added; alternative to d2rq:propertyBridge
+* d2rq:TranslationTable maps between DB and RDF values
+* d2rq:TranslationTable mappings can be provided in external CSV file
+* d2rq:TranslationTable mappings can be provided by custom Java class
+* d2rq:condition added; allows filtering by SQL expression
+* d2rq:additionalProperty added
+* d2rq:valueContains optimization hint added
+* d2rq:valueMaxLength optimization hint added
+* d2rq:valueRegex optimization hint added
+* logging facility added
+* major speed improvement for queries with with large result sets
+* major speed improvement for maps with URL columns
+* architectural changes for better maintainability
+* many small fixes, improvements, speedups and refactorings
