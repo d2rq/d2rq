@@ -1009,7 +1009,10 @@ db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
   tables and on columns that are not indexed by the database. These are the cases 
   where a well-placed optimization hint can result in an order-of-magnitude improvement 
   for some queries. Don't bother to provide hints for property bridges based on 
-  d2rq:pattern. These can be optimized very well without hints.</p>
+  d2rq:pattern. These can be optimized very well without hints. In general,
+  the biggest payoff is expected for hints on large tables. If you have a few
+  very large tables with non-indexed columns in your database, that's where you
+  should focus your efforts.</p>
 
 <p>Please keep in mind that hint properties are not intended for filtering of 
   unwanted database values. They are only performance hints. Values that do not 
