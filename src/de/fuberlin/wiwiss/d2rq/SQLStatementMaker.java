@@ -139,16 +139,19 @@ class SQLStatementMaker {
      * @param value the value the column must have
      */
 	public void addColumnValue(Column column, String value) {
-	    String databaseColumn=column.getQualifiedName(aliasMap);
-		String whereClause = column.getQualifiedName() + "=" +
-				getQuotedColumnValue(value, this.database.getColumnType(databaseColumn)); 
+		String whereClause = column.getQualifiedName() + "=" + correctlyQuotedColumnValue(column,value); 
 		if (this.sqlWhere.contains(whereClause)) {
 			return;
 		}
 		this.sqlWhere.add(whereClause);
 		referColumn(column);
 	}
-
+	
+	public String correctlyQuotedColumnValue(Column column, String value) {
+	    String databaseColumn=column.getQualifiedName(aliasMap);
+	    return getQuotedColumnValue(value, this.database.getColumnType(databaseColumn));
+	}
+	
 	/**
 	 * Adds multiple WHERE clauses from a map. The map keys are
 	 * {@link Column} instances. The map values are the values

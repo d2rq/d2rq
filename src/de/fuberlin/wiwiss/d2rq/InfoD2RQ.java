@@ -27,6 +27,12 @@ public class InfoD2RQ implements Cloneable {
     		numberOfReturnedFields-=minus.numberOfReturnedFields;
     		timeMillis-=minus.timeMillis;
     }
+    public void div(int n) {
+		numberOfExecutedSQLQueries/=n;
+		numberOfReturnedRows/=n;
+		numberOfReturnedFields/=n;
+		timeMillis/=n; 
+    }
     
     // Creating Instances (convenience methods)
     

@@ -39,11 +39,14 @@ class SQLResultSet {
 		this.columnNameNumberMap = columnNameNumberMap;
     }
 
+	public static Logger logger=Logger.instance();
+	public static Logger separatorLogger=Logger.instance();
+	
     protected void executeSQLQuery() {
-		if (Logger.instance().debugEnabled()) {
-            Logger.instance().debug("--------------------------------------------");
-            Logger.instance().debug("SQL statement executed: " + this.sql);
-            Logger.instance().debug("--------------------------------------------");
+		if (logger.debugEnabled()) {
+		    separatorLogger.debug("--------------------------------------------");
+            logger.debug("SQL statement executed: " + this.sql);
+            separatorLogger.debug("--------------------------------------------");
         }
         try {
         		InfoD2RQ.totalNumberOfExecutedSQLQueries++;
@@ -53,7 +56,7 @@ class SQLResultSet {
 			this.resultSet = stmt.executeQuery(this.sql);
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {
-            Logger.instance().error(ex.getMessage());
+            logger.error(ex.getMessage());
         }
     }
 
@@ -86,7 +89,7 @@ class SQLResultSet {
 			}
 			return result;
 		} catch (SQLException ex) {
-			Logger.instance().error(ex.getMessage());
+			logger.error(ex.getMessage());
 			return null;
 		}
 	}

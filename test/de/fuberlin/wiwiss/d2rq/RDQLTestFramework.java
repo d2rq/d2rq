@@ -1,5 +1,5 @@
 /*
- * $Id: RDQLTestFramework.java,v 1.1 2005/03/07 17:39:53 garbers Exp $
+ * $Id: RDQLTestFramework.java,v 1.2 2005/03/09 18:53:49 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -45,6 +45,15 @@ import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
 public class RDQLTestFramework extends TestFramework {
 	protected ModelD2RQ model;
 	protected Set results;
+	protected String queryString;
+	
+	protected static Logger separator=new Logger();
+	protected static Logger logger=new Logger();
+	protected static Logger performanceLogger=new Logger();
+	protected static Logger rdqlLogger=new Logger();
+	protected static Logger differentLogger=new Logger();
+	protected static Logger differenceLogger=new Logger();
+	protected static Logger rsLogger=new Logger();
 	
 	public RDQLTestFramework(String arg0) {
 		super(arg0);
@@ -53,68 +62,83 @@ public class RDQLTestFramework extends TestFramework {
 	protected void setUp() throws Exception {
 		super.setUp();
 		this.model = new ModelD2RQ(D2RQMap);
+		GraphD2RQ.setUsingD2RQQueryHandler(true);
+		logger.setDebug(false);
+		separator.setDebug(true);
+		differentLogger.setDebug(true);
+		differenceLogger.setDebug(false);
+		performanceLogger.setDebug(true);
+		rdqlLogger.setDebug(false);
+		rsLogger.setDebug(false);
+		SQLResultSet.logger=rsLogger;
+		SQLResultSet.separatorLogger=new Logger(); // silent
 //		this.model.enableDebug();
 	}
 
 	public static boolean compareQueryHandlers=true;
 	
 	public void runTest() throws Throwable {
+	    separator.debug("");
 		if (!compareQueryHandlers) {
-			super.run();
+			super.runTest();
 			return;
 		}		
 		boolean oldState=GraphD2RQ.isUsingD2RQQueryHandler();
 		try {
-			InfoD2RQ startInst, firstInst, simpleHandler, d2rqHandler;
-			startInst=InfoD2RQ.instance();
-			
-			Logger.instance().debug("using SimpleQueryHandler ...");
-			GraphD2RQ.setUsingD2RQQueryHandler(false);
-			super.runTest();
-			Set first=results;
-			firstInst=InfoD2RQ.instance();
-			simpleHandler=firstInst.minus(startInst);
-				
-			Logger.instance().debug("using D2RQQueryHandler ...");
-			GraphD2RQ.setUsingD2RQQueryHandler(true);
-			super.runTest();
-			Set second=results;
-			d2rqHandler=InfoD2RQ.instanceMinus(firstInst);
-			
-			Set firstMaps, secondMaps;
-			firstMaps=resultBindingsToMaps(first);
-			secondMaps=resultBindingsToMaps(second);
-			System.out.println("D2RQQueryHandler vs. SimpleQueryHandler = " + 
-					d2rqHandler.sqlPerformanceString() + " : " + simpleHandler.sqlPerformanceString() +
+		    int configs=2;
+			int nTimes=10;
+
+			InfoD2RQ startInst;
+			InfoD2RQ diffInfo[]=new InfoD2RQ[configs];
+			Set resultSets[]= new HashSet[configs];
+			Set resultMaps[]= new HashSet[configs];
+			String printed[] = new String[configs];
+			String description[]= new String[] { "SimpleQueryHandler", "D2RQQueryHandler"};
+			boolean usingD2RQ[] = new boolean[] {false, true};
+			boolean verbatim[] = new boolean[] {false,true};
+			for (int i=0; i<configs; i++) {
+			    GraphD2RQ.setUsingD2RQQueryHandler(usingD2RQ[i]);
+			    rdqlLogger.setDebug(verbatim[i]);
+			    rsLogger.setDebug(verbatim[i]);
+				logger.debug("using " + description[i] + " ...");
+			    startInst=InfoD2RQ.instance();
+			    for (int j=0; j< nTimes; j++) {
+			        if (j>0) {
+					    rdqlLogger.setDebug(false);
+					    rsLogger.setDebug(false);
+			        }
+			        super.runTest();
+			    }
+				diffInfo[i]=InfoD2RQ.instanceMinus(startInst);
+				diffInfo[i].div(nTimes);
+				resultSets[i]=results;
+				resultMaps[i]=resultBindingsToMaps(results);
+			}
+			// performanceLogger.debug("RDQL-Query: " + queryString);
+			performanceLogger.debug(description[0] + " vs. " + description[1] + " = " + 
+			        diffInfo[0].sqlPerformanceString() + " : " + diffInfo[1].sqlPerformanceString() +
 					" (duration - SQL queries/rows/fields)");
-			if (!firstMaps.equals(secondMaps)) {
-			    System.out.println("D2RQQueryHandler vs. SimpleQueryHandler different results (" +
-			            firstMaps.size() + ":" + secondMaps.size() + ")");
-			    String firstPrinted=printObject(firstMaps);
-			    String secondPrinted=printObject(secondMaps);
-			    if (firstPrinted.equals(secondPrinted)) {
-			        System.out.println("... but printed the same.");
+			if (!resultMaps[0].equals(resultMaps[1])) {
+			    differentLogger.debug(description[0] + " vs. " + description[1] + " different results (" +
+			            resultMaps[0].size() + ":" + resultMaps[1].size() + ")");
+			    differenceLogger.debug("Query: " + queryString);
+			    printed[0]=printObject(resultMaps[0]);
+			    printed[1]=printObject(resultMaps[1]);
+			    if (printed[0].equals(printed[1])) {
+			        differentLogger.debug("... but printed the same.");
 			    } else {
-			        System.out.println("first Result:");
-			        System.out.println(firstPrinted);
-			        System.out.println("----------------");
-			        System.out.println("second Result:");
-			        System.out.println(secondPrinted);
+			        differenceLogger.debug("first Result:");
+			        differenceLogger.debug(printed[0]);
+			        differenceLogger.debug("----------------");
+			        differenceLogger.debug("second Result:");
+			        differenceLogger.debug(printed[1]);
 			    }
 			}
-			assertEquals(firstMaps,secondMaps);
-//			if (firstMap.equals(secondMap)) {
-//				System.out.println("RDQL same : D2RQQueryHandler returns same results as SimpleQueryHandler");
-//			} else {
-//				System.out.println("RDQL different : D2RQQueryHandler returns different results than SimpleQueryHandler");
-//				System.out.println("SimpleQueryHandler-Result:");	
-//				System.out.println(firstMap.toString());					
-//				System.out.println("D2RQQueryHandler-Result:");
-//				System.out.println(secondMap.toString());	
-//			}
+			assertEquals(resultMaps[0],resultMaps[1]);
 		} catch (Exception e) {
 			GraphD2RQ.setUsingD2RQQueryHandler(oldState);
-			System.out.println(e.toString());
+			logger.error(e.toString());
+			throw new RuntimeException(e); 
 		}
 		GraphD2RQ.setUsingD2RQQueryHandler(oldState);
 	}
@@ -177,6 +201,8 @@ public class RDQLTestFramework extends TestFramework {
 	}
 
 	protected void rdql(String rdql) {
+	    rdqlLogger.debug("RDQL-Query: " + rdql);
+	    queryString=rdql;
 		this.results = new HashSet();
 		Query query = new Query(rdql);
 		query.setSource(this.model);
@@ -219,7 +245,11 @@ public class RDQLTestFramework extends TestFramework {
 			it.next();
 			String var=it.varName();
 			Object val=it.value();
-			m.put(var,val.toString());
+			String strVal=val.toString();
+			int size=strVal.length();
+			if (size>250)
+			    logger.debug("Big string (" + size + ") in resultBinding:\n" + strVal);
+			m.put(var,strVal);
 		}
 		return m;
 	}
@@ -266,12 +296,12 @@ public class RDQLTestFramework extends TestFramework {
 		Iterator it = this.results.iterator();
 		int count = 1;
 		while (it.hasNext()) {
-			System.out.println("Result binding " + count + ":");
+			logger.debug("Result binding " + count + ":");
 			ResultBinding binding = (ResultBinding) it.next();
 			ResultBindingIterator it2 = binding.iterator();
 			while (it2.hasNext()) {
 				it2.next();
-				System.out.println("    " + it2.varName() + " => " + it2.value());
+				logger.debug("    " + it2.varName() + " => " + it2.value());
 			}
 			count++;
 		}

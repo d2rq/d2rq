@@ -1,5 +1,5 @@
 /*
- * $Id: Logger.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: Logger.java,v 1.3 2005/03/09 18:53:46 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -17,7 +17,7 @@ package de.fuberlin.wiwiss.d2rq;
 class Logger {
 	private static Logger instance = null;
 	private boolean debug = false;
-
+	
 	/**
 	 * Returns an instance of this class.
 	 * @return a Logger

@@ -14,7 +14,7 @@ class ConstraintHandler {
     public boolean possible=true;
     VariableBindings bindings;
     TripleQuery[] conjunction;
-    Map variableToConstraint=new HashMap();
+    Map variableToConstraint=new HashMap(); // Node (variable) -> NodeConstraint
     
     public void setVariableBindings(VariableBindings bindings) {
         this.bindings=bindings;
@@ -26,7 +26,7 @@ class ConstraintHandler {
     public void makeConstraints() {
         Iterator it=bindings.sharedBindVariables.iterator();
         while (possible && it.hasNext()) {
-            Object node=it.next();
+            Node node=(Node)it.next();
             Set varIndices=(Set) bindings.bindVariableToShared.get(node);
             NodeConstraint c=new NodeConstraint();
             do {
@@ -39,13 +39,18 @@ class ConstraintHandler {
                     n.matchConstraint(c);
                     possible = c.possible;
                 }
-            } while (c.infoAdded);
+            } while (possible && c.infoAdded);
+            variableToConstraint.put(node,c);
         }
     }
     
     
     public void addConstraintsToSQL(SQLStatementMaker sql) {
-      // TODO   
+        Iterator it=variableToConstraint.values().iterator();
+        while (it.hasNext()) {
+            NodeConstraint c=(NodeConstraint)it.next();
+            c.addConstraintsToSQL(sql);
+        }
     }
     
 }

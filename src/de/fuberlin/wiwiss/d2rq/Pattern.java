@@ -1,5 +1,5 @@
 /*
- * $Id: Pattern.java,v 1.5 2005/03/07 10:07:53 garbers Exp $
+ * $Id: Pattern.java,v 1.6 2005/03/09 18:53:46 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -39,6 +39,27 @@ class Pattern implements ValueSource, Prefixable {
 			columnsAsSet=new HashSet(columns);
 			pattern=reconstructPattern();
 		}
+	}
+	public void matchPatternIntoNodeConstraint(Pattern other, NodeConstraint c) {
+	    boolean startOK=other.firstLiteralPart.startsWith(this.firstLiteralPart) || 
+  	  		this.firstLiteralPart.startsWith(other.firstLiteralPart);
+	    if (!startOK) {
+	        c.possible=false;
+	        return;
+	    }
+	    String thisLastLiteral=(String)literalParts.get(literalParts.size()-1);
+	    String otherLastLiteral=(String)other.literalParts.get(other.literalParts.size()-1);
+	    boolean endOK=otherLastLiteral.endsWith(thisLastLiteral) || 
+	    	thisLastLiteral.endsWith(otherLastLiteral);
+	    if (!endOK) {
+	        c.possible=false;
+	        return;
+	    }
+	    if ((columns.size()==1) && (other.columns.size()==1) &&
+	            this.firstLiteralPart.equals(other.firstLiteralPart) &&
+	            thisLastLiteral.equals(otherLastLiteral)) {
+	        c.addEqualColumn((Column)columns.get(0),(Column)other.columns.get(0));
+	    }
 	}
 
 	/**

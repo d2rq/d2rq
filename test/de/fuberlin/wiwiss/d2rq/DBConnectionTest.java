@@ -70,7 +70,7 @@ public class DBConnectionTest extends TestCase {
 			assertEquals(result, "1");
 		}
 	}
-
+	
 	private static String performQuery(Connection c, String theQuery) {
 		String query_results = "";
 		Statement s;
@@ -92,16 +92,12 @@ public class DBConnectionTest extends TestCase {
 		return query_results;
 	}
 
-	// without declarations in 
-	public void testManuallyConfiguredConnection() {
-		int configure = 1;
+	public Connection manuallyConfiguredConnection() {
+		int configure = 2;
 		String driverClass;
 		String url;
 		String name;
 		String pass;
-		// String query = simplestQuery;
-		// String query = "select PaperID from Papers";
-		String query = "SELECT Papers.PaperID, Papers.Year FROM Papers WHERE Papers.Year=2002 AND Papers.PaperID = 2 AND Papers.Publish = 1;";
 
 		if (configure == 1) {
 			driverClass = "com.mysql.jdbc.Driver";
@@ -114,7 +110,7 @@ public class DBConnectionTest extends TestCase {
 			name = "x";
 			pass = "y";
 		} else
-			return;
+			return null;
 
 		Connection c=null;
 		try {
@@ -124,12 +120,37 @@ public class DBConnectionTest extends TestCase {
 				c = DriverManager.getConnection(url, name, pass);
 			else if (configure == 2)
 				c = DriverManager.getConnection(url);
-			String query_results = performQuery(c, query);
-			assertEquals(query_results,"2 2002");
-			c.close();
+			return c;
 		} //end try
 		catch (Exception x) {
 			x.printStackTrace();
 		}
+		return null;
 	}
+	
+	// without declarations in 
+	public void testManuallyConfiguredConnection() throws SQLException {
+	    Connection c=manuallyConfiguredConnection();
+		// String query = simplestQuery;
+		// String query = "select PaperID from Papers";
+		String query = "SELECT Papers.PaperID, Papers.Year FROM Papers WHERE Papers.Year=2002 AND Papers.PaperID = 2 AND Papers.Publish = 1;";
+    
+		String query_results = performQuery(c, query);
+		System.out.println(query_results);
+		c.close();
+		assertEquals(query_results,"2 2002");
+	}
+	
+	public void testDistinct() throws SQLException {
+	    // there seems to be a problem with MSAccess databases
+	    // when using the DISTINCT keyword, Strings are truncated to 256 chars
+	    Connection c=manuallyConfiguredConnection();
+		String nonDistinct = "SELECT T0_Papers.Abstract FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
+		String distinct = "SELECT DISTINCT T0_Papers.Abstract FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
+		String distinctResult = performQuery(c, distinct);
+		String nonDistinctResult = performQuery(c, nonDistinct);
+		c.close();
+		assertEquals(distinctResult,nonDistinctResult);
+	}
+	
 }
