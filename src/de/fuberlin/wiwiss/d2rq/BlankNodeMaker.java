@@ -11,9 +11,12 @@ import com.hp.hpl.jena.rdf.model.AnonId;
 /**
  * BlankNodeMakers transform attribute values from a result set into blank nodes.
  *
- * <BR>History: 06-21-2004   : Initial version of this class.
+ * <p>History:<br>
+ * 06-21-2004: Initial version of this class.<br>
+ * 
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
+ * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class BlankNodeMaker implements NodeMaker {
 	private ValueSource valueSource;

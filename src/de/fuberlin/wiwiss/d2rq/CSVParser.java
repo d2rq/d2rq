@@ -1,5 +1,5 @@
 /*
- * $Id: CSVParser.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: CSVParser.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -19,7 +19,11 @@ import java.util.Map;
  * file must contain exactly two columns. Keys come from the
  * first, values from the second.
  *
+ * <p>History:<br>
+ * 08-03-2004: Initial version of this class.<br>
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class CSVParser {
 	private BufferedReader reader;

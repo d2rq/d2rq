@@ -1,5 +1,5 @@
 /*
- * $Id: MaxLengthRestriction.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: MaxLengthRestriction.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -11,7 +11,11 @@ import java.util.Set;
  * length of its values. This is useful because the query engine can exclude sources
  * if a value is longer.
  *
+ * <p>History:<br>
+ * 08-03-2004: Initial version of this class.<br>
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class MaxLengthRestriction implements ValueSource {
 	private ValueSource valueSource;

@@ -1,5 +1,5 @@
 /*
- * $Id: ValueSource.java,v 1.2 2004/08/04 19:55:33 cyganiak Exp $
+ * $Id: ValueSource.java,v 1.3 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -28,8 +28,8 @@ import java.util.Set;
  * <p>
  * TODO: Better name for ValueSource: ValueSetDescription?
  * 
- * <p>History:
- * <br>2004-08-02: Initial version.
+ * <p>History:<br>
+ * 2004-08-02: Initial version.<br>
  * 
  * @author Richard Cyganiak <richard@cyganiak.de>
  */

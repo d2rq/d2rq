@@ -1,5 +1,5 @@
 /*
- * $Id: BlankNodeIdentifier.java,v 1.2 2004/08/03 12:44:33 cyganiak Exp $
+ * $Id: BlankNodeIdentifier.java,v 1.3 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -16,11 +16,15 @@ import java.util.StringTokenizer;
  * <p>
  * (Note: The implementation makes some assumptions about the Column
  * class to keep the code simple and fast. This means BlankNodeIdentifier
- * may not work with some hypothetical subclasses of Column.)
+ * might not work with some hypothetical subclasses of Column.)
  *
  * TODO: Write tests for matches, extractColumnValues, getValue
  * 
+ * <p>History:<br>
+ * 08-03-2004: Initial version of this class.<br>
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class BlankNodeIdentifier implements ValueSource {
 	private String classMapID;

@@ -1,5 +1,5 @@
 /*
- * $Id: QueryCombiner.java,v 1.3 2004/08/05 08:10:53 cyganiak Exp $
+ * $Id: QueryCombiner.java,v 1.4 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -15,7 +15,11 @@ import java.util.List;
  * possible. After adding all queries, a {@link D2RQResultIterator}
  * can be obtained from the {@link #getResultIterator} method.
  *
+ * <p>History:<br>
+ * 08-03-2004: Initial version of this class.<br>
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class QueryCombiner {
 	private Collection compatibleQueries = new ArrayList(10);

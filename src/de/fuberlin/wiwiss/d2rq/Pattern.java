@@ -1,5 +1,5 @@
 /*
- * $Id: Pattern.java,v 1.2 2004/08/03 12:44:33 cyganiak Exp $
+ * $Id: Pattern.java,v 1.3 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -18,7 +18,11 @@ import java.util.Set;
  * class to keep the code simple and fast. This means Pattern may not
  * work with some hypothetical subclasses of Column.)
  * 
+ * <p>History:<br>
+ * 08-03-2004: Initial version of this class.<br>
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class Pattern implements ValueSource {
 	private String pattern;

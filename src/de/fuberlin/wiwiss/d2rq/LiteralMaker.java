@@ -12,9 +12,13 @@ import com.hp.hpl.jena.datatypes.*;
 /**
  * LiteralMakers transform attribute values from a result set into literals.
  *
- * <BR>History: 06-21-2004   : Initial version of this class.
+ * <p>History:<br>
+ * 06-21-2004: Initial version of this class.<br>
+ * 08-03-2004: Extended with couldFit, getColumns, getColumnValues
+ * 
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
+ * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class LiteralMaker implements NodeMaker {
 	private ValueSource valueSource;

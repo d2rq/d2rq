@@ -7,12 +7,17 @@ import com.hp.hpl.jena.graph.*;
 import java.sql.*;
 import java.util.*;
 
-/** Representation of a d2rq:Database from the mapping file.
+/**
+ * Representation of a d2rq:Database from the mapping file.
  * It contains the connection information for the database and the column types of all database columns used.
  *
- * <BR>History: 06-03-2004   : Initial version of this class.
+ * <p>History:<br>
+ * 06-03-2004: Initial version of this class.<br>
+ * 08-03-2004: Added some column type logic.<br>
+ * 
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
+ * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class Database {
 

@@ -29,11 +29,13 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
  * ontologies and relational data models. More information about D2RQ is found
  * at: http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/
  * 
- * <BR>
- * History: 06-06-2004 : Initial version of this class.
+ * <p>History:<br>
+ * 06-06-2004: Initial version of this class.<br>
+ * 08-03-2004: New query algorithm, moved map building to MapParser
  * 
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
+ * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  * 
  * @see de.fuberlin.wiwiss.d2rq.D2RQCapabilities
  */

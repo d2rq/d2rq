@@ -40,8 +40,8 @@ import com.hp.hpl.jena.graph.Node;
  * TODO: Better name for NodeMaker: NodeSetDescription?
  * 
  * <p>History:<br>
- * 06-16-2004: Initial version of this class.
- * 08-04-2004: Added couldFit, getColumns and getColumnValues
+ * 06-16-2004: Initial version.<br>
+ * 08-04-2004: Added couldFit, getColumns and getColumnValues<br>
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak <richard@cyganiak.de>

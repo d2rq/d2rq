@@ -1,13 +1,18 @@
 /*
- * $Id: Logger.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: Logger.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
 /**
  * Logging class for handling debug information, warnings and errors. Implemented
- * as a singleton.
+ * as a singleton. The motivation for this class is to limit the impact if we
+ * decide to change to some "real" logging facility like log4j or java.util.logging.
  *
+ * <p>History:<br>
+ * 08-03-2004: Initial version of this class.<br>
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class Logger {
 	private static Logger instance = null;

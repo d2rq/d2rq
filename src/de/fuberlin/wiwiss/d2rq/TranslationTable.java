@@ -1,5 +1,5 @@
 /*
- * $Id: TranslationTable.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: TranslationTable.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -24,7 +24,11 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * TODO: The two cases (addTranslation calls and setTranslator) should
  * probalby be in separate classes.
  * 
+ * <p>History:<br>
+ * 08-03-2004: Initial version.<br>
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class TranslationTable implements Translator {
 	private Map db2rdf = new HashMap();

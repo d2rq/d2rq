@@ -14,10 +14,16 @@ import java.util.ArrayList;
  * which says:
  * "You may use this code for any purpose, as long as you leave 
  * the copyright notice and book citation attached." I have done so.
+ * 
+ * <p>History:<br>
+ * 08-03-2004: Lifted from somewhere on the Web<br>
+
  * @author Brian W. Kernighan and Rob Pike (C++ original)
  * @author Ian F. Darwin (translation into Java and removal of I/O)
  * @author Ben Ballard (rewrote advQuoted to handle '""' and for readability)
  * @author Don Brown (wanted to return a String array instead of Iterator)
+ * @author Richard Cyganiak <richard@cyganiak.de> (adapted to local coding style)
+ * @version V0.2
  */
 class CSV {      
 

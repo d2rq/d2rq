@@ -7,12 +7,17 @@ import com.hp.hpl.jena.graph.*;
 import java.sql.*;
 import java.util.*;
 
-/** The TripleResultSet contains the result set from one SQL query and transforms it into triples.
+/**
+ * Contains the result set from one SQL query and transforms it into triples.
  * A triple is produced for TripleMaker in TripleMaker and each row in the result set.
  *
- * <BR>History: 06-06-2004   : Initial version of this class.
+ * <p>History:<br>
+ * 06-06-2004: Initial version of this class.<br>
+ * 08-03-2004: Almost complete rewrite to make logic more explicit.<br>
+ * 
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
+ * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class TripleResultSet {
 

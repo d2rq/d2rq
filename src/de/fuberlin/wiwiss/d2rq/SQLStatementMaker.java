@@ -9,12 +9,17 @@ import java.util.regex.Pattern;
 
 import com.hp.hpl.jena.graph.Node;
 
-/** SQLStatementMakers collect SELECT and WHERE elements and deliver a corresponding SQL statement.
- * They are used within TripleResultSets.
+/**
+ * Collects parts of a SELECT query and delivers a corresponding SQL statement.
+ * Used within TripleResultSets.
  *
- * <BR>History: 06-07-2004   : Initial version of this class.
+ * <p>History:<br>
+ * 06-07-2004: Initial version of this class.<br>
+ * 08-03-2004: Higher-level operations added (addColumnValues etc.)
+ * 
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
+ * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 
 class SQLStatementMaker {

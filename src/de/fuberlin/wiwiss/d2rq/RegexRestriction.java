@@ -1,5 +1,5 @@
 /*
- * $Id: RegexRestriction.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: RegexRestriction.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -12,7 +12,11 @@ import java.util.regex.Pattern;
  * that all its values match a certain regular expression. This is useful because the
  * query engine can exclude sources if a value doesn't match the expression.
  *
+ * <p>History:<br>
+ * 08-03-2004: Initial version of this class.<br>
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class RegexRestriction implements ValueSource {
 	private ValueSource valueSource;

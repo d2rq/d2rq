@@ -13,8 +13,13 @@ import com.hp.hpl.jena.graph.*;
  * The D2RQResultIterator iterates over all contained ResultTripleSets.
  *
  * <BR>History: 06-21-2004   : Initial version of this class.
- * @author Chris Bizer chris@bizer.de
  * @version V0.1
+ * <p>History:<br>
+ * 06-21-2004: Initial version of this class.<br>
+ * 
+ * @author Chris Bizer chris@bizer.de
+ * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  * @see de.fuberlin.wiwiss.d2rq.TripleResultSet

@@ -9,9 +9,12 @@ import com.hp.hpl.jena.graph.*;
 /**
  * D2RQ vocabulary terms as static objects.
  *
- * <BR>History: 06-03-2004   : Initial version of this class.
+ * <p>History:<br>
+ * 06-03-2004: Initial version of this class.<br>
+ * 08-03-2004: Added new terms for version 0.2<br>
+ * 
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
+ * @version V0.2
  */
 class D2RQ {
 

@@ -1,5 +1,5 @@
 /*
- * $Id: TripleQuery.java,v 1.4 2004/08/09 19:39:45 cyganiak Exp $
+ * $Id: TripleQuery.java,v 1.5 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -29,7 +29,11 @@ import com.hp.hpl.jena.graph.Triple;
  *       the wrong place; especially {@link #getReplacedColumns()}
  *       seems awkward
  * 
+ * <p>History:<br>
+ * 08-03-2004: Initial version of this class.<br>
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class TripleQuery {
 	private PropertyBridge bridge;

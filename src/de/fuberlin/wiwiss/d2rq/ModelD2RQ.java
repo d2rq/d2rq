@@ -8,16 +8,21 @@ import com.hp.hpl.jena.rdf.model.impl.*;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.enhanced.*;
 
-/** A D2RQ read-only Jena model backed by a non-RDF database.
-    * 
-    * D2RQ is a declarative mapping language for describing mappings between ontologies and relational data models.
-    * More information about D2RQ is found at: http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/
-    * 
-    * <BR>History: 06-14-2004   : Initial version of this class.
-    * @author Chris Bizer chris@bizer.de
-    * @version V0.1
-    *
-    * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
+/**
+ * A D2RQ read-only Jena model backed by a non-RDF database.
+ *
+ * D2RQ is a declarative mapping language for describing mappings between ontologies and relational data models.
+ * More information about D2RQ is found at: http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/
+ *
+ * <p>History:<br>
+ * 06-14-2004: Initial version of this class.<br>
+ * 08-03-2004: enableDebug(), new constructors
+ * 
+ * @author Chris Bizer chris@bizer.de
+ * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
+ *
+ * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */
 public class ModelD2RQ extends ModelCom implements Model {
 

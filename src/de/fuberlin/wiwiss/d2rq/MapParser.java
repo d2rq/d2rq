@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.7 2004/08/09 19:39:45 cyganiak Exp $
+ * $Id: MapParser.java,v 1.8 2004/08/09 20:16:52 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -25,9 +25,13 @@ import com.hp.hpl.jena.vocabulary.RDF;
 /**
  * Creates D2RQ domain classes (like {@link PropertyBridge},
  * {@link TranslationTable} from a Jena model representation
- * of a D2RQ mapping file.
+ * of a D2RQ mapping file. Checks the map for consistency.
  *
+ * <p>History:<br>
+ * 08-03-2004: Initial version of this class.<br>
+ * 
  * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class MapParser {
 	private Model model;

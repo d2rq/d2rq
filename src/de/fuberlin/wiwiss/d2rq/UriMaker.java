@@ -10,12 +10,14 @@ import com.hp.hpl.jena.graph.*;
 /**
  * UriMakers transform attribute values from a result set into URIrefs.
  * They are used within TripleMakers.
- * A node can be created from:
  *
- * <BR>History: 06-21-2004   : Initial version of this class.
+ * <p>History:<br>
+ * 06-21-2004: Initial version of this class.<br>
+ * 08-03-2004: added couldFit, getColumns, getColumnValues
+ * 
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
- *
+ * @author Richard Cyganiak <richard@cyganiak.de>
+ * @version V0.2
  */
 class UriMaker implements NodeMaker {
 	private ValueSource valueSource;
