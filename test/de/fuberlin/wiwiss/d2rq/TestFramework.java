@@ -1,6 +1,7 @@
 /*
- * $Id: TestFramework.java,v 1.1 2005/03/07 17:39:54 garbers Exp $
- */
+  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
+
 package de.fuberlin.wiwiss.d2rq;
 
 import junit.framework.TestCase;

@@ -1,6 +1,7 @@
 /*
- * $Id: RDQLTestFramework.java,v 1.2 2005/03/09 18:53:49 garbers Exp $
- */
+  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
+
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.ArrayList;
