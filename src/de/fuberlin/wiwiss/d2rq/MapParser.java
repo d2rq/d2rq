@@ -1,11 +1,12 @@
 /*
- * $Id: MapParser.java,v 1.2 2004/08/02 23:13:59 cyganiak Exp $
+ * $Id: MapParser.java,v 1.3 2004/08/03 17:19:04 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -153,6 +154,7 @@ class MapParser {
 					" needs a d2rq:uriColumn, d2rq:uriPattern or d2rq:bNodeIdColumns");
 			return;
 		}
+		assertHasColumnTypes(resourceMaker, db);
 		this.classMaps.put(node, resourceMaker);
 		this.resourcesDatabasesMap.put(resourceMaker, db);
 		if (pattern != null) {
@@ -162,6 +164,14 @@ class MapParser {
 			this.columnNodeMakers.add(resourceMaker);
 		}
 		this.resourcesConditionsMap.put(resourceMaker, findLiterals(node, D2RQ.condition));
+	}
+
+	private void assertHasColumnTypes(NodeMaker nodeMaker, Database db) {
+		Iterator it = nodeMaker.getColumns().iterator();
+		while (it.hasNext()) {
+			Column column = (Column) it.next();
+			db.assertHasType(column);			
+		}
 	}
 
 	TranslationTable getTranslationTable(Node node) {
@@ -242,6 +252,9 @@ class MapParser {
 			valueSource = new Pattern(pattern);
 		}
 		Set joins = Join.buildJoins(findLiterals(node, D2RQ.join));
+		if (!joins.isEmpty()) {
+			inferColumnTypesFromJoins(joins, resourceMaker);
+		}
 		String valueRegex = findZeroOrOneLiteral(node, D2RQ.valueRegex);
 		if (valueRegex != null) {
 			valueSource = new RegexRestriction(valueSource, valueRegex);
@@ -306,6 +319,7 @@ class MapParser {
 					" must be either d2rq:DatatypePropertyBridge or d2rq:ObjectPropertyBridge");
 			return;
 		}
+		assertHasColumnTypes(objectMaker, getDatabase(resourceMaker));
 		PropertyBridge bridge = new PropertyBridge(node, property, resourceMaker, objectMaker, getDatabase(resourceMaker), joins);
 		this.propertyBridges.put(node, bridge);
 		if (pattern != null) {
@@ -322,6 +336,14 @@ class MapParser {
 		bridge.setURIMatchPolicy(policy);
 		bridge.addConditions(findLiterals(node, D2RQ.condition));
 		bridge.addConditions((Set) this.resourcesConditionsMap.get(resourceMaker));
+	}
+
+	private void inferColumnTypesFromJoins(Collection joins, NodeMaker resourceMaker) {
+		Iterator it = joins.iterator();
+		while (it.hasNext()) {
+			Join join = (Join) it.next();
+			getDatabase(resourceMaker).inferColumnTypes(join);
+		}
 	}
 
 	private Database getDatabase(NodeMaker resourceMaker) {

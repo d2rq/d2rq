@@ -41,6 +41,30 @@ class Database {
     }
 
     /**
+     * Infers additional type information for columns used in a join
+     * by assuming that two joined columns have the same type.
+     * @param join try to infer column types based on this join
+     */
+	public void inferColumnTypes(Join join) {
+		Iterator it = join.getFirstColumns().iterator();
+		while (it.hasNext()) {
+			Column column = (Column) it.next();
+			inferColumnTypes(column.getQualifiedName(),
+					join.getOtherSide(column).getQualifiedName());
+		}
+	}
+
+	private void inferColumnTypes(String col1, String col2) {
+		if (this.columnTypes.containsKey(col1)) {
+			if (!this.columnTypes.containsKey(col2)) {
+				this.columnTypes.put(col2, this.columnTypes.get(col1));
+			}
+		} else if (this.columnTypes.containsKey(col2)) {
+			this.columnTypes.put(col1, this.columnTypes.get(col2));
+		}
+	}
+
+    /**
      * Returns a connection to this database.
      * @return connection
      */
@@ -97,12 +121,18 @@ class Database {
      * @return Node columnType D2RQ.textColumn or D2RQ.numericColumn or D2RQ.dateColumn
      */
     public Node getColumnType(Column column) {
-		Node type = (Node) this.columnTypes.get(column.getQualifiedName());
-//		if (type == null) {
-//			Logger.instance().warning("The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
-//		}
-		return type;
+		return (Node) this.columnTypes.get(column.getQualifiedName());
 	}
+
+    /**
+     * Raises a D2RQ error if there's no type information for the column.
+     * @param column a database column
+     */
+	public void assertHasType(Column column) {
+		if (getColumnType(column) == null) {
+			Logger.instance().error("The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
+		}
+    }
 
     private void connectToDatabase() {
        try {
