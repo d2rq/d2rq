@@ -190,9 +190,11 @@ P.footer {
     <DD><A 
   href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/</A>
 <DT> 
-  <DT>Author: 
+  <DT>Authors: 
     <DD><a href="http://www.wiwiss.fu-berlin.de/suhl/ueber_uns/team/chris_bizer.htm" target="_blank">Chris 
       Bizer</a> (Freie Universit&auml;t Berlin, Germany) 
+    <DD>  
+    <DD><a href="http://richard.cyganiak.de/">Richard Cyganiak</a> (Freie Universit&auml;t Berlin, Germany) 
     <DD>  
   <DT>  
 </DL>
@@ -220,7 +222,7 @@ P.footer {
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.3. <a href="#propertybridge">d2rq:PropertyBridge</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.4. <a href="#additionalproperty">d2rq:AdditionalProperty</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.5. <a href="#translationtable">d2rq:TranslationTable</a> 
-    <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.6 <a href="#condtional">Conditional Mappings</a>
+    <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.6 <a href="#conditional">Conditional Mappings</a>
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.7 <a href="#hint">Performance Optimization using 
       Hint Properties</a>
     <LI>4. <a href="#usingD2RQ">Using D2RQ within Jena</a> 
@@ -324,7 +326,7 @@ P.footer {
 # Other namespaces
 @prefix rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .
 @prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .
-@prefix dtype: &lt;http://www.w3.org/2001/XMLSchema#&gt; . 
+@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; . 
 
 # -----------------------------------------------
 # Database
@@ -353,13 +355,13 @@ db1:eventTitle rdf:type d2rq:DatatypePropertyBridge ;
             d2rq:property :eventTitle ;
             d2rq:column &quot;Conferences.Name&quot; ;
             d2rq:belongsToClassMap db1:Conference ;
-            d2rq:datatype dtype:string .
+            d2rq:datatype xsd:string .
 
 db1:location rdf:type d2rq:DatatypePropertyBridge ;
             d2rq:property :location ;
             d2rq:column &quot;Conferences.Location&quot; ; 
             d2rq:belongsToClassMap db1:Conference ;
-            d2rq:datatype dtype:string . 
+            d2rq:datatype xsd:string . 
 </pre>
   </DIV>
 <P>The D2RQ language constructs are described in detail below:</P>
@@ -731,7 +733,7 @@ db1:authorNameBridge rdf:type d2rq:DatatypePropertyBridge ;
             d2rq:column &quot;Persons.Name&quot;;
             d2rq:join &quot;Papers.PaperID = Rel_Person_Paper.PaperID&quot; ;
             d2rq:join &quot;Rel_Person_Paper.PersonID = Persons.PerID&quot; ;
-            d2rq:datatype dtype:string .
+            d2rq:datatype xsd:string .
 </DIV>
 <p>This property bridge adds the names of authors to papers. 
   If a paper has several authors, then several authorName properties are added. 
@@ -913,13 +915,135 @@ db1:ColorTable rdf:type d2rq:TranslationTable;
   </tr>
 </table>
 <p>&nbsp;</p>
-<h2><a name="&lt;/tt&gt;" id="&lt;/tt&gt;"></a>3.6 Conditional Mappings</h2>
-<p>You can ..... <font color="#FF0000"><strong>Todo zwei Beispiele, eins auf ClassMap 
-  und eins auf PropertyBridge Ebene</strong></font></p>
+<h2><a name="conditional" id="conditional"></a>3.6 Conditional Mappings</h2>
+<p>Sometimes you have to filter your data before publishing it to RDF. Parts
+  might be confidential, or might not match the semantics of the RDF vocabulary
+  that you use. These cases are easy to deal with if those parts are
+  in their own tables and columns. Just don't write class maps and property bridges
+  for them. But what if some <em>rows</em> are to be published, and some not?</p>
+
+<p>That's where <strong>d2rq:condition</strong> is useful. You can use this property
+  on class maps and property bridges. The value of the property is an SQL WHERE
+  clause. If the condition evaluates to FALSE for a database row, then no triples
+  will be generated from that row.</p>
+
+<p><strong>Example: Using d2rq:condition on a d2rq:ClassMap</strong></p>
+<div class="trigOuter trigInner">
+  <pre>db1:InProceedings rdf:type d2rq:ClassMap;
+            d2rq:class :InProceedings;
+            d2rq:uriPattern "http://www.conference.org/conf02004/paper#Paper@@Papers.PaperID@@";
+            d2rq:condition "Papers.Publish = 1";
+            d2rq:dataStorage db1:Database1.</pre>
+</div>
+<p>Only those papers with a value of 1 in the Papers.Publish column will be
+accessible in the virtual RDF graph. All other papers are ignored, as if
+their rows were not present in the Papers table.
+
+<p><strong>Example: Filtering zero-length strings</strong></p>
+<p>Usually, the special value NULL is used in a database to indicate that some
+  field has no value, or that the value is unknown. In some databases, however,
+  a zero-length string ("") is
+  used instead. D2RQ is smart enough not to generate RDF statements from
+  NULL values, but it doesn't recognize zero-length strings and will generate
+  statements like <tt>:Person123 :firstName "".</tt> if the person's first name
+  is not known.</p>
+<p>To suppress these statements, a d2rq:condition can be added to the property
+  bridge:</p>
+<div class="trigOuter trigInner">
+  <pre>db1:PersonsClassFirstName rdf:type d2rq:DatatypePropertyBridge;
+            d2rq:property :firstName;
+            d2rq:column "Persons.FirstName";
+            d2rq:belongsToClassMap db1:PersonsClassMap;
+            d2rq:condition "Persons.FirstName <> ''".</pre>
+</div>
+
+<p><strong>Example: Relationship type codes</strong></p>
+<p>Imagine a table Rel_Paper_Topic that associates rows from a Papers table
+  with rows from a Topics table. The Rel_Paper_Topic table contains a
+  PaperID column to reference the papers, a TopicID to reference the topics,
+  and a RelationshipType column which contains 1 if the topic is a primary
+  topic of the paper, and 2 if it is a secondary topic.</p>
+<p>For primary topic relationships, the :primaryTopic property shall be used,
+  and for others the :secondaryTopic property.</p>
+<p>We can build a map for this scenario by creating two property bridges.
+  One for :primaryTopic, one for :secondaryTopic. We add a d2rq:condition
+  to both bridges to suppress those statements where the RelationshipType
+  column doesn't have the correct value.</p>
+<div class="trigOuter trigInner">
+  <pre>db1:primaryTopic rdf:type d2rq:ObjectPropertyBridge;
+            d2rq:belongsToClassMap db1:InProceedings;
+            d2rq:property :primaryTopic;
+            d2rq:refersToClassMap db1:Topic;
+            d2rq:join "Papers.PaperID = Rel_Paper_Topic.PaperID";
+            d2rq:join "Rel_Paper_Topic.TopicID = Topics.TopicID";
+            d2rq:condition "Rel_Paper_Topic.RelationType = 1".
+
+db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
+            d2rq:belongsToClassMap db1:InProceedings;
+            d2rq:property :secondaryTopic;
+            d2rq:refersToClassMap db1:Topic;
+            d2rq:join "Papers.PaperID = Rel_Paper_Topic.PaperID";
+            d2rq:join "Rel_Paper_Topic.TopicID = Topics.TopicID";
+            d2rq:condition "Rel_Paper_Topic.RelationType = 2".</pre>
+</div>
 <p>&nbsp;</p>
+
 <h2><a name="hint" id="hint"></a>3.7 Performance Optimization using Hint Properties</h2>
-<p>You can ..... <font color="#FF0000"><strong>Todo valueRegex, valueMaxLenght 
-  valueContains beschreiben</strong></font></p>
+<p>This section covers some properties that can be added to d2rq:PropertyBridge instances
+  to speed up queries: d2rq:valueMaxLength, d2rq:valueRegex and d2rq:valueContains.</p>
+
+<p><strong>Example: Providing a maximum length</strong></p>
+<div class="trigOuter trigInner">
+  <pre>db1:PersonsClassFirstName rdf:type d2rq:DatatypePropertyBridge;
+            d2rq:property :firstName;
+            d2rq:column "Persons.FirstName";
+            d2rq:belongsToClassMap db1:PersonsClassMap;
+            d2rq:valueMaxLength "15".</pre>
+</div>
+<p>Let us assume that the database field Persons.FirstName was limited to 15 characters
+  by the database schema designer. The d2rq:valueMaxLength property can be used to tell
+  D2RQ about that restriction. The statement asserts that no value in that column is
+  longer than 15 characters.
+
+<p><strong>Example: Providing a regular expression</strong></p>
+<div class="trigOuter trigInner">
+  <pre>db1:inProceedingsYear rdf:type d2rq:DatatypePropertyBridge;
+            d2rq:property :year;
+            d2rq:column "Papers.Year";
+            d2rq:belongsToClassMap db1:InProceedings;
+            d2rq:datatype xsd:gYear;
+            d2rq:valueRegex "^[0-9]{4}$".</pre>
+</div>
+<p>Here, the d2rq:valueRegex property is used to provide a
+  <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regular
+  expression</a> for the Papers.Year column. The statement asserts that all values
+  match the regular expression (or are NULL). The expression <tt>^[0-9]{4}$</tt> matches
+  every four-digit number.</p>
+
+<p>If you don't want to use the full regular expression machinery, you can use
+  d2rq:valueContains to assert that all values generated by the property bridge contain
+  a certain phrase.</p>
+
+<p>If you provide these hints, you help D2RQ to execute queries faster. In the example
+  above, if a query searches for a literal that is 20 characters long, D2RQ knows that
+  it doesn't have to look in the Persons.FirstName column because all of its values are
+  shorter than 20 characters.</p>
+
+<p>You can get the largest gain by providing hints for property bridges based
+  on d2rq:column whose values are shorter than the average string in your database,
+  or whose values are all matched by a fairly specific regular expression. You should
+  focus your efforts on columns in the largest tables, and on columns that have no
+  database index structure. These are the cases where a well-placed optimization hint
+  can result in an order-of-magnitude improvement for some queries. Don't bother to provide
+  hints for property bridges based on d2rq:pattern. These can be optimized very well
+  without hints.</p>
+
+<p>Please keep in mind that these properties are not intended for filtering
+  of unwanted database values. They are only performance hints. Values that do not
+  fulfill the criteria
+  could still appear in query results under certain circumstances. To filter values,
+  use d2rq:condition or a <a href="#translationtable">translation table</a> with a
+  custom Java class that returns <tt>null</tt> for unwanted database values.</p>
 <p>&nbsp;</p>
 
 <HR title="Separator for header">
