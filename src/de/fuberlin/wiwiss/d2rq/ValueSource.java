@@ -1,5 +1,5 @@
 /*
- * $Id: ValueSource.java,v 1.3 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: ValueSource.java,v 1.4 2005/04/12 13:23:53 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -34,7 +34,7 @@ import java.util.Set;
  * @author Richard Cyganiak <richard@cyganiak.de>
  */
 interface ValueSource {
-
+    
 	/**
 	 * Checks if a given value fits this source without querying the
 	 * database.

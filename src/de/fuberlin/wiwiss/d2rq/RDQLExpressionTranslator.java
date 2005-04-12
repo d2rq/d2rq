@@ -12,8 +12,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.query.Expression;
+import com.hp.hpl.jena.graph.query.IndexValues;
 import com.hp.hpl.jena.rdql.parser.*;
+import com.hp.hpl.jena.graph.Node;
 
+import de.fuberlin.wiwiss.d2rq.ConstraintHandler.NodeMakerIterator;
 import de.fuberlin.wiwiss.d2rq.helpers.VariableBindings;
 
 /**
@@ -25,21 +28,30 @@ import de.fuberlin.wiwiss.d2rq.helpers.VariableBindings;
 public class RDQLExpressionTranslator {
     ConstraintHandler handler;
     VariableBindings variableBindings;
-    Map variableNameToNodes;
+    Map variableNameToNodeConstraint=new HashMap();
     
     /** indicates that the translated sub-expression should be weaker or stronger
      * than the rdql sub-expression. (switched during negation).
      */
     boolean weaker=true;  
+    int argType=BoolType;
     static Map opMap; // rdql operator to sql operator map. null means: no map 
-     
+    static Map argTypeMap; // rdql operator to type map
+    
+    static int NoType=0;
+    static int BoolType=1;
+    static int BitType=2;
+    static int StringType=2;
+    static int NumberType=4;
+    static int AnyType=7;
+    
+    
     public RDQLExpressionTranslator(ConstraintHandler handler) {
         super();
         this.handler=handler;
         variableBindings=handler.bindings;
-        variableNameToNodes=variableBindings.variableNameToNodeMap();
+        // variableNameToNodes=variableBindings.variableNameToNodeMap;
         setupOperatorMap();
-        // TODO Auto-generated constructor stub
     }
     
     
@@ -85,36 +97,70 @@ public class RDQLExpressionTranslator {
             return null;
     }
     
+    // the case where "?x=?y" should be handled before triples are checked for shared variables
+    /**
+     * translate a variable.
+     * To translate a variable, we must either resolve its value or a reference to a column
+     * @param var
+     * @return
+     */
     public StringBuffer translate(Q_Var var) {
-        return translateVariable(var.getName());
+        if (variableBindings.isBound(var.getName()))
+            return translateValue(var.eval(null,variableBindings.inputDomain));
+        else
+            return translateVarName(var.getName());
     }
     public StringBuffer translate(Expression.Variable var) {
-        return translateVariable(var.getName());
+        return translateVarName(var.getName());
     }
     public StringBuffer translate(WorkingVar var) {
         //throw new RuntimeException("WorkingVar in RDQLExpressionTranslator");
-        return null; 
+        return translateValue(var); 
     }
     
-    // the case where "?x=?y" should be handled before triples are checked for shared variables
-    /**
-     * node variables that cannot be mapped to an SQL expression
-     */ 
+    public StringBuffer translateValue(NodeValue val) {
+       String valueString=val.valueString();
+       // TODO check for correctness of different node values
+       return new StringBuffer(valueString);
+    }
 
-    public StringBuffer translateVariable(String varName) {
+    public StringBuffer translateVarName(String varName) {
         // map var to a column-expression
         // we should choose the one that is most simple
-        
-        Node n=(Node) variableNameToNodes.get(varName);
-        Set varIndexSet=(Set)variableBindings.boundVariableToShared.get(n);
-        if (varIndexSet!=null) { // bound
-            // TODO
-            // substitute variable with value
-        } else {
-            // TODO
-            // substitute variable with NodeMaker columns
+        NodeConstraint c=(NodeConstraint)variableNameToNodeConstraint.get(varName);
+        if (c==null) {
+            Node n=(Node) variableBindings.variableNameToNodeMap.get(varName);
+            c=(NodeConstraint)handler.variableToConstraint.get(n);
+            if (c==null) {
+                Set varIndexSet=(Set)variableBindings.bindVariableToShared.get(n);
+                ConstraintHandler.NodeMakerIterator e=handler.makeNodeMakerIterator(varIndexSet);
+                if (e.hasNext()) {
+                    NodeMaker m=e.nextNodeMaker();
+                    c=new NodeConstraint();
+                    m.matchConstraint(c);
+                } else
+                    return null;
+            }
+            variableNameToNodeConstraint.put(varName,c);
         }
-        return null;       
+        return translateNodeConstraint(c);       
+    }
+    
+    public StringBuffer translateNodeConstraint(NodeConstraint c) {
+        if (!weaker)
+            return null;
+        if (c.fixedNode!=null) {
+            return new StringBuffer(c.fixedNode.toString());
+        }
+        // TODO
+        return null;
+    }
+    
+    public StringBuffer translateNode(Node n) {
+        if (n.isLiteral()) {
+            // TODO
+        }
+        return null;
     }
     
     /**
@@ -266,10 +312,14 @@ public class RDQLExpressionTranslator {
     }
    
     void putOp(String className,String sqlOp) {
+        putOp(className,sqlOp,NoType);
+    }
+    void putOp(String className,String sqlOp, int argType) {
         if (sqlOp==null) 
             return;
         String url=opURL(className);
         opMap.put(url,sqlOp);
+        argTypeMap.put(url,new Integer(argType));
     }
     /*
     String getOp(String className) {
@@ -286,15 +336,16 @@ public class RDQLExpressionTranslator {
     void setupOperatorMap() {
         if (opMap==null) {
             opMap=new HashMap();
-            putOp("Q_Add","+");
-            putOp("Q_BitAnd",null);
-            putOp("Q_BitOr",null); // "||"
-            putOp("Q_BitXor",null);
-            putOp("Q_Divide","/");
-            putOp("Q_Equal","=");
-            putOp("Q_GreaterThan",">");
+            argTypeMap=new HashMap();
+            putOp("Q_Add","+",NumberType+StringType);
+            putOp("Q_BitAnd",null,NumberType);
+            putOp("Q_BitOr",null,NumberType); // "||"
+            putOp("Q_BitXor",null,NumberType);
+            putOp("Q_Divide","/",NumberType);
+            putOp("Q_Equal","=",AnyType);
+            putOp("Q_GreaterThan",">",NumberType);
             putOp("Q_GreaterThanOrEqual",">=");
-            putOp("Q_LeftShift",null);
+            putOp("Q_LeftShift",null,NumberType);
             putOp("Q_LessThan","<");
             putOp("Q_LessThanOrEqual","<=");
             putOp("Q_LogicalAnd","AND");

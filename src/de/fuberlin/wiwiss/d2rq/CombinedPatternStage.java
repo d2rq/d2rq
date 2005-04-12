@@ -240,6 +240,7 @@ public abstract class CombinedPatternStage extends Stage {
 	protected void run(Pipe source, Pipe sink) {
 		while (stillOpen && source.hasNext()) {
 			Domain inputDomain = source.get();
+			varInfo.inputDomain=inputDomain;
 			updateTriplesWithDomain(inputDomain);
 			
 			// get solutions from hook method and put in sink
@@ -281,7 +282,7 @@ public abstract class CombinedPatternStage extends Stage {
 			triples[index] = p.asTripleMatch(inputDomain).asTriple();
 		}
 	}
-	
+		
 	/**
 	 * It is the subclass' duty to create an iterator.
 	 * @param triples all {@link Triple} nodes are fixed or ANY. 

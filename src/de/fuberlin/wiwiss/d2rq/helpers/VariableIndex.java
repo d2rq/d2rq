@@ -40,4 +40,5 @@ public class VariableIndex implements Comparable {
 	public String toString() {
 		return "VariableIndex@<" + tripleNr + "," + nodeNr + ">";
 	}
+	
 }

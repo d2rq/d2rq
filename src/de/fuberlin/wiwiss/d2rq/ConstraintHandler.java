@@ -30,7 +30,7 @@ class ConstraintHandler {
     public VariableBindings bindings;
     TripleQuery[] conjunction;
     /** Mapping between a variable (Node) and its NodeConstraints. */
-    Map variableToConstraint=new HashMap(); 
+    public Map variableToConstraint=new HashMap(); 
     ExpressionSet rdqlConstraints;
     RDQLExpressionTranslator rdqlTranslator;
     
@@ -59,11 +59,9 @@ class ConstraintHandler {
             NodeConstraint c=new NodeConstraint();
             do {
                 c.infoAdded = false;
-                Iterator e = varIndices.iterator();
-                while (possible && e.hasNext()) {
-                    VariableIndex i = (VariableIndex) e.next();
-                    NodeMaker n = conjunction[i.tripleNr]
-                            .getNodeMaker(i.nodeNr);
+                NodeMakerIterator e=makeNodeMakerIterator(varIndices);
+                 while (possible && e.hasNext()) {
+                    NodeMaker n = e.nextNodeMaker();
                     n.matchConstraint(c);
                     possible = c.possible;
                 }
@@ -108,6 +106,34 @@ class ConstraintHandler {
     */
     // TODO other cases ;-)
     // see RDQLExpressionTranslator
+    
+    public NodeMakerIterator makeNodeMakerIterator(Set indexSet)  {
+        return new NodeMakerIterator(conjunction,indexSet);
+    }
+    
+	public class NodeMakerIterator implements Iterator {
+	    TripleQuery[] conjunction;
+	    Iterator indexSetIterator;
+		public NodeMakerIterator(TripleQuery[] conjunction, Set indexSet) {
+		    this.conjunction=conjunction;
+		    this.indexSetIterator=indexSet.iterator();
+		}
+        public void remove() {
+        }
+        public boolean hasNext() {
+            return indexSetIterator.hasNext();
+        }
+        public NodeMaker nextNodeMaker() {
+            VariableIndex i = (VariableIndex) indexSetIterator.next();
+            NodeMaker n = conjunction[i.tripleNr]
+                    .getNodeMaker(i.nodeNr);
+            return n;
+        }
+        public Object next() {
+            return nextNodeMaker();
+        }
+	}
+
 }
 
 
