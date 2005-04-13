@@ -27,11 +27,11 @@ import com.hp.hpl.jena.rdql.ResultBinding;
 import com.hp.hpl.jena.rdql.ResultBindingIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.InfoD2RQ;
-import de.fuberlin.wiwiss.d2rq.Logger;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
+import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
 import de.fuberlin.wiwiss.d2rq.helpers.JenaCompatibility;
+import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 
 /**
  * Functional tests that exercise a ModelD2RQ by running RDQL queries against it. 

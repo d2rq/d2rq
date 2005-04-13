@@ -1,10 +1,12 @@
 /*
- * $Id: ColumnTest.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: ColumnTest.java,v 1.2 2005/04/13 16:56:08 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import de.fuberlin.wiwiss.d2rq.map.Column;
 
 import junit.framework.TestCase;
 

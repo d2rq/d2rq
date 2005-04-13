@@ -1,8 +1,11 @@
 /*
- * $Id: ValueRestrictionTest.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: ValueRestrictionTest.java,v 1.2 2005/04/13 16:56:08 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
+import de.fuberlin.wiwiss.d2rq.map.ContainsRestriction;
+import de.fuberlin.wiwiss.d2rq.map.MaxLengthRestriction;
+import de.fuberlin.wiwiss.d2rq.map.RegexRestriction;
 import junit.framework.TestCase;
 
 /**

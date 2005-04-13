@@ -1,5 +1,5 @@
 /*
- * $Id: RDQLTest.java,v 1.6 2005/04/04 19:14:43 garbers Exp $
+ * $Id: RDQLTest.java,v 1.7 2005/04/13 16:56:08 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -19,6 +19,8 @@ import com.hp.hpl.jena.rdql.Query;
 import com.hp.hpl.jena.rdql.QueryEngine;
 import com.hp.hpl.jena.rdql.QueryResults;
 import com.hp.hpl.jena.rdql.ResultBinding;
+
+import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
 
@@ -94,6 +96,7 @@ public class RDQLTest extends RDQLTestFramework {
 	}
 
 	public void testRDQLGetAuthorsAndEmailsWithCondition() {
+	    // GraphD2RQ.setUsingD2RQQueryHandler(false);
 		rdql("SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), " +
 								"(?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y)" +
 								" AND ! (?x eq ?z)");

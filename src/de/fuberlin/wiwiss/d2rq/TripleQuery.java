@@ -1,5 +1,5 @@
 /*
- * $Id: TripleQuery.java,v 1.7 2005/03/08 14:10:48 garbers Exp $
+ * $Id: TripleQuery.java,v 1.8 2005/04/13 16:55:09 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -14,6 +14,13 @@ import java.util.Map.Entry;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.Join;
+import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
 /**
  * Encapsulates a query for a triple. Three elements are necessary for 
@@ -35,7 +42,7 @@ import com.hp.hpl.jena.graph.Triple;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class TripleQuery {
+public class TripleQuery {
 	private PropertyBridge bridge;
 	private Set joins = new HashSet(2);
 	private Map columnValues = new HashMap();

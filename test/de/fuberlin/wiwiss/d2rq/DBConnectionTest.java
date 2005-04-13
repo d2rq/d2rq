@@ -17,8 +17,8 @@ import junit.framework.TestCase;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
-import de.fuberlin.wiwiss.d2rq.Database;
-import de.fuberlin.wiwiss.d2rq.MapParser;
+import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.map.MapParser;
 
 
 /**

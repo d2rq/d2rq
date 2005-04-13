@@ -2,12 +2,14 @@ package de.fuberlin.wiwiss.d2rq;
 
 import java.util.HashMap;
 
+import de.fuberlin.wiwiss.d2rq.map.Database;
+
 import junit.framework.TestCase;
 
 /**
  * Tests for {@link D2RQResultIterator}.
  *
- * @version $Id: ResultIteratorTest.java,v 1.1 2005/01/24 23:18:31 cyganiak Exp $
+ * @version $Id: ResultIteratorTest.java,v 1.2 2005/04/13 16:56:08 garbers Exp $
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class ResultIteratorTest extends TestCase {

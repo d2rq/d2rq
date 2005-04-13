@@ -9,6 +9,11 @@ import java.util.regex.Pattern;
 
 import com.hp.hpl.jena.graph.Node;
 
+import de.fuberlin.wiwiss.d2rq.map.Alias;
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.map.Join;
+
 /**
  * Collects parts of a SELECT query and delivers a corresponding SQL statement.
  * Used within TripleResultSets.
@@ -22,7 +27,7 @@ import com.hp.hpl.jena.graph.Node;
  * @version V0.2
  */
 
-class SQLStatementMaker {
+public class SQLStatementMaker {
 	private final static Pattern escapePattern = Pattern.compile("([\\\\'])");
 	private final static String escapeReplacement = "\\\\$1";
 	private Database database;

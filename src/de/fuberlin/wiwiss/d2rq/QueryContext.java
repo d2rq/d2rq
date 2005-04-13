@@ -1,5 +1,5 @@
 /*
- * $Id: QueryContext.java,v 1.2 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: QueryContext.java,v 1.3 2005/04/13 16:55:08 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -12,14 +12,14 @@ package de.fuberlin.wiwiss.d2rq;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class QueryContext {
+public class QueryContext {
 	private boolean uriPatternMatched = false;
 
-	protected void setURIPatternMatched(boolean matched) {
+	public void setURIPatternMatched(boolean matched) {
 		this.uriPatternMatched = matched;
 	}
 
-	protected boolean isURIPatternMatched() {
+	public boolean isURIPatternMatched() {
 		return this.uriPatternMatched;
 	}
 }

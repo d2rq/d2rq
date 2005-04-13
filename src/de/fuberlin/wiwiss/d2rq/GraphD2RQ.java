@@ -22,6 +22,11 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
+import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.map.MapParser;
+import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
+
 /**
  * A D2RQ virtual read-only graph backed by a non-RDF database.
  * 

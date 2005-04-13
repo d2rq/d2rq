@@ -7,6 +7,10 @@ package de.fuberlin.wiwiss.d2rq;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.Join;
+import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+
 import junit.framework.TestCase;
 
 /**

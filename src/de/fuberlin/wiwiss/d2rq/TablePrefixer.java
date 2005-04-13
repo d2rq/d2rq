@@ -11,8 +11,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.Column;
-import de.fuberlin.wiwiss.d2rq.Join;
+import de.fuberlin.wiwiss.d2rq.map.Alias;
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.Join;
+import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.Prefixable;
+import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+import de.fuberlin.wiwiss.d2rq.map.ValueSource;
 
 /** 
  * A class for collecting database table information and for creating table aliases.
@@ -20,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.Join;
  * @author jgarbers
  *
  */
-class TablePrefixer {
+public class TablePrefixer {
     /** 
      * The common prefix to use in aliasing.
      * If null, collects info only but leave everything identical.

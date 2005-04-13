@@ -4,6 +4,9 @@
 package de.fuberlin.wiwiss.d2rq;
 
 import com.hp.hpl.jena.graph.*;
+
+import de.fuberlin.wiwiss.d2rq.map.Database;
+
 import java.sql.*;
 import java.util.*;
 
@@ -19,7 +22,7 @@ import java.util.*;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class CombinedTripleResultSet extends SQLResultSet {
+public class CombinedTripleResultSet extends SQLResultSet {
 
 	/** List of tripleMakers that are used on every row of the result set. */
     private TripleQuery[] tripleMakers = null;

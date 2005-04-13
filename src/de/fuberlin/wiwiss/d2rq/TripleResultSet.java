@@ -4,6 +4,9 @@
 package de.fuberlin.wiwiss.d2rq;
 
 import com.hp.hpl.jena.graph.*;
+
+import de.fuberlin.wiwiss.d2rq.map.Database;
+
 import java.sql.*;
 import java.util.*;
 

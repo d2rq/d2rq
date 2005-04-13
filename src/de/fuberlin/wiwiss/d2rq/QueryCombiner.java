@@ -1,5 +1,5 @@
 /*
- * $Id: QueryCombiner.java,v 1.4 2004/08/09 20:16:52 cyganiak Exp $
+ * $Id: QueryCombiner.java,v 1.5 2005/04/13 16:55:08 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -21,7 +21,7 @@ import java.util.List;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class QueryCombiner {
+public class QueryCombiner {
 	private Collection compatibleQueries = new ArrayList(10);
 
 	public void add(TripleQuery newQuery) {
