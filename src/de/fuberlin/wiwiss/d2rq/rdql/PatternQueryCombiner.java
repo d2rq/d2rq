@@ -23,12 +23,11 @@ import com.hp.hpl.jena.graph.query.Pipe;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
-import de.fuberlin.wiwiss.d2rq.CombinedTripleResultSet;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.QueryCombiner;
-import de.fuberlin.wiwiss.d2rq.SQLStatementMaker;
-import de.fuberlin.wiwiss.d2rq.TablePrefixer;
-import de.fuberlin.wiwiss.d2rq.TripleQuery;
+import de.fuberlin.wiwiss.d2rq.find.CombinedTripleResultSet;
+import de.fuberlin.wiwiss.d2rq.find.QueryCombiner;
+import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
+import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.ConjunctionIterator;
 import de.fuberlin.wiwiss.d2rq.helpers.IndexArray;
 import de.fuberlin.wiwiss.d2rq.map.Database;

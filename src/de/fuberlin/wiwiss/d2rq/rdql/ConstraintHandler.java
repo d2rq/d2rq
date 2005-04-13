@@ -14,8 +14,8 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Expression;
 import com.hp.hpl.jena.graph.query.ExpressionSet;
 
-import de.fuberlin.wiwiss.d2rq.SQLStatementMaker;
-import de.fuberlin.wiwiss.d2rq.TripleQuery;
+import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
+import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 

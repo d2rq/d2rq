@@ -1,9 +1,9 @@
 /*
- * $Id: URIMatchPolicy.java,v 1.1 2005/04/13 16:55:28 garbers Exp $
+ * $Id: URIMatchPolicy.java,v 1.2 2005/04/13 17:17:41 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
-import de.fuberlin.wiwiss.d2rq.QueryContext;
+import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 
 
 

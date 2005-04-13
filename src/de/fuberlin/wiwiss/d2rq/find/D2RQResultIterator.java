@@ -1,11 +1,13 @@
 /*
   (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
 */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.find;
 
 import java.util.*;
 import com.hp.hpl.jena.util.iterator.*;
 import com.hp.hpl.jena.graph.*;
+
+import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
 /**
  * Extended iterator over the results of a find(spo) query.
@@ -22,9 +24,9 @@ import com.hp.hpl.jena.graph.*;
  * @version V0.2
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
- * @see de.fuberlin.wiwiss.d2rq.TripleResultSet
+ * @see de.fuberlin.wiwiss.d2rq.find.TripleResultSet
  */
-class D2RQResultIterator extends NiceIterator implements ExtendedIterator {
+public class D2RQResultIterator extends NiceIterator implements ExtendedIterator {
 
     /** 
      * All TripleResultSets for this D2RQResultIterator.

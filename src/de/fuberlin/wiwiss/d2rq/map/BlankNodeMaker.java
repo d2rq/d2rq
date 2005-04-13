@@ -8,8 +8,8 @@ import java.util.*;
 import com.hp.hpl.jena.graph.*;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
-import de.fuberlin.wiwiss.d2rq.TablePrefixer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * BlankNodeMakers transform attribute values from a result set into blank nodes.

@@ -28,6 +28,7 @@ import com.hp.hpl.jena.rdql.ResultBindingIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.find.SQLResultSet;
 import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
 import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
 import de.fuberlin.wiwiss.d2rq.helpers.JenaCompatibility;

@@ -4,7 +4,7 @@
 
 package de.fuberlin.wiwiss.d2rq.map;
 
-import de.fuberlin.wiwiss.d2rq.TablePrefixer;
+import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * Implementing instances provide a uniform way of creating a copy of themselves

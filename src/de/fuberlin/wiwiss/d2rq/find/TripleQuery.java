@@ -1,7 +1,7 @@
 /*
- * $Id: TripleQuery.java,v 1.8 2005/04/13 16:55:09 garbers Exp $
+ * $Id: TripleQuery.java,v 1.1 2005/04/13 17:17:43 garbers Exp $
  */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.find;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,5 +1,5 @@
 /*
- * $Id: BlankNodeIdentifier.java,v 1.1 2005/04/13 16:55:28 garbers Exp $
+ * $Id: BlankNodeIdentifier.java,v 1.2 2005/04/13 17:17:42 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import de.fuberlin.wiwiss.d2rq.TablePrefixer;
+import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * A blank node identifier that uniquely identifies all resources generated from

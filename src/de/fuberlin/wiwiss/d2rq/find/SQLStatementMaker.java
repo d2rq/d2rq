@@ -1,7 +1,7 @@
 /*
   (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
 */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.find;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -250,7 +250,7 @@ public class SQLStatementMaker {
 	 * Escape special characters in database literals to avoid
 	 * SQL injection
 	 */
-	protected static String escape(String s) {
+	public static String escape(String s) {
 		return SQLStatementMaker.escapePattern.matcher(s).
 				replaceAll(SQLStatementMaker.escapeReplacement);
 	}

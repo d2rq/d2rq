@@ -9,8 +9,8 @@ import com.hp.hpl.jena.graph.*;
 import com.hp.hpl.jena.graph.impl.LiteralLabel;
 import com.hp.hpl.jena.datatypes.*;
 
-import de.fuberlin.wiwiss.d2rq.TablePrefixer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * LiteralMakers transform attribute values from a result set into literals.

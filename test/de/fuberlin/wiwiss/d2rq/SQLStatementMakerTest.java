@@ -1,8 +1,9 @@
 /*
- * $Id: SQLStatementMakerTest.java,v 1.1 2004/08/02 22:48:44 cyganiak Exp $
+ * $Id: SQLStatementMakerTest.java,v 1.2 2005/04/13 17:18:01 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
+import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import junit.framework.TestCase;
 
 /**

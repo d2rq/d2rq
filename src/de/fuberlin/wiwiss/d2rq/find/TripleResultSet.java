@@ -1,7 +1,7 @@
 /*
   (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
 */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.find;
 
 import com.hp.hpl.jena.graph.*;
 
@@ -22,7 +22,7 @@ import java.util.*;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class TripleResultSet extends SQLResultSet {
+public class TripleResultSet extends SQLResultSet {
 
 	/** List of tripleMakers that are used on every row of the result set. */
     private ArrayList tripleMakers = new ArrayList();

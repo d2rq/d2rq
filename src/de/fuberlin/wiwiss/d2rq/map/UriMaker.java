@@ -7,8 +7,8 @@ import java.util.*;
 
 import com.hp.hpl.jena.graph.*;
 
-import de.fuberlin.wiwiss.d2rq.TablePrefixer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * UriMakers transform attribute values from a result set into URIrefs.

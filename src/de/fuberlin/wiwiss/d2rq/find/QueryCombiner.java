@@ -1,12 +1,13 @@
 /*
- * $Id: QueryCombiner.java,v 1.5 2005/04/13 16:55:08 garbers Exp $
+ * $Id: QueryCombiner.java,v 1.1 2005/04/13 17:17:43 garbers Exp $
  */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.find;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
 
 /**
  * Container for {@link TripleQuery} instances. TripleQueries can

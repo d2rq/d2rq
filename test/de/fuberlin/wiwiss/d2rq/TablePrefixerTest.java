@@ -10,6 +10,7 @@ import java.util.List;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Join;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 import junit.framework.TestCase;
 

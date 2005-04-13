@@ -10,8 +10,8 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
-import de.fuberlin.wiwiss.d2rq.QueryContext;
-import de.fuberlin.wiwiss.d2rq.TablePrefixer;
+import de.fuberlin.wiwiss.d2rq.find.QueryContext;
+import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * A respresentation of a d2rq:PropertyBridge, describing how
