@@ -59,10 +59,11 @@ public class NodeConstraint {
     // protected Set regexSet=new HashSet();
     // protected int maxLength=-1;
  
+    // same as PlaceholderNode constants
     public static final int NotFixedNodeType = 0;
     public static final int BlankNodeType = 1;
     public static final int UriNodeType = 2;
-    public static final int LiteralNodeType = 3;    
+    public static final int LiteralNodeType = 4;    
     
     /** 
      * We see a literal NodeMaker.

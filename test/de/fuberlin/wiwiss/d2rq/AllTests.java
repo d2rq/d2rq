@@ -1,8 +1,9 @@
 /*
- * $Id: AllTests.java,v 1.5 2005/04/13 16:56:08 garbers Exp $
+ * $Id: AllTests.java,v 1.6 2005/04/14 16:23:32 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
+import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixerTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

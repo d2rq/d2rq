@@ -2,11 +2,12 @@
  * Created on Mar 2, 2005
  *
  */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import de.fuberlin.wiwiss.d2rq.FindTestFramework;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Join;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;

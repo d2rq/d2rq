@@ -34,7 +34,7 @@ public class SQLResultSet {
     protected String[] currentRow;
 
     protected Database database;
-    protected ResultSet resultSet = null;
+    private ResultSet resultSet = null;
     protected String sql;
     protected int numCols = 0;
 
@@ -46,15 +46,22 @@ public class SQLResultSet {
 
 	public static Logger logger=Logger.instance();
 	public static Logger separatorLogger=Logger.instance();
+	public static boolean simulationMode=false;
+	public static Collection protocol=null;
 	
     protected void executeSQLQuery() {
 		if (logger.debugEnabled()) {
 		    separatorLogger.debug("--------------------------------------------");
-            logger.debug("SQL statement executed: " + this.sql);
+            logger.debug("SQL statement " + (simulationMode?"simulated":"executed") + ": " 
+                    + this.sql);
             separatorLogger.debug("--------------------------------------------");
         }
+    	InfoD2RQ.totalNumberOfExecutedSQLQueries++;
+    	if (protocol!=null)
+    	    protocol.add(this.sql);
+    	if (simulationMode)
+    	    return;
         try {
-        		InfoD2RQ.totalNumberOfExecutedSQLQueries++;
 			Connection con = this.database.getConnnection();
 			// Create and execute SQL statement
 			java.sql.Statement stmt = con.createStatement();
@@ -81,6 +88,8 @@ public class SQLResultSet {
 
 	/** Gets the current row from the result set in an array which is passed to the triple makers */
 	protected String[] nextRow() {
+	    if (simulationMode)
+	        return null;
 		try {
 			if (!this.resultSet.next()) {
 				this.resultSet.close();

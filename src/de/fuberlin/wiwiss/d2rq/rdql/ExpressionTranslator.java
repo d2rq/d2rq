@@ -39,14 +39,15 @@ public class ExpressionTranslator {
     static Map opMap; // rdql operator to sql operator map. null means: no map 
 //    static Map argTypeMap; // rdql operator to type map
     
-    static int NoType=0;
-    static int BoolType=1;
-    static int BitType=2;
-    static int StringType=4;
-    static int NumberType=8;
-    static int AnyType=15;
-    static int LeftRightType=16; // different type for left and right operand
-    
+    public static final int NoType=0;
+    public static final int BoolType=1;
+    public static final int BitType=2;
+    public static final int StringType=4;
+    public static final int NumberType=8;
+    public static final int AnyType=15;
+    public static final int LeftRightType=16; // different type for left and right operand
+    public static final int LeftType=-1;
+    public static final int RightType=-2;
     
     public ExpressionTranslator(ConstraintHandler handler) {
         super();
@@ -70,19 +71,54 @@ public class ExpressionTranslator {
      * We should try to resolve the strongest SQL condition possible.
      * Maybe for each expression we should calculate both the strongest and the weakest
      * condition, so that negation flips the meaning.
+     * There is one generic method for operators, that do not need special handling.
+     * For others, such as logical operators (and, or, not) 
+     * and d2rq-map items (variables, values), there are custom methods that match by type.
+     *  
      * @param e
      * @return null if no 1:1 translation possible.
      * @see com.hp.hpl.jena.graph.query.Expression
      */
     public Result translate(Expression e) {
-        String op=getSQLOp(e); // see at bottom
+        OperatorMap op=getSQLOp(e); // see at bottom
         if (op==null)
             return null;
+        int args=e.argCount();
+        if (op.unary) {
+            if (args!=1) 
+                return null;
+            else 
+                return translateUnary(op,e);
+        } else {
+            if (args<=1) 
+                return null;
+            else
+                return translateBinary(op,e);
+        }
+    }
+    
+    public Result translateBinary(OperatorMap op, Expression e) {
         List list=translateArgs(e, true, null);
         if (list==null)
             return null;
-        return applyInfix(op,list);        
+        return op.applyInfix(list);              
     }
+    
+    /** 
+     * no operator checking is performed
+     * @param op
+     * @param e
+     * @return
+     */
+    public Result translateUnary(OperatorMap op, Expression e) {
+        Expression ex=e.getArg(0);
+        Result exStr=translate(ex);
+        if (exStr==null)
+            return null;
+        Result result=op.applyUnary(exStr);
+        return result;
+    }
+
     
     /**
      * TODO check, if there are problems in SQL when comparing text fields 
@@ -173,45 +209,6 @@ public class ExpressionTranslator {
         return null;
     }
     
-    /**
-     * creates an sql expression that contains op at infix positions
-     * @param op
-     * @param args
-     * @return
-     */
-    public Result applyInfix(String op, List args) {
-        StringBuffer sb=new StringBuffer("(");
-        Iterator it=args.iterator();
-        boolean first=true;
-        while (it.hasNext()) {
-            if (first) 
-                first=false;
-            else {
-                sb.append(' ');
-                sb.append(op);
-                sb.append(' ');
-            }
-            String item=(String)it.next();
-            sb.append(item);
-        }
-        sb.append(")");
-        return newResult(sb,NoType);
-    }
-    
-    /**
-     * creates a unary sql expression
-     * @param op
-     * @param arg
-     * @return
-     */
-    public Result applyUnary(String op, Result arg) {
-        StringBuffer result=new StringBuffer("(");
-        result.append(op);
-        result.append(" ");
-        arg.appendTo(result);
-        result.append(")");
-        return newResult(result,NoType);
-    }
     
     /**
      * translates an RDQL expression
@@ -238,6 +235,7 @@ public class ExpressionTranslator {
     public static Result falseBuffer=newResult("false",BoolType);
         
     public Result translate(Q_LogicalAnd e) {
+        OperatorMap op=getSQLOp(e); // see at bottom
         List list=translateArgs(e, false, trueBuffer);
         if (list==null)
             return null;
@@ -248,10 +246,11 @@ public class ExpressionTranslator {
             return trueBuffer;
         if (count==1)
             return (Result) list.get(0);
-        return applyInfix("AND",list);        
+        return op.applyInfix(list);        
     }
     
     public Result translate(Q_LogicalOr e) {
+        OperatorMap op=getSQLOp(e); // see at bottom
         List list=translateArgs(e, true, falseBuffer);
         if (list==null)
             return null;
@@ -262,7 +261,7 @@ public class ExpressionTranslator {
             return falseBuffer;
         if (count==1)
             return (Result) list.get(0);
-        return applyInfix("OR",list);        
+        return op.applyInfix(list);        
     }
     
     /**
@@ -271,6 +270,7 @@ public class ExpressionTranslator {
      * @return
      */
     public Result translate(Q_UnaryNot e) {
+        OperatorMap op=getSQLOp(e); // see at bottom
         boolean oldWeaker=weaker;
         weaker=!weaker;
         Expression ex=e.getArg(0);
@@ -283,26 +283,19 @@ public class ExpressionTranslator {
             else if (exStr==falseBuffer)
                 result=trueBuffer;
             else 
-                result=applyUnary("NOT",result);
+                result=op.applyUnary(result);
         }
         return result;
     }
     
-    public Result translateUnary(Expression e, String sqlOp) {
-        Expression ex=e.getArg(0);
-        Result exStr=translate(ex);
-        if (exStr==null)
-            return null;
-        Result result=applyUnary(sqlOp,exStr);
-        return result;
-    }
+/*
     public Result translate(Q_UnaryMinus e) {
-        return translateUnary(e,"-");
+        return translateUnary(e);
     }
     public Result translate(Q_UnaryPlus e) {
-        return translateUnary(e,"-");
+        return translateUnary(e);
     }
-
+*/
     
     /////////////   Massive Mapping /////////////////////////////
     
@@ -321,34 +314,39 @@ public class ExpressionTranslator {
         return constructURI(obj.getClass().getName());
     }
    
-    void putOp(String className,String sqlOp) {
-        putOp(className,sqlOp,NoType);
+    OperatorMap putOp(String className,String sqlOp) {
+        return putOp(className,sqlOp,NoType);
     }
-    void putOp(String className,String sqlOp, int argTypes) {
+    OperatorMap putOp(String className,String sqlOp, int argTypes) {
+        return putOp(className, sqlOp, argTypes, argTypes, true, LeftType);
+    }        
+    OperatorMap putOp(String className,String sqlOp, int leftTypes, int rightTypes, 
+                boolean sameType, int returnType) {
         if (sqlOp==null) 
-            return;
+            return null;
         String url=opURL(className);
-        Operator op=new Operator();
+        OperatorMap op=new OperatorMap();
         opMap.put(url,op);
         op.rdqlOperator=url;
         op.sqlOperator=sqlOp;
-        op.argTypes=argType;
-        if (argTypes>=LeftRightType) {
-            op.leftTypes=argTypes/LeftRightType;
-            op.rightTypes=argTypes % LeftRightType;
-        }
+        // op.argTypes=argType;
+        op.sameType=sameType;
+        op.leftTypes=leftTypes;
+        op.rightTypes=rightTypes;
+        op.returnType=returnType;
+        return op;
     }
     /*
-    Operator getOp(String className) {
-        return (Operator)opMap.get(opURL(className));
+    OperatorMap getOp(String className) {
+        return (OperatorMap)opMap.get(opURL(className));
     }
-    Operator getOp(Object obj) {
-        return (Operator)opMap.get(opURL(obj));
+    OperatorMap getOp(Object obj) {
+        return (OperatorMap)opMap.get(opURL(obj));
     }
     */
-    String getSQLOp(Expression e) {
-        Operator op=(Operator)opMap.get(e.getFun());
-        return op.sqlOperator;
+    OperatorMap getSQLOp(Expression e) {
+        OperatorMap op=(OperatorMap)opMap.get(e.getFun());
+        return op; // .sqlOperator;
     }
     
     void setupOperatorMap() {
@@ -378,21 +376,23 @@ public class ExpressionTranslator {
             putOp("Q_StringMatch",null); // "LIKE"
             putOp("Q_StringNoMatch",null); // "NOT LIKE"
             putOp("Q_Subtract","-");
-            putOp("Q_UnaryMinus","-");
-            putOp("Q_UnaryNot","!");
-            putOp("Q_UnaryPlus","+");
+            putOp("Q_UnaryMinus","-").unary=true;
+            putOp("Q_UnaryNot","!").unary=true;
+            putOp("Q_UnaryPlus","+").unary=true;
         }
     }
     
-    class Operator {
-        public String rdqlOperator; // unqualified class name
-        public String sqlOperator;
-        public int argTypes;
-        public int leftTypes;
-        public int rightTypes;
-        public int returnTypes;
-    }
+    // Auxiliary constructs
+ 
     
+    public interface Result {
+        public int getType(); // a concrete type, not a combination of types!
+        public void setType(int type);
+        public String getString();
+        public StringBuffer getStringBuffer();
+        public void appendTo(StringBuffer sb);
+    }
+
     static public Result newResult(String expr, int type) {
         return new SQLExpr(expr,type);
         // return new StringResult(expr,type);
@@ -402,10 +402,4 @@ public class ExpressionTranslator {
         // return new StringBufferResult(expr,type);
     }
 
-    public interface Result {
-        public int getType();
-        public String getString();
-        public StringBuffer getStringBuffer();
-        public void appendTo(StringBuffer sb);
-    }
 }

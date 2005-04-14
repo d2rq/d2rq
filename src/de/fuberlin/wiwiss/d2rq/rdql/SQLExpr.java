@@ -24,6 +24,9 @@ package de.fuberlin.wiwiss.d2rq.rdql;
         public int getType() {
             return type;
         }
+        public void setType(int type) {
+            this.type=type;
+        }
         public String getString() {
             if (str==null) {
                 str=strBuf.toString();
