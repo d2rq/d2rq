@@ -123,7 +123,7 @@ public class NodeConstraint {
             return;
         columns.add(c);
     }
-    
+        
     /** 
      * Pattern-Constraints can be translated to column constraints.
      * NodeMakers with an attached {@link ValueSource} call this.
@@ -156,6 +156,14 @@ public class NodeConstraint {
     }
     public void matchValueSource(ValueSource s) {
         // skip any other
+        // Here we are another victim of no correct parameter polymorphie
+        // so feed it upwards
+        if (s instanceof Column)
+            matchValueSource((Column)s);
+        else if (s instanceof Pattern)
+            matchValueSource((Pattern)s);
+        else if (s instanceof RegexRestriction) 
+            matchValueSource((RegexRestriction)s);
     }
     
     public void addEqualColumn(Column c1, Column c2) {

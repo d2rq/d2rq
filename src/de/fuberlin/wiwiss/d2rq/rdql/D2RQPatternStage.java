@@ -29,8 +29,6 @@ public class D2RQPatternStage extends PatternStage { // jg: reference PatternSta
 
 	private GraphD2RQ graph;
 
-	private ExpressionSet constraints;
-
 	// instanciate just one PatternQueryCombiner? it could do some caching
 	// or leave the caching for graph? e.g. triple -> list of bridges
 
@@ -40,7 +38,6 @@ public class D2RQPatternStage extends PatternStage { // jg: reference PatternSta
 		// some contraints are eaten up at this point!
 		// so use s.th. like a clone() and setter method at invocation time
 		D2RQPatternStage.this.graph = graph;
-		D2RQPatternStage.this.constraints = constraints;
 	}
 
 /**
@@ -55,7 +52,7 @@ protected void run( Pipe source, Pipe sink ) {
 			Pattern p = compiled[index];
 			triples[index] = p.asTripleMatch( inputDomain ).asTriple();
 		}
-		PatternQueryCombiner combiner=new PatternQueryCombiner(graph, null ,constraints,triples); // pass map?
+		PatternQueryCombiner combiner=new PatternQueryCombiner(graph, null ,null,triples); // pass map?  constraints
 		combiner.setup(); 
 		// get solutins and put in sink
 		// maybe it would be more efficient to reduce matching by checking just the difference set 

@@ -87,11 +87,22 @@ public abstract class CombinedPatternStage extends Stage {
 	 */
 	protected Triple[] triples;
 	
+	// support setup()
+	protected Mapping queryMapping;
+	protected Triple[] queryTriples;
+	protected ExpressionSet queryConstraints;
+	
 	public CombinedPatternStage(Graph graph, Mapping map,
 			ExpressionSet constraints, Triple[] triples) {
-		compiled = compile(map, triples);
-		guard = makeGuard(map, constraints);
-		this.triples=new Triple[triples.length];
+	    this.queryMapping=map;
+	    this.queryConstraints=constraints;
+	    this.queryTriples=triples;
+		this.triples=new Triple[queryTriples.length];
+	}
+	
+	public void setup() {
+		compiled = compile(queryMapping, queryTriples);
+		guard = makeGuard(queryMapping, queryConstraints);	    
 	}
 	
 	/** Compiles <code>triples</code> into <code>compiled</code>. 
@@ -167,13 +178,19 @@ public abstract class CombinedPatternStage extends Stage {
 		Iterator it = constraints.iterator();
 		while (it.hasNext()) {
 			Expression e = (Expression) it.next();
-			if (canEval(map,e)) { 
+			boolean evaluable=canEval(map,e);
+			hookPrepareExpression(e,evaluable);
+			if (evaluable) { 
 				Valuator prepared = e.prepare(map);
 				es.add(prepared);
 				it.remove();
 			}
 		}
 		return es;
+	}
+	
+	protected void hookPrepareExpression(Expression e, boolean evaluable) {
+	    // see subclasses
 	}
 	
 	/**

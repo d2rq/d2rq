@@ -1,11 +1,12 @@
 /*
- * $Id: Pattern.java,v 1.2 2005/04/13 17:17:42 garbers Exp $
+ * $Id: Pattern.java,v 1.3 2005/04/21 14:13:46 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -171,12 +172,15 @@ public class Pattern implements ValueSource, Prefixable {
 	}
 	
 	public String reconstructPattern() {
+	    return joinPattern(D2RQ.deliminator);
+	}
+	public String joinPattern(String joinOp) {
 		StringBuffer result = new StringBuffer(this.firstLiteralPart);
-		result.append(D2RQ.deliminator);
+		result.append(joinOp);
 		for (int i=0;i<columns.size(); i++) {
 			Column column = (Column) columns.get(i);
 			result.append(column.getQualifiedName());
-			result.append(D2RQ.deliminator);
+			result.append(joinOp);
 			result.append(literalParts.get(i));
 		}
 		return result.toString();
@@ -213,5 +217,27 @@ public class Pattern implements ValueSource, Prefixable {
 			// get text
 			this.literalParts.add(this.pattern.substring(fieldEnd, fieldStart));
 		}
+	}
+	
+	public Iterator partsIterator() {
+	    return new PartsIterator();
+	}
+	public class PartsIterator implements Iterator {
+	    int i=0;
+	    Iterator litIt=literalParts.iterator();
+	    Iterator colIt=columns.iterator();
+        public void remove() {
+        }
+        public boolean hasNext() {
+            return litIt.hasNext();
+        }
+        public Object next() {
+            i++;
+            if (i==1) 
+                return firstLiteralPart;
+            else if (i%2==0) 
+                return colIt.next();
+            else return litIt.next();
+        }
 	}
 }

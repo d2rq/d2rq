@@ -4,6 +4,7 @@
 
 package de.fuberlin.wiwiss.d2rq.rdql;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,7 +13,6 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Expression;
-import com.hp.hpl.jena.graph.query.ExpressionSet;
 
 import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
@@ -33,7 +33,7 @@ class ConstraintHandler {
     TripleQuery[] conjunction;
     /** Mapping between a variable (Node) and its NodeConstraints. */
     public Map variableToConstraint=new HashMap(); 
-    ExpressionSet rdqlConstraints;
+    Collection rdqlConstraints;
     ExpressionTranslator rdqlTranslator;
     
     public void setVariableBindings(VariableBindings bindings) {
@@ -44,7 +44,7 @@ class ConstraintHandler {
         this.conjunction=conjunction;
     }
     
-    public void setRDQLConstraints(ExpressionSet rdqlConstraints) {
+    public void setRDQLConstraints(Collection rdqlConstraints) {
         this.rdqlConstraints=rdqlConstraints;
     }
     
@@ -83,12 +83,12 @@ class ConstraintHandler {
             NodeConstraint c=(NodeConstraint)it.next();
             c.addConstraintsToSQL(sql);
         }
-        // TODO addRDQLConstraints(sql);
+        addRDQLConstraints(sql); // TODO test
     }
     
     void addRDQLConstraints(SQLStatementMaker sql) {
         if (rdqlTranslator==null)
-            rdqlTranslator=new ExpressionTranslator(this);
+            rdqlTranslator=new ExpressionTranslator(this,sql);
         Set s=new HashSet();
         Iterator it=rdqlConstraints.iterator();
         while (possible && it.hasNext()) {

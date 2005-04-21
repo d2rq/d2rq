@@ -153,8 +153,12 @@ public class SQLStatementMaker {
 	}
 	
 	public String correctlyQuotedColumnValue(Column column, String value) {
+	    return getQuotedColumnValue(value, columnType(column));
+	}
+	
+	public int columnType(Column column) {
 	    String databaseColumn=column.getQualifiedName(aliasMap);
-	    return getQuotedColumnValue(value, this.database.getColumnType(databaseColumn));
+	    return this.database.getColumnType(databaseColumn);
 	}
 	
 	/**

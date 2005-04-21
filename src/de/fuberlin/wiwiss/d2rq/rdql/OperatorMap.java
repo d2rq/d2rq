@@ -96,7 +96,7 @@ class OperatorMap {
             result.appendTo(sb);
         }
         sb.append(")");
-        return ExpressionTranslator.newResult(sb,NoType);
+        return returnResult;
     }
     
     /**

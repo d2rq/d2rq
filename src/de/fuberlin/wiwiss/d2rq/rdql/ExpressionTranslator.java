@@ -5,18 +5,25 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.hp.hpl.jena.graph.impl.LiteralLabel;
 import com.hp.hpl.jena.graph.query.Expression;
 import com.hp.hpl.jena.graph.query.IndexValues;
 import com.hp.hpl.jena.rdql.parser.*;
 import com.hp.hpl.jena.graph.Node;
 
+import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
+import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.rdql.ConstraintHandler.NodeMakerIterator;
 
 /**
@@ -27,6 +34,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.ConstraintHandler.NodeMakerIterator;
  */
 public class ExpressionTranslator {
     ConstraintHandler handler;
+    SQLStatementMaker statementMaker; // provides database and escaper
     VariableBindings variableBindings;
     Map variableNameToNodeConstraint=new HashMap();
     
@@ -44,25 +52,38 @@ public class ExpressionTranslator {
     public static final int BitType=2;
     public static final int StringType=4;
     public static final int NumberType=8;
-    public static final int AnyType=15;
-    public static final int LeftRightType=16; // different type for left and right operand
+    public static final int UriType=16; // TODO ?
+    public static final int AnyType=31;
+    public static final int LeftRightType=32; // different type for left and right operand
     public static final int LeftType=-1;
     public static final int RightType=-2;
+    public static final int SameType=-3;
     
-    public ExpressionTranslator(ConstraintHandler handler) {
+    public ExpressionTranslator(ConstraintHandler handler, SQLStatementMaker sql) {
         super();
         this.handler=handler;
+        this.statementMaker=sql;
         variableBindings=handler.bindings;
         // variableNameToNodes=variableBindings.variableNameToNodeMap;
         setupOperatorMap();
     }
     
+    public static Collection logSqlExpressions=null;
+    
     public String translateToString(Expression e) {
         Result r=translate(e);
-        if (r==null)
+        if (r==null) {
+            Logger.instance().debug("No sql expression 1");
             return null;
-        if ((r.getType() & BoolType) != 0)
-            return r.getString();
+        }
+        if ((r.getType() & BoolType) != 0) {
+            Logger.instance().debug("SQL expression:" + r.getString());
+            String res=r.getString();
+            if (logSqlExpressions!=null)
+                logSqlExpressions.add(res);
+            return res;
+        }
+        Logger.instance().debug("No sql expression 2");
         return null;
     }
     
@@ -80,6 +101,22 @@ public class ExpressionTranslator {
      * @see com.hp.hpl.jena.graph.query.Expression
      */
     public Result translate(Expression e) {
+        // in absense of usable parameter overloading...
+        if (e instanceof ParsedLiteral)
+            return translateParsedLiteral((ParsedLiteral)e);
+        if (e instanceof Q_Var)
+            return translateQ_Var((Q_Var)e);
+        if (e instanceof Expression.Variable)
+            return translateExprVariable((Expression.Variable)e);
+        if (e instanceof WorkingVar)
+            return translateWorkingVar((WorkingVar)e);
+        if (e instanceof Q_LogicalAnd)
+            return translateAnd((Q_LogicalAnd)e);
+        if (e instanceof Q_LogicalOr)
+            return translateOr((Q_LogicalOr)e);
+        if (e instanceof Q_UnaryNot)
+            return translateNot((Q_UnaryNot)e);
+             
         OperatorMap op=getSQLOp(e); // see at bottom
         if (op==null)
             return null;
@@ -121,13 +158,13 @@ public class ExpressionTranslator {
 
     
     /**
-     * TODO check, if there are problems in SQL when comparing text fields 
-     * with numeric values and text values with numeric fields
-     * 
      * @param e
      * @return
      */
     public Result translate(ParsedLiteral e) {
+        return translateParsedLiteral(e);
+    }
+    public Result translateParsedLiteral(ParsedLiteral e) {
         StringBuffer b=new StringBuffer();
         if (e.isInt())
             return newResult(Long.toString(e.getInt()),NumberType);
@@ -138,9 +175,19 @@ public class ExpressionTranslator {
         // else if (e.isNode())   
         // else if (e.isURI())
         else if (e.isString())
-            return newResult("\'"+e.getString()+"\'",StringType);
+            return translateString(e.getString());
         else 
             return null;
+    }
+    
+    public Result translateString(String s) {
+        return translateString(s,StringType);
+    }
+    public Result translateString(String s, int resultType) {
+        StringBuffer b=new StringBuffer("\'");
+        b.append(SQLStatementMaker.escape(s));
+        b.append("\'");
+        return newResult(b,resultType);
     }
     
     // the case where "?x=?y" should be handled before triples are checked for shared variables
@@ -151,25 +198,45 @@ public class ExpressionTranslator {
      * @return
      */
     public Result translate(Q_Var var) {
+        return translateQ_Var(var);
+    }
+    public Result translateQ_Var(Q_Var var) {
         if (variableBindings.isBound(var.getName()))
             return translateValue(var.eval(null,variableBindings.inputDomain));
         else
             return translateVarName(var.getName());
     }
     public Result translate(Expression.Variable var) {
+        return translateExprVariable(var);
+    }
+    public Result translateExprVariable(Expression.Variable var) {
         return translateVarName(var.getName());
     }
     public Result translate(WorkingVar var) {
+        return translateWorkingVar(var);
+    }
+    public Result translateWorkingVar(WorkingVar var) {
         //throw new RuntimeException("WorkingVar in RDQLExpressionTranslator");
         return translateValue(var); 
     }
     
     public Result translateValue(NodeValue val) {
-       String valueString=val.valueString();
-       // TODO check for correctness of different node values
-       return newResult(valueString,NoType);
+        if ( val.isInt() ) {
+            return newResult(Long.toString(val.getInt()),NumberType);
+        } else if ( val.isDouble() ) {
+            return newResult(Double.toString(val.getDouble()),NumberType);
+        } else if (val.isBoolean()) {
+            return (val.getBoolean() ? trueBuffer : falseBuffer);
+         } else if (val.isURI()) {
+            return translateString(val.getURI(),UriType);
+        } else if (val.isString()) {
+            return translateString(val.getString(),StringType);
+        } else if (val.isNode()) {
+            // Graph
+        }
+        return null;
     }
-
+    
     public Result translateVarName(String varName) {
         // map var to a column-expression
         // we should choose the one that is most simple
@@ -180,7 +247,7 @@ public class ExpressionTranslator {
             if (c==null) {
                 Set varIndexSet=(Set)variableBindings.bindVariableToShared.get(n);
                 ConstraintHandler.NodeMakerIterator e=handler.makeNodeMakerIterator(varIndexSet);
-                if (e.hasNext()) {
+                if (e.hasNext()) { // it is not shared, so we do not have to check next occourence
                     NodeMaker m=e.nextNodeMaker();
                     c=new NodeConstraint();
                     m.matchConstraint(c);
@@ -193,18 +260,96 @@ public class ExpressionTranslator {
     }
     
     public Result translateNodeConstraint(NodeConstraint c) {
+        Iterator it;
         if (!weaker)
             return null;
         if (c.fixedNode!=null) {
-            return newResult(c.fixedNode.toString(),NoType);
+            return translateNode(c.fixedNode);
         }
-        // TODO
+        it=c.columns.iterator();
+        while (it.hasNext()) {
+            Column col=(Column)it.next();
+            Result res=translateColumn(col);
+            if (res!=null)
+                return res;
+        }
+        it=c.patterns.iterator();
+        while (it.hasNext()) {
+            Pattern pat=(Pattern)it.next();
+            Result res=translatePattern(pat);
+            if (res!=null)
+                return res;
+        }
         return null;
+    }
+    
+    public Result translateColumn(Column col) {
+        String columnName=col.getQualifiedName();
+        int columnType=statementMaker.columnType(col);
+        if (columnType==Database.numericColumnType) {
+            return newResult(columnName,NumberType);
+        } else if (columnType==Database.textColumnType) {
+            return newResult(columnName,StringType);
+        } 
+        return null;
+    }
+    
+    public Result castToString(Result r) {
+        if (r.getType()==StringType)
+            return r;
+        StringBuffer sb=new StringBuffer("CAST(");
+        r.appendTo(sb);
+        sb.append(" AS SQL_TEXT)");
+        return newResult(sb,StringType);
+    }
+    
+    public final static String concatenateOp="Concatenate";
+    public Result translatePattern(Pattern p) {
+        OperatorMap op=getSQLOp(concatenateOp);
+        if (op==null)
+            return null;
+        Iterator it=p.partsIterator();
+        int i=0;
+        List list=new ArrayList();
+        while (it.hasNext()) {
+            i++;
+            if (i%2==1) {
+                String literalPart=(String)it.next();
+                Result escaped=translateString(literalPart);
+                list.add(escaped);
+            } else {
+                Column c=(Column)it.next();
+                Result res=castToString(translateColumn(c));
+                if (res==null)
+                    return null;
+                list.add(res);
+            }
+        }
+        return op.applyInfix(list);
     }
     
     public Result translateNode(Node n) {
         if (n.isLiteral()) {
-            // TODO
+            LiteralLabel label=n.getLiteral();
+            String dType=label.getDatatypeURI();
+            String str=label.getValue().toString();
+            String lang=label.language();
+            if (dType!=null) {
+                if ("http://www.w3.org/2001/XMLSchema#int".equals(dType) || 
+                        "http://www.w3.org/2001/XMLSchema#float".equals(dType) || 
+                        "http://www.w3.org/2001/XMLSchema#double".equals(dType)) {
+                    return newResult(str,NumberType);
+                } else if ("http://www.w3.org/2001/XMLSchema#string".equals(dType)) {
+                    return newResult(SQLStatementMaker.escape(str),StringType);
+                }
+                return null;
+            } else if (lang!=null && !"".equals(lang)) {
+                return null;
+            }
+            return newResult(SQLStatementMaker.escape(str),StringType);
+        } else if (n.isURI()) {
+            String str=n.getURI();
+            return newResult(str,UriType);
         }
         return null;
     }
@@ -235,6 +380,10 @@ public class ExpressionTranslator {
     public static Result falseBuffer=newResult("false",BoolType);
         
     public Result translate(Q_LogicalAnd e) {
+        return translateAnd(e);
+    }
+
+    public Result translateAnd(Q_LogicalAnd e) {
         OperatorMap op=getSQLOp(e); // see at bottom
         List list=translateArgs(e, false, trueBuffer);
         if (list==null)
@@ -250,6 +399,9 @@ public class ExpressionTranslator {
     }
     
     public Result translate(Q_LogicalOr e) {
+        return translateOr(e);
+    }
+    public Result translateOr(Q_LogicalOr e) {
         OperatorMap op=getSQLOp(e); // see at bottom
         List list=translateArgs(e, true, falseBuffer);
         if (list==null)
@@ -270,6 +422,9 @@ public class ExpressionTranslator {
      * @return
      */
     public Result translate(Q_UnaryNot e) {
+        return translateNot(e);
+    }
+    public Result translateNot(Q_UnaryNot e) {
         OperatorMap op=getSQLOp(e); // see at bottom
         boolean oldWeaker=weaker;
         weaker=!weaker;
@@ -283,7 +438,7 @@ public class ExpressionTranslator {
             else if (exStr==falseBuffer)
                 result=trueBuffer;
             else 
-                result=op.applyUnary(result);
+                result=op.applyUnary(exStr);
         }
         return result;
     }
@@ -307,9 +462,6 @@ public class ExpressionTranslator {
             className = className.substring(className.lastIndexOf('.')+1) ;
         return exprBaseURI+className ;
     }
-    String opURL(String className) {
-        return constructURI(className);
-    }
     String opURL(Object obj) {
         return constructURI(obj.getClass().getName());
     }
@@ -318,19 +470,22 @@ public class ExpressionTranslator {
         return putOp(className,sqlOp,NoType);
     }
     OperatorMap putOp(String className,String sqlOp, int argTypes) {
-        return putOp(className, sqlOp, argTypes, argTypes, true, LeftType);
+        return putOp(className, sqlOp, argTypes, argTypes, SameType, LeftType);
+    }        
+    OperatorMap putOp(String className,String sqlOp, int argTypes, int returnType) {
+        return putOp(className, sqlOp, argTypes, argTypes, SameType, returnType);
     }        
     OperatorMap putOp(String className,String sqlOp, int leftTypes, int rightTypes, 
-                boolean sameType, int returnType) {
+                int leftRightConstraint, int returnType) {
         if (sqlOp==null) 
             return null;
-        String url=opURL(className);
+        String url=constructURI(className);
         OperatorMap op=new OperatorMap();
         opMap.put(url,op);
         op.rdqlOperator=url;
         op.sqlOperator=sqlOp;
         // op.argTypes=argType;
-        op.sameType=sameType;
+        op.sameType=(leftRightConstraint==SameType);
         op.leftTypes=leftTypes;
         op.rightTypes=rightTypes;
         op.returnType=returnType;
@@ -338,47 +493,59 @@ public class ExpressionTranslator {
     }
     /*
     OperatorMap getOp(String className) {
-        return (OperatorMap)opMap.get(opURL(className));
+        return (OperatorMap)opMap.get(constructURI(className));
     }
     OperatorMap getOp(Object obj) {
         return (OperatorMap)opMap.get(opURL(obj));
     }
     */
-    OperatorMap getSQLOp(Expression e) {
-        OperatorMap op=(OperatorMap)opMap.get(e.getFun());
+    
+    OperatorMap getSQLOp(String className) {
+        String fun=constructURI(className);
+        OperatorMap op=(OperatorMap)opMap.get(fun);
+        return op; // .sqlOperator;
+   }
+    OperatorMap getSQLOp(Object e) { // Expression e) {
+        // String fun=e.getFun(); sometimes returns exprBaseURI:..., 
+        // sometimes the fully qualified classname. 
+        // So we skip this "feature"
+        String fun=opURL(e); 
+       OperatorMap op=(OperatorMap)opMap.get(fun);
         return op; // .sqlOperator;
     }
     
     void setupOperatorMap() {
+        int NumberStringType=NumberType+StringType;
         if (opMap==null) {
             opMap=new HashMap();
-            putOp("Q_Add","+",NumberType+StringType);
+            putOp("Q_Add","+",NumberType);
             putOp("Q_BitAnd",null,NumberType);
             putOp("Q_BitOr",null,NumberType); // "||"
             putOp("Q_BitXor",null,NumberType);
             putOp("Q_Divide","/",NumberType);
-            putOp("Q_Equal","=",AnyType);
-            putOp("Q_GreaterThan",">",NumberType);
-            putOp("Q_GreaterThanOrEqual",">=");
+            putOp("Q_Equal","=",AnyType,AnyType,SameType,BoolType);
+            putOp("Q_GreaterThan",">",NumberType,BoolType);
+            putOp("Q_GreaterThanOrEqual",">=",NumberType,BoolType);
             putOp("Q_LeftShift",null,NumberType);
-            putOp("Q_LessThan","<");
-            putOp("Q_LessThanOrEqual","<=");
-            putOp("Q_LogicalAnd","AND");
-            putOp("Q_LogicalOr","OR");
+            putOp("Q_LessThan","<",NumberType,BoolType);
+            putOp("Q_LessThanOrEqual","<=",NumberType,BoolType);
+            putOp("Q_LogicalAnd","AND",BoolType,BoolType);
+            putOp("Q_LogicalOr","OR",BoolType,BoolType);
             putOp("Q_Modulus",null);
-            putOp("Q_Multiply","*");
-            putOp("Q_NotEqual","<>");
+            putOp("Q_Multiply","*",NumberType);
+            putOp("Q_NotEqual","<>",AnyType,AnyType,SameType,BoolType);
             putOp("Q_PatternLiteral",null);
             putOp("Q_RightSignedShift",null);
             putOp("Q_RightUnsignedShift",null);
-            putOp("Q_StringEqual","=");
+            putOp("Q_StringEqual","=",StringType,StringType,SameType,BoolType);
             putOp("Q_StringLangEqual",null);
             putOp("Q_StringMatch",null); // "LIKE"
             putOp("Q_StringNoMatch",null); // "NOT LIKE"
-            putOp("Q_Subtract","-");
-            putOp("Q_UnaryMinus","-").unary=true;
-            putOp("Q_UnaryNot","!").unary=true;
-            putOp("Q_UnaryPlus","+").unary=true;
+            putOp("Q_Subtract","-",NumberType);
+            putOp("Q_UnaryMinus","-",NumberType).unary=true;
+            putOp("Q_UnaryNot","NOT",BoolType).unary=true;
+            putOp("Q_UnaryPlus","+",NumberType).unary=true;
+            putOp(concatenateOp,"||",StringType);
         }
     }
     

@@ -43,9 +43,11 @@ public class D2RQQueryHandler extends SimpleQueryHandler implements QueryHandler
     
     public Stage patternStage( Mapping map, ExpressionSet constraints, Triple [] t )
     { 
-    		if (runVersion2) 
-    			return new D2RQPatternStage2( graph, map, constraints, t );
-    		else 
+    		if (runVersion2) {
+    		    D2RQPatternStage2 inst= new D2RQPatternStage2( graph, map, constraints, t );
+    			inst.setup();
+    			return inst;
+    		} else 
     			return new D2RQPatternStage( graph, map, constraints, t ); // jg see PatternStage for overriding
     }
 }

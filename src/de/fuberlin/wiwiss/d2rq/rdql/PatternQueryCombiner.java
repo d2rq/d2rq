@@ -20,6 +20,7 @@ import com.hp.hpl.jena.graph.query.Mapping;
 import com.hp.hpl.jena.graph.query.PatternStage;
 import com.hp.hpl.jena.graph.query.Pattern;
 import com.hp.hpl.jena.graph.query.Pipe;
+import com.hp.hpl.jena.graph.query.ValuatorSet;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
@@ -57,7 +58,7 @@ class PatternQueryCombiner {
 	protected GraphD2RQ graph;
 	protected Triple [] triples; // nodes are ANY or fixed
 	protected int tripleCount;
-	protected ExpressionSet constraints; // RDQL-Constraints
+	protected Collection constraints; // RDQL-Constraints
 
 	VariableBindings bindings; // includes variables and sharedVariables
 	
@@ -70,7 +71,7 @@ class PatternQueryCombiner {
 	/** holds for each triple its disjunctive SQL-TripleQuery Objects */
 	protected TripleQuery[][] tripleQueries; 
 	
-public PatternQueryCombiner( GraphD2RQ graph, VariableBindings bindings, ExpressionSet constraints, Triple [] triples ) {
+public PatternQueryCombiner( GraphD2RQ graph, VariableBindings bindings, Collection constraints, Triple [] triples ) {
 	this.graph=graph;
 	this.bindings=bindings;
 	tripleCount=triples.length;

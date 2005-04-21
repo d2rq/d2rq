@@ -4,9 +4,15 @@
 
 package de.fuberlin.wiwiss.d2rq.rdql;
 
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.query.Domain;
+import com.hp.hpl.jena.graph.query.Expression;
 import com.hp.hpl.jena.graph.query.ExpressionSet;
 import com.hp.hpl.jena.graph.query.Mapping;
 import com.hp.hpl.jena.graph.query.PatternStage;
@@ -33,8 +39,7 @@ public class D2RQPatternStage2 extends CombinedPatternStage {
     // only when updated with previous stage (see varInfo.boundDomainIndexToShared)
 
 	private GraphD2RQ graph;
-
-	private ExpressionSet constraints;
+	private Collection expressionSet=new ArrayList();
 
 	// instanciate just one PatternQueryCombiner? it could do some caching
 	// or leave the caching for graph? e.g. triple -> list of bridges
@@ -45,7 +50,12 @@ public class D2RQPatternStage2 extends CombinedPatternStage {
 		// some contraints are eaten up at this point!
 		// so use s.th. like a clone() and setter method at invocation time
 		D2RQPatternStage2.this.graph = graph;
-		D2RQPatternStage2.this.constraints = constraints;
+	}
+	
+	// overridden
+	protected void hookPrepareExpression(Expression e, boolean evaluable) {
+	    if (evaluable)
+	        expressionSet.add(e);
 	}
 
 	/**
@@ -57,7 +67,7 @@ public class D2RQPatternStage2 extends CombinedPatternStage {
 	 */
 	protected ClosableIterator resultIteratorForTriplePattern(Triple[] triples) {
 		PatternQueryCombiner combiner = new PatternQueryCombiner(graph,
-				varInfo, constraints, triples); // pass map?
+				varInfo, expressionSet, triples); // pass map?
 		combiner.setup();
 		// maybe it would be more efficient to reduce matching by checking
 		// just the difference set
