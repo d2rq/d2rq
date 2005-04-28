@@ -115,7 +115,6 @@ class OperatorMap {
     
     /**
      * creates a unary sql expression
-     * @param op
      * @param arg
      * @return result
      */
