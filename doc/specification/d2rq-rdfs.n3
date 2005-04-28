@@ -6,7 +6,7 @@
 
 # -----------------------------------------------
 #
-# D2RQ Language Specification V0.2
+# D2RQ Language Specification V0.3
 #
 # -----------------------------------------------
 
@@ -29,6 +29,18 @@
 # D2RQ Namespace
 @prefix :       <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
 
+# -----------------------------------------------
+# Processing Instructions
+# -----------------------------------------------
+
+:ProcessingInstructions rdf:type rdfs:Class ;
+    		rdfs:comment "Attach processing instructions to nodes of this type." 
+    		.
+
+:queryHandler	rdf:type rdf:Property ;
+				rdfs:comment "a Java class name that specifies the graphs QueryHandler";
+	   			rdfs:domain :ProcessingInstructions
+            	.
 
 # -----------------------------------------------
 # Database
@@ -62,6 +74,15 @@
 :dateColumn     rdf:type rdf:Property ;
                 rdfs:domain :Database
                 .
+:allowDistinct  rdf:type rdf:Property ;
+				rdfs:comment "Value: true/false that describe the databases ability to handle DISTINCT correctly. (e.g. MSAccess cuts fields longer than 256 chars)";
+                rdfs:domain :Database
+                .
+:expressionTranslator     rdf:type rdf:Property ;
+				rdfs:comment "A Java class or string null (for no expression translation";
+                rdfs:domain :Database
+                .
+
 
 
 # -----------------------------------------------
@@ -132,6 +153,9 @@
              	rdfs:domain :PropertyBridge
              	.
 :join        	rdf:type rdf:Property ;
+             	rdfs:domain :PropertyBridge 
+             	.
+:alias        	rdf:type rdf:Property ;
              	rdfs:domain :PropertyBridge 
              	.
 :pattern     	rdf:type rdf:Property ;

@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <?xml version="1.0" encoding="utf-8"?><HTML lang=en xml:lang="en" 
-xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>D2RQ V0.2  -  User Manual</TITLE>
+xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>D2RQ V0.3  -  User Manual</TITLE>
 <META http-equiv=Content-Type content="text/html; charset=utf-8">
 <STYLE type=text/css>
 
@@ -180,13 +180,13 @@ P.footer {
 </HEAD>
 <BODY>
 <DIV class=head> 
-  <H1 id=title>D2RQ V0.2 - Treating Non-RDF Relational Databases as Virtual RDF 
+  <H1 id=title>D2RQ V0.3 - Treating Non-RDF Relational Databases as Virtual RDF 
     Graphs</H1>
   <H2 id=doctype>User Manual and Language Specification</H2>
 <DL>
   <DT>This Version: 
     <DD><A 
-  href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20040804/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20040804/</A> 
+  href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20050429/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20040804/</A> 
     <DT>Latest Version: 
     <DD><A 
   href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/</A>
@@ -197,6 +197,9 @@ P.footer {
     <DD>  
     <DD><a href="http://richard.cyganiak.de/">Richard Cyganiak</a> (Freie Universit&auml;t Berlin, Germany) 
     <DD>  
+    <DD><a href="http://www.wiwiss.fu-berlin.de/suhl/ueber_uns/team/Joerg_Garbers.htm" target="_blank">J&ouml;rg 
+      Garbers</a> (Freie Universit&auml;t Berlin, Germany) V0.2 to V0.3 code.
+    <DD>  
   <DT>  
 </DL>
 <P>&nbsp;</P>
@@ -206,7 +209,7 @@ P.footer {
 <P>As Semantic Web technologies are getting mature, there is a growing need for 
   RDF applications to access the content of huge, live, non-RDF, legacy databases 
   without having to replicate the whole database into RDF. This document describes 
-  D2RQ V0.2, a declarative mapping language for treating non-RDF relational databases 
+  D2RQ V0.3, a declarative mapping language for treating non-RDF relational databases 
   as virtual RDF graphs within the Jena Semantic Web development toolkit.</P>
 <DIV class=status>
   <P>    <!-- End Status-Of-This-Document Text -->
@@ -228,6 +231,8 @@ P.footer {
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.6 <a href="#conditional">Conditional Mappings</a>
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.7 <a href="#hint">Performance Optimization using 
       Hint Properties</a>
+    <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.8 <a href="#processing">d2rq:ProcessingInstructions</a>
+      
     <LI>4. <a href="#usingD2RQ">Using D2RQ within Jena</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.1. <a href="#usingmodel">Using D2RQ with the 
       Jena model API</a> 
@@ -243,7 +248,7 @@ P.footer {
 <HR>
 
 <H1><A id=introduction name=introduction>1. Introduction</A></H1>
-<P>This document describes D2RQ V0.2, a declarative mapping language for treating 
+<P>This document describes D2RQ V0.3, a declarative mapping language for treating 
   non-RDF, relational databases as virtual, read-only RDF graphs within the Jena 
   toolkit [<a href="#jena">Jena</a>]. D2RQ offers a flexible access mechanism 
   to the content of huge, non-RDF databases without having to replicate the database 
@@ -296,6 +301,8 @@ P.footer {
   <li> how D2RQ translates different find(spo) patterns into SQL queries: <a href="D2RQ_Find_Examples.txt">D2RQ_Find_Examples.txt</a></li>
   <li> how D2RQ translates different RDQL queries into a series of SQL queries: 
     <a href="D2RQ_RDQL_Examples.txt">D2RQ_RDQL_Examples.txt</a> </li>
+  <li> how D2RQ translates complete RDQL queries into complex SQL queries:
+    <a href="QueryHandler_Test_Output.txt">QueryHandler_Test_Output.txt</a> </li>
 </ul>
 
 <p>&nbsp;</p>
@@ -412,6 +419,19 @@ db1:location rdf:type d2rq:DatatypePropertyBridge ;
     <td>Specifies that a database column contains dates. D2RQ will use # quotes 
       around values from this column in SQL statements.</td>
   </tr>
+  <tr> 
+    <td><strong>d2rq:allowDistinct</strong></td>
+    <td>Specifies the databases ability to handle DISTINCT correctly. 
+    Value: "true" or "false". For example MSAccess cuts fields longer than 256 chars.</td>
+  </tr>
+  <tr> 
+    <td><strong>d2rq:expressionTranslator </strong></td>
+    <td>Specifies a Java class that can translate Jena RDQL expression objects 
+    into SQL expressions that are understood by the database.
+    "null" means: no expression translation. Otherwise full SQL 92 is assumed.
+    For Example MySQL is not completely SQL 92 conform (string concatenation ...).</td>
+  </tr>
+  
 </table>
 <P>d2rq:numericColumn, d2rq:textColumn, d2rq:dateColumn define the quoting style 
   used within SQL WHERE clauses. You must define the column type for all columns 
@@ -611,6 +631,11 @@ db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
       then the tables have to be joined together using one or more d2rq:join
       properties.
       See <a href="#exjoin">example</a> below.</td>
+  </tr>
+  <tr>
+    <td valign="top"><strong>d2rq:alias</strong></td>
+    <td valign="top">Aliases are used to join a table with itself. This can be
+      used to express a "works for" or "is child of" property.</td>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:condition</strong></td>
@@ -1024,6 +1049,22 @@ db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
   that returns <tt>null</tt> for unwanted database values.</p>
 <p>&nbsp;</p>
 
+<h2><a name="processing" id="processing"></a>3.8 Processing Instructions</h2>
+<p>To configure the D2RQ mapping by modifying the source code is one option.
+A better one for most of the users is to specify a configuration within the D2RQ map.
+</p>
+
+<p><strong>Example: Specifying a different query handler</strong></p>
+<div class="trigOuter trigInner">
+  <pre>:ProcessingInstructions1 rdf:type d2rq:ProcessingInstructions;
+            d2rq:queryHandler "com.hp.hpl.jena.graph.query.SimpleQueryHandler".</pre>
+</div>
+<p>The d2rq:queryHandler property can be used to specify a query handler that is 
+  different from the default query handler which in V0.3 is D2RQQueryHandler.
+  So if You wonder wether the bug is in the new features of V0.3, switch back
+  to the slow but highly tested SimpleQueryHandler.</p>
+<p>&nbsp;</p>
+
 <HR title="Separator for header">
 
 <H1><A id=ntrip_grammar name=usingD2RQ>4.</A> Using D2RQ within Jena</H1>
@@ -1158,6 +1199,7 @@ name=change_log>6. Change Log</A></H1>
 <ul>
   <li>2004-06-15: Initial version of this document.</li>
   <li>2004-08-03: Updated reflecting changes in D2RQ v0.2.</li>
+  <li>2005-04-29: Updated for D2RQ v0.3.</li>
 </ul>
 <P>&nbsp;</P>
 <HR>
