@@ -12,6 +12,7 @@ import com.hp.hpl.jena.graph.*;
  * <p>History:<br>
  * 06-03-2004: Initial version of this class.<br>
  * 08-03-2004: Added new terms for version 0.2<br>
+ * 28-04-2005: Added new terms for version 0.3<br>
  * 
  * @author Chris Bizer chris@bizer.de
  * @version V0.2

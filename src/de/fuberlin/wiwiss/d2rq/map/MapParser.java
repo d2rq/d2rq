@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.2 2005/04/28 15:58:33 garbers Exp $
+ * $Id: MapParser.java,v 1.3 2005/04/28 19:21:20 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -94,9 +94,10 @@ public class MapParser {
 	
 	private void parseProcessingInstructions() {
 	    ExtendedIterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.ProcessingInstructions);
-	    if (!it.hasNext()) {
-	        Node instructions=(Node)it.next();
-	        Map nextMap=findLiteralsAsMap(instructions, Node.ANY, null);		    
+	    while (it.hasNext()) {
+	        Node instructions=((Triple) it.next()).getSubject();
+	        // predicate is key, object is value => false parameter (XML style)
+	        Map nextMap=findLiteralsAsMap(instructions, Node.ANY, null, false,false); 		    
 	        processingInstructions.putAll(nextMap);
 	    }
 	}
@@ -621,20 +622,32 @@ public class MapParser {
 	}
 
 	private Map findLiteralsAsMap(Node subject, Node predicate, Map predicateToObjectMap) {
+	    return findLiteralsAsMap(subject, predicate, predicateToObjectMap, true,true);
+	}
+	private Map findLiteralsAsMap(Node subject, Node predicate, Map predicateToObjectMap, boolean objectIsKey,boolean warnIfNotLiteral) {
 		Map result = new HashMap();
 		ExtendedIterator itColText = this.graph.find(subject, predicate, Node.ANY);
 		while (itColText.hasNext()) {
 			Triple t = (Triple) itColText.next();
-			if (!t.getObject().isLiteral()) {
-				Logger.instance().warning("Ignoring non-literal " + toQName(predicate) +
-						" for " + subject + " (\"" + t.getObject() + "\")");
+			subject=t.getSubject();
+			predicate=t.getPredicate();
+			Node object=t.getObject();
+			if (!object.isLiteral()) {
+			    if (warnIfNotLiteral) {
+			        Logger.instance().warning("Ignoring non-literal " + toQName(predicate) +
+						" for " + subject + " (\"" + object + "\")");
+			    }
 				continue;
 			}
-			Object value=(predicateToObjectMap==null)? predicate : predicateToObjectMap.get(predicate);
+			String objectString=object.getLiteral().getLexicalForm();
+			Object predicateValue=(predicateToObjectMap==null)? predicate : predicateToObjectMap.get(predicate);
 //			if (value==null) {
 //			    throw new RuntimeException("Unmapped database type " + predicate);
 //			}
-			result.put(t.getObject().getLiteral().getLexicalForm(), value);
+			if (objectIsKey) // most cases
+			    result.put(objectString, predicateValue); // put(key, value)
+			else // xml style
+			    result.put(predicateValue, objectString); 
 		}
 		return result;
 	}

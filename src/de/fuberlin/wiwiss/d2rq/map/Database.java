@@ -190,10 +190,10 @@ public class Database {
        }
     }
     
-    public  boolean databaseMayUseDistict=false;
+   public boolean databaseMayUseDistinct=true;
 
    public void setAllowDistinct(boolean b) {
-        databaseMayUseDistict=b;
+        databaseMayUseDistinct=b;
     }
 
     /** 
@@ -201,10 +201,10 @@ public class Database {
      * For example MSAccess cuts strings larger than 256 bytes when queried
      * with the DISTINCT keyword.
      * TODO We would need some assertions about a database or specific columns.
-     * @return databaseMayUseDistict 
+     * @return databaseMayUseDistinct 
      */
     public boolean correctlyHandlesDistinct() {
-        return databaseMayUseDistict;
+        return databaseMayUseDistinct;
     }
     
     private String expressionTranslator=null; // class name, if given

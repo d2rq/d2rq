@@ -58,8 +58,7 @@ public class ExpressionTranslator {
     boolean weaker=true;  
     int argType=BoolType;
 
-    static Map opMap; // rdql operator to sql operator map. null means: no map 
-//    static Map argTypeMap; // rdql operator to type map
+    Map opMap; // rdql operator to sql operator map. null means: no map 
     
     public static final int NoType=0;
     public static final int BoolType=1;
@@ -565,8 +564,7 @@ public class ExpressionTranslator {
             putOp("Q_UnaryMinus","-",NumberType).unary=true;
             putOp("Q_UnaryNot","NOT",BoolType).unary=true;
             putOp("Q_UnaryPlus","+",NumberType).unary=true;
-            // putOp(concatenateOp,"||",StringType); // SQL 92
-            putOp(concatenateOp,"CONCAT",StringType).functional=true; // mySQL
+            putOp(concatenateOp,"||",StringType); // SQL 92
         }
     }
     

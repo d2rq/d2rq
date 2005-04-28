@@ -140,6 +140,11 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	}
 
 	/**
+	 * Returns a QueryHandler for this graph.
+	 * The query handler class can be set by the mapping.
+	 * It then must have exact constructor signature QueryHandler(Graph)
+	 * For some reasons, Java does not allow to call getConstructor(GraphD2RQ.class)
+	 * on SimpleQueryHandler class.
 	 * @see com.hp.hpl.jena.graph.Graph#queryHandler
 	 */
 	public QueryHandler queryHandler() {
@@ -147,12 +152,14 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		// on the other hand: new instance guaranties that all information with handler
 		// is up to date.
 		checkOpen();
-		String queryHandler=(String)processingInstructions.get(D2RQ.ProcessingInstructions);
+		String queryHandler=(String)processingInstructions.get(D2RQ.queryHandler);
 		if (queryHandler!=null) {
 		    try {
 		        Class c=Class.forName(queryHandler);
-		        Constructor con=c.getConstructor(new Class[]{this.getClass()});
-		        return (QueryHandler)con.newInstance(new Object[]{this});
+		        Class thisClass=this.getClass();
+		        Constructor con=c.getConstructor(new Class[]{Graph.class}); 
+		        QueryHandler qh=(QueryHandler)con.newInstance(new Object[]{this});
+		        return qh;
 		    } catch (Exception e) {
 		        throw new RuntimeException(e);
 		    }

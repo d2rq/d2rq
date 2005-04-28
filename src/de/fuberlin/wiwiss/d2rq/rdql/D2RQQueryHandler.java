@@ -33,9 +33,9 @@ public class D2RQQueryHandler extends SimpleQueryHandler implements QueryHandler
 	private GraphD2RQ graph; // see also SimpleQueryHandler.graph
 	private boolean doFastpath;  // if true, enable fastpath optimization
 
-    public D2RQQueryHandler( GraphD2RQ graph ) {
-        super((Graph)graph);
-		this.graph = graph;
+    public D2RQQueryHandler( Graph graph ) {
+        super(graph);
+		this.graph = (GraphD2RQ)graph;
 		doFastpath = true;
     }     
    

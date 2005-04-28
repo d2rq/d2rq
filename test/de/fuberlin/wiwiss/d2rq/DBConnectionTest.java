@@ -157,9 +157,15 @@ public class DBConnectionTest extends TestCase {
 		String distinctResult = performQuery(c, distinct);
 		String nonDistinctResult = performQuery(c, nonDistinct);
 		c.close();
-		if (!distinctResult.equals(nonDistinctResult))
-		    System.out.println("testDistinct() has a mismatch. Please use a standard (!) Database! ;-)");
-		// assertEquals(distinctResult,nonDistinctResult);
+		if (!distinctResult.equals(nonDistinctResult)) {
+		    if (firstDatabase.correctlyHandlesDistinct()) {
+		       System.out.println("testDistinct() has a mismatch." +
+		               " Please use a better Database or " +
+		               "put into your Database specification " +
+		               "d2rq:allowDistinct \"true\".");
+		       assertEquals(distinctResult,nonDistinctResult);
+		    }
+		}
 	}
 	
 	public void testLong() throws SQLException {

@@ -96,6 +96,9 @@ class ConstraintHandler {
      * about nodes, such as  ! (?a = "v").
      * Note that the SQL term given to the database becomes stronger,
      * so that less entries are returned.
+     * The class of the rdqlTranslator is settable in the mapping file.
+     * Note that its constructor must have exactly the same signature as
+     * ExpressionTranslator. This is likely to change in the future.
      * @param sql contains information about the SQL dialect of the database and aliases.
      */
     void addRDQLConstraints(SQLStatementMaker sql) {
