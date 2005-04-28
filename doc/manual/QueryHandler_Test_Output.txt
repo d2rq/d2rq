@@ -1,0 +1,78 @@
+RDQLTest run with MSAccess
+	# ODBC database connection (MSAccess)
+		d2rq:odbcDSN "IswcDB";
+		d2rq:expressionTranslator "null";
+		d2rq:allowDistinct "false";
+
+
+RDQL-Query: SELECT ?x, ?y WHERE (<http://www.conference.org/conf02004/paper#Paper1>, ?x, ?y)
+SQL statement executed: SELECT T0_Conferences.ConfID FROM Papers AS T0_Papers , Conferences AS T0_Conferences WHERE T0_Conferences.ConfID=T0_Papers.Conference AND T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT T0_Topics.TopicID FROM Topics AS T0_Topics , Papers AS T0_Papers , Rel_Paper_Topic AS T0_Rel_Paper_Topic WHERE T0_Rel_Paper_Topic.TopicID=T0_Topics.TopicID AND T0_Papers.PaperID=T0_Rel_Paper_Topic.PaperID AND T0_Papers.PaperID=1 AND T0_Papers.Publish = 1 AND T0_Rel_Paper_Topic.RelationType = 2;
+SQL statement executed: SELECT 1 FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT T0_Papers.Year FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT T0_Papers.Title FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT T0_Topics.TopicID FROM Topics AS T0_Topics , Papers AS T0_Papers , Rel_Paper_Topic AS T0_Rel_Paper_Topic WHERE T0_Papers.PaperID=T0_Rel_Paper_Topic.PaperID AND T0_Rel_Paper_Topic.TopicID=T0_Topics.TopicID AND T0_Papers.PaperID=1 AND T0_Papers.Publish = 1 AND T0_Rel_Paper_Topic.RelationType = 1;
+SQL statement executed: SELECT T0_Papers.Abstract FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT T0_Persons.URI FROM Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT T0_Papers.URI FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SimpleQueryHandler vs. D2RQQueryHandler = 36ms(5/6/9) : 28ms(9/10/10) (duration - SQL queries/rows/fields)
+
+RDQL-Query: SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), (?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y)
+SQL statement executed: SELECT T0_Papers.PaperID, T0_Persons.URI, T1_Persons.Email, T1_Persons.URI FROM Persons AS T1_Persons , Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Papers.Publish = 1 AND T0_Persons.URI=T1_Persons.URI;
+SimpleQueryHandler vs. D2RQQueryHandler = 20ms(8/14/21) : 9ms(1/7/28) (duration - SQL queries/rows/fields)
+
+RDQL-Query: SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), (?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y) AND ! (?x eq ?z)
+SQL statement executed: SELECT T0_Papers.PaperID, T0_Persons.URI, T1_Persons.Email, T1_Persons.URI FROM Persons AS T1_Persons , Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Papers.Publish = 1 AND T0_Persons.URI=T1_Persons.URI;
+SimpleQueryHandler vs. D2RQQueryHandler = 23ms(8/14/21) : 7ms(1/7/28) (duration - SQL queries/rows/fields)
+
+RDQL-Query: SELECT ?x, ?z, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#primaryTopic>, ?z), (?z, <http://annotation.semanticweb.org/iswc/iswc.daml#name>, ?y)
+SQL statement executed: SELECT T0_Papers.PaperID, T0_Topics.TopicID, T1_Topics.TopicName, T1_Topics.TopicID FROM Topics AS T0_Topics , Papers AS T0_Papers , Rel_Paper_Topic AS T0_Rel_Paper_Topic , Topics AS T1_Topics WHERE T0_Papers.PaperID=T0_Rel_Paper_Topic.PaperID AND T0_Rel_Paper_Topic.TopicID=T0_Topics.TopicID AND T0_Papers.Publish = 1 AND T0_Rel_Paper_Topic.RelationType = 1;
+SimpleQueryHandler vs. D2RQQueryHandler = 12ms(4/6/9) : 10ms(1/45/180) (duration - SQL queries/rows/fields)
+
+RDQL-Query: SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y), (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language'@en)
+SQL statement executed: SELECT T0_Papers.PaperID, T0_Persons.URI, T1_Papers.PaperID FROM Papers AS T1_Papers , Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Papers.Publish = 1 AND T1_Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language' AND T1_Papers.Publish = 1 AND T0_Papers.PaperID=T1_Papers.PaperID;
+SimpleQueryHandler vs. D2RQQueryHandler = 21ms(8/9/16) : 6ms(1/2/6) (duration - SQL queries/rows/fields)
+
+RDQL-Query: SELECT ?x, ?y, ?a WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y), (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language'@en), (?y, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?a)
+SQL statement executed: SELECT T0_Papers.PaperID, T0_Persons.URI, T1_Papers.PaperID, T2_Persons.URI, T2_Persons.Email FROM Papers AS T1_Papers , Papers AS T0_Papers , Persons AS T2_Persons , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.Publish = 1 AND T1_Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language' AND T1_Papers.Publish = 1 AND T2_Persons.URI=T0_Persons.URI AND T0_Papers.PaperID=T1_Papers.PaperID;
+SimpleQueryHandler vs. D2RQQueryHandler = 32ms(10/11/18) : 9ms(1/2/10) (duration - SQL queries/rows/fields)
+
+==============================================================================
+
+RDQLTest run with MySQL
+        d2rq:odbcDSN "myiswc";
+		d2rq:allowDistinct "true";
+		d2rq:expressionTranslator "de.fuberlin.wiwiss.d2rq.rdql.MySQLExpressionTranslator";
+
+
+RDQL-Query: SELECT ?x, ?y WHERE (<http://www.conference.org/conf02004/paper#Paper1>, ?x, ?y)
+SQL statement executed: SELECT DISTINCT T0_Conferences.ConfID FROM Papers AS T0_Papers , Conferences AS T0_Conferences WHERE T0_Conferences.ConfID=T0_Papers.Conference AND T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT DISTINCT T0_Topics.TopicID FROM Topics AS T0_Topics , Papers AS T0_Papers , Rel_Paper_Topic AS T0_Rel_Paper_Topic WHERE T0_Rel_Paper_Topic.TopicID=T0_Topics.TopicID AND T0_Papers.PaperID=T0_Rel_Paper_Topic.PaperID AND T0_Papers.PaperID=1 AND T0_Papers.Publish = 1 AND T0_Rel_Paper_Topic.RelationType = 2;
+SQL statement executed: SELECT DISTINCT T0_Papers.Year FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT DISTINCT T0_Papers.Title FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT DISTINCT 1 FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT DISTINCT T0_Topics.TopicID FROM Topics AS T0_Topics , Papers AS T0_Papers , Rel_Paper_Topic AS T0_Rel_Paper_Topic WHERE T0_Rel_Paper_Topic.TopicID=T0_Topics.TopicID AND T0_Papers.PaperID=T0_Rel_Paper_Topic.PaperID AND T0_Papers.PaperID=1 AND T0_Papers.Publish = 1 AND T0_Rel_Paper_Topic.RelationType = 1;
+SQL statement executed: SELECT DISTINCT T0_Papers.Abstract FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT DISTINCT T0_Persons.URI FROM Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SQL statement executed: SELECT DISTINCT T0_Papers.URI FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;
+SimpleQueryHandler vs. D2RQQueryHandler = 45ms(5/6/9) : 26ms(9/10/10) (duration - SQL queries/rows/fields)
+
+RDQL-Query: SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), (?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y)
+SQL statement executed: SELECT DISTINCT T0_Papers.PaperID, T0_Persons.URI, T1_Persons.Email, T1_Persons.URI FROM Persons AS T1_Persons , Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Papers.Publish = 1 AND T0_Persons.URI=T1_Persons.URI;
+SimpleQueryHandler vs. D2RQQueryHandler = 17ms(8/14/21) : 9ms(1/7/28) (duration - SQL queries/rows/fields)
+
+RDQL-Query: SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), (?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y) AND ! (?x eq ?z)
+SQL statement executed: SELECT DISTINCT T0_Papers.PaperID, T0_Persons.URI, T1_Persons.Email, T1_Persons.URI FROM Persons AS T1_Persons , Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.Publish = 1 AND T0_Persons.URI=T1_Persons.URI AND (NOT (CONCAT('http://www.conference.org/conf02004/paper#Paper' , CAST(T0_Papers.PaperID AS char) , '') = T0_Persons.URI));
+SimpleQueryHandler vs. D2RQQueryHandler = 17ms(8/14/21) : 9ms(1/7/28) (duration - SQL queries/rows/fields)
+
+RDQL-Query: SELECT ?x, ?z, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#primaryTopic>, ?z), (?z, <http://annotation.semanticweb.org/iswc/iswc.daml#name>, ?y)
+SQL statement executed: SELECT DISTINCT T0_Papers.PaperID, T0_Topics.TopicID, T1_Topics.TopicName, T1_Topics.TopicID FROM Topics AS T0_Topics , Papers AS T0_Papers , Rel_Paper_Topic AS T0_Rel_Paper_Topic , Topics AS T1_Topics WHERE T0_Rel_Paper_Topic.TopicID=T0_Topics.TopicID AND T0_Papers.PaperID=T0_Rel_Paper_Topic.PaperID AND T0_Papers.Publish = 1 AND T0_Rel_Paper_Topic.RelationType = 1;
+SimpleQueryHandler vs. D2RQQueryHandler = 9ms(4/6/9) : 15ms(1/45/180) (duration - SQL queries/rows/fields)
+
+RDQL-Query: SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y), (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language'@en)
+SQL statement executed: SELECT DISTINCT T0_Papers.PaperID, T0_Persons.URI, T1_Papers.PaperID FROM Papers AS T1_Papers , Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.Publish = 1 AND T1_Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language' AND T1_Papers.Publish = 1 AND T0_Papers.PaperID=T1_Papers.PaperID;
+SimpleQueryHandler vs. D2RQQueryHandler = 14ms(8/9/16) : 4ms(1/2/6) (duration - SQL queries/rows/fields)
+
+RDQL-Query: SELECT ?x, ?y, ?a WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y), (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language'@en), (?y, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?a)
+SQL statement executed: SELECT DISTINCT T0_Papers.PaperID, T0_Persons.URI, T1_Papers.PaperID, T2_Persons.URI, T2_Persons.Email FROM Papers AS T1_Papers , Papers AS T0_Papers , Persons AS T2_Persons , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.Publish = 1 AND T1_Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language' AND T1_Papers.Publish = 1 AND T2_Persons.URI=T0_Persons.URI AND T0_Papers.PaperID=T1_Papers.PaperID;
+SimpleQueryHandler vs. D2RQQueryHandler = 15ms(10/11/18) : 4ms(1/2/10) (duration - SQL queries/rows/fields)
