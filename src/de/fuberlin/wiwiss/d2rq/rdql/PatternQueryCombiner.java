@@ -42,7 +42,7 @@ import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
  * then  call resultTriplesIterator().
  * <p>
  * This class does not need to know anything about D2RQPatternStage, except
- * it's {@link VariableBinding} semantics.
+ * it's {@link VariableBindings} semantics.
  * <p>
  * It seems that some of the information computed here could be reused in successive
  * calls from D2RQPatternStage2. On the other hand, lots of preprocessing is

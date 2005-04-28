@@ -12,7 +12,7 @@ import java.util.Iterator;
  * normal form (a_1_1 \/ ... \/ a_1_M1) /\ .... /\ (a_n_1 \/ ... \/ a_n_Mn)
  * we want to multiplicate it out into conjunctive normal form
  * (a_1_1 /\ ... /\ a_n_1) \/ .... \/ (a_1_M1 /\ ... /\ a_n_Mn).
- * We can expect to get M1 * ... * Mn factors {@link #estimatedNumberOfResults).
+ * We can expect to get M1 * ... * Mn factors {@link #estimatedNumberOfResults}.
  * 
  * @author jgarbers
  *

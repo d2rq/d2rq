@@ -107,7 +107,7 @@ public class TablePrefixer {
 	/** 
 	 * Actual prefixing method with some plausibility checks.
 	 * @param table
-	 * @return
+	 * @return prefixed string
 	 */
 	public String prefixString(String table) {
 		if (tablePrefix==null)

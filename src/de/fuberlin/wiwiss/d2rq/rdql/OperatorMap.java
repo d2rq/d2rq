@@ -74,7 +74,7 @@ class OperatorMap {
      * Creates an sql expression that contains sqlOperator at infix positions
      * or as the head of a function call.
      * @param args
-     * @return
+     * @return result
      */
     public Result applyList(List args) {
         StringBuffer sb;
@@ -117,7 +117,7 @@ class OperatorMap {
      * creates a unary sql expression
      * @param op
      * @param arg
-     * @return
+     * @return result
      */
     public Result applyUnary(Result arg) {
         StringBuffer result;

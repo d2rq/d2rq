@@ -159,7 +159,7 @@ public class ExpressionTranslator {
      * no operator checking is performed
      * @param op
      * @param e
-     * @return
+     * @return result
      */
     public Result translateUnary(OperatorMap op, Expression e) {
         Expression ex=e.getArg(0);
@@ -171,10 +171,6 @@ public class ExpressionTranslator {
     }
 
     
-    /**
-     * @param e
-     * @return
-     */
     public Result translate(ParsedLiteral e) {
         return translateParsedLiteral(e);
     }
@@ -209,7 +205,7 @@ public class ExpressionTranslator {
      * translate a variable.
      * To translate a variable, we must either resolve its value or a reference to a column
      * @param var
-     * @return
+     * @return translated variable
      */
     public Result translate(Q_Var var) {
         return translateQ_Var(var);
@@ -375,7 +371,7 @@ public class ExpressionTranslator {
      * @param e the RDQL expression
      * @param strict if set, all arguments must be translatable to create a complex SQL expression
      * @param neutral the neutral element of the current operation
-     * @return
+     * @return tranlated argument list
      */
     public List translateArgs(Expression e, boolean strict, Result neutral) {
         List list=new ArrayList();
@@ -433,8 +429,6 @@ public class ExpressionTranslator {
     
     /**
      * is this really the logical Not or bit not or both?
-     * @param e
-     * @return
      */
     public Result translate(Q_UnaryNot e) {
         return translateNot(e);
