@@ -1,10 +1,15 @@
 //
-//  RDQLHandler.java
-//  XCode
+//  RDQLHandler.txt
 //
 //  Created by Joerg Garbers on 20.01.05.
 //  Copyright 2005 Joerg Garbers. All rights reserved.
 //
+
+This pseudo code contains the ideas that lead to the implementaion PatternQueryCombinder.
+Some features have not been implemented, some have a different implemnetation now.
+Do not take this for reference.
+
+////////////////////////////////////////////
 
 // Classes that participate in the query handler in Jena: (all constructors add Graph access)
 QueryHandler - SimpleQueryHandler

@@ -1,7 +1,6 @@
 /*
- * Created on 14.04.2005 by Joerg Garbers, FU-Berlin
- *
- */
+(c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.Iterator;
@@ -27,6 +26,7 @@ class OperatorMap {
     public int returnType=LeftType; 
     public boolean sameType;
     public boolean unary=false;
+    public boolean functional=false;
     
     public static final int NoType=ExpressionTranslator.NoType;
     public static final int LeftRightType=16; // different type for left and right operand
@@ -43,6 +43,13 @@ class OperatorMap {
     public int resultType(Result left, Result right) {
         return resultType(left,right,false);
     }
+    /**
+     * Computes the type that results from applying the operator to left (and right).
+     * @param left
+     * @param right
+     * @param unaryApplication
+     * @return one of the types defined in ExpressionTranslator
+     */
     public int resultType(Result left, Result right, boolean unaryApplication) {
         int ret=returnType;
         if (this.unary!=unaryApplication)
@@ -64,13 +71,17 @@ class OperatorMap {
         return ret;
     }
     /**
-     * creates an sql expression that contains sqlOperator at infix positions
-     * @param op
+     * Creates an sql expression that contains sqlOperator at infix positions
+     * or as the head of a function call.
      * @param args
      * @return
      */
-    public Result applyInfix(List args) {
-        StringBuffer sb=new StringBuffer("(");
+    public Result applyList(List args) {
+        StringBuffer sb;
+        if (!functional) 
+            sb=new StringBuffer("(");
+        else 
+            sb=new StringBuffer(sqlOperator+"(");
         Result returnResult=ExpressionTranslator.newResult(sb,NoType);
         Result leftResult=null;
         Result rightResult=null;
@@ -90,7 +101,10 @@ class OperatorMap {
                 returnResult.setType(returnType);
                 leftResult=returnResult;
                 sb.append(' ');
-                sb.append(sqlOperator);
+                if (functional) 
+                    sb.append(",");
+                else 
+                    sb.append(sqlOperator);
                 sb.append(' ');                   
             }
             result.appendTo(sb);
@@ -106,11 +120,14 @@ class OperatorMap {
      * @return
      */
     public Result applyUnary(Result arg) {
-        StringBuffer result=new StringBuffer("(");
+        StringBuffer result;
         int type=resultType(arg);
         if (type==NoType)
             return null;
-        result.append(sqlOperator);
+        if (!functional) 
+            result=new StringBuffer("(" + sqlOperator);
+        else 
+            result=new StringBuffer(sqlOperator + "(");
         result.append(" ");
         arg.appendTo(result);
         result.append(")");

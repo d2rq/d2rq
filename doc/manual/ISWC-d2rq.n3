@@ -32,9 +32,15 @@
    .
 
 # History
+# 2005-04-29: Updated with D2RQ V0.3 features
 # 2004-08-10: Updated with D2RQ V0.2 features
 # 2004-06-14: Initial version of this document
 
+:ProcessingInstructions1 rdf:type d2rq:ProcessingInstructions .
+	# Processing Instructions (optional, one of the following)
+	# d2rq:queryHandler "com.hp.hpl.jena.graph.query.SimpleQueryHandler" . 
+	# d2rq:queryHandler "de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler" .
+	
 
 # -----------------------------------------------
 # Databases
@@ -45,9 +51,16 @@ db1:Database1 rdf:type d2rq:Database;
 	# MySQL database connection
         #d2rq:jdbcDriver "com.mysql.jdbc.Driver";
         #d2rq:jdbcDSN "jdbc:mysql:///iswc?user=root";
+        # or setup MySQL DB with ODBC as myiswc and:
+        d2rq:odbcDSN "myiswc";
 
 	# ODBC database connection
-	d2rq:odbcDSN "IswcDB";
+		#d2rq:odbcDSN "IswcDB";
+
+	# SQL "standard" issues of your database
+		d2rq:allowDistinct "yes";
+		d2rq:expressionTranslator "null";
+		d2rq:expressionTranslator "de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator";
 
         d2rq:numericColumn "Conferences.ConfID";
         d2rq:textColumn "Conferences.URI";

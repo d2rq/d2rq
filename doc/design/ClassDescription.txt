@@ -1,19 +1,20 @@
+This file resembles the state of D2RQ Version 0.2
+
 Possible improvements
 =====================
 reduce dependencies on jena where possible with wrapper classes/interfaces
 and make compatible with sesame
 
-Ungereimtheiten:
+Issues:
 =================
-Database gibt an einer Stelle Column-Typen als Nodes raus. Einziger Bezug zu RDF. Diesen rausnehmen?
-GraphD2RQ Todo: Implement D2RQ query handler
-MapParser was sucht assertHasColumnTypes(nodeMaker) hier? und getDatabase(NodeMaker resourceMaker)
+Database returns Column types as Nodes at one point. This is the only reference to RDF. Remove it?
+MapParser why is assertHasColumnTypes(nodeMaker) here? and getDatabase(NodeMaker resourceMaker)
 TripleQuery TODO: The logic for removing unnecessary joins is ugly and probably 
 BlankNodeIdentifier constructor: problem if there are columns: XId, X and Id?
 some of the NodeMaker classes (esp. classes, that just give performance hints through couldFit()
 could well be derived from a common superclass (reduces source code size).
-parseClassMaps meldet fehler, wenn datastorage nicht definiert wurde. Was macht man bei Datenbank-uebergreifenden definitionen?
-Column gibt bei getColumnValues(String) ein Map zurück, das statt eines Strings das Column-Objekt selbst als key hat. Richtig?
+parseClassMaps returns errors, when datastorage is not defined. What happens with definitions that relate to more than one database?
+Column getColumnValues(String) returns a Map, that contains Column objects a keys. correct?
 
 Ingnore (quoting Richard)
 =========================

@@ -4,6 +4,7 @@
 
 package de.fuberlin.wiwiss.d2rq.rdql;
 
+import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,16 +14,19 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Expression;
+import com.hp.hpl.jena.graph.query.QueryHandler;
 
 import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
+import de.fuberlin.wiwiss.d2rq.map.D2RQ;
+import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 
 /** 
  * Handles variable node constraints for a TripleQuery conjunction.
  * Assumption: Bound variables in conjunction allready have been bound.
- * This code could as well be kept in PatternQueryCombiner.
+ * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
  *
@@ -86,9 +90,32 @@ class ConstraintHandler {
         addRDQLConstraints(sql); // TODO test
     }
     
+    /**
+     * Adds constraints that come from the RDQL expression.
+     * The RDQL query not just contains triple but also conditions
+     * about nodes, such as  ! (?a = "v").
+     * Note that the SQL term given to the database becomes stronger,
+     * so that less entries are returned.
+     * @param sql contains information about the SQL dialect of the database and aliases.
+     */
     void addRDQLConstraints(SQLStatementMaker sql) {
-        if (rdqlTranslator==null)
-            rdqlTranslator=new ExpressionTranslator(this,sql);
+        if (rdqlTranslator==null) {
+            Database db=sql.getDatabase();
+    		String tranlatorClassName=db.getExpressionTranslator();
+    		if (tranlatorClassName!=null) {
+    		    if (tranlatorClassName.equals("null"))
+    		        return;
+    		    try {
+    		        Class c=Class.forName(tranlatorClassName);
+    		        Constructor con=c.getConstructor(new Class[]{this.getClass(),sql.getClass()});
+    		        rdqlTranslator=(ExpressionTranslator)con.newInstance(new Object[]{this,sql});
+    		    } catch (Exception e) {
+    		        throw new RuntimeException(e);
+    		    }
+    		} else {
+    		    rdqlTranslator=new ExpressionTranslator(this,sql);
+    		}
+        }
         Set s=new HashSet();
         Iterator it=rdqlConstraints.iterator();
         while (possible && it.hasNext()) {
@@ -99,20 +126,16 @@ class ConstraintHandler {
         }
         sql.addConditions(s);
     }
-    
- /*   String rdqlConstraint(SQLStatementMaker sql, Expression e) {
-        StringBuffer b=rdqlTranslator.translate(e);
-        
-        // default: do nothing
-    }
-    */
-    // TODO other cases ;-)
-    // see RDQLExpressionTranslator
-    
+       
     public NodeMakerIterator makeNodeMakerIterator(Set indexSet)  {
         return new NodeMakerIterator(conjunction,indexSet);
     }
     
+    /**
+     * Iterates over all the nodes of a triple conjunction.
+     * @author jgarbers
+     *
+     */
 	public class NodeMakerIterator implements Iterator {
 	    TripleQuery[] conjunction;
 	    Iterator indexSetIterator;

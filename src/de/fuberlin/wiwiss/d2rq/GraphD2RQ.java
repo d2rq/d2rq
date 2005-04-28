@@ -4,12 +4,14 @@
 
 package de.fuberlin.wiwiss.d2rq;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.hp.hpl.jena.graph.Capabilities;
 import com.hp.hpl.jena.graph.Graph;
@@ -26,6 +28,7 @@ import de.fuberlin.wiwiss.d2rq.find.QueryCombiner;
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.MapParser;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
@@ -49,6 +52,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	static private boolean usingD2RQQueryHandler=false;
+	protected Map processingInstructions=null;
 	
 //	private final ReificationStyle style;
 //	private boolean closed = false;
@@ -120,6 +124,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		MapParser parser = new MapParser(mapModel);
 		parser.parse();
 		this.propertyBridges = sortPropertyBridges(parser.getPropertyBridges());
+		this.processingInstructions = parser.getProcessingInstructions();
 	}
     
 	private List sortPropertyBridges(Collection unsortedBridges) {
@@ -135,17 +140,27 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	}
 
 	/**
-	 * Todo: Implement D2RQ query handler
 	 * @see com.hp.hpl.jena.graph.Graph#queryHandler
 	 */
 	public QueryHandler queryHandler() {
 		// jg: it would be more efficient to have just one instance per graph
-		// on the other hand: new instance guaraties that all information with handler
+		// on the other hand: new instance guaranties that all information with handler
 		// is up to date.
 		checkOpen();
-		if (usingD2RQQueryHandler) 
+		String queryHandler=(String)processingInstructions.get(D2RQ.ProcessingInstructions);
+		if (queryHandler!=null) {
+		    try {
+		        Class c=Class.forName(queryHandler);
+		        Constructor con=c.getConstructor(new Class[]{this.getClass()});
+		        return (QueryHandler)con.newInstance(new Object[]{this});
+		    } catch (Exception e) {
+		        throw new RuntimeException(e);
+		    }
+		} else if (usingD2RQQueryHandler) {
 			return new D2RQQueryHandler(this);
-		return new SimpleQueryHandler(this);
+		} else {
+		    return new SimpleQueryHandler(this);
+		}
 	}
 
 	/**

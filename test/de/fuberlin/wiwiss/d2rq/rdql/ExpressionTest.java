@@ -5,6 +5,7 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
@@ -18,7 +19,7 @@ import junit.framework.TestCase;
  *
  */
 public class ExpressionTest extends RDQLTestFramework {
-    String condition;
+    String condition, sqlCondition=null;
     Logger translatedLogger=new Logger();
 
     public ExpressionTest(String arg0) {
@@ -31,7 +32,7 @@ public class ExpressionTest extends RDQLTestFramework {
 		rdqlLogger.setDebug(false); // true
 		translatedLogger.setDebug(true);
 		if (translatedLogger.debugEnabled())
-		    ExpressionTranslator.logSqlExpressions=new ArrayList();
+		    ExpressionTranslator.logSqlExpressions=new HashSet();
 		SQLResultSet.simulationMode=true;
 		RDQLTestFramework.compareQueryHandlers=false;
 		GraphD2RQ.setUsingD2RQQueryHandler(true);
@@ -45,7 +46,7 @@ public class ExpressionTest extends RDQLTestFramework {
 	    String query="SELECT ?x, ?y WHERE " + triples + " AND " + condition;
 	    return query;
 	}
-	
+		
 	void query() {
 	    rdql(getQuery(condition));
 	    if (translatedLogger.debugEnabled()) {
@@ -55,18 +56,26 @@ public class ExpressionTest extends RDQLTestFramework {
 	            String translated=(String) it.next();
 	            translatedLogger.debug(translated);
 	        }
+	        if (sqlCondition!=null)
+	            assertTrue(ExpressionTranslator.logSqlExpressions.contains(sqlCondition));
+	        // else
+	        //    assertTrue(ExpressionTranslator.logSqlExpressions.size()==0);
 	    }
 	}
 
 	public void testRDQLGetAuthorsAndEmailsWithCondition() {
 	    // GraphD2RQ.setUsingD2RQQueryHandler(false);
 	    condition="(?x eq ?z)";
+	    //sqlCondition=""
 		query();
 	}
 	public void testNobody() {
-	    // GraphD2RQ.setUsingD2RQQueryHandler(false);
 	    condition="(?z eq \"Nobody\")";
 		query();
+	}
+	public void testIsSeaborne() {
+	    condition="?z eq \"http://www-uk.hpl.hp.com/people#andy_seaborne\"";
+	    query();
 	}
 	public void testEasy() {
 	    condition="(1 == 1)";

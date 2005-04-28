@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.1 2005/04/13 16:55:28 garbers Exp $
+ * $Id: MapParser.java,v 1.2 2005/04/28 15:58:33 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -49,7 +49,8 @@ public class MapParser {
 	private Set patternResourceMakers = new HashSet();
 	private Set uniqueNodeMakers = new HashSet();
 	private PrefixMapping prefixes;
-
+	private Map processingInstructions = new HashMap();
+	
 	/**
 	 * Constructs a new MapParser from a Jena model containing the RDF statements
 	 * from a D2RQ mapping file.
@@ -67,6 +68,7 @@ public class MapParser {
 	 * from the getter methods.
 	 */
 	public void parse() {
+	    parseProcessingInstructions();
 		parseDatabases();
 		parseClassMaps();
 		parsePropertyBridges();
@@ -85,6 +87,20 @@ public class MapParser {
 	public Collection getPropertyBridges() {
 		return this.propertyBridges.values();
 	}
+	
+	public Map getProcessingInstructions() {
+	    return this.processingInstructions;
+	}
+	
+	private void parseProcessingInstructions() {
+	    ExtendedIterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.ProcessingInstructions);
+	    if (!it.hasNext()) {
+	        Node instructions=(Node)it.next();
+	        Map nextMap=findLiteralsAsMap(instructions, Node.ANY, null);		    
+	        processingInstructions.putAll(nextMap);
+	    }
+	}
+	
 
 	private void parseDatabases() {
 	    ExtendedIterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.Database);
@@ -106,6 +122,9 @@ public class MapParser {
 		String jdbcDriver = findZeroOrOneLiteral(node, D2RQ.jdbcDriver);
 		String username = findZeroOrOneLiteral(node, D2RQ.username);
 		String password = findZeroOrOneLiteral(node, D2RQ.password);
+		String allowDistinct = findZeroOrOneLiteral(node, D2RQ.allowDistinct);
+		String expressionTranslator = findZeroOrOneLiteral(node, D2RQ.expressionTranslator);
+		
 		if (d2rqColumnTypeToDatabaseColumnType==null) {
 		    d2rqColumnTypeToDatabaseColumnType=new HashMap();
 		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.textColumn,Database.textColumn);
@@ -120,6 +139,16 @@ public class MapParser {
 			Logger.instance().error("d2rq:jdbcDSN and d2rq:jdbcDriver must be used together");
 		}
 		Database db = new Database(odbcDSN, jdbcDSN, jdbcDriver, username, password, columnTypes);
+		if (allowDistinct!=null) {
+		    if (allowDistinct.equals("true"))
+		        db.setAllowDistinct(true);
+		    else if (allowDistinct.equals("false"))
+		        db.setAllowDistinct(false);
+		    else 
+		        Logger.instance().error("d2rq:allowDistinct value must be true or false");			
+		}
+		if (expressionTranslator!=null)
+		    db.setExpressionTranslator(expressionTranslator);
 		this.databases.put(node, db);
 	}
 

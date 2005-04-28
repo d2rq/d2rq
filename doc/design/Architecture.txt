@@ -1,0 +1,37 @@
+RDQL
+==== 
+Jena Interface:
+  D2RQQueryHandler replaces SimpleQueryHandler.
+  D2RQPatternStage2 replaces PatternStage.
+  CombinedPatternStage is not specific to D2RQ.
+  ergo D2RQPatternStage2 inherits from CombinedPatternStage.
+The actual translation of RDQL triples and expressions is done in PatternQueryCombiner.
+For the algorithm see PatternQueryCombiner.
+  ConstraintHandler and NodeConstraint try to reduce the possible combinations of 
+     Property bridges, e.g. bridge1 says "?x is a literal" 
+     while bridge2 says "?x is a blank node, then (bridge1 AND bridge2) is impossible.
+  ExpressionTranslator, OperatorMap and SQLExpr implement the translation of RDQL 
+    expressions, e.g. (?x != "url") into (NOT (concat('http:...',Table.Col,'.html') = 'url')
+
+Configuration
+=============
+There is some support for giving processing instructions from the d2rq-map.
+
+d2rq:ProcessingInstructions d2rq:queryHandler "className" (optional):
+  "com.hp.hpl.jena.graph.query.SimpleQueryHandler"
+  "de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler"
+  
+aDatabaseNode d2rq:allowDistinct "yes/no" (optional)
+aDatabaseNode d2rq:expressionTranslator "className" (optional) :
+  "null" (no translation performed)
+  "de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator"
+  
+Issues:
+=======
+D2RQ is work in progress.
+Some classes are not designed with decoupling in mind.
+Especially there are currently many dependencies on Jena Nodes and in the
+RDQL branch also on other Jena classes, some of which probably will not survive the
+transition to the next Jena versions, e.g. classes for RDQL expressions, which were in
+fact just copied from a Java parser by the Jena people.
+

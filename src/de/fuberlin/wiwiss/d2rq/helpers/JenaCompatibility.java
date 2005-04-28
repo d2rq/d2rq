@@ -1,7 +1,6 @@
 /*
- * Created on 31.03.2005 by Joerg Garbers, FU-Berlin
- *
- */
+(c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
 package de.fuberlin.wiwiss.d2rq.helpers;
 
 /**

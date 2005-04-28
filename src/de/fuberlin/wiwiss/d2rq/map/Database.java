@@ -190,7 +190,11 @@ public class Database {
        }
     }
     
-    public static boolean databaseMayUseDistict=false;
+    public  boolean databaseMayUseDistict=false;
+
+   public void setAllowDistinct(boolean b) {
+        databaseMayUseDistict=b;
+    }
 
     /** 
      * Some Databases do not handle large entries correctly.
@@ -203,10 +207,21 @@ public class Database {
         return databaseMayUseDistict;
     }
     
+    private String expressionTranslator=null; // class name, if given
+ 
+    public void setExpressionTranslator(String expressionTranslator) {
+        this.expressionTranslator=expressionTranslator;
+    }
+    public String getExpressionTranslator() {
+        return this.expressionTranslator;
+    }
+
     public String toString() {
     	  return super.toString() + "(" + 
 		  (odbc!=null ? odbc : "") + 
 		  (jdbc!=null ? jdbc : "") +
 		   ")";
     }
+
+
 }

@@ -1,0 +1,40 @@
+ExpressionTranslator assumes that the SQL database understands the generated
+expressions.
+We would like to have a world, where each database understands (at least)
+the SQL 92 expressions.
+But it is not the case.
+
+e.g. MySQL 4.1.10
+===========
+does not understand  CAST(1 AS SQL_TEXT)
+we must use CAST(1 AS CHAR)
+
+does not understand "||" as string concatenation, just as a bit operator.
+we must use concat(...) instead.
+
+documentation says that
+SET GLOBAL sql_mode='ANSI';
+(same as SET GLOBAL sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE';)
+changes mysql to ANSI (=SQL 92?) mode.
+But this is not fully true. (see above)
+
+I did not dig deep, just at the surfice there allready is no standard.
+
+e.g. MS Access
+==============
+o boy...
+even DISTINCT does not work for result strings > 256 characters.
+The strings are truncated!
+
+
+Try some sql 92 expressions on your database:
+=======================================
+(CAST(1 AS SQL_TEXT) || '');
+SET GLOBAL sql_mode='ANSI';
+select @@global.sql_mode;
+select ('a' || 'b');
+select cast(1 as sql_text); 
+select cast(10 as char);
+select ('a' || 1);
+select (1 || 'a');
+select concat('a' , 'b' , 'c');

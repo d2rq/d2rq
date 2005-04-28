@@ -1,5 +1,5 @@
 /*
- * $Id: RDQLTest.java,v 1.7 2005/04/13 16:56:08 garbers Exp $
+ * $Id: RDQLTest.java,v 1.8 2005/04/28 15:59:20 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -97,6 +97,8 @@ public class RDQLTest extends RDQLTestFramework {
 
 	public void testRDQLGetAuthorsAndEmailsWithCondition() {
 	    // GraphD2RQ.setUsingD2RQQueryHandler(false);
+	    // mysql must be prepared for ANSI expressions with:
+	    // SET GLOBAL sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE';
 		rdql("SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), " +
 								"(?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y)" +
 								" AND ! (?x eq ?z)");

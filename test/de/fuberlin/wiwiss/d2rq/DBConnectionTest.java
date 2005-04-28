@@ -34,8 +34,10 @@ public class DBConnectionTest extends TestCase {
 	private MapParser parser;
 
 	private Collection databases;
+	private Database firstDatabase;
 
 	private String simplestQuery;
+	private String complexQuery;
 
 	public DBConnectionTest() {
 		super();
@@ -53,7 +55,10 @@ public class DBConnectionTest extends TestCase {
 		parser = new MapParser(mapModel);
 		parser.parse();
 		databases = parser.getDatabases();
+		firstDatabase = (Database)databases.iterator().next();
 		simplestQuery = "SELECT 1;";
+		complexQuery = "SELECT T0_Papers.PaperID, T0_Persons.URI, T1_Persons.Email, T1_Persons.URI FROM Persons AS T1_Persons , Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Papers.Publish = 1 AND T0_Persons.URI=T1_Persons.URI AND (NOT (CONCAT('http://www.conference.org/conf02004/paper#Paper' , CAST(T0_Papers.PaperID AS char) , '') = T0_Persons.URI));";
+
 	}
 
 	protected void tearDown() throws Exception {
@@ -66,7 +71,7 @@ public class DBConnectionTest extends TestCase {
 			Database db = (Database) it.next();
 			System.out.println("Testing Database " + db.toString());
 			Connection c = db.getConnnection();
-			String result = performQuery(c, simplestQuery);
+			String result = performQuery(c, simplestQuery); // 
 			assertEquals(result, "1");
 		}
 	}
@@ -99,16 +104,17 @@ public class DBConnectionTest extends TestCase {
 		String name;
 		String pass;
 
-		if (configure == 1) {
+		if (configure == 1) { // omit ODBC. (You must install jdbc driver in advance)
 			driverClass = "com.mysql.jdbc.Driver";
 			url = "jdbc:mysql:///iswc";
-			name = ""; //  "@localhost";
+			name = "root"; //  "@localhost";
 			pass = ""; // "";
-		} else if (configure == 2) {
+		} else if (configure == 2) { // use ODBC (Windows)
 			driverClass = "sun.jdbc.odbc.JdbcOdbcDriver";
-			url = "jdbc:odbc:IswcDB";
-			name = "x";
-			pass = "y";
+			// url = "jdbc:odbc:IswcDB";
+			url = "jdbc:odbc:myiswc";
+			name = "jg";
+			pass = "";
 		} else
 			return null;
 
@@ -144,7 +150,8 @@ public class DBConnectionTest extends TestCase {
 	public void testDistinct() throws SQLException {
 	    // there seems to be a problem with MSAccess databases
 	    // when using the DISTINCT keyword, Strings are truncated to 256 chars
-	    Connection c=manuallyConfiguredConnection();
+	    Connection c = firstDatabase.getConnnection(); 
+	    //Connection c=manuallyConfiguredConnection();
 		String nonDistinct = "SELECT T0_Papers.Abstract FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
 		String distinct = "SELECT DISTINCT T0_Papers.Abstract FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
 		String distinctResult = performQuery(c, distinct);
@@ -154,5 +161,17 @@ public class DBConnectionTest extends TestCase {
 		    System.out.println("testDistinct() has a mismatch. Please use a standard (!) Database! ;-)");
 		// assertEquals(distinctResult,nonDistinctResult);
 	}
+	
+	public void testLong() throws SQLException {
+	     Connection c = firstDatabase.getConnnection(); 
+	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
+		String query = complexQuery;
+		String query_results = performQuery(c, query);
+		System.out.println(query_results);
+		c.close();
+		// assertEquals(query_results,"2 2002");
+	}
+
+	
 	
 }

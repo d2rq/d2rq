@@ -1,7 +1,7 @@
 /*
- * Created on 31.03.2005 by Joerg Garbers, FU-Berlin
- *
- */
+(c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
+*/
+
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
@@ -27,8 +27,22 @@ import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.rdql.ConstraintHandler.NodeMakerIterator;
 
 /**
- * RDQLExpressionTranslator translates an RDQL expression into a SQL
- * expression that may be weaker than the RDQL expression
+ * Translates an RDQL expression into a SQL expression.
+ * The SQL expression that may be weaker than the RDQL expression.
+ * Idea: traverse the RDQL expression tree. If there is a mapping
+ * defined for an operator, translate its arguments, and construct the SQL term. 
+ * Issues: 
+ * 1) we must keep track of argument types, because a + might be a plus 
+ *    or a concatenate. 
+ * 2) Negation turns weaker into stronger.
+ * 3) Some arguments in AND can be skipped (expression becomes weaker)
+ * 4) Translation of variables into Columns needs access to calling context
+ * 	  (ConstraintHandler and SQLStatementMaker)
+ * TODO:
+ *   split code into modules for 
+ *   1) Query Language expressions
+ *   2) SQL dialects
+ *   3) Variable translators
  * @author jgarbers
  *
  */
@@ -117,6 +131,7 @@ public class ExpressionTranslator {
         if (e instanceof Q_UnaryNot)
             return translateNot((Q_UnaryNot)e);
              
+        // otherwise a functional operator
         OperatorMap op=getSQLOp(e); // see at bottom
         if (op==null)
             return null;
@@ -138,7 +153,7 @@ public class ExpressionTranslator {
         List list=translateArgs(e, true, null);
         if (list==null)
             return null;
-        return op.applyInfix(list);              
+        return op.applyList(list);              
     }
     
     /** 
@@ -299,7 +314,8 @@ public class ExpressionTranslator {
             return r;
         StringBuffer sb=new StringBuffer("CAST(");
         r.appendTo(sb);
-        sb.append(" AS SQL_TEXT)");
+        sb.append(" AS SQL_TEXT)"); // SQL 92
+        //sb.append(" AS char)"); // mysql
         return newResult(sb,StringType);
     }
     
@@ -325,7 +341,7 @@ public class ExpressionTranslator {
                 list.add(res);
             }
         }
-        return op.applyInfix(list);
+        return op.applyList(list);
     }
     
     public Result translateNode(Node n) {
@@ -395,7 +411,7 @@ public class ExpressionTranslator {
             return trueBuffer;
         if (count==1)
             return (Result) list.get(0);
-        return op.applyInfix(list);        
+        return op.applyList(list);        
     }
     
     public Result translate(Q_LogicalOr e) {
@@ -413,11 +429,11 @@ public class ExpressionTranslator {
             return falseBuffer;
         if (count==1)
             return (Result) list.get(0);
-        return op.applyInfix(list);        
+        return op.applyList(list);        
     }
     
     /**
-     * is this really the logical Not?
+     * is this really the logical Not or bit not or both?
      * @param e
      * @return
      */
@@ -514,6 +530,10 @@ public class ExpressionTranslator {
         return op; // .sqlOperator;
     }
     
+    /**
+     * Defines operator maps between RDQL classes and SQL operators or functions.
+     * null means: no mapping.
+     */
     void setupOperatorMap() {
         int NumberStringType=NumberType+StringType;
         if (opMap==null) {
@@ -545,13 +565,21 @@ public class ExpressionTranslator {
             putOp("Q_UnaryMinus","-",NumberType).unary=true;
             putOp("Q_UnaryNot","NOT",BoolType).unary=true;
             putOp("Q_UnaryPlus","+",NumberType).unary=true;
-            putOp(concatenateOp,"||",StringType);
+            // putOp(concatenateOp,"||",StringType); // SQL 92
+            putOp(concatenateOp,"CONCAT",StringType).functional=true; // mySQL
         }
     }
     
     // Auxiliary constructs
  
-    
+    /**
+     * A Result is an auxiliary construct used with the ExpressionTranslator class only.
+     * The Result of a translation is a SQL expression (string) that will have a
+     * type when evaluated by the database. The type information is necessary for
+     * expression casting.
+     * @author jgarbers
+     *
+     */
     public interface Result {
         public int getType(); // a concrete type, not a combination of types!
         public void setType(int type);

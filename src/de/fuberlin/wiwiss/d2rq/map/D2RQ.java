@@ -29,6 +29,10 @@ public class D2RQ {
     */
     public static String getURI()
         { return uri; }
+    
+    // Processing
+    public static final Node ProcessingInstructions = Node.createURI(uri + "ProcessingInstructions");
+    public static final Node queryHandler = Node.createURI(uri + "queryHandler"); // className
 
     // Database
     public static final Node Database = Node.createURI(uri + "Database");
@@ -40,6 +44,8 @@ public class D2RQ {
     public static final Node numericColumn = Node.createURI(uri + "numericColumn");
     public static final Node textColumn = Node.createURI(uri + "textColumn");
     public static final Node dateColumn = Node.createURI(uri + "dateColumn");
+    public static Node allowDistinct = Node.createURI(uri + "allowDistinct"); // true/false
+    public static Node expressionTranslator = Node.createURI(uri + "expressionTranslator"); // className
 
     // ClassMap
     public static final Node ClassMap = Node.createURI(uri + "ClassMap");
@@ -68,6 +74,8 @@ public class D2RQ {
     public static final Node valueRegex = Node.createURI(uri + "valueRegex");
     public static final Node propertyBridge = Node.createURI(uri + "propertyBridge");
     public static final Node property = Node.createURI(uri + "property");
+
+
 
     // ClassMap and PropertyBridge
     public static final Node condition = Node.createURI(uri + "condition");

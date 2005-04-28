@@ -46,6 +46,10 @@ public class SQLStatementMaker {
 	public SQLStatementMaker(Database database) {
 		this.database = database;
 	}
+	
+	public Database getDatabase() {
+	    return this.database;
+	}
 
 	public String getSQLStatement() {
 		StringBuffer result = new StringBuffer("SELECT ");
