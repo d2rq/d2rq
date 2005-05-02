@@ -186,7 +186,7 @@ P.footer {
 <DL>
   <DT>This Version: 
     <DD><A 
-  href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20050429/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20040804/</A> 
+  href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20050429/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20050429/</A> 
     <DT>Latest Version: 
     <DD><A 
   href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/</A>
@@ -198,7 +198,7 @@ P.footer {
     <DD><a href="http://richard.cyganiak.de/">Richard Cyganiak</a> (Freie Universit&auml;t Berlin, Germany) 
     <DD>  
     <DD><a href="http://www.wiwiss.fu-berlin.de/suhl/ueber_uns/team/Joerg_Garbers.htm" target="_blank">J&ouml;rg 
-      Garbers</a> (Freie Universit&auml;t Berlin, Germany) V0.2 to V0.3 code.
+    Garbers</a> (Freie Universit&auml;t Berlin, Germany)    
     <DD>  
   <DT>  
 </DL>
@@ -286,6 +286,7 @@ P.footer {
     query results as RDF triples up to the higher layers of the Jena framework.</li>
 </ul>
 <p><img src="architecture.gif" width="450" height="207"></p>
+<p>D2RQ V0.3 provides an new experimental D2RQQueryHandler  which speeds up complex RDQL queries significantly by rewriting groups of RDQL patterns into single SQL statements and by rewriting RDQL AND conditions into SQL WHERE clauses. You can switch between the new query handler and Jena's standard SimpleQueryHandler using the <a href="#processing">d2rq:queryHandler</a> directive.</p>
 <p><strong>D2RQ Example</strong></p>
 <p>We are using an example database which stores information about conferences, 
   papers, authors and topics through this manual. The database is mapped to the 
@@ -299,9 +300,9 @@ P.footer {
 <p>The examples below show:</p>
 <ul>
   <li> how D2RQ translates different find(spo) patterns into SQL queries: <a href="D2RQ_Find_Examples.txt">D2RQ_Find_Examples.txt</a></li>
-  <li> how D2RQ translates different RDQL queries into a series of SQL queries: 
+  <li> how D2RQ translates different RDQL queries into a series of SQL queries using Jena's SimpleQueryHandler: 
     <a href="D2RQ_RDQL_Examples.txt">D2RQ_RDQL_Examples.txt</a> </li>
-  <li> how D2RQ translates complete RDQL queries into complex SQL queries:
+  <li> how D2RQ translates complete RDQL queries into complex SQL queries using the D2RQQueryHandler:
     <a href="QueryHandler_Test_Output.txt">QueryHandler_Test_Output.txt</a> </li>
 </ul>
 
@@ -375,7 +376,7 @@ db1:location rdf:type d2rq:DatatypePropertyBridge ;
             d2rq:belongsToClassMap db1:Conference ;
             d2rq:datatype xsd:string . 
 </pre>
-  </DIV>
+</DIV>
 <P>The D2RQ language constructs are described in detail below:</P>
 <P>&nbsp;</P>
 <h2><a name="database"></a>3.1 Database</h2>
@@ -428,8 +429,7 @@ db1:location rdf:type d2rq:DatatypePropertyBridge ;
     <td><strong>d2rq:expressionTranslator </strong></td>
     <td>Specifies a Java class that can translate Jena RDQL expression objects 
     into SQL expressions that are understood by the database.
-    "null" means: no expression translation. Otherwise full SQL 92 is assumed.
-    For Example MySQL is not completely SQL 92 conform (string concatenation ...).</td>
+    "null" means: no expression translation. Otherwise full SQL 92 is assumed.</td>
   </tr>
   
 </table>
@@ -485,7 +485,7 @@ that create the same URIs or blank node IDs.</P>
         values.</p>
       <p>Example pattern:<br>
         <tt>&quot;http://example.org/lineItems/item@@Orders.orderID@@-@@LineItems.itemID@@&quot;</tt></p>
-      </td>
+    </td>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:uriColumn</strong></td>
@@ -591,7 +591,7 @@ db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
       d2rq:property rdf:type ;
       d2rq:pattern &quot;http://annotation.semanticweb.org/iswc/iswc.daml#@@Persons.Type@@&quot; ; 
       d2rq:belongsToClassMap db1:PersonsClassMap .</pre>
-  </DIV>
+</DIV>
 <P>Here, the class of each person is obtained by prefixing the values of the Persons.Type 
   column with an ontology namespace. If the class names within the ontology can't 
   be constructed directly from values of the Persons.Type column, then a <a href="#translationtable">TranslationTable</a> 
@@ -643,7 +643,7 @@ db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
       a statement if the condition holds. A common usage is to suppress triples 
       with empty literal values: <tt>d2rq:condition &quot;Table.Column <> ''&quot;</tt>. 
       See section <a href="#condtional">Conditional Mappings</a> for details. 
-      </td>
+    </td>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:translateWith</strong></td>
@@ -1050,19 +1050,11 @@ db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
 <p>&nbsp;</p>
 
 <h2><a name="processing" id="processing"></a>3.8 Processing Instructions</h2>
-<p>To configure the D2RQ mapping by modifying the source code is one option.
-A better one for most of the users is to specify a configuration within the D2RQ map.
-</p>
-
-<p><strong>Example: Specifying a different query handler</strong></p>
+<p>You can configure  D2RQ by providing d2rq:ProcessingInstructions. Up till now D2RQ V0.3 only supports the queryHandler processing instruction. The d2rq:queryHandler processing instruction can be used to specify a query handler that is different from the default query handler which is D2RQQueryHandler. </p>
+<p><strong>Example: Swich back to Jena's standard query handler </strong></p>
 <div class="trigOuter trigInner">
-  <pre>:ProcessingInstructions1 rdf:type d2rq:ProcessingInstructions;
-            d2rq:queryHandler "com.hp.hpl.jena.graph.query.SimpleQueryHandler".</pre>
-</div>
-<p>The d2rq:queryHandler property can be used to specify a query handler that is 
-  different from the default query handler which in V0.3 is D2RQQueryHandler.
-  So if You wonder wether the bug is in the new features of V0.3, switch back
-  to the slow but highly tested SimpleQueryHandler.</p>
+<pre>:ProcessingInstructions1 rdf:type d2rq:ProcessingInstructions;
+            d2rq:queryHandler "com.hp.hpl.jena.graph.query.SimpleQueryHandler".</pre></div>
 <p>&nbsp;</p>
 
 <HR title="Separator for header">
@@ -1177,7 +1169,7 @@ QueryResultsFormatter fmt = new QueryResultsFormatter(results) ;<br>PrintWriter 
   <DD> D2R MAP - A Database to RDF Mapping Language, Christian Bizer, <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/pub/www2003-D2R-Map.pdf" target="_blank">http://www.wiwiss.fu-berlin.de/suhl/bizer/pub/www2003-D2R-Map.pdf</a> 
   <DT><A id=TriG name=TriG>[RDF2SQL]</A> 
   <DD> RDF to SQL Mapping, Eric Prud'hommeaux, <a href="http://www.w3.org/2003/01/21-RDF-RDB-access/" target="_blank">http://www.w3.org/2003/01/21-RDF-RDB-access/</a> 
-  <DT>&nbsp; 
+  <DT> 
   <DT><A id=ref-rdf-syntax name=ref-rdf-syntax></A>[RDF-SYNTAX] 
   <DD><CITE>RDF/XML Syntax Specification (Revised)</CITE>, Beckett D. (Editor), 
     W3C Recommendation, <a href="http://www.w3.org/TR/rdf-syntax-grammar/" target="_blank">http://www.w3.org/TR/rdf-syntax-grammar/</a> 
