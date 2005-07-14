@@ -4,9 +4,16 @@
 
 package de.fuberlin.wiwiss.d2rq;
 
-import com.hp.hpl.jena.rdf.model.impl.*;
-import com.hp.hpl.jena.rdf.model.*;
-import com.hp.hpl.jena.enhanced.*;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+import com.hp.hpl.jena.enhanced.BuiltinPersonalities;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.impl.ModelCom;
+import com.hp.hpl.jena.shared.PrefixMapping;
+import com.hp.hpl.jena.util.FileManager;
+
+import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 
 /**
  * A D2RQ read-only Jena model backed by a non-RDF database.
@@ -14,13 +21,9 @@ import com.hp.hpl.jena.enhanced.*;
  * D2RQ is a declarative mapping language for describing mappings between ontologies and relational data models.
  * More information about D2RQ is found at: http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/
  *
- * <p>History:<br>
- * 06-14-2004: Initial version of this class.<br>
- * 08-03-2004: enableDebug(), new constructors
- * 
  * @author Chris Bizer chris@bizer.de
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: ModelD2RQ.java,v 1.5 2005/07/14 15:02:42 cyganiak Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */
@@ -32,7 +35,7 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 * @param mapURL URL of the D2RQ map to be used for this model
 	 */
 	public ModelD2RQ(String mapURL) {
-		super(new GraphD2RQ(mapURL), BuiltinPersonalities.model);
+		this(FileManager.get().loadModel(mapURL));
 	}
 
 	/** 
@@ -43,7 +46,7 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 * @param serializationFormat the format of the map
 	 */
 	public ModelD2RQ(String mapURL, String serializationFormat) {
-		super(new GraphD2RQ(mapURL, serializationFormat), BuiltinPersonalities.model);
+		this(FileManager.get().loadModel(mapURL, serializationFormat));
 	}
 
 	/** 
@@ -53,8 +56,27 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 */
 	public ModelD2RQ(Model mapModel) {
 		super(new GraphD2RQ(mapModel), BuiltinPersonalities.model);
+		copyPrefixes(mapModel);
 	}
 
+	/**
+	 * Copies all prefixes from the mapping file to the D2RQ model.
+	 * This makes the output of Model.write(...) nicer. The D2RQ
+	 * prefix is dropped on the assumption that it is not wanted
+	 * in the actual data.
+	 */ 
+	private void copyPrefixes(PrefixMapping prefixes) {
+		setNsPrefixes(prefixes);
+		Iterator it = getNsPrefixMap().entrySet().iterator();
+		while (it.hasNext()) {
+			Entry entry = (Entry) it.next();
+			String namespace = (String) entry.getValue();
+			if (D2RQ.uri.equals(namespace)) {
+				removeNsPrefix((String) entry.getKey());
+			}
+		}
+	}
+	
 	/**
 	 * Enables D2RQ debug messages.
 	 */
@@ -62,5 +84,3 @@ public class ModelD2RQ extends ModelCom implements Model {
 		((GraphD2RQ) getGraph()).enableDebug();
 	}
 }
-
-
