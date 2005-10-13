@@ -345,7 +345,10 @@ P.footer {
 # Database
 
 db1:Database1 rdf:type d2rq:Database;
-              d2rq:odbcDSN &quot;IswcDB&quot;;
+              d2rq:jdbcDSN &quot;jdbc:mysql://localhost/iswc&quot;;
+              d2rq:jdbcDriver &quot;com.mysql.jdbc.Driver&quot;;
+              d2rq:username &quot;user&quot;;
+              d2rq:password &quot;password&quot;;
               d2rq:numericColumn &quot;Conferences.ConfID&quot;;
               d2rq:textColumn &quot;Conferences.Name&quot;;
               d2rq:textColumn &quot;Conferences.Location&quot; .
@@ -380,22 +383,26 @@ db1:location rdf:type d2rq:DatatypePropertyBridge ;
 <P>The D2RQ language constructs are described in detail below:</P>
 <P>&nbsp;</P>
 <h2><a name="database"></a>3.1 Database</h2>
-<P>A <strong>d2rq:Database</strong> defines an ODBC or JDBC connection to a local relational database 
+<P>A <strong>d2rq:Database</strong> defines a JDBC or ODBC connection to a local relational database 
   and specifies the type of the database columns used by D2RQ. A D2RQ map can 
   contain several d2rq:Databases for accessing different local databases.</P>
 <P><strong>Properties</strong></P>
 <table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
   <tr> 
-    <td width="20%"><strong>d2rq:odbcDSN</strong></td>
-    <td width="80%">The ODBC data source name of the database.</td>
+    <td width="20%"><strong>d2rq:jdbcDSN</strong></td>
+    <td width="80%">The JDBC database URL. This is a string of the form
+      <tt>jdbc:<em>subprotocol</em>:<em>subname</em></tt>. For a MySQL database,
+      this is something like <tt>jdbc:mysql://hostname:port/dbname</tt>.
+      <a href="http://www.devx.com/tips/Tip/28818">Examples for other databases</a></td>
   </tr>
   <tr> 
     <td><strong>d2rq:jdbcDriver</strong></td>
-    <td>The JDBC driver for the database. Used together with d2rq:jdbcDSN.</td>
+    <td>The JDBC driver class name for the database. Used together with d2rq:jdbcDSN.
+      Example: <tt>com.mysql.jdbc.Driver</tt> for MySQL.</td>
   </tr>
   <tr> 
-    <td><strong>d2rq:jdbcDSN</strong></td>
-    <td>The JDBC data source name of the database.</td>
+    <td><strong>d2rq:odbcDSN</strong></td>
+    <td>The ODBC data source name of the database.</td>
   </tr>
   <tr> 
     <td><strong>d2rq:username </strong></td>
@@ -441,9 +448,10 @@ db1:location rdf:type d2rq:DatatypePropertyBridge ;
 <P><strong>Example</strong></P>
 <DIV class="trigOuter trigInner"> 
   <pre>db1:Database1 rdf:type d2rq:Database;
-              d2rq:odbcDSN &quot;IswcDB&quot;;
-              d2rq:username=&quot;joseki&quot;;
-              d2rq:password=&quot;*****&quot;;
+              d2rq:jdbcDSN &quot;jdbc:mysql://localhost/iswc&quot;;
+              d2rq:jdbcDriver &quot;com.mysql.jdbc.Driver&quot;;
+              d2rq:username &quot;user&quot;;
+              d2rq:password &quot;password&quot;;
               d2rq:numericColumn &quot;Conferences.ConfID&quot;;
               d2rq:textColumn &quot;Conferences.URI&quot;;
               d2rq:textColumn &quot;Conferences.Name&quot;;
