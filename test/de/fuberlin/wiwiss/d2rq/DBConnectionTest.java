@@ -98,7 +98,7 @@ public class DBConnectionTest extends TestCase {
 	}
 
 	public Connection manuallyConfiguredConnection() {
-		int configure = 2;
+		final int configure = 3; // TODO change this to your local DB configuration
 		String driverClass;
 		String url;
 		String name;
@@ -109,12 +109,14 @@ public class DBConnectionTest extends TestCase {
 			url = "jdbc:mysql:///iswc";
 			name = "root"; //  "@localhost";
 			pass = ""; // "";
-		} else if (configure == 2) { // use ODBC (Windows)
+		} else if (configure == 2) { // use Mysql on ODBC (Windows) (name and passwd may be not necessary)
 			driverClass = "sun.jdbc.odbc.JdbcOdbcDriver";
-			// url = "jdbc:odbc:IswcDB";
 			url = "jdbc:odbc:myiswc";
 			name = "jg";
 			pass = "";
+		} else if (configure == 3) { // use MSAccess ODBC (Windows)
+			driverClass = "sun.jdbc.odbc.JdbcOdbcDriver";
+			url = "jdbc:odbc:IswcDB";
 		} else
 			return null;
 
@@ -124,7 +126,7 @@ public class DBConnectionTest extends TestCase {
 			Class.forName(driverClass);
 			if (configure == 1)
 				c = DriverManager.getConnection(url, name, pass);
-			else if (configure == 2)
+			else if (configure == 2 || configure == 3)
 				c = DriverManager.getConnection(url);
 			return c;
 		} //end try
@@ -135,7 +137,7 @@ public class DBConnectionTest extends TestCase {
 	}
 	
 	// without declarations in 
-	public void testManuallyConfiguredConnection() throws SQLException {
+	public void xtestManuallyConfiguredConnection() throws SQLException {
 	    Connection c=manuallyConfiguredConnection();
 		// String query = simplestQuery;
 		// String query = "select PaperID from Papers";

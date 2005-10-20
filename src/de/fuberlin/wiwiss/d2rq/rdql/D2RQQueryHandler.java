@@ -39,7 +39,7 @@ public class D2RQQueryHandler extends SimpleQueryHandler implements QueryHandler
 		doFastpath = true;
     }     
    
-    public static boolean runVersion2=true;
+    public static final boolean runVersion2=true;
     
     public Stage patternStage( Mapping map, ExpressionSet constraints, Triple [] t )
     { 
@@ -47,7 +47,14 @@ public class D2RQQueryHandler extends SimpleQueryHandler implements QueryHandler
     		    D2RQPatternStage2 inst= new D2RQPatternStage2( graph, map, constraints, t );
     			inst.setup();
     			return inst;
-    		} else 
-    			return new D2RQPatternStage( graph, map, constraints, t ); // jg see PatternStage for overriding
+    		} else {
+    		    // D2RQPatternStage does not compile any more under Jena 2.3
+    		    // The new Jena implementation of PatternStage should be examined.
+    		    // Maybe it resolves the errors found in the last version.
+    		    // See comments in CombinedPatternStage. 
+    		    // But anyhow, we still have the better D2RQPatternStage2.
+    		    // return new D2RQPatternStage( graph, map, constraints, t );  // jg see PatternStage for overriding
+    			return null; 
+    		}
     }
 }

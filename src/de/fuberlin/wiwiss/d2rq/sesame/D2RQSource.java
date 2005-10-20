@@ -45,7 +45,7 @@ public class D2RQSource implements RdfSource {
             d2rqMap.read(d2rqMapUrl, language);
             this.d2rqGraph = new GraphD2RQ(d2rqMap);
         } catch(D2RQException e){
-            throw new GraphException("Couldn't load D2RQ mapping from Model.", e);
+            throw new GraphException("Couldn't load D2RQ mapping from Model.");
         }
         this.rdfSource = new org.openrdf.sesame.sailimpl.memory.RdfSource();
     }

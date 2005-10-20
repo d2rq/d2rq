@@ -23,7 +23,10 @@ class D2RQCapabilities implements Capabilities
     public boolean deleteAllowed( boolean every ) { return false; }
     public boolean canBeEmpty() { return true; }
     public boolean iteratorRemoveAllowed() { return false; }
-    public boolean findContractSafe() { return false; } // TODO check semantic of this in Jena 2.2.
+    public boolean findContractSafe() { return false; } // TODO check semantic of this in Jena 2.2.    
+    // TODO check handlesLiteralTyping() for correctness. 
+    // SQL does it for numbers, but currently not for dates.
+    public boolean handlesLiteralTyping() { return false; } // required by Jena 2.3
     }
 
 
