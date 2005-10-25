@@ -39,17 +39,17 @@ public class D2RQSource implements RdfSource {
      *  @param language Identifies the format of the rdf data in the mapping file. Should be one of the values "RDF/XML", "RDF/XML-ABBREV", "N-TRIPLE" and "N3". The default value, represented by <code>null</code>, is "RDF/XML".
      */
     public D2RQSource(String d2rqMapUrl, String language) 
-    throws GraphException {
-        try{
-            Model d2rqMap = ModelFactory.createDefaultModel();
-            d2rqMap.read(d2rqMapUrl, language);
-            this.d2rqGraph = new GraphD2RQ(d2rqMap);
-        } catch(D2RQException e){
-            throw new GraphException("Couldn't load D2RQ mapping from Model.");
-        }
+    throws D2RQException{
+        Model d2rqMap = ModelFactory.createDefaultModel();
+        d2rqMap.read(d2rqMapUrl, language);
+        this.d2rqGraph = new GraphD2RQ(d2rqMap);
         this.rdfSource = new org.openrdf.sesame.sailimpl.memory.RdfSource();
     }
 
+    /**
+     * Returns all know namespaces within the source.
+     * @return interator over all known namespaces
+     */
     public org.openrdf.sesame.sail.NamespaceIterator getNamespaces() {
         return rdfSource.getNamespaces();
     }
@@ -75,10 +75,21 @@ public class D2RQSource implements RdfSource {
         return new D2RQStatementIterator(resultIterator, rdfSource.getValueFactory());
     }
 
+    /**
+     * Rerturns the ValueFactory of the RdfSource.
+     * @return the ValueFactory
+     */
     public org.openrdf.model.ValueFactory getValueFactory() {
         return rdfSource.getValueFactory();
     }
 
+    /**
+     * Returns true, if the source contains the specified statement.
+     * @param resource the RDF resource of the subject
+     * @param uRI the URI of the statment property
+     * @param value the RDF resource of the object
+     * @return true, if the sourec contains the specified statement, false otherwise
+     */
     public boolean hasStatement(org.openrdf.model.Resource resource, org.openrdf.model.URI uRI, org.openrdf.model.Value value) {
         if(getStatements(resource, uRI,value).hasNext()){
             return true;
@@ -86,14 +97,26 @@ public class D2RQSource implements RdfSource {
         return false;
     }
 
+    /**
+     * Initialize the repository.
+     * @param configParams
+     */
     public void initialize(java.util.Map configParams) throws org.openrdf.sesame.sail.SailInitializationException {
         this.rdfSource.initialize(configParams);
     }
 
+    /**
+     * Optimize queries (no opitmization in this implementation)
+     * @param query the unoptimized query
+     * @return the optimized query
+     */
     public org.openrdf.sesame.sail.query.Query optimizeQuery(org.openrdf.sesame.sail.query.Query query) {
         return query;
     }
 
+    /**
+     * Shuts down the repository.
+     */
     public void shutDown() {
         this.rdfSource.shutDown();
     }

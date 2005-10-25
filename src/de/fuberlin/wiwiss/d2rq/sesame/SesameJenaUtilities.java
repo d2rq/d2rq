@@ -44,6 +44,12 @@ public class SesameJenaUtilities {
 	final static public String s_bnodePrefix = "urn:bnode:";
 
 	    
+    /**
+     * Builds a Sesame Statement out of an Jena Triple.
+     * @param t the jena triple
+     * @param vf the ValueFactory of the Sesame RdfSource, where the Sesame Statement should be stored.
+     * @return the Sesame Statement
+     */
     public static Statement makeSesameStatement(Triple t, ValueFactory vf){
         Resource subj = makeSesameSubject(t.getSubject(), vf);
         URI pred = makeSesamePredicate(t.getPredicate(), vf);
@@ -51,6 +57,9 @@ public class SesameJenaUtilities {
         return new StatementImpl(subj, pred, obj);
     }
 	
+    /**
+     * Builds a Jena subject node from a Sesame Resource.
+     */
     public static Node makeJenaSubject(Resource sub){
         if(sub == null){
             return Node.ANY;
@@ -67,6 +76,9 @@ public class SesameJenaUtilities {
         return null;
     }
     
+    /**
+     * Builds a Jena predicate Node form a Sesame predicate URI.
+     */
     public static Node makeJenaPredicate(URI pred){
         if(pred == null){
             return Node.ANY;
@@ -75,6 +87,9 @@ public class SesameJenaUtilities {
         }
     }
     
+    /**
+     * Builds a Jena object Node from a Sesame object Value.
+     */
     public static Node makeJenaObject(Value obj){
         Node objnode = null;
         if(obj == null){
@@ -106,6 +121,10 @@ public class SesameJenaUtilities {
         return objnode;
     }
     
+    
+    /**
+     * Builds a Sesame subject Resource from a Jena subject Node.
+     */
     public static Resource makeSesameSubject(Node subnode,ValueFactory myFactory){
         Resource mySubject = null;
         if(subnode.isBlank()){
@@ -123,10 +142,16 @@ public class SesameJenaUtilities {
         return mySubject;
     }
    
+    /**
+     * Builds a Sesame predicate URI from a Jena predicate Node.
+     */
     public static URI makeSesamePredicate(Node prednode,ValueFactory myFactory){
 		return myFactory.createURI(prednode.getURI());
     }
     
+    /**
+     * Builds a Sesame object Value from a Jena object Node.
+     */
     public static Value makeSesameObject(Node objnode,ValueFactory myFactory){
 		Value myobj = null;
 		if(objnode.isBlank()){

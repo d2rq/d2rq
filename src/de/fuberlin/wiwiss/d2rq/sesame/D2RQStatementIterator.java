@@ -32,12 +32,12 @@ public class D2RQStatementIterator implements StatementIterator {
         this.iterator = d2rq;
         this.valueFactory = valueFactory;
     }
-
+    
     public void close() {
         this.iterator.close();
     }
 
-    public boolean hasNext() {
+    public boolean hasNext(){
         return this.iterator.hasNext();
     }
     
