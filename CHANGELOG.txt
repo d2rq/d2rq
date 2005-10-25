@@ -1,3 +1,10 @@
+Version 0.4 2005-10-25
+
+Changes since v0.4
+------------------
+
+* added wrapers for sesame
+
 Version 0.3 2005-04-29
 
 Changes since v0.2
