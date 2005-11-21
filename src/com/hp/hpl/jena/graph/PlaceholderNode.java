@@ -23,16 +23,15 @@ import com.hp.hpl.jena.shared.PrefixMapping;
 public class PlaceholderNode extends Node {
 
     /** if not null, we allready know the value of the variable, but still have to check for 
-     * other occourences. */
+     * other occurrences. */
     protected Node node=null;
     /** What is the type, an URI, a blank node or a literal? */
     protected int nodeType=NotFixedNodeType;
     
     public static Node unwrapNode(Node n) {
+        if (n instanceof PlaceholderNode)
+            return ((PlaceholderNode)n).givenNode();
         return n;
-    }
-    public static Node unwrapNode(PlaceholderNode n) {
-        return n.givenNode();
     }
 
     public static final int NotFixedNodeType = 0;
