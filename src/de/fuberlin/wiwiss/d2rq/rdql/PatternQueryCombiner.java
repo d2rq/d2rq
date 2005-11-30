@@ -86,6 +86,7 @@ void setup() {
 	makePropertyBridges(); // -> setsOfPossiblePropertyBridges
 	// reducePropertyBridges();
 	makeTripleQueries();
+	// TODO handle bridges from multiple databases correctly
 	database=((PropertyBridge)bridges[0].get(0)).getDatabase();
 	// makeCompatibleConjunctions(); // can be returned by an iterator
 	// conjunctionResultIterator(); // pulls answers from database
@@ -289,6 +290,10 @@ private class PQCResultIterator extends NiceIterator implements ClosableIterator
 			if (!conjunctionsIterator.hasNext())
 				return;
 			conjunctionsIterator.next();
+			// TODO partition conjunction and conditions into parts
+			// that can be handled by separate databases.
+			// keep intermediate results and perform cross-products
+			// in java.
 			ConstraintHandler ch=new ConstraintHandler();
 			ch.setVariableBindings(bindings);
 			ch.setTripleQueryConjunction(conjunction);
