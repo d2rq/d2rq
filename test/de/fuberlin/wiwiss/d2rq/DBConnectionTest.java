@@ -37,6 +37,7 @@ public class DBConnectionTest extends TestCase {
 	private Database firstDatabase;
 
 	private String simplestQuery;
+	private String mediumQuery;
 	private String complexQuery;
 
 	public DBConnectionTest() {
@@ -57,6 +58,8 @@ public class DBConnectionTest extends TestCase {
 		databases = parser.getDatabases();
 		firstDatabase = (Database)databases.iterator().next();
 		simplestQuery = "SELECT 1;";
+		// mediumQuery = "SELECT PaperID from PAPERS";
+		mediumQuery = "SELECT DISTINCT Papers.PaperID FROM Rel_Paper_Topic , Papers , Topics WHERE Papers.PaperID=Rel_Paper_Topic.PaperID AND Rel_Paper_Topic.TopicID=Topics.TopicID AND Topics.TopicID=3 AND Rel_Paper_Topic.RelationType = 1 AND Papers.Publish = 1;";
 		complexQuery = "SELECT T0_Papers.PaperID, T0_Persons.URI, T1_Persons.Email, T1_Persons.URI FROM Persons AS T1_Persons , Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Papers.Publish = 1 AND T0_Persons.URI=T1_Persons.URI AND (NOT (CONCAT('http://www.conference.org/conf02004/paper#Paper' , CAST(T0_Papers.PaperID AS char) , '') = T0_Persons.URI));";
 
 	}
@@ -92,6 +95,7 @@ public class DBConnectionTest extends TestCase {
 				}
 			} // end while
 		} catch (SQLException e) {
+			e.printStackTrace();
 			query_results = null;
 		}
 		return query_results;
@@ -170,12 +174,25 @@ public class DBConnectionTest extends TestCase {
 		}
 	}
 	
+	// fails with wrong MSAccess Iswc DB (doc/manual/ISWC.mdb revision < 1.5)
+	// succeeds with revision 1.5
+	public void testMedium() throws SQLException {
+	     Connection c = firstDatabase.getConnnection(); 
+	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
+		String query = mediumQuery;
+		String query_results = performQuery(c, query);
+		System.out.println("testMedium:" + query_results);
+		c.close();
+		assertNotNull(query_results);
+	}
+
+	// fails with MSAccess
 	public void testLong() throws SQLException {
 	     Connection c = firstDatabase.getConnnection(); 
 	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 		String query = complexQuery;
 		String query_results = performQuery(c, query);
-		System.out.println(query_results);
+		System.out.println("testLong: " + query_results);
 		c.close();
 		// assertEquals(query_results,"2 2002");
 	}
