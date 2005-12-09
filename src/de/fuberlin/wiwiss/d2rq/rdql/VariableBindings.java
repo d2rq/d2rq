@@ -21,6 +21,12 @@ import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 /** 
  * A class for capturing binding information for variables that occour in a
  * {@link CombinedPatternStage}.
+ * It provides for a stage, a set of triples or nodes:
+ * - all occuring variable names and nodes.
+ * - all positions where a variable is accessed that was bound before 
+ *   (previous stage or previous triple or previous node in triple).
+ * - all variables that bind in these triples. (keys in bindVariableToShared)
+ * - information if and where these bind variables are used again in bound positions.
  * 
  * @author jgarbers
  *
@@ -29,6 +35,7 @@ public class VariableBindings {
     
     /**
      * variable bindings from inputDomain
+     * @deprecated see VarInfos 
      */
     public Domain inputDomain;
 
@@ -38,7 +45,7 @@ public class VariableBindings {
     /** 
      * variable Nodes in given triples
      */
-	public Map variableNameToNodeMap = new HashMap(); 
+	public Map variableNameToNodeMap; 
 
 	/**
 	 * variables nodes bound in a previous stage.
@@ -46,14 +53,14 @@ public class VariableBindings {
 	 * Optimized for variable lookup in RDQL conditions.
 	 * @see #bindVariableToShared
 	 */
-	public Map boundVariableToShared = new HashMap(); 
+	public Map boundVariableToShared; 
 
 	/** 
 	 * variable positions bound in previous stages. 
 	 * Domain index (Integer) -> set of VariableIndex.
 	 * => update these nodes in actual Triple[].
 	 */
-	public Map boundDomainIndexToShared = new HashMap(); 
+	public Map boundDomainIndexToShared; 
 	
 	/**	 
 	 * variables nodes to be bound in this stage.
@@ -61,7 +68,7 @@ public class VariableBindings {
 	 * For each variable a set of occurence positions.
 	 * Optimized for variable name lookup.
 	 */
-	public Map bindVariableToShared = new HashMap(); 
+	public Map bindVariableToShared; 
 
 	/**
 	 * variables nodes to be bound in this stage.
@@ -69,18 +76,41 @@ public class VariableBindings {
 	 * Optimized for variable index lookup.
 	 * @see #bindVariableToShared
 	 */
-	public Map bindVariableIndexToShared = new HashMap(); 
+	public Map bindVariableIndexToShared; 
 
 	/**
 	 * set of shared variable Nodes that are to be bound in this stage.
 	 */
-	public Set sharedBindVariables = new HashSet(); 
+	public Set sharedBindVariables; 
 
 	/**
 	 * set of indices of shared variables in a query.
 	 */
-	public Set sharedBindIndices = new HashSet(); 
+	public Set sharedBindIndices; 
 	
+	public VariableBindings() {
+		// inputDomain = null;
+		variableNameToNodeMap = new HashMap();
+		boundVariableToShared = new HashMap();
+		boundDomainIndexToShared = new HashMap();
+		bindVariableToShared = new HashMap();
+		bindVariableIndexToShared = new HashMap(); 
+		sharedBindVariables = new HashSet();
+		sharedBindIndices = new HashSet(); 
+	}
+	
+	/*
+	public VariableBindings(VariableBindings b) {
+		inputDomain = b.inputDomain;
+		variableNameToNodeMap = new HashMap(b.variableNameToNodeMap);
+		boundVariableToShared = new HashMap(b.boundVariableToShared);
+		boundDomainIndexToShared = new HashMap(b.boundDomainIndexToShared);
+		bindVariableToShared = new HashMap(b.bindVariableToShared);
+		bindVariableIndexToShared = new HashMap(b.bindVariableIndexToShared); 
+		sharedBindVariables = new HashSet(b.sharedBindVariables);
+		sharedBindIndices = new HashSet(b.sharedBindIndices); 
+	}
+	*/
 	
 	protected void addVariable(Node n) {
 	    String key=n.getName();

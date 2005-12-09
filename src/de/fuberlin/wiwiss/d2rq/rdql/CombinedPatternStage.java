@@ -88,9 +88,9 @@ public abstract class CombinedPatternStage extends Stage {
 	protected Triple[] triples;
 	
 	// support setup()
-	protected Mapping queryMapping;
+	protected Mapping queryMapping; // modified by side effects
 	protected Triple[] queryTriples;
-	protected ExpressionSet queryConstraints;
+	protected ExpressionSet queryConstraints; // modified by side effects
 	
 	public CombinedPatternStage(Graph graph, Mapping map,
 			ExpressionSet constraints, Triple[] triples) {
@@ -164,14 +164,18 @@ public abstract class CombinedPatternStage extends Stage {
 	 * expression that can be evaluated after the triples have matched.
 	 * By "can be evaluated" we mean that all its variables are bound.
 	 * <p>
-	 * Note: makeGuards/canEval() can not work correctly in PatternStage, because makeBoundVariables()
+	 * Note: makeGuards/canEval() can not work correctly in Jena 2.2 PatternStage, because makeBoundVariables()
 	 * is wrong there. It just unifies all variables that will be bound in this stage, but does
 	 * not contain the variables that are bound by a previous stage. So expressions like
 	 * x=y where x is bound by previous stage and y by this stage cannot be evaluated.
 	 *
-	 @param map the Mapping to prepare {@link Expression}s against
-	 @param constraints the set of (RDQL) constraint expressions
-	 @return the prepared ExpressionSet
+	 * Note: PatternStage in Jena 2.3: makeGuard()-Problem continues to exist:
+	 * GuardArranger still omits the variables that are bound in previous stages.
+	 * GuardArranger.canEval checks only for boundVariables (stemming from these triples).
+	 *
+	 * @param map the Mapping to prepare {@link Expression}s against
+	 * @param constraints the set of (RDQL) constraint expressions
+	 * @return the prepared ExpressionSet
 	 */
 	protected ValuatorSet makeGuard(Mapping map, ExpressionSet constraints) {
 		ValuatorSet es = new ValuatorSet();
@@ -276,7 +280,9 @@ public abstract class CombinedPatternStage extends Stage {
 					Pattern p = compiled[index];
 					possible = p.match(inputDomain, resultTriples[index]);
 				}
-				guard.evalBool(inputDomain);
+				if (possible) {
+					possible=guard.evalBool(inputDomain);
+				}
 				if (possible) {
 					sink.put(inputDomain.copy());
 				}

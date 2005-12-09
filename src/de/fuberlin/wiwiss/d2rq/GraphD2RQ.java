@@ -27,8 +27,10 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import de.fuberlin.wiwiss.d2rq.find.QueryCombiner;
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
+import de.fuberlin.wiwiss.d2rq.helpers.D2RQUtil;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
+import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.MapParser;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
@@ -60,6 +62,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 
     /** Collection of all PropertyBridges definded in the mapping file */
 	private List propertyBridges;
+	private Map propertyBridgesByDatabase;
 
 	public static boolean isUsingD2RQQueryHandler() {
 		return usingD2RQQueryHandler;
@@ -70,6 +73,9 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	
 	public List getPropertyBridges() {
 		return propertyBridges;
+	}
+	public List getPropertyBridges(Database db) {
+		return (List)propertyBridgesByDatabase.get(db);
 	}
 
 	
@@ -125,6 +131,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		parser.parse();
 		this.propertyBridges = sortPropertyBridges(parser.getPropertyBridges());
 		this.processingInstructions = parser.getProcessingInstructions();
+		this.propertyBridgesByDatabase=D2RQUtil.makeDatabaseMapFromPropertyBridges(propertyBridges);
 	}
     
 	private List sortPropertyBridges(Collection unsortedBridges) {
@@ -138,7 +145,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		Collections.sort(result, uriEvaluationOrderComparator);
 		return result;
 	}
-
+	
 	/**
 	 * Returns a QueryHandler for this graph.
 	 * The query handler class can be set by the mapping.
@@ -185,6 +192,9 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	// TODO change graphBaseFind to find when compiling/linking against Jena2.1
 	public ExtendedIterator graphBaseFind( TripleMatch m ) {
 		checkOpen();
+		return graphBaseFind(m,this.propertyBridges);
+	}
+	public ExtendedIterator graphBaseFind( TripleMatch m, List propertyBridgeCandidates ) {
 		Triple t = m.asTriple();
 
 		if (Logger.instance().debugEnabled()) {
@@ -199,7 +209,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 
 		QueryCombiner combiner = new QueryCombiner();
 		QueryContext context = new QueryContext();
-		Iterator it = this.propertyBridges.iterator();
+		Iterator it = propertyBridgeCandidates.iterator();
 		while (it.hasNext()) {
 			PropertyBridge bridge = (PropertyBridge) it.next();
 			if (!bridge.couldFit(t, context)) {
@@ -218,23 +228,22 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	static PropertyBridge[] emptyPropertyBridgeArray=new PropertyBridge[0];
 	
 	// used by D2RQPatternStage
+	/**
+	 * Finds all property bridges from this graph mapping that match a triple.
+	 */
 	public ArrayList propertyBridgesForTriple(Triple t) { // PropertyBridge[]
-		QueryContext context = new QueryContext();
-		Iterator it = this.propertyBridges.iterator();
-		ArrayList list=new ArrayList(2);
-		while (it.hasNext()) {
-			PropertyBridge bridge = (PropertyBridge) it.next();
-			if (!bridge.couldFit(t, context)) {
-				continue;
-			}
-			if (Logger.instance().debugEnabled()) {
-				Logger.instance().debug("--------------------------------------------");
-				Logger.instance().debug("Using property bridge: " + bridge + " for triple " + t );
-			}
-			list.add(bridge);
-		}
-		return list;
-		// return (PropertyBridge[]) list.toArray(emptyPropertyBridgeArray);
+		return D2RQUtil.propertyBridgesForTriple(t,propertyBridges);
+	}
+	
+	public ArrayList propertyBridgesForTriple(Triple t, Database db) {
+		Collection candidates=getPropertyBridges(db);
+		return D2RQUtil.propertyBridgesForTriple(t,candidates);
 	}	
 	
+    /**
+     * @return Returns the propertyBridgesByDatabase.
+     */
+    public Map getPropertyBridgesByDatabase() {
+        return propertyBridgesByDatabase;
+    }
 }
