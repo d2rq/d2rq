@@ -5,6 +5,18 @@
 //  Copyright 2005 Joerg Garbers. All rights reserved.
 //
 
+Working class combinations for D2RQQueryHandler:
+------------------------------------------------
+D2RQPatternStage2 + CombinedPatternStage + PatternQueryCombiner
+D2RQPatternStage3 + CombinedPatternStage3 + StageInfo + PatternQueryCombiner 
+D2RQPatternStage4 + CombinedPatternStage4 StageInfo + PatternQueryCombiner4
+
+D2RQPatternStage2 working in version 0.3 and 0.4. Error for multiple databases.
+D2RQPatternStage3 class/file decomposition. Error for multiple databases. 
+D2RQPatternStage4 works for single database. Multiple database support untested.
+
+///////////////////////////////////////////
+
 This pseudo code contains the ideas that lead to the implementaion PatternQueryCombinder.
 Some features have not been implemented, some have a different implemnetation now.
 Do not take this for reference.

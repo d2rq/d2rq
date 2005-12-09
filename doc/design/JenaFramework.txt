@@ -1,11 +1,13 @@
-A. From query String to graph interface (com.hp.hpl.jena.rdql)
+A. From query String to graph interface (all classes from com.hp.hpl.jena.rdql)
 ==============================================================
-Query query=new Query(string);
-  query.setSource(model);
-QueryEngine queryEngine=new QueryEngine(query);
-QueryResults queryResults=queryEngine.exec(ResultBinding startBinding);  // impl: QueryResultsMem or QueryResultsStream
-ResultBinding resultBinding=queryResults.next();
-  resultBinding getValue(varName);  // or similar
+class jena.rdfquery
+static query(String s, String dataURL, String language) {
+  Query query=new Query(string);
+    query.setSource(model);
+  QueryEngine queryEngine=new QueryEngine(query);
+  QueryResults queryResults=queryEngine.exec(ResultBinding startBinding);  // impl: QueryResultsMem or QueryResultsStream
+  ResultBinding resultBinding=queryResults.next();
+    resultBinding getValue(varName);  // or similar
 
 => queryEngine.exec() and QueryResults implement interface to graph.
 
@@ -17,7 +19,7 @@ class QueryEngine:
         resultsIter = new ResultsIterator(query, startBinding) ;
         return new QueryResultsStream(query, this, resultsIter) ;
     } 
-class ResultsIterator:
+class ResultsIterator:(in class QueryEngine)
 	ClosableIterator planIter;
     public ResultsIterator(Query q, ResultBinding presets)
     {	
@@ -25,7 +27,7 @@ class ResultsIterator:
     	queryHandler=graph.queryHandler(); // jg specified by graph. override!
     	com.hp.hpl.jena.graph.query.Query graphQuery = new com.hp.hpl.jena.graph.query.Query();
     	  ... // set up graphQuery from Query
-    	  !!! // graphQuery currently does not contain constraints!!!
+    	  !!! // graphQuery does not contain constraints in Jena 2.2 but in 2.3 !!!
  		BindingQueryPlan plan = queryHandler.prepareBindings(graphQuery, projectionVars); // override?
         planIter = plan.executeBindings() ;
 	}        
@@ -36,6 +38,13 @@ class QueryResultsStream:
     
 B. Package com.hp.hpl.jena.graph.query
 =========================================
+Note: QueryHandler.patternStage( Mapping map, ExpressionSet constraints, Triple [] p )
+is not called by this framework, but from com.hp.hpl.jena.graph.query.SimpleQueryEngine only.
+SimpleQueryEngine is referenced by: 
+  1. SimpleQueryPlan (BindingQueryPlan!) -> patternStage() is refinement of Simple framework
+  2. Query (uses SimpleQueryPlan as default for its executeBindings()
+  3. NamedTripleBunches.    
+    
 interface BindingQueryPlan: 
    All Known Implementing Classes: SimpleQueryPlan 
    SimpleQueryPlan is an implementation of QueryPlan which uses the engine defined in Query to do the work.
