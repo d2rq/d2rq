@@ -4,30 +4,21 @@
 
 package de.fuberlin.wiwiss.d2rq;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
-
-import junit.framework.TestResult;
 
 import com.hp.hpl.jena.rdql.Query;
 import com.hp.hpl.jena.rdql.QueryEngine;
 import com.hp.hpl.jena.rdql.QueryResults;
 import com.hp.hpl.jena.rdql.ResultBinding;
-
-//for Jena2.1:
-//import com.hp.hpl.jena.rdql.ResultBinding.ResultBindingIterator;
-//for Jena2.2:
 import com.hp.hpl.jena.rdql.ResultBindingIterator;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.find.SQLResultSet;
 import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
 import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
@@ -97,7 +88,6 @@ public class RDQLTestFramework extends TestFramework {
 
 			InfoD2RQ startInst;
 			InfoD2RQ diffInfo[]=new InfoD2RQ[configs];
-			Set resultSets[]= new HashSet[configs];
 			Set resultMaps[]= new HashSet[configs];
 			String printed[] = new String[configs];
 			String description[]= new String[] { "SimpleQueryHandler", "D2RQQueryHandler"};
@@ -118,8 +108,7 @@ public class RDQLTestFramework extends TestFramework {
 			    }
 				diffInfo[i]=InfoD2RQ.instanceMinus(startInst);
 				diffInfo[i].div(nTimes);
-				resultSets[i]=results;
-				resultMaps[i]=resultBindingsToMaps(results);
+				resultMaps[i]=results;
 			}
 			// performanceLogger.debug("RDQL-Query: " + queryString);
 			performanceLogger.debug(description[0] + " vs. " + description[1] + " = " + 
@@ -144,8 +133,7 @@ public class RDQLTestFramework extends TestFramework {
 			assertEquals(resultMaps[0],resultMaps[1]);
 		} catch (Exception e) {
 			GraphD2RQ.setUsingD2RQQueryHandler(oldState);
-			logger.error(e.toString());
-			throw new RuntimeException(e); 
+			throw e; 
 		}
 		GraphD2RQ.setUsingD2RQQueryHandler(oldState);
 	}
@@ -216,10 +204,10 @@ public class RDQLTestFramework extends TestFramework {
 		QueryResults qr = new QueryEngine(query).exec();
 		while (qr.hasNext()) {
 			ResultBinding binding = (ResultBinding) qr.next();
-			this.results.add(binding);
+			this.results.add(resultBindingToMap(binding, qr.getResultVars()));
 		}
 	}
-		
+
 	protected void assertResultCount(int count) {
 		assertEquals(count, this.results.size());
 	}
@@ -227,36 +215,28 @@ public class RDQLTestFramework extends TestFramework {
 	protected void assertResult(Map map) {
 		Iterator it = this.results.iterator();
 		while (it.hasNext()) {
-			ResultBinding binding = (ResultBinding) it.next();
-			if (containsAll(binding, map)) {
+			if (it.next().equals(map)) {
 				return;
 			}
 		}
 		fail();
 	}
 	
-	public static Set resultBindingsToMaps(Set b) {
-		Set result=new HashSet();
-		Iterator it=b.iterator();
-		while (it.hasNext()) {
-			ResultBinding bind=(ResultBinding)it.next();
-			result.add(resultBindingToMap(bind));
-		}
-		return result;
-	}
-	
-	public static Map resultBindingToMap(ResultBinding b) {
+	public static Map resultBindingToMap(ResultBinding b, List variables) {
 		Map m=new HashMap();
 		ResultBindingIterator it=b.iterator();
 		while (it.hasNext()) {
 			it.next();
 		    String var=JenaCompatibility.resultBindingIteratorVarName(it);
+		    if (!variables.contains(var)) {
+		    	continue;
+		    }
 		    Object val=JenaCompatibility.resultBindingIteratorValue(it,b);
 			String strVal=val.toString();
 			int size=strVal.length();
 			if (size>250)
 			    logger.debug("Big string (" + size + ") in resultBinding:\n" + strVal);
-			m.put(var,strVal);
+			m.put(var,val);
 		}
 		return m;
 	}
@@ -286,30 +266,16 @@ public class RDQLTestFramework extends TestFramework {
 //		}
 //	}
 
-	protected boolean containsAll(ResultBinding actual, Map expected) {
-		Iterator it = expected.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			String actualResource = actual.get((String) entry.getKey()).toString();
-			String expectedResource = entry.getValue().toString();
-			if (!actualResource.equals(expectedResource)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	protected void dump() {
 		Iterator it = this.results.iterator();
 		int count = 1;
 		while (it.hasNext()) {
 			logger.debug("Result binding " + count + ":");
-			ResultBinding binding = (ResultBinding) it.next();
-			ResultBindingIterator it2 = binding.iterator();
+			Map binding = (Map) it.next();
+			Iterator it2 = binding.keySet().iterator();
 			while (it2.hasNext()) {
-			    it2.next();
-			    String varName=JenaCompatibility.resultBindingIteratorVarName(it2);
-			    Object val=JenaCompatibility.resultBindingIteratorValue(it2,binding);
+			    String varName = (String) it2.next();
+			    Object val = binding.get(varName);
 				logger.debug("    " + varName + " => " + val); 
 			}
 			count++;

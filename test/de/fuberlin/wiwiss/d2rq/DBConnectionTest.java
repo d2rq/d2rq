@@ -17,6 +17,7 @@ import junit.framework.TestCase;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
+import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.MapParser;
 
@@ -39,6 +40,8 @@ public class DBConnectionTest extends TestCase {
 	private String simplestQuery;
 	private String mediumQuery;
 	private String complexQuery;
+
+	protected static Logger logger=new Logger();
 
 	public DBConnectionTest() {
 		super();
@@ -68,22 +71,21 @@ public class DBConnectionTest extends TestCase {
 		mapModel.close();
 	}
 
-	public void testConnections() {
+	public void testConnections() throws SQLException {
 		Iterator it = databases.iterator();
 		while (it.hasNext()) {
 			Database db = (Database) it.next();
-			System.out.println("Testing Database " + db.toString());
+			logger.debug("Testing Database " + db.toString());
 			Connection c = db.getConnnection();
 			String result = performQuery(c, simplestQuery); // 
 			assertEquals(result, "1");
 		}
 	}
 	
-	private static String performQuery(Connection c, String theQuery) {
+	private static String performQuery(Connection c, String theQuery) throws SQLException {
 		String query_results = "";
 		Statement s;
 		ResultSet rs;
-		try {
 			s = c.createStatement();
 			rs = s.executeQuery(theQuery);
 			int col = (rs.getMetaData()).getColumnCount();
@@ -94,10 +96,6 @@ public class DBConnectionTest extends TestCase {
 					query_results += rs.getString(pos);
 				}
 			} // end while
-		} catch (SQLException e) {
-			e.printStackTrace();
-			query_results = null;
-		}
 		return query_results;
 	}
 
@@ -126,7 +124,7 @@ public class DBConnectionTest extends TestCase {
 
 		Connection c=null;
 		try {
-			System.out.println("connecting to the " + url + " data source...");
+			logger.debug("connecting to the " + url + " data source...");
 			Class.forName(driverClass);
 			if (configure == 1)
 				c = DriverManager.getConnection(url, name, pass);
@@ -148,7 +146,7 @@ public class DBConnectionTest extends TestCase {
 		String query = "SELECT Papers.PaperID, Papers.Year FROM Papers WHERE Papers.Year=2002 AND Papers.PaperID = 2 AND Papers.Publish = 1;";
     
 		String query_results = performQuery(c, query);
-		System.out.println(query_results);
+		logger.debug(query_results);
 		c.close();
 		assertEquals(query_results,"2 2002");
 	}
@@ -165,7 +163,7 @@ public class DBConnectionTest extends TestCase {
 		c.close();
 		if (!distinctResult.equals(nonDistinctResult)) {
 		    if (firstDatabase.correctlyHandlesDistinct()) {
-		       System.out.println("testDistinct() has a mismatch." +
+		       logger.debug("testDistinct() has a mismatch." +
 		               " Please use a better Database or " +
 		               "put into your Database specification " +
 		               "d2rq:allowDistinct \"true\".");
@@ -181,7 +179,7 @@ public class DBConnectionTest extends TestCase {
 	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 		String query = mediumQuery;
 		String query_results = performQuery(c, query);
-		System.out.println("testMedium:" + query_results);
+		logger.debug("testMedium:" + query_results);
 		c.close();
 		assertNotNull(query_results);
 	}
@@ -191,9 +189,14 @@ public class DBConnectionTest extends TestCase {
 	     Connection c = firstDatabase.getConnnection(); 
 	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 		String query = complexQuery;
-		String query_results = performQuery(c, query);
-		System.out.println("testLong: " + query_results);
-		c.close();
+		try {
+			String query_results = performQuery(c, query);
+			logger.debug("testLong: " + query_results);
+		} catch (SQLException e) {
+			fail("DBConnectionTest.testLong() is known to fail with MSAccess");
+		} finally {
+			c.close();
+		}
 		// assertEquals(query_results,"2 2002");
 	}
 
