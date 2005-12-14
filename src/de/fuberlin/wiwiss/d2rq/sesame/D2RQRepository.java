@@ -93,6 +93,7 @@ public class D2RQRepository extends LocalRepository implements SesameRepository{
     public void clear(org.openrdf.sesame.admin.AdminListener adminListener) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
     }
 
+    //TODO wrong documentation
 	/**
 	 * Extracts data from the repository and reports the triples to the supplied
 	 * <tt>RdfDocumentWriter</tt>.
