@@ -61,7 +61,7 @@ public class RDQLTestFramework extends TestFramework {
 		super.setUp();
 		this.model = new ModelD2RQ(D2RQMap);
 		GraphD2RQ.setUsingD2RQQueryHandler(true);
-		logger.setDebug(false);
+		logger.setDebug(true);
 		separator.setDebug(true);
 		differentLogger.setDebug(true);
 		differenceLogger.setDebug(false);
@@ -84,7 +84,7 @@ public class RDQLTestFramework extends TestFramework {
 		boolean oldState=GraphD2RQ.isUsingD2RQQueryHandler();
 		try {
 		    int configs=2;
-			int nTimes=10;
+			int nTimes=1;
 
 			InfoD2RQ startInst;
 			InfoD2RQ diffInfo[]=new InfoD2RQ[configs];
@@ -267,6 +267,7 @@ public class RDQLTestFramework extends TestFramework {
 //	}
 
 	protected void dump() {
+		logger.debug("\n#Results: " + results.size() + ":");
 		Iterator it = this.results.iterator();
 		int count = 1;
 		while (it.hasNext()) {

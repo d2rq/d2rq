@@ -185,7 +185,7 @@ public class DBConnectionTest extends TestCase {
 	}
 
 	// fails with MSAccess
-	public void testLong() throws SQLException {
+	public void testLongComplexSQLQuery() throws SQLException {
 	     Connection c = firstDatabase.getConnnection(); 
 	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 		String query = complexQuery;

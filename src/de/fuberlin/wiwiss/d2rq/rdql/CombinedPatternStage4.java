@@ -166,10 +166,13 @@ public abstract class CombinedPatternStage4 extends Stage {
 			IteratorResult res=(IteratorResult)it.next();
 			Object aboutNext=res.about; 
 			Triple[] resultTriples = res.triples;
-			int next2=nextToFind+resultTriples.length;
+			int resultLen=resultTriples.length;
+			if (resultTriples==null || resultLen==0)
+			    throw new RuntimeException("Iterator returns resultTriple array of length 0.");
+			int next2=nextToFind+resultLen;
 			boolean possible = true;
 			// TODO check indices
-			possible=matchAndEvalGuards(domain,resultTriples,0,resultTriples.length-1);
+			possible=matchAndEvalGuards(domain,resultTriples,nextToFind,next2-1);
 			if (possible) {
 				if (next2==triples.length)
 					sink.put(domain.copy());
@@ -183,9 +186,10 @@ public abstract class CombinedPatternStage4 extends Stage {
 	protected boolean matchAndEvalGuards(Domain domain, Triple[] resultTriples, int from, int to) {
 		boolean possible = true;
 		//  evaluate all matches and guards at once
-		for (int index = from; possible && (index <= to); index++) {
+		int resultTripleIndex=0;
+		for (int index = from; possible && (index <= to); index++, resultTripleIndex++) {
 			Pattern p = stageInfo.compiled[index];
-			possible = p.match(domain, resultTriples[index]);
+			possible = p.match(domain, resultTriples[resultTripleIndex]);
 			if (possible && stageInfo.guards!=null) {
 				stageInfo.guards[index].evalBool(domain);
 			}

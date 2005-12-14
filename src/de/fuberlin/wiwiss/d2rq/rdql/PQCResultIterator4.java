@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -12,6 +14,7 @@ import de.fuberlin.wiwiss.d2rq.find.CombinedTripleResultSet;
 import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.ConjunctionIterator;
+import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /** 
@@ -19,7 +22,14 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * @author jgarbers
  *
  */
-class PQCResultIterator4 extends NiceIterator implements ClosableIterator {
+public class PQCResultIterator4 extends NiceIterator implements ClosableIterator {
+
+    public static Logger logger;
+    public static int instanceCounter=1;
+    public int instanceNr=instanceCounter++;
+    public int returnedTriplePatternNr=0;
+    
+    private String additionalLogInfo;
 
     /**
 	 * 
@@ -62,6 +72,12 @@ class PQCResultIterator4 extends NiceIterator implements ClosableIterator {
 		return (prefetchedResult!=null);
 	}
 
+	private static int lastPrintedInstanceNr=-1;
+	
+	public boolean isDebugEnabled() {
+	    return logger!=null && logger.debugEnabled();
+	}
+	
 	public Object next() {
 		if (!didPrefetch) {
 			prefetch();
@@ -71,6 +87,18 @@ class PQCResultIterator4 extends NiceIterator implements ClosableIterator {
 		Triple[] ret=prefetchedResult;
 		prefetchedResult=null;
 		didPrefetch=false;
+        returnedTriplePatternNr++;
+        if (isDebugEnabled()) {
+            String str=Arrays.asList(ret).toString();
+            // if (lastPrintedInstanceNr!=instanceNr) {
+            //     logger.debug("-- Iterator switch --");
+            //     lastPrintedInstanceNr=instanceNr;
+            // }
+            logger.debug("PQCResultIterator4-" + instanceNr + 
+                    " resultPattern-" + returnedTriplePatternNr + 
+                    " length-" + ret.length + 
+                    " DB-" + nextDatabase + (additionalLogInfo!=null?additionalLogInfo:"") + ":\n" + str + "\n");
+        }
 		return new CombinedPatternStage4.IteratorResult(ret,nextDatabase);
 	}
 	
@@ -131,4 +159,16 @@ class PQCResultIterator4 extends NiceIterator implements ClosableIterator {
 		throw new UnsupportedOperationException();
 	}
 
+    /**
+     * @return Returns the additionalLogInfo.
+     */
+    public String getAdditionalLogInfo() {
+        return additionalLogInfo;
+    }
+    /**
+     * @param additionalLogInfo The additionalLogInfo to set.
+     */
+    public void setAdditionalLogInfo(String additionalLogInfo) {
+        this.additionalLogInfo = additionalLogInfo;
+    }
 }

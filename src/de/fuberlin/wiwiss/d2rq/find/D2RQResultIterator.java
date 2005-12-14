@@ -8,6 +8,7 @@ import com.hp.hpl.jena.util.iterator.*;
 import com.hp.hpl.jena.graph.*;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 
 /**
  * Extended iterator over the results of a find(spo) query.
@@ -28,6 +29,11 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  */
 public class D2RQResultIterator extends NiceIterator implements ExtendedIterator {
 
+    public static Logger logger;
+    public static int instanceCounter=1;
+    public int instanceNr=instanceCounter++;
+    public int returnedTripleNr=0;
+    
     /** 
      * All TripleResultSets for this D2RQResultIterator.
 	 * There can be serveral because query results can be stored in several tables (e.g. rdf:type)
@@ -80,6 +86,11 @@ public class D2RQResultIterator extends NiceIterator implements ExtendedIterator
         this.m_prefetched = false;
         if (this.m_finished) {
             throw new NoSuchElementException();
+        }
+        returnedTripleNr++;
+        if (logger!=null && logger.debugEnabled()) {
+            String str=m_prefetchedTriple.toString();
+            logger.debug("D2RQResultIterator-" + instanceNr + " triple-" + returnedTripleNr + ": " + str);
         }
         return this.m_prefetchedTriple;
     }

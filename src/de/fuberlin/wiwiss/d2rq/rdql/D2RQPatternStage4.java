@@ -93,54 +93,71 @@ public class D2RQPatternStage4 extends CombinedPatternStage4 {
 	}
 
 	/**
-	 * Sets up {@link PatternQueryCombiner} and returns its resultTriplesIterator.
-	 * Passes stage information to the PatternQueryCombiner.
-	 * @param triples identical to this.triples
-	 * @return an iterator. Each result is a possible and full instanciation of
-	 * triples according to D2RQ. 
-	 */
-	protected ClosableIterator resultIteratorForTriplePattern(Triple[] triples, int nextToFind, Object aboutPrevious) {
-		if (!refersToMultipleDatabases) {
-			List[] candidates=getSoleCandidateBridgeLists();
-			return makeCombinedIterator(candidates,triples,stageInfo.vars.allBindings,stageInfo.vars.allExpressions);
-		} else {
-			Map reducedCandidateBridgeLists;
-			if (aboutPrevious==null)
-				reducedCandidateBridgeLists=candidateBridgeLists;
-			else {
-				Database previousDatabase=(Database)aboutPrevious;
-				reducedCandidateBridgeLists=new HashMap();
-				reducedCandidateBridgeLists.putAll(candidateBridgeLists);
-				reducedCandidateBridgeLists.remove(previousDatabase);
-			}
-			Map cuttedCandidateBridgeLists=new HashMap();
-			GraphUtils.cutLists(reducedCandidateBridgeLists,nextToFind,cuttedCandidateBridgeLists,true);
-			ExtendedIterator ret=NiceIterator.emptyIterator();
-			Iterator it=cuttedCandidateBridgeLists.entrySet().iterator();
-			while (it.hasNext()) {
-		        Map.Entry e=(Map.Entry)it.next();
-		        List[] dbBridges=(List[])e.getValue();
-        		    Triple[] triplesCut=new Triple[dbBridges.length];
-        		    System.arraycopy(triples,nextToFind,triplesCut,0,triplesCut.length);
-				PatternQueryCombiner4 combiner = new PatternQueryCombiner4(graph, dbBridges, triplesCut); 
-				combiner.setCareForPossible(false);
-				combiner.setup();
-				int maxlen=combiner.possibleLength();
-		        for (int len=maxlen; len>0; len--) {
-		        	  // either full length or devide where options from other databases
-		        	  if (len==maxlen || multipleDatabasesMarker.get(nextToFind+len)) {
-		        		TripleQuery[][] tripleQueries=new TripleQuery[len][];
-			        	System.arraycopy(combiner.tripleQueries,nextToFind,tripleQueries,0,len);
-			        	int partEnd=nextToFind+len-1;
-			        PQCResultIterator4 item=makeCombinedIterator(tripleQueries,stageInfo.vars.partBindings[nextToFind][partEnd],stageInfo.vars.partExpressions[nextToFind][partEnd]);
-			        if (item!=null)
-			        	  ret.andThen(item);		        		  
-		        	  }
-		        }
-			}
-			return ret;
-		}
-	}
+     * Sets up {@link PatternQueryCombiner}and returns its
+     * resultTriplesIterator. Passes stage information to the
+     * PatternQueryCombiner.
+     * 
+     * @param triples
+     *            identical to this.triples
+     * @return an iterator. Each result is a possible and full instanciation of
+     *         triples according to D2RQ.
+     */
+    protected ClosableIterator resultIteratorForTriplePattern(Triple[] triples,
+            int nextToFind, Object aboutPrevious) {
+        if (!refersToMultipleDatabases) {
+            List[] candidates = getSoleCandidateBridgeLists();
+            return makeCombinedIterator(candidates, triples,
+                    stageInfo.vars.allBindings, stageInfo.vars.allExpressions);
+        } else {
+            Map reducedCandidateBridgeLists;
+            if (aboutPrevious == null)
+                reducedCandidateBridgeLists = candidateBridgeLists;
+            else {
+                Database previousDatabase = (Database) aboutPrevious;
+                reducedCandidateBridgeLists = new HashMap();
+                reducedCandidateBridgeLists.putAll(candidateBridgeLists);
+                reducedCandidateBridgeLists.remove(previousDatabase);
+            }
+            Map cuttedCandidateBridgeLists = new HashMap();
+            GraphUtils.cutLists(reducedCandidateBridgeLists, nextToFind,
+                    cuttedCandidateBridgeLists, true);
+            ExtendedIterator ret = NiceIterator.emptyIterator();
+            Iterator it = cuttedCandidateBridgeLists.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry e = (Map.Entry) it.next();
+                List[] dbBridges = (List[]) e.getValue();
+                Triple[] triplesCut = new Triple[dbBridges.length];
+                System.arraycopy(triples, nextToFind, triplesCut, 0,
+                        triplesCut.length);
+                PatternQueryCombiner4 combiner = new PatternQueryCombiner4(
+                        graph, dbBridges, triplesCut);
+                combiner.setCareForPossible(false);
+                combiner.setup();
+                int maxlen = combiner.possibleLength();
+                for (int len = maxlen; len > 0; len--) {
+                    // either full length or devide where options from other
+                    // databases
+                    if (len == maxlen
+                            || multipleDatabasesMarker.get(nextToFind + len)) {
+                        TripleQuery[][] tripleQueries = new TripleQuery[len][];
+                        System.arraycopy(combiner.tripleQueries, 0,
+                                tripleQueries, 0, len);
+                        int partEnd = nextToFind + len - 1;
+                        PQCResultIterator4 item = makeCombinedIterator(
+                                tripleQueries,
+                                stageInfo.vars.partBindings[nextToFind][partEnd],
+                                stageInfo.vars.partExpressions[nextToFind][partEnd]);
+                        if (item.isDebugEnabled()) {
+                            item.setAdditionalLogInfo("" + nextToFind + "-" + partEnd);
+                        }
+                        if (item != null)
+                            ret = ret.andThen(item);
+                    }
+                }
+            }
+            return ret;
+        }
+    }
 
 
 	private PQCResultIterator4 makeCombinedIterator(List[] candidates, Triple[] triples, VariableBindings variableBindings, Collection constraints) {
