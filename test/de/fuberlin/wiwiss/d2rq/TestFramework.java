@@ -28,20 +28,13 @@ import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
  * @author Richard Cyganiak <richard@cyganiak.de>
  */
 public class TestFramework extends TestCase {
-	public static String D2RQMap = "file:doc/manual/ISWC-d2rq.n3"; // "file:srcMac/jgISWC-d2rq.n3"; 
+	protected String D2RQMap = "file:doc/manual/ISWC-d2rq.n3"; // "file:srcMac/jgISWC-d2rq.n3"; 
 	protected static String NS = "http://annotation.semanticweb.org/iswc/iswc.daml#";
 	protected final static RDFDatatype xsdString =
 			TypeMapper.getInstance().getSafeTypeByName("http://www.w3.org/2001/XMLSchema#string");
 	protected final static RDFDatatype xsdYear =
 			TypeMapper.getInstance().getSafeTypeByName("http://www.w3.org/2001/XMLSchema#gYear");
 	
-	
-	public static String getD2RQMap() {
-		return D2RQMap;
-	}
-	public static void setD2RQMap(String map) {
-		D2RQMap = map;
-	}
 	public static String getNS() {
 		return NS;
 	}

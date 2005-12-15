@@ -28,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.map.MapParser;
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
-public class DBConnectionTest extends TestCase {
+public class DBConnectionTest extends TestFramework {
 
 	private Model mapModel;
 
@@ -43,11 +43,6 @@ public class DBConnectionTest extends TestCase {
 
 	protected static Logger logger=new Logger();
 
-	public DBConnectionTest() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
 	public DBConnectionTest(String arg0) {
 		super(arg0);
 		// TODO Auto-generated constructor stub
@@ -55,7 +50,7 @@ public class DBConnectionTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		mapModel = ModelFactory.createDefaultModel();
-		mapModel.read(TestFramework.D2RQMap, "N3");
+		mapModel.read(D2RQMap, "N3");
 		parser = new MapParser(mapModel);
 		parser.parse();
 		databases = parser.getDatabases();
