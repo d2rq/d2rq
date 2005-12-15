@@ -6,6 +6,7 @@ package de.fuberlin.wiwiss.d2rq.rdql;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
+import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 
@@ -45,6 +47,8 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 public class D2RQPatternStage4 extends CombinedPatternStage4 {
     // TODO keep just one instance of PatternQueryCombiner and update Property Bridges
     // only when updated with previous stage (see varInfo.boundDomainIndexToShared)
+
+    public static Logger logger;
 
 	private GraphD2RQ graph;
 	protected Map candidateBridgeLists; // Database -> List[] 
@@ -129,6 +133,12 @@ public class D2RQPatternStage4 extends CombinedPatternStage4 {
                 Triple[] triplesCut = new Triple[dbBridges.length];
                 System.arraycopy(triples, nextToFind, triplesCut, 0,
                         triplesCut.length);
+                if (logger!=null && logger.debugEnabled()) {
+                    String str=Arrays.asList(triplesCut).toString();
+                    logger.debug("creating PatternQueryCombiner4 with " + 
+                    		triplesCut.length +" triples starting from " + nextToFind + ":\n" + str + "\n");
+
+                }
                 PatternQueryCombiner4 combiner = new PatternQueryCombiner4(
                         graph, dbBridges, triplesCut);
                 combiner.setCareForPossible(false);

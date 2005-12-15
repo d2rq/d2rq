@@ -172,17 +172,27 @@ public abstract class CombinedPatternStage4 extends Stage {
 			int next2=nextToFind+resultLen;
 			boolean possible = true;
 			// TODO check indices
-			possible=matchAndEvalGuards(domain,resultTriples,nextToFind,next2-1);
+			Domain copy=domain.copy();
+			possible=matchAndEvalGuards(copy,resultTriples,nextToFind,next2-1);
 			if (possible) {
 				if (next2==triples.length)
-					sink.put(domain.copy());
+					sink.put(copy);
 				else
-					findFrom(domain,next2,sink,aboutNext);
+					findFrom(copy,next2,sink,aboutNext);
 			}
 		}
 		it.close();
 	}
 	
+	/**
+	 * Matches domain with resultTriples.
+	 * Thereby modifies domain.
+	 * @param domain
+	 * @param resultTriples
+	 * @param from
+	 * @param to
+	 * @return
+	 */
 	protected boolean matchAndEvalGuards(Domain domain, Triple[] resultTriples, int from, int to) {
 		boolean possible = true;
 		//  evaluate all matches and guards at once

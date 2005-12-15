@@ -1,11 +1,12 @@
 /*
- * $Id: RDQLDB2Test.java,v 1.2 2005/12/14 18:15:30 garbers Exp $
+ * $Id: RDQLDB2Test.java,v 1.3 2005/12/15 12:04:05 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
 import de.fuberlin.wiwiss.d2rq.find.D2RQResultIterator;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.rdql.D2RQPatternStage4;
 import de.fuberlin.wiwiss.d2rq.rdql.PQCResultIterator4;
 
 
@@ -28,12 +29,9 @@ public class RDQLDB2Test extends RDQLTestFramework {
 	static String paperYauthorB=
 	    "(?y, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?b)";
 
-	{
-		setD2RQMap(DB2MappingFile);	
-	}
-	
 	public RDQLDB2Test(String arg0) {
 		super(arg0);
+		D2RQMap=DB2MappingFile;
 	}
 	
 	protected void setUp() throws Exception {
@@ -41,8 +39,10 @@ public class RDQLDB2Test extends RDQLTestFramework {
 	    // Logger.instance().setDebug(true);
 	    // D2RQResultIterator.logger=new Logger();
 	    // D2RQResultIterator.logger.setDebug(true);
-	    PQCResultIterator4.logger=new Logger();
-	    PQCResultIterator4.logger.setDebug(true);
+	    //PQCResultIterator4.logger=new Logger();
+	    //PQCResultIterator4.logger.setDebug(true);
+	    //D2RQPatternStage4.logger=new Logger();
+	    //D2RQPatternStage4.logger.setDebug(true);
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class RDQLDB2Test extends RDQLTestFramework {
 	}
 	
 	// TODO make it work
-	public void testPersonACitesPaperB() {
+	public void testPersonACitesPersonB() {
 		rdql("SELECT ?a, ?b WHERE " +
 		        paperXauthorA +
 				", " + 

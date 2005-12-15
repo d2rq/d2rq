@@ -1,5 +1,5 @@
 /*
- * $Id: AllTests.java,v 1.2 2005/03/07 10:08:48 garbers Exp $
+ * $Id: AllTests.java,v 1.3 2005/12/15 12:04:05 garbers Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -30,6 +30,7 @@ public class AllTests {
 		suite.addTestSuite(FindTest.class);
 		suite.addTestSuite(RDQLTest.class);
 		suite.addTestSuite(ModelAPITest.class);
+		suite.addTestSuite(RDQLDB2Test.class);
 		//$JUnit-END$
 		return suite;
 	}

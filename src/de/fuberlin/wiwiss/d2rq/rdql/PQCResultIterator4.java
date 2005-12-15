@@ -78,6 +78,19 @@ public class PQCResultIterator4 extends NiceIterator implements ClosableIterator
 	    return logger!=null && logger.debugEnabled();
 	}
 	
+	private void logPattern(String msg, Triple[] ret) {
+        if (logger!=null && logger.debugEnabled()) {
+            String str=Arrays.asList(ret).toString();
+            // if (lastPrintedInstanceNr!=instanceNr) {
+            //     logger.debug("-- Iterator switch --");
+            //     lastPrintedInstanceNr=instanceNr;
+            // }
+            logger.debug("PQCResultIterator4-" + instanceNr + " " + msg +
+                    " length-" + ret.length + 
+                    " DB-" + nextDatabase + (additionalLogInfo!=null?additionalLogInfo:"") + ":\n" + str + "\n");
+        }
+	}
+	
 	public Object next() {
 		if (!didPrefetch) {
 			prefetch();
@@ -88,17 +101,7 @@ public class PQCResultIterator4 extends NiceIterator implements ClosableIterator
 		prefetchedResult=null;
 		didPrefetch=false;
         returnedTriplePatternNr++;
-        if (isDebugEnabled()) {
-            String str=Arrays.asList(ret).toString();
-            // if (lastPrintedInstanceNr!=instanceNr) {
-            //     logger.debug("-- Iterator switch --");
-            //     lastPrintedInstanceNr=instanceNr;
-            // }
-            logger.debug("PQCResultIterator4-" + instanceNr + 
-                    " resultPattern-" + returnedTriplePatternNr + 
-                    " length-" + ret.length + 
-                    " DB-" + nextDatabase + (additionalLogInfo!=null?additionalLogInfo:"") + ":\n" + str + "\n");
-        }
+        logPattern("resultPattern-" + returnedTriplePatternNr ,ret);
 		return new CombinedPatternStage4.IteratorResult(ret,nextDatabase);
 	}
 	
