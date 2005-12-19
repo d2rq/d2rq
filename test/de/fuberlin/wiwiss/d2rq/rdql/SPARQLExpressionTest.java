@@ -19,25 +19,28 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import junit.framework.TestCase;
 
 /**
+ * Note:
+ * Currently (Jena 2.3) the expressions are not passed from the SPARQL parser down to the pattern stage.
+ * So no reasonable results are given by this test case.
  * @author jgarbers
  *
  */
-public class ExpressionTest extends ExpressionTestFramework { 
+public class SPARQLExpressionTest extends ExpressionTestFramework { 
     
-    public ExpressionTest(String arg0) {
+    public SPARQLExpressionTest(String arg0) {
         super(arg0);
      }
-
-	String getRDQLQuery(String condition) {
+	
+	String getSPARQLQuery(String condition) {
 	    String triples=
-	        "(?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), " +
-			"(?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y)";
-	    String query="SELECT ?x, ?y WHERE " + triples + " AND " + condition;
+	        " ?x <http://annotation.semanticweb.org/iswc/iswc.daml#author> ?z . " +
+			" ?z <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> ?y ";
+	    String query="SELECT ?x ?y WHERE { " + triples + " . FILTER (" + condition + ") }";
 	    return query;
 	}
 		
-	void rdqlQuery() {
-	    rdql(getRDQLQuery(condition));
+	void sparqlQuery() {
+	    sparql(getSPARQLQuery(condition));
 	    if (translatedLogger.debugEnabled()) {
 	        translatedLogger.debug(condition + " ->");
 	        Iterator it=ExpressionTranslator.logSqlExpressions.iterator();
@@ -54,30 +57,35 @@ public class ExpressionTest extends ExpressionTestFramework {
 
 	public void testRDQLGetAuthorsAndEmailsWithCondition() {
 	    // GraphD2RQ.setUsingD2RQQueryHandler(false);
-	    condition="(?x eq ?z)";
+	    condition="(?x = ?z)";
 	    //sqlCondition=""
-		rdqlQuery();
+	    sparqlQuery();
 	}
 	public void testNobody() {
 	    condition="(?z != \"Nobody\")";
-		rdqlQuery();
+	    sparqlQuery();
 	}
 	public void testIsSeaborne() {
 	    //condition="?z eq \"http://www-uk.hpl.hp.com/people#andy_seaborne\"";
-	    condition="(?z eq \"http://www-uk.hpl.hp.com/people#andy_seaborne\")";
-	    rdqlQuery();
+	    condition="(?z = <http://www-uk.hpl.hp.com/people#andy_seaborne>)";
+	    sparqlQuery();
+	}
+	public void testIsNotSeaborne() {
+	    //condition="?z eq \"http://www-uk.hpl.hp.com/people#andy_seaborne\"";
+	    condition="! (?z = <http://www-uk.hpl.hp.com/people#andy_seaborne>)";
+	    sparqlQuery();
 	}
 	public void testEasy() {
-	    condition="(1 == 1)";
-		rdqlQuery();
+	    condition="(1 = 1)";
+	    sparqlQuery();
 	}
 	public void testImpossible() {
-	    condition="! (1 == 1)";
-		rdqlQuery();
+	    condition="! (1 = 1)";
+	    sparqlQuery();
 	}
 	public void testAnd() {
-	    condition="(1 == 1) && true";
-		rdqlQuery();
+	    condition="(1 = 1) && true";
+	    sparqlQuery();
 	}
 
 }

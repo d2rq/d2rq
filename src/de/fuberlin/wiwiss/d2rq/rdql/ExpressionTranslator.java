@@ -47,6 +47,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.ConstraintHandler.NodeMakerIterator;
  *
  */
 public class ExpressionTranslator {
+	
     ConstraintHandler handler;
     SQLStatementMaker statementMaker; // provides database and escaper
     VariableBindings variableBindings;
@@ -71,6 +72,8 @@ public class ExpressionTranslator {
     public static final int LeftType=-1;
     public static final int RightType=-2;
     public static final int SameType=-3;
+
+    public static final Logger logger=new Logger();
     
     public ExpressionTranslator(ConstraintHandler handler, SQLStatementMaker sql) {
         super();
@@ -83,20 +86,61 @@ public class ExpressionTranslator {
     
     public static Collection logSqlExpressions=null;
     
+    public static void expressionToStringBuffer(Expression e, StringBuffer b, String indent) {
+    	b.append(indent);
+    	b.append(e.toString());
+    	if (e.isVariable()) {
+    		b.append(e.getName());
+    		return;
+    	} else if (e.isConstant()) {
+    		// note: Q_NumericLiteral does not respond appropriately!!
+    		//       it returns null
+    		// therefore the translate(e) instanceof switches are necessary :-(
+    		Object val=e.getValue();
+    		if (val==null)
+    			b.append("null");
+    		else {
+    			b.append("(" + val.getClass() + ")" + val.toString());
+    		}
+    	} else if (e.isApply()) {
+    		b.append(e.getFun());
+    		b.append("(");
+    		if (e.argCount()>0)
+    			b.append("\n");
+    		for (int i=0; i<e.argCount(); i++) {
+    			if (i>0)
+    				b.append(",");
+    			b.append("\n");
+    			expressionToStringBuffer(e.getArg(i),b, indent+"  ");
+    		}
+    		b.append(")");
+    	}
+    }
+    public static String expressionToString(Expression e) {
+    	StringBuffer buf=new StringBuffer();
+    	expressionToStringBuffer(e,buf,"");
+    	return buf.toString();
+    }
+   
     public String translateToString(Expression e) {
+    	if (logger.debugEnabled())
+    		logger.debug(expressionToString(e));
         Result r=translate(e);
         if (r==null) {
-            Logger.instance().debug("No sql expression 1");
+        	if (logger.debugEnabled())
+        		logger.debug("No sql expression 1");
             return null;
         }
         if ((r.getType() & BoolType) != 0) {
-            Logger.instance().debug("SQL expression:" + r.getString());
+        	if (logger.debugEnabled())
+        		logger.debug("SQL expression:" + r.getString());
             String res=r.getString();
             if (logSqlExpressions!=null)
                 logSqlExpressions.add(res);
             return res;
         }
-        Logger.instance().debug("No sql expression 2");
+        if (logger.debugEnabled())
+        	logger.debug("No sql expression 2");
         return null;
     }
     
