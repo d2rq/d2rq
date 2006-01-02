@@ -45,64 +45,126 @@ public class RDQLTestFramework extends TestFramework {
 	protected Set results;
 	protected String queryString;
 	
-	protected static Logger separator=new Logger();
-	protected static Logger logger=new Logger();
-	protected static Logger performanceLogger=new Logger();
-	protected static Logger rdqlLogger=new Logger();
-	protected static Logger differentLogger=new Logger();
-	protected static Logger differenceLogger=new Logger();
-	protected static Logger rsLogger=new Logger();
+	// compare fields
+	int nTimes=1;
+	InfoD2RQ startInst;
+	boolean compareQueryHandlers=false;
+    int configs;
+	InfoD2RQ diffInfo[];
+	Set resultMaps[];
+	String printed[];
+	String handlerDescription[];
+	boolean usingD2RQ[];
+	boolean verbatim[];
+
+	
+	protected void setUpHandlers() {
+	    configs=2;
+		diffInfo=new InfoD2RQ[configs];
+		resultMaps= new HashSet[configs];
+		printed = new String[configs];
+		handlerDescription= new String[] { "SimpleQueryHandler", "D2RQQueryHandler"};
+		usingD2RQ = new boolean[] {false, true};
+	    verbatim = new boolean[] {false,true};
+	}
+	
+	protected static Logger bigStringInResultLogger=new Logger();
+	// Loggers used for switching on/off output
+	protected Logger dumpLogger=new Logger();
+	protected Logger usingLogger=new Logger();
+	protected Logger testCaseSeparatorLogger=new Logger();
+	protected Logger performanceLogger=new Logger();
+	protected Logger rdqlLogger=new Logger();
+	protected Logger differentLogger=new Logger();
+	protected Logger differenceLogger=new Logger();
+	protected Logger sqlResultSetLogger=new Logger();
+	protected Logger oldSQLResultSetLogger;
+	protected Logger oldSQLResultSetSeparatorLogger;
+	protected boolean oldIsUsingD2RQQueryHandler;
 	
 	public RDQLTestFramework(String arg0) {
 		super(arg0);
+		setUpHandlers();
+	}
+	
+	protected void setUpShowPerformance() {
+	    nTimes=10;
+	    compareQueryHandlers=true;
+	    rdqlLogger.setDebug(true);
+		rdqlLogger.setDebug(true);
+		performanceLogger.setDebug(true);
+	}
+	protected void setUpMixOutputs(boolean v) {
+	    compareQueryHandlers=v;
+	    usingLogger.setDebug(v);	    
+		testCaseSeparatorLogger.setDebug(v);
+	}
+	protected void setUpShowStatements() {
+	    rdqlLogger.setDebug(true);
+		sqlResultSetLogger.setDebug(true);	    
+	}
+	protected void setUpShowErrors() {
+		differentLogger.setDebug(true);
+		differenceLogger.setDebug(true);	    
+	}
+	protected void setUpShowWarnings() {
+		bigStringInResultLogger.setDebug(true);	    
+	}
+	protected void setUpShowAll() {
+	    setUpMixOutputs(true);
+	    verbatim[0]=true;
+	    setUpShowPerformance();
+	    setUpShowStatements();
+	    setUpShowErrors();
+	    setUpShowWarnings();
 	}
 	
 	protected void setUp() throws Exception {
 		super.setUp();
 		this.model = new ModelD2RQ(D2RQMap);
+		oldIsUsingD2RQQueryHandler=GraphD2RQ.isUsingD2RQQueryHandler();
 		GraphD2RQ.setUsingD2RQQueryHandler(true);
-		logger.setDebug(true);
-		separator.setDebug(true);
-		differentLogger.setDebug(true);
-		differenceLogger.setDebug(false);
-		performanceLogger.setDebug(true);
-		rdqlLogger.setDebug(false);
-		rsLogger.setDebug(false);
-		SQLResultSet.logger=rsLogger;
+		oldSQLResultSetLogger=SQLResultSet.logger;
+		oldSQLResultSetSeparatorLogger=SQLResultSet.separatorLogger;
+		SQLResultSet.logger=sqlResultSetLogger;
 		SQLResultSet.separatorLogger=new Logger(); // silent
 //		this.model.enableDebug();
+	    setUpShowErrors(); // should be activated all the time
+	    setUpShowPerformance(); // activate (only) to test performance (only)
+	    //setUpShowStatements(); // activate to analyse generated SQL statements
+	    //setUpMixOutputs(true); // activate to mix output from two QueryHandlers nicely
+		//setUpShowAll(); // activate to get most verbatim output
 	}
-
-	public static boolean compareQueryHandlers=true;
+	
+	protected void tearDown() throws Exception {
+	    GraphD2RQ.setUsingD2RQQueryHandler(oldIsUsingD2RQQueryHandler);
+		SQLResultSet.logger=oldSQLResultSetLogger;
+		SQLResultSet.separatorLogger=oldSQLResultSetSeparatorLogger;
+		this.model.close();
+		this.results = null;
+		super.tearDown();
+	}
 	
 	public void runTest() throws Throwable {
-	    separator.debug("");
+	    testCaseSeparatorLogger.debug("");
 		if (!compareQueryHandlers) {
 			super.runTest();
 			return;
 		}		
 		boolean oldState=GraphD2RQ.isUsingD2RQQueryHandler();
+		boolean oldRDQLLoggerState=rdqlLogger.debugEnabled();
+		boolean oldSqlResultSetLoggerState=sqlResultSetLogger.debugEnabled();
 		try {
-		    int configs=2;
-			int nTimes=1;
-
-			InfoD2RQ startInst;
-			InfoD2RQ diffInfo[]=new InfoD2RQ[configs];
-			Set resultMaps[]= new HashSet[configs];
-			String printed[] = new String[configs];
-			String description[]= new String[] { "SimpleQueryHandler", "D2RQQueryHandler"};
-			boolean usingD2RQ[] = new boolean[] {false, true};
-			boolean verbatim[] = new boolean[] {false,true};
 			for (int i=0; i<configs; i++) {
 			    GraphD2RQ.setUsingD2RQQueryHandler(usingD2RQ[i]);
-			    rdqlLogger.setDebug(verbatim[i]);
-			    rsLogger.setDebug(verbatim[i]);
-				logger.debug("using " + description[i] + " ...");
+			    rdqlLogger.setDebug(verbatim[i] && oldRDQLLoggerState);
+			    sqlResultSetLogger.setDebug(verbatim[i] && oldSqlResultSetLoggerState);
+			    usingLogger.debug("using " + handlerDescription[i] + " ...");
 			    startInst=InfoD2RQ.instance();
 			    for (int j=0; j< nTimes; j++) {
 			        if (j>0) {
 					    rdqlLogger.setDebug(false);
-					    rsLogger.setDebug(false);
+					    sqlResultSetLogger.setDebug(false);
 			        }
 			        super.runTest();
 			    }
@@ -111,11 +173,11 @@ public class RDQLTestFramework extends TestFramework {
 				resultMaps[i]=results;
 			}
 			// performanceLogger.debug("RDQL-Query: " + queryString);
-			performanceLogger.debug(description[0] + " vs. " + description[1] + " = " + 
+			performanceLogger.debug(handlerDescription[0] + " vs. " + handlerDescription[1] + " = " + 
 			        diffInfo[0].sqlPerformanceString() + " : " + diffInfo[1].sqlPerformanceString() +
 					" (duration - SQL queries/rows/fields)");
 			if (!resultMaps[0].equals(resultMaps[1])) {
-			    differentLogger.debug(description[0] + " vs. " + description[1] + " different results (" +
+			    differentLogger.debug(handlerDescription[0] + " vs. " + handlerDescription[1] + " different results (" +
 			            resultMaps[0].size() + ":" + resultMaps[1].size() + ")");
 			    differenceLogger.debug("Query: " + queryString);
 			    printed[0]=printObject(resultMaps[0]);
@@ -132,10 +194,12 @@ public class RDQLTestFramework extends TestFramework {
 			}
 			assertEquals(resultMaps[0],resultMaps[1]);
 		} catch (Exception e) {
-			GraphD2RQ.setUsingD2RQQueryHandler(oldState);
 			throw e; 
+		} finally {
+			GraphD2RQ.setUsingD2RQQueryHandler(oldState);
+			rdqlLogger.setDebug(oldRDQLLoggerState);
+			sqlResultSetLogger.setDebug(oldSqlResultSetLoggerState);
 		}
-		GraphD2RQ.setUsingD2RQQueryHandler(oldState);
 	}
 	
 	
@@ -189,12 +253,6 @@ public class RDQLTestFramework extends TestFramework {
 	}
 
 	
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		this.model.close();
-		this.results = null;
-	}
-
 	protected void rdql(String rdql) {
 	    rdqlLogger.debug("RDQL-Query: " + rdql);
 	    queryString=rdql;
@@ -235,7 +293,7 @@ public class RDQLTestFramework extends TestFramework {
 			String strVal=val.toString();
 			int size=strVal.length();
 			if (size>250)
-			    logger.debug("Big string (" + size + ") in resultBinding:\n" + strVal);
+			    bigStringInResultLogger.debug("Big string (" + size + ") in resultBinding:\n" + strVal);
 			m.put(var,val);
 		}
 		return m;
@@ -267,17 +325,19 @@ public class RDQLTestFramework extends TestFramework {
 //	}
 
 	protected void dump() {
-		logger.debug("\n#Results: " + results.size() + ":");
+	    if (!dumpLogger.debugEnabled())
+	        return;
+	    dumpLogger.debug("\n#Results: " + results.size() + ":");
 		Iterator it = this.results.iterator();
 		int count = 1;
 		while (it.hasNext()) {
-			logger.debug("Result binding " + count + ":");
+		    dumpLogger.debug("Result binding " + count + ":");
 			Map binding = (Map) it.next();
 			Iterator it2 = binding.keySet().iterator();
 			while (it2.hasNext()) {
 			    String varName = (String) it2.next();
 			    Object val = binding.get(varName);
-				logger.debug("    " + varName + " => " + val); 
+			    dumpLogger.debug("    " + varName + " => " + val); 
 			}
 			count++;
 		}

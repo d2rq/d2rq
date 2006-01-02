@@ -32,21 +32,20 @@ public class ExpressionTestFramework extends SPARQLTestFramework {
     		db.setExpressionTranslator(tr);
     	}
     }
-    
+    	
 	protected void setUp() throws Exception {
 		super.setUp();
 		ExpressionTranslator.logger.setDebug(true);
-		rsLogger.setDebug(false); // true
+		sqlResultSetLogger.setDebug(false); // true
 		rdqlLogger.setDebug(false); // true
 		translatedLogger.setDebug(true);
 		if (translatedLogger.debugEnabled())
 		    ExpressionTranslator.logSqlExpressions=new HashSet();
 		SQLResultSet.simulationMode=true;
-		RDQLTestFramework.compareQueryHandlers=false;
+		setUpMixOutputs(false);
 		GraphD2RQ.setUsingD2RQQueryHandler(true);
-		SQLResultSet.protocol=new ArrayList();    	
+		SQLResultSet.protocol=new ArrayList();
 		activateExpressionTranslator(model);
 	}
-	
 
 }
