@@ -1,0 +1,536 @@
+
+--------------------------------------------
+D2RQ RDQL Test 06/14/04
+--------------------------------------------
+
+--------------------------------------------
+D2RQ model created using map C:/D2RQ/maps/ISWC-d2r.n3
+--------------------------------------------
+
+--------------------------------------------
+Test Number 1
+--------------------------------------------
+RDQL query: 
+
+SELECT ?x, ?y 
+WHERE (<http://www.conference.org/conf02004/paper#Paper1>, ?x, ?y)
+
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper1
+Predicate: ANY
+Object: ANY
+
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.URI, Papers.Abstract, Papers.Year, Persons.URI, Topics.TopicID, Papers.Title, Conferences.ConfID FROM Papers, Persons, Rel_Person_Paper, Topics, Rel_Paper_Topic, Conferences WHERE Papers.PaperID=1 AND Papers.PaperID = Rel_Person_Paper.PaperID AND Rel_Person_Paper.PersonID = Persons.PerID AND Rel_Paper_Topic.TopicID = Topics.TopicID AND Papers.PaperID = Rel_Paper_Topic.PaperID AND Papers.Conference = Conferences.ConfID;
+--------------------------------------------
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Papers.PaperID, Persons.LastName, Persons.FirstName, Topics.TopicID, Persons.Email FROM Persons, Papers, Rel_Person_Paper, Topics, Rel_Person_Topic WHERE Persons.URI='http://www.conference.org/conf02004/paper#Paper1' AND Persons.PerID = Rel_Person_Paper.PersonID AND Rel_Person_Paper.PaperID = Papers.PaperID AND Persons.PerID = Rel_Person_Topic.PersonID AND Rel_Person_Topic.TopicID = Topics.TopicID;
+--------------------------------------------
+Query Results
+--------------------------------------------
+x                                                             | y                                                                                                                                                                                                                                                                   
+====================================================================================================================================================================================================================================================================================================================================
+<http://www.w3.org/2002/07/owl#sameAs>                        | <http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Trusting Information Sources One Citizen at a Time>                                                                                                                                       
+<http://annotation.semanticweb.org/iswc/iswc.daml#abstract>   | "This paper describes an approach to derive assessments about information 
+      sources based on individual feedback about the sources. We describe 
+      TRELLIS, a system that helps users annotate their analysis of 
+      alternative information sources"@en
+<http://annotation.semanticweb.org/iswc/iswc.daml#year>       | "2002"^^<http://www.w3.org/2001/XMLSchema#gYear>                                                                                                                                                                                                                    
+<http://annotation.semanticweb.org/iswc/iswc.daml#author>     | <http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Jim Blythe>                                                                                                                                                                               
+<http://annotation.semanticweb.org/iswc/iswc.daml#topic>      | <http://www.example.org/dbserver01/db01#InProceedings@@Topics.TopicID@@4>                                                                                                                                                                                           
+<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>             | <http://annotation.semanticweb.org/iswc/iswc.daml#InProceedings>                                                                                                                                                                                                    
+<http://annotation.semanticweb.org/iswc/iswc.daml#title>      | "Titel of the Paper: Trusting Information Sources One Citizen at a Time"@en                                                                                                                                                                                         
+<http://annotation.semanticweb.org/iswc/iswc.daml#conference> | <http://conferences.org/comp/confno23541>                                                                                                                                                                                                                           
+<http://annotation.semanticweb.org/iswc/iswc.daml#author>     | <http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Varun Ratnakar>                                                                                                                                                                           
+<http://annotation.semanticweb.org/iswc/iswc.daml#author>     | <http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil>                                                                                                                                                                              
+
+
+--------------------------------------------
+Test Number 2
+--------------------------------------------
+RDQL query: 
+
+SELECT ?x, ?y 
+WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z),
+      (?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y)
+
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: ANY
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#author
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsAuthor
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Persons.URI FROM Papers, Persons, Rel_Person_Paper WHERE Papers.PaperID = Rel_Person_Paper.PaperID AND Rel_Person_Paper.PersonID = Persons.PerID;
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Jim Blythe
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Jim Blythe';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Varun Ratnakar
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Varun Ratnakar';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.i-u.de/schools/eberhart/iswc2002/#Andreas Eberhart
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://www.i-u.de/schools/eberhart/iswc2002/#Andreas Eberhart';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://reggiori.webweaving.org#Alberto Reggiori
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://reggiori.webweaving.org#Alberto Reggiori';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www-uk.hpl.hp.com/people#andy_seaborne
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://www-uk.hpl.hp.com/people#andy_seaborne';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.dbgroup.unimo.it/iswc/iswc.html#F. Guerra
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://www.dbgroup.unimo.it/iswc/iswc.html#F. Guerra';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.dbgroup.unimo.it/iswc/iswc.html#S. Bergamaschi
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://www.dbgroup.unimo.it/iswc/iswc.html#S. Bergamaschi';
+--------------------------------------------
+Query Results
+--------------------------------------------
+x                                                  | y                                  
+========================================================================================
+<http://www.conference.org/conf02004/paper#Paper1> | <mailto:blythe@isi.edu>            
+<http://www.conference.org/conf02004/paper#Paper1> | <mailto:varunr@isi.edu>            
+<http://www.conference.org/conf02004/paper#Paper1> | <mailto:gil@isi.edu>               
+<http://www.conference.org/conf02004/paper#Paper2> | <mailto:eberhart@i-u.de>           
+<http://www.conference.org/conf02004/paper#Paper4> | <mailto:areggiori@webweaving.org>  
+<http://www.conference.org/conf02004/paper#Paper4> | <mailto:andy.seaborne@hpl.hp.com>  
+<http://www.conference.org/conf02004/paper#Paper5> | <mailto:gil@isi.edu>               
+<http://www.conference.org/conf02004/paper#Paper5> | <mailto:guerra.francesco@unimo.it> 
+<http://www.conference.org/conf02004/paper#Paper5> | <mailto:bergamaschi.sonia@unimo.it>
+
+
+--------------------------------------------
+Test Number 3
+--------------------------------------------
+RDQL query: 
+
+SELECT ?x, ?y 
+WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#name>, ?y)
+
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: ANY
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#name
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#topicName
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Topics.TopicID, Topics.TopicName FROM Topics;
+--------------------------------------------
+Query Results
+--------------------------------------------
+x                                                                  | y                                                                              
+====================================================================================================================================================
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@1>  | "Knowledge Representation Languages"^^<http://www.w3.org/2001/XMLSchema#string>
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@2>  | "Knowledge Systems"^^<http://www.w3.org/2001/XMLSchema#string>                 
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@3>  | "Artificial Intelligence"^^<http://www.w3.org/2001/XMLSchema#string>           
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@4>  | "Semantic Annotation"^^<http://www.w3.org/2001/XMLSchema#string>               
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@5>  | "Semantic Web"^^<http://www.w3.org/2001/XMLSchema#string>                      
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@6>  | "Semantic Web Languages"^^<http://www.w3.org/2001/XMLSchema#string>            
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@7>  | "Web Services"^^<http://www.w3.org/2001/XMLSchema#string>                      
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@8>  | "World Wide Web"^^<http://www.w3.org/2001/XMLSchema#string>                    
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@9>  | "Text Mining"^^<http://www.w3.org/2001/XMLSchema#string>                       
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@10> | "Databases"^^<http://www.w3.org/2001/XMLSchema#string>                         
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@11> | "Semantic Web Infrastructure"^^<http://www.w3.org/2001/XMLSchema#string>       
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@12> | "XML"^^<http://www.w3.org/2001/XMLSchema#string>                               
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@13> | "E-Business"^^<http://www.w3.org/2001/XMLSchema#string>                        
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@14> | "Query Languages"^^<http://www.w3.org/2001/XMLSchema#string>                   
+<http://www.example.org/dbserver01/db01#Topic@@Topics.TopicID@@15> | "Knowledge Management"^^<http://www.w3.org/2001/XMLSchema#string>              
+
+
+--------------------------------------------
+Test Number 4
+--------------------------------------------
+RDQL query: 
+
+SELECT ?x, ?y 
+WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y),
+      (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language'@en)
+
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: ANY
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#author
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsAuthor
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Persons.URI FROM Papers, Persons, Rel_Person_Paper WHERE Papers.PaperID = Rel_Person_Paper.PaperID AND Rel_Person_Paper.PersonID = Persons.PerID;
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper1
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=1 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper1
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=1 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper1
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=1 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper2
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=2 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper4
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=4 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper4
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=4 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper5
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=5 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper5
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=5 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper5
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=5 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+Query Results
+--------------------------------------------
+x                                                  | y                                                
+======================================================================================================
+<http://www.conference.org/conf02004/paper#Paper4> | <http://reggiori.webweaving.org#Alberto Reggiori>
+<http://www.conference.org/conf02004/paper#Paper4> | <http://www-uk.hpl.hp.com/people#andy_seaborne>  
+
+
+--------------------------------------------
+Test Number 5
+--------------------------------------------
+RDQL query: 
+
+SELECT ?x, ?y, ?a 
+WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y),
+      (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language'@en), 
+      (?y, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?a)
+
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: ANY
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#author
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsAuthor
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Persons.URI FROM Papers, Persons, Rel_Person_Paper WHERE Papers.PaperID = Rel_Person_Paper.PaperID AND Rel_Person_Paper.PersonID = Persons.PerID;
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper1
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=1 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper1
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=1 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper1
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=1 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper2
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=2 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper4
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=4 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://reggiori.webweaving.org#Alberto Reggiori
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://reggiori.webweaving.org#Alberto Reggiori';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper4
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=4 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www-uk.hpl.hp.com/people#andy_seaborne
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#eMail
+Object: ANY
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#PersonsClassEmail
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Persons.URI, Persons.Email FROM Persons WHERE Persons.URI='http://www-uk.hpl.hp.com/people#andy_seaborne';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper5
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=5 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper5
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=5 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+--------------------------------------------
+        Find(S P O) Query Pattern
+--------------------------------------------
+Subject: http://www.conference.org/conf02004/paper#Paper5
+Predicate: http://annotation.semanticweb.org/iswc/iswc.daml#title
+Object: Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language~en
+
+--------------------------------------------
+Using bridge: http://www.example.org/dbserver01/db01#inProceedingsTitle
+--------------------------------------------
+SQL Statment executed: SELECT DISTINCT Papers.PaperID, Papers.Title FROM Papers WHERE Papers.PaperID=5 AND Papers.Title='Three Implementations of SquishQL, a Simple RDF Query Language';
+--------------------------------------------
+Query Results
+--------------------------------------------
+x                                                  | y                                                 | a                                
+==========================================================================================================================================
+<http://www.conference.org/conf02004/paper#Paper4> | <http://reggiori.webweaving.org#Alberto Reggiori> | <mailto:areggiori@webweaving.org>
+<http://www.conference.org/conf02004/paper#Paper4> | <http://www-uk.hpl.hp.com/people#andy_seaborne>   | <mailto:andy.seaborne@hpl.hp.com>
