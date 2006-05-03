@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>D2R Server</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+
+  <body>
+    <h1>D2R Server | SPARQL endpoint</h1>
+
+    <form action="sparql" method="get">
+      <p>SELECT - get variables (apply XSLT stylesheet)</p>
+      <textarea name="query" cols="70" rows="5"></textarea>
+	  <br/>
+	  XSLT stylesheet (leave blank for none): <input name="stylesheet" size="25" value="xml-to-html.xsl" />
+	  or JSON output: <input type="checkbox" name="output" value="json"/>
+	  <br/>
+	  <input type="submit" value="Get Results" />
+    </form>
+  </body>
+</html>

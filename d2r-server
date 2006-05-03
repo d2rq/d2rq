@@ -1,0 +1,13 @@
+if [ -n "$D2R_ROOT" ]
+then
+    echo $D2R_ROOT
+elif [ -e "./lib/d2rq.jar" ]
+then
+    D2R_ROOT=`pwd`
+else
+    echo "Please run the D2R Server from its root directory, or set \$D2R_ROOT"
+    exit 1
+fi
+
+export JOSEKIROOT=$D2R_ROOT
+exec $JOSEKIROOT/bin/rdfserver $JOSEKIROOT/etc/joseki-config.ttl

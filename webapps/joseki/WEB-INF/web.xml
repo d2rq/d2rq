@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN" "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+<web-app>
+
+  <display-name>D2R Server</display-name>
+
+
+  <!-- SERVLETS -->
+
+  <!-- The Joseki SPARQL servlet -->
+  <servlet>
+    <servlet-name>SPARQL service processor</servlet-name>
+    <servlet-class>org.joseki.http.Servlet</servlet-class>
+
+    <!-- Configuration file -->
+    <init-param>
+      <param-name>org.joseki.rdfserver.config</param-name>
+      <param-value>joseki-config.ttl</param-value>
+    </init-param>
+
+  </servlet>
+
+
+  <!-- MAPPINGS -->
+  <!-- Map URLs to SPARQL service processors -->
+
+  <!-- D2R service -->
+  <servlet-mapping>
+    <servlet-name>SPARQL service processor</servlet-name>
+    <url-pattern>/sparql</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+
+
+  <!-- SECURIY -->
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Joseki</web-resource-name>
+      <url-pattern>/*</url-pattern>
+      <http-method>GET</http-method>
+      <http-method>POST</http-method>
+      <!-- <http-method>OPTIONS</http-method> -->
+    </web-resource-collection>
+  </security-constraint>
+
+</web-app>
