@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="D2RQ" default="all" basedir=".">
+
+	<property name="version" value="0.1"/>
+	<property name="project.package" value="de.fuberlin.wiwiss.d2rs"/>
+	<property name="project.path" value="de/fuberlin/wiwiss/d2rs"/>
+	<property name="src" value="src"/>
+	<property name="build" value="bldsrc"/>
+	<property name="lib" value="lib"/>
+	<property name="doc" value="doc"/>
+	<property name="distname" value="d2r-server-${version}"/>
+	<property name="jar" value="${lib}/${distname}.jar"/>
+	<property name="zip" value="${distname}.zip"/>
+	<property name="tar" value="${distname}.tar.gz"/>
+	
+	<path id="project.class.path">
+		<fileset dir="${lib}">
+			<include name="**/*.jar"/>
+		</fileset>
+		<pathelement path="${java.class.path}"/>
+	</path>
+
+	<patternset id="distfiles">
+		<include name="**/*"/>
+		<exclude name="${src}/**"/>
+		<exclude name="build.xml"/>
+		<exclude name="${build}/**"/>
+		<exclude name="build/**"/>
+		<exclude name="${zip}"/>
+		<exclude name="${tar}"/>
+		<exclude name=".project"/>
+		<exclude name=".classpath"/>
+	</patternset>
+
+	<property name="execfiles" value="d2r-server bin/joseki_path bin/make_classpath bin/rdfserver"/>
+	
+	<target name="clean">
+		<delete dir="${build}" failonerror="false"/>
+		<delete file="${jar}" failonerror="false"/>
+		<delete file="${zip}" failonerror="false"/>
+		<delete file="${tar}" failonerror="false"/>
+	</target>
+	
+	<target name="init">
+		<mkdir dir="${build}"/>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="${src}" destdir="${build}" debug="on">
+			<classpath refid="project.class.path"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar jarfile="${jar}" basedir="${build}"/>
+	</target>
+
+	<target name="zip" depends="jar">
+		<zip destfile="${zip}">
+			<zipfileset prefix="${distname}" dir=".">
+				<patternset refid="distfiles"/>
+			</zipfileset>
+		</zip>
+	</target>
+
+	<target name="tar" depends="jar">
+		<tar destfile="${tar}" compression="gzip">
+			<tarfileset prefix="${distname}" dir="." includes="${execfiles}" mode="755"/>
+			<tarfileset prefix="${distname}" dir="." excludes="${execfiles}">
+				<patternset refid="distfiles"/>
+			</tarfileset>
+		</tar>
+	</target>
+
+	<target name="all" depends="zip,tar"/>
+</project>
