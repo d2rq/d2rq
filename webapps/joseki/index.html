@@ -10,13 +10,26 @@
     <h1>D2R Server | SPARQL endpoint</h1>
 
     <form action="sparql" method="get">
-      <p>SELECT - get variables (apply XSLT stylesheet)</p>
-      <textarea name="query" cols="70" rows="5"></textarea>
+      <p>Execute a SPARQL query:</p>
+      <textarea name="query" cols="70" rows="10">
+SELECT *
+WHERE {
+    ?resource a ?class .
+}
+ORDER BY ?resource</textarea>
 	  <br/>
 	  XSLT stylesheet (leave blank for none): <input name="stylesheet" size="25" value="xml-to-html.xsl" />
 	  or JSON output: <input type="checkbox" name="output" value="json"/>
 	  <br/>
 	  <input type="submit" value="Get Results" />
     </form>
+
+    <p>Precooked queries:
+    <ul>
+      <li><a href="sparql?query=SELECT+DISTINCT+*+WHERE+%7B+%5B%5D+a+%3Fclass+%7D+ORDER+BY+%3Fclass&stylesheet=xml-to-html.xsl">list all classes</a></li>
+      <li><a href="http://localhost:2020/sparql?query=SELECT+DISTINCT+*+WHERE+%7B+%5B%5D+%3Fproperty+%5B%5D+%7D+ORDER+BY+%3Fproperty&stylesheet=xml-to-html.xsl">list all properties</a></li>
+    </ul>
+    <hr />
+    <p>Powered by <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/">D2R Server</a></p>
   </body>
 </html>

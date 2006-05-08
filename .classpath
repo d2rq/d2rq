@@ -5,10 +5,10 @@
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/org.mortbay.jetty.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-3.1.12-bin.jar"/>
-	<classpathentry kind="lib" path="lib/joseki.jar"/>
-	<classpathentry kind="lib" path="lib/jena.jar"/>
+	<classpathentry sourcepath="/Joseki-3.0-beta-2/src" kind="lib" path="lib/joseki.jar"/>
+	<classpathentry sourcepath="/Jena-2.4-RC-1/src" kind="lib" path="lib/jena.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet.jar"/>
-	<classpathentry kind="lib" path="lib/d2rq.jar"/>
+	<classpathentry sourcepath="/D2RQ-CVS/src" kind="lib" path="lib/d2rq.jar"/>
 	<classpathentry kind="lib" path="lib/concurrent.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/arq.jar"/>
