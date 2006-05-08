@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>D2R Server &#8211; SPARQL endpoint for relational databases</title>
+</head>
+<style type="text/css">
+h1, h2 { color: #800; font-family: sans-serif; font-weight: normal; }
+h1 { font-size: 200%; margin-bottom: 0; }
+h2 { font-size: 120%; margin: 1.5em 0 -0.5em 0; }
+#download { font-family: sans-serif; font-size: 125%; margin: 1.5em 0 1em 0; text-align: center; }
+body { text-align: center; }
+#header { border-bottom: 1px solid #ccc; text-align: center; }
+#header p { margin-top: 0.5em; }
+#authors { text-align: right; position: absolute; top: 1em; right: 1em; }
+#content { margin-left: auto; margin-right: auto; text-align: justify; width: 36em; }
+#footer { border-top: 1px solid #ccc; text-align: left; }
+</style>
+<body>
+
+<div id="header">
+  <h1>D2R Server v0.1 (alpha)</h1>
+  <p id="tagline">SPARQL endpoint for relational databases</p>
+</div>
+
+<div id="authors">
+  <a href="http://www.bizer.de/">Chris Bizer</a><br />
+  <a href="http://richard.cyganiak.de/">Richard Cyganiak</a>
+</div>
+
+<div id="content">
+<p>D2R Server provides
+  <strong><a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a>
+  access to relational databases</strong>. It combines
+  the <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/">D2RQ API</a>
+  and <a href="http://www.joseki.org/">Joseki SPARQL Server</a> to
+  map a database's contents into a virtual RDF graph that can
+  be accessed over the <strong>SPARQL protocol</strong>. It is bundled with a
+  Jetty webserver and aims at being <strong>easy to set up</strong> and use.</p>
+<p>D2R Server is currently in an <strong>alpha</strong> state.
+  It works for us, but has a minimal feature set and needs much more
+  testing.</p>
+
+
+<div id="download"><a href="">Download D2R Server</a></div>
+
+<h2>Requirements</h2>
+
+<p>You need:</p>
+
+<ul>
+  <li><strong>Java 1.4</strong> or newer on the path (check with
+    <tt>java -version</tt> if you're not sure),</li>
+  <li>a <strong>D2RQ mapping file</strong> that describes how the tables
+    and columns of your database should be mapped into RDF and how to
+    connect to the database; the
+    <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/">D2RQ Manual</a>
+    describes how to create one.</li>
+</ul>
+
+
+<h2>Installing and running D2R Server</h2>
+
+<ol>
+  <li><p><strong>Extract the archive</strong> into a suitable location.
+    Optionally, add the extracted directory (where the <tt>d2r-server</tt>
+    and <tt>d2r-server.bat</tt> files reside) to the path.</p></li>
+  <li><p><strong>Change into the directory and run:</strong><br />
+    <tt>./d2r-server path/to/mappingfile.ttl</tt> (for Unix)<br />
+    <tt>d2r-server c:\path\to\mappingfile.ttl</tt> (for Windows)</p>
+    <p>(<tt>mappingfile.ttl</tt> is a D2RQ mapping file that describes how your
+    database tables and columns are mapped to RDF and how to connect
+    to the database &#8211; the
+    <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/">D2RQ Manual</a>
+    describes how to create one)</p></li>
+  <li><p><strong>Open <a href="http://localhost:2020/">http://localhost:2020/</a></strong>
+    in a web browser. The SPARQL endpoint is at
+    <a href="http://localhost:2020/sparql">http://localhost:2020/sparql</a>.</p>
+  </li>
+</ol>
+
+
+<h2>Source code and development</h2>
+
+<p>The latest source code is available from the project's
+  <a href="http://sourceforge.net/cvs/?group_id=111002">CVS repository</a>
+  and can be
+  <a href="http://cvs.sourceforge.net/viewcvs.py/d2rq-map/d2r-server/">browsed
+  online</a>.</p>
+
+<p>(Note: SourceForge's CVS service is currently unreliable.)</p>
+
+
+<h2>Support and feedback</h2>
+
+<p>You can contact us on the
+  <a href="https://lists.sourceforge.net/lists/listinfo/d2rq-map-devel">D2RQ
+  mailing list</a> at
+  <a href="mailto:d2rq-map-devel@lists.sourceforge.net">d2rq-map-devel@lists.sourceforge.net</a>.</p>
+</div>
+
+<div id="footer">
+  <p>$Id: index.html,v 1.1 2006/05/08 15:46:47 cyganiak Exp $</p>
+</div>
+
+</body>
+</html>
