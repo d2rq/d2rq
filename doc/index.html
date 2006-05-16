@@ -32,12 +32,12 @@ body { text-align: center; }
 <div id="content">
 <p>D2R Server provides
   <strong><a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a>
-  access to relational databases</strong>. It combines
-  the <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/">D2RQ API</a>
-  and <a href="http://www.joseki.org/">Joseki SPARQL Server</a> to
-  map a database's contents into a virtual RDF graph that can
-  be accessed over the <strong>SPARQL protocol</strong>. It is bundled with a
-  Jetty webserver and aims at being <strong>easy to set up</strong> and use.</p>
+  access to relational databases</strong>.  The server takes SPARQL queries from the Web and rewrites them via a D2RQ mapping into SQL queries against a relational database. This on-the-fly translation allows RDF applications to access the content of large databases without having to replicate them into RDF. D2R Server can be used to integrate existing databases into RDF systems, and to add SPARQL interfaces to database-backed software products. </p>
+<p>D2R Server  combines
+    the <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/">D2RQ API</a> and <a href="http://www.joseki.org/">Joseki SPARQL Server</a> to
+    map a database's contents into a virtual RDF graph that can
+    be accessed over the <strong>SPARQL protocol</strong>. It is bundled with a
+    Jetty webserver and aims at being <strong>easy to set up</strong> and use.</p>
 <p>D2R Server is currently in an <strong>alpha</strong> state.
   It works for us, but has a minimal feature set and needs much more
   testing.</p>
@@ -103,7 +103,7 @@ body { text-align: center; }
 </div>
 
 <div id="footer">
-  <p>$Id: index.html,v 1.3 2006/05/16 22:30:55 cyganiak Exp $</p>
+  <p>$Id: index.html,v 1.4 2006/05/16 22:46:58 cyganiak Exp $</p>
 </div>
 
 </body>
