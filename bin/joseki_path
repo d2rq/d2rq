@@ -1,9 +1,0 @@
-#!/bin/bash
-
-if [ "$JOSEKIROOT" = "" ]
-then
-    echo "JOSEKIROOT not set" 1>&2
-    exit 1
-    fi
-
-echo `exec "$JOSEKIROOT/bin/make_classpath" "$JOSEKIROOT"`
