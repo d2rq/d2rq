@@ -11,6 +11,16 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 
+/**
+ * A Joseki dataset description that returns a dataset
+ * consisting only of the one ModelD2RQ passed in. We need
+ * this because regular Joseki dataset descriptions are
+ * initialized from a configuration Model, and we want
+ * to initialize programmatically.
+ * 
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: D2RQDatasetDesc.java,v 1.2 2006/05/16 22:30:55 cyganiak Exp $
+ */
 public class D2RQDatasetDesc extends DatasetDesc {
 	private ModelD2RQ modelD2RQ;
 	private DataSource dataset;

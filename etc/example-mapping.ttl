@@ -51,7 +51,7 @@ db1:Database1 rdf:type d2rq:Database;
 
 	# MySQL database connection
         d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-        d2rq:jdbcDSN "jdbc:mysql:///iswc?user=root";
+        d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/iswc?user=root";
         # or setup MySQL DB with ODBC as myiswc and:
         #d2rq:odbcDSN "myiswc";
 		d2rq:allowDistinct "true";

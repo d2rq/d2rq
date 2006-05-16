@@ -32,7 +32,7 @@
 		<exclude name=".classpath"/>
 	</patternset>
 
-	<property name="execfiles" value="d2r-server bin/joseki_path bin/make_classpath bin/rdfserver"/>
+	<property name="execfiles" value="d2r-server etc/make_classpath"/>
 	
 	<target name="clean">
 		<delete dir="${build}" failonerror="false"/>

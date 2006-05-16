@@ -1,13 +1,30 @@
-if [ -n "$D2R_ROOT" ]
-then
-    echo $D2R_ROOT
-elif [ -e "./lib/d2rq.jar" ]
+#!/bin/bash
+# $Id$
+if [ -e "./lib/d2rq.jar" ]
 then
     D2R_ROOT=`pwd`
 else
-    echo "Please run the D2R Server from its root directory, or set \$D2R_ROOT"
+    echo "Please run the D2R Server from its root directory"
     exit 1
 fi
 
-export JOSEKIROOT=$D2R_ROOT
-exec $JOSEKIROOT/bin/rdfserver $JOSEKIROOT/etc/joseki-config.ttl
+CP=`exec "$D2R_ROOT/etc/make_classpath" "$D2R_ROOT"`
+
+## ============= java logging
+## If you use Java.util.logging ...
+## See etc/logging-file.properties for an example of logging to a file.
+#LOGCONFIG=${LOGCONFIG:-$D2R_ROOT/etc/logging.properties}
+#LOG1="-Djava.util.logging.config.file=${LOGCONFIG}"
+#LOG2="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Jdk14Logger"
+#LOG="$LOG1 $LOG2"
+
+## ============= log4j logging
+## If you use Log4J ...
+## See etc/log4j-file.properties for an example of logging to a file.
+LOGCONFIG=${LOGCONFIG:-file:$D2R_ROOT/etc/log4j.properties}
+#LOGCONFIG="file:$JOSEKIROOT/etc/log4j-detail.properties"
+LOG1="-Dlog4j.configuration=${LOGCONFIG}"
+#LOG2="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"
+LOG="$LOG1 $LOG2"
+
+exec java -cp "$CP" $LOG d2r.server "$@"

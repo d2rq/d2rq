@@ -1,0 +1,63 @@
+@prefix : <#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+# Database
+:myDB a d2rq:Database;
+    d2rq:jdbcDriver "com.mysql.jdbc.Driver";
+    d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/d2rtest?user=root";
+
+    d2rq:numericColumn "People.ID";
+    d2rq:textColumn "People.name";
+    d2rq:textColumn "People.email";
+    d2rq:textColumn "People.organization";
+    d2rq:numericColumn "Organizations.ID";
+    d2rq:textColumn "Organizations.name";
+    d2rq:textColumn "Organizations.website";
+    .
+
+# Table People
+:PeopleTable a d2rq:ClassMap;
+    d2rq:uriPattern "http://example.org/people#person@@People.ID@@";
+    d2rq:class foaf:Person;
+    d2rq:dataStorage :myDB;
+    .
+
+:PeopleNameColumn a d2rq:DatatypePropertyBridge;
+    d2rq:column "People.name";
+    d2rq:property foaf:name;
+    d2rq:belongsToClassMap :PeopleTable;
+    .
+
+:PeopleEmailColumn a d2rq:ObjectPropertyBridge;
+    d2rq:pattern "mailto:@@People.email@@";
+    d2rq:property foaf:mbox;
+    d2rq:belongsToClassMap :PeopleTable;
+    .
+
+:PeopleOrganizationColumn a d2rq:ObjectPropertyBridge;
+    d2rq:join "People.organization = Organizations.ID";
+    d2rq:property <http://example.org/vocab#affiliatedWith>;
+    d2rq:belongsToClassMap :PeopleTable;
+    d2rq:refersToClassMap :OrganizationsTable;
+    .
+
+# Table Organizations
+
+:OrganizationsTable a d2rq:ClassMap;
+    d2rq:uriPattern "http://example.org/people#organizations@@Organizations.ID@@";
+    d2rq:class foaf:Organization;
+    d2rq:dataStorage :myDB;
+    .
+
+:OrganizationsNameColumn a d2rq:DatatypePropertyBridge;
+    d2rq:column "Organizations.name";
+    d2rq:property foaf:name;
+    d2rq:belongsToClassMap :OrganizationsTable;
+    .
+
+:OrganizationsWebsiteColumn a d2rq:ObjectPropertyBridge;
+    d2rq:column "Organizations.website";
+    d2rq:property foaf:homepage;
+    d2rq:belongsToClassMap :OrganizationsTable;
+    .
