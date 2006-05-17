@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="D2RQ" default="all" basedir=".">
 
+	<property name="name" value="d2r-server"/>
 	<property name="version" value="0.1.1"/>
 	<property name="project.package" value="de.fuberlin.wiwiss.d2rs"/>
 	<property name="project.path" value="de/fuberlin/wiwiss/d2rs"/>
@@ -8,7 +9,7 @@
 	<property name="build" value="bldsrc"/>
 	<property name="lib" value="lib"/>
 	<property name="doc" value="doc"/>
-	<property name="distname" value="d2r-server-${version}"/>
+	<property name="distname" value="${name}-${version}"/>
 	<property name="jar" value="${lib}/${distname}.jar"/>
 	<property name="zip" value="${distname}.zip"/>
 	<property name="tar" value="${distname}.tar.gz"/>
@@ -36,9 +37,9 @@
 	
 	<target name="clean">
 		<delete dir="${build}" failonerror="false"/>
-		<delete file="${jar}" failonerror="false"/>
-		<delete file="${zip}" failonerror="false"/>
-		<delete file="${tar}" failonerror="false"/>
+		<delete failonerror="false">
+			<fileset dir="." includes="${lib}/${name}-*.jar,${name}-*.zip,${name}-*.tar.gz"/>
+		</delete>
 	</target>
 	
 	<target name="init">
