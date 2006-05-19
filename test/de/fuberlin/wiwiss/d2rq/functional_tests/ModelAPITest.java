@@ -1,9 +1,7 @@
 /*
- * $Id: ModelAPITest.java,v 1.3 2005/03/07 17:38:42 garbers Exp $
+ * $Id: ModelAPITest.java,v 1.4 2006/05/19 18:42:37 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
-
-import junit.framework.TestCase;
 
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;

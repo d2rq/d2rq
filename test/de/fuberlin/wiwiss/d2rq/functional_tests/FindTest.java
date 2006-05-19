@@ -1,24 +1,13 @@
 /*
- * $Id: FindTest.java,v 1.4 2005/03/07 17:38:33 garbers Exp $
+ * $Id: FindTest.java,v 1.5 2006/05/19 18:42:37 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import junit.framework.TestCase;
-
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.rdf.model.AnonId;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.FindTestFramework;
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
 /**
  * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.GraphD2RQ}.

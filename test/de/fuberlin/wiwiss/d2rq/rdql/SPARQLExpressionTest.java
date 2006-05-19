@@ -4,19 +4,7 @@
  */
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
-import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
-import de.fuberlin.wiwiss.d2rq.SPARQLTestFramework;
-import de.fuberlin.wiwiss.d2rq.find.SQLResultSet;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
-import de.fuberlin.wiwiss.d2rq.map.Database;
-import junit.framework.TestCase;
 
 /**
  * Note:

@@ -1,13 +1,9 @@
 /*
- * $Id: RDQLDB2Test.java,v 1.3 2005/12/15 12:04:05 garbers Exp $
+ * $Id: RDQLDB2Test.java,v 1.4 2006/05/19 18:42:37 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
-import de.fuberlin.wiwiss.d2rq.find.D2RQResultIterator;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
-import de.fuberlin.wiwiss.d2rq.rdql.D2RQPatternStage4;
-import de.fuberlin.wiwiss.d2rq.rdql.PQCResultIterator4;
 
 
 public class RDQLDB2Test extends RDQLTestFramework {

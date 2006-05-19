@@ -1,27 +1,13 @@
 /*
- * $Id: RDQLTest.java,v 1.8 2005/04/28 15:59:20 garbers Exp $
+ * $Id: RDQLTest.java,v 1.9 2006/05/19 18:42:37 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
-import junit.framework.TestCase;
-
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.rdf.model.AnonId;
-import com.hp.hpl.jena.rdql.Query;
-import com.hp.hpl.jena.rdql.QueryEngine;
-import com.hp.hpl.jena.rdql.QueryResults;
-import com.hp.hpl.jena.rdql.ResultBinding;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
 
 

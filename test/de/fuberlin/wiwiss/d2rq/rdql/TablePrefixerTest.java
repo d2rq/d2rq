@@ -4,16 +4,12 @@
  */
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.fuberlin.wiwiss.d2rq.FindTestFramework;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Join;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
-
-import junit.framework.TestCase;
 
 /**
  * @author jg
@@ -98,8 +94,7 @@ public class TablePrefixerTest extends FindTestFramework {
 	}
 	
 	public void testPropertyBridge() {
-		PropertyBridge p=prefixer.prefixPropertyBridge(propertyBridge);
-		// TODO
+		// TODO Write TablePrefixerTest.testPropertyBridge
 	}
 	
 	protected void assertPrefixed(TablePrefixer prefixer, String prefixed, String unprefixed) {

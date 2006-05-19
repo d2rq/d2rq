@@ -240,8 +240,6 @@ public class RDQLTestFramework extends TestFramework {
 	private String printMap(Map m) {
 	    String a[]=new String[m.size()];
 	    Iterator it=m.entrySet().iterator();
-	    Object[] side=new Object[2];
-	    String[] res=new String[2];
 	    int i=0;
 	    while (it.hasNext()) {
 	        Map.Entry e=(Map.Entry)it.next();
