@@ -1,7 +1,7 @@
 /*
- * $Id: MapParser.java,v 1.3 2005/04/28 19:21:20 garbers Exp $
+ * $Id: MapParser.java,v 1.1 2006/05/19 19:13:02 cyganiak Exp $
  */
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.parser;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,17 +24,33 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.helpers.CSVParser;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.map.Alias;
+import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
+import de.fuberlin.wiwiss.d2rq.map.BlankNodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.ContainsRestriction;
+import de.fuberlin.wiwiss.d2rq.map.D2RQ;
+import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.Join;
+import de.fuberlin.wiwiss.d2rq.map.LiteralMaker;
+import de.fuberlin.wiwiss.d2rq.map.MaxLengthRestriction;
+import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.Pattern;
+import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+import de.fuberlin.wiwiss.d2rq.map.RegexRestriction;
+import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
+import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
+import de.fuberlin.wiwiss.d2rq.map.UriMaker;
+import de.fuberlin.wiwiss.d2rq.map.ValueSource;
 
 /**
  * Creates D2RQ domain classes (like {@link PropertyBridge},
  * {@link TranslationTable} from a Jena model representation
  * of a D2RQ mapping file. Checks the map for consistency.
- *
- * <p>History:<br>
- * 08-03-2004: Initial version of this class.<br>
  * 
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: MapParser.java,v 1.1 2006/05/19 19:13:02 cyganiak Exp $
  */
 public class MapParser {
 	private Model model;
@@ -617,14 +633,10 @@ public class MapParser {
 		return result;
 	}
 
-	private Map findLiteralsAsMap(Node subject, Node predicate) {
-	    return findLiteralsAsMap(subject, predicate, null);
-	}
-
 	private Map findLiteralsAsMap(Node subject, Node predicate, Map predicateToObjectMap) {
-	    return findLiteralsAsMap(subject, predicate, predicateToObjectMap, true,true);
+	    return findLiteralsAsMap(subject, predicate, predicateToObjectMap, true, true);
 	}
-	private Map findLiteralsAsMap(Node subject, Node predicate, Map predicateToObjectMap, boolean objectIsKey,boolean warnIfNotLiteral) {
+	private Map findLiteralsAsMap(Node subject, Node predicate, Map predicateToObjectMap, boolean objectIsKey, boolean warnIfNotLiteral) {
 		Map result = new HashMap();
 		ExtendedIterator itColText = this.graph.find(subject, predicate, Node.ANY);
 		while (itColText.hasNext()) {

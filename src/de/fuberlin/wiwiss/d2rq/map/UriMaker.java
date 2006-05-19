@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class UriMaker implements NodeMaker, Prefixable {
+public class UriMaker implements NodeMaker, Prefixable {
 	private ValueSource valueSource;
 	private String id;
 

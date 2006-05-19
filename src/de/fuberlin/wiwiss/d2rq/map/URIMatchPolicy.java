@@ -1,5 +1,5 @@
 /*
- * $Id: URIMatchPolicy.java,v 1.2 2005/04/13 17:17:41 garbers Exp $
+ * $Id: URIMatchPolicy.java,v 1.3 2006/05/19 19:13:02 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -26,43 +26,43 @@ public class URIMatchPolicy {
 	private boolean isObjectBasedOnURIPattern = false;
 	private boolean isObjectBasedOnURIColumn = false;
 
-	protected void setObjectBasedOnURIColumn(boolean isObjectBasedOnURIColumn) {
+	public void setObjectBasedOnURIColumn(boolean isObjectBasedOnURIColumn) {
 		this.isObjectBasedOnURIColumn = isObjectBasedOnURIColumn;
 	}
 
-	protected void setObjectBasedOnURIPattern(boolean isObjectBasedOnURIPattern) {
+	public void setObjectBasedOnURIPattern(boolean isObjectBasedOnURIPattern) {
 		this.isObjectBasedOnURIPattern = isObjectBasedOnURIPattern;
 	}
 
-	protected void setSubjectBasedOnURIColumn(boolean isSubjectBasedOnURIColumn) {
+	public void setSubjectBasedOnURIColumn(boolean isSubjectBasedOnURIColumn) {
 		this.isSubjectBasedOnURIColumn = isSubjectBasedOnURIColumn;
 	}
 
-	protected void setSubjectBasedOnURIPattern(boolean isSubjectBasedOnURIPattern) {
+	public void setSubjectBasedOnURIPattern(boolean isSubjectBasedOnURIPattern) {
 		this.isSubjectBasedOnURIPattern = isSubjectBasedOnURIPattern;
 	}
 	
-	protected boolean couldFitSubjectInContext(QueryContext context) {
+	public boolean couldFitSubjectInContext(QueryContext context) {
 		return !this.isSubjectBasedOnURIColumn || !context.isURIPatternMatched();
 	}
 	
-	protected void updateContextAfterSubjectMatch(QueryContext context) {
+	public void updateContextAfterSubjectMatch(QueryContext context) {
 		if (this.isSubjectBasedOnURIPattern) {
 			context.setURIPatternMatched(true);
 		}
 	}
 	
-	protected boolean couldFitObjectInContext(QueryContext context) {
+	public boolean couldFitObjectInContext(QueryContext context) {
 		return !this.isObjectBasedOnURIColumn || !context.isURIPatternMatched();
 	}
 	
-	protected void updateContextAfterObjectMatch(QueryContext context) {
+	public void updateContextAfterObjectMatch(QueryContext context) {
 		if (this.isObjectBasedOnURIPattern) {
 			context.setURIPatternMatched(true);
 		}
 	}
 
-	protected int getEvaluationPriority() {
+	public int getEvaluationPriority() {
 		int result = 0;
 		if (this.isObjectBasedOnURIColumn) {
 			result -= 1;

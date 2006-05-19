@@ -1,5 +1,5 @@
 /*
- * $Id: BlankNodeIdentifier.java,v 1.2 2005/04/13 17:17:42 garbers Exp $
+ * $Id: BlankNodeIdentifier.java,v 1.3 2006/05/19 19:13:02 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -28,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-class BlankNodeIdentifier implements ValueSource, Prefixable {
+public class BlankNodeIdentifier implements ValueSource, Prefixable {
 	private String classMapID;
 	private Set identifierColumns = new HashSet(3);
 	

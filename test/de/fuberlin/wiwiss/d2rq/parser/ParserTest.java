@@ -1,7 +1,9 @@
 /*
- * $Id: ParserTest.java,v 1.3 2006/05/19 18:42:37 cyganiak Exp $
+ * $Id: ParserTest.java,v 1.1 2006/05/19 19:13:02 cyganiak Exp $
  */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.parser;
+
+import junit.framework.TestCase;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -9,12 +11,10 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import de.fuberlin.wiwiss.d2rq.MockLogger;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
-import de.fuberlin.wiwiss.d2rq.map.MapParser;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
-
-import junit.framework.TestCase;
 
 /**
  * Unit tests for {@link MapParser}
