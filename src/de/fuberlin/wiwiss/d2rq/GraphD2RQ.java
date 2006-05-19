@@ -53,7 +53,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * @see de.fuberlin.wiwiss.d2rq.D2RQCapabilities
  */
 public class GraphD2RQ extends GraphBase implements Graph {
-	static private boolean usingD2RQQueryHandler=false;
+	static private boolean usingD2RQQueryHandler=true;
 	protected Map processingInstructions=null;
 	
 //	private final ReificationStyle style;
