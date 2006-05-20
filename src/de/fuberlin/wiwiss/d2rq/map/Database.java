@@ -46,6 +46,7 @@ public class Database {
     public static final Integer textColumn = new Integer(2);
     public static final Integer dateColumn = new Integer(3);
 
+	private DatabaseSchemaInspector schemaInspector = null;
 
     public Database(String odbc, String jdbc, String jdbcDriver, String databaseUsername, String databasePassword, Map columnTypes) {
         this.odbc = odbc;
@@ -133,10 +134,7 @@ public class Database {
     }
 
     public int getColumnType(String qualifiedColumnName) {
-        Integer t=(Integer)this.columnTypes.get(qualifiedColumnName);
-        if (t==null)
-            return Database.noColumnType;
-		return t.intValue();
+    		return getColumnType(new Column(qualifiedColumnName));
     }
     
     /**
@@ -144,9 +142,47 @@ public class Database {
      * @return Node columnType D2RQ.textColumn or D2RQ.numericColumn or D2RQ.dateColumn
      */
     public int getColumnType(Column column) {
-        return getColumnType(column.getQualifiedName());
+		Integer t = (Integer) this.columnTypes.get(column.getQualifiedName());
+		if (t != null) {
+			return t.intValue();
+		}
+		int type = schemaInspector().columnType(column);
+		switch (type) {
+		case Types.CHAR: return Database.textColumnType;
+		case Types.VARCHAR: return Database.textColumnType;
+		case Types.LONGVARCHAR: return Database.textColumnType;
+		case Types.NUMERIC: return Database.numericColumnType;
+		case Types.DECIMAL: return Database.numericColumnType;
+		case Types.BIT: return Database.numericColumnType;
+		case Types.TINYINT: return Database.numericColumnType;
+		case Types.SMALLINT: return Database.numericColumnType;
+		case Types.INTEGER: return Database.numericColumnType;
+		case Types.BIGINT: return Database.numericColumnType;
+		case Types.REAL: return Database.numericColumnType;
+		case Types.FLOAT: return Database.numericColumnType;
+		case Types.DOUBLE: return Database.numericColumnType;
+
+		// TODO: What to do with binary columns?
+		case Types.BINARY: return Database.textColumnType;
+		case Types.VARBINARY: return Database.textColumnType;
+		case Types.LONGVARBINARY: return Database.textColumnType;
+
+		case Types.DATE: return Database.dateColumnType;
+		case Types.TIME: return Database.dateColumnType;
+		case Types.TIMESTAMP: return Database.dateColumnType;
+		
+		default: throw new D2RQException("Unsupported database type code (" + type + ") for column "
+				+ column.getQualifiedName());
+		}
 	}
 
+	private DatabaseSchemaInspector schemaInspector() {
+		if (this.schemaInspector == null) {
+			this.schemaInspector = new DatabaseSchemaInspector(getConnnection());
+		}
+		return this.schemaInspector;
+	}
+	
     /**
      * Raises a D2RQ error if there's no type information for the column.
      * @param column a database column
