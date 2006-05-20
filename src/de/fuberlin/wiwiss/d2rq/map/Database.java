@@ -148,6 +148,7 @@ public class Database {
 		}
 		int type = schemaInspector().columnType(column);
 		switch (type) {
+		// TODO There are a bunch of others, see http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Types.html
 		case Types.CHAR: return Database.textColumnType;
 		case Types.VARCHAR: return Database.textColumnType;
 		case Types.LONGVARCHAR: return Database.textColumnType;
