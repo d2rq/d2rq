@@ -5,6 +5,9 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
 import com.hp.hpl.jena.graph.*;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 /**
  * D2RQ vocabulary terms as static objects.
@@ -95,4 +98,8 @@ public class D2RQ {
     public static final Node Translation = Node.createURI(uri + "Translation");
     public static final Node databaseValue = Node.createURI(uri + "databaseValue");
     public static final Node rdfValue = Node.createURI(uri + "rdfValue");
+
+    // D2RQ assembler for Jena
+    public static final Resource D2RQModel = ResourceFactory.createResource(uri + "D2RQModel");
+    public static final Property mappingFile = ResourceFactory.createProperty(uri + "mappingFile");
 }

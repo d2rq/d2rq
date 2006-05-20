@@ -4,6 +4,7 @@
 @prefix owl:        <http://www.w3.org/2002/07/owl#> .
 @prefix dc:         <http://purl.org/dc/elements/1.1/> .
 @prefix dtype:      <http://www.w3.org/2001/XMLSchema#> . 
+@prefix ja: <http://jena.hpl.hp.com/2005/11/Assembler#> .
 
 # -----------------------------------------------
 #
@@ -98,7 +99,7 @@ d2rq:ResourceMap
 		.
 d2rq:uriPattern
 		a rdf:Property;
-		rdfs:label "URI pattern"
+		rdfs:label "URI pattern";
 		rdfs:comment "URI pattern with placeholders that will be filled with values from a database column.";
 		rdfs:domain d2rq:ResourceMap;
 		.
@@ -305,3 +306,22 @@ d2rq:lang
 :rdfValue	rdf:type rdf:Property ;
              	rdfs:domain :Translation
              	.
+
+
+# -----------------------------------------------
+# Jena Assembler
+# -----------------------------------------------
+
+d2rq:D2RQModel
+		a rdfs:Class;
+		rdfs:subClassOf ja:Object;
+		rdfs:label "D2RQ model";
+		rdfs:comment "Jena Assemler specification for a relational database, mapped to RDF using the D2RQ tool";
+		ja:assembler "de.fuberlin.wiwiss.d2rq.assembler.D2RQAssembler";
+		.
+d2rq:mappingFile
+		a rdf:Property;
+		rdfs:label "mapping file";
+		rdfs:comment "URL of a D2RQ mapping file";
+		rdfs:domain d2rq:D2RQModel;
+		.
