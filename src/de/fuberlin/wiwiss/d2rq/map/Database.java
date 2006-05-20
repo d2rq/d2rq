@@ -1,12 +1,12 @@
-/*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-*/
 package de.fuberlin.wiwiss.d2rq.map;
+
 
 import java.sql.*;
 import java.util.*;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+
 
 /**
  * Representation of a d2rq:Database from the mapping file.
@@ -184,10 +184,11 @@ public class Database {
                 return;
             }
             this.connectedToDatabase = true;
-       }  catch (Exception ex) {
-            System.err.println(ex.getMessage());
-            ex.printStackTrace();
-       }
+        } catch (SQLException ex) {
+            throw new D2RQException(ex.getMessage(), ex);
+        } catch (ClassNotFoundException ex) {
+            throw new D2RQException("Database driver class not found in the lib directory: " + ex.getMessage(), ex);
+        }
     }
     
    public boolean databaseMayUseDistinct=true;
