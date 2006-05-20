@@ -1,3 +1,4 @@
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
 @prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl:        <http://www.w3.org/2002/07/owl#> .
@@ -27,6 +28,7 @@
 
 
 # D2RQ Namespace
+# @@@ TODO: replace all occurrences with d2rq:
 @prefix :       <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
 
 # -----------------------------------------------
@@ -84,33 +86,58 @@
                 .
 
 
+# -----------------------------------------------
+# Resource Map
+# -----------------------------------------------
+# Supertype of ClassMap and PropertyBridge, not used in mapping files
+
+d2rq:ResourceMap
+		a rdfs:Class;
+		rdfs:label "Resources map";
+		rdfs:comment "A database-to-RDF mapping from one or more database columns to a set of RDF resources";
+		.
+d2rq:uriPattern
+		a rdf:Property;
+		rdfs:label "URI pattern"
+		rdfs:comment "URI pattern with placeholders that will be filled with values from a database column.";
+		rdfs:domain d2rq:ResourceMap;
+		.
+d2rq:uriColumn
+		a rdf:Property;
+		rdfs:label "URI column";
+		rdfs:comment "Database column which contains URIs.";
+		rdfs:domain d2rq:ResourceMap;
+		.
+d2rq:bNodeIdColumns
+		a rdf:Property;
+		rdfs:label "bNode ID columns";
+		rdfs:comment "Comma-separated list of database columns used for construction of blank nodes";
+		rdfs:domain d2rq:ResourceMap;
+		.
+d2rq:condition
+		a rdf:Property;
+		rdfs:label "condition";
+		rdfs:comment "SQL WHERE condition that must be satisfied for a database row to be mapped";
+		rdfs:domain d2rq:ResourceMap;
+		.
+
 
 # -----------------------------------------------
 # Class Map
 # -----------------------------------------------
 
-:ClassMap 	rdf:type rdfs:Class ;
-    		rdfs:comment "Maps a class in the ontology to its relational representation in a specific database." 
+d2rq:ClassMap
+		a rdfs:Class;
+    		rdfs:subClassOf d2rq:ResourceMap;
+		rdfs:label "Class map";
+		rdfs:comment "Maps an RDFS or OWL class to its database representation.";
     		.
-
 :class          rdf:type rdf:Property ;
                 rdfs:comment "Links d2rq:classMaps to RDFS or OWL classes." ;
                 rdfs:domain :ClassMap ;
                 rdfs:range rdfs:Class ;
                 owl:inverseOf :classMap
                 .
-:uriPattern  	rdf:type rdf:Property ;
-             	rdfs:comment "Pattern used for URI construction and reversing."; 
-             	rdfs:domain :ClassMap
-             	.
-:uriColumn   	rdf:type rdf:Property ;
-             	rdfs:comment "Database column which contains object URIs.";
-             	rdfs:domain :ClassMap
-             	.
-:bNodeIdColumns	rdf:type rdf:Property ;
-             	rdfs:comment "Database column or columns which contain the primary key information about an which is identified by an bNode in RDF.";
-             	rdfs:domain :ClassMap
-             	.
 :dataStorage 	rdf:type rdf:Property ;
              	rdfs:domain :ClassMap ;
              	rdfs:range  :Database
@@ -139,10 +166,12 @@
 # Property Bridge
 # -----------------------------------------------
 
-:PropertyBridge rdf:type rdfs:Class ;
-             	rdfs:comment "Abstract Superclass of DatatypePropertyBridge and ObjectPropertyBridge" 
-             	.
-
+d2rq:PropertyBridge
+		a rdfs:Class;
+		rdfs:subClassOf d2rq:ResourceMap;
+		rdfs:label "Property bridge";
+		rdfs:comment "Maps an RDF property to one or more database columns.";
+		.
 :property       rdf:type rdf:Property ;
                 rdf:comment "Links a d2rq:PropertyBridge to an RDF property." ;
                 rdfs:domain :PropertyBridge ;
@@ -161,8 +190,25 @@
 :pattern     	rdf:type rdf:Property ;
              	rdfs:domain :PropertyBridge
              	.
+d2rq:datatype
+		a rdf:Property;
+		rdfs:label "datatype";
+		rdfs:comment "The datatype of literals created by this bridge";
+		rdfs:domain d2rq:PropertyBridge;
+		.
+d2rq:lang
+		a rdf:Property;
+		rdfs:label "language";
+		rdfs:comment "The language tag of literals created by this bridge";
+		rdfs:domain d2rq:PropertyBridge;
+		.
 :belongsToClassMap rdf:type rdf:Property ;
              	rdfs:domain :PropertyBridge ;
+             	rdfs:range  :ClassMap
+             	.
+:refersToClassMap rdf:type rdf:Property ;
+             	rdfs:domain :ObjectPropertyBridge ;
+             	rdfs:comment "Has to be used if a join refers to a different classMap."; 
              	rdfs:range  :ClassMap
              	.
 :translateWith rdf:type rdf:Property ;
@@ -184,35 +230,25 @@
 
 
 # -----------------------------------------------
-# Datatype Property Bridge
+# Datatype and Object Property Bridge
 # -----------------------------------------------
+# Deprecated: use PropertyBridge and indicate the kind of generated
+# resources by specifying either d2rq:column/d2rq:pattern or
+# d2rq:uriColumn/d2rq:uriPattern.
 
-:DatatypePropertyBridge rdf:type rdfs:Class ;
-             	rdfs:subClassOf :PropertyBridge ;
-             	rdfs:comment "Maps a datatype property to a column in a specific database." 
-             	.
-:datatype    	rdf:type rdf:Property ;
-             	rdfs:domain :DatatypePropertyBridge
-             	.
-:lang        	rdf:type rdf:Property ;
-             	rdfs:domain :DatatypePropertyBridge
-             	.
+:DatatypePropertyBridge
+		a rdfs:Class;
+		rdfs:subClassOf d2rq:PropertyBridge;
+		rdfs:label "Datatype property bridge (deprecated)";
+		rdfs:comment "Maps a datatype property to one or more database columns.";
+		.
 
+:ObjectPropertyBridge
+		a rdfs:Class;
+		rdfs:subClassOf d2rq:PropertyBridge;
+		rdfs:comment "Maps an object property to one or more database columns.";
+		.
 
-# -----------------------------------------------
-# Object Property Bridge
-# -----------------------------------------------
-
-:ObjectPropertyBridge rdf:type rdfs:Class ;
-             	rdfs:subClassOf :PropertyBridge ;
-             	rdfs:comment "Maps a object property to a column in a specific database." 
-             	.
-
-:refersToClassMap rdf:type rdf:Property ;
-             	rdfs:domain :ObjectPropertyBridge ;
-             	rdfs:comment "Has to be used if a join refers to a different classMap."; 
-             	rdfs:range  :ClassMap
-             	.
 
 # -----------------------------------------------
 # Property Bridge Property
@@ -224,17 +260,6 @@
                  rdfs:range  :PropertyBridge ;
                  owl:inverseOf :property
                  .
-
-
-# -----------------------------------------------
-# Properties for Class Map and Property Bridge
-# -----------------------------------------------
-
-:condition      rdf:type rdf:Property ;
-             	rdfs:comment "Additional SQL WHERE condition"
-             	.
-# rdfs:domain of d2rq:condition is d2rq:ClassMap and d2rq:PropertyBridge.
-
 
 # -----------------------------------------------
 # Additional Property Definition
