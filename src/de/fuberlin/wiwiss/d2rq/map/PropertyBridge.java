@@ -37,6 +37,7 @@ public class PropertyBridge implements Prefixable {
 	private Database database;
 	private Map aliases; // = new HashMap(1);
 	private Set joins; // = new HashSet(2);
+	// TODO: Move conditions into NodeMaker
 	private Set conditions = new HashSet(1);
 	private URIMatchPolicy uriMatchPolicy = new URIMatchPolicy();
 	private boolean mightContainDuplicates = false;
