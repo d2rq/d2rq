@@ -9,18 +9,22 @@ h1, h2 { color: #800; font-family: sans-serif; font-weight: normal; }
 h1 { font-size: 200%; margin-bottom: 0; }
 h2 { font-size: 120%; margin: 1.5em 0 -0.5em 0; }
 a img { border: none; }
-#download { font-family: sans-serif; font-size: 125%; margin: 1.5em 0 1em 0; text-align: center; }
+#download { font-family: sans-serif; margin: 1.5em 0 1em 0; text-align: center; }
+#download a { font-size: 125%; }
+#download small { color: #888; font-size: 80%; }
 body { text-align: center; }
 #header { border-bottom: 1px solid #ccc; text-align: center; }
 #header p { margin-top: 0.5em; }
 #authors { text-align: right; position: absolute; top: 1em; right: 1em; }
-#content { margin-left: auto; margin-right: auto; text-align: justify; width: 36em; }
+#logos { height: 0; margin: 0; position: relative; }
+#logos div { padding: 1em 0 0 38em; }
+#content { margin: 1em auto; text-align: justify; width: 36em; }
 #footer { border-top: 1px solid #ccc; color: #aaa; text-align: left; }
 </style>
 <body>
 
 <div id="header">
-  <h1>D2R Server v0.1.1 (alpha)</h1>
+  <h1>D2R Server</h1>
   <p id="tagline">SPARQL endpoint for relational databases</p>
 </div>
 
@@ -30,6 +34,12 @@ body { text-align: center; }
 </div>
 
 <div id="content">
+
+<div id="logos">
+  <div><a href="http://www.fu-berlin.de/"><img src="images/fu-logo.gif" alt="Freie Universit&auml;t Berlin Logo" /></a></div>
+  <div><a href="http://sourceforge.net/projects/d2rq-map/"><img src="http://sourceforge.net/sflogo.php?group_id=111002&type=5" alt="SourceForge Logo" /></a></div>
+</div>
+
 <p>D2R Server provides
   <strong><a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a>
   access to relational databases</strong>.  The server takes SPARQL queries from the Web and rewrites them via a D2RQ mapping into SQL queries against a relational database. This on-the-fly translation allows RDF applications to access the content of large databases without having to replicate them into RDF. D2R Server can be used to integrate existing databases into RDF systems, and to add SPARQL interfaces to database-backed software products. </p>
@@ -38,12 +48,14 @@ body { text-align: center; }
     map a database's contents into a virtual RDF graph that can
     be accessed over the <strong>SPARQL protocol</strong>. It is bundled with a
     Jetty webserver and aims at being <strong>easy to set up</strong> and use.</p>
-<p>D2R Server is currently in an <strong>alpha</strong> state.
-  It works for us, but has a minimal feature set and needs much more
+<p>D2R Server is currently in an <strong>alpha</strong> state. It works, but needs more
   testing.</p>
 
 
-<div id="download"><a href="http://sourceforge.net/project/showfiles.php?group_id=111002&package_id=188901">Download D2R Server</a></div>
+<div id="download">
+  <a href="http://sourceforge.net/project/showfiles.php?group_id=111002&package_id=188901">Download D2R Server</a><br />
+  <small>v0.2 (alpha), released 2006-05-30</small>
+</div>
 
 <h2>Requirements</h2>
 
@@ -52,11 +64,9 @@ body { text-align: center; }
 <ul>
   <li><strong>Java 1.4</strong> or newer on the path (check with
     <tt>java -version</tt> if you're not sure),</li>
-  <li>a <strong>D2RQ mapping file</strong> that describes how the tables
-    and columns of your database should be mapped into RDF and how to
-    connect to the database; the
-    <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/">D2RQ Manual</a>
-    describes how to create one.</li>
+  <li>a <strong>modern browser</strong> like Firefox, Opera or Safari
+    to access the web interface. Internet Explorer will currently not
+    work.</li>
 </ul>
 
 
@@ -66,18 +76,42 @@ body { text-align: center; }
   <li><p><strong>Extract the archive</strong> into a suitable location.
     Optionally, add the extracted directory (where the <tt>d2r-server</tt>
     and <tt>d2r-server.bat</tt> files reside) to the path.</p></li>
-  <li><p><strong>Change into the directory and run:</strong><br />
-    <tt>./d2r-server path/to/mappingfile.ttl</tt> (for Unix)<br />
-    <tt>d2r-server c:\path\to\mappingfile.ttl</tt> (for Windows)</p>
-    <p>(<tt>mappingfile.ttl</tt> is a D2RQ mapping file that describes how your
-    database tables and columns are mapped to RDF and how to connect
-    to the database &#8211; the
-    <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/">D2RQ Manual</a>
-    describes how to create one)</p></li>
+  <li><p><strong>Download a JDBC driver</strong> from your database vendor.
+    Place the driver's JAR file into D2R Server's <tt>/lib</tt> directory.
+    A <a href="http://developers.sun.com/product/jdbc/drivers">list of JDBC drivers</a>
+    from different vendors is maintained by Sun. Also take
+    note of the <strong>driver class name</strong> (e.g.
+    <tt>org.postgresql.Driver</tt> for PostgreSQL or
+    <tt>oracle.jdbc.driver.OracleDriver</tt> for Oracle) and
+    <strong>JDBC URL pattern</strong> (e.g.
+    <tt>jdbc:mysql://<em>servername</em>/<em>database</em></tt>
+    for MySQL) from the driver's documentation. A driver for MySQL is
+    already included with D2R Server.</p></li>
+  <li><p><strong>Generate a mapping file</strong> for your database schema.
+    Change into the D2R Server directory and run:</strong></p>
+    <pre>generate-mapping -o <em>mapping.ttl</em> -d <em>driver.class.name</em>
+    -u <em>db-user</em> -p <em>db-password</em> <em>jdbc:url:...</em></pre>
+    <p>Replace the parts in italics with appropriate values.
+    <tt><em>mapping.ttl</em></tt> is the name for the new mapping file.
+    <tt>-d</tt> can be skipped for MySQL.</li></p>
+  <li><p><strong>Start the server:</strong>
+    <tt>d2r-server <em>mapping.ttl</em></tt></p>
+    <p>The SPARQL endpoint is at
+    <a href="http://localhost:2020/sparql">http://localhost:2020/sparql</a>
+    and can now be queried by SPARQL clients.</p></li>
   <li><p><strong>Open <a href="http://localhost:2020/">http://localhost:2020/</a></strong>
-    in a web browser. The SPARQL endpoint is at
-    <a href="http://localhost:2020/sparql">http://localhost:2020/sparql</a>.</p>
-  </li>
+    in a web browser.</p>
+    <p><img src="images/d2rs-screenshot-start.png" alt="Screenshot of D2R Server's web interface" style="margin: -4px -15px -15px -10px;"/></p></li>
+    <p>You can use the SPARQL form to execute queries and display results
+      in a number of formats, or use the Browse box on the right to explore
+      the endpoint's contents.</p>
+    <p><img src="images/d2rs-screenshot-browse.png" alt="Screenshot of D2R Server's SPARQL explorer" style="margin: -4px -15px -15px -10px;"/></p></li>
+    </li>
+  <li><p><strong>Customize the database-to-RDF mapping</strong> by editing the
+    mapping file with a text editor. Its syntax is described in the
+    <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/">D2RQ Manual</a>.
+    D2R Server will automatically detect changes to the mapping file and
+    reload appropriately when you hit the browser's refresh button.</p></li>
 </ol>
 
 
@@ -91,8 +125,6 @@ body { text-align: center; }
   <a href="http://d2rq-map.cvs.sourceforge.net/d2rq-map/d2r-server/">browsed
   online</a>.</p>
 
-<p><a href="http://sourceforge.net/projects/d2rq-map/"><img src="http://sourceforge.net/sflogo.php?group_id=111002&type=5" alt="SourceForge Logo" /></a></p>
-
 
 <h2>Support and feedback</h2>
 
@@ -104,7 +136,7 @@ body { text-align: center; }
 
 
 <div id="footer">
-  <p>$Id: index.html,v 1.5 2006/05/17 09:07:08 cyganiak Exp $</p>
+  <p>$Id: index.html,v 1.6 2006/05/30 10:38:12 cyganiak Exp $</p>
 </div>
 
 </body>
