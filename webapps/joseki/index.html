@@ -174,10 +174,13 @@ function submitQuery() {
     var output = document.getElementById('selectoutput').value;
     if (output == 'browse') {
         document.getElementById('queryform').action = browserBaseURL();
+        document.getElementById('query').value = document.getElementById('querytext').value;
+        document.getElementById('prefixes').value = prefixes;
+        document.getElementById('prefixes').disabled = false;
+    } else {
+        document.getElementById('query').value = prefixes + document.getElementById('querytext').value;
+        document.getElementById('prefixes').disabled = true;
     }
-    document.getElementById('query').value = document.getElementById('querytext').value;
-    document.getElementById('prefixes').value = prefixes;
-    document.getElementById('prefixes').disabled = (output != 'browse');
     document.getElementById('jsonoutput').disabled = (output != 'json');
     document.getElementById('stylesheet').disabled = (output != 'xslt' || !document.getElementById('xsltstylesheet').value);
     if (output == 'xslt') {
