@@ -318,7 +318,7 @@ function nodeToHTML(node, linkMaker) {
         }
         return span;
     }
-    if (node.type == 'blank') {
+    if (node.type == 'bnode') {
         return document.createTextNode('_:' + node.value);
     }
     if (node.type == 'literal') {
