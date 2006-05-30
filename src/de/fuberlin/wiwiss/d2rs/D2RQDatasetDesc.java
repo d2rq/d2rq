@@ -7,9 +7,8 @@ import org.joseki.DatasetDesc;
 import com.hp.hpl.jena.query.DataSource;
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.query.DatasetFactory;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 
 /**
  * A Joseki dataset description that returns a dataset
@@ -19,17 +18,18 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * to initialize programmatically.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQDatasetDesc.java,v 1.2 2006/05/16 22:30:55 cyganiak Exp $
+ * @version $Id: D2RQDatasetDesc.java,v 1.3 2006/05/30 07:31:56 cyganiak Exp $
  */
 public class D2RQDatasetDesc extends DatasetDesc {
-	private ModelD2RQ modelD2RQ;
+	private Model model;
 	private DataSource dataset;
 	
-	public D2RQDatasetDesc(ModelD2RQ modelD2RQ) {
+	public D2RQDatasetDesc(Model model, NamespacePrefixModel prefixes) {
 		super(null);
-		this.modelD2RQ = modelD2RQ;
+		this.model = model;
 		this.dataset = DatasetFactory.create();
-		this.dataset.setDefaultModel(this.modelD2RQ);
+		this.dataset.setDefaultModel(this.model);
+		this.dataset.addNamedModel(NamespacePrefixModel.namespaceModelURI, prefixes);
 	}
 
 	public Dataset getDataset() {
@@ -38,12 +38,12 @@ public class D2RQDatasetDesc extends DatasetDesc {
 
 	public void clearDataset() {
 		this.dataset = null;
-		this.modelD2RQ = null;
+		this.model = null;
 	}
 
 	public void freeDataset() {
 		this.dataset = null;
-		this.modelD2RQ = null;
+		this.model = null;
 	}
 
 	public void setDefaultGraph(Resource dftGraph) {
@@ -63,6 +63,6 @@ public class D2RQDatasetDesc extends DatasetDesc {
 	}
 
 	public String toString() {
-		return "D2RQDatasetDecl(" + this.modelD2RQ + ")";
+		return "D2RQDatasetDecl(" + this.model + ")";
 	}
 }
