@@ -12,7 +12,7 @@ import com.hp.hpl.jena.shared.PrefixMapping;
  * TODO: Kill class?
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NamespacePrefixModel.java,v 1.1 2006/05/30 07:31:56 cyganiak Exp $
+ * @version $Id: NamespacePrefixModel.java,v 1.2 2006/05/30 07:40:07 cyganiak Exp $
  */
 public class NamespacePrefixModel extends ModelCom {
 	public final static String namespaceModelURI = 
@@ -31,7 +31,7 @@ public class NamespacePrefixModel extends ModelCom {
 		while (it.hasNext()) {
 			String prefix = (String) it.next();
 			String url = prefixes.getNsPrefixURI(prefix);
-			add(createResource(url), NamespacePrefixModel.prefix, createLiteral(prefix));
+			getResource(url).addProperty(NamespacePrefixModel.prefix, prefix);
 		}
 	}
 }
