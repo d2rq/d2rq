@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.3 2006/05/30 07:31:56 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.4 2006/06/01 06:51:02 cyganiak Exp $
  */
 public class D2RServer {
 	private static Log log = LogFactory.getLog(D2RServer.class);
@@ -44,7 +44,7 @@ public class D2RServer {
 			initAutoReloading(mappingFileURL.substring(5));
 			return;
 		}
-		if (!mappingFileURL.contains(":")) {
+		if (mappingFileURL.indexOf(":") == -1) {
 			initAutoReloading(mappingFileURL);
 			return;
 		}
