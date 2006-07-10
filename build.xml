@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="D2RQ" default="all" basedir=".">
+
+	<property name="project.package" value="de.fuberlin.wiwiss.d2rq"/>
+	<property name="project.path" value="de/fuberlin/wiwiss/d2rq"/>
+	<property name="src" value="src"/>
+	<property name="src.tests" value="test"/>
+	<property name="build" value="bldsrc"/>
+	<property name="build.tests" value="bldtests"/>
+	<property name="lib" value="lib"/>
+	<property name="doc" value="doc"/>
+	<property name="javadoc" value="${doc}/javadoc"/>
+	<property name="jar" value="d2rq.jar"/>
+	<property name="zip" value="d2rq.zip"/>
+	<property name="junit.jar" value="${lib}/junit-4.0.jar"/>
+	
+	<path id="project.class.path">
+		<fileset dir="${lib}">
+			<include name="**/*.jar"/>
+			<exclude name="${junit.jar}"/>
+		</fileset>
+		<pathelement path="${java.class.path}"/>
+	</path>
+	
+	<target name="clean">
+		<delete dir="${build}" failonerror="false"/>
+		<delete dir="${build.tests}" failonerror="false"/>
+		<delete dir="${javadoc}" failonerror="false"/>
+		<delete file="${jar}" failonerror="false"/>
+		<delete file="${zip}" failonerror="false"/>
+	</target>
+	
+	<target name="init">
+		<mkdir dir="${build}"/>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="${src}" destdir="${build}" debug="on" source="1.4" target="1.4">
+			<classpath refid="project.class.path"/>
+		</javac>
+	</target>
+<!--	
+	<target name="copyfiles" depends="init">
+		<copy todir="${build}/">
+			<fileset dir="${src}/">
+				<include name="${project.path}/trix/*.xsd"/>
+			</fileset>
+		</copy>
+	</target>
+-->
+	<target name="init.tests">
+		<mkdir dir="${build.tests}"/>
+	</target>
+
+	<target name="compile.tests" depends="init.tests,compile">
+		<javac srcdir="${src.tests}" destdir="${build.tests}" debug="on">
+			<classpath>
+				<path refid="project.class.path"/>
+				<pathelement path="${build}"/>
+				<pathelement path="${junit.jar}"/>
+			</classpath>
+		</javac>
+	</target>
+<!--			
+	<target name="copyfiles.tests" depends="init">
+		<copy todir="${build.tests}/">
+			<fileset dir="${src.tests}/">
+				<include name="${project.path}/trix/tests/*"/>
+				<include name="${project.path}/trig/tests/*"/>
+			</fileset>
+		</copy>
+	</target>
+-->
+	<target name="test" depends="compile.tests">
+		<java classname="junit.textui.TestRunner" fork="yes" failonerror="true">
+			<arg value="${project.package}.AllTests"/>
+			<classpath>
+				<path refid="project.class.path"/>
+				<pathelement path="${build}"/>
+				<pathelement path="${build.tests}"/>
+				<pathelement path="${junit.jar}"/>
+			</classpath>
+		</java>
+	</target>
+
+	<target name="javadoc">
+		<!-- Creates javadoc documentation for the source
+			 (but not for the tests) -->
+		<delete dir="${javadoc}"/>
+		<mkdir dir="${javadoc}"/>
+		<javadoc packagenames="*"
+				sourcepath="${src}"
+				classpathref="project.class.path"
+				destdir="${javadoc}"
+				author="true"
+				version="true"
+				private="false"
+				use="true"
+				splitindex="true"
+				windowtitle="D2RQ"
+				doctitle="D2RQ">
+			<link href="http://jena.sourceforge.net/javadoc/"/>
+			<link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
+			<link href="http://jena.sourceforge.net/ARQ/javadoc/"/>
+		</javadoc>
+	</target>
+
+<!--
+ 	<target name="jar" depends="compile,test">
+-->
+	<target name="jar" depends="compile">
+		<jar jarfile="${jar}" basedir="${build}"/>
+	</target>
+
+	<target name="zip" depends="jar,javadoc">
+		<zip destfile="${zip}"
+			 basedir="."
+			 excludes="${build}/** ${build.tests}/** ${zip}"/>
+	</target>
+
+	<target name="all" depends="zip"/>
+</project>
