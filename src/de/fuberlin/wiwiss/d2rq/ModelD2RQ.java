@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.5 2005/07/14 15:02:42 cyganiak Exp $
+ * @version $Id: ModelD2RQ.java,v 1.6 2006/07/12 11:03:43 cyganiak Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */
@@ -71,7 +71,7 @@ public class ModelD2RQ extends ModelCom implements Model {
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
 			String namespace = (String) entry.getValue();
-			if (D2RQ.uri.equals(namespace)) {
+			if (D2RQ.uri.equals(namespace) || namespace.startsWith("file:")) {
 				removeNsPrefix((String) entry.getKey());
 			}
 		}
