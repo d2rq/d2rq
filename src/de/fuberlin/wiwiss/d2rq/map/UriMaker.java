@@ -22,14 +22,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-public class UriMaker implements NodeMaker, Prefixable {
-	private ValueSource valueSource;
+public class UriMaker extends NodeMakerBase {
 	private String id;
-
-	public Object clone() throws CloneNotSupportedException {return super.clone();}
-	public void prefixTables(TablePrefixer prefixer) {
-		valueSource=prefixer.prefixValueSource(valueSource);
-	}
+	private ValueSource valueSource;
 	
 	public void matchConstraint(NodeConstraint c) {
         c.matchNodeType(NodeConstraint.UriNodeType);
@@ -37,9 +32,10 @@ public class UriMaker implements NodeMaker, Prefixable {
 	}       
 
 	
-	public UriMaker(String id, ValueSource valueSource) {
-		this.valueSource = valueSource;
+	public UriMaker(String id, ValueSource valueSource, Set joins, Set conditions, boolean isUnique) {
+		super(joins, conditions, isUnique);
 		this.id = id;
+		this.valueSource = valueSource;
 	}
 
 	/* (non-Javadoc)
@@ -58,6 +54,7 @@ public class UriMaker implements NodeMaker, Prefixable {
 	public Set getColumns() {
 		return this.valueSource.getColumns();
 	}
+
 	/* (non-Javadoc)
 	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getColumnValues(com.hp.hpl.jena.graph.Node)
 	 */
@@ -76,4 +73,9 @@ public class UriMaker implements NodeMaker, Prefixable {
 	public String toString() {
 		return "URIMaker@" + this.id;
 	}
+	
+	public void prefixTables(TablePrefixer prefixer) {
+		super.prefixTables(prefixer);
+		this.valueSource = prefixer.prefixValueSource(this.valueSource);
+	}	
 }

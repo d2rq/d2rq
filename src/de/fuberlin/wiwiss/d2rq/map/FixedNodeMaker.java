@@ -1,10 +1,9 @@
 /*
- * $Id: FixedNodeMaker.java,v 1.2 2005/04/14 16:23:19 garbers Exp $
+ * $Id: FixedNodeMaker.java,v 1.3 2006/07/12 11:08:09 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,14 +50,22 @@ public class FixedNodeMaker implements NodeMaker {
 	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getColumns()
 	 */
 	public Set getColumns() {
-		return new HashSet(0);
+		return Collections.EMPTY_SET;
 	}
 
+	public Set getJoins() {
+		return Collections.EMPTY_SET;
+	}
+	
+	public Set getConditions() {
+		return Collections.EMPTY_SET;
+	}
+	
 	/* (non-Javadoc)
 	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getColumnValues(com.hp.hpl.jena.graph.Node)
 	 */
 	public Map getColumnValues(Node node) {
-		return new HashMap(0);
+		return Collections.EMPTY_MAP;
 	}
 
 	/* (non-Javadoc)
@@ -67,5 +74,9 @@ public class FixedNodeMaker implements NodeMaker {
 	public Node getNode(String[] row, Map columnNameNumberMap) {
 	    //	fixedNode can be instance of PlaceholderNode
 		return PlaceholderNode.unwrapNode(this.fixedNode);
+	}
+	
+	public boolean isUnique() {
+		return true;
 	}
 }

@@ -18,14 +18,15 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * NodeMakers
  * <ul>
  * <li>can return the database column(s) that the node set is based on
- *   ({@link #getColumns}),</li>
+ *   ({@link #getColumns}), along with any necessary join
+ *   condtions (@link #getJoins})</li>
  * <li>can check if a concrete node could be in the node set
  *   without querying the DB ({@link #couldFit}),</li>
  * <li>can check what database column
  *   values correspond to a concrete node ({@link #getColumnValues}),</li>
- * <li>and build a concrete node from a database result row
- *   ({@link #getNode}).</li>
- * <li>Since V0.3 a NodeMaker also adds constraint information to a 
+ * <li>build a concrete node from a database result row
+ *   ({@link #getNode}),</li>
+ * <li>add constraint information to a 
  * {@link NodeConstraint} ({@link #matchConstraint}).</li>
  * </ul>
  * <p>
@@ -69,7 +70,7 @@ public interface NodeMaker extends Cloneable {
 	 * Checks if a node could fit this NodeMaker without querying the
 	 * database.
 	 */
-	boolean couldFit(Node node);
+    boolean couldFit(Node node);
 
 	/**
 	 * Returns a map of database fields and values corresponding
@@ -82,15 +83,30 @@ public interface NodeMaker extends Cloneable {
 	 * @param node a concrete, non-<tt>null</tt> RDF node 
 	 * @return a map with {@link Column} keys, and string values.
 	 */
-	Map getColumnValues(Node node);
+    Map getColumnValues(Node node);
 
 	/**
 	 * Returns a set of all columns containing data necessary
 	 * for this NodeMaker to build its nodes.
-	 * @return a set of {Column}s
+	 * @return a set of {@link Column}s
 	 */
-	Set getColumns();
+    Set getColumns();
 
+	/**
+	 * Returns a set of all join conditions necessary for this
+	 * NodeMaker to build its nodes.
+	 * @return a set of {@link Join}s 
+	 */
+    Set getJoins();
+	
+    /**
+     * A set of additional SQL WHERE conditions that must be
+     * satisfied for a result row, or the node maker won't
+     * build a node out of it.
+     * @return a set of Strings
+     */
+    Set getConditions();
+    
 	/**
 	 * Creates a new Node from a database result row.
 	 * @param row a database result row
@@ -99,5 +115,12 @@ public interface NodeMaker extends Cloneable {
 	 * @return a node created from the row, or <tt>null</tt> if a <tt>NULL</tt> value
 	 *			was encountered in a required field.
 	 */
-	Node getNode(String[] row, Map columnNameNumberMap);
+    Node getNode(String[] row, Map columnNameNumberMap);
+
+	/**
+	 * Does this NodeMaker produce unique nodes, or may there be duplicates?
+	 * @return true iff the NodeMaker is guaranteed to produce unique nodes,
+	 * without duplicates
+	 */
+	boolean isUnique();
 }

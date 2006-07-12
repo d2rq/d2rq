@@ -21,23 +21,19 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-public class BlankNodeMaker implements NodeMaker, Prefixable {
-	private ValueSource valueSource;
+public class BlankNodeMaker extends NodeMakerBase {
 	private String id;
-	
-	public Object clone() throws CloneNotSupportedException {return super.clone();}
-	public void prefixTables(TablePrefixer prefixer) {
-		valueSource=prefixer.prefixValueSource(valueSource);
-	}
+	private ValueSource valueSource;
 	
 	public void matchConstraint(NodeConstraint c) {
         c.matchNodeType(NodeConstraint.BlankNodeType);
         c.matchValueSource(valueSource);
 	}       
 	
-	public BlankNodeMaker(String id, ValueSource valueSource) {
-		this.valueSource = valueSource;
+	public BlankNodeMaker(String id, ValueSource valueSource, Set joins, Set conditions, boolean isUnique) {
+		super(joins, conditions, isUnique);
 		this.id = id;
+		this.valueSource = valueSource;
 	}
 
 	public boolean couldFit(Node node) {
@@ -72,4 +68,9 @@ public class BlankNodeMaker implements NodeMaker, Prefixable {
 	public String toString() {
 		return "BlankNodeMaker@" + this.id;
 	}
+	
+	public void prefixTables(TablePrefixer prefixer) {
+		super.prefixTables(prefixer);
+		this.valueSource = prefixer.prefixValueSource(this.valueSource);
+	}	
 }

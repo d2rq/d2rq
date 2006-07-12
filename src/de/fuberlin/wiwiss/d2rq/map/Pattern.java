@@ -1,5 +1,5 @@
 /*
- * $Id: Pattern.java,v 1.3 2005/04/21 14:13:46 garbers Exp $
+ * $Id: Pattern.java,v 1.4 2006/07/12 11:08:09 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -26,6 +26,8 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * 
  * <p>History:<br>
  * 08-03-2004: Initial version of this class.<br>
+ * 
+ * TODO: Use String.split() instead of indexOf() hackery?
  * 
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2

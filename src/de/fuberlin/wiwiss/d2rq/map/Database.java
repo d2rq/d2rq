@@ -19,9 +19,24 @@ import de.fuberlin.wiwiss.d2rq.helpers.Logger;
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
+ * 
+ * TODO: Make a bunch of public methods private?
  */
 public class Database {
 
+	/**
+	 * Pre-registers a JDBC driver if its class can be found on the
+	 * classpath. If the class is not found, nothing will happen.
+	 * @param driverClassName Fully qualified class name of a JDBC driver
+	 */
+	public static void registerJDBCDriverIfPresent(String driverClassName) {
+		try {
+			Class.forName(driverClassName);
+		} catch (ClassNotFoundException ex) {
+			// not present, just ignore this driver
+		}
+	}
+	
     /** Flag that the database connection has been established */
     private boolean connectedToDatabase = false;
 
@@ -56,30 +71,6 @@ public class Database {
         this.databasePassword = databasePassword;
         this.columnTypes = columnTypes;
     }
-
-    /**
-     * Infers additional type information for columns used in a join
-     * by assuming that two joined columns have the same type.
-     * @param join try to infer column types based on this join
-     */
-	public void inferColumnTypes(Join join) {
-		Iterator it = join.getFirstColumns().iterator();
-		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			inferColumnTypes(column.getQualifiedName(),
-					join.getOtherSide(column).getQualifiedName());
-		}
-	}
-
-	private void inferColumnTypes(String col1, String col2) {
-		if (this.columnTypes.containsKey(col1)) {
-			if (!this.columnTypes.containsKey(col2)) {
-				this.columnTypes.put(col2, this.columnTypes.get(col1));
-			}
-		} else if (this.columnTypes.containsKey(col2)) {
-			this.columnTypes.put(col1, this.columnTypes.get(col2));
-		}
-	}
 
     /**
      * Returns a connection to this database.
@@ -197,28 +188,23 @@ public class Database {
     private void connectToDatabase() {
        try {
             // Connect to database
-            String url = "";
             if (this.odbc != null) {
-                url = "jdbc:odbc:" + this.odbc;
-                Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
-            } else if (this.jdbc != null) {
-                url = this.jdbc;
-                if (this.jdbcDriver != null) {
-                    Class.forName(this.jdbcDriver);
-                } else {
-                    Logger.instance().error("Could not connect to database because of missing JDBC driver.");
-                    return;
-                }
+                this.jdbc = "jdbc:odbc:" + this.odbc;
+                this.jdbcDriver = "sun.jdbc.odbc.JdbcOdbcDriver";
             }
-            if (url != "") {
-                if (this.getDatabaseUsername() != null && this.getDatabasePassword() != null) {
-                		this.con = DriverManager.getConnection(url, this.getDatabaseUsername(), this.getDatabasePassword());
-                } else {
-                		this.con = DriverManager.getConnection(url);
-                }
-            } else {
+            if (this.jdbc == null) {
                 Logger.instance().error("Could not connect to database because of missing URL.");
                 return;
+            }
+            if (this.jdbcDriver != null) {
+                Class.forName(this.jdbcDriver);
+            } else {
+                this.jdbcDriver = DriverManager.getDriver(this.jdbc).getClass().getName();
+            }
+            if (this.getDatabaseUsername() != null || this.getDatabasePassword() != null) {
+            		this.con = DriverManager.getConnection(this.jdbc, this.getDatabaseUsername(), this.getDatabasePassword());
+            } else {
+            		this.con = DriverManager.getConnection(this.jdbc);
             }
             this.connectedToDatabase = true;
         } catch (SQLException ex) {
@@ -254,12 +240,32 @@ public class Database {
         return this.expressionTranslator;
     }
 
+    /**
+     * Connects to the database and reports the brand of RDBMS.
+     * Will currently report one of these:
+     * 
+     * <ul>
+     * <li>MySQL</li>
+     * <li>Other</li>
+     * </ul>
+     * @return The brand of RDBMS
+     */
+	public String getType() {
+		connectToDatabase();
+		try {
+			if (this.con.getMetaData().getDriverName().toLowerCase().indexOf("mysql") >= 0) {
+				return "MySQL";
+			}
+			return "Other";
+		} catch (SQLException ex) {
+			throw new D2RQException("Database exception", ex);
+		}
+	}
+    
     public String toString() {
     	  return super.toString() + "(" + 
 		  (odbc!=null ? odbc : "") + 
 		  (jdbc!=null ? jdbc : "") +
 		   ")";
     }
-
-
 }

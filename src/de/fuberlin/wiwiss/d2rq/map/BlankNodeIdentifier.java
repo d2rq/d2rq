@@ -1,14 +1,14 @@
 /*
- * $Id: BlankNodeIdentifier.java,v 1.3 2006/05/19 19:13:02 cyganiak Exp $
+ * $Id: BlankNodeIdentifier.java,v 1.4 2006/07/12 11:08:09 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * class to keep the code simple and fast. This means BlankNodeIdentifier
  * might not work with some hypothetical subclasses of Column.)
  *
- * TODO: Write tests for matches, extractColumnValues, getValue
+ * TODO: Write tests for matches, extractColumnValues, getValue -- what happens with bad label? Zero-length ID cols?
  * 
  * <p>History:<br>
  * 08-03-2004: Initial version of this class.<br>
@@ -46,9 +46,9 @@ public class BlankNodeIdentifier implements ValueSource, Prefixable {
 	 */
 	public BlankNodeIdentifier(String columns, String classMapID) {
 		this.classMapID = classMapID;
-		StringTokenizer tokenizer = new StringTokenizer(columns, ",");
-		while (tokenizer.hasMoreTokens()) {
-			this.identifierColumns.add(new Column(tokenizer.nextToken()));
+		Iterator it = Arrays.asList(columns.split(",")).iterator();
+		while (it.hasNext()) {
+			this.identifierColumns.add(new Column((String) it.next()));
 		}
 	}
 
@@ -78,15 +78,14 @@ public class BlankNodeIdentifier implements ValueSource, Prefixable {
 	 * @see de.fuberlin.wiwiss.d2rq.map.ValueSource#getColumnValues(java.lang.String)
 	 */
 	public Map getColumnValues(String anonID) {
-		StringTokenizer tokenizer = new StringTokenizer(anonID, D2RQ.deliminator);
-		// Skip classMap name
-		tokenizer.nextToken();
+		String[] parts = anonID.split(D2RQ.deliminator);
 		Map result = new HashMap(3);
 		Iterator it = this.identifierColumns.iterator();
+		int i = 1;	// parts[0] is classMap identifier
 		while (it.hasNext()) {
 			Column column = (Column) it.next();
-			String value = tokenizer.nextToken();
-			result.put(column, value);
+			result.put(column, parts[i]);
+			i++;
 		}
 		return result;
 	}

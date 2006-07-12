@@ -1,6 +1,3 @@
-/*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-*/
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.HashSet;
@@ -21,13 +18,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  *
  * TODO: Rename to TripleMap?
  * 
- * <p>History:<br>
- * 06-03-2004: Initial version of this class.<br>
- * 08-03-2004: Many, many changes.<br>
- * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @version $Id: PropertyBridge.java,v 1.4 2006/07/12 11:08:09 cyganiak Exp $
  */
 public class PropertyBridge implements Prefixable {
 	private Node id;
@@ -36,21 +29,34 @@ public class PropertyBridge implements Prefixable {
 	private NodeMaker objectMaker; 
 	private Database database;
 	private Map aliases; // = new HashMap(1);
-	private Set joins; // = new HashSet(2);
-	// TODO: Move conditions into NodeMaker
+	private Set joins = new HashSet(2);
 	private Set conditions = new HashSet(1);
 	private URIMatchPolicy uriMatchPolicy = new URIMatchPolicy();
 	private boolean mightContainDuplicates = false;
 	private TablePrefixer tablePrefixer; // use this to store PropertyBridge instaciation info
 
-	public PropertyBridge(Node id, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker, Database database, Set joins, Map aliases) {
+	public PropertyBridge(Node id, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker, Database database, URIMatchPolicy policy, Map aliases) {
 		this.id = id;
 		this.subjectMaker = subjectMaker;
 		this.predicateMaker = predicateMaker;
 		this.objectMaker = objectMaker;
 		this.database = database;
-		this.joins = joins;
+		this.uriMatchPolicy = policy;
 		this.aliases = aliases;
+		this.joins.addAll(this.subjectMaker.getJoins());
+		this.joins.addAll(this.predicateMaker.getJoins());
+		this.joins.addAll(this.objectMaker.getJoins());
+		this.conditions.addAll(this.subjectMaker.getConditions());
+		this.conditions.addAll(this.predicateMaker.getConditions());
+		this.conditions.addAll(this.objectMaker.getConditions());
+		boolean oneOrMoreUnique = this.subjectMaker.isUnique()
+				|| this.predicateMaker.isUnique()
+				|| this.objectMaker.isUnique();
+		boolean allUnique = this.subjectMaker.isUnique()
+				&& this.predicateMaker.isUnique()
+				&& this.objectMaker.isUnique();
+		this.mightContainDuplicates = !((joins.isEmpty() && oneOrMoreUnique)
+				|| (joins.size() >= 1 && allUnique));
 	}
 	
 	public Object clone() throws CloneNotSupportedException {return super.clone();}
@@ -78,18 +84,6 @@ public class PropertyBridge implements Prefixable {
 		this.tablePrefixer = tablePrefixer;
 	}
 
-
-	/**
-	 * Adds SQL WHERE conditions that must evaluate to TRUE for a given
-	 * database row or the bridge will not generate a triple.
-	 * @param whereConditions a set of Strings
-	 */
-	public void addConditions(Set whereConditions) {
-		if (whereConditions != null) {
-			this.conditions.addAll(whereConditions);
-		}
-	}
-
 	/**
 	 * Returns the SQL WHERE conditions that must hold for a given
 	 * database row or the bridge will not generate a triple.
@@ -99,21 +93,14 @@ public class PropertyBridge implements Prefixable {
 		return this.conditions;
 	}
 
-	public void setURIMatchPolicy(URIMatchPolicy policy) {
-		this.uriMatchPolicy = policy;
-	}
-
 	public int getEvaluationPriority() {
 		return this.uriMatchPolicy.getEvaluationPriority();
-	}
-
-	public void setMightContainDuplicates(boolean mightContainDuplicates) {
-		this.mightContainDuplicates = mightContainDuplicates;
 	}
 
 	public boolean mightContainDuplicates() {
 		return this.mightContainDuplicates;
 	}
+	
 	/**
 	 * Checks if a given triple could match this bridge without
 	 * querying the database.

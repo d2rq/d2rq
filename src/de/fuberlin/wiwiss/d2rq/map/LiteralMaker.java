@@ -23,17 +23,12 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-public class LiteralMaker implements NodeMaker, Prefixable {
+public class LiteralMaker extends NodeMakerBase {
+	private String id;
 	private ValueSource valueSource;
 	private RDFDatatype datatype;
 	private String lang;
-	private String id;
 	
-	public Object clone() throws CloneNotSupportedException {return super.clone();}
-	public void prefixTables(TablePrefixer prefixer) {
-		valueSource=prefixer.prefixValueSource(valueSource);
-	}
-
     public void matchConstraint(NodeConstraint c) {
         c.matchNodeType(NodeConstraint.LiteralNodeType);
         c.matchLiteralMaker(this);  
@@ -48,11 +43,12 @@ public class LiteralMaker implements NodeMaker, Prefixable {
         return b1 && b2;
     }        	
     
-	public LiteralMaker(String id, ValueSource valueSource, RDFDatatype datatype, String lang) {
+	public LiteralMaker(String id, ValueSource valueSource, Set joins, Set conditions, boolean isUnique, RDFDatatype datatype, String lang) {
+		super(joins, conditions, isUnique);
+		this.id = id;
 		this.valueSource = valueSource;
 		this.datatype = datatype;
 		this.lang = lang;
-		this.id = id;
 	}
 
 	/* (non-Javadoc)
@@ -120,5 +116,10 @@ public class LiteralMaker implements NodeMaker, Prefixable {
 	
 	public String toString() {
 		return "LiteralMaker@" + this.id;
+	}
+
+	public void prefixTables(TablePrefixer prefixer) {
+		super.prefixTables(prefixer);
+		this.valueSource = prefixer.prefixValueSource(this.valueSource);
 	}
 }
