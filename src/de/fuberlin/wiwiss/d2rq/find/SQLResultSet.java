@@ -3,14 +3,15 @@
 */
 package de.fuberlin.wiwiss.d2rq.find;
 
-import com.hp.hpl.jena.graph.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Map;
 
 import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-
-import java.sql.*;
-import java.util.*;
 
 /**
  * Contains the result set from one SQL query and transforms it into triples.
@@ -68,7 +69,7 @@ public class SQLResultSet {
 			this.resultSet = stmt.executeQuery(this.sql);
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {
-            logger.error(ex.getMessage());
+            logger.error(ex.getMessage() + ": " + this.sql);
         }
     }
 
