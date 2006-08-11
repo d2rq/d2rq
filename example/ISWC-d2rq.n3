@@ -46,35 +46,17 @@ db1:Database1 rdf:type d2rq:Database;
 	#       But test code uses doc/manual/ISWC-d2rq.n3 !
 
 	# MySQL database connection
-        #d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-        #d2rq:jdbcDSN "jdbc:mysql:///iswc?user=root";
+        d2rq:jdbcDriver "com.mysql.jdbc.Driver";
+        d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/iswc?user=root";
         # or setup MySQL DB with ODBC as myiswc and:
         #d2rq:odbcDSN "myiswc";
-		#d2rq:allowDistinct "true";
-		#d2rq:expressionTranslator "de.fuberlin.wiwiss.d2rq.rdql.MySQLExpressionTranslator";
+		d2rq:allowDistinct "true";
+		d2rq:expressionTranslator "de.fuberlin.wiwiss.d2rq.rdql.MySQLExpressionTranslator";
 
 	# ODBC database connection (e.g. MSAccess)
-		d2rq:odbcDSN "IswcDB";
-		d2rq:expressionTranslator "null";
-		d2rq:allowDistinct "false";
-
-        d2rq:numericColumn "Conferences.ConfID";
-        d2rq:textColumn "Conferences.URI";
-        d2rq:textColumn "Conferences.Name";
-        d2rq:textColumn "Conferences.Location";
-        d2rq:dateColumn "Conferences.Date";
-        d2rq:numericColumn "Topics.TopicID";
-        d2rq:textColumn "Topics.TopicName";
-        d2rq:textColumn "Papers.URI";
-        d2rq:numericColumn "Papers.PaperID";
-        d2rq:textColumn "Papers.Title";
-        d2rq:textColumn "Papers.Abstract";
-        d2rq:numericColumn "Papers.Year";
-        d2rq:numericColumn "Papers.Conference";
-        d2rq:textColumn "Persons.URI";
-        d2rq:textColumn "Persons.FirstName";
-        d2rq:textColumn "Persons.LastName";
-        d2rq:textColumn "Persons.Email"
+		#d2rq:odbcDSN "IswcDB";
+		#d2rq:expressionTranslator "null";
+		#d2rq:allowDistinct "false";
         .
 
 # -----------------------------------------------
@@ -118,11 +100,16 @@ db1:location rdf:type d2rq:DatatypePropertyBridge ;
             d2rq:lang "en"; 
             d2rq:datatype xsd:string
             .            
-db1:date    rdf:type d2rq:DatatypePropertyBridge ;
+db1:date2   rdf:type d2rq:DatatypePropertyBridge ;
             d2rq:property :date ;
             d2rq:column "Conferences.Date" ; 
             d2rq:belongsToClassMap db1:Conference ;
-            d2rq:datatype xsd:date
+            .            
+db1:date    rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:property :date ;
+            d2rq:column "Conferences.Datum" ; 
+            d2rq:belongsToClassMap db1:Conference ;
+            d2rq:datatype xsd:dateTime ;
             .            
 
 # -----------------------------------------------
