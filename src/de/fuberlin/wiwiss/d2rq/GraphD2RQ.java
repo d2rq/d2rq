@@ -163,7 +163,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		if (queryHandler!=null) {
 		    try {
 		        Class c=Class.forName(queryHandler);
-		        Class thisClass=this.getClass();
 		        Constructor con=c.getConstructor(new Class[]{Graph.class}); 
 		        QueryHandler qh=(QueryHandler)con.newInstance(new Object[]{this});
 		        return qh;

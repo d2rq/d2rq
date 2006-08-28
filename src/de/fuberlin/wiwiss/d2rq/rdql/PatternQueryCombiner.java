@@ -6,31 +6,14 @@ package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
 
-import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.graph.query.ExpressionSet;
-import com.hp.hpl.jena.graph.query.Mapping;
-import com.hp.hpl.jena.graph.query.PatternStage;
-import com.hp.hpl.jena.graph.query.Pattern;
-import com.hp.hpl.jena.graph.query.Pipe;
-import com.hp.hpl.jena.graph.query.ValuatorSet;
-import com.hp.hpl.jena.util.iterator.ClosableIterator;
-import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.find.CombinedTripleResultSet;
 import de.fuberlin.wiwiss.d2rq.find.QueryCombiner;
 import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
-import de.fuberlin.wiwiss.d2rq.helpers.ConjunctionIterator;
-import de.fuberlin.wiwiss.d2rq.helpers.IndexArray;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
@@ -53,17 +36,19 @@ import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
  */
 class PatternQueryCombiner {
     /** if false then contradiction, no SQL query necessary. */
-	private boolean possible=true; 
-	protected Database database;
+	protected boolean possible=true; 
+	protected boolean careForPossible=true;
+	// protected Database database;
 	protected GraphD2RQ graph;
 	protected Triple [] triples; // nodes are ANY or fixed
 	protected int tripleCount;
-	protected Collection constraints; // RDQL-Constraints
+	protected Collection[] constraints; // RDQL-Constraints
 
-	VariableBindings bindings; // includes variables and sharedVariables
+	/** holds for each triple a list of bridge candidates */
+	protected List[] candidateBridges; // may be longer than triples[] (for speed somewhere else)
 	
 	/** holds for each triple its 'a priory' appliable bridges */
-	protected ArrayList[] bridges; 
+	protected List[] bridges; 
 	
 	/** holds for each triple its number of bridges or tripleQueries */
 	protected int[] bridgesCounts; 
@@ -71,23 +56,29 @@ class PatternQueryCombiner {
 	/** holds for each triple its disjunctive SQL-TripleQuery Objects */
 	protected TripleQuery[][] tripleQueries; 
 	
-public PatternQueryCombiner( GraphD2RQ graph, VariableBindings bindings, Collection constraints, Triple [] triples ) {
-	this.graph=graph;
-	this.bindings=bindings;
+public PatternQueryCombiner( GraphD2RQ graph, List[] candidateBridges, Triple [] triples) {
+    // alternative modelling
+    this.graph=graph;
+	this.candidateBridges=candidateBridges;
 	tripleCount=triples.length;
+	if (candidateBridges!=null)
+		tripleCount=Math.min(tripleCount,candidateBridges.length);
 	this.triples=triples; 
-	this.constraints=constraints;
 }	
 
+private boolean cont() {
+	return possible || !careForPossible;
+}
+
 void setup() {
-	if (!possible)
+	if (!cont())
 		return;
 	makeStores();
 	makePropertyBridges(); // -> setsOfPossiblePropertyBridges
 	// reducePropertyBridges();
 	makeTripleQueries();
 	// TODO handle bridges from multiple databases correctly
-	database=((PropertyBridge)bridges[0].get(0)).getDatabase();
+	// database=((PropertyBridge)bridges[0].get(0)).getDatabase();
 	// makeCompatibleConjunctions(); // can be returned by an iterator
 	// conjunctionResultIterator(); // pulls answers from database
 								 //	for each result
@@ -100,7 +91,7 @@ void setup() {
 
 /** allocates arrays */
 void makeStores() {
-	if (!possible)
+	if (!cont())
 		return;
 	bridges=new ArrayList[tripleCount];
 	bridgesCounts=new int[tripleCount];
@@ -115,22 +106,14 @@ void makeStores() {
  *  triple in the overall query.
  */
 void makePropertyBridges() {
-	if (!possible)
+	if (!cont())
 		return;
-	for (int i=0; possible && (i<tripleCount); i++) {
-		Triple t=triples[i];
-		ArrayList tBridges=graph.propertyBridgesForTriple(t);
-		bridges[i]=tBridges;
-		int bridgesCount=tBridges.size();
-		if (bridgesCount==0) {
-			possible=false;
-			return;
-		}
-		for (int j=0; j<bridgesCount; j++) {
-			PropertyBridge bridge = (PropertyBridge) tBridges.get(j);
-			tBridges.set(j, bridge.withPrefix(i));
-		}
-	}
+	if (candidateBridges==null)
+		bridges=GraphUtils.makePrefixedPropertyBridges(graph,triples);
+	else
+		bridges=GraphUtils.refinePropertyBridges(candidateBridges,triples);
+	if (bridges==null)
+		possible=false;
 }
 
 /** 
@@ -138,7 +121,7 @@ void makePropertyBridges() {
  * As a side effect we also set <code>bridgesCounts</code>.
  */
 void makeTripleQueries() {
-	if (!possible)
+	if (!cont())
 		return;
 	for (int i=0; i<tripleCount; i++) {
 		Triple t=triples[i];
@@ -149,11 +132,17 @@ void makeTripleQueries() {
 			tripleQueries[i][j]=new TripleQuery((PropertyBridge)bridges[i].get(j), t.getSubject(), t.getPredicate(), t.getObject());
 		}
 	}
-	
+}
+
+int possibleLength() {
+	for (int i=0; i<bridgesCounts.length; i++)
+		if (bridgesCounts[i]<1)
+			return i+1;
+	return bridgesCounts.length;
 }
 
 void reducePropertyBridges() {
-	if (!possible)
+	if (!cont())
 		return;
 	// TODO: 1. compute for each triple the weakest condition wrt. all its propertyBridges
 	// TODO: 2. check if the conjunction of all weakest conditions is fulfillable (possible)
@@ -192,8 +181,11 @@ void reducePropertyBridges() {
 //	//		replace all instances of Tr2_Papers with Tr1_Papers
 //}
 
-
-private SQLStatementMaker getSQL(TripleQuery[] conjunction) {
+/**
+ * produces an SQL statement for a conjunction of triples that refer to
+ * the same database.
+ */
+protected static SQLStatementMaker getSQL(TripleQuery[] conjunction) {
 	boolean possible=true;
 	Database db=conjunction[0].getDatabase();
 	SQLStatementMaker sql=new SQLStatementMaker(db);
@@ -213,116 +205,8 @@ private SQLStatementMaker getSQL(TripleQuery[] conjunction) {
 	return sql;
 }
 
-public ClosableIterator resultTriplesIterator() {
-	PQCResultIterator result = new PQCResultIterator();
-	// TODO ?
-	return result;
+public void setCareForPossible(boolean careForPossible) {
+	this.careForPossible = careForPossible;
 }
-
-/** 
- * Iterator for PatternQueryCombiner results.
- * @author jgarbers
- *
- */
-private class PQCResultIterator extends NiceIterator implements ClosableIterator {
-
-    /** Iterator for TripleQuery conjunctions */
-    protected ConjunctionIterator conjunctionsIterator;
-    /** next TripleQuery conjunction to be processed */
-	protected TripleQuery[] conjunction; 
-	/** iterator helper */
-	protected Triple[] prefetchedResult=null;
-	/** iterator helper */
-	protected boolean didPrefetch=false;
-	/** iterator that returns triple arrays for database rows */
-	CombinedTripleResultSet resultSet=null; 
-											
-
-	public PQCResultIterator() { // or maybe pass conjunctionsIterator as
-								 // argument
-		if (!possible)
-			return;
-		conjunction=new TripleQuery[tripleCount];
-		conjunctionsIterator= new ConjunctionIterator((Object[][]) tripleQueries, conjunction);
-	}
 	
-	public boolean hasNext() {
-		if (!possible)
-			return false;
-		if (!didPrefetch) {
-			prefetch();
-			didPrefetch=true;
-		}
-		return (prefetchedResult!=null);
-	}
-	
-	public Object next() {
-		if (!didPrefetch) {
-			prefetch();
-		}
-		if (prefetchedResult==null)
-			throw new NoSuchElementException();
-		Object ret=prefetchedResult;
-		prefetchedResult=null;
-		didPrefetch=false;
-		return ret;
-	}
-	
-	/**
-	 * Tries to prefetch a <code>prefetchedResult</code>.
-	 * There are two resources to draw from:
-	 * 1. another row from the current SQL query (resultSet)
-	 * 2. a new SQL query can be started
-	 * Only those TripleQuery conjunctions are considered that may have
-	 * solutions in terms of NodeConstraints on shared variables.
-	 */
-	protected void prefetch() {
-		prefetchedResult=null;
-		while (true) {
-			if ((resultSet!=null) && (resultSet.hasNext())) {
-				prefetchedResult = resultSet.next();
-				return;
-			}
-			if (!conjunctionsIterator.hasNext())
-				return;
-			conjunctionsIterator.next();
-			// TODO partition conjunction and conditions into parts
-			// that can be handled by separate databases.
-			// keep intermediate results and perform cross-products
-			// in java.
-			ConstraintHandler ch=new ConstraintHandler();
-			ch.setVariableBindings(bindings);
-			ch.setTripleQueryConjunction(conjunction);
-			ch.setRDQLConstraints(constraints);
-			ch.makeConstraints();
-			if (!ch.possible)
-			    continue;
-			SQLStatementMaker sql=getSQL(conjunction);
-			ch.addConstraintsToSQL(sql);
-			resultSet = new 
-				CombinedTripleResultSet(sql.getSQLStatement(),
-											sql.getColumnNameNumberMap(),
-											database);
-			resultSet.setTripleMakers(conjunction);
-		} // enless while loop
-	}
-
-	/* 
-	 * Closes query to database.
-	 * @see com.hp.hpl.jena.util.iterator.ClosableIterator#close()
-	 */
-	public void close() {
-		if (resultSet!=null)
-		    resultSet.close();
-	}
-
-	/* 
-	 * Not supported.
-	 * @see java.util.Iterator#remove()
-	 */
-	public void remove() {
-		throw new UnsupportedOperationException();
-	}
-} // class PQCResultIterator
-
 }

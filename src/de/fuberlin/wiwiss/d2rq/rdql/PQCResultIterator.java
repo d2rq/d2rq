@@ -1,5 +1,8 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import com.hp.hpl.jena.graph.Triple;
@@ -10,37 +13,46 @@ import de.fuberlin.wiwiss.d2rq.find.CombinedTripleResultSet;
 import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.ConjunctionIterator;
+import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /** 
  * Iterator for PatternQueryCombiner results.
  * @author jgarbers
  *
  */
-class PQCResultIterator extends NiceIterator implements ClosableIterator {
+public class PQCResultIterator extends NiceIterator implements ClosableIterator {
 
-    /**
-	 * 
-	 */
-	private final PatternQueryCombiner combiner;
+    public static Logger logger;
+    public static int instanceCounter=1;
+    public int instanceNr=instanceCounter++;
+    public int returnedTriplePatternNr=0;
+    
+    private String additionalLogInfo;
+
+	private final VariableBindings variableBindings;
+	private final Collection constraints;
+	
 	/** Iterator for TripleQuery conjunctions */
     protected ConjunctionIterator conjunctionsIterator;
     /** next TripleQuery conjunction to be processed */
-	protected TripleQuery[] conjunction; 
+	private TripleQuery[] conjunction; 
 	/** iterator helper */
 	protected Triple[] prefetchedResult=null;
 	/** iterator helper */
 	protected boolean didPrefetch=false;
 	/** iterator that returns triple arrays for database rows */
 	CombinedTripleResultSet resultSet=null; 
+	
+	Database nextDatabase;
 											
 
-	public PQCResultIterator(PatternQueryCombiner combiner) { // or maybe pass conjunctionsIterator as
-		this.combiner = combiner;
-		// argument
-		// if (!possible)
-		//	return;
-		conjunction=new TripleQuery[combiner.tripleCount];
-		conjunctionsIterator= new ConjunctionIterator((Object[][]) combiner.tripleQueries, conjunction);
+	public PQCResultIterator(TripleQuery[][] tripleQueries, VariableBindings variableBindings, Collection constraints) { // or maybe pass conjunctionsIterator as
+		//combiner = combiner4;
+		this.variableBindings=variableBindings;
+		this.constraints=constraints;
+		conjunction=new TripleQuery[tripleQueries.length];
+		conjunctionsIterator= new ConjunctionIterator(tripleQueries, conjunction);
 	}
 	
 	public boolean hasNext() {
@@ -52,6 +64,23 @@ class PQCResultIterator extends NiceIterator implements ClosableIterator {
 		}
 		return (prefetchedResult!=null);
 	}
+
+	public boolean isDebugEnabled() {
+	    return logger!=null && logger.debugEnabled();
+	}
+	
+	private void logPattern(String msg, Triple[] ret) {
+        if (logger!=null && logger.debugEnabled()) {
+            String str=Arrays.asList(ret).toString();
+            // if (lastPrintedInstanceNr!=instanceNr) {
+            //     logger.debug("-- Iterator switch --");
+            //     lastPrintedInstanceNr=instanceNr;
+            // }
+            logger.debug("PQCResultIterator4-" + instanceNr + " " + msg +
+                    " length-" + ret.length + 
+                    " DB-" + nextDatabase + (additionalLogInfo!=null?additionalLogInfo:"") + ":\n" + str + "\n");
+        }
+	}
 	
 	public Object next() {
 		if (!didPrefetch) {
@@ -59,10 +88,12 @@ class PQCResultIterator extends NiceIterator implements ClosableIterator {
 		}
 		if (prefetchedResult==null)
 			throw new NoSuchElementException();
-		Object ret=prefetchedResult;
+		Triple[] ret=prefetchedResult;
 		prefetchedResult=null;
 		didPrefetch=false;
-		return ret;
+        returnedTriplePatternNr++;
+        logPattern("resultPattern-" + returnedTriplePatternNr ,ret);
+		return new CombinedPatternStage.IteratorResult(ret,nextDatabase);
 	}
 	
 	/**
@@ -88,18 +119,19 @@ class PQCResultIterator extends NiceIterator implements ClosableIterator {
 			// keep intermediate results and perform cross-products
 			// in java.
 			ConstraintHandler ch=new ConstraintHandler();
-			ch.setVariableBindings(combiner.bindings);
+			ch.setVariableBindings(variableBindings);
 			ch.setTripleQueryConjunction(conjunction);
-			ch.setRDQLConstraints(combiner.constraints);
+			ch.setRDQLConstraints(constraints);
 			ch.makeConstraints();
 			if (!ch.possible)
 			    continue;
-			SQLStatementMaker sql=PatternQueryCombiner4.getSQL(conjunction);
+			SQLStatementMaker sql=PatternQueryCombiner.getSQL(conjunction);
 			ch.addConstraintsToSQL(sql);
+			String statement=sql.getSQLStatement();
+			Map map=sql.getColumnNameNumberMap();
+			nextDatabase=sql.getDatabase();
 			resultSet = new 
-				CombinedTripleResultSet(sql.getSQLStatement(),
-											sql.getColumnNameNumberMap(),
-											sql.getDatabase());
+				CombinedTripleResultSet(statement,map,nextDatabase);
 			resultSet.setTripleMakers(conjunction);
 		} // enless while loop
 	}
@@ -120,4 +152,17 @@ class PQCResultIterator extends NiceIterator implements ClosableIterator {
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
+
+    /**
+     * @return Returns the additionalLogInfo.
+     */
+    public String getAdditionalLogInfo() {
+        return additionalLogInfo;
+    }
+    /**
+     * @param additionalLogInfo The additionalLogInfo to set.
+     */
+    public void setAdditionalLogInfo(String additionalLogInfo) {
+        this.additionalLogInfo = additionalLogInfo;
+    }
 }

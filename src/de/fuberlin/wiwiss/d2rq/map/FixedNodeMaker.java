@@ -1,5 +1,5 @@
 /*
- * $Id: FixedNodeMaker.java,v 1.4 2006/08/28 19:44:21 cyganiak Exp $
+ * $Id: FixedNodeMaker.java,v 1.5 2006/08/28 20:23:43 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.PlaceholderNode;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
@@ -76,8 +75,7 @@ public class FixedNodeMaker implements NodeMaker {
 	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getNode(java.lang.String[], java.util.Map)
 	 */
 	public Node getNode(String[] row, Map columnNameNumberMap) {
-	    //	fixedNode can be instance of PlaceholderNode
-		return PlaceholderNode.unwrapNode(this.fixedNode);
+		return this.fixedNode;
 	}
 	
 	public boolean isUnique() {
