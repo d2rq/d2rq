@@ -64,32 +64,36 @@ public class TripleResultSet extends SQLResultSet {
      * @return The next triple, or null if no more triples.
      */
 	public Triple next() {
-		if (!hasTripleMakers()) {
-			return null;
-		}
-		if (this.chachedTriple != null) {
-			Triple t = this.chachedTriple;
-			this.chachedTriple = null;
-			return t;
-		}
-		if (!this.queryHasBeenExecuted) {
-			executeSQLQuery();
-			this.queryHasBeenExecuted = true;
-		}
-		if (this.rsForward && !this.tripleMakerIterator.hasNext()) {
-			this.rsForward = false;
-		}
-		if (!this.rsForward) {
-			this.currentRow = nextRow();
-			if (this.currentRow == null) {
+		do {
+			if (!hasTripleMakers()) {
 				return null;
 			}
-			this.tripleMakerIterator = this.tripleMakers.iterator();
-			this.rsForward = true;
-		}
-		TripleQuery tripMaker = (TripleQuery) this.tripleMakerIterator.next();
-		Triple triple = tripMaker.makeTriple(this.currentRow, this.columnNameNumberMap);
-		return (triple != null) ? triple : next();
+			if (this.chachedTriple != null) {
+				Triple t = this.chachedTriple;
+				this.chachedTriple = null;
+				return t;
+			}
+			if (!this.queryHasBeenExecuted) {
+				executeSQLQuery();
+				this.queryHasBeenExecuted = true;
+			}
+			if (this.rsForward && !this.tripleMakerIterator.hasNext()) {
+				this.rsForward = false;
+			}
+			if (!this.rsForward) {
+				this.currentRow = nextRow();
+				if (this.currentRow == null) {
+					return null;
+				}
+				this.tripleMakerIterator = this.tripleMakers.iterator();
+				this.rsForward = true;
+			}
+			TripleQuery tripMaker = (TripleQuery) this.tripleMakerIterator.next();
+			Triple triple = tripMaker.makeTriple(this.currentRow, this.columnNameNumberMap);
+			if (triple != null) {
+				return triple;
+			}
+		} while (true);
     }
 
 }
