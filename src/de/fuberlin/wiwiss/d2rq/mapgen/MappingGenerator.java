@@ -156,6 +156,10 @@ public class MappingGenerator {
 		this.out.println("# Table " + tableName);
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage :database;");
+		if (!hasPrimaryKey(tableName)) {
+			this.out.println("\t# Sorry, I don't know which columns to put into the uriPattern");
+			this.out.println("\t# because the table doesn't have a primary key");
+		}
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
 		this.out.println("\td2rq:class vocab:" + tableName + ";");
 		this.out.println("\t.");
@@ -251,6 +255,10 @@ public class MappingGenerator {
 
 	private String classMapName(String tableName) {
 		return ":classMap_" + tableName;
+	}
+	
+	private boolean hasPrimaryKey(String tableName) {
+		return !this.schema.primaryKeyColumns(tableName).isEmpty();
 	}
 	
 	private String uriPattern(String tableName) {
