@@ -10,11 +10,11 @@ import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.find.CombinedTripleResultSet;
-import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.ConjunctionIterator;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
  * Iterator for PatternQueryCombiner results.
@@ -125,11 +125,11 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 			ch.makeConstraints();
 			if (!ch.possible)
 			    continue;
-			SQLStatementMaker sql=PatternQueryCombiner.getSQL(conjunction);
+			SelectStatementBuilder sql=PatternQueryCombiner.getSQL(conjunction);
 			ch.addConstraintsToSQL(sql);
 			String statement=sql.getSQLStatement();
 			Map map=sql.getColumnNameNumberMap();
-			nextDatabase=sql.getDatabase();
+			nextDatabase = conjunction[0].getDatabase();
 			resultSet = new 
 				CombinedTripleResultSet(statement,map,nextDatabase);
 			resultSet.setTripleMakers(conjunction);

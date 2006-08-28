@@ -1,5 +1,5 @@
 /*
- * $Id: QueryCombiner.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
+ * $Id: QueryCombiner.java,v 1.3 2006/08/28 21:13:47 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.find;
 
@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 
 /**
@@ -50,7 +52,7 @@ public class QueryCombiner {
 	}
 
 	private TripleResultSet getTripleResultSet(List queries) {
-		SQLStatementMaker sql = getSQL(queries);
+		SelectStatementBuilder sql = getSQL(queries);
 		Iterator it = queries.iterator();
 		TripleQuery first = (TripleQuery) it.next();
 		TripleResultSet result = new TripleResultSet(sql.getSQLStatement(),
@@ -64,10 +66,10 @@ public class QueryCombiner {
 		return result;
 	}
 
-	private SQLStatementMaker getSQL(List queries) {
+	private SelectStatementBuilder getSQL(List queries) {
 		Iterator it = queries.iterator();
 		TripleQuery first = (TripleQuery) it.next();
-		SQLStatementMaker result = new SQLStatementMaker(first.getDatabase());
+		SelectStatementBuilder result = new SelectStatementBuilder(first.getDatabase());
 		result.addJoins(first.getJoins());
 		result.addColumnValues(first.getColumnValues());
 		result.addConditions(first.getConditions());

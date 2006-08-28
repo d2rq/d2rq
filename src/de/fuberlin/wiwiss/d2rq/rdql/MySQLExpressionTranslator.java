@@ -4,8 +4,7 @@
  */
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
-import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator.Result;
+import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
  * @author jgarbers
@@ -14,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator.Result;
 public class MySQLExpressionTranslator extends ExpressionTranslator {
 
     public MySQLExpressionTranslator(ConstraintHandler handler,
-            SQLStatementMaker sql) {
+            SelectStatementBuilder sql) {
         super(handler, sql);
         // TODO Auto-generated constructor stub
         putOp(concatenateOp,"CONCAT",StringType).functional=true; // mySQL

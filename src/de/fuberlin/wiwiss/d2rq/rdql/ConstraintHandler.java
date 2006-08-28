@@ -15,11 +15,11 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Expression;
 
-import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
  * Handles variable node constraints for a TripleQuery conjunction.
@@ -79,7 +79,7 @@ class ConstraintHandler {
      * @param sql contains both the places where to store expressions 
      * and the methods, how to format them.
      */
-    public void addConstraintsToSQL(SQLStatementMaker sql) {
+    public void addConstraintsToSQL(SelectStatementBuilder sql) {
         Iterator it=variableToConstraint.values().iterator();
         while (it.hasNext()) {
             NodeConstraint c=(NodeConstraint)it.next();
@@ -99,7 +99,7 @@ class ConstraintHandler {
      * ExpressionTranslator. This is likely to change in the future.
      * @param sql contains information about the SQL dialect of the database and aliases.
      */
-    void addRDQLConstraints(SQLStatementMaker sql) {
+    void addRDQLConstraints(SelectStatementBuilder sql) {
         if (rdqlTranslator==null) {
             Database db=sql.getDatabase();
     		String tranlatorClassName=db.getExpressionTranslator();

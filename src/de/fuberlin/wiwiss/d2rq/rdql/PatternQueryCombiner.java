@@ -12,10 +12,10 @@ import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.find.QueryCombiner;
-import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 
 /** 
@@ -185,10 +185,10 @@ void reducePropertyBridges() {
  * produces an SQL statement for a conjunction of triples that refer to
  * the same database.
  */
-protected static SQLStatementMaker getSQL(TripleQuery[] conjunction) {
+protected static SelectStatementBuilder getSQL(TripleQuery[] conjunction) {
 	boolean possible=true;
 	Database db=conjunction[0].getDatabase();
-	SQLStatementMaker sql=new SQLStatementMaker(db);
+	SelectStatementBuilder sql=new SelectStatementBuilder(db);
 	sql.setEliminateDuplicates(db.correctlyHandlesDistinct());	
 	
 	for (int i=0; (i<conjunction.length) && possible; i++) {

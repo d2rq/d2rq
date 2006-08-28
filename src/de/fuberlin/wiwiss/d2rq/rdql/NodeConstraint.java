@@ -8,18 +8,18 @@ import java.util.List;
 
 import com.hp.hpl.jena.graph.Node;
 
-import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.LiteralMaker;
 import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.map.ValueSource;
+import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
  * TODO: Describe this type
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeConstraint.java,v 1.5 2006/08/28 19:44:22 cyganiak Exp $
+ * @version $Id: NodeConstraint.java,v 1.6 2006/08/28 21:13:47 cyganiak Exp $
  */
 public interface NodeConstraint {
 
@@ -67,5 +67,5 @@ public interface NodeConstraint {
     
     public void addEqualColumn(Column c1, Column c2);
     
-    public void addConstraintsToSQL(SQLStatementMaker sql);
+    public void addConstraintsToSQL(SelectStatementBuilder sql);
 }

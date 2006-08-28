@@ -1,7 +1,7 @@
 /*
   (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
 */
-package de.fuberlin.wiwiss.d2rq.find;
+package de.fuberlin.wiwiss.d2rq.sql;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,16 +23,12 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  * Collects parts of a SELECT query and delivers a corresponding SQL statement.
  * Used within TripleResultSets.
  *
- * <p>History:<br>
- * 06-07-2004: Initial version of this class.<br>
- * 08-03-2004: Higher-level operations added (addColumnValues etc.)
- * 
  * @author Chris Bizer chris@bizer.de
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: SelectStatementBuilder.java,v 1.1 2006/08/28 21:13:47 cyganiak Exp $
  */
 
-public class SQLStatementMaker {
+public class SelectStatementBuilder {
 	private final static Pattern escapePattern = Pattern.compile("([\\\\'])");
 	private final static String escapeReplacement = "\\\\$1";
 	private Database database;
@@ -47,7 +43,7 @@ public class SQLStatementMaker {
 	protected AliasMap aliases = AliasMap.NO_ALIASES;
 	protected Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
 
-	public SQLStatementMaker(Database database) {
+	public SelectStatementBuilder(Database database) {
 		this.database = database;
 	}
 	
@@ -71,8 +67,10 @@ public class SQLStatementMaker {
 				result.append(", ");
 			}
 		}
-		result.append(" FROM ");
 		it = mentionedTables.iterator();
+		if (it.hasNext()) {
+			result.append(" FROM ");
+		}
 		while (it.hasNext()) {			
 			String tableName = (String) it.next();
 			if (this.aliases.isAlias(tableName)) {
@@ -206,6 +204,7 @@ public class SQLStatementMaker {
 
 	/**
 	 * Make columns accessible through their old, pre-renaming names.
+	 * TODO: Use AliasMap instead of HashMap
 	 * @param renamedColumns
 	 */
 	public void addColumnRenames(Map renamedColumns) { 
@@ -246,7 +245,7 @@ public class SQLStatementMaker {
 		} else if (Database.dateColumnType==columnType) {
 			return "#" + value + "#";
 		}
-		return "'" + SQLStatementMaker.escape(value) + "'";
+		return "'" + SelectStatementBuilder.escape(value) + "'";
 	}
 	
 	/**
@@ -254,7 +253,7 @@ public class SQLStatementMaker {
 	 * SQL injection
 	 */
 	public static String escape(String s) {
-		return SQLStatementMaker.escapePattern.matcher(s).
-				replaceAll(SQLStatementMaker.escapeReplacement);
+		return SelectStatementBuilder.escapePattern.matcher(s).
+				replaceAll(SelectStatementBuilder.escapeReplacement);
 	}
 }

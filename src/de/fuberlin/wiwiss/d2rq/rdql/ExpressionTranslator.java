@@ -23,12 +23,12 @@ import com.hp.hpl.jena.rdql.parser.Q_UnaryNot;
 import com.hp.hpl.jena.rdql.parser.Q_Var;
 import com.hp.hpl.jena.rdql.parser.WorkingVar;
 
-import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.Pattern;
+import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
  * Translates an RDQL expression into a SQL expression.
@@ -53,7 +53,7 @@ import de.fuberlin.wiwiss.d2rq.map.Pattern;
 public class ExpressionTranslator {
 	
     ConstraintHandler handler;
-    SQLStatementMaker statementMaker; // provides database and escaper
+    SelectStatementBuilder statementMaker; // provides database and escaper
     VariableBindings variableBindings;
     Map variableNameToNodeConstraint=new HashMap();
     
@@ -79,7 +79,7 @@ public class ExpressionTranslator {
 
     public static final Logger logger=new Logger();
     
-    public ExpressionTranslator(ConstraintHandler handler, SQLStatementMaker sql) {
+    public ExpressionTranslator(ConstraintHandler handler, SelectStatementBuilder sql) {
         super();
         this.handler=handler;
         this.statementMaker=sql;
@@ -242,7 +242,7 @@ public class ExpressionTranslator {
     }
     public Result translateString(String s, int resultType) {
         StringBuffer b=new StringBuffer("\'");
-        b.append(SQLStatementMaker.escape(s));
+        b.append(SelectStatementBuilder.escape(s));
         b.append("\'");
         return newResult(b,resultType);
     }
@@ -398,13 +398,13 @@ public class ExpressionTranslator {
                         "http://www.w3.org/2001/XMLSchema#double".equals(dType)) {
                     return newResult(str,NumberType);
                 } else if ("http://www.w3.org/2001/XMLSchema#string".equals(dType)) {
-                    return newResult(SQLStatementMaker.escape(str),StringType);
+                    return newResult(SelectStatementBuilder.escape(str),StringType);
                 }
                 return null;
             } else if (lang!=null && !"".equals(lang)) {
                 return null;
             }
-            return newResult(SQLStatementMaker.escape(str),StringType);
+            return newResult(SelectStatementBuilder.escape(str),StringType);
         } else if (n.isURI()) {
             String str=n.getURI();
             return newResult(str,UriType);

@@ -12,13 +12,13 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 
-import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.LiteralMaker;
 import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.map.ValueSource;
+import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
  * Holds constraint information for a variable node.
@@ -231,7 +231,7 @@ public class NodeConstraintImpl implements NodeConstraint {
      * It knows about Alias and correct quoting of values for integer/string
      * database columns.
      */
-    public void addConstraintsToSQL(SQLStatementMaker sql) {
+    public void addConstraintsToSQL(SelectStatementBuilder sql) {
         String value=null;
         String firstCol=null;
         if (fixedNode!=null)
