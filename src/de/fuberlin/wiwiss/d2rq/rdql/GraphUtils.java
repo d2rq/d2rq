@@ -165,10 +165,8 @@ public class GraphUtils {
 			}
 		    nonEmptyLists++;
 			for (int j=0; j<bridgesCount; j++) {
-				TablePrefixer prefixer=new TablePrefixer(i); // really i!
-				PropertyBridge p=(PropertyBridge)prefixer.prefix(tBridges.get(j));
-				p.setTablePrefixer(prefixer);
-				tBridges.set(j,p);
+				PropertyBridge bridge = (PropertyBridge) tBridges.get(j);
+				tBridges.set(j, bridge.withPrefix(i));
 			}
 		}
 		return nonEmptyLists;

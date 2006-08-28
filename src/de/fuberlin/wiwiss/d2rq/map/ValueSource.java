@@ -1,10 +1,12 @@
 /*
- * $Id: ValueSource.java,v 1.1 2005/04/13 16:55:28 garbers Exp $
+ * $Id: ValueSource.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Map;
 import java.util.Set;
+
+import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
  * Describes a set of strings that are obtained in some way
@@ -69,4 +71,6 @@ public interface ValueSource {
 	 * @return a value created from the row
 	 */
 	String getValue(String[] row, Map columnNameNumberMap);
+	
+	void matchConstraint(NodeConstraint c);
 }

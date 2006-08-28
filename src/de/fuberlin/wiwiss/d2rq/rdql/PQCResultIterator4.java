@@ -1,6 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -31,18 +30,13 @@ public class PQCResultIterator4 extends NiceIterator implements ClosableIterator
     
     private String additionalLogInfo;
 
-    /**
-	 * 
-	 */
-	//private final PatternQueryCombiner4 combiner;
-	private final TripleQuery[][] tripleQueries;
 	private final VariableBindings variableBindings;
 	private final Collection constraints;
 	
 	/** Iterator for TripleQuery conjunctions */
     protected ConjunctionIterator conjunctionsIterator;
     /** next TripleQuery conjunction to be processed */
-	protected TripleQuery[] conjunction; 
+	private TripleQuery[] conjunction; 
 	/** iterator helper */
 	protected Triple[] prefetchedResult=null;
 	/** iterator helper */
@@ -55,7 +49,6 @@ public class PQCResultIterator4 extends NiceIterator implements ClosableIterator
 
 	public PQCResultIterator4(TripleQuery[][] tripleQueries, VariableBindings variableBindings, Collection constraints) { // or maybe pass conjunctionsIterator as
 		//combiner = combiner4;
-		this.tripleQueries=tripleQueries;
 		this.variableBindings=variableBindings;
 		this.constraints=constraints;
 		conjunction=new TripleQuery[tripleQueries.length];
@@ -72,8 +65,6 @@ public class PQCResultIterator4 extends NiceIterator implements ClosableIterator
 		return (prefetchedResult!=null);
 	}
 
-	private static int lastPrintedInstanceNr=-1;
-	
 	public boolean isDebugEnabled() {
 	    return logger!=null && logger.debugEnabled();
 	}

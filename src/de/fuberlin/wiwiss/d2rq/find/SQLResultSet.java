@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.logging.LogFactory;
+
 import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -51,6 +53,7 @@ public class SQLResultSet {
 	public static Collection protocol=null;
 	
     protected void executeSQLQuery() {
+    	LogFactory.getLog(SQLResultSet.class).debug(this.sql);
 		if (logger.debugEnabled()) {
 		    separatorLogger.debug("--------------------------------------------");
             logger.debug("SQL statement " + (simulationMode?"simulated":"executed") + ": " 

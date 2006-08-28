@@ -12,11 +12,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.impl.LiteralLabel;
 import com.hp.hpl.jena.graph.query.Expression;
-import com.hp.hpl.jena.graph.query.IndexValues;
-import com.hp.hpl.jena.rdql.parser.*;
-import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.rdql.parser.NodeValue;
+import com.hp.hpl.jena.rdql.parser.ParsedLiteral;
+import com.hp.hpl.jena.rdql.parser.Q_LogicalAnd;
+import com.hp.hpl.jena.rdql.parser.Q_LogicalOr;
+import com.hp.hpl.jena.rdql.parser.Q_UnaryNot;
+import com.hp.hpl.jena.rdql.parser.Q_Var;
+import com.hp.hpl.jena.rdql.parser.WorkingVar;
 
 import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
@@ -24,7 +29,6 @@ import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.Pattern;
-import de.fuberlin.wiwiss.d2rq.rdql.ConstraintHandler.NodeMakerIterator;
 
 /**
  * Translates an RDQL expression into a SQL expression.
@@ -219,7 +223,6 @@ public class ExpressionTranslator {
         return translateParsedLiteral(e);
     }
     public Result translateParsedLiteral(ParsedLiteral e) {
-        StringBuffer b=new StringBuffer();
         if (e.isInt())
             return newResult(Long.toString(e.getInt()),NumberType);
         else if (e.isDouble())
@@ -294,16 +297,16 @@ public class ExpressionTranslator {
     public Result translateVarName(String varName) {
         // map var to a column-expression
         // we should choose the one that is most simple
-        NodeConstraint c=(NodeConstraint)variableNameToNodeConstraint.get(varName);
+        NodeConstraintImpl c=(NodeConstraintImpl)variableNameToNodeConstraint.get(varName);
         if (c==null) {
             Node n=(Node) variableBindings.variableNameToNodeMap.get(varName);
-            c=(NodeConstraint)handler.variableToConstraint.get(n);
+            c=(NodeConstraintImpl)handler.variableToConstraint.get(n);
             if (c==null) {
                 Set varIndexSet=(Set)variableBindings.bindVariableToShared.get(n);
                 ConstraintHandler.NodeMakerIterator e=handler.makeNodeMakerIterator(varIndexSet);
                 if (e.hasNext()) { // it is not shared, so we do not have to check next occourence
                     NodeMaker m=e.nextNodeMaker();
-                    c=new NodeConstraint();
+                    c=new NodeConstraintImpl();
                     m.matchConstraint(c);
                 } else
                     return null;
@@ -313,21 +316,21 @@ public class ExpressionTranslator {
         return translateNodeConstraint(c);       
     }
     
-    public Result translateNodeConstraint(NodeConstraint c) {
+    public Result translateNodeConstraint(NodeConstraintImpl c) {
         Iterator it;
         if (!weaker)
             return null;
-        if (c.fixedNode!=null) {
-            return translateNode(c.fixedNode);
+        if (c.fixedNode()!=null) {
+            return translateNode(c.fixedNode());
         }
-        it=c.columns.iterator();
+        it=c.columns().iterator();
         while (it.hasNext()) {
             Column col=(Column)it.next();
             Result res=translateColumn(col);
             if (res!=null)
                 return res;
         }
-        it=c.patterns.iterator();
+        it=c.patterns().iterator();
         while (it.hasNext()) {
             Pattern pat=(Pattern)it.next();
             Result res=translatePattern(pat);
@@ -572,7 +575,6 @@ public class ExpressionTranslator {
      * null means: no mapping.
      */
     void setupOperatorMap() {
-        int NumberStringType=NumberType+StringType;
         if (opMap==null) {
             opMap=new HashMap();
             putOp("Q_Add","+",NumberType);

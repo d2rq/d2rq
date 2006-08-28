@@ -3,14 +3,14 @@
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
-import com.hp.hpl.jena.graph.*;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.impl.LiteralLabel;
-import com.hp.hpl.jena.datatypes.*;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * LiteralMakers transform attribute values from a result set into literals.
@@ -32,7 +32,7 @@ public class LiteralMaker extends NodeMakerBase {
     public void matchConstraint(NodeConstraint c) {
         c.matchNodeType(NodeConstraint.LiteralNodeType);
         c.matchLiteralMaker(this);  
-        c.matchValueSource(valueSource);
+        this.valueSource.matchConstraint(c);
     }
 
     // jg
@@ -43,8 +43,8 @@ public class LiteralMaker extends NodeMakerBase {
         return b1 && b2;
     }        	
     
-	public LiteralMaker(String id, ValueSource valueSource, Set joins, Set conditions, boolean isUnique, RDFDatatype datatype, String lang) {
-		super(joins, conditions, isUnique);
+	public LiteralMaker(String id, ValueSource valueSource, boolean isUnique, RDFDatatype datatype, String lang) {
+		super(isUnique);
 		this.id = id;
 		this.valueSource = valueSource;
 		this.datatype = datatype;
@@ -116,10 +116,5 @@ public class LiteralMaker extends NodeMakerBase {
 	
 	public String toString() {
 		return "LiteralMaker@" + this.id;
-	}
-
-	public void prefixTables(TablePrefixer prefixer) {
-		super.prefixTables(prefixer);
-		this.valueSource = prefixer.prefixValueSource(this.valueSource);
 	}
 }

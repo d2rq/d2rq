@@ -3,12 +3,13 @@
 */
 package de.fuberlin.wiwiss.d2rq.find;
 
-import com.hp.hpl.jena.graph.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+
+import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.map.Database;
-
-import java.sql.*;
-import java.util.*;
 
 /**
  * Contains the result set from one SQL query and transforms it into triples.

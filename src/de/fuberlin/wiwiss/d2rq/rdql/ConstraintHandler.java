@@ -14,12 +14,10 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Expression;
-import com.hp.hpl.jena.graph.query.QueryHandler;
 
 import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
-import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 
@@ -62,16 +60,16 @@ class ConstraintHandler {
         while (possible && it.hasNext()) {
             Node node=(Node)it.next();
             Set varIndices=(Set) bindings.bindVariableToShared.get(node);
-            NodeConstraint c=new NodeConstraint();
+            NodeConstraintImpl c = new NodeConstraintImpl();
             do {
-                c.infoAdded = false;
+                c.resetInfoAdded();
                 NodeMakerIterator e=makeNodeMakerIterator(varIndices);
                  while (possible && e.hasNext()) {
                     NodeMaker n = e.nextNodeMaker();
                     n.matchConstraint(c);
-                    possible = c.possible;
+                    possible = c.isPossible();
                 }
-            } while (possible && c.infoAdded);
+            } while (possible && c.infoAdded());
             variableToConstraint.put(node,c);
         }
     }

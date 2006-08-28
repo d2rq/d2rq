@@ -1,16 +1,18 @@
 /*
- * $Id: BlankNodeIdentifier.java,v 1.4 2006/07/12 11:08:09 cyganiak Exp $
+ * $Id: BlankNodeIdentifier.java,v 1.5 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
+import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
  * A blank node identifier that uniquely identifies all resources generated from
@@ -28,15 +30,10 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-public class BlankNodeIdentifier implements ValueSource, Prefixable {
+public class BlankNodeIdentifier implements ValueSource {
 	private String classMapID;
-	private Set identifierColumns = new HashSet(3);
+	private List identifierColumns = new ArrayList(3);
 	
-	public Object clone() throws CloneNotSupportedException {return super.clone();}
-	public void prefixTables(TablePrefixer prefixer) {
-		identifierColumns=prefixer.prefixSet(identifierColumns);
-	}
-
 	/**
 	 * Constructs a new blank node identifier.
 	 * @param columns a comma-seperated list of column names uniquely
@@ -52,6 +49,9 @@ public class BlankNodeIdentifier implements ValueSource, Prefixable {
 		}
 	}
 
+	public void matchConstraint(NodeConstraint c) {
+		c.matchBlankNodeIdentifier(this, this.identifierColumns);
+	}
 
 	public boolean couldFit(String anonID) {
 		int index = anonID.indexOf(D2RQ.deliminator);
@@ -67,7 +67,7 @@ public class BlankNodeIdentifier implements ValueSource, Prefixable {
 	 * @see de.fuberlin.wiwiss.d2rq.ValueSource#getColumns()
 	 */
 	public Set getColumns() {
-		return this.identifierColumns;
+		return new HashSet(this.identifierColumns);
 	}
 
 	/**

@@ -3,13 +3,18 @@
 */
 package de.fuberlin.wiwiss.d2rq.find;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import com.hp.hpl.jena.graph.Node;
-
-import de.fuberlin.wiwiss.d2rq.map.Alias;
+import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Join;
@@ -32,7 +37,6 @@ public class SQLStatementMaker {
 	private final static String escapeReplacement = "\\\\$1";
 	private Database database;
 	private List sqlSelect = new ArrayList(10);
-//	private List sqlFrom = new ArrayList(5); // -> referedTables, aliasMap
 	private List sqlWhere = new ArrayList(15);
 	/** Maps column names from the database to columns numbers in the result set. */
 	private Map columnNameNumber = new HashMap(10);
@@ -40,8 +44,8 @@ public class SQLStatementMaker {
 	private boolean eliminateDuplicates = false;
 	
 	// see SQLStatementMaker.sqlFromExpression(referredTables,aliasMap)
-	protected Map aliasMap=new HashMap(1); // from String (aliased Table) to Alias
-	protected Collection referedTables = new HashSet(5); // Strings in their alias forms	
+	protected AliasMap aliases = AliasMap.NO_ALIASES;
+	protected Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
 
 	public SQLStatementMaker(Database database) {
 		this.database = database;
@@ -68,14 +72,18 @@ public class SQLStatementMaker {
 			}
 		}
 		result.append(" FROM ");
-		result.append(sqlFromExpression(referedTables,aliasMap));
-//		it = this.sqlFrom.iterator();
-//		while (it.hasNext()) {
-//			result.append(it.next());
-//			if (it.hasNext()) {
-//				result.append(", ");
-//			}
-//		}
+		it = mentionedTables.iterator();
+		while (it.hasNext()) {			
+			String tableName = (String) it.next();
+			if (this.aliases.isAlias(tableName)) {
+				result.append(this.aliases.originalOf(tableName));
+				result.append(" AS ");
+			}
+			result.append(tableName);
+			if (it.hasNext()) {
+				result.append(", ");
+			}
+		}
 		it = this.sqlWhere.iterator();
 		if (it.hasNext()) {
 			result.append(" WHERE ");
@@ -89,29 +97,16 @@ public class SQLStatementMaker {
 		return result.toString();
 	}
 	
-	public void addAliasMap(Map m) {
-		aliasMap.putAll(m);
+	public void addAliasMap(AliasMap newAliases) {
+		this.aliases = this.aliases.applyTo(newAliases);
 	}
 	
 	private void referTable(String tableName) {
-		if (!referedTables.contains(tableName)) {
-			referedTables.add(tableName);
-		}
-	}
-	private void referColumn(Column c) {
-		String tableName=c.getTableName();
-		referTable(tableName);
-	}
-
-	private void referColumns(Collection columns) {
-		Iterator it = columns.iterator();
-		while (it.hasNext()) {
-			referColumn((Column) it.next());
+		if (!mentionedTables.contains(tableName)) {
+			mentionedTables.add(tableName);
 		}
 	}
 
-	
-	
 	/**
 	 * Adds a column to the SELECT part of the query.
 	 * @param column the column
@@ -124,8 +119,8 @@ public class SQLStatementMaker {
 		this.sqlSelect.add(qualName);
 		this.selectColumnCount++;
 		this.columnNameNumber.put(qualName,
-				new Integer(this.selectColumnCount));		
-		referColumn(column); // jg
+				new Integer(this.selectColumnCount));
+		this.mentionedTables.add(column.getTableName());
 	}
 
     /**
@@ -152,7 +147,7 @@ public class SQLStatementMaker {
 			return;
 		}
 		this.sqlWhere.add(whereClause);
-		referColumn(column);
+		this.mentionedTables.add(column.getTableName());
 	}
 	
 	public String correctlyQuotedColumnValue(Column column, String value) {
@@ -160,8 +155,8 @@ public class SQLStatementMaker {
 	}
 	
 	public int columnType(Column column) {
-	    String databaseColumn=column.getQualifiedName(aliasMap);
-	    return this.database.getColumnType(databaseColumn);
+	    Column physicalColumn = this.aliases.originalOf(column);
+	    return this.database.getColumnType(physicalColumn.getQualifiedName());
 	}
 	
 	/**
@@ -181,6 +176,7 @@ public class SQLStatementMaker {
 	
 	/**
 	 * Adds multiple WHERE clauses to the query.
+	 * TODO This should also add columns to mentionedTables
 	 * @param conditions a set of Strings containing SQL WHERE clauses
 	 */
 	public void addConditions(Set conditions) {
@@ -261,30 +257,4 @@ public class SQLStatementMaker {
 		return SQLStatementMaker.escapePattern.matcher(s).
 				replaceAll(SQLStatementMaker.escapeReplacement);
 	}
-	
-	// jg
-	private static String sqlFromExpression(Collection referedTables, Map aliasMap) {
-		StringBuffer result = new StringBuffer();
-		Iterator it=referedTables.iterator();
-		int i=0;
-		while (it.hasNext()) {			
-			if (i > 0) {
-				result.append(" , ");
-			}
-			String tableName=(String)it.next();
-			String expression=tableName;
-			if (aliasMap!=null) {
-				Alias mapVal=(Alias)aliasMap.get(tableName);
-				
-				if (mapVal!=null) {
-					expression=mapVal.sqlExpression();
-				} 
-			}
-			result.append(expression);
-			i++;
-		}
-		return result.toString();
-	}
-
-	
 }

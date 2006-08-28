@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.3 2006/07/12 11:08:09 cyganiak Exp $
+ * $Id: MapParser.java,v 1.4 2006/08/28 19:44:23 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.parser;
 
@@ -21,7 +21,6 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.helpers.CSVParser;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
-import de.fuberlin.wiwiss.d2rq.map.Alias;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -37,7 +36,7 @@ import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
  * of a D2RQ mapping file. Checks the map for consistency.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.3 2006/07/12 11:08:09 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.4 2006/08/28 19:44:23 cyganiak Exp $
  */
 public class MapParser {
 	private Model model;
@@ -169,7 +168,7 @@ public class MapParser {
 		Iterator it = nodeMaker.getColumns().iterator();
 		while (it.hasNext()) {
 			Column column = (Column) it.next();
-			database.assertHasType(column);			
+			database.assertHasType(nodeMaker.getAliases().originalOf(column));			
 		}
 	}
 
@@ -222,9 +221,7 @@ public class MapParser {
 					propBridgeNode,
 					subjectSpec,
 					NodeMakerSpec.createFixed(findPropertyForBridge(propBridgeNode)),
-					buildObjectSpec(propBridgeNode, subjectSpec.database()),
-					// TODO Is alias handling OK like this?
-					Alias.buildAliases(findLiterals(propBridgeNode, D2RQ.alias)));
+					buildObjectSpec(propBridgeNode, subjectSpec.database()));
 		}
 		it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.DatatypePropertyBridge);
 		while (it.hasNext()) {
@@ -325,6 +322,7 @@ public class MapParser {
 		}
 		spec.addJoins(Join.buildJoins(findLiterals(node, D2RQ.join)));
 		spec.addConditions(findLiterals(node, D2RQ.condition));
+		spec.setAliases(findLiterals(node, D2RQ.alias));
 		boolean isUnique = defaultToUnique;
 		String containsDuplicates = findZeroOrOneLiteral(node, D2RQ.containsDuplicates);
 		if ("true".equals(containsDuplicates)) {
@@ -344,10 +342,8 @@ public class MapParser {
 		return this.graph.contains(node, RDF.Nodes.type, D2RQ.ObjectPropertyBridge);
 	}
 
-	// TODO pass in a predicatesSpec
 	private PropertyBridge createPropertyBridge(Node node, 
-			NodeMakerSpec subjectsSpec, NodeMakerSpec predicatesSpec, NodeMakerSpec objectsSpec, 
-			Map aliasses) {
+			NodeMakerSpec subjectsSpec, NodeMakerSpec predicatesSpec, NodeMakerSpec objectsSpec) {
 		URIMatchPolicy policy = new URIMatchPolicy();
 		policy.setSubjectBasedOnURIColumn(subjectsSpec.isURIColumnSpec());
 		policy.setSubjectBasedOnURIPattern(subjectsSpec.isURIPatternSpec());
@@ -358,7 +354,7 @@ public class MapParser {
 		NodeMaker objects = objectsSpec.build();
 		PropertyBridge bridge = new PropertyBridge(node,
 				subjects, predicates, objects,
-				subjectsSpec.database(), policy, aliasses);
+				subjectsSpec.database(), policy);
 		this.nodesToPropertyBridges.put(node, bridge);
 		return bridge;
 	}
@@ -407,8 +403,7 @@ public class MapParser {
 					t.getObject(),
 					subjectSpec,
 					NodeMakerSpec.createFixed(findOneNode(t.getObject(), D2RQ.propertyName)),
-					NodeMakerSpec.createFixed(findOneNode(t.getObject(), D2RQ.propertyValue)),
-					new HashMap(0));
+					NodeMakerSpec.createFixed(findOneNode(t.getObject(), D2RQ.propertyValue)));
 		}
 	}
 
@@ -435,8 +430,7 @@ public class MapParser {
 		createPropertyBridge(Node.createAnon(), 
 				spec,
 				NodeMakerSpec.createFixed(RDF.Nodes.type),
-				NodeMakerSpec.createFixed(rdfsClass),
-				new HashMap(0));
+				NodeMakerSpec.createFixed(rdfsClass));
 	}
 
 	private void checkColumnTypes() {

@@ -1,5 +1,5 @@
 /*
- * $Id: DummyValueSource.java,v 1.2 2005/04/13 16:56:08 garbers Exp $
+ * $Id: DummyValueSource.java,v 1.3 2006/08/28 19:44:23 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.map.ValueSource;
+import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
  * Dummy implementation of {@link ValueSource}
@@ -22,6 +23,9 @@ public class DummyValueSource implements ValueSource {
 	public DummyValueSource(String value, boolean couldFit) {
 		this.returnValue = value;
 		this.couldFit = couldFit;
+	}
+
+	public void matchConstraint(NodeConstraint c) {
 	}
 
 	public void setCouldFit(boolean couldFit) {

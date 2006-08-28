@@ -1,5 +1,5 @@
 /*
- * $Id: Join.java,v 1.2 2005/04/13 17:17:42 garbers Exp $
+ * $Id: Join.java,v 1.3 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
@@ -22,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-public class Join implements Prefixable {
+public class Join {
 	private Set fromColumns = new HashSet(2);
 	private Set toColumns = new HashSet(2);
 	private Map otherSide = new HashMap(4); 
@@ -30,47 +29,28 @@ public class Join implements Prefixable {
 	private String toTable = null;
 	private String sqlExpression=null; // cached value
 	
-	public Object clone() throws CloneNotSupportedException {return super.clone();}
-	public void prefixTables(TablePrefixer prefixer) {
-		fromTable=prefixer.prefixTable(fromTable);
-		toTable=prefixer.prefixTable(toTable);	
-		if (!prefixer.mayChangeID()) {
-			return;
-		}
-		sqlExpression=null;
-		Set columnsToPrefix=otherSide.keySet(); // contains both fromColumns and toColumns
-		Map oldNewMap= new HashMap(columnsToPrefix.size());
-		prefixer.prefixCollectionIntoCollectionAndMap(columnsToPrefix,null,oldNewMap);
-		fromColumns=(Set) TablePrefixer.createCollectionFromCollectionWithMap(fromColumns,oldNewMap);
-		toColumns=(Set) TablePrefixer.createCollectionFromCollectionWithMap(toColumns,oldNewMap);
-		Map newOther = new HashMap(fromColumns.size()+toColumns.size());
-		Iterator it=otherSide.entrySet().iterator();
-		while (it.hasNext()){
-			Map.Entry oldEntry=(Map.Entry)it.next();
-			Column oldFromColumn=(Column) oldEntry.getKey();
-			Column oldToColumn=(Column)oldEntry.getValue();
-			Column fromColumn=(Column)oldNewMap.get(oldFromColumn);
-			Column toColumn=(Column)oldNewMap.get(oldToColumn);
-			newOther.put(fromColumn,toColumn); // pair (toColumn,fromColumn) will be seen in another iteration
-		}
-		otherSide=newOther;
-	}
-
-	
 	public void addCondition(String joinCondition) {
-		sqlExpression=null;
 		Column col1 = Join.getColumn(joinCondition, true);
 		Column col2 = Join.getColumn(joinCondition, false);
-		if (this.fromTable == null) {
-			this.fromTable = col1.getTableName();
-			this.toTable = col2.getTableName();
-		}
-		this.fromColumns.add(col1);
-		this.toColumns.add(col2);
-		this.otherSide.put(col1, col2);
-		this.otherSide.put(col2, col1);
+		addCondition(col1, col2);
 	}
 
+	public void addCondition(Column column1, Column column2) {
+		this.sqlExpression = null;
+		if (this.fromTable == null) {
+			this.fromTable = column1.getTableName();
+			this.toTable = column2.getTableName();
+		} else if (!this.fromTable.equals(column1.getTableName())
+				|| !this.toTable.equals(column2.getTableName())) {
+			throw new IllegalArgumentException(
+					"Illegal join -- all conditions must go from *one* table to another *one* table");
+		}
+		this.fromColumns.add(column1);
+		this.toColumns.add(column2);
+		this.otherSide.put(column1, column2);
+		this.otherSide.put(column2, column1);
+	}
+	
 	public boolean containsTable(String tableName) {
 		return tableName.equals(this.fromTable) ||
 				tableName.equals(this.toTable);

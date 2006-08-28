@@ -1,5 +1,5 @@
 /*
- * $Id: TranslationTable.java,v 1.1 2005/04/13 16:55:28 garbers Exp $
+ * $Id: TranslationTable.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -12,6 +12,7 @@ import java.util.Set;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
  * Translation table that maps a set of database values to a set of
@@ -206,6 +207,10 @@ public class TranslationTable implements Translator {
 		public String getValue(String[] row, Map columnNames) {
 			return this.translator.toRDFValue(
 					this.valueSource.getValue(row, columnNames));
+		}
+		
+		public void matchConstraint(NodeConstraint c) {
+			this.valueSource.matchConstraint(c);
 		}
 	}
 }

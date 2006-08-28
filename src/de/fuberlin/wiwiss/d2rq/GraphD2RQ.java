@@ -189,7 +189,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		return this.capabilities;
 	}
 
-	// TODO change graphBaseFind to find when compiling/linking against Jena2.1
 	public ExtendedIterator graphBaseFind( TripleMatch m ) {
 		checkOpen();
 		return graphBaseFind(m,this.propertyBridges);

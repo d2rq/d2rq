@@ -1,11 +1,12 @@
 /*
- * $Id: RDQLTest.java,v 1.9 2006/05/19 18:42:37 cyganiak Exp $
+ * $Id: RDQLTest.java,v 1.10 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
 import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
@@ -54,7 +55,7 @@ public class RDQLTest extends RDQLTestFramework {
 		assertResult(aResult);
 
 		aResult.put("x", this.model.createResource(NS + "title"));
-		aResult.put("y", this.model.createLiteral("Titel of the Paper: Trusting Information Sources One Citizen at a Time", "en"));
+		aResult.put("y", this.model.createLiteral("Trusting Information Sources One Citizen at a Time (Full paper)", "en"));
 		assertResult(aResult);
 
 		aResult.put("x", this.model.createResource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
@@ -127,7 +128,7 @@ public class RDQLTest extends RDQLTestFramework {
 	}
 
 	public void testRDQLGetAuthorsOfPaperByTitle() {
-		rdql("SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y), (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language'@en)");
+		rdql("SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y), (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Three Implementations of SquishQL, a Simple RDF Query Language (Full paper)'@en)");
 //		dump();
 		Map aResult = new HashMap();
 
@@ -143,7 +144,7 @@ public class RDQLTest extends RDQLTestFramework {
 	}
 
 	public void testRDQLGetAuthorsNameAndEmail() {
-		rdql("SELECT ?x, ?y, ?a WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y), (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language'@en), (?y, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?a)");
+		rdql("SELECT ?x, ?y, ?a WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y), (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Three Implementations of SquishQL, a Simple RDF Query Language (Full paper)'@en), (?y, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?a)");
 //		dump();
 		Map aResult = new HashMap();
 
@@ -160,5 +161,16 @@ public class RDQLTest extends RDQLTestFramework {
 		assertResultCount(2);
 	}
 
+	public void testGetTitleAndYearOfAllPapers() {
+		rdql("SELECT ?title, ?year WHERE " +
+				"(?paper, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, ?title), "+
+				"(?paper, <http://annotation.semanticweb.org/iswc/iswc.daml#year>, ?year)");
+		Map aResult = new HashMap();
 
+		aResult.put("title", this.model.createLiteral("Trusting Information Sources One Citizen at a Time (Full paper)", "en"));
+		aResult.put("year", this.model.createTypedLiteral("2002", XSDDatatype.XSDgYear));
+		assertResult(aResult);
+		
+		assertResultCount(4);
+	}
 }

@@ -55,7 +55,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * @author Joerg Garbers
  * @version V0.3
  */
-public interface NodeMaker extends Cloneable { 
+public interface NodeMaker { 
     
     /** 
      * Adds constraint information to a {@link NodeConstraint}.
@@ -103,9 +103,19 @@ public interface NodeMaker extends Cloneable {
      * A set of additional SQL WHERE conditions that must be
      * satisfied for a result row, or the node maker won't
      * build a node out of it.
+     * 
+     * TODO Introduce a Condition class that knows about its columns
+     * 
      * @return a set of Strings
      */
     Set getConditions();
+
+    /**
+     * A set of table aliases that must be used when making an SQL
+     * query that will be interpreted by this NodeMaker.
+     * @return all table aliases required by this node maker
+     */
+    AliasMap getAliases();
     
 	/**
 	 * Creates a new Node from a database result row.
@@ -114,6 +124,7 @@ public interface NodeMaker extends Cloneable {
 	 * 							to Integers representing indices within the row array
 	 * @return a node created from the row, or <tt>null</tt> if a <tt>NULL</tt> value
 	 *			was encountered in a required field.
+	 * TODO Column names should be represented as Columns not Strings
 	 */
     Node getNode(String[] row, Map columnNameNumberMap);
 

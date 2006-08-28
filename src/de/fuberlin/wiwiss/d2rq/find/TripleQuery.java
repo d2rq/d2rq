@@ -1,5 +1,5 @@
 /*
- * $Id: TripleQuery.java,v 1.1 2005/04/13 17:17:43 garbers Exp $
+ * $Id: TripleQuery.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.find;
 
@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
+import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
@@ -54,6 +55,7 @@ public class TripleQuery {
 	private NodeMaker predicateMaker;
 	private NodeMaker objectMaker;
 	private Map replacedColumns = new HashMap(4);
+	private AliasMap aliases;
 
 	/**
 	 * Constructs a new TripleQuery.
@@ -90,6 +92,7 @@ public class TripleQuery {
 
 		this.joins.addAll(bridge.getJoins());
 		removeOptionalJoins();
+		this.aliases = bridge.getAliases();
 
 		if (!this.selectColumns.isEmpty()) {
 			this.aTable = ((Column) this.selectColumns.iterator().next()).getTableName();
@@ -114,6 +117,10 @@ public class TripleQuery {
 	}
 	public Set getJoins() {
 		return this.joins;
+	}
+	
+	public AliasMap getAliases() {
+		return this.aliases;
 	}
 	
 	public Set getConditions() {
@@ -172,6 +179,9 @@ public class TripleQuery {
 			return false;
 		}
 		if (getJoins().isEmpty() && !getATable().equals(other.getATable())) {
+			return false;
+		}
+		if (!getAliases().equals(other.getAliases())) {
 			return false;
 		}
 		return true;

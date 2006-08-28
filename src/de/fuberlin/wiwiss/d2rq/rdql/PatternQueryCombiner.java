@@ -113,8 +113,6 @@ void makeStores() {
  * so we create individual instances of the bridges and systematically rename 
  * their tables. We prefix each Table with "T<n>_ where <n> is the index of the
  *  triple in the overall query.
- * 
- * @see TablePrefixer 
  */
 void makePropertyBridges() {
 	if (!possible)
@@ -129,10 +127,8 @@ void makePropertyBridges() {
 			return;
 		}
 		for (int j=0; j<bridgesCount; j++) {
-			TablePrefixer prefixer=new TablePrefixer(i); // really i!
-			PropertyBridge p=(PropertyBridge)prefixer.prefix(tBridges.get(j));
-			p.setTablePrefixer(prefixer);
-			tBridges.set(j,p);
+			PropertyBridge bridge = (PropertyBridge) tBridges.get(j);
+			tBridges.set(j, bridge.withPrefix(i));
 		}
 	}
 }
@@ -206,13 +202,13 @@ private SQLStatementMaker getSQL(TripleQuery[] conjunction) {
 	for (int i=0; (i<conjunction.length) && possible; i++) {
 		TripleQuery t=conjunction[i];
 		sql.addAliasMap(t.getPropertyBridge().getAliases());
+		sql.addColumnRenames(t.getReplacedColumns()); // ?
 		sql.addSelectColumns(t.getSelectColumns());
 		sql.addJoins(t.getJoins());
 		sql.addColumnValues(t.getColumnValues());
 		// addConditions should be last, because checks if a textual token is likely to 
 		// be a table based on previously in select, join and column values seen tables
 		sql.addConditions(t.getConditions()); 
-		sql.addColumnRenames(t.getReplacedColumns()); // ?
 	}
 	return sql;
 }

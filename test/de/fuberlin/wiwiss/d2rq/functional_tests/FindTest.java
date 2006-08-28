@@ -1,5 +1,5 @@
 /*
- * $Id: FindTest.java,v 1.5 2006/05/19 18:42:37 cyganiak Exp $
+ * $Id: FindTest.java,v 1.6 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -141,12 +141,12 @@ public class FindTest extends FindTestFramework {
 
 	public void testLiteralLanguage() {
 		find(Node.ANY, Node.createURI(NS + "title"),
-				Node.createLiteral("Titel of the Paper: Trusting Information Sources One Citizen at a Time", "en", null));
+				Node.createLiteral("Trusting Information Sources One Citizen at a Time (Full paper)", "en", null));
 //		dump();
 		assertTriple(
 				Node.createURI("http://www.conference.org/conf02004/paper#Paper1"),
 				Node.createURI(NS + "title"),
-				Node.createLiteral("Titel of the Paper: Trusting Information Sources One Citizen at a Time", "en", null));
+				Node.createLiteral("Trusting Information Sources One Citizen at a Time (Full paper)", "en", null));
 		assertTripleCount(1);
 	}
 

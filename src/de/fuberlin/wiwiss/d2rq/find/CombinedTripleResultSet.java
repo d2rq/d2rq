@@ -3,12 +3,11 @@
 */
 package de.fuberlin.wiwiss.d2rq.find;
 
-import com.hp.hpl.jena.graph.*;
+import java.util.Map;
+
+import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.map.Database;
-
-import java.sql.*;
-import java.util.*;
 
 /**
  * Contains the result set from one SQL query and transforms it into triples.
@@ -33,7 +32,8 @@ public class CombinedTripleResultSet extends SQLResultSet {
 	 * delivered afterwards by next().
 	 */
     private Triple[] chachedTriples;
-
+    private boolean exhausted = false;
+    
 	public CombinedTripleResultSet(String SQL, Map columnNameNumberMap, Database db) {
 		super(SQL, columnNameNumberMap, db);
 	}
@@ -43,6 +43,9 @@ public class CombinedTripleResultSet extends SQLResultSet {
 	}
 
 	public boolean hasNext() {
+		if (this.exhausted) {
+			return false;
+		}
 		if (this.chachedTriples == null) {
 			this.chachedTriples = next();
 		}
@@ -66,6 +69,7 @@ public class CombinedTripleResultSet extends SQLResultSet {
 		do {
 			this.currentRow = nextRow();
 			if (this.currentRow == null) {
+				this.exhausted = true;
 				return null;
 			}
 			done=true;

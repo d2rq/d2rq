@@ -1,5 +1,5 @@
 /*
- * $Id: FixedNodeMaker.java,v 1.3 2006/07/12 11:08:09 cyganiak Exp $
+ * $Id: FixedNodeMaker.java,v 1.4 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -59,6 +59,10 @@ public class FixedNodeMaker implements NodeMaker {
 	
 	public Set getConditions() {
 		return Collections.EMPTY_SET;
+	}
+
+	public AliasMap getAliases() {
+		return AliasMap.NO_ALIASES;
 	}
 	
 	/* (non-Javadoc)

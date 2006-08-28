@@ -9,8 +9,9 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.query.Domain;
 import com.hp.hpl.jena.graph.query.ExpressionSet;
 import com.hp.hpl.jena.graph.query.Mapping;
-import com.hp.hpl.jena.graph.query.PatternStage;
 import com.hp.hpl.jena.graph.query.Pattern;
+import com.hp.hpl.jena.graph.query.PatternStage;
+import com.hp.hpl.jena.graph.query.PatternStageCompiler;
 import com.hp.hpl.jena.graph.query.Pipe;
 import com.hp.hpl.jena.graph.query.ValuatorSet;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
@@ -28,13 +29,18 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 public class D2RQPatternStage extends PatternStage { // jg: reference PatternStage and QueryCombiner
 
 	private GraphD2RQ graph;
-
+	
+	// This used to be in Jena's PatternStage, but was removed in 2.3,
+	// so I duplicate it here [RC]
+	private Pattern[] compiled;
+	
 	// instanciate just one PatternQueryCombiner? it could do some caching
 	// or leave the caching for graph? e.g. triple -> list of bridges
 
 	public D2RQPatternStage(GraphD2RQ graph, Mapping map,
 			ExpressionSet constraints, Triple[] triples) {
 		super((Graph) graph, map, constraints, triples);
+		this.compiled = PatternStageCompiler.compile(new PatternStageCompiler(), map, triples);
 		// some contraints are eaten up at this point!
 		// so use s.th. like a clone() and setter method at invocation time
 		D2RQPatternStage.this.graph = graph;

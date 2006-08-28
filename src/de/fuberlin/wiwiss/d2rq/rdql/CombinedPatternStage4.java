@@ -4,37 +4,20 @@
 
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-import com.hp.hpl.jena.graph.query.PatternStage;
-import com.hp.hpl.jena.graph.query.PatternStageCompiler;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.query.Bind;
 import com.hp.hpl.jena.graph.query.Bound;
 import com.hp.hpl.jena.graph.query.BufferPipe;
 import com.hp.hpl.jena.graph.query.Domain;
-import com.hp.hpl.jena.graph.query.Element;
-import com.hp.hpl.jena.graph.query.Expression;
 import com.hp.hpl.jena.graph.query.ExpressionSet;
 import com.hp.hpl.jena.graph.query.Fixed;
 import com.hp.hpl.jena.graph.query.Mapping;
 import com.hp.hpl.jena.graph.query.Pattern;
+import com.hp.hpl.jena.graph.query.PatternStage;
 import com.hp.hpl.jena.graph.query.Pipe;
-import com.hp.hpl.jena.graph.query.Query;
 import com.hp.hpl.jena.graph.query.Stage;
-import com.hp.hpl.jena.graph.query.Valuator;
-import com.hp.hpl.jena.graph.query.ValuatorSet;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
-
-import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 
 /**
  * A CombinedPatternStage is a {@link Stage} that handles a conjunction of triples (a pattern). 

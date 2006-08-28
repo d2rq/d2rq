@@ -130,7 +130,7 @@ public class RDQLTestFramework extends TestFramework {
 		SQLResultSet.separatorLogger=new Logger(); // silent
 //		this.model.enableDebug();
 	    setUpShowErrors(); // should be activated all the time
-	    setUpShowPerformance(); // activate (only) to test performance (only)
+//	    setUpShowPerformance(); // activate (only) to test performance (only)
 	    //setUpShowStatements(); // activate to analyse generated SQL statements
 	    //setUpMixOutputs(true); // activate to mix output from two QueryHandlers nicely
 		//setUpShowAll(); // activate to get most verbatim output

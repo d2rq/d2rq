@@ -1,14 +1,12 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * A respresentation of a d2rq:PropertyBridge, describing how
@@ -20,35 +18,36 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak <richard@cyganiak.de>
- * @version $Id: PropertyBridge.java,v 1.4 2006/07/12 11:08:09 cyganiak Exp $
+ * @version $Id: PropertyBridge.java,v 1.5 2006/08/28 19:44:21 cyganiak Exp $
  */
-public class PropertyBridge implements Prefixable {
+public class PropertyBridge {
 	private Node id;
 	private NodeMaker subjectMaker;
 	private NodeMaker predicateMaker;
 	private NodeMaker objectMaker; 
 	private Database database;
-	private Map aliases; // = new HashMap(1);
+	private AliasMap aliases;
 	private Set joins = new HashSet(2);
 	private Set conditions = new HashSet(1);
 	private URIMatchPolicy uriMatchPolicy = new URIMatchPolicy();
 	private boolean mightContainDuplicates = false;
-	private TablePrefixer tablePrefixer; // use this to store PropertyBridge instaciation info
 
-	public PropertyBridge(Node id, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker, Database database, URIMatchPolicy policy, Map aliases) {
+	public PropertyBridge(Node id, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker, Database database, URIMatchPolicy policy) {
 		this.id = id;
 		this.subjectMaker = subjectMaker;
 		this.predicateMaker = predicateMaker;
 		this.objectMaker = objectMaker;
 		this.database = database;
 		this.uriMatchPolicy = policy;
-		this.aliases = aliases;
 		this.joins.addAll(this.subjectMaker.getJoins());
 		this.joins.addAll(this.predicateMaker.getJoins());
 		this.joins.addAll(this.objectMaker.getJoins());
 		this.conditions.addAll(this.subjectMaker.getConditions());
 		this.conditions.addAll(this.predicateMaker.getConditions());
 		this.conditions.addAll(this.objectMaker.getConditions());
+		this.aliases = this.subjectMaker.getAliases();
+		this.aliases = this.aliases.applyTo(this.predicateMaker.getAliases());
+		this.aliases = this.aliases.applyTo(this.objectMaker.getAliases());
 		boolean oneOrMoreUnique = this.subjectMaker.isUnique()
 				|| this.predicateMaker.isUnique()
 				|| this.objectMaker.isUnique();
@@ -60,30 +59,11 @@ public class PropertyBridge implements Prefixable {
 	}
 	
 	public Object clone() throws CloneNotSupportedException {return super.clone();}
-	public void prefixTables(TablePrefixer prefixer) {
-		Map m=prefixer.getAliasMap();
-		prefixer.setAliasMap(aliases); // aliases Map is changed during prefixing
-		// do also set up new PrefixedAliasMap here if (prefixer.mayChangeID()) ?
-		subjectMaker=prefixer.prefixNodeMaker(subjectMaker);
-		predicateMaker=prefixer.prefixNodeMaker(predicateMaker);
-		objectMaker=prefixer.prefixNodeMaker(objectMaker);
-		joins=prefixer.prefixSet(joins);		
-		conditions=prefixer.prefixConditions(conditions);
-		if (prefixer.mayChangeID())
-			aliases=prefixer.getPrefixedAliasMap();
-		prefixer.setAliasMap(m);
-	}
 
-	public Map getAliases() {
-		return aliases;
+	public AliasMap getAliases() {
+		return this.aliases;
 	}
-	public TablePrefixer getTablePrefixer() {
-		return tablePrefixer;
-	}
-	public void setTablePrefixer(TablePrefixer tablePrefixer) {
-		this.tablePrefixer = tablePrefixer;
-	}
-
+	
 	/**
 	 * Returns the SQL WHERE conditions that must hold for a given
 	 * database row or the bridge will not generate a triple.
@@ -148,5 +128,14 @@ public class PropertyBridge implements Prefixable {
 
 	public String toString() {
 		return super.toString() + "(" + this.id.toString() + ")";
+	}
+	
+	public PropertyBridge withPrefix(int index) {
+		return new PropertyBridge(this.id,
+				TableRenamingNodeMaker.prefix(getSubjectMaker(), index),
+				TableRenamingNodeMaker.prefix(getPredicateMaker(), index),
+				TableRenamingNodeMaker.prefix(getObjectMaker(), index),
+				this.database,
+				this.uriMatchPolicy);
 	}
 }

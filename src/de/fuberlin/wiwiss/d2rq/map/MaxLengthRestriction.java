@@ -1,12 +1,12 @@
 /*
- * $Id: MaxLengthRestriction.java,v 1.2 2005/04/13 17:17:42 garbers Exp $
+ * $Id: MaxLengthRestriction.java,v 1.3 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
+import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
  * Restriction which can be chained with another {@link ValueSource} to limit the
@@ -19,19 +19,17 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-public class MaxLengthRestriction implements ValueSource, Prefixable {
+public class MaxLengthRestriction implements ValueSource {
 	private ValueSource valueSource;
 	private int maxLength;
 	
-	public Object clone() throws CloneNotSupportedException {return super.clone();}
-	public void prefixTables(TablePrefixer prefixer) {
-		valueSource=prefixer.prefixValueSource(valueSource);
-	}
-
-
 	public MaxLengthRestriction(ValueSource valueSource, int maxLength) {
 		this.valueSource = valueSource;
 		this.maxLength = maxLength;
+	}
+
+	public void matchConstraint(NodeConstraint c) {
+		this.valueSource.matchConstraint(c);
 	}
 
 	public boolean couldFit(String value) {

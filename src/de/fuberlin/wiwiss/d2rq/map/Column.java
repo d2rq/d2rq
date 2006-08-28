@@ -1,5 +1,5 @@
 /*
- * $Id: Column.java,v 1.2 2005/04/13 17:17:42 garbers Exp $
+ * $Id: Column.java,v 1.3 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
+import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
  * A database column.
@@ -20,22 +20,10 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-public class Column implements ValueSource, Prefixable {
+public class Column implements ValueSource {
 	private String qualifiedName;
 	private String tableName;
 	private final String columnName;
-
-	public static String appendTableColumn(String t, String c) {
-	    return t + "." + c;
-	}
-	
-	public Object clone() throws CloneNotSupportedException {return super.clone();}
-	public void prefixTables(TablePrefixer prefixer) {
-		String oldTable=tableName;
-		tableName=prefixer.prefixTable(tableName);
-		if (oldTable!=tableName)
-			qualifiedName=tableName + "." + columnName;
-	}
 
 	/**
 	 * Constructs a new Column from a fully qualified column name
@@ -57,6 +45,9 @@ public class Column implements ValueSource, Prefixable {
 		this.columnName=colName;
 	}
 	
+	public void matchConstraint(NodeConstraint c) {
+		c.matchColumn(this);
+	}
 
 	/**
 	 * Returns the column name in <tt>Table.Column</tt> form
@@ -66,18 +57,6 @@ public class Column implements ValueSource, Prefixable {
 		return this.qualifiedName;
 	}
 	
-	public String getQualifiedName(Map aliasMap) {
-	    if (aliasMap==null)
-	        return qualifiedName;
-	    Alias alias=(Alias)aliasMap.get(tableName);
-	    if (alias==null)
-	        return qualifiedName;
-	    String databaseTable=alias.databaseTable();
-	    String databaseColumn=appendTableColumn(databaseTable,columnName);
-		return databaseColumn;
-	}
-
-
 	/**
 	 * Extracts the database column name from a tablename.columnname
 	 * combination.

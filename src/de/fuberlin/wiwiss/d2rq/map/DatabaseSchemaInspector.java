@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.2 2006/07/12 11:08:09 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.3 2006/08/28 19:44:21 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -32,7 +32,7 @@ public class DatabaseSchemaInspector {
 //		case Types.BINARY:        return "xsd:hexBinary";
 //		case Types.BIT:           return "xsd:boolean";
 //		case Types.BLOB:          return "xsd:hexBinary";
-//		case Types.CHAR:          return "xsd:string";
+		case Types.CHAR:          return "xsd:string";
 //		case Types.CLOB:          return "xsd:string";
 		case Types.DATE:          return "xsd:date";
 		case Types.DECIMAL:       return "xsd:decimal";
@@ -41,7 +41,7 @@ public class DatabaseSchemaInspector {
 		case Types.INTEGER:       return "xsd:int";
 //		case Types.JAVA_OBJECT:   return "xsd:string";
 //		case Types.LONGVARBINARY: return "xsd:hexBinary";
-//		case Types.LONGVARCHAR:   return "xsd:string";
+		case Types.LONGVARCHAR:   return "xsd:string";
 		case Types.NUMERIC:       return "xsd:decimal";
 		case Types.REAL:          return "xsd:float";
 //		case Types.REF:           return "xsd:IDREF";
@@ -51,6 +51,7 @@ public class DatabaseSchemaInspector {
 		case Types.TIMESTAMP:     return "xsd:dateTime";
 		case Types.TINYINT:       return "xsd:byte";
 //		case Types.VARBINARY:     return "xsd:hexBinary";
+		case Types.VARCHAR:       return "xsd:string";
 		default: return null;
 		}
 	}
@@ -114,5 +115,31 @@ public class DatabaseSchemaInspector {
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
 		}
+	}
+	
+	public List foreignKeyColumns(String tableName) {
+		try {
+			List result = new ArrayList();
+			ResultSet rs = this.schema.getImportedKeys(null, null, tableName);
+			while (rs.next()) {
+				String pkTableName = rs.getString("PKTABLE_NAME");
+				String pkColumnName = rs.getString("PKCOLUMN_NAME");
+				Column primaryColumn = new Column(pkTableName, pkColumnName);
+				String fkTableName = rs.getString("FKTABLE_NAME");
+				String fkColumnName = rs.getString("FKCOLUMN_NAME");
+				Column foreignColumn = new Column(fkTableName, fkColumnName);
+				result.add(new Column[]{foreignColumn, primaryColumn});
+			}
+			return result;
+		} catch (SQLException ex) {
+			throw new D2RQException("Database exception", ex);
+		}
+	}
+
+	public boolean isLinkTable(String tableName) {
+		if (listColumns(tableName).size() != 2) {
+			return false;
+		}
+		return foreignKeyColumns(tableName).size() == 2;
 	}
 }

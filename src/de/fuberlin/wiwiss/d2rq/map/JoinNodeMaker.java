@@ -1,60 +1,30 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import com.hp.hpl.jena.graph.Node;
-
-import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
-
 /**
- * A node maker that wraps another node maker and adds some joins
- * and/or conditions to the wrapped node maker.
+ * A node maker that wraps another node maker and adds some join conditions.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinNodeMaker.java,v 1.1 2006/07/12 11:08:09 cyganiak Exp $
+ * @version $Id: JoinNodeMaker.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
  */
-public class JoinNodeMaker extends NodeMakerBase {
+public class JoinNodeMaker extends WrappingNodeMaker {
+	private Set joins;
+	private boolean isUnique;
 	
-	public static NodeMaker create(NodeMaker other, Set joins, Set conditions, boolean isUnique) {
-		Set allJoins = new HashSet(joins);
-		allJoins.addAll(other.getJoins());
-		Set allConditions = new HashSet(conditions);
-		allConditions.addAll(other.getConditions());
-		return new JoinNodeMaker(other, allJoins, allConditions, isUnique && other.isUnique());
-	}
-	
-	private NodeMaker other;
-
-	private JoinNodeMaker(NodeMaker other, Set allJoins, Set allConditions, boolean isUnique) {
-		super(allJoins, allConditions, isUnique);
-		this.other = other;
+	public JoinNodeMaker(NodeMaker base, Set joins, boolean isUnique) {
+		super(base);
+		this.joins = new HashSet(joins);
+		joins.addAll(base.getJoins());
+		this.isUnique = isUnique;
 	}
 	
-	public void matchConstraint(NodeConstraint c) {
-		other.matchConstraint(c);
-	}
-
-	public boolean couldFit(Node node) {
-		return other.couldFit(node);
-	}
-
-	public Map getColumnValues(Node node) {
-		return other.getColumnValues(node);
-	}
-
-	public Set getColumns() {
-		return other.getColumns();
-	}
-
-	public Node getNode(String[] row, Map columnNameNumberMap) {
-		return other.getNode(row, columnNameNumberMap);
+	public Set getJoins() {
+		return this.joins;
 	}
 	
-	public void prefixTables(TablePrefixer prefixer) {
-		super.prefixTables(prefixer);
-		this.other = prefixer.prefixNodeMaker(this.other);
+	public boolean isUnique() {
+		return this.isUnique;
 	}
 }

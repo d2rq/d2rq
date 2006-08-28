@@ -3,13 +3,13 @@
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
-import com.hp.hpl.jena.graph.*;
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * BlankNodeMakers transform attribute values from a result set into blank nodes.
@@ -26,12 +26,12 @@ public class BlankNodeMaker extends NodeMakerBase {
 	private ValueSource valueSource;
 	
 	public void matchConstraint(NodeConstraint c) {
-        c.matchNodeType(NodeConstraint.BlankNodeType);
-        c.matchValueSource(valueSource);
+		c.matchNodeType(NodeConstraint.BlankNodeType);
+		this.valueSource.matchConstraint(c);
 	}       
 	
-	public BlankNodeMaker(String id, ValueSource valueSource, Set joins, Set conditions, boolean isUnique) {
-		super(joins, conditions, isUnique);
+	public BlankNodeMaker(String id, ValueSource valueSource, boolean isUnique) {
+		super(isUnique);
 		this.id = id;
 		this.valueSource = valueSource;
 	}
@@ -68,9 +68,4 @@ public class BlankNodeMaker extends NodeMakerBase {
 	public String toString() {
 		return "BlankNodeMaker@" + this.id;
 	}
-	
-	public void prefixTables(TablePrefixer prefixer) {
-		super.prefixTables(prefixer);
-		this.valueSource = prefixer.prefixValueSource(this.valueSource);
-	}	
 }

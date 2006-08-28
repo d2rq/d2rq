@@ -1,5 +1,5 @@
 /*
- * $Id: SPARQLTest.java,v 1.1 2005/12/13 14:15:33 garbers Exp $
+ * $Id: SPARQLTest.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
@@ -54,7 +54,7 @@ public class SPARQLTest extends SPARQLTestFramework {
 		assertResult(aResult);
 
 		aResult.put("x", this.model.createResource(NS + "title"));
-		aResult.put("y", this.model.createLiteral("Titel of the Paper: Trusting Information Sources One Citizen at a Time", "en"));
+		aResult.put("y", this.model.createLiteral("Trusting Information Sources One Citizen at a Time (Full paper)", "en"));
 		assertResult(aResult);
 
 		aResult.put("x", this.model.createResource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
@@ -127,7 +127,7 @@ public class SPARQLTest extends SPARQLTestFramework {
 	}
 
 	public void testSPARQLGetAuthorsOfPaperByTitle() {
-		sparql("SELECT ?x ?y WHERE { ?x <http://annotation.semanticweb.org/iswc/iswc.daml#author> ?y . ?x <http://annotation.semanticweb.org/iswc/iswc.daml#title> 'Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language'@en }");
+		sparql("SELECT ?x ?y WHERE { ?x <http://annotation.semanticweb.org/iswc/iswc.daml#author> ?y . ?x <http://annotation.semanticweb.org/iswc/iswc.daml#title> 'Three Implementations of SquishQL, a Simple RDF Query Language (Full paper)'@en }");
 //		dump();
 		Map aResult = new HashMap();
 
@@ -143,7 +143,7 @@ public class SPARQLTest extends SPARQLTestFramework {
 	}
 
 	public void testSPARQLGetAuthorsNameAndEmail() {
-		sparql("SELECT ?x ?y ?a WHERE { ?x <http://annotation.semanticweb.org/iswc/iswc.daml#author> ?y . ?x <http://annotation.semanticweb.org/iswc/iswc.daml#title> 'Titel of the Paper: Three Implementations of SquishQL, a Simple RDF Query Language'@en . ?y <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> ?a }");
+		sparql("SELECT ?x ?y ?a WHERE { ?x <http://annotation.semanticweb.org/iswc/iswc.daml#author> ?y . ?x <http://annotation.semanticweb.org/iswc/iswc.daml#title> 'Three Implementations of SquishQL, a Simple RDF Query Language (Full paper)'@en . ?y <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> ?a }");
 //		dump();
 		Map aResult = new HashMap();
 
@@ -158,5 +158,9 @@ public class SPARQLTest extends SPARQLTestFramework {
 		assertResult(aResult);
 
 		assertResultCount(2);
+	}
+	
+	public void testRDFType(){
+		sparql("SELECT ?x ?y ?z WHERE { ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://annotation.semanticweb.org/iswc/iswc.daml#InProceedings> . ?x ?y ?z } ");
 	}
 }

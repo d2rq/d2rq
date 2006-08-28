@@ -6,27 +6,14 @@ package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
-import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.graph.query.ExpressionSet;
-import com.hp.hpl.jena.graph.query.Mapping;
-import com.hp.hpl.jena.graph.query.PatternStage;
-import com.hp.hpl.jena.graph.query.Pattern;
-import com.hp.hpl.jena.graph.query.Pipe;
-import com.hp.hpl.jena.graph.query.ValuatorSet;
-import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.find.QueryCombiner;
 import de.fuberlin.wiwiss.d2rq.find.SQLStatementMaker;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
-import de.fuberlin.wiwiss.d2rq.helpers.IndexArray;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
@@ -117,8 +104,6 @@ void makeStores() {
  * so we create individual instances of the bridges and systematically rename 
  * their tables. We prefix each Table with "T<n>_ where <n> is the index of the
  *  triple in the overall query.
- * 
- * @see TablePrefixer 
  */
 void makePropertyBridges() {
 	if (!cont())
@@ -209,13 +194,13 @@ protected static SQLStatementMaker getSQL(TripleQuery[] conjunction) {
 	for (int i=0; (i<conjunction.length) && possible; i++) {
 		TripleQuery t=conjunction[i];
 		sql.addAliasMap(t.getPropertyBridge().getAliases());
+		sql.addColumnRenames(t.getReplacedColumns()); // ?
 		sql.addSelectColumns(t.getSelectColumns());
 		sql.addJoins(t.getJoins());
 		sql.addColumnValues(t.getColumnValues());
 		// addConditions should be last, because checks if a textual token is likely to 
 		// be a table based on previously in select, join and column values seen tables
 		sql.addConditions(t.getConditions()); 
-		sql.addColumnRenames(t.getReplacedColumns()); // ?
 	}
 	return sql;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: Pattern.java,v 1.4 2006/07/12 11:08:09 cyganiak Exp $
+ * $Id: Pattern.java,v 1.5 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
@@ -14,7 +14,6 @@ import java.util.Set;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
 
 /**
  * A pattern that combines one or more database columns into a String. Often
@@ -32,43 +31,12 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-public class Pattern implements ValueSource, Prefixable {
+public class Pattern implements ValueSource {
 	private String pattern;
 	private String firstLiteralPart = null;
 	private List columns = new ArrayList(3);
 	private List literalParts = new ArrayList(3);
 	private Set columnsAsSet;
-
-	public Object clone() throws CloneNotSupportedException {return super.clone();}
-	public void prefixTables(TablePrefixer prefixer) {
-		List old=columns;
-		columns=(List)prefixer.prefixCollection(columns);
-		if (old!=columns) {
-			columnsAsSet=new HashSet(columns);
-			pattern=reconstructPattern();
-		}
-	}
-	public void matchPatternIntoNodeConstraint(Pattern other, NodeConstraint c) {
-	    boolean startOK=other.firstLiteralPart.startsWith(this.firstLiteralPart) || 
-  	  		this.firstLiteralPart.startsWith(other.firstLiteralPart);
-	    if (!startOK) {
-	        c.possible=false;
-	        return;
-	    }
-	    String thisLastLiteral=(String)literalParts.get(literalParts.size()-1);
-	    String otherLastLiteral=(String)other.literalParts.get(other.literalParts.size()-1);
-	    boolean endOK=otherLastLiteral.endsWith(thisLastLiteral) || 
-	    	thisLastLiteral.endsWith(otherLastLiteral);
-	    if (!endOK) {
-	        c.possible=false;
-	        return;
-	    }
-	    if ((columns.size()==1) && (other.columns.size()==1) &&
-	            this.firstLiteralPart.equals(other.firstLiteralPart) &&
-	            thisLastLiteral.equals(otherLastLiteral)) {
-	        c.addEqualColumn((Column)columns.get(0),(Column)other.columns.get(0));
-	    }
-	}
 
 	/**
 	 * Constructs a new Pattern instance from a pattern syntax string
@@ -79,6 +47,10 @@ public class Pattern implements ValueSource, Prefixable {
 		this.pattern = pattern;
 		parsePattern();
 		this.columnsAsSet = new HashSet(this.columns);
+	}
+
+	public void matchConstraint(NodeConstraint c) {
+		c.matchPattern(this, this.columns);
 	}
 
 	public boolean couldFit(String value) {
@@ -173,25 +145,24 @@ public class Pattern implements ValueSource, Prefixable {
 		return result.toString();
 	}
 	
-	public String reconstructPattern() {
-	    return joinPattern(D2RQ.deliminator);
-	}
-	public String joinPattern(String joinOp) {
-		StringBuffer result = new StringBuffer(this.firstLiteralPart);
-		result.append(joinOp);
-		for (int i=0;i<columns.size(); i++) {
-			Column column = (Column) columns.get(i);
-			result.append(column.getQualifiedName());
-			result.append(joinOp);
-			result.append(literalParts.get(i));
-		}
-		return result.toString();
-	}
-	
 	public String toString() {
 		return "D2RQ pattern: \"" + this.pattern + "\"";
 	}
 
+	public Pattern renameTables(AliasMap renames) {
+		int index = 0;
+		StringBuffer newPattern = new StringBuffer(this.firstLiteralPart);
+		while (index < this.columns.size()) {
+			Column column = (Column) this.columns.get(index);
+			newPattern.append(D2RQ.deliminator);
+			newPattern.append(renames.applyTo(column).getQualifiedName());
+			newPattern.append(D2RQ.deliminator);
+			newPattern.append(this.literalParts.get(index));
+			index++;
+		}
+		return new Pattern(newPattern.toString());
+	}
+	
 	private void parsePattern() {
 		int fieldStart = this.pattern.indexOf(D2RQ.deliminator);
 		if (fieldStart == -1) {

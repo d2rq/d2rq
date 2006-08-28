@@ -3,11 +3,15 @@
 */
 package de.fuberlin.wiwiss.d2rq.find;
 
-import java.util.*;
-import com.hp.hpl.jena.util.iterator.*;
-import com.hp.hpl.jena.graph.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.util.iterator.ClosableIterator;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.util.iterator.NiceIterator;
+
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 
 /**

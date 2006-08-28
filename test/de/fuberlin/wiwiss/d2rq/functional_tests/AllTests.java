@@ -1,9 +1,8 @@
 /*
- * $Id: AllTests.java,v 1.3 2005/12/15 12:04:05 garbers Exp $
+ * $Id: AllTests.java,v 1.4 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
-import de.fuberlin.wiwiss.d2rq.DBConnectionTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -26,11 +25,11 @@ public class AllTests {
 		TestSuite suite = new TestSuite(
 				"Test for de.fuberlin.wiwiss.d2rq.functional_tests");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(DBConnectionTest.class);
-		suite.addTestSuite(FindTest.class);
 		suite.addTestSuite(RDQLTest.class);
-		suite.addTestSuite(ModelAPITest.class);
+		suite.addTestSuite(FindTest.class);
+		suite.addTestSuite(SPARQLTest.class);
 		suite.addTestSuite(RDQLDB2Test.class);
+		suite.addTestSuite(ModelAPITest.class);
 		//$JUnit-END$
 		return suite;
 	}

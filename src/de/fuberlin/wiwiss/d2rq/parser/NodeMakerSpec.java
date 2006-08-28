@@ -9,9 +9,12 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.map.AliasMap;
+import de.fuberlin.wiwiss.d2rq.map.TableRenamingNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
 import de.fuberlin.wiwiss.d2rq.map.BlankNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.ConditionNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.ContainsRestriction;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
@@ -31,7 +34,7 @@ import de.fuberlin.wiwiss.d2rq.types.DateTimeTranslator;
  * through calls to the setter methods.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeMakerSpec.java,v 1.2 2006/07/12 11:08:09 cyganiak Exp $
+ * @version $Id: NodeMakerSpec.java,v 1.3 2006/08/28 19:44:23 cyganiak Exp $
  */
 public class NodeMakerSpec {
 	
@@ -62,6 +65,8 @@ public class NodeMakerSpec {
 	private TranslationTable translationTable = null;
 	private Set joins = new HashSet();
 	private Set conditions = new HashSet();
+	private AliasMap aliases = null;
+	
 	private boolean isUnique = false;
 	private Database database = null;
 	
@@ -140,6 +145,10 @@ public class NodeMakerSpec {
 		this.conditions.addAll(conditions);
 	}
 	
+	public void setAliases(Set aliases) {
+		this.aliases = AliasMap.buildFromSQL(aliases);
+	}
+	
 	public void setIsUnique() {
 		this.isUnique = true;
 	}
@@ -160,14 +169,46 @@ public class NodeMakerSpec {
 		if (this.product != null) {
 			return this.product;
 		}
-		if (this.wrapped != null) {
-			return JoinNodeMaker.create(this.wrapped.build(), 
-					this.joins, this.conditions, this.isUnique);
-		}
 		if (this.fixed != null) {
 			return new FixedNodeMaker(this.fixed);
 		}
-		ValueSource values = buildValueSource();
+		if (this.wrapped == null) {
+			this.product = buildNodeMaker(wrapValueSource(buildValueSource()));
+		} else {
+			this.product = this.wrapped.build();
+		}
+		if (!AliasMap.NO_ALIASES.equals(this.aliases)) {
+			this.product = new TableRenamingNodeMaker(this.product, this.aliases);
+		}
+		if (!this.joins.isEmpty()) {
+			this.product = new JoinNodeMaker(this.product, this.joins, this.isUnique);
+		}
+		if (!this.conditions.isEmpty()) {
+			this.product = new ConditionNodeMaker(this.product, this.conditions);
+		}
+		return this.product;
+	}
+
+	private ValueSource buildValueSource() {
+		if (this.blankColumns != null) {
+			return new BlankNodeIdentifier(this.blankColumns, this.mapName);
+		}
+		if (this.uriColumn != null) {
+			return new Column(this.uriColumn);
+		}
+		if (this.uriPattern != null) {
+			return new Pattern(this.uriPattern);
+		}
+		if (this.literalColumn != null) {
+			return new Column(this.literalColumn);
+		}
+		if (this.literalPattern != null) {
+			return new Pattern(this.literalPattern);
+		}
+		throw new D2RQException(this.mapName + " needs a column/pattern/bNodeID specification");
+	}
+
+	private ValueSource wrapValueSource(ValueSource values) {
 		if (this.regexHint != null) {
 			values = new RegexRestriction(values, this.regexHint);
 		}
@@ -191,38 +232,18 @@ public class NodeMakerSpec {
 		if (this.translationTable != null) {
 			values = this.translationTable.getTranslatingValueSource(values);
 		}
-		this.product = buildNodeMaker(values);
-		return this.product;
+		return values;
 	}
-
-	private ValueSource buildValueSource() {
-		if (this.blankColumns != null) {
-			return new BlankNodeIdentifier(this.blankColumns, this.mapName);
-		}
-		if (this.uriColumn != null) {
-			return new Column(this.uriColumn);
-		}
-		if (this.uriPattern != null) {
-			return new Pattern(this.uriPattern);
-		}
-		if (this.literalColumn != null) {
-			return new Column(this.literalColumn);
-		}
-		if (this.literalPattern != null) {
-			return new Pattern(this.literalPattern);
-		}
-		throw new D2RQException(this.mapName + " needs a column/pattern/bNodeID specification");
-	}
-
+	
 	private NodeMaker buildNodeMaker(ValueSource values) {
 		if (this.blankColumns != null) {
-			return new BlankNodeMaker(this.mapName, values, this.joins, this.conditions, this.isUnique);
+			return new BlankNodeMaker(this.mapName, values, this.isUnique);
 		}
 		if (this.uriColumn != null || this.uriPattern != null) {
-			return new UriMaker(this.mapName, values, this.joins, this.conditions, this.isUnique);
+			return new UriMaker(this.mapName, values, this.isUnique);
 		}
 		if (this.literalColumn != null || this.literalPattern != null) {
-			return new LiteralMaker(this.mapName, values, this.joins, this.conditions, this.isUnique, buildDatatype(this.datatypeURI), this.lang);
+			return new LiteralMaker(this.mapName, values, this.isUnique, buildDatatype(this.datatypeURI), this.lang);
 		}
 		throw new D2RQException(this.mapName + " needs a column/pattern/bNodeID specification");
 	}

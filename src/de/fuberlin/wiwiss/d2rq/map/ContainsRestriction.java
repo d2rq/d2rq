@@ -1,12 +1,12 @@
 /*
- * $Id: ContainsRestriction.java,v 1.2 2005/04/13 17:17:42 garbers Exp $
+ * $Id: ContainsRestriction.java,v 1.3 2006/08/28 19:44:21 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
+import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
  * Restriction which can be chained with another {@link ValueSource} to state
@@ -19,18 +19,17 @@ import de.fuberlin.wiwiss.d2rq.rdql.TablePrefixer;
  * @author Richard Cyganiak <richard@cyganiak.de>
  * @version V0.2
  */
-public class ContainsRestriction implements ValueSource, Prefixable {
+public class ContainsRestriction implements ValueSource {
 	private ValueSource valueSource;
 	private String containedValue;
 	
-	public Object clone() throws CloneNotSupportedException {return super.clone();}
-	public void prefixTables(TablePrefixer prefixer) {
-		valueSource=prefixer.prefixValueSource(valueSource);
-	}
-
 	public ContainsRestriction(ValueSource valueSource, String containedValue) {
 		this.valueSource = valueSource;
 		this.containedValue = containedValue;
+	}
+	
+	public void matchConstraint(NodeConstraint c) {
+		this.valueSource.matchConstraint(c);
 	}
 
 	public boolean couldFit(String value) {
