@@ -9,11 +9,11 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
-import de.fuberlin.wiwiss.d2rq.find.CombinedTripleResultSet;
 import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.ConjunctionIterator;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
@@ -42,7 +42,7 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 	/** iterator helper */
 	protected boolean didPrefetch=false;
 	/** iterator that returns triple arrays for database rows */
-	CombinedTripleResultSet resultSet=null; 
+	ApplyTripleMakerRowIterator resultSet=null; 
 	
 	Database nextDatabase;
 											
@@ -108,7 +108,7 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 		prefetchedResult=null;
 		while (true) {
 			if ((resultSet!=null) && (resultSet.hasNext())) {
-				prefetchedResult = resultSet.next();
+				prefetchedResult = resultSet.nextRow();
 				return;
 			}
 			if (!conjunctionsIterator.hasNext())
@@ -130,9 +130,8 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 			String statement=sql.getSQLStatement();
 			Map map=sql.getColumnNameNumberMap();
 			nextDatabase = conjunction[0].getDatabase();
-			resultSet = new 
-				CombinedTripleResultSet(statement,map,nextDatabase);
-			resultSet.setTripleMakers(conjunction);
+			QueryExecutionIterator it = new QueryExecutionIterator(statement, this.nextDatabase);
+			this.resultSet = new ApplyTripleMakerRowIterator(it, conjunction, map);
 		} // enless while loop
 	}
 
