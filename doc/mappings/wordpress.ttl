@@ -39,6 +39,13 @@
 	d2rq:column "categories.category_description";
 	d2rq:condition "categories.category_description!=''";
 	.
+:propertyBridge_categories_category_parent a d2rq:PropertyBridge;
+    d2rq:belongsToClassMap :classMap_categories;
+    d2rq:property skos:broader;
+    d2rq:refersToClassMap :classMap_categories;
+    d2rq:join "categories.category_parent = parent_cat.cat_ID";
+    d2rq:alias "categories AS parent_cat";
+    .
 
 # Table comments
 :classMap_comments a d2rq:ClassMap;
