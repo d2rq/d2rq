@@ -32,8 +32,10 @@ import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
  *       the wrong place; especially {@link #getReplacedColumns()}
  *       seems awkward
  * 
+ * TODO: Common interface with PropertyBridge?
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PropertyBridgeQuery.java,v 1.1 2006/08/29 16:12:14 cyganiak Exp $
+ * @version $Id: PropertyBridgeQuery.java,v 1.2 2006/08/29 17:30:22 cyganiak Exp $
  */
 public class PropertyBridgeQuery {
 	private PropertyBridge bridge;
