@@ -60,7 +60,7 @@ public class generate_mapping {
 			} else {
 				out = System.out;
 			}
-			gen.write(out);
+			gen.writeMapping(out);
 		} catch (IOException ex) {
 			System.err.println(ex.getMessage());
 			System.exit(1);
