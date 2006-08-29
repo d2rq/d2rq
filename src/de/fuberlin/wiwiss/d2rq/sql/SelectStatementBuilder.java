@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.2 2006/08/29 15:13:12 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.3 2006/08/29 20:33:29 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -232,14 +232,16 @@ public class SelectStatementBuilder {
 
 	private static String getQuotedColumnValue(String value, int columnType) {
 		if (Database.numericColumnType==columnType) {
-			// convert to number and back to String to avoid SQL injection
+			// Check if it actually is a number to avoid SQL injection
 			try {
 				return Integer.toString(Integer.parseInt(value));
 			} catch (NumberFormatException nfex) {
 				try {
 					return Double.toString(Double.parseDouble(value));
 				} catch (NumberFormatException nfex2) {
-					return "NULL";
+					// No number -- return as quoted string
+					// DBs seem to interpret non-number strings as 0
+					return "'" + SelectStatementBuilder.escape(value) + "'";
 				}
 			}
 		} else if (Database.dateColumnType==columnType) {
