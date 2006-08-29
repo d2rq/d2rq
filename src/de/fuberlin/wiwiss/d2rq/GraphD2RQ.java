@@ -220,7 +220,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			combiner.add(new TripleQuery(bridge,
 					t.getSubject(), t.getPredicate(), t.getObject()));
 		}
-		return combiner.getResultIterator();
+		return combiner.tripleIterator();
     }
 	
 	static PropertyBridge[] emptyPropertyBridgeArray=new PropertyBridge[0];

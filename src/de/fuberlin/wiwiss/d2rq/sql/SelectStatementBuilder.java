@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.1 2006/08/28 21:13:47 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.2 2006/08/29 15:13:12 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -115,10 +115,10 @@ public class SelectStatementBuilder {
 			return;
 		}
 		this.sqlSelect.add(qualName);
-		this.selectColumnCount++;
 		this.columnNameNumber.put(qualName,
 				new Integer(this.selectColumnCount));
 		this.mentionedTables.add(column.getTableName());
+		this.selectColumnCount++;
 	}
 
     /**

@@ -19,11 +19,11 @@ import com.hp.hpl.jena.rdql.QueryResults;
 import com.hp.hpl.jena.rdql.ResultBinding;
 import com.hp.hpl.jena.rdql.ResultBindingIterator;
 
-import de.fuberlin.wiwiss.d2rq.find.SQLResultSet;
 import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
 import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
 import de.fuberlin.wiwiss.d2rq.helpers.JenaCompatibility;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 
 /**
  * Functional tests that exercise a ModelD2RQ by running RDQL queries against it. 
@@ -124,10 +124,10 @@ public class RDQLTestFramework extends TestFramework {
 		this.model = new ModelD2RQ(D2RQMap);
 		oldIsUsingD2RQQueryHandler=GraphD2RQ.isUsingD2RQQueryHandler();
 		GraphD2RQ.setUsingD2RQQueryHandler(true);
-		oldSQLResultSetLogger=SQLResultSet.logger;
-		oldSQLResultSetSeparatorLogger=SQLResultSet.separatorLogger;
-		SQLResultSet.logger=sqlResultSetLogger;
-		SQLResultSet.separatorLogger=new Logger(); // silent
+		oldSQLResultSetLogger=QueryExecutionIterator.logger;
+		oldSQLResultSetSeparatorLogger=QueryExecutionIterator.separatorLogger;
+		QueryExecutionIterator.logger=sqlResultSetLogger;
+		QueryExecutionIterator.separatorLogger=new Logger(); // silent
 //		this.model.enableDebug();
 	    setUpShowErrors(); // should be activated all the time
 //	    setUpShowPerformance(); // activate (only) to test performance (only)
@@ -138,8 +138,8 @@ public class RDQLTestFramework extends TestFramework {
 	
 	protected void tearDown() throws Exception {
 	    GraphD2RQ.setUsingD2RQQueryHandler(oldIsUsingD2RQQueryHandler);
-		SQLResultSet.logger=oldSQLResultSetLogger;
-		SQLResultSet.separatorLogger=oldSQLResultSetSeparatorLogger;
+		QueryExecutionIterator.logger=oldSQLResultSetLogger;
+		QueryExecutionIterator.separatorLogger=oldSQLResultSetSeparatorLogger;
 		this.model.close();
 		this.results = null;
 		super.tearDown();

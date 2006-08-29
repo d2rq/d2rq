@@ -1,5 +1,5 @@
 /*
- * $Id: QueryCombiner.java,v 1.3 2006/08/28 21:13:47 cyganiak Exp $
+ * $Id: QueryCombiner.java,v 1.4 2006/08/29 15:13:12 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.find;
 
@@ -8,6 +8,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.util.iterator.NullIterator;
+
+import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 
@@ -41,29 +45,17 @@ public class QueryCombiner {
 		this.compatibleQueries.add(newList);
 	}
 
-	public D2RQResultIterator getResultIterator() {
-		D2RQResultIterator result = new D2RQResultIterator();
+	public ExtendedIterator tripleIterator() {
+		ExtendedIterator resultIterator = new NullIterator();
 		Iterator it = this.compatibleQueries.iterator();
 		while (it.hasNext()) {
 			List queryList = (List) it.next();
-			result.addTripleResultSet(getTripleResultSet(queryList));
+			SelectStatementBuilder sql = getSQL(queryList);
+			resultIterator = resultIterator.andThen(new ApplyTripleMakersIterator(
+					new QueryExecutionIterator(sql.getSQLStatement(), sql.getDatabase()),
+					queryList, sql.getColumnNameNumberMap()));
 		}
-		return result;
-	}
-
-	private TripleResultSet getTripleResultSet(List queries) {
-		SelectStatementBuilder sql = getSQL(queries);
-		Iterator it = queries.iterator();
-		TripleQuery first = (TripleQuery) it.next();
-		TripleResultSet result = new TripleResultSet(sql.getSQLStatement(),
-				sql.getColumnNameNumberMap(),
-				first.getDatabase());
-		result.addTripleMaker(first);
-		while (it.hasNext()) {
-			TripleQuery query = (TripleQuery) it.next();
-			result.addTripleMaker(query);
-		}
-		return result;
+		return resultIterator;
 	}
 
 	private SelectStatementBuilder getSQL(List queries) {

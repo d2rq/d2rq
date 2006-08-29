@@ -1,8 +1,9 @@
 /*
- * $Id: AllTests.java,v 1.9 2006/08/28 21:33:40 cyganiak Exp $
+ * $Id: AllTests.java,v 1.10 2006/08/29 15:13:13 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
+import de.fuberlin.wiwiss.d2rq.find.ApplyTripleMakersIteratorTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -24,12 +25,13 @@ public class AllTests {
 		suite.addTestSuite(ValueRestrictionTest.class);
 		suite.addTestSuite(DBConnectionTest.class);
 		suite.addTestSuite(ColumnTest.class);
-		suite.addTestSuite(ResultIteratorTest.class);
+		suite.addTestSuite(ApplyTripleMakersIteratorTest.class);
 		suite.addTestSuite(CSVParserTest.class);
 		suite.addTestSuite(TranslationTableTest.class);
 		//$JUnit-END$
 		suite.addTest(de.fuberlin.wiwiss.d2rq.parser.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.map.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.find.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.sql.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.functional_tests.AllTests.suite());
 		return suite;

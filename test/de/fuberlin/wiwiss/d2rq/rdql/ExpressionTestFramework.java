@@ -8,9 +8,9 @@ import java.util.Map;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.SPARQLTestFramework;
-import de.fuberlin.wiwiss.d2rq.find.SQLResultSet;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 
 public class ExpressionTestFramework extends SPARQLTestFramework {
     String condition, sqlCondition=null;
@@ -40,10 +40,10 @@ public class ExpressionTestFramework extends SPARQLTestFramework {
 		translatedLogger.setDebug(true);
 		if (translatedLogger.debugEnabled())
 		    ExpressionTranslator.logSqlExpressions=new HashSet();
-		SQLResultSet.simulationMode=true;
+// RC	QueryExecutionIterator.simulated=true;
 		setUpMixOutputs(false);
 		GraphD2RQ.setUsingD2RQQueryHandler(true);
-		SQLResultSet.protocol=new ArrayList();
+		QueryExecutionIterator.protocol=new ArrayList();
 		activateExpressionTranslator(model);
 	}
 
