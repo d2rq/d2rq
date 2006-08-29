@@ -22,7 +22,7 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
+import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
@@ -142,7 +142,7 @@ public class D2RQPatternStage extends CombinedPatternStage {
                     // databases
                     if (len == maxlen
                             || multipleDatabasesMarker.get(nextToFind + len)) {
-                        TripleQuery[][] tripleQueries = new TripleQuery[len][];
+                        PropertyBridgeQuery[][] tripleQueries = new PropertyBridgeQuery[len][];
                         System.arraycopy(combiner.tripleQueries, 0,
                                 tripleQueries, 0, len);
                         int partEnd = nextToFind + len - 1;
@@ -170,7 +170,7 @@ public class D2RQPatternStage extends CombinedPatternStage {
 			return null;
 		return makeCombinedIterator(combiner.tripleQueries,variableBindings,constraints);
 	}
-	private PQCResultIterator makeCombinedIterator(TripleQuery[][] tripleQueries, VariableBindings variableBindings, Collection constraints) {
+	private PQCResultIterator makeCombinedIterator(PropertyBridgeQuery[][] tripleQueries, VariableBindings variableBindings, Collection constraints) {
 		PQCResultIterator it=new PQCResultIterator(tripleQueries, 
 				variableBindings, constraints);
 		return it;

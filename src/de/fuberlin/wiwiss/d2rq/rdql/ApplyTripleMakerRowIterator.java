@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
-import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
+import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 
 /**
@@ -14,16 +14,16 @@ import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
  * A triple is produced for TripleMaker in TripleMaker and each row in the result set.
  *
  * @author jgarbers
- * @version $Id: ApplyTripleMakerRowIterator.java,v 1.1 2006/08/29 15:37:30 cyganiak Exp $
+ * @version $Id: ApplyTripleMakerRowIterator.java,v 1.2 2006/08/29 16:12:14 cyganiak Exp $
  */
 public class ApplyTripleMakerRowIterator implements ClosableIterator {
 	private QueryExecutionIterator sqlIterator;
 	private Map columnNameNumberMap;
-	private TripleQuery[] tripleMakers = null;
+	private PropertyBridgeQuery[] tripleMakers = null;
 	private Triple[] prefetchedRow;
 	private boolean explicitlyClosed = false;
 
-	public ApplyTripleMakerRowIterator(QueryExecutionIterator sqlIterator, TripleQuery[] tripleMakers,
+	public ApplyTripleMakerRowIterator(QueryExecutionIterator sqlIterator, PropertyBridgeQuery[] tripleMakers,
 			Map columnNameNumberMap) {
 		this.sqlIterator = sqlIterator;
 		this.tripleMakers = tripleMakers;
@@ -76,7 +76,7 @@ public class ApplyTripleMakerRowIterator implements ClosableIterator {
 	private Triple[] makeTripleRow(String[] row) {
 		Triple[] result = new Triple[tripleMakers.length];
 		for (int i = 0; i < tripleMakers.length; i++) {
-			TripleQuery tripleMaker = (TripleQuery) tripleMakers[i];
+			PropertyBridgeQuery tripleMaker = (PropertyBridgeQuery) tripleMakers[i];
 			Triple triple = tripleMaker.makeTriple(row, this.columnNameNumberMap);
 			if (triple == null) {
 				return null;

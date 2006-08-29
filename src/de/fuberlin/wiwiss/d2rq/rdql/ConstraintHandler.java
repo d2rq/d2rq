@@ -15,7 +15,7 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Expression;
 
-import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
+import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
@@ -32,7 +32,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 class ConstraintHandler {
     public boolean possible=true;
     public VariableBindings bindings;
-    TripleQuery[] conjunction;
+    PropertyBridgeQuery[] conjunction;
     /** Mapping between a variable (Node) and its NodeConstraints. */
     public Map variableToConstraint=new HashMap(); 
     Collection rdqlConstraints;
@@ -42,7 +42,7 @@ class ConstraintHandler {
         this.bindings=bindings;
     }
     
-    public void setTripleQueryConjunction(TripleQuery[] conjunction) {
+    public void setTripleQueryConjunction(PropertyBridgeQuery[] conjunction) {
         this.conjunction=conjunction;
     }
     
@@ -138,9 +138,9 @@ class ConstraintHandler {
      *
      */
 	public class NodeMakerIterator implements Iterator {
-	    TripleQuery[] conjunction;
+	    PropertyBridgeQuery[] conjunction;
 	    Iterator indexSetIterator;
-		public NodeMakerIterator(TripleQuery[] conjunction, Set indexSet) {
+		public NodeMakerIterator(PropertyBridgeQuery[] conjunction, Set indexSet) {
 		    this.conjunction=conjunction;
 		    this.indexSetIterator=indexSet.iterator();
 		}

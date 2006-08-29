@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * queries on an LRU basis.
  * 
  * @author Holger Knublauch (holger@topquadrant.com)
- * @version $Id: CachingGraphD2RQ.java,v 1.1 2006/08/10 19:53:50 cyganiak Exp $
+ * @version $Id: CachingGraphD2RQ.java,v 1.2 2006/08/29 16:12:15 cyganiak Exp $
  */
 public class CachingGraphD2RQ extends GraphD2RQ {
 
@@ -57,14 +57,14 @@ public class CachingGraphD2RQ extends GraphD2RQ {
 	/**
 	 * Overloaded to reuse and update the cache.
 	 */
-	public ExtendedIterator graphBaseFind( TripleMatch m, List propertyBridgeCandidates ) {
+	public ExtendedIterator graphBaseFind(TripleMatch m) {
 
 		List cached = (List) queryCache.get(m);
 		if(cached != null) {
             return WrappedIterator.create(cached.iterator());
 		}
 		
-		ExtendedIterator it = super.graphBaseFind(m, propertyBridgeCandidates);
+		ExtendedIterator it = super.graphBaseFind(m);
 		
 		final List list = it.toList();
 		queryCache.put(m, list);

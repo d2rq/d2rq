@@ -9,7 +9,7 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
-import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
+import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.ConjunctionIterator;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -36,7 +36,7 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 	/** Iterator for TripleQuery conjunctions */
     protected ConjunctionIterator conjunctionsIterator;
     /** next TripleQuery conjunction to be processed */
-	private TripleQuery[] conjunction; 
+	private PropertyBridgeQuery[] conjunction; 
 	/** iterator helper */
 	protected Triple[] prefetchedResult=null;
 	/** iterator helper */
@@ -47,11 +47,11 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 	Database nextDatabase;
 											
 
-	public PQCResultIterator(TripleQuery[][] tripleQueries, VariableBindings variableBindings, Collection constraints) { // or maybe pass conjunctionsIterator as
+	public PQCResultIterator(PropertyBridgeQuery[][] tripleQueries, VariableBindings variableBindings, Collection constraints) { // or maybe pass conjunctionsIterator as
 		//combiner = combiner4;
 		this.variableBindings=variableBindings;
 		this.constraints=constraints;
-		conjunction=new TripleQuery[tripleQueries.length];
+		conjunction=new PropertyBridgeQuery[tripleQueries.length];
 		conjunctionsIterator= new ConjunctionIterator(tripleQueries, conjunction);
 	}
 	

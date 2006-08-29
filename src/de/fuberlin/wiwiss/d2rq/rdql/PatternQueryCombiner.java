@@ -11,8 +11,8 @@ import java.util.List;
 import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.find.QueryCombiner;
-import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
+import de.fuberlin.wiwiss.d2rq.find.FindQuery;
+import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
@@ -32,7 +32,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * useless, if there are (Bound) variables for predicates.
  * 
  * @author jgarbers
- * @see QueryCombiner
+ * @see FindQuery
  */
 class PatternQueryCombiner {
     /** if false then contradiction, no SQL query necessary. */
@@ -54,7 +54,7 @@ class PatternQueryCombiner {
 	protected int[] bridgesCounts; 
 								  
 	/** holds for each triple its disjunctive SQL-TripleQuery Objects */
-	protected TripleQuery[][] tripleQueries; 
+	protected PropertyBridgeQuery[][] tripleQueries; 
 	
 public PatternQueryCombiner( GraphD2RQ graph, List[] candidateBridges, Triple [] triples) {
     // alternative modelling
@@ -95,7 +95,7 @@ void makeStores() {
 		return;
 	bridges=new ArrayList[tripleCount];
 	bridgesCounts=new int[tripleCount];
-	tripleQueries=new TripleQuery[tripleCount][];
+	tripleQueries=new PropertyBridgeQuery[tripleCount][];
 }
 
 /** 
@@ -117,7 +117,7 @@ void makePropertyBridges() {
 }
 
 /** 
- * Creates a {@link TripleQuery} for each {@link PropertyBridge}.
+ * Creates a {@link PropertyBridgeQuery} for each {@link PropertyBridge}.
  * As a side effect we also set <code>bridgesCounts</code>.
  */
 void makeTripleQueries() {
@@ -126,10 +126,10 @@ void makeTripleQueries() {
 	for (int i=0; i<tripleCount; i++) {
 		Triple t=triples[i];
 		int bridgesCount=bridges[i].size();
-		tripleQueries[i]=new TripleQuery[bridgesCount];
+		tripleQueries[i]=new PropertyBridgeQuery[bridgesCount];
 		bridgesCounts[i]=bridgesCount;
 		for (int j=0; j<bridgesCount; j++) {
-			tripleQueries[i][j]=new TripleQuery((PropertyBridge)bridges[i].get(j), t.getSubject(), t.getPredicate(), t.getObject());
+			tripleQueries[i][j]=new PropertyBridgeQuery((PropertyBridge)bridges[i].get(j), t);
 		}
 	}
 }
@@ -185,14 +185,14 @@ void reducePropertyBridges() {
  * produces an SQL statement for a conjunction of triples that refer to
  * the same database.
  */
-protected static SelectStatementBuilder getSQL(TripleQuery[] conjunction) {
+protected static SelectStatementBuilder getSQL(PropertyBridgeQuery[] conjunction) {
 	boolean possible=true;
 	Database db=conjunction[0].getDatabase();
 	SelectStatementBuilder sql=new SelectStatementBuilder(db);
 	sql.setEliminateDuplicates(db.correctlyHandlesDistinct());	
 	
 	for (int i=0; (i<conjunction.length) && possible; i++) {
-		TripleQuery t=conjunction[i];
+		PropertyBridgeQuery t=conjunction[i];
 		sql.addAliasMap(t.getPropertyBridge().getAliases());
 		sql.addColumnRenames(t.getReplacedColumns()); // ?
 		sql.addSelectColumns(t.getSelectColumns());

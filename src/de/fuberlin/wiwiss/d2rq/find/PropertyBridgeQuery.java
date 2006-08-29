@@ -1,6 +1,3 @@
-/*
- * $Id: TripleQuery.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.find;
 
 import java.util.ArrayList;
@@ -24,11 +21,9 @@ import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
 /**
- * Encapsulates a query for a triple. Three elements are necessary for 
- * constructing a TripleQuery: a {@link PropertyBridge}, a subject
- * node, and an object node. Both nodes may be wildcard nodes ({{Node.ANY}}).
- * The TripleQuery determines which database columns, database joins
- * and database conditions must be used to find the triple, and builds
+ * Encapsulates a query for a triple pattern on a specific
+ * {@link PropertyBridge}. Determines which database columns, database joins
+ * and database conditions must be used to find matching triples, and builds
  * Jena triples from SQL result rows. It also has logic to determine if
  * it can be combined with other TripleQuery instances into a single
  * SQL statement.
@@ -37,13 +32,10 @@ import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
  *       the wrong place; especially {@link #getReplacedColumns()}
  *       seems awkward
  * 
- * <p>History:<br>
- * 08-03-2004: Initial version of this class.<br>
- * 
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: PropertyBridgeQuery.java,v 1.1 2006/08/29 16:12:14 cyganiak Exp $
  */
-public class TripleQuery {
+public class PropertyBridgeQuery {
 	private PropertyBridge bridge;
 	private Set joins = new HashSet(2);
 	private Map columnValues = new HashMap();
@@ -63,28 +55,28 @@ public class TripleQuery {
 	 * @param subject the subject node, may be {{Node.ANY}}
 	 * @param object the object node, may be {{Node.ANY}}
 	 */
-	public TripleQuery(PropertyBridge bridge, Node subject, Node predicate, Node object) {
+	public PropertyBridgeQuery(PropertyBridge bridge, Triple query) {
 		this.bridge = bridge;
 		this.subjectColumns = bridge.getSubjectMaker().getColumns();
 		this.objectColumns = bridge.getObjectMaker().getColumns();
 	
-		if (subject.isConcrete()) {
-			this.columnValues.putAll(bridge.getSubjectMaker().getColumnValues(subject));
-			this.subjectMaker = new FixedNodeMaker(subject);
+		if (query.getSubject().isConcrete()) {
+			this.columnValues.putAll(bridge.getSubjectMaker().getColumnValues(query.getSubject()));
+			this.subjectMaker = new FixedNodeMaker(query.getSubject());
 		} else {
 			this.selectColumns.addAll(bridge.getSubjectMaker().getColumns());
 			this.subjectMaker = bridge.getSubjectMaker();
 		}
-		if (predicate.isConcrete()) {
-			this.columnValues.putAll(bridge.getPredicateMaker().getColumnValues(predicate));
-			this.predicateMaker = new FixedNodeMaker(predicate);
+		if (query.getPredicate().isConcrete()) {
+			this.columnValues.putAll(bridge.getPredicateMaker().getColumnValues(query.getPredicate()));
+			this.predicateMaker = new FixedNodeMaker(query.getPredicate());
 		} else {
 			this.selectColumns.addAll(bridge.getPredicateMaker().getColumns());
 			this.predicateMaker = bridge.getPredicateMaker();
 		}
-		if (object.isConcrete()) {
-			this.columnValues.putAll(bridge.getObjectMaker().getColumnValues(object));
-			this.objectMaker = new FixedNodeMaker(object);
+		if (query.getObject().isConcrete()) {
+			this.columnValues.putAll(bridge.getObjectMaker().getColumnValues(query.getObject()));
+			this.objectMaker = new FixedNodeMaker(query.getObject());
 		} else {
 			this.selectColumns.addAll(bridge.getObjectMaker().getColumns());
 			this.objectMaker = bridge.getObjectMaker();
@@ -162,7 +154,7 @@ public class TripleQuery {
 	 * @param other a query to be compared with this one
 	 * @return <tt>true</tt> if both are combinable
 	 */
-	public boolean isCombinable(TripleQuery other) {
+	public boolean isCombinable(PropertyBridgeQuery other) {
 		if (!getDatabase().equals(other.getDatabase())) {
 			return false;
 		}

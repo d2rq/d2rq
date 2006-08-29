@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,9 +23,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
-import de.fuberlin.wiwiss.d2rq.find.QueryCombiner;
-import de.fuberlin.wiwiss.d2rq.find.QueryContext;
-import de.fuberlin.wiwiss.d2rq.find.TripleQuery;
+import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.D2RQUtil;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
@@ -190,9 +187,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 
 	public ExtendedIterator graphBaseFind( TripleMatch m ) {
 		checkOpen();
-		return graphBaseFind(m,this.propertyBridges);
-	}
-	public ExtendedIterator graphBaseFind( TripleMatch m, List propertyBridgeCandidates ) {
 		Triple t = m.asTriple();
 
 		if (Logger.instance().debugEnabled()) {
@@ -204,23 +198,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			Logger.instance().debug("Object: " + t.getObject());
 			Logger.instance().debug("");
 		}
-
-		QueryCombiner combiner = new QueryCombiner();
-		QueryContext context = new QueryContext();
-		Iterator it = propertyBridgeCandidates.iterator();
-		while (it.hasNext()) {
-			PropertyBridge bridge = (PropertyBridge) it.next();
-			if (!bridge.couldFit(t, context)) {
-				continue;
-			}
-			if (Logger.instance().debugEnabled()) {
-				Logger.instance().debug("--------------------------------------------");
-				Logger.instance().debug("Using property bridge: " + bridge);
-			}
-			combiner.add(new TripleQuery(bridge,
-					t.getSubject(), t.getPredicate(), t.getObject()));
-		}
-		return combiner.tripleIterator();
+		return new FindQuery(t, this.propertyBridges).iterator();
     }
 	
 	static PropertyBridge[] emptyPropertyBridgeArray=new PropertyBridge[0];

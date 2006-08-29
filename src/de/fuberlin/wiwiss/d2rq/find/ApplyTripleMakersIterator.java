@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ApplyTripleMakersIterator.java,v 1.1 2006/08/29 15:13:12 cyganiak Exp $
+ * @version $Id: ApplyTripleMakersIterator.java,v 1.2 2006/08/29 16:12:14 cyganiak Exp $
  */
 public class ApplyTripleMakersIterator implements ClosableIterator {
 	private Map columnNameNumberMap;
@@ -74,7 +74,7 @@ public class ApplyTripleMakersIterator implements ClosableIterator {
 			String[] nextRow = this.sqlIterator.nextRow();
 			Iterator it = this.tripleMakers.iterator();
 			while (it.hasNext()) {
-				TripleQuery tripleMaker = (TripleQuery) it.next();
+				PropertyBridgeQuery tripleMaker = (PropertyBridgeQuery) it.next();
 				Triple product = tripleMaker.makeTriple(nextRow, this.columnNameNumberMap);
 				if (product != null) {
 					this.tripleQueue.add(product);
