@@ -25,12 +25,40 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.3 2006/08/29 20:33:29 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.4 2006/08/30 19:32:35 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
-	private final static Pattern escapePattern = Pattern.compile("([\\\\'])");
-	private final static String escapeReplacement = "\\\\$1";
+	private final static Pattern singleQuoteEscapePattern = Pattern.compile("([\\\\'])");
+	private final static String singleQuoteEscapeReplacement = "\\\\$1";
+	private final static Pattern backtickEscapePattern = Pattern.compile("([\\\\`])");
+	private final static String backtickEscapeReplacement = "$1$1";
+	
+	/**
+	 * Wraps s in single quotes and escapes special characters to avoid SQL injection
+	 */
+	public static String singleQuote(String s) {
+		return "'" + SelectStatementBuilder.singleQuoteEscapePattern.matcher(s).
+				replaceAll(SelectStatementBuilder.singleQuoteEscapeReplacement) + "'";
+	}
+
+	/**
+	 * Wraps s in backticks and escapes special characters to avoid SQL injection
+	 */
+	public static String backtickQuote(String s) {
+		return "`" + SelectStatementBuilder.backtickEscapePattern.matcher(s).
+				replaceAll(SelectStatementBuilder.backtickEscapeReplacement) + "`";
+	}
+
+	/**
+	 * @param s Any String
+	 * @return <tt>true</tt> if it is an SQL reserved word
+	 * @see {@link ReservedWords}
+	 */
+	public static boolean isReservedWord(String s) {
+		return ReservedWords.contains(s);
+	}
+	
 	private Database database;
 	private List sqlSelect = new ArrayList(10);
 	private List sqlWhere = new ArrayList(15);
@@ -74,10 +102,10 @@ public class SelectStatementBuilder {
 		while (it.hasNext()) {			
 			String tableName = (String) it.next();
 			if (this.aliases.isAlias(tableName)) {
-				result.append(this.aliases.originalOf(tableName));
+				result.append(quoteTableName(this.aliases.originalOf(tableName)));
 				result.append(" AS ");
 			}
-			result.append(tableName);
+			result.append(quoteTableName(tableName));
 			if (it.hasNext()) {
 				result.append(", ");
 			}
@@ -155,6 +183,19 @@ public class SelectStatementBuilder {
 	public int columnType(Column column) {
 	    Column physicalColumn = this.aliases.originalOf(column);
 	    return this.database.getColumnType(physicalColumn.getQualifiedName());
+	}
+	
+	private String quoteTableName(String tableName) {
+		if (!isReservedWord(tableName)) {
+			// No need to quote
+			return tableName;
+		}
+		if ("MySQL".equals(this.database.getType())) {
+			return backtickQuote(tableName);
+		}
+		// Not MySQL -- We just return the plain table name without
+		// quoting because I'm not sure how other RDBMSes handle this
+		return tableName;
 	}
 	
 	/**
@@ -241,21 +282,12 @@ public class SelectStatementBuilder {
 				} catch (NumberFormatException nfex2) {
 					// No number -- return as quoted string
 					// DBs seem to interpret non-number strings as 0
-					return "'" + SelectStatementBuilder.escape(value) + "'";
+					return SelectStatementBuilder.singleQuote(value);
 				}
 			}
 		} else if (Database.dateColumnType==columnType) {
 			return "#" + value + "#";
 		}
-		return "'" + SelectStatementBuilder.escape(value) + "'";
-	}
-	
-	/**
-	 * Escape special characters in database literals to avoid
-	 * SQL injection
-	 */
-	public static String escape(String s) {
-		return SelectStatementBuilder.escapePattern.matcher(s).
-				replaceAll(SelectStatementBuilder.escapeReplacement);
+		return SelectStatementBuilder.singleQuote(value);
 	}
 }

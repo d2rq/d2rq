@@ -241,10 +241,7 @@ public class ExpressionTranslator {
         return translateString(s,StringType);
     }
     public Result translateString(String s, int resultType) {
-        StringBuffer b=new StringBuffer("\'");
-        b.append(SelectStatementBuilder.escape(s));
-        b.append("\'");
-        return newResult(b,resultType);
+        return newResult(SelectStatementBuilder.singleQuote(s),resultType);
     }
     
     // the case where "?x=?y" should be handled before triples are checked for shared variables
@@ -398,13 +395,13 @@ public class ExpressionTranslator {
                         "http://www.w3.org/2001/XMLSchema#double".equals(dType)) {
                     return newResult(str,NumberType);
                 } else if ("http://www.w3.org/2001/XMLSchema#string".equals(dType)) {
-                    return newResult(SelectStatementBuilder.escape(str),StringType);
+                    return translateString(str);
                 }
                 return null;
             } else if (lang!=null && !"".equals(lang)) {
                 return null;
             }
-            return newResult(SelectStatementBuilder.escape(str),StringType);
+            return translateString(str);
         } else if (n.isURI()) {
             String str=n.getURI();
             return newResult(str,UriType);
