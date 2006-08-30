@@ -62,6 +62,7 @@ public class Database {
     public static final Integer dateColumn = new Integer(3);
 
 	private DatabaseSchemaInspector schemaInspector = null;
+	private String rdbmsType = null;
 
     public Database(String odbc, String jdbc, String jdbcDriver, String databaseUsername, String databasePassword, Map columnTypes) {
         this.odbc = odbc;
@@ -251,15 +252,19 @@ public class Database {
      * @return The brand of RDBMS
      */
 	public String getType() {
-		connectToDatabase();
-		try {
-			if (this.con.getMetaData().getDriverName().toLowerCase().indexOf("mysql") >= 0) {
-				return "MySQL";
+		if (this.rdbmsType == null) {
+			connectToDatabase();
+			try {
+				if (this.con.getMetaData().getDriverName().toLowerCase().indexOf("mysql") >= 0) {
+					this.rdbmsType = "MySQL";
+				} else {
+					this.rdbmsType = "Other";
+				}
+			} catch (SQLException ex) {
+				throw new D2RQException("Database exception", ex);
 			}
-			return "Other";
-		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
 		}
+		return this.rdbmsType;
 	}
     
     public String toString() {
