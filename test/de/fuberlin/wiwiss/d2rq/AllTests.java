@@ -1,5 +1,5 @@
 /*
- * $Id: AllTests.java,v 1.10 2006/08/29 15:13:13 cyganiak Exp $
+ * $Id: AllTests.java,v 1.11 2006/08/30 19:29:46 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -32,6 +32,7 @@ public class AllTests {
 		suite.addTest(de.fuberlin.wiwiss.d2rq.parser.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.map.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.find.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.rdql.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.sql.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.functional_tests.AllTests.suite());
 		return suite;
