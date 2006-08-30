@@ -9,6 +9,7 @@ public class AllTests {
 		TestSuite suite = new TestSuite("Test for de.fuberlin.wiwiss.d2rq.map");
 		//$JUnit-BEGIN$
 		suite.addTestSuite(AliasMapTest.class);
+		suite.addTestSuite(NodeMakerTest.class);
 		//$JUnit-END$
 		return suite;
 	}

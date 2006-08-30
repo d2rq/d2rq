@@ -1,6 +1,3 @@
-/*
- * $Id: FixedNodeMaker.java,v 1.5 2006/08/28 20:23:43 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Collections;
@@ -14,40 +11,24 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 /**
  * NodeMaker that returns a fixed node.
  *
- * <p>History:<br>
- * 08-03-2004: Initial version of this class.<br>
- * 
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: FixedNodeMaker.java,v 1.6 2006/08/30 10:25:26 cyganiak Exp $
  */
 public class FixedNodeMaker implements NodeMaker {
-	private Node fixedNode; // can be instance of PlaceholderNode
-
-    public void matchConstraint(NodeConstraint c) {
-        c.matchFixedNode(fixedNode);
-    }
+	private Node fixedNode;
 
 	public FixedNodeMaker(Node fixedNode) {
 		this.fixedNode = fixedNode;
 	}
+	
+    public void matchConstraint(NodeConstraint c) {
+        c.matchFixedNode(fixedNode);
+    }
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#isDisjointFromOtherNodeMakers()
-	 */
-	public boolean isURIPattern() {
-		return false;
-	}
-
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#couldFit(com.hp.hpl.jena.graph.Node)
-	 */
 	public boolean couldFit(Node node) {
 		return Node.ANY.equals(node) || this.fixedNode.equals(node);
 	}
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getColumns()
-	 */
 	public Set getColumns() {
 		return Collections.EMPTY_SET;
 	}
@@ -64,21 +45,37 @@ public class FixedNodeMaker implements NodeMaker {
 		return AliasMap.NO_ALIASES;
 	}
 	
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getColumnValues(com.hp.hpl.jena.graph.Node)
-	 */
 	public Map getColumnValues(Node node) {
 		return Collections.EMPTY_MAP;
 	}
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getNode(java.lang.String[], java.util.Map)
-	 */
 	public Node getNode(String[] row, Map columnNameNumberMap) {
 		return this.fixedNode;
 	}
 	
 	public boolean isUnique() {
 		return true;
+	}
+	
+	public String toString() {
+		return "Fixed(" + toString(this.fixedNode) + ")";
+	}
+
+	private static String toString(Node n) {
+		if (n.isURI()) {
+			return "<" + n.getURI() + ">";
+		}
+		if (n.isBlank()) {
+			return "_:" + n.getBlankNodeLabel();
+		}
+		// Literal
+		String s = "\"" + n.getLiteralLexicalForm() + "\"";
+		if (!"".equals(n.getLiteralLanguage())) {
+			s += "@" + n.getLiteralLanguage();
+		}
+		if (n.getLiteralDatatype() != null) {
+			s += "^^<" + n.getLiteralDatatypeURI() + ">";
+		}
+		return s;
 	}
 }
