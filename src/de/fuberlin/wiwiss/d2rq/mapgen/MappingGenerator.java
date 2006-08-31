@@ -145,7 +145,7 @@ public class MappingGenerator {
 	}
 	
 	private void writeDatabase() {
-		this.out.println(":database a d2rq:Database;");
+		this.out.println(databaseName() + " a d2rq:Database;");
 		this.out.println("\td2rq:jdbcDriver \"" + this.driverClass + "\";");
 		this.out.println("\td2rq:jdbcDSN \"" + this.jdbcURL + "\";");
 		if (this.databaseUser != null) {
@@ -161,7 +161,7 @@ public class MappingGenerator {
 	public void writeTable(String tableName) {
 		this.out.println("# Table " + tableName);
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
-		this.out.println("\td2rq:dataStorage :database;");
+		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
 		if (!hasPrimaryKey(tableName)) {
 			this.out.println("\t# Sorry, I don't know which columns to put into the uriPattern");
 			this.out.println("\t# because the table doesn't have a primary key");
@@ -259,6 +259,10 @@ public class MappingGenerator {
 		createLinkProperty(linkTableName, firstForeignColumn.getTableName(), secondForeignColumn.getTableName());
 	}
 
+	private String databaseName() {
+		return "map:database";
+	}
+	
 	private String classMapName(String tableName) {
 		return "map:" + tableName;
 	}
