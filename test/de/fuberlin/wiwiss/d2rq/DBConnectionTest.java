@@ -49,7 +49,7 @@ public class DBConnectionTest extends TestFramework {
 	protected void setUp() throws Exception {
 		mapModel = ModelFactory.createDefaultModel();
 		mapModel.read(D2RQMap, "N3");
-		parser = new MapParser(mapModel);
+		parser = new MapParser(mapModel, null);
 		parser.parse();
 		databases = parser.getDatabases();
 		firstDatabase = (Database)databases.iterator().next();

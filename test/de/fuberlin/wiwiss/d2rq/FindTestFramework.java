@@ -8,7 +8,6 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
 
 /**
@@ -39,7 +38,7 @@ public class FindTestFramework extends TestFramework {
 	}
 
 	protected void setUp() throws Exception {
-		this.graph = new GraphD2RQ(D2RQMap);
+		this.graph = (GraphD2RQ) new ModelD2RQ(D2RQMap).getGraph();
 //		this.graph.enableDebug();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * $Id: ParserTest.java,v 1.2 2006/08/28 19:44:22 cyganiak Exp $
+ * $Id: ParserTest.java,v 1.3 2006/08/31 14:10:15 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.parser;
 
@@ -59,7 +59,7 @@ public class ParserTest extends TestCase {
 
 	public void testEmptyTranslationTable() {
 		Resource r = createTranslationTableResource();
-		MapParser parser = new MapParser(this.model);
+		MapParser parser = new MapParser(this.model, null);
 		this.logger.expectWarning(null);
 		TranslationTable table = parser.getTranslationTable(r.asNode());
 		assertNotNull(table);
@@ -69,7 +69,7 @@ public class ParserTest extends TestCase {
 	public void testGetSameTranslationTable() {
 		Resource r = createTranslationTableResource();
 		addTranslationResource(r, this.model.createLiteral("foo"), this.model.createLiteral("bar"));
-		MapParser parser = new MapParser(this.model);
+		MapParser parser = new MapParser(this.model, null);
 		TranslationTable table1 = parser.getTranslationTable(r.asNode());
 		TranslationTable table2 = parser.getTranslationTable(r.asNode());
 		assertSame(table1, table2);
@@ -79,7 +79,7 @@ public class ParserTest extends TestCase {
 		Resource r = createTranslationTableResource();
 		addTranslationResource(r, this.model.createLiteral("foo"), this.model.createLiteral("bar"));
 		addTranslationResource(r, this.model.createLiteral("baz"), this.model.createResource(D2RQ.uri));
-		MapParser parser = new MapParser(this.model);
+		MapParser parser = new MapParser(this.model, null);
 		TranslationTable table = parser.getTranslationTable(r.asNode());
 		assertEquals(2, table.size());
 		assertEquals("bar", table.toRDFValue("foo"));
@@ -99,7 +99,7 @@ public class ParserTest extends TestCase {
 	private MapParser parse(String testFileName) {
 		Model m = ModelFactory.createDefaultModel();
 		m.read(TEST_FILES + testFileName, "N3");
-		MapParser result = new MapParser(m);
+		MapParser result = new MapParser(m, null);
 		result.parse();
 		return result;
 	}

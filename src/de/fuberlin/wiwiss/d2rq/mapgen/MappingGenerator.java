@@ -32,6 +32,7 @@ import de.fuberlin.wiwiss.d2rq.map.DatabaseSchemaInspector;
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
 	private String jdbcURL;
+	private String mapNamespaceURI;
 	private String instanceNamespaceURI;
 	private String vocabNamespaceURI;
 	private String driverClass = null;
@@ -46,6 +47,7 @@ public class MappingGenerator {
 
 	public MappingGenerator(String jdbcURL) {
 		this.jdbcURL = jdbcURL;
+		this.mapNamespaceURI = "#";
 		this.instanceNamespaceURI = this.jdbcURL + "#";
 		this.vocabNamespaceURI = this.jdbcURL + "/vocab#";
 	}
@@ -58,6 +60,10 @@ public class MappingGenerator {
 			this.driverClass = db.getJdbcDriver();
 		}
 		this.databaseType = db.getType();
+	}
+	
+	public void setMapNamespaceURI(String uri) {
+		this.mapNamespaceURI = uri;
 	}
 	
 	public void setInstanceNamespaceURI(String uri) {
@@ -119,7 +125,7 @@ public class MappingGenerator {
 	}
 	
 	private void run() {
-		this.out.println("@prefix : <#> .");
+		this.out.println("@prefix map: <" + this.mapNamespaceURI + "> .");
 		this.out.println("@prefix db: <" + this.instanceNamespaceURI + "> .");
 		this.out.println("@prefix vocab: <" + this.vocabNamespaceURI + "> .");
 		this.out.println("@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .");
@@ -181,9 +187,9 @@ public class MappingGenerator {
 	}
 	
 	public void writeColumn(Column column, String tableName, List foreignKeys) {
-		this.out.println(":propertyBridge_" + name(column) + " a d2rq:PropertyBridge;");
+		this.out.println(propertyBridgeName(toRelationName(column)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(tableName) + ";");
-		this.out.println("\td2rq:property vocab:" + name(column) + ";");
+		this.out.println("\td2rq:property vocab:" + toRelationName(column) + ";");
 		Column foreignKeyColumn = null;
 		Iterator it = foreignKeys.iterator();
 		while (it.hasNext()) {
@@ -243,7 +249,7 @@ public class MappingGenerator {
 		Column secondLocalColumn = ((Column[]) foreignKeys.get(1))[0];
 		Column secondForeignColumn = ((Column[]) foreignKeys.get(1))[1];
 		this.out.println("# n:m table " + linkTableName);
-		this.out.println(":propertyBridge_" + linkTableName + " a d2rq:PropertyBridge;");
+		this.out.println(propertyBridgeName(linkTableName) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(firstForeignColumn.getTableName()) + ";");
 		this.out.println("\td2rq:property vocab:" + linkTableName + ";");
 		this.out.println("\td2rq:refersToClassMap " + classMapName(secondForeignColumn.getTableName()) + ";");
@@ -254,7 +260,11 @@ public class MappingGenerator {
 	}
 
 	private String classMapName(String tableName) {
-		return ":classMap_" + tableName;
+		return "map:" + tableName;
+	}
+	
+	private String propertyBridgeName(String relationName) {
+		return "map:" + relationName;
 	}
 	
 	private boolean hasPrimaryKey(String tableName) {
@@ -271,7 +281,7 @@ public class MappingGenerator {
 		return result;
 	}
 	
-	private String name(Column column) {
+	private String toRelationName(Column column) {
 		return column.getTableName() + "_" + column.getColumnName();
 	}
 
@@ -310,7 +320,7 @@ public class MappingGenerator {
 
 	private void initProperty(Resource r, Column column) {
 		r.addProperty(RDF.type, RDF.Property);
-		r.addProperty(RDFS.label, name(column));
+		r.addProperty(RDFS.label, toRelationName(column));
 		r.addProperty(RDFS.domain, classResource(column.getTableName()));
 		r.addProperty(RDFS.isDefinedBy, ontologyResource());		
 	}
@@ -353,7 +363,7 @@ public class MappingGenerator {
 	}
 
 	private Resource propertyResource(Column column) {
-		String propertyURI = this.vocabNamespaceURI + name(column);
+		String propertyURI = this.vocabNamespaceURI + toRelationName(column);
 		return this.vocabModel.createResource(propertyURI);
 	}
 	
