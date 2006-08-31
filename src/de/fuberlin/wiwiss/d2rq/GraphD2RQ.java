@@ -20,7 +20,6 @@ import com.hp.hpl.jena.graph.impl.GraphBase;
 import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.graph.query.SimpleQueryHandler;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
@@ -75,39 +74,23 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		return (List)propertyBridgesByDatabase.get(db);
 	}
 
-	
-	/**
-	 * Creates a new D2RQ graph from a D2RQ mapping file in Notation 3 syntax.
-	 * @param mapURL the URL where the mapping file is located
-	 * @throws D2RQException on error in the mapping file
-	 */
-	public GraphD2RQ(String mapURL) throws D2RQException {
-		this(mapURL, "N3");
-	}
-
-	/**
-	 * Creates a new D2RQ graph from a D2RQ mapping file. The second parameter
-	 * specifies the RDF syntax of the mapping file. Supported values
-	 * are "RDF/XML", "N-TRIPLE" and "N3". 
-	 * @param mapURL the URL where the mapping file is located
-	 * @param serializationFormat the serialization syntax format
-	 * @throws D2RQException on error in the mapping file
-	 */
-	public GraphD2RQ(String mapURL, String serializationFormat) throws D2RQException {
-//		this.style = ReificationStyle.Minimal;
-		Model mapModel = getModelFromURL(mapURL, serializationFormat);
-		this.initMap(mapModel);
-	}
-
 	/**
 	 * Creates a new D2RQ graph from a Jena model containing a D2RQ
 	 * mapping.
 	 * @param mapModel the model containing a D2RQ mapping file
+	 * @param baseURIForData Base URI for turning relative URI patterns into
+	 * 		absolute URIs; if <tt>null</tt>, then D2RQ will pick a base URI
 	 * @throws D2RQException on error in the mapping model
 	 */
-	public GraphD2RQ(Model mapModel) throws D2RQException {
-//		this.style = ReificationStyle.Minimal;
-		this.initMap(mapModel);
+	public GraphD2RQ(Model mapModel, String baseURIForData) throws D2RQException {
+		if (baseURIForData == null) {
+			baseURIForData = "http://localhost/resource/";
+		}
+		MapParser parser = new MapParser(mapModel, baseURIForData);
+		parser.parse();
+		this.propertyBridges = sortPropertyBridges(parser.getPropertyBridges());
+		this.processingInstructions = parser.getProcessingInstructions();
+		this.propertyBridgesByDatabase=D2RQUtil.makeDatabaseMapFromPropertyBridges(propertyBridges);
 	}
 
 	/**
@@ -117,20 +100,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		Logger.instance().setDebug(true);
 	}
 
-	private Model getModelFromURL(String mapURL, String serializationFormat) {
-		Model result = ModelFactory.createDefaultModel();
-		result.read(mapURL, serializationFormat);
-		return result;
-	}
-
-	private void initMap(Model mapModel) throws D2RQException {
-		MapParser parser = new MapParser(mapModel);
-		parser.parse();
-		this.propertyBridges = sortPropertyBridges(parser.getPropertyBridges());
-		this.processingInstructions = parser.getProcessingInstructions();
-		this.propertyBridgesByDatabase=D2RQUtil.makeDatabaseMapFromPropertyBridges(propertyBridges);
-	}
-    
 	private List sortPropertyBridges(Collection unsortedBridges) {
 		Comparator uriEvaluationOrderComparator = new Comparator() {
 			public int compare(Object policy1, Object policy2) {

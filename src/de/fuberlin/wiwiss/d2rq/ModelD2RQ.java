@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.6 2006/07/12 11:03:43 cyganiak Exp $
+ * @version $Id: ModelD2RQ.java,v 1.7 2006/08/31 01:50:47 cyganiak Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */
@@ -35,7 +35,7 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 * @param mapURL URL of the D2RQ map to be used for this model
 	 */
 	public ModelD2RQ(String mapURL) {
-		this(FileManager.get().loadModel(mapURL));
+		this(FileManager.get().loadModel(mapURL), mapURL + "#");
 	}
 
 	/** 
@@ -44,18 +44,23 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 * format.
 	 * @param mapURL URL of the D2RQ map to be used for this model
 	 * @param serializationFormat the format of the map
+	 * @param baseURIForData Base URI for turning relative URI patterns into
+	 * 		absolute URIs; if <tt>null</tt>, then D2RQ will pick a base URI
 	 */
-	public ModelD2RQ(String mapURL, String serializationFormat) {
-		this(FileManager.get().loadModel(mapURL, serializationFormat));
+	public ModelD2RQ(String mapURL, String serializationFormat, String baseURIForData) {
+		this(FileManager.get().loadModel(mapURL, serializationFormat),
+				(baseURIForData == null) ? mapURL + "#" : baseURIForData);
 	}
 
 	/** 
 	 * Create a non-RDF database-based model. The model is created
 	 * from a D2RQ map that is provided as a Jena model.
 	 * @param mapModel a Jena model containing the D2RQ map
+	 * @param baseURIForData Base URI for turning relative URI patterns into
+	 * 		absolute URIs; if <tt>null</tt>, then D2RQ will pick a base URI
 	 */
-	public ModelD2RQ(Model mapModel) {
-		super(new GraphD2RQ(mapModel), BuiltinPersonalities.model);
+	public ModelD2RQ(Model mapModel, String baseURIForData) {
+		super(new GraphD2RQ(mapModel, baseURIForData), BuiltinPersonalities.model);
 		copyPrefixes(mapModel);
 	}
 

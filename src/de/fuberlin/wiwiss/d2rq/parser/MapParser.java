@@ -1,5 +1,5 @@
 /*
- * $Id: MapParser.java,v 1.4 2006/08/28 19:44:23 cyganiak Exp $
+ * $Id: MapParser.java,v 1.5 2006/08/31 01:50:47 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq.parser;
 
@@ -36,11 +36,12 @@ import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
  * of a D2RQ mapping file. Checks the map for consistency.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.4 2006/08/28 19:44:23 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.5 2006/08/31 01:50:47 cyganiak Exp $
  */
 public class MapParser {
 	private Model model;
 	private Graph graph;
+	private String baseURI;
 	private Map nodesToDatabases = new HashMap();
 	private Map nodesToClassMapSpecs = new HashMap();
 	private Map nodesToTranslationTables = new HashMap();
@@ -52,9 +53,10 @@ public class MapParser {
 	 * from a D2RQ mapping file.
 	 * @param mapModel a Jena model containing the RDF statements from a D2RQ mapping file
 	 */
-	public MapParser(Model mapModel) {
+	public MapParser(Model mapModel, String baseURI) {
 		this.model = mapModel;
 		this.graph = mapModel.getGraph();
+		this.baseURI = baseURI;
 	}
 	
 	/**
@@ -263,7 +265,7 @@ public class MapParser {
 		String pattern = findZeroOrOneLiteral(node, D2RQ.pattern);
 		if (pattern != null) {
 			if (isObjectPropertyBridge(node)) {
-				spec.setURIPattern(pattern);
+				spec.setURIPattern(ensureIsAbsolute(pattern));
 			} else {
 				spec.setLiteralPattern(pattern);
 			}
@@ -292,7 +294,7 @@ public class MapParser {
 		}
 		String uriPattern = findZeroOrOneLiteral(node, D2RQ.uriPattern);
 		if (uriPattern != null) {
-			spec.setURIPattern(uriPattern);
+			spec.setURIPattern(ensureIsAbsolute(uriPattern));
 		}
 		String valueRegex = findZeroOrOneLiteral(node, D2RQ.valueRegex);
 		if (valueRegex != null) {
@@ -567,5 +569,12 @@ public class MapParser {
 
 	private String toQName(Node node) {
 		return node.toString(this.model);
+	}
+	
+	private String ensureIsAbsolute(String uriPattern) {
+		if (uriPattern.indexOf(":") == -1) {
+			return this.baseURI + uriPattern;
+		}
+		return uriPattern;
 	}
 }

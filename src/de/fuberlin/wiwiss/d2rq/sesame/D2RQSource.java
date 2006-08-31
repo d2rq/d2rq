@@ -6,7 +6,8 @@
 
 package de.fuberlin.wiwiss.d2rq.sesame;
 
-import com.hp.hpl.jena.graph.Graph;
+import org.openrdf.sesame.sail.RdfSource;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -15,10 +16,6 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-
-import org.openrdf.model.GraphException;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.sesame.sail.RdfSource;
 
 
 
@@ -42,7 +39,7 @@ public class D2RQSource implements RdfSource {
     throws D2RQException{
         Model d2rqMap = ModelFactory.createDefaultModel();
         d2rqMap.read(d2rqMapUrl, language);
-        this.d2rqGraph = new GraphD2RQ(d2rqMap);
+        this.d2rqGraph = new GraphD2RQ(d2rqMap, d2rqMapUrl + "#");
         this.rdfSource = new org.openrdf.sesame.sailimpl.memory.RdfSource();
     }
 

@@ -262,15 +262,11 @@ public class MappingGenerator {
 	}
 	
 	private String uriPattern(String tableName) {
-		// TODO: Handle tables without primary key
 		String result = this.instanceNamespaceURI + tableName;
 		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
 		while (it.hasNext()) {
 			Column column = (Column) it.next();
-			result += "@@" + column.getQualifiedName() + "@@";
-			if (it.hasNext()) {
-				result += "-";
-			}
+			result += "/@@" + column.getQualifiedName() + "@@";
 		}
 		return result;
 	}

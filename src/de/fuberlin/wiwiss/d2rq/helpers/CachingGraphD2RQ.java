@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * queries on an LRU basis.
  * 
  * @author Holger Knublauch (holger@topquadrant.com)
- * @version $Id: CachingGraphD2RQ.java,v 1.2 2006/08/29 16:12:15 cyganiak Exp $
+ * @version $Id: CachingGraphD2RQ.java,v 1.3 2006/08/31 01:50:47 cyganiak Exp $
  */
 public class CachingGraphD2RQ extends GraphD2RQ {
 
@@ -34,16 +34,9 @@ public class CachingGraphD2RQ extends GraphD2RQ {
 	    }
 	};
 	
-	
-	public CachingGraphD2RQ(String mapURL, String serializationFormat) throws D2RQException {
-		super(mapURL, serializationFormat);
+	public CachingGraphD2RQ(Model mapModel, String baseURIForData) throws D2RQException {
+		super(mapModel, baseURIForData);
 	}
-
-	
-	public CachingGraphD2RQ(Model mapModel) throws D2RQException {
-		super(mapModel);
-	}
-
 	
 	/**
 	 * Clears the current cache.  This can be used in case the
