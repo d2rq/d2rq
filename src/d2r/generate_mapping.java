@@ -52,14 +52,19 @@ public class generate_mapping {
 		if (cmd.contains(driverArg)) {
 			gen.setJDBCDriverClass(cmd.getArg(driverArg).getValue());
 		}
+		File outputFile = null;
+		if (cmd.contains(outfileArg)) {
+			outputFile = new File(cmd.getArg(outfileArg).getValue());
+			gen.setMapNamespaceURI(outputFile.toURI().toString() + "#");
+		} else {
+			gen.setMapNamespaceURI("file:///stdout#");
+		}
+		gen.setInstanceNamespaceURI("");
+		gen.setVocabNamespaceURI("vocab/");
 		try {
-			PrintStream out;
-			if (cmd.contains(outfileArg)) {
-					out = new PrintStream(new FileOutputStream(
-							new File(cmd.getArg(outfileArg).getValue())));
-			} else {
-				out = System.out;
-			}
+			PrintStream out = (outputFile == null)
+					? System.out
+					: new PrintStream(new FileOutputStream(outputFile));
 			gen.writeMapping(out);
 		} catch (IOException ex) {
 			System.err.println(ex.getMessage());
