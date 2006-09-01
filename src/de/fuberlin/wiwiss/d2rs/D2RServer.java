@@ -16,13 +16,14 @@ import com.hp.hpl.jena.query.describe.DescribeHandlerRegistry;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
+import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 
 /**
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.5 2006/08/31 14:53:22 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.6 2006/09/01 08:51:09 cyganiak Exp $
  */
 public class D2RServer {
 	private static D2RServer instance = null;
@@ -40,6 +41,7 @@ public class D2RServer {
 	private int port = 2020;
 	private String baseURI = null;
 	private Model model = null;
+	private GraphD2RQ currentGraph = null;
 	private NamespacePrefixModel prefixesModel;
 	private Log log = LogFactory.getLog(D2RServer.class);
 	
@@ -87,10 +89,20 @@ public class D2RServer {
 		return this.model;
 	}
 
+	/**
+	 * @return The graph currently in use; will change to a new instance on auto-reload
+	 */
+	public GraphD2RQ currentGraph() {
+		return this.currentGraph;
+	}
+	
 	public ModelD2RQ reloadModelD2RQ(String mappingFileURL) {
 		Model mapModel = ModelFactory.createDefaultModel();
 		mapModel.read(mappingFileURL, resourceBaseURI(), "N3");
-		return new ModelD2RQ(mapModel, resourceBaseURI());
+		ModelD2RQ d2rqModel = new ModelD2RQ(mapModel, resourceBaseURI());
+		this.currentGraph = (GraphD2RQ) d2rqModel.getGraph();
+		this.currentGraph.initInventory(baseURI() + "all", baseURI() + "all/");
+		return d2rqModel;
 	}
 	
 	public void initFromMappingFile(String mappingFileURL) {

@@ -25,19 +25,32 @@
     <servlet-class>de.fuberlin.wiwiss.d2rs.ResourceServlet</servlet-class>
   </servlet>
   
+  <servlet>
+    <servlet-name>D2R ClassMap Lister</servlet-name>
+    <servlet-class>de.fuberlin.wiwiss.d2rs.ClassMapServlet</servlet-class>
+  </servlet>
+  
   <!-- MAPPINGS -->
   <!-- Map URLs to SPARQL service processors -->
 
-  <!-- D2R SPARQL service -->
   <servlet-mapping>
     <servlet-name>SPARQL service processor</servlet-name>
     <url-pattern>/sparql</url-pattern>
   </servlet-mapping>
 
-  <!-- D2R Resource Forwarder service -->
   <servlet-mapping>
     <servlet-name>D2R Resource Forwarder</servlet-name>
     <url-pattern>/resource/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>D2R ClassMap Lister</servlet-name>
+    <url-pattern>/all/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>D2R ClassMap Lister</servlet-name>
+    <url-pattern>/all</url-pattern>
   </servlet-mapping>
   
   <welcome-file-list>
