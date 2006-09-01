@@ -1,12 +1,11 @@
-/*
- * $Id: MapParser.java,v 1.5 2006/08/31 01:50:47 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.parser;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
  * of a D2RQ mapping file. Checks the map for consistency.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.5 2006/08/31 01:50:47 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.6 2006/09/01 08:49:27 cyganiak Exp $
  */
 public class MapParser {
 	private Model model;
@@ -209,21 +208,24 @@ public class MapParser {
 		while (it.hasNext()) {
 			Triple t = (Triple) it.next();
 			Node propBridgeNode = t.getSubject();
-			NodeMakerSpec subjectSpec = classMapSpecForNode(t.getObject());
+			Node classMapNode = t.getObject();
+			NodeMakerSpec subjectSpec = classMapSpecForNode(classMapNode);
 			if (subjectSpec == null) {
 				Logger.instance().error("d2rq:belongsToClassMap for " +
-						t.getSubject() + " is no d2rq:ClassMap");
+						propBridgeNode + " is no d2rq:ClassMap");
 				return;
 			}
 			if (this.nodesToPropertyBridges.containsKey(propBridgeNode)) {
 				Logger.instance().error("Multiple d2rq:belongsToClassMap in " + propBridgeNode);
 				return;
 			}
-			createPropertyBridge(
+			PropertyBridge bridge = createPropertyBridge(
+					classMapNode,
 					propBridgeNode,
 					subjectSpec,
 					NodeMakerSpec.createFixed(findPropertyForBridge(propBridgeNode)),
 					buildObjectSpec(propBridgeNode, subjectSpec.database()));
+			registerBridgeForClassMap(classMapNode, bridge);
 		}
 		it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.DatatypePropertyBridge);
 		while (it.hasNext()) {
@@ -344,7 +346,7 @@ public class MapParser {
 		return this.graph.contains(node, RDF.Nodes.type, D2RQ.ObjectPropertyBridge);
 	}
 
-	private PropertyBridge createPropertyBridge(Node node, 
+	private PropertyBridge createPropertyBridge(Node classMap, Node node, 
 			NodeMakerSpec subjectsSpec, NodeMakerSpec predicatesSpec, NodeMakerSpec objectsSpec) {
 		URIMatchPolicy policy = new URIMatchPolicy();
 		policy.setSubjectBasedOnURIColumn(subjectsSpec.isURIColumnSpec());
@@ -358,6 +360,7 @@ public class MapParser {
 				subjects, predicates, objects,
 				subjectsSpec.database(), policy);
 		this.nodesToPropertyBridges.put(node, bridge);
+		registerBridgeForClassMap(classMap, bridge);
 		return bridge;
 	}
 
@@ -402,6 +405,7 @@ public class MapParser {
 				continue;
 			}
 			createPropertyBridge(
+					t.getSubject(),
 					t.getObject(),
 					subjectSpec,
 					NodeMakerSpec.createFixed(findOneNode(t.getObject(), D2RQ.propertyName)),
@@ -429,7 +433,7 @@ public class MapParser {
 					rdfsClass + ", is no d2rq:ClassMap");
 			return;
 		}
-		createPropertyBridge(Node.createAnon(), 
+		createPropertyBridge(toClassMap, Node.createAnon(), 
 				spec,
 				NodeMakerSpec.createFixed(RDF.Nodes.type),
 				NodeMakerSpec.createFixed(rdfsClass));
@@ -576,5 +580,29 @@ public class MapParser {
 			return this.baseURI + uriPattern;
 		}
 		return uriPattern;
+	}
+
+	/**
+	 * TODO This section was added as a quick hack for D2R Server 0.3 and should probably not be here
+	 */
+	private Map nodesToClassMapBridgeLists = new HashMap();
+	private Map nodesToClassMapMakers = new HashMap();
+	
+	public Map propertyBridgesByClassMap() {
+		return this.nodesToClassMapBridgeLists;
+	}
+
+	public Map NodeMakersByClassMap() {
+		return this.nodesToClassMapMakers;
+	}
+	
+	private void registerBridgeForClassMap(Node classMap, PropertyBridge bridge) {
+		List bridgeList = (List) this.nodesToClassMapBridgeLists.get(classMap);
+		if (bridgeList == null) {
+			bridgeList = new ArrayList();
+			this.nodesToClassMapBridgeLists.put(classMap, bridgeList);
+		}
+		bridgeList.add(bridge);
+		nodesToClassMapMakers.put(classMap, bridge.getSubjectMaker());
 	}
 }

@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq;
 
 import java.lang.reflect.Constructor;
@@ -9,25 +5,37 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.hp.hpl.jena.graph.Capabilities;
 import com.hp.hpl.jena.graph.Graph;
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.TripleMatch;
 import com.hp.hpl.jena.graph.impl.GraphBase;
 import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.graph.query.SimpleQueryHandler;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
+import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 import de.fuberlin.wiwiss.d2rq.helpers.D2RQUtil;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
 
@@ -38,15 +46,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * ontologies and relational data models. More information about D2RQ is found
  * at: http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/
  * 
- * <p>History:<br>
- * 06-06-2004: Initial version of this class.<br>
- * 08-03-2004: New query algorithm, moved map building to MapParser
- * 
  * @author Chris Bizer chris@bizer.de
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
- * 
- * @see de.fuberlin.wiwiss.d2rq.D2RQCapabilities
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: GraphD2RQ.java,v 1.22 2006/09/01 08:49:27 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	static private boolean usingD2RQQueryHandler=false;
@@ -59,7 +61,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
     /** Collection of all PropertyBridges definded in the mapping file */
 	private List propertyBridges;
 	private Map propertyBridgesByDatabase;
-
+	
 	public static boolean isUsingD2RQQueryHandler() {
 		return usingD2RQQueryHandler;
 	}
@@ -91,6 +93,9 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		this.propertyBridges = sortPropertyBridges(parser.getPropertyBridges());
 		this.processingInstructions = parser.getProcessingInstructions();
 		this.propertyBridgesByDatabase=D2RQUtil.makeDatabaseMapFromPropertyBridges(propertyBridges);
+		// TODO clean up
+		this.propertyBridgesByClassMap = parser.propertyBridgesByClassMap();
+		this.nodeMakersByClassMap = parser.NodeMakersByClassMap();
 	}
 
 	/**
@@ -190,5 +195,98 @@ public class GraphD2RQ extends GraphBase implements Graph {
      */
     public Map getPropertyBridgesByDatabase() {
         return propertyBridgesByDatabase;
+    }
+    
+    /**
+     * TODO This section was done as a quick hack for D2R Server 0.3 and really shouldn't be here
+     */
+    private String inventoryBaseURI = null;
+    private String directoryURI = null;
+    private Map propertyBridgesByClassMap;
+    private Map nodeMakersByClassMap;
+    private Map classMapInventoryBridges = new HashMap();
+    private Map classMapNodeMakers = new HashMap();
+    
+    public void initInventory(String directoryURI, String inventoryBaseURI) {
+    	this.directoryURI = directoryURI;
+    	this.inventoryBaseURI = inventoryBaseURI;
+		Iterator it = this.propertyBridgesByClassMap.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry entry = (Entry) it.next();
+			Node classMap = (Node) entry.getKey();
+			List propertyBridges = (List) entry.getValue();
+			List inventoryBridges = new ArrayList();
+			Iterator bridgeIt = propertyBridges.iterator();
+			while (bridgeIt.hasNext()) {
+				PropertyBridge bridge = (PropertyBridge) bridgeIt.next();
+				if (bridge.couldFit(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY),
+						new QueryContext())) {
+					inventoryBridges.add(bridge);
+				}
+				if (bridge.couldFit(new Triple(Node.ANY, RDFS.label.asNode(), Node.ANY),
+						new QueryContext())) {
+					inventoryBridges.add(bridge);
+				}
+			}
+			NodeMaker classMapNodeMaker = new FixedNodeMaker(Node.createURI(
+					this.inventoryBaseURI + toClassMapName(classMap)));
+			NodeMaker seeAlsoNodeMaker = new FixedNodeMaker(RDFS.seeAlso.asNode());
+			if (!propertyBridges.isEmpty()) {
+				PropertyBridge aBridge = (PropertyBridge) propertyBridges.iterator().next();
+				inventoryBridges.add(new PropertyBridge(
+						Node.createAnon(),
+						classMapNodeMaker,
+						seeAlsoNodeMaker,
+						aBridge.getSubjectMaker(),
+						aBridge.getDatabase(),
+						new URIMatchPolicy()));
+			}
+			this.classMapInventoryBridges.put(toClassMapName(classMap), inventoryBridges);
+			this.classMapNodeMakers.put(toClassMapName(classMap),
+					(NodeMaker) this.nodeMakersByClassMap.get(classMap));
+		}
+    }
+
+    private String toClassMapName(Node classMap) {
+    	return classMap.getLocalName();
+    }
+    
+    public Collection classMapNames() {
+    	return this.classMapInventoryBridges.keySet();
+    }
+    
+    public Model classMapInventory(String classMapName) {
+    	List inventoryBridges = (List) this.classMapInventoryBridges.get(classMapName);
+    	if (inventoryBridges == null) {
+    		return null;
+    	}
+    	Model result = ModelFactory.createDefaultModel();
+// TODO Handle prefixes in a smart way -- no time now
+//    	result.setNsPrefixes(this.getPrefixMapping());
+    	result.getGraph().getBulkUpdateHandler().add(
+    			new FindQuery(Triple.ANY, inventoryBridges).iterator());
+    	Resource classMap = result.getResource(this.inventoryBaseURI + classMapName);
+    	Resource directory = result.createResource(this.directoryURI);
+    	classMap.addProperty(RDFS.seeAlso, directory);
+    	classMap.addProperty(RDFS.label, "List of all instances: " + classMapName);
+    	directory.addProperty(RDFS.label, "D2R Server contents");
+    	return result;
+    }
+
+    public Collection classMapNamesForResource(Node resource) {
+    	if (!resource.isURI()) {
+    		return Collections.EMPTY_LIST;
+    	}
+    	List results = new ArrayList();
+    	Iterator it = this.classMapNodeMakers.entrySet().iterator();
+    	while (it.hasNext()) {
+			Entry entry = (Entry) it.next();
+			String classMapName = (String) entry.getKey();
+			NodeMaker nodeMaker = (NodeMaker) entry.getValue();
+			if (nodeMaker.couldFit(resource)) {
+				results.add(classMapName);
+			}
+		}
+    	return results;
     }
 }
