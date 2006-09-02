@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" class="snorql">
   <head>
-    <title>SPARQL Explorer &#8211; D2R Server</title>
+    <title>SPARQL Explorer</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script src="yahoo.js"></script> 
     <script src="connection.js"></script> 
@@ -84,8 +84,8 @@ function start() {
 
 var service;
 function setEndpointURL(url) {
-    document.title = document.title + ' at ' + url;
-    document.getElementById('title').appendChild(document.createTextNode(' at ' + url));
+    document.title = document.title + ' for ' + url;
+    document.getElementById('title').appendChild(document.createTextNode(' for ' + url));
     document.getElementById('queryform').action = url;
     service = new SPARQL.Service(url);
 }
@@ -316,6 +316,7 @@ function nodeToHTML(node, linkMaker) {
             img = document.createElement('img');
             img.src = 'link.png';
             img.alt = '[' + match[1] + ']';
+            img.title = 'Go to Web page';
             externalLink.appendChild(img);
             span.appendChild(externalLink);
         }
@@ -365,7 +366,7 @@ function addEvent(obj, evType, fn){
 
   <body onLoad="start()">
     <div id="header">
-      <h1 id="title">D2R Server</h1>
+      <h1 id="title">SPARQL Explorer</h1>
     </div>
 
     <div class="section" style="float: right; width: 6em">

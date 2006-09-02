@@ -12,6 +12,9 @@ import org.joseki.Service;
 import org.joseki.ServiceRegistry;
 import org.joseki.processors.SPARQL;
 
+import com.hp.hpl.jena.query.DataSource;
+import com.hp.hpl.jena.query.Dataset;
+import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.query.describe.DescribeHandlerRegistry;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -23,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.6 2006/09/01 08:51:09 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.7 2006/09/02 11:44:45 cyganiak Exp $
  */
 public class D2RServer {
 	private static D2RServer instance = null;
@@ -42,6 +45,7 @@ public class D2RServer {
 	private String baseURI = null;
 	private Model model = null;
 	private GraphD2RQ currentGraph = null;
+	private DataSource dataset;
 	private NamespacePrefixModel prefixesModel;
 	private Log log = LogFactory.getLog(D2RServer.class);
 	
@@ -96,6 +100,10 @@ public class D2RServer {
 		return this.currentGraph;
 	}
 	
+	public Dataset dataset() {
+		return this.dataset;
+	}
+	
 	public ModelD2RQ reloadModelD2RQ(String mappingFileURL) {
 		Model mapModel = ModelFactory.createDefaultModel();
 		mapModel.read(mappingFileURL, resourceBaseURI(), "N3");
@@ -131,6 +139,9 @@ public class D2RServer {
 		DescribeHandlerRegistry.get().add(new FindDescribeHandler(this.model));
 		this.prefixesModel = new NamespacePrefixModel();		
 		reloader.setPrefixModel(this.prefixesModel);
+		this.dataset = DatasetFactory.create();
+		this.dataset.setDefaultModel(this.model);
+		this.dataset.addNamedModel(NamespacePrefixModel.namespaceModelURI, this.prefixesModel);
 		reloader.forceReload();
 	}
 	
@@ -148,7 +159,8 @@ public class D2RServer {
 	}
 	
 	protected Service createJosekiService() {
-		return new Service(new SPARQL(), D2RServer.SPARQLServiceName, new D2RQDatasetDesc(this.model, this.prefixesModel));
+		return new Service(new SPARQL(), D2RServer.SPARQLServiceName,
+				new D2RQDatasetDesc(this.dataset));
 	}
 	
 	protected void checkIfModelWorks() {

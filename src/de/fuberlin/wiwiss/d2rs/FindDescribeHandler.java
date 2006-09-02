@@ -3,7 +3,6 @@ package de.fuberlin.wiwiss.d2rs;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.describe.DescribeHandler;
 import com.hp.hpl.jena.query.engine1.ExecutionContext;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -21,7 +20,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * TODO Is this thread-safe? ARQ uses just a single instance of this class.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindDescribeHandler.java,v 1.2 2006/09/01 08:51:09 cyganiak Exp $
+ * @version $Id: FindDescribeHandler.java,v 1.3 2006/09/02 11:44:45 cyganiak Exp $
  */
 public class FindDescribeHandler implements DescribeHandler {
 	private Model dataModel;
@@ -56,7 +55,7 @@ public class FindDescribeHandler implements DescribeHandler {
 			Iterator it = classMapNames.iterator();
 			while (it.hasNext()) {
 				String classMapName = (String) it.next();
-				r2.addProperty(RDFS.seeAlso, Node.createURI(D2RServer.instance().baseURI() + "all/" + classMapName));
+				r2.addProperty(RDFS.seeAlso, seeAlsos.createResource(D2RServer.instance().baseURI() + "all/" + classMapName));
 			}
 		}
 		resultModel.add(description);

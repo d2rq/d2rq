@@ -6,8 +6,6 @@ import org.joseki.DatasetDesc;
 
 import com.hp.hpl.jena.query.DataSource;
 import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.DatasetFactory;
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 /**
@@ -18,18 +16,14 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * to initialize programmatically.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQDatasetDesc.java,v 1.3 2006/05/30 07:31:56 cyganiak Exp $
+ * @version $Id: D2RQDatasetDesc.java,v 1.4 2006/09/02 11:44:45 cyganiak Exp $
  */
 public class D2RQDatasetDesc extends DatasetDesc {
-	private Model model;
 	private DataSource dataset;
 	
-	public D2RQDatasetDesc(Model model, NamespacePrefixModel prefixes) {
+	public D2RQDatasetDesc(DataSource dataset) {
 		super(null);
-		this.model = model;
-		this.dataset = DatasetFactory.create();
-		this.dataset.setDefaultModel(this.model);
-		this.dataset.addNamedModel(NamespacePrefixModel.namespaceModelURI, prefixes);
+		this.dataset = dataset;
 	}
 
 	public Dataset getDataset() {
@@ -38,12 +32,10 @@ public class D2RQDatasetDesc extends DatasetDesc {
 
 	public void clearDataset() {
 		this.dataset = null;
-		this.model = null;
 	}
 
 	public void freeDataset() {
 		this.dataset = null;
-		this.model = null;
 	}
 
 	public void setDefaultGraph(Resource dftGraph) {
@@ -63,6 +55,6 @@ public class D2RQDatasetDesc extends DatasetDesc {
 	}
 
 	public String toString() {
-		return "D2RQDatasetDecl(" + this.model + ")";
+		return "D2RQDatasetDecl(" + this.dataset + ")";
 	}
 }
