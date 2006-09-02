@@ -2,21 +2,25 @@
 <project name="D2RQ" default="all" basedir=".">
 
 	<property name="name" value="d2r-server"/>
-	<property name="version" value="0.2.1"/>
+	<property name="version" value="0.3-dev"/>
 	<property name="project.package" value="de.fuberlin.wiwiss.d2rs"/>
 	<property name="project.path" value="de/fuberlin/wiwiss/d2rs"/>
 	<property name="src" value="src"/>
+	<property name="src.tests" value="tests"/>
 	<property name="build" value="bldsrc"/>
+	<property name="build.tests" value="bldtests"/>
 	<property name="lib" value="lib"/>
 	<property name="doc" value="doc"/>
 	<property name="distname" value="${name}-${version}"/>
 	<property name="jar" value="${lib}/${distname}.jar"/>
 	<property name="zip" value="${distname}.zip"/>
 	<property name="tar" value="${distname}.tar.gz"/>
+	<property name="junit.jar" value="${lib}/junit.jar"/>
 	
 	<path id="project.class.path">
 		<fileset dir="${lib}">
 			<include name="**/*.jar"/>
+			<exclude name="${junit.jar}"/>
 		</fileset>
 		<pathelement path="${java.class.path}"/>
 	</path>
@@ -24,19 +28,23 @@
 	<patternset id="distfiles">
 		<include name="**/*"/>
 		<exclude name="${src}/**"/>
+		<exclude name="${src.tests}/**"/>
 		<exclude name="build.xml"/>
 		<exclude name="${build}/**"/>
+		<exclude name="${build.tests}/**"/>
 		<exclude name="build/**"/>
 		<exclude name="${zip}"/>
 		<exclude name="${tar}"/>
 		<exclude name=".project"/>
 		<exclude name=".classpath"/>
+		<exclude name="velocity.log"/>
 	</patternset>
 
 	<property name="execfiles" value="d2r-server etc/make_classpath"/>
 	
 	<target name="clean">
 		<delete dir="${build}" failonerror="false"/>
+		<delete dir="${build.tests}" failonerror="false"/>
 		<delete failonerror="false">
 			<fileset dir="." includes="${lib}/${name}-*.jar,${name}-*.zip,${name}-*.tar.gz"/>
 		</delete>
@@ -52,7 +60,33 @@
 		</javac>
 	</target>
 
-	<target name="jar" depends="compile">
+	<target name="init.tests">
+		<mkdir dir="${build.tests}"/>
+	</target>
+
+	<target name="compile.tests" depends="init.tests,compile">
+		<javac srcdir="${src.tests}" destdir="${build.tests}" debug="on">
+			<classpath>
+				<path refid="project.class.path"/>
+				<pathelement path="${build}"/>
+				<pathelement path="${junit.jar}"/>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="test" depends="compile.tests">
+		<java classname="junit.textui.TestRunner" fork="yes" failonerror="true">
+			<arg value="${project.package}.AllTests"/>
+			<classpath>
+				<path refid="project.class.path"/>
+				<pathelement path="${build}"/>
+				<pathelement path="${build.tests}"/>
+				<pathelement path="${junit.jar}"/>
+			</classpath>
+		</java>
+	</target>
+
+	<target name="jar" depends="compile,test">
 		<jar jarfile="${jar}" basedir="${build}"/>
 	</target>
 
