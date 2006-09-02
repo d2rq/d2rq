@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.Arrays;
@@ -13,32 +9,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.hp.hpl.jena.rdql.Query;
-import com.hp.hpl.jena.rdql.QueryEngine;
-import com.hp.hpl.jena.rdql.QueryResults;
-import com.hp.hpl.jena.rdql.ResultBinding;
-import com.hp.hpl.jena.rdql.ResultBindingIterator;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 
-import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
 import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
-import de.fuberlin.wiwiss.d2rq.helpers.JenaCompatibility;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 
 /**
- * Functional tests that exercise a ModelD2RQ by running RDQL queries against it. 
- * For notes on running the tests, see {@link AllTests}.
- * 
- * Each test method runs one RDQL query and automatically compares the actual
- * results to the expected results. For some tests, only the number of returned triples
- * is checked. For others, the returned values are compared against expected values.
- * 
- * If a test fails, the dump() method can be handy. It shows the actual results returned
- * by a query on System.out.
- *
- * To see debug information, uncomment the enableDebug() call in the setUp() method.
- *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @author jgarbers
+ * @version $Id: RDQLTestFramework.java,v 1.13 2006/09/02 20:52:25 cyganiak Exp $
  */
 public class RDQLTestFramework extends TestFramework {
 	protected ModelD2RQ model;
@@ -255,12 +241,11 @@ public class RDQLTestFramework extends TestFramework {
 	    rdqlLogger.debug("RDQL-Query: " + rdql);
 	    queryString=rdql;
 		this.results = new HashSet();
-		Query query = new Query(rdql);
-		query.setSource(this.model);
-		QueryResults qr = new QueryEngine(query).exec();
+		Query query = QueryFactory.create(rdql, Syntax.syntaxRDQL);
+		ResultSet qr = QueryExecutionFactory.create(query, this.model).execSelect();
 		while (qr.hasNext()) {
-			ResultBinding binding = (ResultBinding) qr.next();
-			this.results.add(resultBindingToMap(binding, qr.getResultVars()));
+			QuerySolution binding = (QuerySolution) qr.next();
+			this.results.add(solutionToMap(binding, qr.getResultVars()));
 		}
 	}
 
@@ -269,59 +254,29 @@ public class RDQLTestFramework extends TestFramework {
 	}
 
 	protected void assertResult(Map map) {
-		Iterator it = this.results.iterator();
-		while (it.hasNext()) {
-			if (it.next().equals(map)) {
-				return;
-			}
+		if (!this.results.contains(map)) {
+			fail();
 		}
-		fail();
 	}
 	
-	public static Map resultBindingToMap(ResultBinding b, List variables) {
-		Map m=new HashMap();
-		ResultBindingIterator it=b.iterator();
+	public static Map solutionToMap(QuerySolution solution, List variables) {
+		Map result = new HashMap();
+		Iterator it = solution.varNames();
 		while (it.hasNext()) {
-			it.next();
-		    String var=JenaCompatibility.resultBindingIteratorVarName(it);
-		    if (!variables.contains(var)) {
+		    String variableName = (String) it.next();
+		    if (!variables.contains(variableName)) {
 		    	continue;
 		    }
-		    Object val=JenaCompatibility.resultBindingIteratorValue(it,b);
-			String strVal=val.toString();
-			int size=strVal.length();
-			if (size>250)
-			    bigStringInResultLogger.debug("Big string (" + size + ") in resultBinding:\n" + strVal);
-			m.put(var,val);
+		    RDFNode value = solution.get(variableName);
+			int size = value.toString().length();
+			if (size>250) {
+				bigStringInResultLogger.debug("Big string (" + size + ") in resultBinding:\n" + value);
+			}
+			result.put(variableName,value);
 		}
-		return m;
+		return result;
 	}
 	
-// not finished. Better do it in the Map Domain.
-//	protected static void compareBindings(Set b1,Set b2) {
-//		for (int i=0; i<2; i++) {
-//			Set source,target;
-//			if (i==0) {
-//				source=b1;
-//				target=b2;
-//			} else {
-//				source=b2;
-//				target=b1;
-//			}
-//			Iterator s,t;
-//			s=source.iterator();
-//			while (s.hasNext()) {
-//				ResultBinding sourceBinding=(ResultBinding) s.next();
-//				ResultBindingIterator it=sourceBinding.iterator();
-//				while (it.hasNext()) {
-//					it.next();
-//					String var=it.varName();
-//					Object val=it.value();
-//				}
-//			}
-//		}
-//	}
-
 	protected void dump() {
 	    if (!dumpLogger.debugEnabled())
 	        return;
@@ -340,5 +295,4 @@ public class RDQLTestFramework extends TestFramework {
 			count++;
 		}
 	}
-		
  }
