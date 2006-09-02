@@ -20,7 +20,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * TODO Is this thread-safe? ARQ uses just a single instance of this class.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindDescribeHandler.java,v 1.3 2006/09/02 11:44:45 cyganiak Exp $
+ * @version $Id: FindDescribeHandler.java,v 1.4 2006/09/02 16:14:15 cyganiak Exp $
  */
 public class FindDescribeHandler implements DescribeHandler {
 	private Model dataModel;
@@ -49,13 +49,15 @@ public class FindDescribeHandler implements DescribeHandler {
 		while (nit.hasNext()) {
 			addSeeAlsoStatement(nit.nextNode(), seeAlsos, resource.getURI());
 		}
-		Collection classMapNames = D2RServer.instance().currentGraph().classMapNamesForResource(resource.asNode());
-		if (!classMapNames.isEmpty()) {
-			Resource r2 = seeAlsos.createResource(resource.getURI());
-			Iterator it = classMapNames.iterator();
-			while (it.hasNext()) {
-				String classMapName = (String) it.next();
-				r2.addProperty(RDFS.seeAlso, seeAlsos.createResource(D2RServer.instance().baseURI() + "all/" + classMapName));
+		if (!description.isEmpty()) {
+			Collection classMapNames = D2RServer.instance().currentGraph().classMapNamesForResource(resource.asNode());
+			if (!classMapNames.isEmpty()) {
+				Resource r2 = seeAlsos.createResource(resource.getURI());
+				Iterator it = classMapNames.iterator();
+				while (it.hasNext()) {
+					String classMapName = (String) it.next();
+					r2.addProperty(RDFS.seeAlso, seeAlsos.createResource(D2RServer.instance().baseURI() + "all/" + classMapName));
+				}
 			}
 		}
 		resultModel.add(description);
