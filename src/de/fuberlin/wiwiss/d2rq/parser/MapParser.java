@@ -21,7 +21,7 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.helpers.CSVParser;
+import de.fuberlin.wiwiss.d2rq.csv.CSVParser;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -37,7 +37,7 @@ import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
  * of a D2RQ mapping file. Checks the map for consistency.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.8 2006/09/02 22:41:44 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.9 2006/09/02 22:49:17 cyganiak Exp $
  */
 public class MapParser {
 	private Log log = LogFactory.getLog(MapParser.class);

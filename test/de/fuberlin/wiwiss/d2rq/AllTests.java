@@ -1,8 +1,6 @@
-/*
- * $Id: AllTests.java,v 1.12 2006/09/02 22:41:42 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq;
 
+import de.fuberlin.wiwiss.d2rq.csv.CSVParserTest;
 import de.fuberlin.wiwiss.d2rq.find.ApplyTripleMakersIteratorTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -10,7 +8,8 @@ import junit.framework.TestSuite;
 /**
  * Test suite for D2RQ
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: AllTests.java,v 1.13 2006/09/02 22:49:17 cyganiak Exp $
  */
 public class AllTests {
 
@@ -35,6 +34,7 @@ public class AllTests {
 		suite.addTest(de.fuberlin.wiwiss.d2rq.rdql.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.sql.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.pp.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.csv.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.functional_tests.AllTests.suite());
 		return suite;
 	}

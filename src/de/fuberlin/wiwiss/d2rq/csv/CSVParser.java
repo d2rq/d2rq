@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.helpers;
+package de.fuberlin.wiwiss.d2rq.csv;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,14 +16,13 @@ import org.apache.commons.logging.LogFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 
-
 /**
  * Parses the contents of a CSV file into a Map. The CVS
  * file must contain exactly two columns. Keys come from the
  * first, values from the second.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: CSVParser.java,v 1.2 2006/09/02 22:41:43 cyganiak Exp $
+ * @version $Id: CSVParser.java,v 1.1 2006/09/02 22:49:17 cyganiak Exp $
  */
 public class CSVParser {
 	private Log log = LogFactory.getLog(CSVParser.class);
