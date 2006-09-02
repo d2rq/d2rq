@@ -1,6 +1,3 @@
-/*
- * $Id: Pattern.java,v 1.5 2006/08/28 19:44:21 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.ArrayList;
@@ -12,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
@@ -23,13 +19,10 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * class to keep the code simple and fast. This means Pattern may not
  * work with some hypothetical subclasses of Column.)
  * 
- * <p>History:<br>
- * 08-03-2004: Initial version of this class.<br>
- * 
  * TODO: Use String.split() instead of indexOf() hackery?
  * 
  * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @version $Id: Pattern.java,v 1.6 2006/09/02 22:41:43 cyganiak Exp $
  */
 public class Pattern implements ValueSource {
 	private String pattern;
@@ -132,9 +125,6 @@ public class Pattern implements ValueSource {
 		while (index < this.columns.size()) {
 			Column column = (Column) this.columns.get(index);
 			Integer fieldNumber = (Integer) columnNameNumberMap.get(column.getQualifiedName());
-			if (fieldNumber == null) {
-				Logger.instance().error("Illegal pattern: '" + this.pattern + "'");
-			}
 			if (row[fieldNumber.intValue()] == null) {
 				return null;
 			}
@@ -167,6 +157,11 @@ public class Pattern implements ValueSource {
 		int fieldStart = this.pattern.indexOf(D2RQ.deliminator);
 		if (fieldStart == -1) {
 			fieldStart = this.pattern.length();
+		} else if (this.pattern.length() > fieldStart + 2) {
+			if (this.pattern.charAt(fieldStart + 2) == '@') {
+				// Three @@@ in a row is interpreted as a literal @ plus a delimiter
+				fieldStart++;
+			}
 		}
 		// get text before first field
 		this.firstLiteralPart = this.pattern.substring(0, fieldStart);
@@ -176,7 +171,7 @@ public class Pattern implements ValueSource {
 			fieldStart += D2RQ.deliminator.length();
 			fieldEnd = this.pattern.indexOf(D2RQ.deliminator, fieldStart + 1);
 			if (fieldEnd == -1) {
-				Logger.instance().error("Illegal pattern: '" + this.pattern + "'");
+				throw new D2RQException("Illegal pattern: '" + this.pattern + "'");
 			}
 			// get field
 			String columnName = this.pattern.substring(fieldStart, fieldEnd).trim();
@@ -186,6 +181,11 @@ public class Pattern implements ValueSource {
 			fieldStart = this.pattern.indexOf(D2RQ.deliminator, fieldEnd);
 			if (fieldStart == -1) {
 				fieldStart = this.pattern.length();
+			} else if (this.pattern.length() > fieldStart + 2) {
+				if (this.pattern.charAt(fieldStart + 2) == '@') {
+					// Three @@@ in a row is interpreted as a literal @ plus a delimiter
+					fieldStart++;
+				}
 			}
 			// get text
 			this.literalParts.add(this.pattern.substring(fieldEnd, fieldStart));

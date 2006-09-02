@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.7 2006/08/31 01:50:47 cyganiak Exp $
+ * @version $Id: ModelD2RQ.java,v 1.8 2006/09/02 22:41:43 cyganiak Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */
@@ -80,12 +80,5 @@ public class ModelD2RQ extends ModelCom implements Model {
 				removeNsPrefix((String) entry.getKey());
 			}
 		}
-	}
-	
-	/**
-	 * Enables D2RQ debug messages.
-	 */
-	public void enableDebug() {
-		((GraphD2RQ) getGraph()).enableDebug();
 	}
 }

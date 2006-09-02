@@ -6,13 +6,14 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 
+import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
  * NodeMaker that returns a fixed node.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FixedNodeMaker.java,v 1.6 2006/08/30 10:25:26 cyganiak Exp $
+ * @version $Id: FixedNodeMaker.java,v 1.7 2006/09/02 22:41:43 cyganiak Exp $
  */
 public class FixedNodeMaker implements NodeMaker {
 	private Node fixedNode;
@@ -58,24 +59,6 @@ public class FixedNodeMaker implements NodeMaker {
 	}
 	
 	public String toString() {
-		return "Fixed(" + toString(this.fixedNode) + ")";
-	}
-
-	private static String toString(Node n) {
-		if (n.isURI()) {
-			return "<" + n.getURI() + ">";
-		}
-		if (n.isBlank()) {
-			return "_:" + n.getBlankNodeLabel();
-		}
-		// Literal
-		String s = "\"" + n.getLiteralLexicalForm() + "\"";
-		if (!"".equals(n.getLiteralLanguage())) {
-			s += "@" + n.getLiteralLanguage();
-		}
-		if (n.getLiteralDatatype() != null) {
-			s += "^^<" + n.getLiteralDatatypeURI() + ">";
-		}
-		return s;
+		return "Fixed(" + PrettyPrinter.toString(this.fixedNode) + ")";
 	}
 }

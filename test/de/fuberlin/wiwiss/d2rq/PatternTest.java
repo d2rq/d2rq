@@ -1,5 +1,5 @@
 /*
- * $Id: PatternTest.java,v 1.2 2005/04/13 16:56:07 garbers Exp $
+ * $Id: PatternTest.java,v 1.3 2006/09/02 22:41:42 cyganiak Exp $
  */
 package de.fuberlin.wiwiss.d2rq;
 
@@ -64,6 +64,7 @@ public class PatternTest extends TestCase {
 		assertPattern("foo@bar", "foo@bar");
 		assertPattern("1@", "@@table.col1@@@");
 		assertPattern("12", "@@table.col1@@@@table.col2@@");
+		assertPattern("@1@", "@@@table.col1@@@");
 	}
 
 	public void testBrokenPattern() {
@@ -76,7 +77,6 @@ public class PatternTest extends TestCase {
 		assertIllegalPattern("@@table.col1@@@@");
 		assertIllegalPattern("@table.col1@@");
 		assertIllegalPattern("@@table.col1@@@@@@@");
-		assertIllegalPattern("@@@table.col1@@@");
 	}
 
 	public void testMatches() {

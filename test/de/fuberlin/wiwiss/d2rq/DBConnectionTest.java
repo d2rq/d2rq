@@ -15,7 +15,6 @@ import java.util.Iterator;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
@@ -38,8 +37,6 @@ public class DBConnectionTest extends TestFramework {
 	private String simplestQuery;
 	private String mediumQuery;
 	private String complexQuery;
-
-	protected static Logger logger=new Logger();
 
 	public DBConnectionTest(String arg0) {
 		super(arg0);
@@ -68,7 +65,6 @@ public class DBConnectionTest extends TestFramework {
 		Iterator it = databases.iterator();
 		while (it.hasNext()) {
 			Database db = (Database) it.next();
-			logger.debug("Testing Database " + db.toString());
 			Connection c = db.getConnnection();
 			String result = performQuery(c, simplestQuery); // 
 			assertEquals(result, "1");
@@ -117,7 +113,6 @@ public class DBConnectionTest extends TestFramework {
 
 		Connection c=null;
 		try {
-			logger.debug("connecting to the " + url + " data source...");
 			Class.forName(driverClass);
 			if (configure == 1)
 				c = DriverManager.getConnection(url, name, pass);
@@ -139,7 +134,6 @@ public class DBConnectionTest extends TestFramework {
 		String query = "SELECT Papers.PaperID, Papers.Year FROM Papers WHERE Papers.Year=2002 AND Papers.PaperID = 2 AND Papers.Publish = 1;";
     
 		String query_results = performQuery(c, query);
-		logger.debug(query_results);
 		c.close();
 		assertEquals(query_results,"2 2002");
 	}
@@ -156,7 +150,7 @@ public class DBConnectionTest extends TestFramework {
 		c.close();
 		if (!distinctResult.equals(nonDistinctResult)) {
 		    if (firstDatabase.correctlyHandlesDistinct()) {
-		       logger.debug("testDistinct() has a mismatch." +
+		    	fail("testDistinct() has a mismatch." +
 		               " Please use a better Database or " +
 		               "put into your Database specification " +
 		               "d2rq:allowDistinct \"true\".");
@@ -172,7 +166,6 @@ public class DBConnectionTest extends TestFramework {
 	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 		String query = mediumQuery;
 		String query_results = performQuery(c, query);
-		logger.debug("testMedium:" + query_results);
 		c.close();
 		assertNotNull(query_results);
 	}
@@ -183,8 +176,7 @@ public class DBConnectionTest extends TestFramework {
 	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 		String query = complexQuery;
 		try {
-			String query_results = performQuery(c, query);
-			logger.debug("testLong: " + query_results);
+			performQuery(c, query);
 		} catch (SQLException e) {
 			fail("DBConnectionTest.testLong() is known to fail with MSAccess");
 		} finally {

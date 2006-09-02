@@ -1,10 +1,10 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
+import junit.framework.TestCase;
+
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
-
-import junit.framework.TestCase;
 
 public class NodeMakerTest extends TestCase {
 

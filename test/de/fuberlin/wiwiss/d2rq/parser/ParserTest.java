@@ -1,9 +1,9 @@
-/*
- * $Id: ParserTest.java,v 1.3 2006/08/31 14:10:15 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.parser;
 
 import java.util.Collections;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -13,8 +13,6 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import de.fuberlin.wiwiss.d2rq.MockLogger;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
@@ -23,45 +21,26 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 /**
  * Unit tests for {@link MapParser}
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: ParserTest.java,v 1.4 2006/09/02 22:41:43 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
 	private final static String TEST_FILES = "file:test/de/fuberlin/wiwiss/d2rq/parser/";
 	
 	private Model model;
-	private MockLogger logger;
 
-	/**
-	 * Constructor for ParserTest.
-	 * @param arg0
-	 */
-	public ParserTest(String arg0) {
-		super(arg0);
-	}
-
-	/*
-	 * @see TestCase#setUp()
-	 */
 	protected void setUp() throws Exception {
 		this.model = ModelFactory.createDefaultModel();
-		this.logger = new MockLogger();
-		Logger.setInstance(this.logger);
-	}
-
-	/*
-	 * @see TestCase#tearDown()
-	 */
-	protected void tearDown() throws Exception {
-		this.logger.tally();
-		Logger.setInstance(null);
 	}
 
 	public void testEmptyTranslationTable() {
 		Resource r = createTranslationTableResource();
 		MapParser parser = new MapParser(this.model, null);
-		this.logger.expectWarning(null);
+		Level save = Logger.getLogger(MapParser.class).getLevel();
+		Logger.getLogger(MapParser.class).setLevel(Level.OFF);
 		TranslationTable table = parser.getTranslationTable(r.asNode());
+		Logger.getLogger(MapParser.class).setLevel(save);
 		assertNotNull(table);
 		assertEquals(0, table.size());
 	}

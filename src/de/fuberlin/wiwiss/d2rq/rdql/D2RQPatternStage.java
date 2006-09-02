@@ -1,11 +1,5 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,7 +17,6 @@ import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 
@@ -33,15 +26,11 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * Created by Joerg Garbers on 25.02.05.
  * 
  * @author jg
- * @since V0.3
- * @see CombinedPatternStage
- * @see PatternQueryCombiner
+ * @version $Id: D2RQPatternStage.java,v 1.6 2006/09/02 22:41:44 cyganiak Exp $
  */
 public class D2RQPatternStage extends CombinedPatternStage {
     // TODO keep just one instance of PatternQueryCombiner and update Property Bridges
     // only when updated with previous stage (see varInfo.boundDomainIndexToShared)
-
-    public static Logger logger;
 
 	private GraphD2RQ graph;
 	protected Map candidateBridgeLists; // Database -> List[] 
@@ -126,12 +115,6 @@ public class D2RQPatternStage extends CombinedPatternStage {
                 Triple[] triplesCut = new Triple[dbBridges.length];
                 System.arraycopy(triples, nextToFind, triplesCut, 0,
                         triplesCut.length);
-                if (logger!=null && logger.debugEnabled()) {
-                    String str=Arrays.asList(triplesCut).toString();
-                    logger.debug("creating PatternQueryCombiner4 with " + 
-                    		triplesCut.length +" triples starting from " + nextToFind + ":\n" + str + "\n");
-
-                }
                 PatternQueryCombiner combiner = new PatternQueryCombiner(
                         graph, dbBridges, triplesCut);
                 combiner.setCareForPossible(false);
@@ -150,9 +133,6 @@ public class D2RQPatternStage extends CombinedPatternStage {
                                 tripleQueries,
                                 stageInfo.vars.partBindings[nextToFind][partEnd],
                                 stageInfo.vars.partExpressions[nextToFind][partEnd]);
-                        if (item.isDebugEnabled()) {
-                            item.setAdditionalLogInfo("" + nextToFind + "-" + partEnd);
-                        }
                         if (item != null)
                             ret = ret.andThen(item);
                     }

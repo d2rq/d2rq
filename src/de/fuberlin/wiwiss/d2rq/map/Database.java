@@ -1,24 +1,21 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
-
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 
 
 /**
  * Representation of a d2rq:Database from the mapping file.
  * It contains the connection information for the database and the column types of all database columns used.
  *
- * <p>History:<br>
- * 06-03-2004: Initial version of this class.<br>
- * 08-03-2004: Added some column type logic.<br>
- * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @version $Id: Database.java,v 1.9 2006/09/02 22:41:43 cyganiak Exp $
  * 
  * TODO: Make a bunch of public methods private?
  */
@@ -182,7 +179,7 @@ public class Database {
      */
 	public void assertHasType(Column column) {
 		if (getColumnType(column) == Database.noColumnType) {
-			Logger.instance().error("The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
+			throw new D2RQException("The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
 		}
     }
 
@@ -194,8 +191,7 @@ public class Database {
                 this.jdbcDriver = "sun.jdbc.odbc.JdbcOdbcDriver";
             }
             if (this.jdbc == null) {
-                Logger.instance().error("Could not connect to database because of missing URL.");
-                return;
+                throw new D2RQException("Could not connect to database because of missing URL.");
             }
             if (this.jdbcDriver != null) {
                 Class.forName(this.jdbcDriver);

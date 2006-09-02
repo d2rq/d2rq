@@ -1,6 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -11,7 +10,6 @@ import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
 import de.fuberlin.wiwiss.d2rq.helpers.ConjunctionIterator;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
@@ -19,11 +17,9 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 /** 
  * Iterator for PatternQueryCombiner results.
  * @author jgarbers
- *
+ * @version $Id: PQCResultIterator.java,v 1.6 2006/09/02 22:41:44 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
-
-    public static Logger logger;
     public static int instanceCounter=1;
     public int instanceNr=instanceCounter++;
     public int returnedTriplePatternNr=0;
@@ -65,23 +61,6 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 		return (prefetchedResult!=null);
 	}
 
-	public boolean isDebugEnabled() {
-	    return logger!=null && logger.debugEnabled();
-	}
-	
-	private void logPattern(String msg, Triple[] ret) {
-        if (logger!=null && logger.debugEnabled()) {
-            String str=Arrays.asList(ret).toString();
-            // if (lastPrintedInstanceNr!=instanceNr) {
-            //     logger.debug("-- Iterator switch --");
-            //     lastPrintedInstanceNr=instanceNr;
-            // }
-            logger.debug("PQCResultIterator4-" + instanceNr + " " + msg +
-                    " length-" + ret.length + 
-                    " DB-" + nextDatabase + (additionalLogInfo!=null?additionalLogInfo:"") + ":\n" + str + "\n");
-        }
-	}
-	
 	public Object next() {
 		if (!didPrefetch) {
 			prefetch();
@@ -92,7 +71,6 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 		prefetchedResult=null;
 		didPrefetch=false;
         returnedTriplePatternNr++;
-        logPattern("resultPattern-" + returnedTriplePatternNr ,ret);
 		return new CombinedPatternStage.IteratorResult(ret,nextDatabase);
 	}
 	

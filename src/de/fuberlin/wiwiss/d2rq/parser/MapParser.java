@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -19,7 +22,6 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.helpers.CSVParser;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -35,9 +37,10 @@ import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
  * of a D2RQ mapping file. Checks the map for consistency.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.7 2006/09/02 11:38:15 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.8 2006/09/02 22:41:44 cyganiak Exp $
  */
 public class MapParser {
+	private Log log = LogFactory.getLog(MapParser.class);
 	private Model model;
 	private Graph graph;
 	private String baseURI;
@@ -96,7 +99,7 @@ public class MapParser {
 	private void parseDatabases() {
 	    ExtendedIterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.Database);
 	    if (!it.hasNext()) {
-	        Logger.instance().error("No d2rq:Database defined in the mapping file.");
+	    	throw new D2RQException("No d2rq:Database defined in the mapping file.");
 	    }
 		while (it.hasNext()) {
 			Node dbNode = ((Triple) it.next()).getSubject();
@@ -130,7 +133,7 @@ public class MapParser {
 		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.numericColumn, d2rqColumnTypeToDatabaseColumnType));
 		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.dateColumn, d2rqColumnTypeToDatabaseColumnType));
 		if (jdbcDSN != null && jdbcDriver == null || jdbcDSN == null && jdbcDriver != null) {
-			Logger.instance().error("d2rq:jdbcDSN and d2rq:jdbcDriver must be used together");
+			throw new D2RQException("d2rq:jdbcDSN and d2rq:jdbcDriver must be used together");
 		}
 		Database db = new Database(odbcDSN, jdbcDSN, jdbcDriver, username, password, columnTypes);
 		if (allowDistinct!=null) {
@@ -139,7 +142,7 @@ public class MapParser {
 		    else if (allowDistinct.equals("false"))
 		        db.setAllowDistinct(false);
 		    else 
-		        Logger.instance().error("d2rq:allowDistinct value must be true or false");			
+		    	throw new D2RQException("d2rq:allowDistinct value must be true or false");			
 		}
 		if (expressionTranslator!=null)
 		    db.setExpressionTranslator(expressionTranslator);
@@ -153,7 +156,7 @@ public class MapParser {
 			Node dbNode = findOneNode(classMapNode, D2RQ.dataStorage);
 			Database db = databaseForNode(dbNode);
 			if (db == null) {
-				Logger.instance().error("Unknown d2rq:dataStorage for d2rq:ClassMap " +
+				throw new D2RQException("Unknown d2rq:dataStorage for d2rq:ClassMap " +
 						classMapNode);
 			}
 			NodeMakerSpec spec = buildResourceSpec(classMapNode, db, true);
@@ -188,10 +191,10 @@ public class MapParser {
 		}
 		ExtendedIterator it = this.graph.find(node, D2RQ.translation, Node.ANY);
 		if (href == null && className == null && !it.hasNext()) {
-			Logger.instance().warning("TranslationTable " + node + " contains no translations");
+			this.log.warn("TranslationTable " + node + " contains no translations");
 		}
 		if (className != null && (href != null || it.hasNext())) {
-			Logger.instance().warning("Can't combine d2rq:javaClass with d2rq:translation or d2rq:href on " + node);
+			throw new D2RQException("Can't combine d2rq:javaClass with d2rq:translation or d2rq:href on " + node);
 		}
 		while (it.hasNext()) {
 			Node translation = ((Triple) it.next()).getObject();
@@ -216,18 +219,15 @@ public class MapParser {
 	private void parsePropertyBridge(Node bridgeNode, Node classMapNode) {
 		NodeMakerSpec subjectSpec = classMapSpecForNode(classMapNode);
 		if (subjectSpec == null) {
-			Logger.instance().error("d2rq:belongsToClassMap for " +
+			throw new D2RQException("d2rq:belongsToClassMap for " +
 					bridgeNode + " is no d2rq:ClassMap");
-			return;
 		}
 		if (this.graph.find(bridgeNode, D2RQ.belongsToClassMap, Node.ANY).toList().size() > 1) {
-			Logger.instance().error("Multiple d2rq:belongsToClassMap in " + bridgeNode);
-			return;
+			throw new D2RQException("Multiple d2rq:belongsToClassMap in " + bridgeNode);
 		}
 		Set propertiesForBridge = findPropertiesForBridge(bridgeNode);
 		if (propertiesForBridge.isEmpty()) {
-			Logger.instance().error("Missing d2rq:property for PropertyBridge " + bridgeNode);
-			return;
+			throw new D2RQException("Missing d2rq:property for PropertyBridge " + bridgeNode);
 		}
 		Iterator it = propertiesForBridge.iterator();
 		while (it.hasNext()) {
@@ -311,7 +311,7 @@ public class MapParser {
 				int maxLength = Integer.parseInt(valueMaxLength);
 				spec.setMaxLengthHint(maxLength);
 			} catch (NumberFormatException nfex) {
-				Logger.instance().warning("Ignoring d2rq:valueMaxLength \"" +
+				this.log.warn("Ignoring d2rq:valueMaxLength \"" +
 						valueMaxLength + "\" on " + node + " (must be an integer)");
 			}
 		}
@@ -319,7 +319,7 @@ public class MapParser {
 		if (translateWith != null) {
 			TranslationTable table = getTranslationTable(translateWith);
 			if (table == null) {
-				Logger.instance().error("Unknown d2rq:translateWith in " + node);
+				throw new D2RQException("Unknown d2rq:translateWith in " + node);
 			}
 			spec.setTranslationTable(table);
 		}
@@ -333,7 +333,7 @@ public class MapParser {
 		} else if ("false".equals(containsDuplicates)) {
 			isUnique = true;
 		} else if (containsDuplicates != null) {
-			Logger.instance().error("Illegal value '" + containsDuplicates + "' for d2rq:containsDuplicates on " + node);
+			throw new D2RQException("Illegal value '" + containsDuplicates + "' for d2rq:containsDuplicates on " + node);
 		}
 		if (isUnique) {
 			spec.setIsUnique();
@@ -384,7 +384,7 @@ public class MapParser {
 			Triple t = (Triple) it.next();
 			NodeMakerSpec subjectSpec = classMapSpecForNode(t.getSubject());
 			if (subjectSpec == null) {
-				Logger.instance().warning("Ignoring d2rq:additionalProperty on " +
+				this.log.warn("Ignoring d2rq:additionalProperty on " +
 						t.getSubject() + " as they are allowed only on d2rq:ClassMaps");
 				continue;
 			}
@@ -413,9 +413,8 @@ public class MapParser {
 	private void addRDFTypePropertyBridge(Node toClassMap, Node rdfsClass) {
 		NodeMakerSpec spec = classMapSpecForNode(toClassMap);
 		if (spec == null) {
-			Logger.instance().error(toClassMap + ", referenced from " +
+			throw new D2RQException(toClassMap + ", referenced from " +
 					rdfsClass + ", is no d2rq:ClassMap");
-			return;
 		}
 		createPropertyBridge(toClassMap, Node.createAnon(), 
 				spec,
@@ -443,8 +442,7 @@ public class MapParser {
 			return null;
 		}
 		if (!node.isLiteral()) {
-			Logger.instance().error(toQName(predicate) + " for " + subject + " must be literal");
-			return null;
+			throw new D2RQException(toQName(predicate) + " for " + subject + " must be literal");
 		}
 		return node.getLiteral().getLexicalForm();
 	}
@@ -459,8 +457,7 @@ public class MapParser {
 		} else if (node.isURI()) {
 			return node.getURI();
 		}
-		Logger.instance().error(toQName(predicate) + " for " + subject + " must be literal or URI");
-		return null;
+		throw new D2RQException(toQName(predicate) + " for " + subject + " must be literal or URI");
 	}
 
 	private Node findZeroOrOneNode(Node subject, Node predicate) {
@@ -470,8 +467,7 @@ public class MapParser {
 		}
 		Node result = ((Triple) it.next()).getObject();
 		if (it.hasNext()) {
-			Logger.instance().warning("Ignoring multiple " + toQName(predicate) + " on " + subject);
-			return null;
+			throw new D2RQException("Ignoring multiple " + toQName(predicate) + " on " + subject);
 		}
 		return result;
 	}
@@ -479,13 +475,12 @@ public class MapParser {
 	private Node findOneNode(Node subject, Node predicate) {
 		ExtendedIterator it = this.graph.find(subject, predicate, Node.ANY);
 		if (!it.hasNext()) {
-			Logger.instance().error("Missing " + toQName(predicate) +
+			throw new D2RQException("Missing " + toQName(predicate) +
 					" in " + toQName(subject));
-			return null;
 		}
 		Node result = ((Triple) it.next()).getObject();
 		if (it.hasNext()) {
-			Logger.instance().warning("Ignoring multiple " + toQName(predicate) + " on " + subject);
+			this.log.warn("Ignoring multiple " + toQName(predicate) + " on " + subject);
 		}
 		return result;
 	}
@@ -493,8 +488,7 @@ public class MapParser {
 	private String findOneLiteral(Node subject, Node predicate) {
 		Node node = findOneNode(subject, predicate);
 		if (!node.isLiteral()) {
-			Logger.instance().error(toQName(predicate) + " for " + subject + " must be literal");
-			return null;
+			throw new D2RQException(toQName(predicate) + " for " + subject + " must be literal");
 		}
 		return node.getLiteral().getLexicalForm();
 	}
@@ -506,8 +500,7 @@ public class MapParser {
 		} else if (node.isURI()) {
 			return node.getURI();
 		}
-		Logger.instance().error(toQName(predicate) + " for " + subject + " must be literal or URI");
-		return null;
+		throw new D2RQException(toQName(predicate) + " for " + subject + " must be literal or URI");
 	}
 
 	private Set findLiterals(Node subject, Node predicate) {
@@ -516,8 +509,7 @@ public class MapParser {
 		while (it.hasNext()) {
 			Node node = ((Triple) it.next()).getObject();
 			if (!node.isLiteral()) {
-				Logger.instance().error(toQName(predicate) + " for " + subject + " must be literal");
-				return null;
+				throw new D2RQException(toQName(predicate) + " for " + subject + " must be literal");
 			}
 			result.add(node.getLiteral().getLexicalForm());
 		}
@@ -537,7 +529,7 @@ public class MapParser {
 			Node object=t.getObject();
 			if (!object.isLiteral()) {
 			    if (warnIfNotLiteral) {
-			        Logger.instance().warning("Ignoring non-literal " + toQName(predicate) +
+			        this.log.warn("Ignoring non-literal " + toQName(predicate) +
 						" for " + subject + " (\"" + object + "\")");
 			    }
 				continue;

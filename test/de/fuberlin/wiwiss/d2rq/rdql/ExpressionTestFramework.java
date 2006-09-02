@@ -34,7 +34,6 @@ public class ExpressionTestFramework extends SPARQLTestFramework {
     	
 	protected void setUp() throws Exception {
 		super.setUp();
-		ExpressionTranslator.logger.setDebug(false);
 		sqlResultSetLogger.setDebug(false); // true
 		rdqlLogger.setDebug(false); // true
 		translatedLogger.setDebug(false);

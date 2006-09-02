@@ -1,6 +1,3 @@
-/*
- * $Id: Join.java,v 1.3 2006/08/28 19:44:21 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Collection;
@@ -10,16 +7,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
  *
- * <p>History:<br>
- * 08-03-2004: Initial version of this class.<br>
- * 
  * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @version $Id: Join.java,v 1.4 2006/09/02 22:41:43 cyganiak Exp $
  */
 public class Join {
 	private Set fromColumns = new HashSet(2);
@@ -94,9 +88,8 @@ public class Join {
 	private static Column getColumn(String joinCondition, boolean first) {
 		int index = joinCondition.indexOf("=");
 		if (index == -1) {
-			Logger.instance().error("Illegal d2rq:join: \"" + joinCondition +
-					"\" (must be in Table1.Col1=Table2.Col2 form)");
-			return null;
+			throw new D2RQException("Illegal d2rq:join: \"" + joinCondition +
+					"\" (must be in \"Table1.Col1 = Table2.Col2\" form)");
 		}
 		String col1 = joinCondition.substring(0, index).trim();
 		String col2 = joinCondition.substring(index + 1).trim();

@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.graph.Capabilities;
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
@@ -28,7 +31,6 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 import de.fuberlin.wiwiss.d2rq.helpers.D2RQUtil;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
@@ -36,6 +38,7 @@ import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
+import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
 
 /**
@@ -47,9 +50,11 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.23 2006/09/02 16:10:09 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.24 2006/09/02 22:41:43 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
+	private Log log = LogFactory.getLog(GraphD2RQ.class);
+	
 	static private boolean usingD2RQQueryHandler=false;
 	protected Map processingInstructions=null;
 	
@@ -60,7 +65,8 @@ public class GraphD2RQ extends GraphBase implements Graph {
     /** Collection of all PropertyBridges definded in the mapping file */
 	private List propertyBridges;
 	private Map propertyBridgesByDatabase;
-	
+
+
 	public static boolean isUsingD2RQQueryHandler() {
 		return usingD2RQQueryHandler;
 	}
@@ -95,13 +101,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		// TODO clean up
 		this.propertyBridgesByClassMap = parser.propertyBridgesByClassMap();
 		this.nodeMakersByClassMap = parser.NodeMakersByClassMap();
-	}
-
-	/**
-	 * Enables D2RQ debug messages.
-	 */
-	public void enableDebug() {
-		Logger.instance().setDebug(true);
 	}
 
 	private List sortPropertyBridges(Collection unsortedBridges) {
@@ -161,15 +160,8 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	public ExtendedIterator graphBaseFind( TripleMatch m ) {
 		checkOpen();
 		Triple t = m.asTriple();
-
-		if (Logger.instance().debugEnabled()) {
-			Logger.instance().debug("--------------------------------------------");
-			Logger.instance().debug("        Find(SPO) Query Pattern");
-			Logger.instance().debug("--------------------------------------------");
-			Logger.instance().debug("Subject: " + t.getSubject());
-			Logger.instance().debug("Predicate: " + t.getPredicate());
-			Logger.instance().debug("Object: " + t.getObject());
-			Logger.instance().debug("");
+		if (this.log.isDebugEnabled()) {
+			this.log.debug("Find: " + PrettyPrinter.toString(t, getPrefixMapping()));
 		}
 		return new FindQuery(t, this.propertyBridges).iterator();
     }

@@ -1,29 +1,26 @@
-/*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq;
 
-import com.hp.hpl.jena.shared.*;
+import com.hp.hpl.jena.shared.JenaException;
 
-/** Exception used to signal most D2RQ errors.
+/**
+ * Exception used to signal most D2RQ errors.
  *
- * <BR>History: 06-10-2004   : Initial version of this class.
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
+ * @version $Id: D2RQException.java,v 1.2 2006/09/02 22:41:43 cyganiak Exp $
  */
 
 public class D2RQException extends JenaException {
 
-    /** Construct an exception with given error message */
-    public D2RQException( String message ) {
-        super( message );
-    }
+	public D2RQException(String message) {
+		super(message);
+	}
 
-    /** Construct an exception with given error message */
-    public D2RQException(String message, Exception e) {
-        super( message, e ); 
-    }
-
+	public D2RQException(Throwable cause) {
+		super(cause);
+	}
+	
+	public D2RQException(String message, Throwable cause) {
+		super(message, cause); 
+	}
 }
 

@@ -19,12 +19,11 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 
 import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
-import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: RDQLTestFramework.java,v 1.13 2006/09/02 20:52:25 cyganiak Exp $
+ * @version $Id: RDQLTestFramework.java,v 1.14 2006/09/02 22:41:42 cyganiak Exp $
  */
 public class RDQLTestFramework extends TestFramework {
 	protected ModelD2RQ model;
@@ -110,10 +109,6 @@ public class RDQLTestFramework extends TestFramework {
 		this.model = new ModelD2RQ(D2RQMap);
 		oldIsUsingD2RQQueryHandler=GraphD2RQ.isUsingD2RQQueryHandler();
 		GraphD2RQ.setUsingD2RQQueryHandler(true);
-		oldSQLResultSetLogger=QueryExecutionIterator.logger;
-		oldSQLResultSetSeparatorLogger=QueryExecutionIterator.separatorLogger;
-		QueryExecutionIterator.logger=sqlResultSetLogger;
-		QueryExecutionIterator.separatorLogger=new Logger(); // silent
 //		this.model.enableDebug();
 	    setUpShowErrors(); // should be activated all the time
 //	    setUpShowPerformance(); // activate (only) to test performance (only)
@@ -124,8 +119,6 @@ public class RDQLTestFramework extends TestFramework {
 	
 	protected void tearDown() throws Exception {
 	    GraphD2RQ.setUsingD2RQQueryHandler(oldIsUsingD2RQQueryHandler);
-		QueryExecutionIterator.logger=oldSQLResultSetLogger;
-		QueryExecutionIterator.separatorLogger=oldSQLResultSetSeparatorLogger;
 		this.model.close();
 		this.results = null;
 		super.tearDown();

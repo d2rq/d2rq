@@ -19,7 +19,6 @@ import com.hp.hpl.jena.rdql.parser.Q_UnaryNot;
 import com.hp.hpl.jena.rdql.parser.Q_Var;
 import com.hp.hpl.jena.rdql.parser.WorkingVar;
 
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
@@ -44,7 +43,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  *   2) SQL dialects
  *   3) Variable translators
  * @author jgarbers
- * @version $Id: ExpressionTranslator.java,v 1.11 2006/09/02 20:59:00 cyganiak Exp $
+ * @version $Id: ExpressionTranslator.java,v 1.12 2006/09/02 22:41:44 cyganiak Exp $
  */
 public class ExpressionTranslator {
 	
@@ -73,8 +72,6 @@ public class ExpressionTranslator {
     public static final int RightType=-2;
     public static final int SameType=-3;
 
-    public static final Logger logger=new Logger();
-    
     public ExpressionTranslator(ConstraintHandler handler, SelectStatementBuilder sql) {
         super();
         this.handler=handler;
@@ -123,24 +120,16 @@ public class ExpressionTranslator {
     }
    
     public String translateToString(Expression e) {
-    	if (logger.debugEnabled())
-    		logger.debug(expressionToString(e));
         Result r=translate(e);
         if (r==null) {
-        	if (logger.debugEnabled())
-        		logger.debug("No sql expression 1");
             return null;
         }
         if ((r.getType() & BoolType) != 0) {
-        	if (logger.debugEnabled())
-        		logger.debug("SQL expression:" + r.getString());
             String res=r.getString();
             if (logSqlExpressions!=null)
                 logSqlExpressions.add(res);
             return res;
         }
-        if (logger.debugEnabled())
-        	logger.debug("No sql expression 2");
         return null;
     }
     

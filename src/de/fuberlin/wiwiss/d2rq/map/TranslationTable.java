@@ -1,6 +1,3 @@
-/*
- * $Id: TranslationTable.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.lang.reflect.Constructor;
@@ -11,7 +8,7 @@ import java.util.Set;
 
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
@@ -27,11 +24,8 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * TODO: The two cases (addTranslation calls and setTranslator) should
  * probalby be in separate classes.
  * 
- * <p>History:<br>
- * 08-03-2004: Initial version.<br>
- * 
  * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @version $Id: TranslationTable.java,v 1.3 2006/09/02 22:41:43 cyganiak Exp $
  */
 public class TranslationTable implements Translator {
 	private Map db2rdf = new HashMap();
@@ -71,8 +65,7 @@ public class TranslationTable implements Translator {
 		try {
 			Class translatorClass = Class.forName(className);
 			if (!implementsTranslator(translatorClass)) {
-				Logger.instance().error("d2rq:javaClass " + className + " must implement " + Translator.class.getName());
-				return;
+				throw new D2RQException("d2rq:javaClass " + className + " must implement " + Translator.class.getName());
 			}
 			if (hasConstructorWithArg(translatorClass)) {
 				setTranslator(invokeConstructorWithArg(translatorClass, resource));
@@ -82,9 +75,9 @@ public class TranslationTable implements Translator {
 				setTranslator(invokeConstructorWithoutArg(translatorClass));
 				return;
 			}
-			Logger.instance().error("No suitable public constructor found on d2rq:javaClass " + className);
+			throw new D2RQException("No suitable public constructor found on d2rq:javaClass " + className);
 		} catch (ClassNotFoundException e) {
-			Logger.instance().error("d2rq:javaClass not on classpath: " + className);
+			throw new D2RQException("d2rq:javaClass not on classpath: " + className);
 		}
 	}
 

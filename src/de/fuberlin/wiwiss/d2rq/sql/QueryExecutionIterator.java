@@ -10,8 +10,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
@@ -20,11 +20,9 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryExecutionIterator.java,v 1.1 2006/08/29 15:13:13 cyganiak Exp $
+ * @version $Id: QueryExecutionIterator.java,v 1.2 2006/09/02 22:41:44 cyganiak Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
-	public static Logger logger=Logger.instance();
-	public static Logger separatorLogger=Logger.instance();
 	public static Collection protocol=null;
 
 	private String sql;
@@ -90,8 +88,7 @@ public class QueryExecutionIterator implements ClosableIterator {
 			}
 			return result;
 		} catch (SQLException ex) {
-			logger.error(ex.getMessage());
-			return null;
+			throw new D2RQException(ex.getMessage());
 		}
 	}
 	
@@ -106,7 +103,7 @@ public class QueryExecutionIterator implements ClosableIterator {
 				this.resultSet.close();
 				this.resultSet = null;
 			} catch (SQLException ex) {
-				logger.error(ex.getMessage() + "; query was: " + this.sql);
+				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
 			}
 	    }
 	}
@@ -121,11 +118,6 @@ public class QueryExecutionIterator implements ClosableIterator {
 	    }
     	this.queryExecuted = true;
     	LogFactory.getLog(QueryExecutionIterator.class).debug(this.sql);
-		if (logger.debugEnabled()) {
-		    separatorLogger.debug("--------------------------------------------");
-            logger.debug("SQL statement executed: " + this.sql);
-            separatorLogger.debug("--------------------------------------------");
-        }
     	InfoD2RQ.totalNumberOfExecutedSQLQueries++;
     	if (protocol!=null)
     	    protocol.add(this.sql);
@@ -135,7 +127,7 @@ public class QueryExecutionIterator implements ClosableIterator {
 			this.resultSet = stmt.executeQuery(this.sql);
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {
-            logger.error(ex.getMessage() + ": " + this.sql);
+        	throw new D2RQException(ex.getMessage() + ": " + this.sql);
         }
     }
 }

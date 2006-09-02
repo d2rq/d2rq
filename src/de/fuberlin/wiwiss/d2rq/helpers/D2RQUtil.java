@@ -30,14 +30,9 @@ public class D2RQUtil {
 			if (!bridge.couldFit(t, context)) {
 				continue;
 			}
-			if (Logger.instance().debugEnabled()) {
-				Logger.instance().debug("--------------------------------------------");
-				Logger.instance().debug("Using property bridge: " + bridge + " for triple " + t );
-			}
 			list.add(bridge);
 		}
 		return list;
-		// return (PropertyBridge[]) list.toArray(emptyPropertyBridgeArray);
 	}
 
 	public static Map makeDatabaseMapFromPropertyBridges(List propertyBridges) {
