@@ -1,22 +1,15 @@
-/*
- * D2RQRepository.java
- *
- * Created on 13. September 2005, 17:36
- *
- */
-
 package de.fuberlin.wiwiss.d2rq.sesame;
 
 import org.openrdf.sesame.repository.SesameRepository;
 import org.openrdf.sesame.repository.local.LocalRepository;
 import org.openrdf.sesame.repository.local.LocalService;
-import org.openrdf.sesame.sail.RdfSource;
 
 /**
  * This implementation for the SesameRepository interface provides a read-only access
  * to a D2RQ Source.
  *
  * @author Oliver Maresch (oliver-maresch@gmx.de)
+ * @version $Id: D2RQRepository.java,v 1.6 2006/09/02 20:59:00 cyganiak Exp $
  */
 public class D2RQRepository extends LocalRepository implements SesameRepository{
     

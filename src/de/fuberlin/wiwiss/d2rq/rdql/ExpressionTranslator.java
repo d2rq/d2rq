@@ -1,7 +1,3 @@
-/*
-(c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
@@ -48,7 +44,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  *   2) SQL dialects
  *   3) Variable translators
  * @author jgarbers
- *
+ * @version $Id: ExpressionTranslator.java,v 1.11 2006/09/02 20:59:00 cyganiak Exp $
  */
 public class ExpressionTranslator {
 	

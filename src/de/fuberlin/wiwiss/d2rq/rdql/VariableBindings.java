@@ -1,14 +1,9 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
  * - information if and where these bind variables are used again in bound positions.
  * 
  * @author jgarbers
- *
+ * @version $Id: VariableBindings.java,v 1.3 2006/09/02 20:59:00 cyganiak Exp $
  */
 public class VariableBindings {
     

@@ -1,25 +1,16 @@
-/*
- * D2RQStatementIterator.java
- *
- * Created on 15. September 2005, 17:52
- *
- */
-
 package de.fuberlin.wiwiss.d2rq.sesame;
+
+import org.openrdf.model.ValueFactory;
+import org.openrdf.sesame.sail.StatementIterator;
 
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Statement;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.sesame.sail.StatementIterator;
-
-/** Wraps a Jena ExtendedIterator with Jena Statements and maps the Jena Statements to Sesame Statments
+/** 
+ * Wraps a Jena ExtendedIterator with Jena Statements and maps the Jena Statements to Sesame Statments
  *
  * @author Oliver Maresch (oliver-maresch@gmx.de)
+ * @version $Id: D2RQStatementIterator.java,v 1.5 2006/09/02 20:59:00 cyganiak Exp $
  */
 public class D2RQStatementIterator implements StatementIterator {
     

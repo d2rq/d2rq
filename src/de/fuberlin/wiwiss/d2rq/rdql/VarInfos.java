@@ -1,7 +1,3 @@
-/*
- * Created on Dec 5, 2005 by Joerg Garbers
- *
- */
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
@@ -14,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.query.Domain;
 import com.hp.hpl.jena.graph.query.Expression;
 import com.hp.hpl.jena.graph.query.ExpressionSet;
@@ -22,6 +17,10 @@ import com.hp.hpl.jena.graph.query.Mapping;
 
 import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 
+/**
+ * @author jgarbers
+ * @version $Id: VarInfos.java,v 1.2 2006/09/02 20:59:00 cyganiak Exp $
+ */
 public class VarInfos {
     /**
      * variable bindings from inputDomain

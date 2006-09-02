@@ -1,10 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 
-import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.query.Bind;
@@ -18,11 +15,14 @@ import com.hp.hpl.jena.graph.query.Mapping;
 import com.hp.hpl.jena.graph.query.Pattern;
 import com.hp.hpl.jena.graph.query.PatternStage;
 import com.hp.hpl.jena.graph.query.PatternStageCompiler;
-import com.hp.hpl.jena.graph.query.Pipe;
 import com.hp.hpl.jena.graph.query.Query;
 import com.hp.hpl.jena.graph.query.Valuator;
 import com.hp.hpl.jena.graph.query.ValuatorSet;
 
+/**
+ * @author jgarbers
+ * @version $Id: StageInfo.java,v 1.2 2006/09/02 20:59:00 cyganiak Exp $
+ */
 public class StageInfo {
 	
 	protected VarInfos vars;

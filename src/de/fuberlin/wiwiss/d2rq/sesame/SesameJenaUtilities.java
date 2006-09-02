@@ -1,14 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.sesame;
 
-import java.io.File;
-import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-
 import org.openrdf.model.BNode;
-import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -16,20 +8,15 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.StatementImpl;
-import org.openrdf.sesame.repository.local.LocalRepository;
-import org.openrdf.sesame.sail.StatementIterator;
 
-//import com.eaio.uuid.UUID;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
-import com.hp.hpl.jena.graph.Factory;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.impl.LiteralLabel;
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 
 
@@ -38,6 +25,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 /**
  * @author tgauss
  * @author oliver-maresch@gmx.de
+ * @version $Id: SesameJenaUtilities.java,v 1.5 2006/09/02 20:59:00 cyganiak Exp $
  */
 public class SesameJenaUtilities {
 	

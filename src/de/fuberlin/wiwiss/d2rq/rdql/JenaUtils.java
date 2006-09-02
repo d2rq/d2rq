@@ -1,7 +1,3 @@
-/*
- * Created on Dec 4, 2005 by Joerg Garbers
- *
- */
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
@@ -12,10 +8,13 @@ import java.util.List;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.query.Expression;
 import com.hp.hpl.jena.graph.query.ExpressionSet;
 
+/**
+ * @author jgarbers
+ * @version $Id: JenaUtils.java,v 1.2 2006/09/02 20:59:00 cyganiak Exp $
+ */
 public class JenaUtils {
 
     static protected void addVariableNames(ExpressionSet es, Set set, List listOfSets) {
