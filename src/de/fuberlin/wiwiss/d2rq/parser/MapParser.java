@@ -35,16 +35,16 @@ import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
  * of a D2RQ mapping file. Checks the map for consistency.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.6 2006/09/01 08:49:27 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.7 2006/09/02 11:38:15 cyganiak Exp $
  */
 public class MapParser {
 	private Model model;
 	private Graph graph;
 	private String baseURI;
+	private Collection propertyBridges = new ArrayList();
 	private Map nodesToDatabases = new HashMap();
 	private Map nodesToClassMapSpecs = new HashMap();
 	private Map nodesToTranslationTables = new HashMap();
-	private Map nodesToPropertyBridges = new HashMap();
 	private Map processingInstructions = new HashMap();
 	
 	/**
@@ -77,7 +77,7 @@ public class MapParser {
 	}
 	
 	public Collection getPropertyBridges() {
-		return this.nodesToPropertyBridges.values();
+		return this.propertyBridges;
 	}
 	
 	public Map getProcessingInstructions() {
@@ -204,42 +204,41 @@ public class MapParser {
 	}
 
 	private void parsePropertyBridges() {
-		ExtendedIterator it = this.graph.find(Node.ANY, D2RQ.belongsToClassMap, Node.ANY);
+		Iterator it = this.graph.find(Node.ANY, D2RQ.belongsToClassMap, Node.ANY);
 		while (it.hasNext()) {
 			Triple t = (Triple) it.next();
 			Node propBridgeNode = t.getSubject();
 			Node classMapNode = t.getObject();
-			NodeMakerSpec subjectSpec = classMapSpecForNode(classMapNode);
-			if (subjectSpec == null) {
-				Logger.instance().error("d2rq:belongsToClassMap for " +
-						propBridgeNode + " is no d2rq:ClassMap");
-				return;
-			}
-			if (this.nodesToPropertyBridges.containsKey(propBridgeNode)) {
-				Logger.instance().error("Multiple d2rq:belongsToClassMap in " + propBridgeNode);
-				return;
-			}
+			parsePropertyBridge(propBridgeNode, classMapNode);
+		}
+	}
+	
+	private void parsePropertyBridge(Node bridgeNode, Node classMapNode) {
+		NodeMakerSpec subjectSpec = classMapSpecForNode(classMapNode);
+		if (subjectSpec == null) {
+			Logger.instance().error("d2rq:belongsToClassMap for " +
+					bridgeNode + " is no d2rq:ClassMap");
+			return;
+		}
+		if (this.graph.find(bridgeNode, D2RQ.belongsToClassMap, Node.ANY).toList().size() > 1) {
+			Logger.instance().error("Multiple d2rq:belongsToClassMap in " + bridgeNode);
+			return;
+		}
+		Set propertiesForBridge = findPropertiesForBridge(bridgeNode);
+		if (propertiesForBridge.isEmpty()) {
+			Logger.instance().error("Missing d2rq:property for PropertyBridge " + bridgeNode);
+			return;
+		}
+		Iterator it = propertiesForBridge.iterator();
+		while (it.hasNext()) {
+			Node property = (Node) it.next();
 			PropertyBridge bridge = createPropertyBridge(
 					classMapNode,
-					propBridgeNode,
+					bridgeNode,
 					subjectSpec,
-					NodeMakerSpec.createFixed(findPropertyForBridge(propBridgeNode)),
-					buildObjectSpec(propBridgeNode, subjectSpec.database()));
+					NodeMakerSpec.createFixed(property),
+					buildObjectSpec(bridgeNode, subjectSpec.database()));
 			registerBridgeForClassMap(classMapNode, bridge);
-		}
-		it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.DatatypePropertyBridge);
-		while (it.hasNext()) {
-			Triple t = (Triple) it.next();
-			if (!this.nodesToPropertyBridges.containsKey(t.getSubject())) {
-				Logger.instance().warning("PropertyBridge " + t.getSubject() + " has no d2rq:belongsToClassMap");
-			}
-		}
-		it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.ObjectPropertyBridge);
-		while (it.hasNext()) {
-			Triple t = (Triple) it.next();
-			if (!this.nodesToPropertyBridges.containsKey(t.getSubject())) {
-				Logger.instance().warning("PropertyBridge " + t.getSubject() + " has no d2rq:belongsToClassMap");
-			}
 		}
 	}
 
@@ -359,39 +358,24 @@ public class MapParser {
 		PropertyBridge bridge = new PropertyBridge(node,
 				subjects, predicates, objects,
 				subjectsSpec.database(), policy);
-		this.nodesToPropertyBridges.put(node, bridge);
+		this.propertyBridges.add(bridge);
 		registerBridgeForClassMap(classMap, bridge);
 		return bridge;
 	}
 
-	private Node findPropertyForBridge(Node bridge) {
-		Node result = null;
-		ExtendedIterator it = this.graph.find(Node.ANY, D2RQ.propertyBridge, bridge);
-		if (it.hasNext()) {
-			result = ((Triple) it.next()).getSubject();
-			if (it.hasNext()) {
-				Logger.instance().warning("Ignoring multiple d2rq:propertyBridges for d2rq:PropertyBridge " + bridge);
-				return null;
-			}
+	private Set findPropertiesForBridge(Node bridge) {
+		Set results = new HashSet();
+		Iterator it = this.graph.find(Node.ANY, D2RQ.propertyBridge, bridge);
+		while (it.hasNext()) {
+			Triple t = (Triple) it.next();
+			results.add(t.getSubject());
 		}
 		it = this.graph.find(bridge, D2RQ.property, Node.ANY);
-		if (result == null && !it.hasNext()) {
-			Logger.instance().error("Missing d2rq:property for PropertyBridge " + bridge);
-			return null;
+		while (it.hasNext()) {
+			Triple t = (Triple) it.next();
+			results.add(t.getObject());
 		}
-		if (result != null && it.hasNext()) {
-			Logger.instance().warning("Ignoring redundant d2rq:property for d2rq:PropertyBridge " + bridge);
-			return null;
-		}
-		if (result != null) {
-			return result;
-		}
-		result = ((Triple) it.next()).getObject();
-		if (it.hasNext()) {
-			Logger.instance().warning("Ignoring multiple d2rq:property statements for d2rq:PropertyBridge " + bridge);
-			return null;
-		}
-		return result;
+		return results;
 	}
 
 	private void parseAdditionalProperties() {
@@ -440,7 +424,7 @@ public class MapParser {
 	}
 
 	private void checkColumnTypes() {
-		Iterator it = this.nodesToPropertyBridges.values().iterator();
+		Iterator it = this.propertyBridges.iterator();
 		while (it.hasNext()) {
 			PropertyBridge bridge = (PropertyBridge) it.next();
 			assertHasColumnTypes(bridge.getSubjectMaker(), bridge.getDatabase());
