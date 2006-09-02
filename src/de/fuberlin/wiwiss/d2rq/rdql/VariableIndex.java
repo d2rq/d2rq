@@ -1,14 +1,10 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
-package de.fuberlin.wiwiss.d2rq.helpers;
+package de.fuberlin.wiwiss.d2rq.rdql;
 
 /** 
  * Helper class for storing the index of a node within a query.
  * 
  * @author jgarbers
- *
+ * @version $Id: VariableIndex.java,v 1.1 2006/09/02 23:10:43 cyganiak Exp $
  */
 public class VariableIndex implements Comparable {
 	public int tripleNr; // >=0

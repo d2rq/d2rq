@@ -1,6 +1,8 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -10,16 +12,11 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.helpers.D2RQUtil;
+import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
 public class GraphUtils {
-
-	public GraphUtils() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
 
 	/**
 	 * Creates a bunch of prefixed property bridge copies for each triple.
@@ -153,7 +150,7 @@ public class GraphUtils {
 		int nonEmptyLists=0;
 		for (int i=0; i<triples.length; i++) {
 			Triple t=triples[i];
-			List tBridges=D2RQUtil.propertyBridgesForTriple(t,candidateBridges);
+			List tBridges = propertyBridgesForTriple(t, candidateBridges);
 			bridges[i]=tBridges;
 			int bridgesCount=tBridges.size();
 			if (bridgesCount==0) {
@@ -200,7 +197,7 @@ public class GraphUtils {
 		boolean fullSuccess=true;
 		for (int i=0; i<refined.length; i++) {
 			Triple t=triples[i];
-			List tBridges=D2RQUtil.propertyBridgesForTriple(t,bridges[i]);
+			List tBridges = propertyBridgesForTriple(t, bridges[i]);
 			if (tBridges.size()==0) {
 				if (stopEarly)
 					return false;
@@ -252,6 +249,42 @@ public class GraphUtils {
 		Triple[] ret=new Triple[triples.length];
 		for (int i=0; i<triples.length; i++)
 			ret[i]=varsToANY(triples[i]);
+		return ret;
+	}
+
+	/**
+	 * Finds all property bridges from a collection that match a triple.
+	 * @param t the triple
+	 * @param pbIt the collection iterator (elements must be of type PropertyBridge)
+	 * @return list of items from pbIt
+	 */
+	public static ArrayList propertyBridgesForTriple(Triple t, Collection propertyListCandidates) { // PropertyBridge[]
+		QueryContext context = new QueryContext();
+		ArrayList list=new ArrayList(2);
+		Iterator pbIt=propertyListCandidates.iterator();
+		while (pbIt.hasNext()) {
+			PropertyBridge bridge = (PropertyBridge) pbIt.next();
+			if (!bridge.couldFit(t, context)) {
+				continue;
+			}
+			list.add(bridge);
+		}
+		return list;
+	}
+
+	public static Map makeDatabaseMapFromPropertyBridges(List propertyBridges) {
+		Map ret=new HashMap();
+		Iterator it=propertyBridges.iterator();
+		while (it.hasNext()) {
+			PropertyBridge pb=(PropertyBridge)it.next();
+			Database db=pb.getDatabase();
+			List list=(List) ret.get(db);
+			if (list==null) {
+				list=new ArrayList();
+				ret.put(db,list);
+			}
+			list.add(pb);
+		}
 		return ret;
 	}
 }

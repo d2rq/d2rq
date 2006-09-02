@@ -15,11 +15,10 @@ import com.hp.hpl.jena.graph.query.Expression;
 import com.hp.hpl.jena.graph.query.ExpressionSet;
 import com.hp.hpl.jena.graph.query.Mapping;
 
-import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 
 /**
  * @author jgarbers
- * @version $Id: VarInfos.java,v 1.3 2006/09/02 21:08:55 cyganiak Exp $
+ * @version $Id: VarInfos.java,v 1.4 2006/09/02 23:10:43 cyganiak Exp $
  */
 public class VarInfos {
     /**

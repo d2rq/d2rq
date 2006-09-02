@@ -1,18 +1,16 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
-package de.fuberlin.wiwiss.d2rq.helpers;
+package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.Arrays;
+
+import de.fuberlin.wiwiss.d2rq.rdql.ConjunctionIterator;
 
 import junit.framework.TestCase;
 
 /**
  * @author jg
- *
+ * @version $Id: ConjunctionIteratorTest.java,v 1.1 2006/09/02 23:10:43 cyganiak Exp $
  */
-public class TestHelpers extends TestCase {
+public class ConjunctionIteratorTest extends TestCase {
 	
 	String[][] cnf; // conjunctive normal form
 	String[] resultStore;

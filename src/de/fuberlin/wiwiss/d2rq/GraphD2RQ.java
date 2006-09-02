@@ -30,7 +30,6 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
-import de.fuberlin.wiwiss.d2rq.helpers.D2RQUtil;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
@@ -40,6 +39,7 @@ import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
+import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
 
 /**
  * A D2RQ virtual read-only graph backed by a non-RDF database.
@@ -50,7 +50,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.24 2006/09/02 22:41:43 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.25 2006/09/02 23:10:43 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -97,7 +97,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		parser.parse();
 		this.propertyBridges = sortPropertyBridges(parser.getPropertyBridges());
 		this.processingInstructions = parser.getProcessingInstructions();
-		this.propertyBridgesByDatabase=D2RQUtil.makeDatabaseMapFromPropertyBridges(propertyBridges);
+		this.propertyBridgesByDatabase = GraphUtils.makeDatabaseMapFromPropertyBridges(propertyBridges);
 		// TODO clean up
 		this.propertyBridgesByClassMap = parser.propertyBridgesByClassMap();
 		this.nodeMakersByClassMap = parser.NodeMakersByClassMap();
@@ -173,12 +173,11 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * Finds all property bridges from this graph mapping that match a triple.
 	 */
 	public ArrayList propertyBridgesForTriple(Triple t) { // PropertyBridge[]
-		return D2RQUtil.propertyBridgesForTriple(t,propertyBridges);
+		return GraphUtils.propertyBridgesForTriple(t, propertyBridges);
 	}
 	
 	public ArrayList propertyBridgesForTriple(Triple t, Database db) {
-		Collection candidates=getPropertyBridges(db);
-		return D2RQUtil.propertyBridgesForTriple(t,candidates);
+		return GraphUtils.propertyBridgesForTriple(t, getPropertyBridges(db));
 	}	
 	
     /**

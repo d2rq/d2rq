@@ -1,11 +1,11 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-package de.fuberlin.wiwiss.d2rq.helpers;
+package de.fuberlin.wiwiss.d2rq.rdql;
 
 /**
  * An IndexArray is an array of (wrapped) counters. 
  * It can be used like an iterator.
+ * 
+ * @author jgarbers
+ * @version $Id: IndexArray.java,v 1.1 2006/09/02 23:10:43 cyganiak Exp $
  */
 public class IndexArray {
 

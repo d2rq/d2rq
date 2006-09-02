@@ -9,7 +9,6 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Domain;
 
-import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 
 /** 
  * A class for capturing binding information for variables that occour in a
@@ -22,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
  * - information if and where these bind variables are used again in bound positions.
  * 
  * @author jgarbers
- * @version $Id: VariableBindings.java,v 1.4 2006/09/02 21:08:55 cyganiak Exp $
+ * @version $Id: VariableBindings.java,v 1.5 2006/09/02 23:10:43 cyganiak Exp $
  */
 public class VariableBindings {
     

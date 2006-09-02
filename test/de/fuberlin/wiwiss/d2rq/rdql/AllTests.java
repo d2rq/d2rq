@@ -10,6 +10,7 @@ public class AllTests {
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ExpressionTest.class);
 		suite.addTestSuite(SPARQLExpressionTest.class);
+		suite.addTestSuite(ConjunctionIteratorTest.class);
 		//$JUnit-END$
 		return suite;
 	}

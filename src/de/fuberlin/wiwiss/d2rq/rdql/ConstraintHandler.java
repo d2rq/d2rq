@@ -16,7 +16,6 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Expression;
 
 import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
-import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;

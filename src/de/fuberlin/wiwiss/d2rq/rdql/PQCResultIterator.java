@@ -9,7 +9,6 @@ import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
-import de.fuberlin.wiwiss.d2rq.helpers.ConjunctionIterator;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
@@ -17,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 /** 
  * Iterator for PatternQueryCombiner results.
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.6 2006/09/02 22:41:44 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.7 2006/09/02 23:10:43 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
     public static int instanceCounter=1;
