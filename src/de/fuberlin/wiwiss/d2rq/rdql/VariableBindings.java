@@ -1,14 +1,12 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.query.Domain;
 
 import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
@@ -24,13 +22,12 @@ import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
  * - information if and where these bind variables are used again in bound positions.
  * 
  * @author jgarbers
- * @version $Id: VariableBindings.java,v 1.3 2006/09/02 20:59:00 cyganiak Exp $
+ * @version $Id: VariableBindings.java,v 1.4 2006/09/02 21:08:55 cyganiak Exp $
  */
 public class VariableBindings {
     
     /**
      * variable bindings from inputDomain
-     * @deprecated see VarInfos 
      */
     public Domain inputDomain;
 
@@ -204,29 +201,5 @@ public class VariableBindings {
 	    return m;
 	}
 	*/
-	
-	// currently not used
-	private static void triplesFindVariablesAndShared(Triple[] triples, Collection variables, Collection sharedVariables) {
-		for (int i=0; i<triples.length; i++) {
-			Triple t=triples[i];
-			for (int j=0; j<3; j++) {
-				Node n=null;
-				switch (j) {
-				case 0: n=t.getSubject(); break;
-				case 1: n=t.getPredicate(); break;
-				case 2: n=t.getObject(); break;
-				}
-				if (n.isVariable()) {
-					if (variables.contains(n)) {
-						sharedVariables.add(n);
-					} else {
-						variables.add(n);
-					}
-				}
-			}
-		}
-	}
-
-
 }
 

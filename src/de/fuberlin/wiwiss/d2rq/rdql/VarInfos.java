@@ -19,13 +19,13 @@ import de.fuberlin.wiwiss.d2rq.helpers.VariableIndex;
 
 /**
  * @author jgarbers
- * @version $Id: VarInfos.java,v 1.2 2006/09/02 20:59:00 cyganiak Exp $
+ * @version $Id: VarInfos.java,v 1.3 2006/09/02 21:08:55 cyganiak Exp $
  */
 public class VarInfos {
     /**
      * variable bindings from inputDomain
      */
-    private Domain inputDomain;
+//    private Domain inputDomain;
 	
 	protected int tripleCount;
 	/**
@@ -139,7 +139,8 @@ public class VarInfos {
 
 	
 	void setInputDomain(Domain d) {
-		inputDomain=d;
+// Was never read, so I commented it out -- RC
+//		inputDomain=d;
 		// TODO add to variableBindings?
 	}
 
