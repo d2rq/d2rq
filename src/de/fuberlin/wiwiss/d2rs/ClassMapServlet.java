@@ -24,6 +24,11 @@ public class ClassMapServlet extends HttpServlet {
 		}
 		String classMapName = request.getPathInfo().substring(1);
 		Model resourceList = graphD2RQ().classMapInventory(classMapName);
+    	Resource classMap = resourceList.getResource(D2RServer.instance().baseURI() + "all/" + classMapName);
+    	Resource directory = resourceList.createResource(D2RServer.instance().baseURI() + "all");
+    	classMap.addProperty(RDFS.seeAlso, directory);
+    	classMap.addProperty(RDFS.label, "List of all instances: " + classMapName);
+    	directory.addProperty(RDFS.label, "D2R Server contents");
 		if (resourceList == null) {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return;

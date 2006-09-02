@@ -39,6 +39,15 @@
     </init-param>
   </servlet>
   
+  <servlet>
+    <servlet-name>D2R ClassMap Directory Page</servlet-name>
+    <servlet-class>de.fuberlin.wiwiss.d2rs.DirectoryServlet</servlet-class>
+    <init-param>
+      <param-name>org.apache.velocity.properties</param-name>
+      <param-value>/WEB-INF/velocity.properties</param-value>
+    </init-param>
+  </servlet>
+  
   <!-- MAPPINGS -->
   <!-- Map URLs to SPARQL service processors -->
 
@@ -65,6 +74,11 @@
   <servlet-mapping>
     <servlet-name>D2R Resource Page</servlet-name>
     <url-pattern>/page/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>D2R ClassMap Directory Page</servlet-name>
+    <url-pattern>/directory/*</url-pattern>
   </servlet-mapping>
   
   <welcome-file-list>

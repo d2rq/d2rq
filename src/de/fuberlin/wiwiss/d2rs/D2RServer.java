@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.7 2006/09/02 11:44:45 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.8 2006/09/02 16:08:46 cyganiak Exp $
  */
 public class D2RServer {
 	private static D2RServer instance = null;
@@ -109,7 +109,7 @@ public class D2RServer {
 		mapModel.read(mappingFileURL, resourceBaseURI(), "N3");
 		ModelD2RQ d2rqModel = new ModelD2RQ(mapModel, resourceBaseURI());
 		this.currentGraph = (GraphD2RQ) d2rqModel.getGraph();
-		this.currentGraph.initInventory(baseURI() + "all", baseURI() + "all/");
+		this.currentGraph.initInventory(baseURI() + "all/");
 		return d2rqModel;
 	}
 	

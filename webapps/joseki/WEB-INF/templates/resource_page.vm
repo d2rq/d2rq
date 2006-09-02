@@ -29,7 +29,7 @@
 #if (!$classmap_links.isEmpty())
       | List all instances:
 #foreach ($classmap in $classmap_links.keySet())
-      <a href="$classmap_links.get($classmap)">$classmap</a>
+      <strong><a href="$classmap_links.get($classmap)">$classmap</a></strong>
 #end
 #end
     </div>
