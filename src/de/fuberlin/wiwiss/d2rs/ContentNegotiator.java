@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rs;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +47,9 @@ public class ContentNegotiator {
 	}
 
 	private List parse(String acceptSpec) {
+		if (acceptSpec == null) {
+			return Collections.EMPTY_LIST;
+		}
 		List results = new ArrayList();
 		Iterator it = splitClauses(acceptSpec).iterator();
 		while (it.hasNext()) {
