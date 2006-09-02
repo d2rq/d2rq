@@ -16,6 +16,7 @@ img { border: none; }
 .link { background: url(link.png) center right no-repeat; padding-right: 13px; }
 .queryresults { border-collapse: collapse; margin-top: 0.3em; }
 .queryresults td, .queryresults th { padding: 0.2em 0.4em; vertical-align: top; }
+.uri { white-space: nowrap; }
 .uri a, a.uri { text-decoration: none; }
 .unbound { color: #888; }
 .queryresults small { font-size: 100%; color: #666; }

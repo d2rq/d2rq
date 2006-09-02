@@ -2,6 +2,9 @@ package de.fuberlin.wiwiss.d2rs;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +22,8 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.vocabulary.RDFS;
+
+import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
 public class PageServlet extends VelocityServlet {
 	private PrefixMapping prefixes;
@@ -45,9 +50,11 @@ public class PageServlet extends VelocityServlet {
 		response.addHeader("Pragma", "no-cache");
 		setContentType(request, response);
 		context.put("uri", resourceURI);
+		context.put("home_link", D2RServer.instance().baseURI());
 		context.put("rdf_link", D2RServer.instance().graphURLDescribingResource(resourceURI));
 		context.put("label", resource.getProperty(RDFS.label));
 		context.put("properties", collectProperties(description, resource));
+		context.put("classmap_links", classmapLinks(resource));
 		try {
 			return getTemplate("resource_page.vm");
 		} catch (Exception ex) {
@@ -64,6 +71,17 @@ public class PageServlet extends VelocityServlet {
 		it = m.listStatements(null, null, r);
 		while (it.hasNext()) {
 			result.add(new Property(it.nextStatement(), true));
+		}
+		return result;
+	}
+
+	private Map classmapLinks(Resource resource) {
+		Map result = new HashMap();
+		GraphD2RQ g = D2RServer.instance().currentGraph();
+		Iterator it = g.classMapNamesForResource(resource.asNode()).iterator();
+		while (it.hasNext()) {
+			String name = (String) it.next();
+			result.put(name, D2RServer.instance().baseURI() + "directory/" + name);
 		}
 		return result;
 	}
