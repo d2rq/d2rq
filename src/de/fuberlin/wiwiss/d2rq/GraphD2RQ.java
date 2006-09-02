@@ -21,7 +21,6 @@ import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.graph.query.SimpleQueryHandler;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
@@ -48,7 +47,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.22 2006/09/01 08:49:27 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.23 2006/09/02 16:10:09 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	static private boolean usingD2RQQueryHandler=false;
@@ -201,14 +200,12 @@ public class GraphD2RQ extends GraphBase implements Graph {
      * TODO This section was done as a quick hack for D2R Server 0.3 and really shouldn't be here
      */
     private String inventoryBaseURI = null;
-    private String directoryURI = null;
     private Map propertyBridgesByClassMap;
     private Map nodeMakersByClassMap;
     private Map classMapInventoryBridges = new HashMap();
     private Map classMapNodeMakers = new HashMap();
     
-    public void initInventory(String directoryURI, String inventoryBaseURI) {
-    	this.directoryURI = directoryURI;
+    public void initInventory(String inventoryBaseURI) {
     	this.inventoryBaseURI = inventoryBaseURI;
 		Iterator it = this.propertyBridgesByClassMap.entrySet().iterator();
 		while (it.hasNext()) {
@@ -265,11 +262,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 //    	result.setNsPrefixes(this.getPrefixMapping());
     	result.getGraph().getBulkUpdateHandler().add(
     			new FindQuery(Triple.ANY, inventoryBridges).iterator());
-    	Resource classMap = result.getResource(this.inventoryBaseURI + classMapName);
-    	Resource directory = result.createResource(this.directoryURI);
-    	classMap.addProperty(RDFS.seeAlso, directory);
-    	classMap.addProperty(RDFS.label, "List of all instances: " + classMapName);
-    	directory.addProperty(RDFS.label, "D2R Server contents");
     	return result;
     }
 
