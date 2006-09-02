@@ -5,7 +5,7 @@
     <title>
       List of all instances: $classmap | D2R Server
     </title>
-    <link rel="stylesheet" type="text/css" href="${home_link}style.css" />
+    <link rel="stylesheet" type="text/css" href="${home_link}snorql/style.css" />
     <link rel="alternate" type="application/rdf+xml" href="$rdf_link" title="RDF" />
   </head>
   <body>

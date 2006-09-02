@@ -14,7 +14,7 @@ function betterUnescape(s) {
 }
 
 function start() {
-    setEndpointURL(document.location.href.match(/^([^?]*)/)[1] + 'sparql');
+    setEndpointURL(document.location.href.match(/^([^?]*)snorql\//)[1] + 'sparql');
     outputChanged('browse');
     var match = document.location.href.match(/\?(.*)/);
     if (match) {

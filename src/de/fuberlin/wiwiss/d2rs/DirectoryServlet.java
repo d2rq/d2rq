@@ -24,10 +24,10 @@ public class DirectoryServlet extends VelocityServlet {
 	public Template handleRequest(HttpServletRequest request,
 			HttpServletResponse response,
 			Context context) throws IOException {
-//		if (request.getPathInfo() == null) {
-//			serveModel(classMapListModel(), response);
-//			return;
-//		}
+		if (request.getPathInfo() == null) {
+			response.sendError(404);
+			return null;
+		}
 		String classMapName = request.getPathInfo().substring(1);
 		Model resourceList = graphD2RQ().classMapInventory(classMapName);
 		if (resourceList == null) {
