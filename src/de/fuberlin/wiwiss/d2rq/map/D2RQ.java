@@ -10,15 +10,12 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQ.java,v 1.5 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: D2RQ.java,v 1.6 2006/09/03 12:50:45 cyganiak Exp $
  */
 public class D2RQ {
 
     /** D2RQnNamespace */
     public static final String uri = "http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#";
-
-    /** Deliminator used in patterns and bNode ids */
-    public static final String deliminator = "@@";
 
     /** Returns the URI for this schema
         @return the URI for this schema

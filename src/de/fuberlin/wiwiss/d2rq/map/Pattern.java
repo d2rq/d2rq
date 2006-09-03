@@ -1,12 +1,14 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
@@ -14,23 +16,22 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 /**
  * A pattern that combines one or more database columns into a String. Often
  * used as an UriPattern for generating URIs from a column's primary key.
- * <p>
- * (Note: The implementation makes some assumptions about the Column
- * class to keep the code simple and fast. This means Pattern may not
- * work with some hypothetical subclasses of Column.)
- * 
- * TODO: Use String.split() instead of indexOf() hackery?
- * 
+ *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.7 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.8 2006/09/03 12:50:45 cyganiak Exp $
  */
 public class Pattern implements ValueSource {
+	public final static String DELIMITER = "@@";
+	private final static java.util.regex.Pattern embeddedColumnRegex = 
+		java.util.regex.Pattern.compile("@@([^@]+)@@");
+
 	private String pattern;
-	private String firstLiteralPart = null;
+	private String firstLiteralPart;
 	private List columns = new ArrayList(3);
 	private List literalParts = new ArrayList(3);
 	private Set columnsAsSet;
-
+	private java.util.regex.Pattern regex;
+	
 	/**
 	 * Constructs a new Pattern instance from a pattern syntax string
 	 * @param pattern a pattern syntax string
@@ -50,29 +51,9 @@ public class Pattern implements ValueSource {
 		if (value == null) {
 			return false;
 		}
-		if (this.columns.size() == 0) {
-			return value.equals(this.firstLiteralPart);
-		}
-		if (!value.startsWith(this.firstLiteralPart)) {
-			return false;
-		}
-		int index = 0;
-		int offset = this.firstLiteralPart.length();
-		while (index < this.columns.size() - 1) {
-			String literalPart = (String) this.literalParts.get(index);
-			offset = value.indexOf(literalPart, offset);
-			if (offset == -1) {
-				return false;
-			}
-			offset += literalPart.length();
-			index++;
-		}
-		return value.endsWith((String) this.literalParts.get(index));
+		return this.regex.matcher(value).matches();
 	}
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.ValueSource#getColumns()
-	 */
 	public Set getColumns() {
 		return this.columnsAsSet;
 	}
@@ -85,30 +66,17 @@ public class Pattern implements ValueSource {
 	 * @see de.fuberlin.wiwiss.d2rq.map.ValueSource#getColumnValues(java.lang.String)
 	 */
 	public Map getColumnValues(String value) {
+		if (value == null) {
+			return Collections.EMPTY_MAP;
+		}
+		Matcher match = this.regex.matcher(value);
+		if (!match.matches()) {
+			return Collections.EMPTY_MAP;
+		}
 		Map result = new HashMap();
-		if (value == null || this.columns.size() == 0 ||
-				!value.startsWith(this.firstLiteralPart)) {
-			return result;
+		for (int i = 0; i < this.columns.size(); i++) {
+			result.put(this.columns.get(i), match.group(i + 1));
 		}
-		int index = 0;
-		int fieldStart = this.firstLiteralPart.length();
-		int fieldEnd;
-		while (index < this.columns.size() - 1) {
-			String literalPart = (String) this.literalParts.get(index);
-			fieldEnd = value.indexOf(literalPart, fieldStart);
-			if (fieldEnd == -1) {
-				return new HashMap();
-			}
-			result.put(this.columns.get(index), value.substring(fieldStart, fieldEnd));
-			fieldStart = fieldEnd + literalPart.length();
-			index++;
-		}
-		String lastLiteralPart = (String) this.literalParts.get(index);
-		if (!value.endsWith(lastLiteralPart)) {
-			return new HashMap();
-		}
-		result.put(this.columns.get(index),
-				value.substring(fieldStart, value.length() - lastLiteralPart.length()));
 		return result;
 	}
 
@@ -136,7 +104,7 @@ public class Pattern implements ValueSource {
 	}
 	
 	public String toString() {
-		return "D2RQ pattern: \"" + this.pattern + "\"";
+		return "Pattern(" + this.pattern + ")";
 	}
 
 	public Pattern renameTables(AliasMap renames) {
@@ -144,9 +112,9 @@ public class Pattern implements ValueSource {
 		StringBuffer newPattern = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {
 			Column column = (Column) this.columns.get(index);
-			newPattern.append(D2RQ.deliminator);
+			newPattern.append(DELIMITER);
 			newPattern.append(renames.applyTo(column).getQualifiedName());
-			newPattern.append(D2RQ.deliminator);
+			newPattern.append(DELIMITER);
 			newPattern.append(this.literalParts.get(index));
 			index++;
 		}
@@ -154,63 +122,41 @@ public class Pattern implements ValueSource {
 	}
 	
 	private void parsePattern() {
-		int fieldStart = this.pattern.indexOf(D2RQ.deliminator);
-		if (fieldStart == -1) {
-			fieldStart = this.pattern.length();
-		} else if (this.pattern.length() > fieldStart + 2) {
-			if (this.pattern.charAt(fieldStart + 2) == '@') {
-				// Three @@@ in a row is interpreted as a literal @ plus a delimiter
-				fieldStart++;
-			}
+		Matcher match = embeddedColumnRegex.matcher(this.pattern);
+		boolean matched = match.find();
+		int firstLiteralEnd = matched ? match.start() : this.pattern.length();
+		this.firstLiteralPart = this.pattern.substring(0, firstLiteralEnd);
+		String regexPattern = "\\Q" + this.firstLiteralPart + "\\E";
+		while (matched) {
+			this.columns.add(new Column(match.group(1)));
+			int nextLiteralStart = match.end();
+			matched = match.find();
+			int nextLiteralEnd = matched ? match.start() : this.pattern.length();
+			String nextLiteralPart = this.pattern.substring(nextLiteralStart, nextLiteralEnd);
+			this.literalParts.add(nextLiteralPart);
+			regexPattern += "(.*?)\\Q" + nextLiteralPart + "\\E";
 		}
-		// get text before first field
-		this.firstLiteralPart = this.pattern.substring(0, fieldStart);
-		int fieldEnd;
-		while (fieldStart < this.pattern.length()) {
-			// find end of field
-			fieldStart += D2RQ.deliminator.length();
-			fieldEnd = this.pattern.indexOf(D2RQ.deliminator, fieldStart + 1);
-			if (fieldEnd == -1) {
-				throw new D2RQException("Illegal pattern: '" + this.pattern + "'");
-			}
-			// get field
-			String columnName = this.pattern.substring(fieldStart, fieldEnd).trim();
-			this.columns.add(new Column(columnName));
-			// find end of text
-			fieldEnd += D2RQ.deliminator.length();
-			fieldStart = this.pattern.indexOf(D2RQ.deliminator, fieldEnd);
-			if (fieldStart == -1) {
-				fieldStart = this.pattern.length();
-			} else if (this.pattern.length() > fieldStart + 2) {
-				if (this.pattern.charAt(fieldStart + 2) == '@') {
-					// Three @@@ in a row is interpreted as a literal @ plus a delimiter
-					fieldStart++;
-				}
-			}
-			// get text
-			this.literalParts.add(this.pattern.substring(fieldEnd, fieldStart));
-		}
+		this.regex = java.util.regex.Pattern.compile(regexPattern, java.util.regex.Pattern.DOTALL);
 	}
 	
 	public Iterator partsIterator() {
-	    return new PartsIterator();
-	}
-	public class PartsIterator implements Iterator {
-	    int i=0;
-	    Iterator litIt=literalParts.iterator();
-	    Iterator colIt=columns.iterator();
-        public void remove() {
-        }
-        public boolean hasNext() {
-            return litIt.hasNext();
-        }
-        public Object next() {
-            i++;
-            if (i==1) 
-                return firstLiteralPart;
-            else if (i%2==0) 
-                return colIt.next();
-            else return litIt.next();
-        }
+	    return new Iterator() {
+		    private int i = 0;
+	        public boolean hasNext() {
+	            return i < columns.size() + literalParts.size() + 1;
+	        }
+	        public Object next() {
+	            i++;
+	            if (i == 1) {
+	            	return firstLiteralPart;
+	            } else if (i % 2 == 0) {
+	            	return columns.get(i / 2 - 1);
+	            }
+            	return literalParts.get(i / 2 - 1);
+	        }
+	        public void remove() {
+	        	throw new UnsupportedOperationException();
+	        }
+	    };
 	}
 }

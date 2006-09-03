@@ -20,9 +20,10 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeIdentifier.java,v 1.6 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: BlankNodeIdentifier.java,v 1.7 2006/09/03 12:50:45 cyganiak Exp $
  */
 public class BlankNodeIdentifier implements ValueSource {
+	private final static String DELIMITER = "@@";
 	private String classMapID;
 	private List identifierColumns = new ArrayList(3);
 	
@@ -46,7 +47,7 @@ public class BlankNodeIdentifier implements ValueSource {
 	}
 
 	public boolean couldFit(String anonID) {
-		int index = anonID.indexOf(D2RQ.deliminator);
+		int index = anonID.indexOf(DELIMITER);
 		// Check if given bNode was created by D2RQ
 		if (index == -1) {
 			return false;
@@ -70,7 +71,7 @@ public class BlankNodeIdentifier implements ValueSource {
 	 * @see de.fuberlin.wiwiss.d2rq.map.ValueSource#getColumnValues(java.lang.String)
 	 */
 	public Map getColumnValues(String anonID) {
-		String[] parts = anonID.split(D2RQ.deliminator);
+		String[] parts = anonID.split(DELIMITER);
 		Map result = new HashMap(3);
 		Iterator it = this.identifierColumns.iterator();
 		int i = 1;	// parts[0] is classMap identifier
@@ -98,7 +99,7 @@ public class BlankNodeIdentifier implements ValueSource {
 			if (row[fieldIndex] == null) {
 				return null;
 		    }
-			result.append(D2RQ.deliminator);
+			result.append(DELIMITER);
 			result.append(row[fieldIndex]);
 		}
         return result.toString();
@@ -108,7 +109,7 @@ public class BlankNodeIdentifier implements ValueSource {
 		StringBuffer result = new StringBuffer("bNodeID: " + this.classMapID);
 		Iterator it = this.identifierColumns.iterator();
 		while (it.hasNext()) {
-			result.append(D2RQ.deliminator);
+			result.append(DELIMITER);
 			result.append(it.next());
 		}
 		return result.toString();

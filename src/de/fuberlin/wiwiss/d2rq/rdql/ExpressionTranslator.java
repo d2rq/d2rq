@@ -43,7 +43,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  *   2) SQL dialects
  *   3) Variable translators
  * @author jgarbers
- * @version $Id: ExpressionTranslator.java,v 1.13 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: ExpressionTranslator.java,v 1.14 2006/09/03 12:50:45 cyganiak Exp $
  */
 public class ExpressionTranslator {
 	
@@ -349,17 +349,13 @@ public class ExpressionTranslator {
         if (op==null)
             return null;
         Iterator it=p.partsIterator();
-        int i=0;
         List list=new ArrayList();
         while (it.hasNext()) {
-            i++;
-            if (i%2==1) {
-                String literalPart=(String)it.next();
-                Result escaped=translateString(literalPart);
-                list.add(escaped);
-            } else {
-                Column c=(Column)it.next();
-                Result res=castToString(translateColumn(c));
+        	Object o = it.next();
+        	if (o instanceof String) {
+                list.add(translateString((String) o));
+            } else {	// o instanceof Column
+                Result res=castToString(translateColumn((Column) o));
                 if (res==null)
                     return null;
                 list.add(res);

@@ -1,21 +1,18 @@
-/*
- * $Id: PatternTest.java,v 1.3 2006/09/02 22:41:42 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Pattern;
-
-import junit.framework.TestCase;
 
 /**
  * Tests the {@link Pattern} class.
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: PatternTest.java,v 1.4 2006/09/03 12:50:45 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private Map map;
@@ -65,18 +62,16 @@ public class PatternTest extends TestCase {
 		assertPattern("1@", "@@table.col1@@@");
 		assertPattern("12", "@@table.col1@@@@table.col2@@");
 		assertPattern("@1@", "@@@table.col1@@@");
-	}
-
-	public void testBrokenPattern() {
-		assertIllegalPattern("@@");
-		assertIllegalPattern("@@@@");
-		assertIllegalPattern("foo@@bar");
-		assertIllegalPattern("foo@@table.col1@@bar@@");
-		assertIllegalPattern("foo@@table.col1@@bar@@baz");
-		assertIllegalPattern("@@table.col1@@@@");
-		assertIllegalPattern("@@table.col1@@@@");
-		assertIllegalPattern("@table.col1@@");
-		assertIllegalPattern("@@table.col1@@@@@@@");
+		// These patterns were previously considered broken, now we allow them
+		assertPattern("@@", "@@");
+		assertPattern("@@@@", "@@@@");
+		assertPattern("foo@@bar", "foo@@bar");
+		assertPattern("foo1bar@@", "foo@@table.col1@@bar@@");
+		assertPattern("foo1bar@@baz", "foo@@table.col1@@bar@@baz");
+		assertPattern("1@@", "@@table.col1@@@@");
+		assertPattern("@@1", "@@@@table.col1@@");
+		assertPattern("@table.col1@@", "@table.col1@@");
+		assertPattern("1@@@@@", "@@table.col1@@@@@@@");
 	}
 
 	public void testMatches() {
@@ -104,6 +99,29 @@ public class PatternTest extends TestCase {
 		this.map.put("table.col1", "xyz");
 		assertPatternValues(p, "xyz", this.map);
 		assertNoMatch(p, null);
+	}
+
+	/**
+	 * We use regular expressions to match patterns and they behave
+	 * oddly around newlines
+	 */
+	public void testMatchesPatternContainingNewlines() {
+		Pattern p = new Pattern("foo@@table.col1@@bar");
+		this.map = new HashMap();
+		this.map.put("table.col1", "1\n2");
+		assertPatternValues(p, "foo1\n2bar", this.map);
+	}
+
+	/**
+	 * We use regular expressions to match patterns; make sure the
+	 * implementation correctly escapes magic characters in the pattern
+	 */
+	public void testMagicRegexCharactersCauseNoProblems() {
+		Pattern p = new Pattern("(foo|bar)@@table.col1@@");
+		this.map = new HashMap();
+		this.map.put("table.col1", "1");
+		assertPatternValues(p, "(foo|bar)1", this.map);
+		assertNoMatch(p, "foo1");
 	}
 
 	public void testMatchesOneColumnPattern() {
@@ -171,19 +189,72 @@ public class PatternTest extends TestCase {
 		assertPatternValues(p, "foobazbarfoo", this.map);
 	}
 
+	public void testPartsIteratorSingleLiteral() {
+		Iterator it = new Pattern("foo").partsIterator();
+		assertTrue(it.hasNext());
+		assertEquals("foo", it.next());
+		assertFalse(it.hasNext());
+	}
+	
+	public void testPartsIteratorFirstLiteralThenColumn() {
+		Iterator it = new Pattern("foo@@table.col1@@").partsIterator();
+		assertTrue(it.hasNext());
+		assertEquals("foo", it.next());
+		assertTrue(it.hasNext());
+		assertEquals(new Column("table.col1"), it.next());
+		assertTrue(it.hasNext());
+		assertEquals("", it.next());
+		assertFalse(it.hasNext());
+	}
+	
+	public void testPartsIteratorFirstColumnThenLiteral() {
+		Iterator it = new Pattern("@@table.col1@@foo").partsIterator();
+		assertTrue(it.hasNext());
+		assertEquals("", it.next());
+		assertTrue(it.hasNext());
+		assertEquals(new Column("table.col1"), it.next());
+		assertTrue(it.hasNext());
+		assertEquals("foo", it.next());
+		assertFalse(it.hasNext());
+	}
+	
+	public void testPartsIteratorSeveralColumns() {
+		Iterator it = new Pattern("foo@@table.col1@@bar@@table.col2@@").partsIterator();
+		assertTrue(it.hasNext());
+		assertEquals("foo", it.next());
+		assertTrue(it.hasNext());
+		assertEquals(new Column("table.col1"), it.next());
+		assertTrue(it.hasNext());
+		assertEquals("bar", it.next());
+		assertTrue(it.hasNext());
+		assertEquals(new Column("table.col2"), it.next());
+		assertTrue(it.hasNext());
+		assertEquals("", it.next());
+		assertFalse(it.hasNext());
+	}
+	
+	public void testPartsIteratorAdjacentColumns() {
+		Iterator it = new Pattern("@@table.col1@@@@table.col2@@").partsIterator();
+		assertTrue(it.hasNext());
+		assertEquals("", it.next());
+		assertTrue(it.hasNext());
+		assertEquals(new Column("table.col1"), it.next());
+		assertTrue(it.hasNext());
+		assertEquals("", it.next());
+		assertTrue(it.hasNext());
+		assertEquals(new Column("table.col2"), it.next());
+		assertTrue(it.hasNext());
+		assertEquals("", it.next());
+		assertFalse(it.hasNext());
+	}
+	
+	public void testToString() {
+		assertEquals("Pattern(foo@@table.col1@@)", new Pattern("foo@@table.col1@@").toString());
+	}
+	
 	private void assertPattern(String expected, String pattern) {
 		Pattern p = new Pattern(pattern);
 		assertEquals(expected, p.getValue(defaultRow, this.map));
-	}
-	
-	private void assertIllegalPattern(String pattern) {
-		try {
-			Pattern p = new Pattern(pattern);
-			p.getValue(defaultRow, this.map);
-			fail("pattern '" + pattern + "' is broken, should have failed");
-		} catch (D2RQException d2rqex) {
-			// is expected
-		}
 	}
 	
 	private void assertPatternValues(Pattern pattern, String value, Map expectedValues) {
