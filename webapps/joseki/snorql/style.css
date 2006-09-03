@@ -21,6 +21,7 @@ img { border: none; }
 .unbound { color: #888; }
 .queryresults small { font-size: 100%; color: #666; }
 .queryresults .property { white-space: nowrap; }
+#rdficon { float: right; margin: 0.6em 1em; }
 
 .snorql h1, .snorql h2 { color: #400; }
 .snorql #header, .snorql .section { background: #ccf; }
