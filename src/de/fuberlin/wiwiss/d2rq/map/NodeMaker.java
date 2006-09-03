@@ -43,7 +43,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author Joerg Garbers
- * @version $Id: NodeMaker.java,v 1.4 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: NodeMaker.java,v 1.5 2006/09/03 17:22:50 cyganiak Exp $
  */
 public interface NodeMaker { 
     
@@ -90,15 +90,11 @@ public interface NodeMaker {
     Set getJoins();
 	
     /**
-     * A set of additional SQL WHERE conditions that must be
-     * satisfied for a result row, or the node maker won't
-     * build a node out of it.
-     * 
-     * TODO Introduce a Condition class that knows about its columns
-     * 
-     * @return a set of Strings
+     * An SQL expression that must be satisfied for a result row,
+     * or the node maker won't build a node out of it.
+	 * @return An SQL expression; {@link Expression#TRUE} indicates no condition
      */
-    Set getConditions();
+    Expression condition();
 
     /**
      * A set of table aliases that must be used when making an SQL

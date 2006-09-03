@@ -10,6 +10,7 @@ import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
 import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.LiteralMaker;
 import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
@@ -24,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * from the {@link PropertyBridge}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.3 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.4 2006/09/03 17:22:50 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeConstraint {
 	/** true means: satisfiable. */
@@ -246,6 +247,10 @@ public class NodeConstraintImpl implements NodeConstraint {
                 sql.addColumnValue(col,value);
             }
         }
-        sql.addConditions(conditions);
+        it = this.conditions.iterator();
+        while (it.hasNext()) {
+			String condition = (String) it.next();
+			sql.addCondition(new Expression(condition));
+		}
     }
 }

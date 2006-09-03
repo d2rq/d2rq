@@ -13,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * NodeMaker that returns a fixed node.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FixedNodeMaker.java,v 1.7 2006/09/02 22:41:43 cyganiak Exp $
+ * @version $Id: FixedNodeMaker.java,v 1.8 2006/09/03 17:22:50 cyganiak Exp $
  */
 public class FixedNodeMaker implements NodeMaker {
 	private Node fixedNode;
@@ -38,8 +38,8 @@ public class FixedNodeMaker implements NodeMaker {
 		return Collections.EMPTY_SET;
 	}
 	
-	public Set getConditions() {
-		return Collections.EMPTY_SET;
+	public Expression condition() {
+		return Expression.TRUE;
 	}
 
 	public AliasMap getAliases() {

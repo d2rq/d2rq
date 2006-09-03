@@ -12,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * behaviour. To be specialized by concrete subclasses.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: WrappingNodeMaker.java,v 1.1 2006/08/28 19:44:21 cyganiak Exp $
+ * @version $Id: WrappingNodeMaker.java,v 1.2 2006/09/03 17:22:50 cyganiak Exp $
  */
 public abstract class WrappingNodeMaker implements NodeMaker {
 	protected NodeMaker base;
@@ -41,8 +41,8 @@ public abstract class WrappingNodeMaker implements NodeMaker {
 		return this.base.getJoins();
 	}
 
-	public Set getConditions() {
-		return this.base.getConditions();
+	public Expression condition() {
+		return this.base.condition();
 	}
 	
 	public AliasMap getAliases() {

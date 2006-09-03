@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.2 2006/08/29 20:34:37 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.3 2006/09/03 17:22:51 cyganiak Exp $
  */
 public class FindQuery {
 	private Triple triplePattern;
@@ -80,7 +80,7 @@ public class FindQuery {
 		result.addAliasMap(first.getAliases());
 		result.addJoins(first.getJoins());
 		result.addColumnValues(first.getColumnValues());
-		result.addConditions(first.getConditions());
+		result.addCondition(first.condition());
 		result.addSelectColumns(first.getSelectColumns());
 		result.addColumnRenames(first.getReplacedColumns());
 		result.setEliminateDuplicates(first.mightContainDuplicates());

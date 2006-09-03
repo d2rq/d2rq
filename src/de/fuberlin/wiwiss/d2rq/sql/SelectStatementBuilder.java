@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Join;
 
 /**
@@ -22,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.5 2006/09/03 00:08:12 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.6 2006/09/03 17:22:50 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -58,7 +59,7 @@ public class SelectStatementBuilder {
 	
 	private Database database;
 	private List sqlSelect = new ArrayList(10);
-	private List sqlWhere = new ArrayList(15);
+	private List conditions = new ArrayList();
 	/** Maps column names from the database to columns numbers in the result set. */
 	private Map columnNameNumber = new HashMap(10);
 	private int selectColumnCount = 0;
@@ -107,11 +108,12 @@ public class SelectStatementBuilder {
 				result.append(", ");
 			}
 		}
-		it = this.sqlWhere.iterator();
+		it = this.conditions.iterator();
 		if (it.hasNext()) {
 			result.append(" WHERE ");
 			while (it.hasNext()) {
-				result.append(it.next());
+				Expression condition = (Expression) it.next();
+				result.append(condition.toSQL());
 				if (it.hasNext()) {
 					result.append(" AND ");
 				}
@@ -125,9 +127,7 @@ public class SelectStatementBuilder {
 	}
 	
 	private void referTable(String tableName) {
-		if (!mentionedTables.contains(tableName)) {
-			mentionedTables.add(tableName);
-		}
+		mentionedTables.add(tableName);
 	}
 
 	/**
@@ -165,12 +165,14 @@ public class SelectStatementBuilder {
      * @param value the value the column must have
      */
 	public void addColumnValue(Column column, String value) {
-		String whereClause = column.getQualifiedName() + "=" + correctlyQuotedColumnValue(column,value); 
-		if (this.sqlWhere.contains(whereClause)) {
+		Expression condition = new Expression(
+				column.getQualifiedName() + " = " +
+				correctlyQuotedColumnValue(column,value));
+		if (this.conditions.contains(condition)) {
 			return;
 		}
-		this.sqlWhere.add(whereClause);
-		this.mentionedTables.add(column.getTableName());
+		this.conditions.add(condition);
+		referTable(column.getTableName());
 	}
 	
 	public String correctlyQuotedColumnValue(Column column, String value) {
@@ -211,18 +213,18 @@ public class SelectStatementBuilder {
 	}
 	
 	/**
-	 * Adds multiple WHERE clauses to the query.
-	 * TODO This should also add columns to mentionedTables
-	 * @param conditions a set of Strings containing SQL WHERE clauses
+	 * Adds a WHERE clause to the query.
+	 * @param An SQL expression
 	 */
-	public void addConditions(Set conditions) {
-		Iterator it = conditions.iterator();
+	public void addCondition(Expression condition) {
+		if (condition.isTrue() || this.conditions.contains(condition)) {
+			return;
+		}
+		this.conditions.add(condition);
+		Iterator it = condition.columns().iterator();
 		while (it.hasNext()) {
-			String condition = (String) it.next(); 
-			if (this.sqlWhere.contains(condition)) {
-				continue;
-			}
-			this.sqlWhere.add(condition);			
+			Column column = (Column) it.next();
+			referTable(column.getTableName());
 		}
 	}
 
@@ -230,11 +232,11 @@ public class SelectStatementBuilder {
 		Iterator it = joins.iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			String expression=join.sqlExpression();
-			if (this.sqlWhere.contains(expression)) {
+			Expression expression = new Expression(join.sqlExpression());
+			if (this.conditions.contains(expression)) {
 				continue;
 			}
-			this.sqlWhere.add(expression);
+			this.conditions.add(expression);
 			referTable(join.getFirstTable());
 			referTable(join.getSecondTable());
         }

@@ -27,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * useless, if there are (Bound) variables for predicates.
  * 
  * @author jgarbers
- * @version $Id: PatternQueryCombiner.java,v 1.10 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: PatternQueryCombiner.java,v 1.11 2006/09/03 17:22:50 cyganiak Exp $
  * @see FindQuery
  */
 class PatternQueryCombiner {
@@ -196,7 +196,7 @@ protected static SelectStatementBuilder getSQL(PropertyBridgeQuery[] conjunction
 		sql.addColumnValues(t.getColumnValues());
 		// addConditions should be last, because checks if a textual token is likely to 
 		// be a table based on previously in select, join and column values seen tables
-		sql.addConditions(t.getConditions()); 
+		sql.addCondition(t.condition()); 
 	}
 	return sql;
 }

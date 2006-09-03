@@ -12,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * Provides default implementations for various NodeMaker methods.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeMakerBase.java,v 1.3 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: NodeMakerBase.java,v 1.4 2006/09/03 17:22:50 cyganiak Exp $
  */
 public abstract class NodeMakerBase implements NodeMaker {
 	private boolean isUnique;
@@ -33,8 +33,8 @@ public abstract class NodeMakerBase implements NodeMaker {
 		return Collections.EMPTY_SET;
 	}
 
-	public Set getConditions() {
-		return Collections.EMPTY_SET;
+	public Expression condition() {
+		return Expression.TRUE;
 	}
 	
 	public AliasMap getAliases() {

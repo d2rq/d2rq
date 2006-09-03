@@ -1,24 +1,21 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A {@link NodeMaker} that adds some SQL WHERE conditions to a wrapped base node maker.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConditionNodeMaker.java,v 1.1 2006/08/28 19:44:21 cyganiak Exp $
+ * @version $Id: ConditionNodeMaker.java,v 1.2 2006/09/03 17:22:49 cyganiak Exp $
  */
 public class ConditionNodeMaker extends WrappingNodeMaker {
-	private Set conditions;
+	private Expression expression;
 	
-	public ConditionNodeMaker(NodeMaker base, Set conditions) {
+	public ConditionNodeMaker(NodeMaker base, Expression condition) {
 		super(base);
-		this.conditions = new HashSet(conditions);
-		this.conditions.addAll(base.getConditions());
+		this.expression = condition.and(base.condition());
 	}
 	
-	public Set getConditions() {
-		return this.conditions;
+	public Expression condition() {
+		return this.expression;
 	}
 }

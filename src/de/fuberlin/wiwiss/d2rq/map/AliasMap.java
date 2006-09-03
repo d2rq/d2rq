@@ -21,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * kinds of objects, the inverse operation is available as well. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.2 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.3 2006/09/03 17:22:49 cyganiak Exp $
  */
 public class AliasMap {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_MAP);
@@ -48,17 +48,6 @@ public class AliasMap {
 		return new AliasMap(m);
 	}
 
-	public static String renameTableInCondition(String condition, String oldName, String newName) {
-		// Matches oldName (wrapped in \Q...\E to avoid problems if oldName contains a character
-		// that has special meaning inside regexes) wherever it is preceded by a non-word
-		// character (the first set of braces) and followed by a dot and more word characters
-		// (the second set of braces). Non-capturing zero-width groups are used for the
-		// before/after conditions because we don't want to replace the stuff before and after
-		// oldName.
-		// TODO This is broken e.g. for oldName occuring inside a string literal
-		return condition.replaceAll("(?<!\\w)\\Q" + oldName + "\\E(?=\\.\\w+)", newName);
-	}
-	
 	/**
 	 * Returns a new map with keys and values exchanged. Lossy if multiple
 	 * keys in the original map to the same value.
@@ -141,6 +130,10 @@ public class AliasMap {
 		return result;
 	}
 
+	public Expression applyTo(Expression expression) {
+		return expression.renameTables(this);
+	}
+	
 	public AliasMap applyTo(AliasMap other) {
 		if (other == null) {
 			return this;
@@ -157,16 +150,6 @@ public class AliasMap {
 			newAliases.put(alias, originalOf(alias));
 		}
 		return new AliasMap(newAliases);
-	}
-	
-	public String applyToCondition(String condition) {
-		String result = condition;
-		Iterator it = allOriginalsWithAliases().iterator();
-		while (it.hasNext()) {
-			String original = (String) it.next();
-			result = renameTableInCondition(result, original, applyTo(original));
-		}
-		return result;
 	}
 	
 	public Map applyToMapKeys(Map mapWithColumnKeys) {
@@ -221,16 +204,6 @@ public class AliasMap {
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
 			result.add(applyTo(join));
-		}
-		return result;
-	}
-	
-	public Set applyToConditionSet(Set conditions) {
-		Set result = new HashSet();
-		Iterator it = conditions.iterator();
-		while (it.hasNext()) {
-			String condition = (String) it.next();
-			result.add(applyToCondition(condition));
 		}
 		return result;
 	}

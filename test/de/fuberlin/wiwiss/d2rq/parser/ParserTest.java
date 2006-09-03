@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.5 2006/09/03 13:45:47 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.6 2006/09/03 17:22:51 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -69,7 +69,7 @@ public class ParserTest extends TestCase {
 		MapParser parser = parse("parser/alias.n3");
 		assertEquals(1, parser.getPropertyBridges().size());
 		PropertyBridge bridge = (PropertyBridge) parser.getPropertyBridges().iterator().next();
-		assertTrue(bridge.getConditions().isEmpty());
+		assertTrue(bridge.condition().isTrue());
 		AliasMap aliases = bridge.getAliases();
 		AliasMap expected = AliasMap.buildFromSQL(Collections.singleton("People AS Bosses"));
 		assertEquals(expected, aliases);

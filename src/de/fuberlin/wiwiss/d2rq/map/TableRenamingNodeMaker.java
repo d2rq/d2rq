@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraintWrapper;
  * Used in conjunction with <tt>d2rq:alias</tt>.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TableRenamingNodeMaker.java,v 1.1 2006/08/28 19:44:21 cyganiak Exp $
+ * @version $Id: TableRenamingNodeMaker.java,v 1.2 2006/09/03 17:22:49 cyganiak Exp $
  */
 public class TableRenamingNodeMaker extends WrappingNodeMaker {
 
@@ -34,7 +34,11 @@ public class TableRenamingNodeMaker extends WrappingNodeMaker {
 			tables.add(join.getFirstTable());
 			tables.add(join.getSecondTable());
 		}
-		// TODO How to get columns out of conditions?
+		it = base.condition().columns().iterator();
+		while (it.hasNext()) {
+			Column column = (Column) it.next();
+			tables.add(column.getTableName());
+		}
 		Map prefixRenames = new HashMap();
 		it = tables.iterator();
 		while (it.hasNext()) {
@@ -47,7 +51,7 @@ public class TableRenamingNodeMaker extends WrappingNodeMaker {
 	private AliasMap renames;
 	private Set columns;
 	private Set joins;
-	private Set conditions;
+	private Expression expression;
 	private AliasMap aliases;
 
 	public TableRenamingNodeMaker(NodeMaker base, AliasMap renames) {
@@ -55,7 +59,7 @@ public class TableRenamingNodeMaker extends WrappingNodeMaker {
 		this.renames = renames;
 		this.columns = this.renames.applyToColumnSet(this.base.getColumns());
 		this.joins = this.renames.applyToJoinSet(this.base.getJoins());
-		this.conditions = this.renames.applyToConditionSet(this.base.getConditions());
+		this.expression = this.renames.applyTo(this.base.condition());
 		this.aliases = this.renames.applyTo(this.base.getAliases());
 	}
 	
@@ -71,8 +75,8 @@ public class TableRenamingNodeMaker extends WrappingNodeMaker {
 		return this.joins;
 	}
 
-	public Set getConditions() {
-		return this.conditions;
+	public Expression condition() {
+		return this.expression;
 	}
 
 	public AliasMap getAliases() {

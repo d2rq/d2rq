@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.parser;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,13 +11,13 @@ import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.TableRenamingNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
 import de.fuberlin.wiwiss.d2rq.map.BlankNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ConditionNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.ContainsRestriction;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.JoinNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.LiteralMaker;
@@ -24,6 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.MaxLengthRestriction;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.map.RegexRestriction;
+import de.fuberlin.wiwiss.d2rq.map.TableRenamingNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.map.UriMaker;
 import de.fuberlin.wiwiss.d2rq.map.ValueSource;
@@ -34,7 +36,7 @@ import de.fuberlin.wiwiss.d2rq.types.DateTimeTranslator;
  * through calls to the setter methods.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeMakerSpec.java,v 1.3 2006/08/28 19:44:23 cyganiak Exp $
+ * @version $Id: NodeMakerSpec.java,v 1.4 2006/09/03 17:22:50 cyganiak Exp $
  */
 public class NodeMakerSpec {
 	
@@ -184,7 +186,8 @@ public class NodeMakerSpec {
 			this.product = new JoinNodeMaker(this.product, this.joins, this.isUnique);
 		}
 		if (!this.conditions.isEmpty()) {
-			this.product = new ConditionNodeMaker(this.product, this.conditions);
+			this.product = new ConditionNodeMaker(
+					this.product, new Expression(new ArrayList(this.conditions)));
 		}
 		return this.product;
 	}

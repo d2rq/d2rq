@@ -1,9 +1,11 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
@@ -11,10 +13,43 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 /**
  * A database column.
  *
+ * TODO: findColumnsInExpression and renameColumnsInExpression will fail
+ *       e.g. for coumn names occuring inside string literals
+ *       
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.5 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: Column.java,v 1.6 2006/09/03 17:22:49 cyganiak Exp $
  */
 public class Column implements ValueSource {
+	private static final java.util.regex.Pattern columnRegex = 
+			java.util.regex.Pattern.compile("([a-zA-Z_]\\w*(?:\\.[a-zA-Z_]\\w*)*)\\.([a-zA-Z_]\\w*)");
+
+	public static Set findColumnsInExpression(String expression) {
+		Set results = new HashSet();
+		Matcher match = columnRegex.matcher(expression);
+		while (match.find()) {
+			results.add(new Column(match.group(1), match.group(2)));
+		}
+		return results;
+	}
+
+	public static String renameColumnsInExpression(String expression, AliasMap aliases) {
+		StringBuffer result = new StringBuffer();
+		Matcher match = columnRegex.matcher(expression);
+		boolean matched = match.find();
+		int firstPartEnd = matched ? match.start() : expression.length();
+		result.append(expression.substring(0, firstPartEnd));
+		while (matched) {
+			result.append(aliases.applyTo(match.group(1)));
+			result.append(".");
+			result.append(match.group(2));
+			int nextPartStart = match.end();
+			matched = match.find();
+			int nextPartEnd = matched ? match.start() : expression.length();
+			result.append(expression.substring(nextPartStart, nextPartEnd));
+		}
+		return result.toString();
+	}
+	
 	private String qualifiedName;
 	private String tableName;
 	private final String columnName;
@@ -24,13 +59,13 @@ public class Column implements ValueSource {
 	 * @param qualifiedName the column's name, for example <tt>Table.Column</tt>
 	 */
 	public Column(String qualifiedName) {
-		int idx=qualifiedName.indexOf('.');
-		if (idx == -1) {
+		Matcher match = columnRegex.matcher(qualifiedName);
+		if (!match.matches()) {
 			throw new D2RQException("\"" + qualifiedName + "\" is not in \"table.column\" notation");
 		}
 		this.qualifiedName = qualifiedName;
-		this.tableName = qualifiedName.substring(0, idx);
-		this.columnName =  qualifiedName.substring(idx+1);
+		this.tableName = match.group(1);
+		this.columnName =  match.group(2);
 	}
 
 	public Column(String tableName, String colName) {
@@ -58,8 +93,6 @@ public class Column implements ValueSource {
 	 */
 	public String getColumnName() {
 		return this.columnName;
-//		int dotIndex = this.qualifiedName.indexOf(".");
-//		return this.qualifiedName.substring(dotIndex + 1);
 	}
 
 	/**
@@ -68,29 +101,16 @@ public class Column implements ValueSource {
 	 */
 	public String getTableName() {
 		return this.tableName;
-//		int dotIndex = this.qualifiedName.indexOf(".");
-//		return this.qualifiedName.substring(0, dotIndex);
 	}
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.ValueSource#couldFit(java.lang.String)
-	 */
 	public boolean couldFit(String value) {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.ValueSource#getColumns()
-	 */
 	public Set getColumns() {
-		Set result = new HashSet(1);
-		result.add(this);
-		return result;
+		return Collections.singleton(this);
 	}
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.ValueSource#getColumnValues(java.lang.String)
-	 */
 	public Map getColumnValues(String value) {
 		Map result = new HashMap(1);
 		result.put(this, value);

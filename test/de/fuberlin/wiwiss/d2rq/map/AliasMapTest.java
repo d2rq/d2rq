@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.2 2006/09/03 00:08:13 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.3 2006/09/03 17:22:50 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static Column foo_col1 = new Column("foo.col1");
@@ -95,12 +95,9 @@ public class AliasMapTest extends TestCase {
 		assertEquals(Collections.singleton(bar_col1), aliased.getSecondColumns());
 	}
 	
-	public void testApplyToCondition() {
-		assertEquals("bar.col1", fooAsBar.applyToCondition("foo.col1"));
-		assertEquals("LEN(bar.col1) > 0", fooAsBar.applyToCondition("LEN(foo.col1) > 0"));
-		assertEquals("baz.col1", fooAsBar.applyToCondition("baz.col1"));
-		assertEquals("fooo.col1", fooAsBar.applyToCondition("fooo.col1"));
-		assertEquals("ofoo.col1", fooAsBar.applyToCondition("ofoo.col1"));
+	public void testApplyToExpression() {
+		assertEquals(new Expression("bar.col1"), 
+				fooAsBar.applyTo(new Expression("foo.col1")));
 	}
 	
 	public void testEmptyMapEqualsItself() {

@@ -3,7 +3,6 @@ package de.fuberlin.wiwiss.d2rq.rdql;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.10 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.11 2006/09/03 17:22:50 cyganiak Exp $
  */
 class ConstraintHandler {
     public boolean possible=true;
@@ -112,15 +111,14 @@ class ConstraintHandler {
     		    rdqlTranslator=new ExpressionTranslator(this,sql);
     		}
         }
-        Set s=new HashSet();
         Iterator it=rdqlConstraints.iterator();
         while (possible && it.hasNext()) {
             Expression e=(Expression)it.next();
             String str=rdqlTranslator.translateToString(e);
-            if (str!=null)
-                s.add(str);
+            if (str != null) {
+            	sql.addCondition(new de.fuberlin.wiwiss.d2rq.map.Expression(str));
+            }
         }
-        sql.addConditions(s);
     }
        
     public NodeMakerIterator makeNodeMakerIterator(Set indexSet)  {

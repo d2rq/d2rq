@@ -15,6 +15,7 @@ import com.hp.hpl.jena.graph.Triple;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.Join;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
@@ -35,7 +36,7 @@ import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
  * TODO: Common interface with PropertyBridge?
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PropertyBridgeQuery.java,v 1.2 2006/08/29 17:30:22 cyganiak Exp $
+ * @version $Id: PropertyBridgeQuery.java,v 1.3 2006/09/03 17:22:51 cyganiak Exp $
  */
 public class PropertyBridgeQuery {
 	private PropertyBridge bridge;
@@ -117,8 +118,8 @@ public class PropertyBridgeQuery {
 		return this.aliases;
 	}
 	
-	public Set getConditions() {
-		return this.bridge.getConditions();
+	public Expression condition() {
+		return this.bridge.condition();
 	}
 
 	public Map getColumnValues() {
@@ -166,7 +167,7 @@ public class PropertyBridgeQuery {
 		if (!getJoins().equals(other.getJoins())) {
 			return false;
 		}
-		if (!getConditions().equals(other.getConditions())) {
+		if (!condition().equals(other.condition())) {
 			return false;
 		}
 		if (!getColumnValues().equals(other.getColumnValues())) {
@@ -211,7 +212,7 @@ public class PropertyBridgeQuery {
 	}
 
 	private void removeOptionalJoins() {
-		if (!this.bridge.getConditions().isEmpty()) {
+		if (!this.bridge.condition().isTrue()) {
 			return;
 		}
 		Iterator it = getAllJoinTables().iterator();

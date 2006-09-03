@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.find.QueryContext;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PropertyBridge.java,v 1.6 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: PropertyBridge.java,v 1.7 2006/09/03 17:22:49 cyganiak Exp $
  */
 public class PropertyBridge {
 	private Node id;
@@ -26,7 +26,7 @@ public class PropertyBridge {
 	private Database database;
 	private AliasMap aliases;
 	private Set joins = new HashSet(2);
-	private Set conditions = new HashSet(1);
+	private Expression condition;
 	private URIMatchPolicy uriMatchPolicy = new URIMatchPolicy();
 	private boolean mightContainDuplicates = false;
 
@@ -40,9 +40,10 @@ public class PropertyBridge {
 		this.joins.addAll(this.subjectMaker.getJoins());
 		this.joins.addAll(this.predicateMaker.getJoins());
 		this.joins.addAll(this.objectMaker.getJoins());
-		this.conditions.addAll(this.subjectMaker.getConditions());
-		this.conditions.addAll(this.predicateMaker.getConditions());
-		this.conditions.addAll(this.objectMaker.getConditions());
+		this.condition = 
+				this.subjectMaker.condition().and(
+				this.predicateMaker.condition().and(
+				this.objectMaker.condition()));
 		this.aliases = this.subjectMaker.getAliases();
 		this.aliases = this.aliases.applyTo(this.predicateMaker.getAliases());
 		this.aliases = this.aliases.applyTo(this.objectMaker.getAliases());
@@ -63,12 +64,12 @@ public class PropertyBridge {
 	}
 	
 	/**
-	 * Returns the SQL WHERE conditions that must hold for a given
+	 * Returns the SQL WHERE condition that must hold for a given
 	 * database row or the bridge will not generate a triple.
-	 * @return a set of Strings
+	 * @return An SQL expression; {@link Expression#TRUE} indicates no condition
 	 */
-	public Set getConditions() {
-		return this.conditions;
+	public Expression condition() {
+		return this.condition;
 	}
 
 	public int getEvaluationPriority() {
