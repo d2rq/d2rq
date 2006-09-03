@@ -2,3 +2,4 @@ build
 bldsrc
 d2r-server-*.zip
 d2r-server-*.tar.gz
+bldtests
