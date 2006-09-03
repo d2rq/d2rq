@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,19 +12,11 @@ import de.fuberlin.wiwiss.d2rq.map.Pattern;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.4 2006/09/03 12:50:45 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.1 2006/09/03 12:57:30 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private Map map;
 	private final static String[] defaultRow = {"1", "2", "3", "4", ""};
-
-	/**
-	 * Constructor for PatternTest.
-	 * @param arg0
-	 */
-	public PatternTest(String arg0) {
-		super(arg0);
-	}
 
 	public void setUp() {
 		this.map = new HashMap();

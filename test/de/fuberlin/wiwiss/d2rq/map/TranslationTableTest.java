@@ -1,7 +1,4 @@
-/*
- * $Id: TranslationTableTest.java,v 1.2 2005/04/13 16:56:08 garbers Exp $
- */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.map;
 
 import com.hp.hpl.jena.graph.Node;
 
@@ -12,13 +9,10 @@ import junit.framework.TestCase;
 /**
  * Tests the TranslationTable functionality
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: TranslationTableTest.java,v 1.1 2006/09/03 12:57:30 cyganiak Exp $
  */
 public class TranslationTableTest extends TestCase {
-
-	public TranslationTableTest(String arg) {
-		super(arg);
-	}
 
 	public void testCreation() {
 		TranslationTable table = new TranslationTable();

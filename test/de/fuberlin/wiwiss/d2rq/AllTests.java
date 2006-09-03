@@ -1,7 +1,5 @@
 package de.fuberlin.wiwiss.d2rq;
 
-import de.fuberlin.wiwiss.d2rq.csv.CSVParserTest;
-import de.fuberlin.wiwiss.d2rq.find.ApplyTripleMakersIteratorTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -9,7 +7,7 @@ import junit.framework.TestSuite;
  * Test suite for D2RQ
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AllTests.java,v 1.13 2006/09/02 22:49:17 cyganiak Exp $
+ * @version $Id: AllTests.java,v 1.14 2006/09/03 12:57:30 cyganiak Exp $
  */
 public class AllTests {
 
@@ -20,13 +18,7 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Test for de.fuberlin.wiwiss.d2rq");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(PatternTest.class);
-		suite.addTestSuite(ValueRestrictionTest.class);
 		suite.addTestSuite(DBConnectionTest.class);
-		suite.addTestSuite(ColumnTest.class);
-		suite.addTestSuite(ApplyTripleMakersIteratorTest.class);
-		suite.addTestSuite(CSVParserTest.class);
-		suite.addTestSuite(TranslationTableTest.class);
 		//$JUnit-END$
 		suite.addTest(de.fuberlin.wiwiss.d2rq.parser.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.map.AllTests.suite());

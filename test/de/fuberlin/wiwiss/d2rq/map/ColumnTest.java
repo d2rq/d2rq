@@ -1,11 +1,9 @@
-/*
- * $Id: ColumnTest.java,v 1.2 2005/04/13 16:56:08 garbers Exp $
- */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 
 import junit.framework.TestCase;
@@ -13,17 +11,10 @@ import junit.framework.TestCase;
 /**
  * Unit test cases for {@link Column}
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: ColumnTest.java,v 1.1 2006/09/03 12:57:30 cyganiak Exp $
  */
 public class ColumnTest extends TestCase {
-
-	/**
-	 * Constructor for ColumnTest.
-	 * @param arg0
-	 */
-	public ColumnTest(String arg0) {
-		super(arg0);
-	}
 
 	public void testCreation() {
 		new Column("table.column");

@@ -1,8 +1,6 @@
-/*
- * $Id: ValueRestrictionTest.java,v 1.2 2005/04/13 16:56:08 garbers Exp $
- */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.map;
 
+import de.fuberlin.wiwiss.d2rq.DummyValueSource;
 import de.fuberlin.wiwiss.d2rq.map.ContainsRestriction;
 import de.fuberlin.wiwiss.d2rq.map.MaxLengthRestriction;
 import de.fuberlin.wiwiss.d2rq.map.RegexRestriction;
@@ -12,17 +10,9 @@ import junit.framework.TestCase;
  * Unit tests for {@link MaxLengthRestriction}, {@link ContainsRestriction}
  * and {@link RegexRestriction}.
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class ValueRestrictionTest extends TestCase {
-
-	/**
-	 * Constructor for ValueRestrictionTest.
-	 * @param arg0
-	 */
-	public ValueRestrictionTest(String arg0) {
-		super(arg0);
-	}
 
 	public void testMaxLengthRestriction() {
 		DummyValueSource source = new DummyValueSource("foo", true);
