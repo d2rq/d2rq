@@ -1,12 +1,14 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
 import junit.framework.TestCase;
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.Expression;
 
 /**
  * Unit tests for {@link SelectStatementBuilder}.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilderTest.java,v 1.2 2006/08/30 19:32:35 cyganiak Exp $
+ * @version $Id: SelectStatementBuilderTest.java,v 1.3 2006/09/03 17:59:08 cyganiak Exp $
  */
 public class SelectStatementBuilderTest extends TestCase {
 
@@ -44,5 +46,18 @@ public class SelectStatementBuilderTest extends TestCase {
 	public void testEmptyBuilder() {
 		SelectStatementBuilder builder = new SelectStatementBuilder(null);
 		assertEquals("SELECT 1", builder.getSQLStatement());
+		assertTrue(builder.isTrivial());
+	}
+	
+	public void testConditionWithNoSelectColumnsIsNotTrivial() {
+		SelectStatementBuilder builder = new SelectStatementBuilder(null);
+		builder.addCondition(new Expression("foo.bar = 1"));
+		assertFalse(builder.isTrivial());
+	}
+
+	public void testQueryWithSelectColumnsIsNotTrivial() {
+		SelectStatementBuilder builder = new SelectStatementBuilder(null);
+		builder.addSelectColumn(new Column("foo.bar"));
+		assertFalse(builder.isTrivial());
 	}
 }

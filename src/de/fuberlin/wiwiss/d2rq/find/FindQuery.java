@@ -2,12 +2,15 @@ package de.fuberlin.wiwiss.d2rq.find;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.NullIterator;
+import com.hp.hpl.jena.util.iterator.SingletonIterator;
 
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
@@ -20,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.3 2006/09/03 17:22:51 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.4 2006/09/03 17:59:08 cyganiak Exp $
  */
 public class FindQuery {
 	private Triple triplePattern;
@@ -39,10 +42,7 @@ public class FindQuery {
 		Iterator it = this.compatibleQueries.iterator();
 		while (it.hasNext()) {
 			List queryList = (List) it.next();
-			SelectStatementBuilder sql = getSQL(queryList);
-			result = result.andThen(new ApplyTripleMakersIterator(
-					new QueryExecutionIterator(sql.getSQLStatement(), sql.getDatabase()),
-					queryList, sql.getColumnNameNumberMap()));
+			result = result.andThen(resultIterator(queryList));
 		}
 		return result;
 	}
@@ -73,22 +73,28 @@ public class FindQuery {
 		this.compatibleQueries.add(newList);
 	}
 
-	private SelectStatementBuilder getSQL(List queries) {
-		Iterator it = queries.iterator();
+	private ClosableIterator resultIterator(List queryList) {
+		Iterator it = queryList.iterator();
 		PropertyBridgeQuery first = (PropertyBridgeQuery) it.next();
-		SelectStatementBuilder result = new SelectStatementBuilder(first.getDatabase());
-		result.addAliasMap(first.getAliases());
-		result.addJoins(first.getJoins());
-		result.addColumnValues(first.getColumnValues());
-		result.addCondition(first.condition());
-		result.addSelectColumns(first.getSelectColumns());
-		result.addColumnRenames(first.getReplacedColumns());
-		result.setEliminateDuplicates(first.mightContainDuplicates());
+		SelectStatementBuilder sql = new SelectStatementBuilder(first.getDatabase());
+		sql.addAliasMap(first.getAliases());
+		sql.addJoins(first.getJoins());
+		sql.addColumnValues(first.getColumnValues());
+		sql.addCondition(first.condition());
+		sql.addSelectColumns(first.getSelectColumns());
+		sql.addColumnRenames(first.getReplacedColumns());
+		sql.setEliminateDuplicates(first.mightContainDuplicates());
 		while (it.hasNext()) {
 			PropertyBridgeQuery query = (PropertyBridgeQuery) it.next();
-			result.addSelectColumns(query.getSelectColumns());
-			result.addColumnRenames(query.getReplacedColumns());
+			sql.addSelectColumns(query.getSelectColumns());
+			sql.addColumnRenames(query.getReplacedColumns());
 		}
-		return result;
+		if (sql.isTrivial()) {
+			return new ApplyTripleMakersIterator(
+					new SingletonIterator(new String[]{}), queryList, Collections.EMPTY_MAP);
+		}
+		return new ApplyTripleMakersIterator(
+				new QueryExecutionIterator(sql.getSQLStatement(), sql.getDatabase()),
+				queryList, sql.getColumnNameNumberMap());				
 	}
 }

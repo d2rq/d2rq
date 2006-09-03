@@ -18,18 +18,18 @@ import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ApplyTripleMakersIterator.java,v 1.2 2006/08/29 16:12:14 cyganiak Exp $
+ * @version $Id: ApplyTripleMakersIterator.java,v 1.3 2006/09/03 17:59:08 cyganiak Exp $
  */
 public class ApplyTripleMakersIterator implements ClosableIterator {
 	private Map columnNameNumberMap;
 	private Collection tripleMakers;
-	private QueryExecutionIterator sqlIterator;
+	private ClosableIterator sqlIterator;
     private LinkedList tripleQueue = new LinkedList();
     private boolean explicitlyClosed = false;
 
-	public ApplyTripleMakersIterator(QueryExecutionIterator query, Collection tripleMakers, 
+	public ApplyTripleMakersIterator(ClosableIterator sqlIterator, Collection tripleMakers, 
 			Map columnNameNumberMap) {
-		this.sqlIterator = query;
+		this.sqlIterator = sqlIterator;
 		this.tripleMakers = tripleMakers;
 		this.columnNameNumberMap = columnNameNumberMap;
 	}
@@ -71,7 +71,7 @@ public class ApplyTripleMakersIterator implements ClosableIterator {
 	 */
 	private void tryFillTripleQueue() {
 		while (this.sqlIterator.hasNext() && this.tripleQueue.isEmpty()) {
-			String[] nextRow = this.sqlIterator.nextRow();
+			String[] nextRow = (String[]) this.sqlIterator.next();
 			Iterator it = this.tripleMakers.iterator();
 			while (it.hasNext()) {
 				PropertyBridgeQuery tripleMaker = (PropertyBridgeQuery) it.next();

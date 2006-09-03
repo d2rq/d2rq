@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.6 2006/09/03 17:22:50 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.7 2006/09/03 17:59:08 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -77,6 +77,10 @@ public class SelectStatementBuilder {
 	    return this.database;
 	}
 
+	public boolean isTrivial() {
+		return this.sqlSelect.isEmpty() && this.conditions.isEmpty();
+	}
+	
 	public String getSQLStatement() {
 		StringBuffer result = new StringBuffer("SELECT ");
 		if (this.eliminateDuplicates) {
