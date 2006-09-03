@@ -4,7 +4,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import de.fuberlin.wiwiss.d2rq.FindTestFramework;
+import de.fuberlin.wiwiss.d2rq.helpers.FindTestFramework;
 
 /**
  * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.GraphD2RQ}.
@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.FindTestFramework;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTest.java,v 1.7 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: FindTest.java,v 1.8 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class FindTest extends FindTestFramework {
     

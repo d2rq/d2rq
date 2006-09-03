@@ -1,6 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
-import de.fuberlin.wiwiss.d2rq.DummyValueSource;
+import de.fuberlin.wiwiss.d2rq.helpers.DummyValueSource;
 import de.fuberlin.wiwiss.d2rq.map.ContainsRestriction;
 import de.fuberlin.wiwiss.d2rq.map.MaxLengthRestriction;
 import de.fuberlin.wiwiss.d2rq.map.RegexRestriction;

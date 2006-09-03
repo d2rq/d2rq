@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.helpers;
 
 import junit.framework.TestCase;
 import junit.framework.TestResult;
@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TestFramework.java,v 1.4 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: TestFramework.java,v 1.1 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class TestFramework extends TestCase {
 	protected String D2RQMap = "file:doc/manual/ISWC-d2rq.n3"; // "file:srcMac/jgISWC-d2rq.n3"; 

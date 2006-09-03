@@ -1,5 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.sesame;
-import de.fuberlin.wiwiss.d2rq.TestFramework;
+import de.fuberlin.wiwiss.d2rq.helpers.TestFramework;
 import de.fuberlin.wiwiss.d2rq.sesame.D2RQRepository;
 import de.fuberlin.wiwiss.d2rq.sesame.D2RQSource;
 
@@ -11,7 +11,7 @@ import org.openrdf.sesame.repository.SesameRepository;
 
 /**
  * @author jgarbers
- * @version $Id: SesameTest.java,v 1.2 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: SesameTest.java,v 1.3 2006/09/03 13:03:43 cyganiak Exp $
  */
 public class SesameTest extends TestFramework {
 

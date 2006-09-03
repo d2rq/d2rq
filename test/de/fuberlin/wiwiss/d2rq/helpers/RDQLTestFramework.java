@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.helpers;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,13 +17,13 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 
-import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
-import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: RDQLTestFramework.java,v 1.15 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: RDQLTestFramework.java,v 1.1 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class RDQLTestFramework extends TestFramework {
 	protected ModelD2RQ model;

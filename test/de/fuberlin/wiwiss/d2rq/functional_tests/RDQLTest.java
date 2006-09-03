@@ -6,7 +6,7 @@ import java.util.Map;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
-import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
+import de.fuberlin.wiwiss.d2rq.helpers.RDQLTestFramework;
 
 
 /**
@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDQLTest.java,v 1.11 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: RDQLTest.java,v 1.12 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class RDQLTest extends RDQLTestFramework {
 

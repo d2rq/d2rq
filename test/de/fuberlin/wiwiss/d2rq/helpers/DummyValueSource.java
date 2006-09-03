@@ -1,7 +1,4 @@
-/*
- * $Id: DummyValueSource.java,v 1.3 2006/08/28 19:44:23 cyganiak Exp $
- */
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.helpers;
 
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +9,8 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 /**
  * Dummy implementation of {@link ValueSource}
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: DummyValueSource.java,v 1.1 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class DummyValueSource implements ValueSource {
 	private boolean couldFit = true;

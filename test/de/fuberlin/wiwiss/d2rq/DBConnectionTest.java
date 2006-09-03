@@ -11,12 +11,13 @@ import java.util.Iterator;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
+import de.fuberlin.wiwiss.d2rq.helpers.TestFramework;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
 /**
  * @author jgarbers
- * @version $Id: DBConnectionTest.java,v 1.19 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: DBConnectionTest.java,v 1.20 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class DBConnectionTest extends TestFramework {
 

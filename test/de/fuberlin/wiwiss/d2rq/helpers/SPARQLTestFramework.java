@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.helpers;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +15,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 
 /**
  * @author jgarbers
- * @version $Id: SPARQLTestFramework.java,v 1.2 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: SPARQLTestFramework.java,v 1.1 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class SPARQLTestFramework extends RDQLTestFramework {
 

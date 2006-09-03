@@ -1,10 +1,10 @@
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
-import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
+import de.fuberlin.wiwiss.d2rq.helpers.RDQLTestFramework;
 
 /**
  * @author jgarbers
- * @version $Id: RDQLDB2Test.java,v 1.5 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: RDQLDB2Test.java,v 1.6 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class RDQLDB2Test extends RDQLTestFramework {
 	static String DB2MappingFile="file:doc/manual/ISWC-2DB-d2rq.n3";

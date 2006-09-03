@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.helpers;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,22 +8,12 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
-import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
+import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 
 /**
- * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.GraphD2RQ}.
- * For notes on running the tests, see {@link AllTests}.
- * 
- * Each test method runs one or more find queries and automatically compares the actual
- * results to the expected results. For some tests, only the number of returned triples
- * is checked. For others, the returned triples are compared against expected triples.
- * 
- * If a test fails, the dump() method can be handy. It shows the actual triples returned
- * by a query on System.out.
- *
- * To see debug information, uncomment the enableDebug() call in the setUp() method.
- * 
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: FindTestFramework.java,v 1.1 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class FindTestFramework extends TestFramework {
 

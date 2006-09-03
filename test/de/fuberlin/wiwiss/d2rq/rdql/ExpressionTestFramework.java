@@ -7,8 +7,8 @@ import java.util.Map;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
-import de.fuberlin.wiwiss.d2rq.SPARQLTestFramework;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
+import de.fuberlin.wiwiss.d2rq.helpers.SPARQLTestFramework;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 

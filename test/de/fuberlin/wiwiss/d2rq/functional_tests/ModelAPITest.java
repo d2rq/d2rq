@@ -7,7 +7,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
-import de.fuberlin.wiwiss.d2rq.TestFramework;
+import de.fuberlin.wiwiss.d2rq.helpers.TestFramework;
 
 /**
  * Functional tests that exercise a ModelD2RQ by calling Model API functions. For
@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.TestFramework;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelAPITest.java,v 1.5 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: ModelAPITest.java,v 1.6 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class ModelAPITest extends TestFramework {
 	private ModelD2RQ model;

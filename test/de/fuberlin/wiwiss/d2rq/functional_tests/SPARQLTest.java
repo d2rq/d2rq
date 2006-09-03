@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.hp.hpl.jena.rdf.model.AnonId;
 
-import de.fuberlin.wiwiss.d2rq.SPARQLTestFramework;
+import de.fuberlin.wiwiss.d2rq.helpers.SPARQLTestFramework;
 
 
 /**
@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.SPARQLTestFramework;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SPARQLTest.java,v 1.3 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: SPARQLTest.java,v 1.4 2006/09/03 13:03:42 cyganiak Exp $
  */
 public class SPARQLTest extends SPARQLTestFramework {
 
