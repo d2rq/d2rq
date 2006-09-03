@@ -13,6 +13,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
@@ -22,11 +23,10 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.4 2006/09/02 22:41:43 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.5 2006/09/03 13:45:47 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
-	private final static String TEST_FILES = "file:test/de/fuberlin/wiwiss/d2rq/parser/";
 	
 	private Model model;
 
@@ -66,7 +66,7 @@ public class ParserTest extends TestCase {
 	}
 
 	public void testParseAlias() {
-		MapParser parser = parse("alias.n3");
+		MapParser parser = parse("parser/alias.n3");
 		assertEquals(1, parser.getPropertyBridges().size());
 		PropertyBridge bridge = (PropertyBridge) parser.getPropertyBridges().iterator().next();
 		assertTrue(bridge.getConditions().isEmpty());
@@ -77,7 +77,7 @@ public class ParserTest extends TestCase {
 	
 	private MapParser parse(String testFileName) {
 		Model m = ModelFactory.createDefaultModel();
-		m.read(TEST_FILES + testFileName, "N3");
+		m.read(D2RQTestSuite.DIRECTORY + testFileName, "N3");
 		MapParser result = new MapParser(m, null);
 		result.parse();
 		return result;

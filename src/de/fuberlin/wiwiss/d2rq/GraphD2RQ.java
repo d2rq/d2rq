@@ -24,6 +24,7 @@ import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.graph.query.SimpleQueryHandler;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
@@ -50,7 +51,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.25 2006/09/02 23:10:43 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.26 2006/09/03 13:45:47 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -90,6 +91,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * @throws D2RQException on error in the mapping model
 	 */
 	public GraphD2RQ(Model mapModel, String baseURIForData) throws D2RQException {
+		copyPrefixes(mapModel);
 		if (baseURIForData == null) {
 			baseURIForData = "http://localhost/resource/";
 		}
@@ -101,6 +103,24 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		// TODO clean up
 		this.propertyBridgesByClassMap = parser.propertyBridgesByClassMap();
 		this.nodeMakersByClassMap = parser.NodeMakersByClassMap();
+	}
+
+	/**
+	 * Copies all prefixes from the mapping file to the D2RQ model.
+	 * This makes the output of Model.write(...) nicer. The D2RQ
+	 * prefix is dropped on the assumption that it is not wanted
+	 * in the actual data. Same for any file: prefix.
+	 */ 
+	private void copyPrefixes(PrefixMapping prefixes) {
+		getPrefixMapping().setNsPrefixes(prefixes);
+		Iterator it = getPrefixMapping().getNsPrefixMap().entrySet().iterator();
+		while (it.hasNext()) {
+			Entry entry = (Entry) it.next();
+			String namespace = (String) entry.getValue();
+			if (D2RQ.uri.equals(namespace) || namespace.startsWith("file:")) {
+				getPrefixMapping().removeNsPrefix((String) entry.getKey());
+			}
+		}
 	}
 
 	private List sortPropertyBridges(Collection unsortedBridges) {
@@ -249,8 +269,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
     		return null;
     	}
     	Model result = ModelFactory.createDefaultModel();
-// TODO Handle prefixes in a smart way -- no time now
-//    	result.setNsPrefixes(this.getPrefixMapping());
+    	result.setNsPrefixes(this.getPrefixMapping());
     	result.getGraph().getBulkUpdateHandler().add(
     			new FindQuery(Triple.ANY, inventoryBridges).iterator());
     	return result;

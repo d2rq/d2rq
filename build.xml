@@ -73,7 +73,7 @@
 -->
 	<target name="test" depends="compile.tests">
 		<java classname="junit.textui.TestRunner" fork="yes" failonerror="true">
-			<arg value="${project.package}.AllTests"/>
+			<arg value="${project.package}.D2RQTestSuite"/>
 			<classpath>
 				<path refid="project.class.path"/>
 				<pathelement path="${build}"/>

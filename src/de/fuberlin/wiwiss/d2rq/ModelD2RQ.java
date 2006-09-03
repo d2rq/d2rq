@@ -1,25 +1,22 @@
 package de.fuberlin.wiwiss.d2rq;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
-
 import com.hp.hpl.jena.enhanced.BuiltinPersonalities;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.impl.ModelCom;
-import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.util.FileManager;
 
-import de.fuberlin.wiwiss.d2rq.map.D2RQ;
-
 /**
- * A D2RQ read-only Jena model backed by a non-RDF database.
+ * <p>A D2RQ read-only Jena model backed by a D2RQ-mapped non-RDF database.</p>
  *
- * D2RQ is a declarative mapping language for describing mappings between ontologies and relational data models.
- * More information about D2RQ is found at: http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/
+ * <p>D2RQ is a declarative mapping language for describing mappings between ontologies and relational data models.
+ * More information about D2RQ is found at: http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/</p>
  *
+ * <p>This class is a thin wrapper around a {@link GraphD2RQ} and provides only
+ * convenience constructors.</p>
+ * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.9 2006/09/03 00:08:12 cyganiak Exp $
+ * @version $Id: ModelD2RQ.java,v 1.10 2006/09/03 13:45:47 cyganiak Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */
@@ -57,24 +54,5 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 */
 	public ModelD2RQ(Model mapModel, String baseURIForData) {
 		super(new GraphD2RQ(mapModel, baseURIForData), BuiltinPersonalities.model);
-		copyPrefixes(mapModel);
-	}
-
-	/**
-	 * Copies all prefixes from the mapping file to the D2RQ model.
-	 * This makes the output of Model.write(...) nicer. The D2RQ
-	 * prefix is dropped on the assumption that it is not wanted
-	 * in the actual data.
-	 */ 
-	private void copyPrefixes(PrefixMapping prefixes) {
-		setNsPrefixes(prefixes);
-		Iterator it = getNsPrefixMap().entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			String namespace = (String) entry.getValue();
-			if (D2RQ.uri.equals(namespace) || namespace.startsWith("file:")) {
-				removeNsPrefix((String) entry.getKey());
-			}
-		}
 	}
 }

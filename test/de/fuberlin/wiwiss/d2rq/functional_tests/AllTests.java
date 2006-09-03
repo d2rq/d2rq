@@ -1,6 +1,3 @@
-/*
- * $Id: AllTests.java,v 1.4 2006/08/28 19:44:21 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import junit.framework.Test;
@@ -13,7 +10,8 @@ import junit.framework.TestSuite;
  * or the MS Access version accessible. Maybe you must adapt the connection information at the
  * beginning of the map file to fit your database server.
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: AllTests.java,v 1.5 2006/09/03 13:45:47 cyganiak Exp $
  */
 public class AllTests {
 
