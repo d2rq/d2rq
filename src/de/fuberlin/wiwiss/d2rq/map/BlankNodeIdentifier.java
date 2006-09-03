@@ -1,6 +1,3 @@
-/*
- * $Id: BlankNodeIdentifier.java,v 1.5 2006/08/28 19:44:21 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.ArrayList;
@@ -22,13 +19,8 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * class to keep the code simple and fast. This means BlankNodeIdentifier
  * might not work with some hypothetical subclasses of Column.)
  *
- * TODO: Write tests for matches, extractColumnValues, getValue -- what happens with bad label? Zero-length ID cols?
- * 
- * <p>History:<br>
- * 08-03-2004: Initial version of this class.<br>
- * 
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: BlankNodeIdentifier.java,v 1.6 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class BlankNodeIdentifier implements ValueSource {
 	private String classMapID;

@@ -1,6 +1,3 @@
-/*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-*/
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Map;
@@ -14,13 +11,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * UriMakers transform attribute values from a result set into URIrefs.
  * They are used within TripleMakers.
  *
- * <p>History:<br>
- * 06-21-2004: Initial version of this class.<br>
- * 08-03-2004: added couldFit, getColumns, getColumnValues
- * 
  * @author Chris Bizer chris@bizer.de
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: UriMaker.java,v 1.6 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class UriMaker extends NodeMakerBase {
 	private String id;

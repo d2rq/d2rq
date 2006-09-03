@@ -3,10 +3,10 @@ package de.fuberlin.wiwiss.d2rq.types;
 import de.fuberlin.wiwiss.d2rq.map.Translator;
 
 /**
- * TODO Describe this type
+ * Translates from MySQL DATETIME values to xsd:dateTime values.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DateTimeTranslator.java,v 1.1 2006/07/12 11:08:09 cyganiak Exp $
+ * @version $Id: DateTimeTranslator.java,v 1.2 2006/09/03 00:08:12 cyganiak Exp $
  */
 public class DateTimeTranslator implements Translator {
 

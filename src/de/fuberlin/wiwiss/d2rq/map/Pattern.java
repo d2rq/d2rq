@@ -21,8 +21,8 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * 
  * TODO: Use String.split() instead of indexOf() hackery?
  * 
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version $Id: Pattern.java,v 1.6 2006/09/02 22:41:43 cyganiak Exp $
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: Pattern.java,v 1.7 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class Pattern implements ValueSource {
 	private String pattern;

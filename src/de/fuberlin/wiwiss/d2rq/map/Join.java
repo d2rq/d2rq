@@ -12,8 +12,8 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version $Id: Join.java,v 1.4 2006/09/02 22:41:43 cyganiak Exp $
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: Join.java,v 1.5 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class Join {
 	private Set fromColumns = new HashSet(2);

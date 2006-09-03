@@ -1,21 +1,13 @@
-/*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq;
 
 import com.hp.hpl.jena.graph.Capabilities;
 
 /**
-    Description of the capabilities of a GraphD2RQ.
-    
- * <BR>History: 06-10-2004   : Initial version of this class.
+ * Description of the capabilities of a GraphD2RQ.
  * @author Chris Bizer chris@bizer.de
- * @version V0.1
+ * @version $Id: D2RQCapabilities.java,v 1.5 2006/09/03 00:08:12 cyganiak Exp $
  */
-
-class D2RQCapabilities implements Capabilities
-    {
+class D2RQCapabilities implements Capabilities {
     public boolean sizeAccurate() { return true; }
     public boolean addAllowed() { return addAllowed( false ); }
     public boolean addAllowed( boolean every ) { return false; }
@@ -23,12 +15,6 @@ class D2RQCapabilities implements Capabilities
     public boolean deleteAllowed( boolean every ) { return false; }
     public boolean canBeEmpty() { return true; }
     public boolean iteratorRemoveAllowed() { return false; }
-    public boolean findContractSafe() { return false; } // TODO check semantic of this in Jena 2.2.    
-    // TODO check handlesLiteralTyping() for correctness. 
-    // SQL does it for numbers, but currently not for dates.
-    public boolean handlesLiteralTyping() { return false; } // required by Jena 2.3
-    }
-
-
-
-
+    public boolean findContractSafe() { return false; }
+    public boolean handlesLiteralTyping() { return true; }
+}

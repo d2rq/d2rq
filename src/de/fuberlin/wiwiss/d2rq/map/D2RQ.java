@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.map;
 
 import com.hp.hpl.jena.graph.*;
@@ -12,13 +8,9 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
 /**
  * D2RQ vocabulary terms as static objects.
  *
- * <p>History:<br>
- * 06-03-2004: Initial version of this class.<br>
- * 08-03-2004: Added new terms for version 0.2<br>
- * 28-04-2005: Added new terms for version 0.3<br>
- * 
  * @author Chris Bizer chris@bizer.de
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: D2RQ.java,v 1.5 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class D2RQ {
 

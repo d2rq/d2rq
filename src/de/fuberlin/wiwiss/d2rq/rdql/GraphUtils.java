@@ -16,6 +16,10 @@ import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
+/**
+ * @author jgarbers
+ * @version $Id: GraphUtils.java,v 1.4 2006/09/03 00:08:11 cyganiak Exp $
+ */
 public class GraphUtils {
 
 	/**

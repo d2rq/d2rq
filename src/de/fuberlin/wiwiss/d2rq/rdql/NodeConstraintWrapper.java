@@ -12,10 +12,12 @@ import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
- * TODO Describe this type
+ * A {@link NodeConstraint} that wraps another NodeConstraint and
+ * presents a view where all tables are renamed according to an
+ * {@link AliasMap}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeConstraintWrapper.java,v 1.2 2006/08/28 21:13:47 cyganiak Exp $
+ * @version $Id: NodeConstraintWrapper.java,v 1.3 2006/09/03 00:08:11 cyganiak Exp $
  */
 public class NodeConstraintWrapper implements NodeConstraint {
 	private NodeConstraint base;

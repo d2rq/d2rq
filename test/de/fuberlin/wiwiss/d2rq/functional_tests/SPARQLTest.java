@@ -1,6 +1,3 @@
-/*
- * $Id: SPARQLTest.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import java.util.HashMap;
@@ -24,13 +21,10 @@ import de.fuberlin.wiwiss.d2rq.SPARQLTestFramework;
  *
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: SPARQLTest.java,v 1.3 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class SPARQLTest extends SPARQLTestFramework {
-
-	public SPARQLTest(String arg0) {
-		super(arg0);
-	}
 
 	public void testSPARQLFetch() {
 		sparql("SELECT ?x ?y WHERE { <http://www.conference.org/conf02004/paper#Paper1> ?x ?y }");

@@ -1,24 +1,14 @@
-/*
- * $Id: URIMatchPolicy.java,v 1.3 2006/05/19 19:13:02 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
-
-
 
 /**
  * Encapsulates code for this optimizing rule: If a query URI matches
  * some NodeMaker based on a URI pattern, then don't check any NodeMakers
  * that are based on an URI column.
  *
- * TODO: Isn't really Policy pattern; use other name or refactor?
- * 
- * <p>History:<br>
- * 08-03-2004: Initial version of this class.<br>
- * 
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: URIMatchPolicy.java,v 1.4 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class URIMatchPolicy {
 	private boolean isSubjectBasedOnURIPattern = false;

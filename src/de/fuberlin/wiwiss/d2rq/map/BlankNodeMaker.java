@@ -1,6 +1,3 @@
-/*
- (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
- */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Map;
@@ -14,12 +11,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 /**
  * BlankNodeMakers transform attribute values from a result set into blank nodes.
  *
- * <p>History:<br>
- * 06-21-2004: Initial version of this class.<br>
- * 
  * @author Chris Bizer chris@bizer.de
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: BlankNodeMaker.java,v 1.6 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class BlankNodeMaker extends NodeMakerBase {
 	private String id;

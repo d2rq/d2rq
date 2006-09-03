@@ -24,8 +24,8 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * TODO: The two cases (addTranslation calls and setTranslator) should
  * probalby be in separate classes.
  * 
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version $Id: TranslationTable.java,v 1.3 2006/09/02 22:41:43 cyganiak Exp $
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: TranslationTable.java,v 1.4 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class TranslationTable implements Translator {
 	private Map db2rdf = new HashMap();

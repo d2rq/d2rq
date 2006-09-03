@@ -1,6 +1,3 @@
-/*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-*/
 package de.fuberlin.wiwiss.d2rq.sql;
 
 import java.util.ArrayList;
@@ -25,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.4 2006/08/30 19:32:35 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.5 2006/09/03 00:08:12 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {

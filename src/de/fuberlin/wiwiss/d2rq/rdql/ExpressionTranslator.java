@@ -43,7 +43,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  *   2) SQL dialects
  *   3) Variable translators
  * @author jgarbers
- * @version $Id: ExpressionTranslator.java,v 1.12 2006/09/02 22:41:44 cyganiak Exp $
+ * @version $Id: ExpressionTranslator.java,v 1.13 2006/09/03 00:08:11 cyganiak Exp $
  */
 public class ExpressionTranslator {
 	
@@ -65,7 +65,7 @@ public class ExpressionTranslator {
     public static final int BitType=2;
     public static final int StringType=4;
     public static final int NumberType=8;
-    public static final int UriType=16; // TODO ?
+    public static final int UriType=16;
     public static final int AnyType=31;
     public static final int LeftRightType=32; // different type for left and right operand
     public static final int LeftType=-1;

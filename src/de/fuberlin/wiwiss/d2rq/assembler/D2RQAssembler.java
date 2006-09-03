@@ -9,6 +9,12 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 
+/**
+ * A Jena assembler that builds ModelD2RQs.
+ * 
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: D2RQAssembler.java,v 1.2 2006/09/03 00:08:11 cyganiak Exp $
+ */
 public class D2RQAssembler extends AssemblerBase {
 
 	public Object open(Assembler ignore, Resource description, Mode ignore2) {

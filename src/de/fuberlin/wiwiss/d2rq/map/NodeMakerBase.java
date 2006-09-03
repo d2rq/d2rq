@@ -8,6 +8,12 @@ import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
+/**
+ * Provides default implementations for various NodeMaker methods.
+ * 
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: NodeMakerBase.java,v 1.3 2006/09/03 00:08:10 cyganiak Exp $
+ */
 public abstract class NodeMakerBase implements NodeMaker {
 	private boolean isUnique;
 	

@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 
@@ -19,11 +21,13 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * kinds of objects, the inverse operation is available as well. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.1 2006/08/28 19:44:21 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.2 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class AliasMap {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_MAP);
-
+	private static final Pattern aliasPattern = 
+			Pattern.compile("(.+)\\s+AS\\s+(.+)", Pattern.CASE_INSENSITIVE);
+	
 	/**
 	 * Builds an AliasMap from a collection of "Table AS Alias" expressions.
 	 * @param aliasExpressions a Collection of Strings
@@ -34,19 +38,12 @@ public class AliasMap {
 		Iterator it = aliasExpressions.iterator();
 		while (it.hasNext()) {
 			String s = (String) it.next();
-			// TODO: use PatternMatcher
-			int index = s.toUpperCase().indexOf(" AS ");
-			if (index == -1) {
+			Matcher matcher = aliasPattern.matcher(s);
+			if (!matcher.matches()) {
 				throw new D2RQException("d2rq:alias '" + s +
 						"' is not in 'table AS alias' form");
 			}
-			String table = s.substring(0, index).trim();
-			String alias = s.substring(index + 4).trim();
-			if ("".equals(table) || "".equals(alias)) {
-				throw new D2RQException("d2rq:alias '" + s + 
-						"' is not in 'table AS alias' form");
-			}
-			m.put(alias, table);
+			m.put(matcher.group(2), matcher.group(1));
 		}
 		return new AliasMap(m);
 	}

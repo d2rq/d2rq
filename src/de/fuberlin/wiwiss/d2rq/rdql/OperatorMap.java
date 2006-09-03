@@ -1,6 +1,3 @@
-/*
-(c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.Iterator;
@@ -16,6 +13,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
  * If sameType (default) then left and right operand must have same actual type.
  * If returnType=LeftType (default) then the result will have the same type as the left argument.
  * If returnType=RightType then the actual rightType.
+ * 
+ * @author jgarbers
+ * @version $Id: OperatorMap.java,v 1.6 2006/09/03 00:08:11 cyganiak Exp $
  */
 class OperatorMap {
     public String rdqlOperator; // unqualified class name

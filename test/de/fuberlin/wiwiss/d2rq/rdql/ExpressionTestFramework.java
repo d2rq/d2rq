@@ -16,10 +16,6 @@ public class ExpressionTestFramework extends SPARQLTestFramework {
     String condition, sqlCondition=null;
     Logger translatedLogger=new Logger();
 
-    public ExpressionTestFramework(String arg0) {
-        super(arg0);
-    }
-
     protected static void activateExpressionTranslator(ModelD2RQ model) {
     	Map dbMap=((GraphD2RQ)model.getGraph()).getPropertyBridgesByDatabase();
     	Iterator it=dbMap.keySet().iterator();

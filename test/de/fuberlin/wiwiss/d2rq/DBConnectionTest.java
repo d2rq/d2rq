@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq;
 
 import java.sql.Connection;
@@ -18,12 +14,9 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
-
 /**
  * @author jgarbers
- * 
- * TODO To change the template for this generated type comment go to Window -
- * Preferences - Java - Code Style - Code Templates
+ * @version $Id: DBConnectionTest.java,v 1.19 2006/09/03 00:08:11 cyganiak Exp $
  */
 public class DBConnectionTest extends TestFramework {
 
@@ -37,11 +30,6 @@ public class DBConnectionTest extends TestFramework {
 	private String simplestQuery;
 	private String mediumQuery;
 	private String complexQuery;
-
-	public DBConnectionTest(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
 
 	protected void setUp() throws Exception {
 		mapModel = ModelFactory.createDefaultModel();

@@ -1,6 +1,3 @@
-/*
- * $Id: ValueSource.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Map;
@@ -27,13 +24,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * ValueSources are used by {@link NodeMaker}s. A node maker
  * wraps the strings into Jena nodes, thus creating a description
  * of a set of RDF nodes.
- * <p>
- * TODO: Better name for ValueSource: ValueSetDescription?
  * 
- * <p>History:<br>
- * 2004-08-02: Initial version.<br>
- * 
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: ValueSource.java,v 1.3 2006/09/03 00:08:10 cyganiak Exp $
  */
 public interface ValueSource {
     

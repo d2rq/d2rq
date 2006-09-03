@@ -14,8 +14,8 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * It contains the connection information for the database and the column types of all database columns used.
  *
  * @author Chris Bizer chris@bizer.de
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version $Id: Database.java,v 1.9 2006/09/02 22:41:43 cyganiak Exp $
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: Database.java,v 1.10 2006/09/03 00:08:10 cyganiak Exp $
  * 
  * TODO: Make a bunch of public methods private?
  */

@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.Iterator;
@@ -23,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.map.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.8 2006/09/02 22:41:43 cyganiak Exp $
+ * @version $Id: ModelD2RQ.java,v 1.9 2006/09/03 00:08:12 cyganiak Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */

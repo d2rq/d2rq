@@ -1,7 +1,3 @@
-/*
- * Created on 21.11.2005 by Joerg Garbers, FU-Berlin
- *
- */
 package de.fuberlin.wiwiss.d2rq.sesame;
 import de.fuberlin.wiwiss.d2rq.TestFramework;
 import de.fuberlin.wiwiss.d2rq.sesame.D2RQRepository;
@@ -15,13 +11,9 @@ import org.openrdf.sesame.repository.SesameRepository;
 
 /**
  * @author jgarbers
- *
+ * @version $Id: SesameTest.java,v 1.2 2006/09/03 00:08:11 cyganiak Exp $
  */
 public class SesameTest extends TestFramework {
-
-    public SesameTest(String arg) {
-        super(arg);
-    }
 
     public void testSimpleSelect() {
         // jg: code taken from doc/manual/index.html

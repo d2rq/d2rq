@@ -11,8 +11,8 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 /**
  * A database column.
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version $Id: Column.java,v 1.4 2006/09/02 22:41:43 cyganiak Exp $
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: Column.java,v 1.5 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class Column implements ValueSource {
 	private String qualifiedName;

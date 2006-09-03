@@ -1,7 +1,3 @@
-/*
- * Created on 14.04.2005 by Joerg Garbers, FU-Berlin
- *
- */
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.Iterator;
@@ -11,14 +7,10 @@ import java.util.Iterator;
  * Currently (Jena 2.3) the expressions are not passed from the SPARQL parser down to the pattern stage.
  * So no reasonable results are given by this test case.
  * @author jgarbers
- *
+ * @version $Id: SPARQLExpressionTest.java,v 1.3 2006/09/03 00:08:12 cyganiak Exp $
  */
 public class SPARQLExpressionTest extends ExpressionTestFramework { 
     
-    public SPARQLExpressionTest(String arg0) {
-        super(arg0);
-     }
-	
 	String getSPARQLQuery(String condition) {
 	    String triples=
 	        " ?x <http://annotation.semanticweb.org/iswc/iswc.daml#author> ?z . " +

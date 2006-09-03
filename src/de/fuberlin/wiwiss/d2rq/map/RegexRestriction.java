@@ -1,6 +1,3 @@
-/*
- * $Id: RegexRestriction.java,v 1.3 2006/08/28 19:44:21 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Map;
@@ -14,11 +11,8 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * that all its values match a certain regular expression. This is useful because the
  * query engine can exclude sources if a value doesn't match the expression.
  *
- * <p>History:<br>
- * 08-03-2004: Initial version of this class.<br>
- * 
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: RegexRestriction.java,v 1.4 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class RegexRestriction implements ValueSource {
 	private ValueSource valueSource;

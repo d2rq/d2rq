@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.List;
@@ -16,10 +12,8 @@ import de.fuberlin.wiwiss.d2rq.map.ValueSource;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
- * TODO: Describe this type
- * 
- * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeConstraint.java,v 1.6 2006/08/28 21:13:47 cyganiak Exp $
+ * @author Richard Cyganiak
+ * @version $Id: NodeConstraint.java,v 1.7 2006/09/03 00:08:11 cyganiak Exp $
  */
 public interface NodeConstraint {
 

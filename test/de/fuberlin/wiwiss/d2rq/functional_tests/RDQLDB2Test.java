@@ -1,11 +1,11 @@
-/*
- * $Id: RDQLDB2Test.java,v 1.4 2006/05/19 18:42:37 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import de.fuberlin.wiwiss.d2rq.RDQLTestFramework;
 
-
+/**
+ * @author jgarbers
+ * @version $Id: RDQLDB2Test.java,v 1.5 2006/09/03 00:08:10 cyganiak Exp $
+ */
 public class RDQLDB2Test extends RDQLTestFramework {
 	static String DB2MappingFile="file:doc/manual/ISWC-2DB-d2rq.n3";
 	static String zHasCitingPaperX=
@@ -25,8 +25,7 @@ public class RDQLDB2Test extends RDQLTestFramework {
 	static String paperYauthorB=
 	    "(?y, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?b)";
 
-	public RDQLDB2Test(String arg0) {
-		super(arg0);
+	public RDQLDB2Test() {
 		D2RQMap=DB2MappingFile;
 	}
 	

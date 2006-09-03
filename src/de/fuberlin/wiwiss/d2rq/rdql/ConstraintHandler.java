@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.lang.reflect.Constructor;
@@ -26,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- *
+ * @version $Id: ConstraintHandler.java,v 1.10 2006/09/03 00:08:11 cyganiak Exp $
  */
 class ConstraintHandler {
     public boolean possible=true;
@@ -84,7 +80,7 @@ class ConstraintHandler {
             NodeConstraint c=(NodeConstraint)it.next();
             c.addConstraintsToSQL(sql);
         }
-        addRDQLConstraints(sql); // TODO test
+        addRDQLConstraints(sql);
     }
     
     /**

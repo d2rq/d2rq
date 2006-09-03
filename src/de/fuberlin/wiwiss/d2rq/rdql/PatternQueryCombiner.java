@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
@@ -17,7 +13,6 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
-
 /** 
  * Handles a triple pattern query on a D2RQ mapped database.
  * (Current)Assumption: all PropertyBridges refer to same database.
@@ -32,6 +27,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * useless, if there are (Bound) variables for predicates.
  * 
  * @author jgarbers
+ * @version $Id: PatternQueryCombiner.java,v 1.10 2006/09/03 00:08:11 cyganiak Exp $
  * @see FindQuery
  */
 class PatternQueryCombiner {
@@ -156,7 +152,7 @@ void reducePropertyBridges() {
 // then we have (combination is x*(x-1)/2, roughly x^2)
 //    O( N^2 * M^2) computations for precomputing compatibility of pairs of triples
 
-//RDFS-optimizations. TODO in next version
+//RDFS-optimizations.
 //void addTypeAssertions() {
 //	for each variable ?x
 //		build the intersection of all possible involved property domains where ?x

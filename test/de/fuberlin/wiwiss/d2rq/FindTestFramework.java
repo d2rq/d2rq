@@ -30,13 +30,6 @@ public class FindTestFramework extends TestFramework {
 	protected GraphD2RQ graph;
 	protected Set resultTriples; 
 
-	/**
-	 * @param arg0
-	 */
-	public FindTestFramework(String arg0) {
-		super(arg0);
-	}
-
 	protected void setUp() throws Exception {
 		this.graph = (GraphD2RQ) new ModelD2RQ(D2RQMap).getGraph();
 //		this.graph.enableDebug();

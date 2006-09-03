@@ -1,6 +1,3 @@
-/*
- * $Id: Translator.java,v 1.1 2005/04/13 16:55:28 garbers Exp $
- */
 package de.fuberlin.wiwiss.d2rq.map;
 
 /**
@@ -28,11 +25,8 @@ package de.fuberlin.wiwiss.d2rq.map;
  * Translators are instantiated at startup time, not at query time. Performance
  * is not critical.
  * 
- * <p>History:<br>
- * 08-03-2004: Initial version.<br>
- * 
- * @author Richard Cyganiak <richard@cyganiak.de>
- * @version V0.2
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: Translator.java,v 1.2 2006/09/03 00:08:10 cyganiak Exp $
  */
 public interface Translator {
 

@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import com.hp.hpl.jena.graph.Graph;
@@ -19,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * Subclassing from SimpleQueryHandler for convenience, makes differences clear.
  * 
  * @author jgarbers
- * @version $Id: D2RQQueryHandler.java,v 1.6 2006/08/28 20:23:42 cyganiak Exp $
+ * @version $Id: D2RQQueryHandler.java,v 1.7 2006/09/03 00:08:11 cyganiak Exp $
  */
 public class D2RQQueryHandler extends SimpleQueryHandler implements QueryHandler {
 	private GraphD2RQ graph;

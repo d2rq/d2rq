@@ -1,13 +1,11 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.helpers;
+
 /**
  * A class for capturing performance information.
  * We grant read/write access to instance variables.
+ * 
  * @author jgarbers
- *
+ * @version $Id: InfoD2RQ.java,v 1.2 2006/09/03 00:08:12 cyganiak Exp $
  */
 public class InfoD2RQ implements Cloneable {
     

@@ -1,6 +1,3 @@
-/*
- * $Id: ModelAPITest.java,v 1.4 2006/05/19 18:42:37 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import com.hp.hpl.jena.rdf.model.Property;
@@ -18,14 +15,11 @@ import de.fuberlin.wiwiss.d2rq.TestFramework;
  *
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: ModelAPITest.java,v 1.5 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class ModelAPITest extends TestFramework {
 	private ModelD2RQ model;
-
-	public ModelAPITest(String arg0) {
-		super(arg0);
-	}
 
 	protected void setUp() throws Exception {
 		this.model = new ModelD2RQ(D2RQMap);

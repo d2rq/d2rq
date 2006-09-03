@@ -9,6 +9,10 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+/**
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: AliasMapTest.java,v 1.2 2006/09/03 00:08:13 cyganiak Exp $
+ */
 public class AliasMapTest extends TestCase {
 	private final static Column foo_col1 = new Column("foo.col1");
 	private final static Column bar_col1 = new Column("bar.col1");
@@ -138,7 +142,7 @@ public class AliasMapTest extends TestCase {
 		assertEquals(fooAsBar, AliasMap.buildFromSQL(Collections.singleton("foo AS bar")));
 		assertEquals(fooAsBar, AliasMap.buildFromSQL(Collections.singleton("foo as bar")));
 	}
-	
+
 	public void testToStringEmpty() {
 		assertEquals("AliasMap()", AliasMap.NO_ALIASES.toString());
 	}

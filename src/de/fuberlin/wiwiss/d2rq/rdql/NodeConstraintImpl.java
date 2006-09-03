@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.ArrayList;
@@ -28,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * from the {@link PropertyBridge}s.
  * 
  * @author jg
- * @since V0.3
+ * @version $Id: NodeConstraintImpl.java,v 1.3 2006/09/03 00:08:11 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeConstraint {
 	/** true means: satisfiable. */

@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2004 by Chris Bizer (chris@bizer.de)
-  (c) Copyright 2005 Bizer, Cyganiak, Garbers
-*/
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Map;
@@ -43,17 +39,11 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * A special implementation is the {@link FixedNodeMaker}, which
  * is a single-element node set.
  * <p>
- * TODO: Better name for NodeMaker: NodeSetDescription?
- * 
- * <p>History:<br>
- * 06-16-2004: Initial version.<br>
- * 08-04-2004: Added couldFit, getColumns and getColumnValues<br>
- * 11-03-2005: Added matchConstraint<br>
  * 
  * @author Chris Bizer chris@bizer.de
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
  * @author Joerg Garbers
- * @version V0.3
+ * @version $Id: NodeMaker.java,v 1.4 2006/09/03 00:08:10 cyganiak Exp $
  */
 public interface NodeMaker { 
     

@@ -1,6 +1,3 @@
-/*
- * $Id: FindTest.java,v 1.6 2006/08/28 19:44:21 cyganiak Exp $
- */
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import com.hp.hpl.jena.graph.Node;
@@ -22,18 +19,11 @@ import de.fuberlin.wiwiss.d2rq.FindTestFramework;
  *
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  * 
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: FindTest.java,v 1.7 2006/09/03 00:08:10 cyganiak Exp $
  */
 public class FindTest extends FindTestFramework {
     
-	/**
-	 * Constructor for FindTest.
-	 * @param arg0
-	 */
-	public FindTest(String arg0) {
-		super(arg0);
-	}
-
 	public void testListTypeStatements() {
 		find(Node.ANY, RDF.Nodes.type, Node.ANY);
 //		dump();

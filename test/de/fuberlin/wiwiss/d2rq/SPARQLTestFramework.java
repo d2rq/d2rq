@@ -13,12 +13,11 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 
+/**
+ * @author jgarbers
+ * @version $Id: SPARQLTestFramework.java,v 1.2 2006/09/03 00:08:11 cyganiak Exp $
+ */
 public class SPARQLTestFramework extends RDQLTestFramework {
-
-	public SPARQLTestFramework(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
 
 	protected void sparql(String sparql) {
 //	    rdqlLogger.debug("RDQL-Query: " + rdql);

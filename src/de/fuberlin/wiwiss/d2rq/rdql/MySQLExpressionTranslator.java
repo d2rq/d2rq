@@ -1,24 +1,19 @@
-/*
- * Created on 28.04.2005 by Joerg Garbers, FU-Berlin
- *
- */
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
  * @author jgarbers
- *
+ * @version $Id: MySQLExpressionTranslator.java,v 1.3 2006/09/03 00:08:11 cyganiak Exp $
  */
 public class MySQLExpressionTranslator extends ExpressionTranslator {
 
     public MySQLExpressionTranslator(ConstraintHandler handler,
             SelectStatementBuilder sql) {
         super(handler, sql);
-        // TODO Auto-generated constructor stub
         putOp(concatenateOp,"CONCAT",StringType).functional=true; // mySQL
-
     }
+    
     public Result castToString(Result r) {
         if (r.getType()==StringType)
             return r;

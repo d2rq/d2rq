@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import com.hp.hpl.jena.graph.Graph;
@@ -47,8 +43,9 @@ import com.hp.hpl.jena.util.iterator.ClosableIterator;
  * varInfo: fast lookup information for different types of variables (shared, bind, bound)
  * triples: list of find-triples with inserted bindings by previous stages, 
  * build each time a binding arrives on the {@link Pipe}.
+ * 
  * @author Joerg Garbers
- * @since V0.3
+ * @version $Id: CombinedPatternStage.java,v 1.5 2006/09/03 00:08:11 cyganiak Exp $
  */
 public abstract class CombinedPatternStage extends Stage {
 	

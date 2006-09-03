@@ -1,21 +1,13 @@
-/*
- * Created on 14.04.2005 by Joerg Garbers, FU-Berlin
- *
- */
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.Iterator;
 
 /**
  * @author jgarbers
- *
+ * @version $Id: ExpressionTest.java,v 1.6 2006/09/03 00:08:12 cyganiak Exp $
  */
 public class ExpressionTest extends ExpressionTestFramework { 
     
-    public ExpressionTest(String arg0) {
-        super(arg0);
-     }
-
 	String getRDQLQuery(String condition) {
 	    String triples=
 	        "(?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), " +

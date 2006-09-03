@@ -1,7 +1,3 @@
-/*
-  (c) Copyright 2005 by Joerg Garbers (jgarbers@zedat.fu-berlin.de)
-*/
-
 package de.fuberlin.wiwiss.d2rq;
 
 import junit.framework.TestCase;
@@ -25,7 +21,8 @@ import de.fuberlin.wiwiss.d2rq.functional_tests.AllTests;
  *
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
- * @author Richard Cyganiak <richard@cyganiak.de>
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: TestFramework.java,v 1.4 2006/09/03 00:08:11 cyganiak Exp $
  */
 public class TestFramework extends TestCase {
 	protected String D2RQMap = "file:doc/manual/ISWC-d2rq.n3"; // "file:srcMac/jgISWC-d2rq.n3"; 
@@ -42,10 +39,6 @@ public class TestFramework extends TestCase {
 		NS = ns;
 	}
 	
-	public TestFramework(String arg0) {
-		super(arg0); // called for each method in a TestCase class (as suite)
-	}
-
 	public void run(TestResult result) {
 		super.run(result); // calls setUp, runTest and tearDown
 	}

@@ -29,6 +29,14 @@ import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.DatabaseSchemaInspector;
 
+/**
+ * Generates a D2RQ mapping by introspecting a database schema.
+ * Result is available as a high-quality N3 serialization, or
+ * as a parsed model.
+ * 
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: MappingGenerator.java,v 1.7 2006/09/03 00:08:12 cyganiak Exp $
+ */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
 	private String jdbcURL;

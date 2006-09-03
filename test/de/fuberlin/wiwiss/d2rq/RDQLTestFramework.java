@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.helpers.Logger;
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: RDQLTestFramework.java,v 1.14 2006/09/02 22:41:42 cyganiak Exp $
+ * @version $Id: RDQLTestFramework.java,v 1.15 2006/09/03 00:08:11 cyganiak Exp $
  */
 public class RDQLTestFramework extends TestFramework {
 	protected ModelD2RQ model;
@@ -67,8 +67,8 @@ public class RDQLTestFramework extends TestFramework {
 	protected Logger oldSQLResultSetSeparatorLogger;
 	protected boolean oldIsUsingD2RQQueryHandler;
 	
-	public RDQLTestFramework(String arg0) {
-		super(arg0);
+	public RDQLTestFramework() {
+		super();
 		setUpHandlers();
 	}
 	
