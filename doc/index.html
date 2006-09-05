@@ -117,14 +117,14 @@ pre { speak-punctuation: code; }
 
 <p>RDF browsers retrieve data  from the Semantic Web  by <a href="http://www.w3.org/TR/2004/REC-webarch-20041215/#dereference-uri" target="_blank">dereferencing</a> URIs and by following <a href="http://www.w3.org/TR/2000/CR-rdf-schema-20000327/#s2.3.4" target="_blank"><tt>rdfs:seeAlso</tt></a> links within the data.   The screenshot below shows an example database browsed in the <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/tab.html" target="_blank">Tabulator</a> RDF browser.</p>
 
-<p class="Stil1">@@@ Tabulator Screenshot. Screenshot bitte auf volle Gr&ouml;&szlig;e extendable verlinken. </p>
+<div style="margin-left: -12px"><a href="images/tabulator-screenshot.png"><img src="images/tabulator-screenshot-small.png" alt="Screenshot of Tabulator" /></a></div>
 
 
 <h3>2.1 Dereferencing URIs Identifying Database Content </h3>
 
 <p>D2R Server allows database-generated URIs to be dereferenced. The HTTP request below, sent to the server <tt>d2r.exmaple.org</tt>, requests an RDF representation of the resource <tt>http://d2r.example.org/resource/persons/4</tt>. Note that the request asks for content type <tt>application/rdf+xml</tt>.</p>
 
-<pre>GET /resource/persons/4 HTTP/1.0
+<pre>GET /resource/Persons/6 HTTP/1.0
 Accept: application/rdf+xml</pre>
 
 <p>According to the <a href="http://www.w3.org/2001/tag/issues.html#httpRange-14" target="_blank">httpRange-14 finding</a>, only information resources (i.e. documents) can 
@@ -143,18 +143,69 @@ Connection: close</pre>
   Location URI. D2R Server will respond with an RDF/XML document
   containing an RDF/XML description of the person:</p>
 
-<pre>@@@ RDF/XML of /resource/persons/4</pre>
+<pre>&lt;rdf:RDF
+    xml:base="http://www3.wiwiss.fu-berlin.de:2020/"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:iswc="http://annotation.semanticweb.org/iswc/iswc.daml#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;
+  &lt;foaf:Person rdf:about="resource/persons/6"&gt;
+    &lt;rdf:type rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Researcher"/&gt;
+    &lt;foaf:name&gt;Andy Seaborne&lt;/foaf:name&gt;
+    &lt;rdfs:label&gt;Andy Seaborne&lt;/rdfs:label&gt;
+    &lt;iswc:research_interests rdf:resource="resource/topics/5"/&gt;
+    &lt;foaf:homepage rdf:resource="http://www-uk.hpl.hp.com/people/afs/"/&gt;
+    &lt;iswc:address&gt;Hewlett-Packard Laboratories, Bristol, BS34 8QZ, UK&lt;/iswc:address&gt;
+    &lt;iswc:has_affiliation rdf:resource="resource/organizations/7"/&gt;
+    &lt;foaf:mbox rdf:resource="mailto:andy.seaborne@hpl.hp.com"/&gt;
+    &lt;rdfs:seeAlso rdf:resource="all/Persons"/&gt;
+  &lt;/foaf:Person&gt;
+  &lt;rdf:Description rdf:about="resource/papers/4"&gt;
+    &lt;dc:creator rdf:resource="resource/persons/6"/&gt;
+  &lt;/rdf:Description&gt;
+&lt;/rdf:RDF&gt;</pre>
 
 <p>The description is generated on the fly from the content of the database.
   Note that the response contains URIs of related resources such as papers
   and topics. Descriptions of these can be retrieved in the same way.
-  There is also an <tt>rdfs:seeAlso</tt> link to <tt>http://d2r.example.org/all/persons</tt>.
+  There is also an <tt>rdfs:seeAlso</tt> link to <tt>http://d2r.example.org/all/Persons</tt>.
   This is an RDF/XML list of all persons stored in the database. Parts of it
   are shown below. By following
   these links, RDF browsers and RDF crawlers can access the complete content
   of the database.</p>
 
-<pre>@@@ &lt;rdf:RDF .... kurze liste die Struktur zeigt&gt;</pre>
+<pre>&lt;rdf:RDF
+    xml:base="http://www3.wiwiss.fu-berlin.de:2020/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"&gt;
+  &lt;rdf:Description rdf:about="http://www3.wiwiss.fu-berlin.de:2020/all/Persons"&gt;
+    &lt;rdfs:label&gt;List of all instances: Persons&lt;/rdfs:label&gt;
+    &lt;rdfs:seeAlso rdf:resource="resource/persons/1"/&gt;
+    &lt;rdfs:seeAlso rdf:resource="resource/persons/2"/&gt;
+    &lt;rdfs:seeAlso rdf:resource="resource/persons/3"/&gt;
+[...]
+    &lt;rdfs:seeAlso rdf:resource="all"/&gt;
+  &lt;/rdf:Description&gt;
+  &lt;rdf:Description rdf:about="resource/persons/1"&gt;
+    &lt;rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/&gt;
+    &lt;rdf:type rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Full_Professor"/&gt;
+    &lt;rdfs:label&gt;Yolanda Gil&lt;/rdfs:label&gt;
+  &lt;/rdf:Description&gt;
+  &lt;rdf:Description rdf:about="resource/persons/2"&gt;
+    &lt;rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/&gt;
+    &lt;rdfs:label&gt;Varun Ratnakar&lt;/rdfs:label&gt;
+  &lt;/rdf:Description&gt;
+  &lt;rdf:Description rdf:about="resource/persons/3"&gt;
+    &lt;rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/&gt;
+    &lt;rdf:type rdf:resource="http://annotation.semanticweb.org/iswc/iswc.daml#Researcher"/&gt;
+    &lt;rdfs:label&gt;Jim Blythe&lt;/rdfs:label&gt;
+  &lt;/rdf:Description&gt;
+[...]
+  &lt;rdf:Description rdf:about="all"&gt;
+    &lt;rdfs:label&gt;D2R Server contents&lt;/rdfs:label&gt;
+  &lt;/rdf:Description&gt;
+&lt;/rdf:RDF&gt;</pre>
 
 <p>The list contains <tt>rdf:type</tt> and <tt>rdfs:label</tt> statements
   for each resource. This leaves a breadcrumb trail to help browsers decide
@@ -175,8 +226,8 @@ Accept: text/html</pre>
 
 <p>Like in the <tt>application/rdf+xml</tt> case, D2R Server will redirect to a document describing the resource, but this time an XHTML page:</p>
 
-<p class="Stil1">@@@ Put Firefox screenshot here. Wichtig: Bitte customized mapping verwenden, dass  viele
-unterschiedliche well-known vocabulaires verwendet. Screenshot bitte auf volle Gr&ouml;&szlig;e extendable verlinken.  </p>
+<div style="margin-left: -15px"><img src="images/d2rs-screenshot-page.png" alt="Screenshot of a D2R Server page describing a person" /></div>
+
 
 <p>The representation contains navigation links that allow the complete content of the database to be browsed.</p>
 <p>The <tt>&lt;head&gt;</tt> section of the HTML page contains a <tt>&lt;link rel="alternate" /&gt;</tt> tag pointing to the resource's RDF representation. This allows tools like <a href="http://simile.mit.edu/piggy-bank/" target="_blank">Piggy Bank</a> to switch between the HTML and RDF views.</p>
@@ -189,11 +240,51 @@ unterschiedliche well-known vocabulaires verwendet. Screenshot bitte auf volle G
 
 <p>Example SPARQL Query:</p>
 
-<pre>GET @@@</pre>
+<pre>SELECT ?title ?authorName WHERE {
+    ?paper dc:title ?title .
+    ?paper skos:subject [ skos:prefLabel "Semantic Web" ] .
+    ?paper dc:creator ?author .
+    ?author foaf:name ?authorName .
+    ?paper dc:date ?date .
+} ORDER BY ?date LIMIT 3</pre>
 
 <p>Response in SPARQL XML Result Format:</p>
 
-<pre>@@@</pre>
+<pre>&lt;sparql
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema#"
+    xmlns="http://www.w3.org/2005/sparql-results#" &gt;
+  &lt;head&gt;
+    &lt;variable name="title"/&gt;
+    &lt;variable name="authorName"/&gt;
+  &lt;/head&gt;
+  &lt;results ordered="true" distinct="false"&gt;
+    &lt;result&gt;
+      &lt;binding name="title"&gt;
+        &lt;literal&gt;Automatic Generation of Java/SQL based Inference Engines from RDF Schema and RuleML&lt;/literal&gt;
+      &lt;/binding&gt;
+      &lt;binding name="authorName"&gt;
+        &lt;literal&gt;Andreas Eberhart&lt;/literal&gt;
+      &lt;/binding&gt;
+    &lt;/result&gt;
+    &lt;result&gt;
+      &lt;binding name="title"&gt;
+        &lt;literal&gt;Trusting Information Sources One Citizen at a Time&lt;/literal&gt;
+      &lt;/binding&gt;
+      &lt;binding name="authorName"&gt;
+        &lt;literal&gt;Varun Ratnakar&lt;/literal&gt;
+      &lt;/binding&gt;
+    &lt;/result&gt;
+    &lt;result&gt;
+      &lt;binding name="title"&gt;
+        &lt;literal&gt;Trusting Information Sources One Citizen at a Time&lt;/literal&gt;
+      &lt;/binding&gt;
+      &lt;binding name="authorName"&gt;
+        &lt;literal&gt;Yolanda Gil&lt;/literal&gt;
+      &lt;/binding&gt;
+    &lt;/result&gt;
+  &lt;/results&gt;
+&lt;/sparql&gt;</pre>
 
 
 <h2><a name="mapping" id="mapping"></a>5. Mapping a Relational Database to RDF</h2>
@@ -250,16 +341,13 @@ unterschiedliche well-known vocabulaires verwendet. Screenshot bitte auf volle G
   <li>
     <p><strong>Testing the Server: </strong> Open <a href="http://localhost:2020/">http://localhost:2020/</a>
     in a web browser.</p>
-    <p>@@@ Re-do screenshot</p>
-    <p><img src="images/d2rs-screenshot-start.png" alt="Screenshot of D2R Server's web interface" style="margin: -4px -15px -15px -10px;"/></p>
-    <p>You can use the SPARQL form to execute queries and display results
-      in a number of formats, or use the Browse box on the right to explore
-      the endpoint's contents.</p>
-    <p>@@@ Re-do screenshot</p>
-    <p><img src="images/d2rs-screenshot-browse.png" alt="Screenshot of D2R Server's SPARQL explorer" style="margin: -4px -15px -15px -10px;"/></p></li>
+    <div><img src="images/d2rs-screenshot-start.png" alt="Screenshot of D2R Server's web interface" style="margin: -4px -15px -15px -10px;"/></div>
+    <p>You can browse the database content or use the SPARQL Explorer to execute
+      queries and display results in a number of formats.</p>
+    <div><img src="images/d2rs-screenshot-sparql.png" alt="Screenshot of D2R Server's SPARQL Explorer" style="margin: -4px -15px -15px -10px;"/></div>
     <p>To test the data in an RDF browser, open any resource URI in
       <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/tab.html">Tabulator</a>.
-      You may have to tweak your Firefox settings first &#8211; see the Tabulator help.</p>
+      You may have to tweak your Firefox settings first &#8211; see the Tabulator help.</p></li>
 
   <li><p><strong>Customize the database-to-RDF mapping</strong> by editing the
     mapping file with a text editor. Its syntax is described in the
@@ -302,7 +390,7 @@ unterschiedliche well-known vocabulaires verwendet. Screenshot bitte auf volle G
 
 
 <div id="footer">
-  <small>$Id: index.html,v 1.11 2006/09/05 08:25:09 cyganiak Exp $</small>
+  <small>$Id: index.html,v 1.12 2006/09/05 13:15:06 cyganiak Exp $</small>
 </div>
 </div>
 
