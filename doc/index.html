@@ -80,7 +80,8 @@ pre { speak-punctuation: code; }
 <h2 id="news">News</h2>
 
 <ul>
-  <li><strong>2006-09-04: Version 0.3 released.</strong> The new version enables database-generated URIs to be dereferenced.</li>
+  <li><strong>2006-09-05: Version 0.3 released.</strong> The new version enables database-generated URIs to be dereferenced.  
+    The server supports content-negotiation and serves RDF and XHTML representations of resources.</li>
   <li><strong>2006-06-01: Version 0.2.1</strong> fixes Java 1.4 compatibility issue.</li>
   <li><strong>2006-05-30: Version 0.2 released</strong>,
     including a script for auto-generating mapping files from DB schemas,
@@ -108,39 +109,39 @@ pre { speak-punctuation: code; }
 <h2><a name="intro" id="intro"></a>1. Introduction</h2>
 
 <p>The <a href="http://www.w3.org/2001/sw/" target="_blank">Semantic Web</a> is a global information space consisting of inter-linked data about <a href="http://www.w3.org/TR/webarch/#intro" target="_blank">resources</a>. There are two access paradigms to the Semantic Web: browsing and searching. Using a Semantic Web browser like <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/tab.html" target="_blank">Tabulator</a>, a surfer can follow links from data about one resource to data about other resources. The second access paradigm is searching. Using the <a href="http://www.w3.org/TR/rdf-sparql-query/" target="_blank">SPARQL</a> query language and protocol, a client application can query data-sources for information about resources. </p>
-<p>D2R Server is a tool for publishing the content of relational databases on the Semantic Web. Database content is mapped to RDF by a customizable mapping which specifies how resources are identified and which properties are used to describe resources. Based on this mapping, D2R Server allows a RDF representation of the database to be browsed and searched. The server provides two interfaces: The  <strong>dereferencing interface</strong> allows resource and vocabulary URIs to be dereferenced over the HTTP protocol. The interface supports content-negotiation and serves RDF and XHTML representations of resources. The server supports browsing by providing links on the RDF and XHTML level. The <strong>SPARQL interface</strong> enables applications to query the database  using the SPARQL query language over the SPARQL protocol. </p>
+<p>D2R Server is a tool for publishing the content of relational databases on the Semantic Web. Database content is mapped to RDF by a customizable mapping which specifies how resources are identified and which properties are used to describe resources. Based on this mapping, D2R Server allows a RDF representation of the database to be browsed and searched. The server provides two interfaces: The  <strong>dereferencing interface</strong> allows resource and vocabulary URIs to be dereferenced over the HTTP protocol. The interface supports content-negotiation and serves RDF and XHTML representations of resources. The generated representations are richly interlinked on RDF and XML level in order to enable browsers and crawlers to navigate database content.  The <strong>SPARQL interface</strong> enables applications to query the database  using the SPARQL query language over the SPARQL protocol. </p>
 <p align="center" class="Stil1"><img src="images/architecture.gif" alt="D2R Server architecture diagram" /></p>
 <p>The server takes requests from the Web and rewrites them via a <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/" target="_blank">D2RQ mapping</a> into SQL queries against a relational database. This on-the-fly translation allows clients to access the content of large databases without having to replicate them into RDF. </p>
 
 
 <h2><a name="RDFclient" id="RDFclient"></a>2. Accessing a Database with an RDF Browser </h2>
 
-<p>RDF browsers retrieve data  from the Semantic Web  by <a href="http://www.w3.org/TR/2004/REC-webarch-20041215/#dereference-uri" target="_blank">dereferencing</a> URIs and by following <a href="http://www.w3.org/TR/2000/CR-rdf-schema-20000327/#s2.3.4" target="_blank"><tt>rdfs:seeAlso</tt></a> links within the data.   The screenshot below shows an example database browsed in the <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/tab.html" target="_blank">Tabulator</a> RDF browser.</p>
+<p>RDF browsers retrieve data  from the Semantic Web  by <a href="http://www.w3.org/TR/2004/REC-webarch-20041215/#dereference-uri" target="_blank">dereferencing</a> URIs and by following <a href="http://www.w3.org/TR/2000/CR-rdf-schema-20000327/#s2.3.4" target="_blank"><tt>rdfs:seeAlso</tt></a> links within the data.   The screenshot below shows an example database being browsed with the <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/tab.html" target="_blank">Tabulator</a> RDF browser.</p>
 
 <div style="margin-left: -12px"><a href="images/tabulator-screenshot.png"><img src="images/tabulator-screenshot-small.png" alt="Screenshot of Tabulator" /></a></div>
 
 
 <h3>2.1 Dereferencing URIs Identifying Database Content </h3>
 
-<p>D2R Server allows database-generated URIs to be dereferenced. The HTTP request below, sent to the server <tt>d2r.exmaple.org</tt>, requests an RDF representation of the resource <tt>http://d2r.example.org/resource/persons/4</tt>. Note that the request asks for content type <tt>application/rdf+xml</tt>.</p>
+<p>D2R Server allows database-generated URIs to be dereferenced. The HTTP request below, sent to the server <tt>http://www3.wiwiss.fu-berlin.de:2020</tt> (currently not running), requests an RDF representation of the resource <tt>http://www3.wiwiss.fu-berlin.de:2020/resource/persons/6</tt>. Note that the request asks for content type <tt>application/rdf+xml</tt>.</p>
 
 <pre>GET /resource/Persons/6 HTTP/1.0
 Accept: application/rdf+xml</pre>
 
-<p>According to the <a href="http://www.w3.org/2001/tag/issues.html#httpRange-14" target="_blank">httpRange-14 finding</a>, only information resources (i.e. documents) can 
-  have representations served on the Web over HTTP. When
+<p>According to the <a href="http://www.w3.org/2001/tag/issues.html#httpRange-14" target="_blank">httpRange-14 TAG finding</a>, only information resources (i.e. documents) can 
+  have representations  served on the Web over HTTP. When
   URIs that identify other kinds of resources, such as a person, 
   are dereferenced, then the HTTP reply must be a 303
   redirect to a second URI. At that location, a document describing
-  the person is served. D2R Server implements this 
-  behaviour and will answer with an HTTP response like this:</p>
+  the real-world resource (i.e. person) is served. D2R Server implements this 
+  behaviour and will answer the request above with an HTTP response like this:</p>
 
 <pre>HTTP/1.1 303 See Other
-Location: http://d2r.example.org/sparql?query=DESCRIBE+%3Chttp%3A%2F%...
+Location: http://www3.wiwiss.fu-berlin.de:2020/sparql?query=DESCRIBE+%3Chttp%3A%2F%...
 Connection: close</pre>
 
 <p>The client has to perform a second HTTP GET request on the
-  Location URI. D2R Server will respond with an RDF/XML document
+  Location URI. D2R Server will respond now with an RDF/XML document
   containing an RDF/XML description of the person:</p>
 
 <pre>&lt;rdf:RDF
@@ -169,7 +170,7 @@ Connection: close</pre>
 <p>The description is generated on the fly from the content of the database.
   Note that the response contains URIs of related resources such as papers
   and topics. Descriptions of these can be retrieved in the same way.
-  There is also an <tt>rdfs:seeAlso</tt> link to <tt>http://d2r.example.org/all/Persons</tt>.
+  Beside of triples having  <tt>resource/persons/6</tt> as subject (out-arcs), the representation also contains triples having <tt>resource/persons/6</tt> as object (in-arcs). Within our example, this enables  RDF browsers to follow the link from Andy to his paper <tt>resource/papers/4</tt>. There is also an <tt>rdfs:seeAlso</tt> link to <tt>http://www3.wiwiss.fu-berlin.de/all/Persons</tt>.
   This is an RDF/XML list of all persons stored in the database. Parts of it
   are shown below. By following
   these links, RDF browsers and RDF crawlers can access the complete content
@@ -207,14 +208,14 @@ Connection: close</pre>
   &lt;/rdf:Description&gt;
 &lt;/rdf:RDF&gt;</pre>
 
-<p>The list contains <tt>rdf:type</tt> and <tt>rdfs:label</tt> statements
-  for each resource. This leaves a breadcrumb trail to help browsers decide
+<p>Beside of a pure <tt>rdfs:seeAlso</tt> links, the list also contains <tt>rdf:type</tt> and <tt>rdfs:label</tt> statements
+  for each referenced resource. This leaves a breadcrumb trail to help browsers decide
   which links to follow.</p>
 
 
 <h3>2.2 Dereferencing External URIs</h3>
 
-<p>The database may also contain information about resources whose URIs are outside the server's namespace. When the server generates output that mentions such a resource, it adds an <tt>rdfs:seeAlso</tt> statement to the resource pointing at an RDF/XML document that contains all information that the database has about the external resource. By dereferencing the external URI and by following the rdf:seeAlso link, an RDF browser can retrieve both <a href="http://www.w3.org/TR/webarch/#representation-management">authoritative as well as non-authoritative information</a>  about the resource. </p>
+<p>The database may also contain information about resources whose URIs are outside the server's namespace. When the server generates output that mentions such a resource, it adds an <tt>rdfs:seeAlso</tt> statement to the resource pointing at an RDF/XML document that contains all information from within the database about the external resource. By dereferencing the external URI and by following the rdf:seeAlso link, an RDF browser can retrieve both <a href="http://www.w3.org/TR/webarch/#representation-management">authoritative as well as non-authoritative information</a>  about the resource. </p>
 
 
 <h2>3. <a name="HTMLclient" id="HTMLclient"></a>Accessing a Database with  an HTML Browser </h2>
@@ -229,14 +230,14 @@ Accept: text/html</pre>
 <div style="margin-left: -15px"><img src="images/d2rs-screenshot-page.png" alt="Screenshot of a D2R Server page describing a person" /></div>
 
 
-<p>The representation contains navigation links that allow the complete content of the database to be browsed.</p>
+<p>The representation contains navigation links (Home | All Persons) that allow the complete content of the database to be browsed.</p>
 <p>The <tt>&lt;head&gt;</tt> section of the HTML page contains a <tt>&lt;link rel="alternate" /&gt;</tt> tag pointing to the resource's RDF representation. This allows tools like <a href="http://simile.mit.edu/piggy-bank/" target="_blank">Piggy Bank</a> to switch between the HTML and RDF views.</p>
-<p>All pages are rendered from <a href="http://jakarta.apache.org/velocity/">Velocity</a> templates to allow customization. Future version of D2R Server might also employ <a href="http://www.w3.org/2005/04/fresnel-info/" target="_blank">Fresnel</a> lenses to improve resource display.</p>
+<p>All pages are rendered from <a href="http://jakarta.apache.org/velocity/">Velocity</a> templates to allow customization. Future version of D2R Server might  employ <a href="http://www.w3.org/2005/04/fresnel-info/" target="_blank">Fresnel</a> lenses to improve resource display.</p>
 
 
 <h2><a name="SPARQLclient" id="SPARQLclient"></a>4. Querying a Database with a SPARQL Client</h2>
 
-<p>D2R Server provides a SPARQL endpoint for querying the database using the <a href="http://www.w3.org/TR/rdf-sparql-query/" target="_blank">SPARQL query language</a> over the <a href="http://www.w3.org/TR/rdf-sparql-protocol/" target="_blank">SPARQL protocol</a>. The endpoint URI is <tt>http://d2r.example.org/sparql</tt>. Results can be retrieved in the <a href="http://www.w3.org/TR/rdf-sparql-XMLres/">SPARQL Query Result XML Format</a> and the <a href="http://www.w3.org/2001/sw/DataAccess/json-sparql/">SPARQL/JSON serialization</a>.</p>
+<p>D2R Server provides a SPARQL endpoint for querying the database using the <a href="http://www.w3.org/TR/rdf-sparql-query/" target="_blank">SPARQL query language</a> over the <a href="http://www.w3.org/TR/rdf-sparql-protocol/" target="_blank">SPARQL protocol</a>. The endpoint URI is <tt>http://www3.wiwiss.fu-berlin.de/sparql</tt>. Results can be retrieved in the <a href="http://www.w3.org/TR/rdf-sparql-XMLres/">SPARQL Query Result XML Format</a> and the <a href="http://www.w3.org/2001/sw/DataAccess/json-sparql/">SPARQL/JSON serialization</a>.</p>
 
 <p>Example SPARQL Query:</p>
 
@@ -336,7 +337,7 @@ Accept: text/html</pre>
     <p>The server can be started with the <tt>-p &lt;port&gt;</tt> option to run
       it on a port other than the default 2020, and with the <tt>-b &lt;baseURI&gt;</tt>
       option if the server's name is different from <tt>localhost</tt>:</p>
-    <pre>d2r-server -p <em>80</em> -b <em>http://d2r.example.org/</em> <em>mapping.ttl</em></pre>
+    <pre>d2r-server -p <em>80</em> -b <em>http://www3.wiwiss.fu-berlin.de/</em> <em>mapping.ttl</em></pre>
     </li>
   <li>
     <p><strong>Testing the Server: </strong> Open <a href="http://localhost:2020/">http://localhost:2020/</a>
@@ -390,7 +391,7 @@ Accept: text/html</pre>
 
 
 <div id="footer">
-  <small>$Id: index.html,v 1.12 2006/09/05 13:15:06 cyganiak Exp $</small>
+  <small>$Id: index.html,v 1.13 2006/09/05 14:30:29 cyganiak Exp $</small>
 </div>
 </div>
 
