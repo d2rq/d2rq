@@ -59,7 +59,7 @@ public class AutoReloader extends GraphBase {
 		return this.base.queryHandler();
 	}
 	
-	private void checkMappingFileChanged() {
+	public void checkMappingFileChanged() {
 		if (this.mappingFile == null) {
 			return;
 		}

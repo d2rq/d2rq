@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.8 2006/09/02 16:08:46 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.9 2006/09/05 13:30:58 cyganiak Exp $
  */
 public class D2RServer {
 	private static D2RServer instance = null;
@@ -47,6 +47,7 @@ public class D2RServer {
 	private GraphD2RQ currentGraph = null;
 	private DataSource dataset;
 	private NamespacePrefixModel prefixesModel;
+	private AutoReloader reloader = null;
 	private Log log = LogFactory.getLog(D2RServer.class);
 	
 	private D2RServer() {
@@ -97,6 +98,9 @@ public class D2RServer {
 	 * @return The graph currently in use; will change to a new instance on auto-reload
 	 */
 	public GraphD2RQ currentGraph() {
+		if (this.reloader != null) {
+			this.reloader.checkMappingFileChanged();
+		}
 		return this.currentGraph;
 	}
 	
@@ -133,16 +137,16 @@ public class D2RServer {
 	}
 
 	private void initAutoReloading(String filename) {
-		AutoReloader reloader = new AutoReloader(new File(filename));
-		this.model = ModelFactory.createModelForGraph(reloader);
+		this.reloader = new AutoReloader(new File(filename));
+		this.model = ModelFactory.createModelForGraph(this.reloader);
 		DescribeHandlerRegistry.get().clear();
 		DescribeHandlerRegistry.get().add(new FindDescribeHandler(this.model));
 		this.prefixesModel = new NamespacePrefixModel();		
-		reloader.setPrefixModel(this.prefixesModel);
+		this.reloader.setPrefixModel(this.prefixesModel);
 		this.dataset = DatasetFactory.create();
 		this.dataset.setDefaultModel(this.model);
 		this.dataset.addNamedModel(NamespacePrefixModel.namespaceModelURI, this.prefixesModel);
-		reloader.forceReload();
+		this.reloader.forceReload();
 	}
 	
 	public void start() {
