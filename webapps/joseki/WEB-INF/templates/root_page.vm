@@ -21,16 +21,25 @@
     <div class="section">
       <strong>Home</strong>
 #if (!$classmap_links.isEmpty())
-      | List all instances:
+      | 
 #foreach ($aClassMap in $classmap_links.keySet())
       <a href="$classmap_links.get($aClassMap)">$aClassMap</a>
 #end
 #end
     </div>
     <div class="section">
-      <h2>A Database on the Web</h2>
-      <p>This is a database published with D2R Server. You can use the links above to explore the database.</p>
-      <p>The database is browsable by <strong>Semantic Web browsers</strong>. To start browsing this database,
+      <p>This is a database published with D2R Server. It can be accessed using</p>
+      <ol><li>your plain old web browser</li>
+        <li>Semantic Web browsers</li>
+        <li>SPARQL clients.</li></ol>
+    </div>
+    <div class="section">
+      <h2>1. HTML View</h2>
+      <p>You can use the navigation links at the top of this page to explore the database.</p>
+    </div>
+    <div class="section">
+      <h2>2. RDF View</h2>
+      <p>You can also explore this database with <strong>Semantic Web browsers</strong> like <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/tab.html">Tabulator</a>. To start browsing,
         open this entry point URL in your Semantic Web browser:</p>
       <p style="text-align: center"><strong>${home_link}all</strong></p>
     </div>
@@ -38,10 +47,10 @@
 
     <div class="snorql">
       <div class="section">
-        <h2>SPARQL Endpoint</h2>
-        <p>An endpoint for use with external SPARQL clients is available at this endpoint URL:</p>
+        <h2>3. SPARQL Endpoint</h2>
+        <p>SPARQL clients can query the database at this SPARQL endpoint:</p>
         <p style="text-align: center"><strong>${home_link}sparql</strong></p>
-        <p>Its contents can also be explored with this <a href="/snorql/">Query Form and SPARQL Explorer</a>.</p>
+        <p>The database can also be explored using <a href="/snorql/">this AJAX-based SPARQL Explorer</a>.</p>
       </div>
     </div>
 

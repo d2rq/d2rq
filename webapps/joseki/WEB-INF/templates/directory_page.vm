@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" class="browser">
   <head>
     <title>
-      List of all instances: $classmap | D2R Server
+      All $classmap | D2R Server
     </title>
     <link rel="stylesheet" type="text/css" href="${home_link}snorql/style.css" />
     <link rel="alternate" type="application/rdf+xml" href="$rdf_link" title="RDF" />
@@ -12,7 +12,7 @@
     <div id="rdficon"><a href="$rdf_link" title="RDF data"><img src="/snorql/rdf_flyer.24.gif" alt="[RDF data]" /></a></div>
     <div id="header">
       <h1 id="title">
-        List of all instances: $classmap
+        All $classmap
       </h1>
       <div class="subtitle">&nbsp;</div>
     </div>
@@ -20,7 +20,7 @@
     <div class="section">
       <strong><a href="$home_link">Home</a></strong>
 #if (!$classmap_links.isEmpty())
-      | List all instances:
+      | 
 #foreach ($aClassMap in $classmap_links.keySet())
 #if ($aClassMap == $classmap)
       <strong>$aClassMap</strong>
@@ -31,10 +31,15 @@
 #end
     </div>
     <div class="section">
-      <ul>
+      <ul class="directory">
 #foreach ($resource as $resources.keySet())
         <li>
-          <a href="$resource">$resources.get($resource)</a>
+#if ($resource == $resources.get($resource))
+          <a href="$resource">$resource</a>
+#else
+          <a href="$resource">$resources.get($resource)</a><br />
+          <small>$resource</small>
+#end
         </li>
 #end
       </ul>

@@ -29,9 +29,9 @@
     <div class="section">
       <strong><a href="$home_link">Home</a></strong>
 #if (!$classmap_links.isEmpty())
-      | List all instances:
+      | 
 #foreach ($classmap in $classmap_links.keySet())
-      <strong><a href="$classmap_links.get($classmap)">$classmap</a></strong>
+      <strong><a href="$classmap_links.get($classmap)">All $classmap</a></strong>
 #end
 #end
     </div>
