@@ -69,12 +69,17 @@ pre { speak-punctuation: code; }
 <div id="content">
 
 <p>D2R Server is a tool for publishing  relational databases on the Semantic Web.<br />
-  The server enables RDF and HTML browsers to access the content of non-RDF databases,<br />
+  The server enables RDF and HTML browsers to navigate the content of 
+
+
+ 
+
+non-RDF databases,<br />
   and allows applications to query the database  using the SPARQL query language.</p>
 
 <div id="download">
   <h2><a href="http://sourceforge.net/project/showfiles.php?group_id=111002&amp;package_id=188901">Download D2R Server</a></h2>
-  <small>v0.3 (alpha), released 2006-09-04</small>
+  <small>v0.3 (alpha), released 2006-09-05</small>
 </div>
 
 <h2 id="news">News</h2>
@@ -131,10 +136,10 @@ Accept: application/rdf+xml</pre>
 <p>According to the <a href="http://www.w3.org/2001/tag/issues.html#httpRange-14" target="_blank">httpRange-14 TAG finding</a>, only information resources (i.e. documents) can 
   have representations  served on the Web over HTTP. When
   URIs that identify other kinds of resources, such as a person, 
-  are dereferenced, then the HTTP reply must be a 303
+  are dereferenced, then the HTTP response must be a 303
   redirect to a second URI. At that location, a document describing
   the real-world resource (i.e. person) is served. D2R Server implements this 
-  behaviour and will answer the request above with an HTTP response like this:</p>
+  behavior and will answer the request above with an HTTP response like this:</p>
 
 <pre>HTTP/1.1 303 See Other
 Location: http://www3.wiwiss.fu-berlin.de:2020/sparql?query=DESCRIBE+%3Chttp%3A%2F%...
@@ -170,7 +175,7 @@ Connection: close</pre>
 <p>The description is generated on the fly from the content of the database.
   Note that the response contains URIs of related resources such as papers
   and topics. Descriptions of these can be retrieved in the same way.
-  Beside of triples having  <tt>resource/persons/6</tt> as subject (out-arcs), the representation also contains triples having <tt>resource/persons/6</tt> as object (in-arcs). Within our example, this enables  RDF browsers to follow the link from Andy to his paper <tt>resource/papers/4</tt>. There is also an <tt>rdfs:seeAlso</tt> link to <tt>http://www3.wiwiss.fu-berlin.de/all/Persons</tt>.
+  Beside of triples having  <tt>resource/persons/6</tt> as subject (out-arcs), the representation also contains triples having <tt>resource/persons/6</tt> as object (in-arcs). Within our example, this enables  RDF browsers to follow the link from Andy to his paper <tt>resource/papers/4</tt>. There is also an <tt>rdfs:seeAlso</tt> link to <tt>http://www3.wiwiss.fu-berlin.de:2020/all/Persons</tt>.
   This is an RDF/XML list of all persons stored in the database. Parts of it
   are shown below. By following
   these links, RDF browsers and RDF crawlers can access the complete content
@@ -237,7 +242,7 @@ Accept: text/html</pre>
 
 <h2><a name="SPARQLclient" id="SPARQLclient"></a>4. Querying a Database with a SPARQL Client</h2>
 
-<p>D2R Server provides a SPARQL endpoint for querying the database using the <a href="http://www.w3.org/TR/rdf-sparql-query/" target="_blank">SPARQL query language</a> over the <a href="http://www.w3.org/TR/rdf-sparql-protocol/" target="_blank">SPARQL protocol</a>. The endpoint URI is <tt>http://www3.wiwiss.fu-berlin.de/sparql</tt>. Results can be retrieved in the <a href="http://www.w3.org/TR/rdf-sparql-XMLres/">SPARQL Query Result XML Format</a> and the <a href="http://www.w3.org/2001/sw/DataAccess/json-sparql/">SPARQL/JSON serialization</a>.</p>
+<p>D2R Server provides a SPARQL endpoint for querying the database using the <a href="http://www.w3.org/TR/rdf-sparql-query/" target="_blank">SPARQL query language</a> over the <a href="http://www.w3.org/TR/rdf-sparql-protocol/" target="_blank">SPARQL protocol</a>. The endpoint URI is <tt>http://www3.wiwiss.fu-berlin.de:2020/sparql</tt>. Results can be retrieved in the <a href="http://www.w3.org/TR/rdf-sparql-XMLres/">SPARQL Query Result XML Format</a> and the <a href="http://www.w3.org/2001/sw/DataAccess/json-sparql/">SPARQL/JSON serialization</a>.</p>
 
 <p>Example SPARQL Query:</p>
 
@@ -292,7 +297,7 @@ Accept: text/html</pre>
 
 <p>D2R Server uses the <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/" target="_blank">D2RQ Mapping Language</a> to map the content of a relational database to RDF. A D2RQ mapping specifies how resources are identified and which properties are used to describe the resources.</p>
 <p>D2R Server includes a tool that automatically generates a D2RQ mapping from the table structure of a database. The  tool generates a new RDF vocabulary for each database, using table names as class names and column names as property names.</p>
-<p>In order to enable Semantic Web client applications to understand as much of your data as possible, you should use <a href="http://ebiquity.umbc.edu/blogger/100-most-common-rdf-namespaces/" target="_blank">well-known</a> and <a href="http://www.w3.org/TR/swbp-vocab-pub/" target="_blank">publically accessable</a> RDF vocabularies to describe your data. Therefore, you should customize your mapping file and replace the auto-generated terms with terms from these RDF vocabularies.</p>
+<p>In order to enable Semantic Web client applications to understand as much of your data as possible, you should use <a href="http://ebiquity.umbc.edu/blogger/100-most-common-rdf-namespaces/" target="_blank">well-known</a> and <a href="http://www.w3.org/TR/swbp-vocab-pub/" target="_blank">publicly accessible</a> RDF vocabularies to describe your data. Therefore, you should customize your mapping file and replace the auto-generated terms with terms from these RDF vocabularies.</p>
 
 
 <h2 id="installing">6. Installing and running D2R Server</h2>
@@ -337,7 +342,7 @@ Accept: text/html</pre>
     <p>The server can be started with the <tt>-p &lt;port&gt;</tt> option to run
       it on a port other than the default 2020, and with the <tt>-b &lt;baseURI&gt;</tt>
       option if the server's name is different from <tt>localhost</tt>:</p>
-    <pre>d2r-server -p <em>80</em> -b <em>http://www3.wiwiss.fu-berlin.de/</em> <em>mapping.ttl</em></pre>
+    <pre>d2r-server -p <em>80</em> -b <em>http://www3.wiwiss.fu-berlin.de:2020/</em> <em>mapping.ttl</em></pre>
     </li>
   <li>
     <p><strong>Testing the Server: </strong> Open <a href="http://localhost:2020/">http://localhost:2020/</a>
@@ -391,7 +396,7 @@ Accept: text/html</pre>
 
 
 <div id="footer">
-  <small>$Id: index.html,v 1.13 2006/09/05 14:30:29 cyganiak Exp $</small>
+  <small>$Id: index.html,v 1.14 2006/09/05 14:44:36 bizer Exp $</small>
 </div>
 </div>
 
