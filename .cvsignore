@@ -1,5 +1,6 @@
 .classpath
 .project
 bldsrc
+bldtests
 d2rq.jar
 d2rq.zip
