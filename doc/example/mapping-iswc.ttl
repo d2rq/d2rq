@@ -120,7 +120,7 @@ map:papers_Year a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Papers;
 	d2rq:property dc:date;
     d2rq:column "papers.Year";
-	d2rq:datatype xsd:date;
+	d2rq:datatype xsd:gYear;
 	.
 map:papers_Conference a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Papers;
