@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.sesame;
+package de.fuberlin.wiwiss.d2rq.examples;
 import junit.framework.TestCase;
 
 import org.openrdf.model.Value;
@@ -8,10 +8,13 @@ import org.openrdf.sesame.query.QueryResultsTable;
 import org.openrdf.sesame.repository.SesameRepository;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
+import de.fuberlin.wiwiss.d2rq.sesame.D2RQRepository;
+import de.fuberlin.wiwiss.d2rq.sesame.D2RQSource;
 
 /**
+ * TODO: Just demo code -- add some assertions!
  * @author jgarbers
- * @version $Id: SesameTest.java,v 1.4 2006/09/06 21:48:47 cyganiak Exp $
+ * @version $Id: SesameTest.java,v 1.1 2006/09/06 21:56:57 cyganiak Exp $
  */
 public class SesameTest extends TestCase {
 

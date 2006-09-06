@@ -1,11 +1,12 @@
-package de.fuberlin.wiwiss.d2rq.functional_tests;
+package de.fuberlin.wiwiss.d2rq.examples;
 
 import de.fuberlin.wiwiss.d2rq.helpers.QueryLanguageTestFramework;
 
 /**
  * TODO: Adapt to latest DB schema and add some assertions
+ * 
  * @author jgarbers
- * @version $Id: RDQLDB2Test.java,v 1.7 2006/09/06 21:48:46 cyganiak Exp $
+ * @version $Id: RDQLDB2Test.java,v 1.1 2006/09/06 21:56:57 cyganiak Exp $
  */
 public class RDQLDB2Test extends QueryLanguageTestFramework {
 	static String zHasCitingPaperX=
