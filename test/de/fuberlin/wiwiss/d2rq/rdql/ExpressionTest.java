@@ -2,12 +2,18 @@ package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.Iterator;
 
+import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
+
 /**
  * @author jgarbers
- * @version $Id: ExpressionTest.java,v 1.6 2006/09/03 00:08:12 cyganiak Exp $
+ * @version $Id: ExpressionTest.java,v 1.7 2006/09/06 21:48:47 cyganiak Exp $
  */
 public class ExpressionTest extends ExpressionTestFramework { 
     
+	public String mapURL() {
+		return D2RQTestSuite.ISWC_MAP;
+	}
+	
 	String getRDQLQuery(String condition) {
 	    String triples=
 	        "(?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), " +

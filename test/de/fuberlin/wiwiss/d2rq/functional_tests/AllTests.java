@@ -11,7 +11,7 @@ import junit.framework.TestSuite;
  * beginning of the map file to fit your database server.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AllTests.java,v 1.5 2006/09/03 13:45:47 cyganiak Exp $
+ * @version $Id: AllTests.java,v 1.6 2006/09/06 21:48:46 cyganiak Exp $
  */
 public class AllTests {
 
@@ -26,7 +26,6 @@ public class AllTests {
 		suite.addTestSuite(RDQLTest.class);
 		suite.addTestSuite(FindTest.class);
 		suite.addTestSuite(SPARQLTest.class);
-		suite.addTestSuite(RDQLDB2Test.class);
 		suite.addTestSuite(ModelAPITest.class);
 		//$JUnit-END$
 		return suite;

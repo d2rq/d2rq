@@ -35,11 +35,11 @@ public class D2RQSource implements RdfSource {
      *  @param d2rqMapUrl URL of the mapping file for D2RQ
      *  @param language Identifies the format of the rdf data in the mapping file. Should be one of the values "RDF/XML", "RDF/XML-ABBREV", "N-TRIPLE" and "N3". The default value, represented by <code>null</code>, is "RDF/XML".
      */
-    public D2RQSource(String d2rqMapUrl, String language) 
+    public D2RQSource(String d2rqMapUrl, String language, String baseURI) 
     throws D2RQException{
         Model d2rqMap = ModelFactory.createDefaultModel();
         d2rqMap.read(d2rqMapUrl, language);
-        this.d2rqGraph = new GraphD2RQ(d2rqMap, d2rqMapUrl + "#");
+        this.d2rqGraph = new GraphD2RQ(d2rqMap, baseURI);
         this.rdfSource = new org.openrdf.sesame.sailimpl.memory.RdfSource();
     }
 

@@ -1,13 +1,16 @@
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
+import junit.framework.TestCase;
+
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.vocabulary.DC;
 
+import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
-import de.fuberlin.wiwiss.d2rq.helpers.TestFramework;
 
 /**
  * Functional tests that exercise a ModelD2RQ by calling Model API functions. For
@@ -16,13 +19,13 @@ import de.fuberlin.wiwiss.d2rq.helpers.TestFramework;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelAPITest.java,v 1.6 2006/09/03 13:03:42 cyganiak Exp $
+ * @version $Id: ModelAPITest.java,v 1.7 2006/09/06 21:48:46 cyganiak Exp $
  */
-public class ModelAPITest extends TestFramework {
+public class ModelAPITest extends TestCase {
 	private ModelD2RQ model;
 
 	protected void setUp() throws Exception {
-		this.model = new ModelD2RQ(D2RQMap);
+		this.model = new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "N3", "http://test/");
 //		this.model.enableDebug();
 	}
 
@@ -39,13 +42,11 @@ public class ModelAPITest extends TestFramework {
 //			dumpStatement(stmt);
 			count++;
 		}
-		assertEquals(139, count);
+		assertEquals(254, count);
 	}
 
 	public void testHasProperty() {
-		Resource paperRessource = this.model.getResource("http://www.conference.org/conf02004/paper#Paper1");
-		Property author = this.model.createProperty(NS + "author");
-		assertTrue(paperRessource.hasProperty(author));
+		assertTrue(this.model.getResource("http://test/papers/1").hasProperty(DC.creator));
 	}
 
 	void dumpStatement(Statement stmt) {

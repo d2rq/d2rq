@@ -4,59 +4,78 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
+import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTestFramework.java,v 1.1 2006/09/03 13:03:42 cyganiak Exp $
+ * @version $Id: FindTestFramework.java,v 1.2 2006/09/06 21:48:47 cyganiak Exp $
  */
-public class FindTestFramework extends TestFramework {
+public class FindTestFramework extends TestCase {
+    protected static final Model m = ModelFactory.createDefaultModel();
 
-	protected GraphD2RQ graph;
-	protected Set resultTriples; 
+    private GraphD2RQ graph;
+	private Set resultTriples; 
 
 	protected void setUp() throws Exception {
-		this.graph = (GraphD2RQ) new ModelD2RQ(D2RQMap).getGraph();
-//		this.graph.enableDebug();
+		this.graph = (GraphD2RQ) new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "N3", "http://test/").getGraph();
 	}
 
 	protected void tearDown() throws Exception {
 		this.graph.close();
 	}
 
-	protected void find(Node s, Node p, Node o) {
+	protected void find(RDFNode s, RDFNode p, RDFNode o) {
 		this.resultTriples = new HashSet();
-		ExtendedIterator it = this.graph.find(s, p, o);
+		ExtendedIterator it = this.graph.find(toNode(s), toNode(p), toNode(o));
 		while (it.hasNext()) {
 			this.resultTriples.add(it.next());
 		}
+	}
+
+	protected RDFNode resource(String relativeURI) {
+		return m.createResource("http://test/" + relativeURI);
 	}
 	
 	protected void dump() {
 		int count = 1;
 		Iterator it = this.resultTriples.iterator();
 		while (it.hasNext()) {
-			System.out.println("Result Triple " + count + ": " + it.next());
+			Triple t = (Triple) it.next();
+			System.out.println("Result Triple " + count + ": " + 
+					PrettyPrinter.toString(t, this.graph.getPrefixMapping()));
 			count++;
 		}
 		System.out.println();
 	}
 
-	protected void assertTripleCount(int count) {
+	protected void assertStatementCount(int count) {
 		assertEquals(count, this.resultTriples.size());
 	}
 	
-	protected void assertTriple(Node s, Node p, Node o) {
-		assertTrue(this.resultTriples.contains(new Triple(s, p, o)));
+	protected void assertStatement(RDFNode s, RDFNode p, RDFNode o) {
+		assertTrue(this.resultTriples.contains(new Triple(toNode(s), toNode(p), toNode(o))));
 	}
 	
-	protected void assertNoTriple(Node s, Node p, Node o) {
-		assertFalse(this.resultTriples.contains(new Triple(s, p, o)));
+	protected void assertNoStatement(RDFNode s, RDFNode p, RDFNode o) {
+		assertFalse(this.resultTriples.contains(new Triple(toNode(s), toNode(p), toNode(o))));
 	}
-
+	
+	private Node toNode(RDFNode n) {
+		if (n == null) {
+			return Node.ANY;
+		}
+		return n.asNode();
+	}
 }

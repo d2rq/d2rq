@@ -8,18 +8,19 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.Iterator;
 
+import junit.framework.TestCase;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
-import de.fuberlin.wiwiss.d2rq.helpers.TestFramework;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
 /**
  * @author jgarbers
- * @version $Id: DBConnectionTest.java,v 1.20 2006/09/03 13:03:42 cyganiak Exp $
+ * @version $Id: DBConnectionTest.java,v 1.21 2006/09/06 21:48:47 cyganiak Exp $
  */
-public class DBConnectionTest extends TestFramework {
+public class DBConnectionTest extends TestCase {
 
 	private Model mapModel;
 
@@ -34,7 +35,7 @@ public class DBConnectionTest extends TestFramework {
 
 	protected void setUp() throws Exception {
 		mapModel = ModelFactory.createDefaultModel();
-		mapModel.read(D2RQMap, "N3");
+		mapModel.read(D2RQTestSuite.ISWC_MAP, "http://test/", "N3");
 		parser = new MapParser(mapModel, null);
 		parser.parse();
 		databases = parser.getDatabases();

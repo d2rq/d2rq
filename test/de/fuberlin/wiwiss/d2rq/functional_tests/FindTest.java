@@ -1,10 +1,13 @@
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.rdf.model.AnonId;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import de.fuberlin.wiwiss.d2rq.helpers.FOAF;
 import de.fuberlin.wiwiss.d2rq.helpers.FindTestFramework;
+import de.fuberlin.wiwiss.d2rq.helpers.ISWC;
+import de.fuberlin.wiwiss.d2rq.helpers.SKOS;
 
 /**
  * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.GraphD2RQ}.
@@ -19,234 +22,186 @@ import de.fuberlin.wiwiss.d2rq.helpers.FindTestFramework;
  *
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  * 
+ * TODO: Re-enable the two blank node tests
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTest.java,v 1.8 2006/09/03 13:03:42 cyganiak Exp $
+ * @version $Id: FindTest.java,v 1.9 2006/09/06 21:48:46 cyganiak Exp $
  */
 public class FindTest extends FindTestFramework {
     
 	public void testListTypeStatements() {
-		find(Node.ANY, RDF.Nodes.type, Node.ANY);
+		find(null, RDF.type, null);
 //		dump();
-		assertTriple(
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper1"),
-				RDF.Nodes.type,
-				Node.createURI(NS + "InProceedings"));
+		assertStatement(resource("papers/1"), RDF.type, ISWC.InProceedings);
 		// Paper6 is filtered by d2rq:condition
-		assertNoTriple(
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper6"),
-				RDF.Nodes.type,
-				Node.createURI(NS + "InProceedings"));
-		assertTriple(
-				Node.createURI("http://conferences.org/comp/confno23541"),
-				RDF.Nodes.type,
-				Node.createURI(NS + "Conference"));
-		assertTriple(
-				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@15")),
-				RDF.Nodes.type,
-				Node.createURI(NS + "Topic"));
-		assertTripleCount(29);
+		assertNoStatement(resource("papers/6"), RDF.type, ISWC.InProceedings);
+		assertStatement(resource("conferences/23541"), RDF.type, ISWC.Conference);
+		assertStatement(resource("topics/15"), RDF.type, SKOS.Concept);
+		assertStatementCount(55);
 	}
 
 	public void testListTopicInstances() {
-		find(Node.ANY, RDF.Nodes.type, Node.createURI(NS + "Topic"));
+		find(null, RDF.type, SKOS.Concept);
 //		dump();
-		assertTriple(
-				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@1")),
-				RDF.Nodes.type,
-				Node.createURI(NS + "Topic"));
-		assertTriple(
-				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@15")),
-				RDF.Nodes.type,
-				Node.createURI(NS + "Topic"));
-		assertTripleCount(15);
+		assertStatement(resource("topics/1"), RDF.type, SKOS.Concept);
+		assertStatement(resource("topics/15"), RDF.type, SKOS.Concept);
+		assertStatementCount(15);
 	}
 
 	public void testListTopicNames() {
-		find(Node.ANY, Node.createURI(NS + "name"), Node.ANY);
+		find(null, SKOS.prefLabel, null);
 //		dump();
-		assertTriple(
-				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@1")),
-				Node.createURI(NS + "name"),
-				Node.createLiteral("Knowledge Representation Languages", null, xsdString));
-		assertTriple(
-				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@15")),
-				Node.createURI(NS + "name"),
-				Node.createLiteral("Knowledge Management", null, xsdString));
-		assertTripleCount(15);
+		assertStatement(resource("topics/1"), SKOS.prefLabel, m.createTypedLiteral(
+				"Knowledge Representation Languages"));
+		assertStatement(resource("topics/15"), SKOS.prefLabel, m.createTypedLiteral(
+				"Knowledge Management"));
+		assertStatementCount(15);
 	}
 
 	public void testListAuthors() {
-		find(Node.ANY, Node.createURI(NS + "author_of"), Node.ANY);
+		find(null, DC.creator, null);
 //		dump();
-		assertTriple(
-				Node.createURI("http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil"),
-				Node.createURI(NS + "author_of"),
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper1"));
-		assertTriple(
-				Node.createURI("http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Varun Ratnakar"),
-				Node.createURI(NS + "author_of"),
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper1"));
-		assertTripleCount(7);
+		assertStatement(resource("papers/1"), DC.creator, resource("persons/1"));
+		assertStatement(resource("papers/1"), DC.creator, resource("persons/2"));
+		assertStatementCount(7);
 	}
 	
-	public void testLiteralDatatype() {
-		find(Node.ANY, Node.createURI(NS + "year"), Node.createLiteral("2003", null, xsdYear));
+	public void testDatatypeFindByYear() {
+		find(null, DC.date, m.createTypedLiteral("2003", XSDDatatype.XSDgYear));
 //		dump();
-		assertTriple(
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper4"),
-				Node.createURI(NS + "year"),
-				Node.createLiteral("2003", null, xsdYear));
-		assertTripleCount(1);
-
-		find(Node.ANY, Node.createURI(NS + "name"), Node.createLiteral("E-Business", null, xsdString));
+		assertStatement(resource("papers/4"), DC.date, m.createTypedLiteral("2003", XSDDatatype.XSDgYear));
+		assertStatementCount(1);
+	}
+	
+	public void testDatatypeFindByString() {
+		find(null, SKOS.prefLabel, m.createTypedLiteral("E-Business", XSDDatatype.XSDstring));
 //		dump();
-		assertTriple(
-				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@13")),
-				Node.createURI(NS + "name"),
-				Node.createLiteral("E-Business", null, xsdString));
-		assertTripleCount(1);
-
-		find(Node.ANY, Node.createURI(NS + "name"), Node.createLiteral("E-Business", null, null));
+		assertStatement(resource("topics/13"), SKOS.prefLabel, m.createTypedLiteral("E-Business", XSDDatatype.XSDstring));
+		assertStatementCount(1);
+	}
+	
+	public void testXSDStringDoesntMatchPlainLiteral() {
+		find(null, SKOS.prefLabel, m.createLiteral("E-Business"));
 //		dump();
-		assertTripleCount(0);
-
-		find(Node.createURI("http://www.conference.org/conf02004/paper#Paper2"),
-				Node.createURI(NS + "year"), Node.ANY);
+		assertStatementCount(0);
+	}
+	
+	public void testDatatypeFindYear() {
+		find(resource("papers/2"), DC.date, null);
 //		dump();
-		assertTriple(
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper2"),
-				Node.createURI(NS + "year"),
-				Node.createLiteral("2002", null, xsdYear));
-		assertTripleCount(1);
-
-		find(Node.createURI("http://www.conference.org/conf02004/paper#Paper2"),
-				Node.createURI(NS + "year"), Node.createLiteral("2002", null, xsdYear));
+		assertStatement(resource("papers/2"), DC.date, m.createTypedLiteral("2002", XSDDatatype.XSDgYear));
+		assertStatementCount(1);
+	}
+	
+	public void testDatatypeYearContains() {
+		find(resource("papers/2"), DC.date, m.createTypedLiteral("2002", XSDDatatype.XSDgYear));
 //		dump();
-		assertTriple(
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper2"),
-				Node.createURI(NS + "year"),
-				Node.createLiteral("2002", null, xsdYear));
-		assertTripleCount(1);
+		assertStatement(resource("papers/2"), DC.date, m.createTypedLiteral("2002", XSDDatatype.XSDgYear));
+		assertStatementCount(1);
+		assertStatementCount(1);
 	}
 
 	public void testLiteralLanguage() {
-		find(Node.ANY, Node.createURI(NS + "title"),
-				Node.createLiteral("Trusting Information Sources One Citizen at a Time (Full paper)", "en", null));
+		find(null, DC.title, m.createLiteral("Trusting Information Sources One Citizen at a Time", "en"));
 //		dump();
-		assertTriple(
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper1"),
-				Node.createURI(NS + "title"),
-				Node.createLiteral("Trusting Information Sources One Citizen at a Time (Full paper)", "en", null));
-		assertTripleCount(1);
+		assertStatement(resource("papers/1"), DC.title, m.createLiteral("Trusting Information Sources One Citizen at a Time", "en"));
+		assertStatementCount(1);
 	}
 
 	public void testFindSubjectWhereObjectURIColumn() {
-		find(Node.ANY, Node.createURI(NS + "author"),
-				Node.createURI("http://www.i-u.de/schools/eberhart/iswc2002/#Andreas Eberhart"));
+		find(null, DC.creator, resource("persons/4"));
 //		dump();
-		assertTriple(
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper2"),
-				Node.createURI(NS + "author"),
-				Node.createURI("http://www.i-u.de/schools/eberhart/iswc2002/#Andreas Eberhart"));
-		assertTripleCount(1);
+		assertStatement(resource("papers/2"), DC.creator, resource("persons/4"));
+		assertStatementCount(1);
     }
 
 	public void testFindSubjectWithConditionalObject() {
 		// The paper is not published, therefore no result triples
-		find(Node.ANY, Node.createURI(NS + "author"),
-				Node.createURI("http://www.cs.vu.nl/~borys#Bomelayenko"));
+		find(null, DC.creator, resource("persons/5"));
 //		dump();
-		assertTripleCount(0);		
+		assertStatementCount(0);
 	}
 
 	public void testFindSubjectWhereObjectURIPattern() {
-		find(Node.ANY, Node.createURI(NS + "eMail"),
-				Node.createURI("mailto:andy.seaborne@hpl.hp.com"));
+		find(null, FOAF.mbox, m.createResource("mailto:andy.seaborne@hpl.hp.com"));
 //		dump();
-		assertTriple(
-				Node.createURI("http://www-uk.hpl.hp.com/people#andy_seaborne"),
-				Node.createURI(NS + "eMail"),
-				Node.createURI("mailto:andy.seaborne@hpl.hp.com"));
-		assertTripleCount(1);
+		assertStatement(resource("persons/6"), FOAF.mbox, m.createResource("mailto:andy.seaborne@hpl.hp.com"));
+		assertStatementCount(1);
     }
 
-	public void testMatchAnonymousNode() {
-		find(Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")),
-				Node.createURI(NS + "name"), Node.ANY);
-//		dump();
-		assertTriple(
-				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")),
-				Node.createURI(NS + "name"),
-				Node.createLiteral("Artificial Intelligence", null, xsdString));
-		assertTripleCount(1);
-
-		find(Node.ANY, Node.createURI(NS + "primaryTopic"),
-				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")));
-//		dump();
-		assertTriple(
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper5"),
-				Node.createURI(NS + "primaryTopic"),
-				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")));
-		assertTripleCount(1);
-	}
+//	public void testMatchAnonymousNode() {
+//		find(Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")),
+//				Node.createURI(NS + "name"), Node.ANY);
+////		dump();
+//		assertTriple(
+//				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")),
+//				Node.createURI(NS + "name"),
+//				Node.createLiteral("Artificial Intelligence", null, xsdString));
+//		assertTripleCount(1);
+//
+//		find(Node.ANY, Node.createURI(NS + "primaryTopic"),
+//				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")));
+////		dump();
+//		assertTriple(
+//				Node.createURI("http://www.conference.org/conf02004/paper#Paper5"),
+//				Node.createURI(NS + "primaryTopic"),
+//				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")));
+//		assertTripleCount(1);
+//	}
 
 	public void testDump() {
-		find(Node.ANY, Node.ANY, Node.ANY);
+		find(null, null, null);
 //		dump();
-		assertTripleCount(139);
+		assertStatementCount(254);
 	}
 
-	public void testFetchAnonAndReverse() {
-		Node topic3 = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3"));
-		find(topic3, Node.ANY, Node.ANY);
-//		dump();
-		assertTriple(
-				topic3,
-				Node.createURI(NS + "name"),
-				Node.createLiteral("Artificial Intelligence", null, xsdString));
-		assertTriple(
-				topic3,
-				RDF.Nodes.type,
-				Node.createURI(NS + "Topic"));
-		assertTripleCount(2);
-
-		find(Node.ANY, Node.ANY, topic3);
-//		dump();
-		assertTriple(
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper5"),
-				Node.createURI(NS + "primaryTopic"),
-				topic3);
-		assertTriple(
-				Node.createURI("http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil"),
-				Node.createURI(NS + "research_topic"),
-				topic3);
-		assertTriple(
-				Node.createURI("http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Jim Blythe"),
-				Node.createURI(NS + "research_topic"),
-				topic3);
-		assertTripleCount(3);
-	}
+//	public void testFetchAnonAndReverse() {
+//		Node topic3 = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3"));
+//		find(topic3, Node.ANY, Node.ANY);
+////		dump();
+//		assertTriple(
+//				topic3,
+//				Node.createURI(NS + "name"),
+//				Node.createLiteral("Artificial Intelligence", null, xsdString));
+//		assertTriple(
+//				topic3,
+//				RDF.Nodes.type,
+//				Node.createURI(NS + "Topic"));
+//		assertTripleCount(2);
+//
+//		find(Node.ANY, Node.ANY, topic3);
+////		dump();
+//		assertTriple(
+//				Node.createURI("http://www.conference.org/conf02004/paper#Paper5"),
+//				Node.createURI(NS + "primaryTopic"),
+//				topic3);
+//		assertTriple(
+//				Node.createURI("http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil"),
+//				Node.createURI(NS + "research_topic"),
+//				topic3);
+//		assertTriple(
+//				Node.createURI("http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Jim Blythe"),
+//				Node.createURI(NS + "research_topic"),
+//				topic3);
+//		assertTripleCount(3);
+//	}
 
 	public void testFindPredicate() {
-		find(Node.createURI("http://www.conference.org/conf02004/paper#Paper2"),
-				Node.ANY, Node.createLiteral("2002", null, xsdYear));
+		find(resource("papers/2"), null, m.createTypedLiteral("2002", XSDDatatype.XSDgYear));
 //		dump();
-		assertTriple(
-				Node.createURI("http://www.conference.org/conf02004/paper#Paper2"),
-				Node.createURI(NS + "year"),
-				Node.createLiteral("2002", null, xsdYear));
-		assertTripleCount(1);
+		assertStatement(resource("papers/2"), DC.date, m.createTypedLiteral("2002", XSDDatatype.XSDgYear));
+		assertStatementCount(1);
     }
 
 	public void testReverseFetchWithDatatype() {
-		find(Node.ANY, Node.ANY, Node.createLiteral("2002", null, xsdYear));
+		find(null, null, m.createTypedLiteral("2002", XSDDatatype.XSDgYear));
 //		dump();
-		assertTripleCount(3);
+		assertStatementCount(3);
 	}
 
 	public void testReverseFetchWithURI() {
-		find(Node.ANY, Node.ANY, Node.createURI("http://www.conference.org/conf02004/paper#Paper1"));
+		find(null, null, resource("topics/11"));
 //		dump();
-		assertTripleCount(2);
+		assertStatementCount(2);
 	}
 }

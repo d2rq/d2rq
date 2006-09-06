@@ -1,7 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.sesame;
-import de.fuberlin.wiwiss.d2rq.helpers.TestFramework;
-import de.fuberlin.wiwiss.d2rq.sesame.D2RQRepository;
-import de.fuberlin.wiwiss.d2rq.sesame.D2RQSource;
+import junit.framework.TestCase;
 
 import org.openrdf.model.Value;
 import org.openrdf.sesame.Sesame;
@@ -9,17 +7,19 @@ import org.openrdf.sesame.constants.QueryLanguage;
 import org.openrdf.sesame.query.QueryResultsTable;
 import org.openrdf.sesame.repository.SesameRepository;
 
+import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
+
 /**
  * @author jgarbers
- * @version $Id: SesameTest.java,v 1.3 2006/09/03 13:03:43 cyganiak Exp $
+ * @version $Id: SesameTest.java,v 1.4 2006/09/06 21:48:47 cyganiak Exp $
  */
-public class SesameTest extends TestFramework {
+public class SesameTest extends TestCase {
 
     public void testSimpleSelect() {
         // jg: code taken from doc/manual/index.html
        try{
             // Initialize repository
-            D2RQSource source = new D2RQSource(D2RQMap, "N3"); // jg: adopted to TestFramework
+            D2RQSource source = new D2RQSource(D2RQTestSuite.ISWC_MAP, "N3", "http://test/"); // jg: adopted to TestFramework
             SesameRepository repos = new D2RQRepository("urn:youRepository", source, Sesame.getService());
 
             // Query the repository

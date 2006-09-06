@@ -1,13 +1,13 @@
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
-import de.fuberlin.wiwiss.d2rq.helpers.RDQLTestFramework;
+import de.fuberlin.wiwiss.d2rq.helpers.QueryLanguageTestFramework;
 
 /**
+ * TODO: Adapt to latest DB schema and add some assertions
  * @author jgarbers
- * @version $Id: RDQLDB2Test.java,v 1.6 2006/09/03 13:03:42 cyganiak Exp $
+ * @version $Id: RDQLDB2Test.java,v 1.7 2006/09/06 21:48:46 cyganiak Exp $
  */
-public class RDQLDB2Test extends RDQLTestFramework {
-	static String DB2MappingFile="file:doc/manual/ISWC-2DB-d2rq.n3";
+public class RDQLDB2Test extends QueryLanguageTestFramework {
 	static String zHasCitingPaperX=
 	    "(?z, <http://annotation.semanticweb.org/iswc/iswc.daml#citingPaper>, ?x)";
 	static String paperXCitesPaperY=
@@ -25,8 +25,8 @@ public class RDQLDB2Test extends RDQLTestFramework {
 	static String paperYauthorB=
 	    "(?y, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?b)";
 
-	public RDQLDB2Test() {
-		D2RQMap=DB2MappingFile;
+	protected String mapURL() {
+		return "file:doc/manual/ISWC-2DB-d2rq.n3";
 	}
 	
 	protected void setUp() throws Exception {

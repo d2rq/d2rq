@@ -8,11 +8,11 @@ import java.util.Map;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.helpers.Logger;
-import de.fuberlin.wiwiss.d2rq.helpers.SPARQLTestFramework;
+import de.fuberlin.wiwiss.d2rq.helpers.QueryLanguageTestFramework;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 
-public class ExpressionTestFramework extends SPARQLTestFramework {
+public abstract class ExpressionTestFramework extends QueryLanguageTestFramework {
     String condition, sqlCondition=null;
     Logger translatedLogger=new Logger();
 

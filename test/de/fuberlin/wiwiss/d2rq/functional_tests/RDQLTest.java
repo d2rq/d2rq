@@ -1,12 +1,13 @@
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.rdf.model.AnonId;
+import com.hp.hpl.jena.vocabulary.DC;
+import com.hp.hpl.jena.vocabulary.RDF;
 
-import de.fuberlin.wiwiss.d2rq.helpers.RDQLTestFramework;
+import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
+import de.fuberlin.wiwiss.d2rq.helpers.ISWC;
+import de.fuberlin.wiwiss.d2rq.helpers.QueryLanguageTestFramework;
+import de.fuberlin.wiwiss.d2rq.helpers.SKOS;
 
 
 /**
@@ -23,55 +24,56 @@ import de.fuberlin.wiwiss.d2rq.helpers.RDQLTestFramework;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDQLTest.java,v 1.12 2006/09/03 13:03:42 cyganiak Exp $
+ * @version $Id: RDQLTest.java,v 1.13 2006/09/06 21:48:46 cyganiak Exp $
  */
-public class RDQLTest extends RDQLTestFramework {
+public class RDQLTest extends QueryLanguageTestFramework {
+
+	protected String mapURL() {
+		return D2RQTestSuite.ISWC_MAP;
+	}
 
 	public void testRDQLFetch() {
-		rdql("SELECT ?x, ?y WHERE (<http://www.conference.org/conf02004/paper#Paper1>, ?x, ?y)");
+		rdql("SELECT ?x, ?y WHERE (<http://test/papers/1>, ?x, ?y)");
 //		dump();
-		Map aResult = new HashMap();
+		
+		expectVariable("x", ISWC.conference);
+		expectVariable("y", this.model.createResource("http://test/conferences/23541"));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource(NS + "conference"));
-		aResult.put("y", this.model.createResource("http://conferences.org/comp/confno23541"));
-		assertResult(aResult);
+		expectVariable("x", SKOS.primarySubject);
+		expectVariable("y", this.model.createResource("http://test/topics/5"));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource(NS + "primaryTopic"));
-		aResult.put("y", this.model.createResource(new AnonId("http://www.example.org/dbserver01/db01#Topic@@5")));
-		assertResult(aResult);
+		expectVariable("x", SKOS.subject);
+		expectVariable("y", this.model.createResource("http://test/topics/15"));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource(NS + "secondaryTopic"));
-		aResult.put("y", this.model.createResource(new AnonId("http://www.example.org/dbserver01/db01#Topic@@15")));
-		assertResult(aResult);
+		expectVariable("x", DC.date);
+		expectVariable("y", this.model.createTypedLiteral("2002", XSDDatatype.XSDgYear));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource(NS + "year"));
-		aResult.put("y", this.model.createTypedLiteral("2002", xsdYear));
-		assertResult(aResult);
+		expectVariable("x", DC.title);
+		expectVariable("y", this.model.createLiteral("Trusting Information Sources One Citizen at a Time", "en"));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource(NS + "title"));
-		aResult.put("y", this.model.createLiteral("Trusting Information Sources One Citizen at a Time (Full paper)", "en"));
-		assertResult(aResult);
+		expectVariable("x", RDF.type);
+		expectVariable("y", ISWC.InProceedings);
+		assertSolution();
 
-		aResult.put("x", this.model.createResource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
-		aResult.put("y", this.model.createResource(NS + "InProceedings"));
-		assertResult(aResult);
-
-		assertResultCount(10);
+		assertResultCount(12);
 	}
 	
 	public void testRDQLGetAuthorsAndEmails() {
-		rdql("SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), " +
-								"(?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y)");
+		rdql("SELECT ?x, ?y WHERE (?x, dc:creator, ?z), (?z, foaf:mbox, ?y)");
 //		dump();
-		Map aResult = new HashMap();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper1"));
-		aResult.put("y", this.model.createResource("mailto:gil@isi.edu"));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/1"));
+		expectVariable("y", this.model.createResource("mailto:gil@isi.edu"));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper1"));
-		aResult.put("y", this.model.createResource("mailto:varunr@isi.edu"));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/1"));
+		expectVariable("y", this.model.createResource("mailto:varunr@isi.edu"));
+		assertSolution();
 
 		assertResultCount(7);
 	}
@@ -80,90 +82,79 @@ public class RDQLTest extends RDQLTestFramework {
 	    // GraphD2RQ.setUsingD2RQQueryHandler(false);
 	    // mysql must be prepared for ANSI expressions with:
 	    // SET GLOBAL sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE';
-		rdql("SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?z), " +
-								"(?z, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?y)" +
-								" AND ! (?x eq ?z)");
+		rdql("SELECT ?x, ?y WHERE (?x, dc:creator, ?z), (?z, foaf:mbox, ?y) AND ! (?x eq ?z)");
 //		dump();
-		Map aResult = new HashMap();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper1"));
-		aResult.put("y", this.model.createResource("mailto:gil@isi.edu"));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/1"));
+		expectVariable("y", this.model.createResource("mailto:gil@isi.edu"));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper1"));
-		aResult.put("y", this.model.createResource("mailto:varunr@isi.edu"));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/1"));
+		expectVariable("y", this.model.createResource("mailto:varunr@isi.edu"));
+		assertSolution();
 
 		assertResultCount(7);
 	}
 
 	
 	public void testRDQLGetTopics() {
-		rdql("SELECT ?x, ?z, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#primaryTopic>, ?z), (?z, <http://annotation.semanticweb.org/iswc/iswc.daml#name>, ?y)");
+		rdql("SELECT ?x, ?y WHERE (?x, skos:primarySubject, ?z), (?z, skos:prefLabel, ?y)");
 //		dump();
-		Map aResult = new HashMap();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper1"));
-		aResult.put("y", this.model.createTypedLiteral("Semantic Web", xsdString));
-		aResult.put("z", this.model.createResource(new AnonId("http://www.example.org/dbserver01/db01#Topic@@5")));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/1"));
+		expectVariable("y", this.model.createTypedLiteral("Semantic Web", XSDDatatype.XSDstring));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper4"));
-		aResult.put("y", this.model.createTypedLiteral("Semantic Web Infrastructure", xsdString));
-		aResult.put("z", this.model.createResource(new AnonId("http://www.example.org/dbserver01/db01#Topic@@11")));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/4"));
+		expectVariable("y", this.model.createTypedLiteral("Semantic Web Infrastructure", XSDDatatype.XSDstring));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper5"));
-		aResult.put("y", this.model.createTypedLiteral("Artificial Intelligence", xsdString));
-		aResult.put("z", this.model.createResource(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/5"));
+		expectVariable("y", this.model.createTypedLiteral("Artificial Intelligence", XSDDatatype.XSDstring));
+		assertSolution();
 
 		assertResultCount(3);
 	}
 
 	public void testRDQLGetAuthorsOfPaperByTitle() {
-		rdql("SELECT ?x, ?y WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y), (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Three Implementations of SquishQL, a Simple RDF Query Language (Full paper)'@en)");
+		rdql("SELECT ?x, ?y WHERE (?x, dc:creator, ?y), (?x, dc:title, 'Three Implementations of SquishQL, a Simple RDF Query Language'@en)");
 //		dump();
-		Map aResult = new HashMap();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper4"));
-		aResult.put("y", this.model.createResource("http://www-uk.hpl.hp.com/people#andy_seaborne"));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/4"));
+		expectVariable("y", this.model.createResource("http://test/persons/6"));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper4"));
-		aResult.put("y", this.model.createResource("http://reggiori.webweaving.org#Alberto Reggiori"));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/4"));
+		expectVariable("y", this.model.createResource("http://test/persons/9"));
+		assertSolution();
 
 		assertResultCount(2);
 	}
 
 	public void testRDQLGetAuthorsNameAndEmail() {
-		rdql("SELECT ?x, ?y, ?a WHERE (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#author>, ?y), (?x, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, 'Three Implementations of SquishQL, a Simple RDF Query Language (Full paper)'@en), (?y, <http://annotation.semanticweb.org/iswc/iswc.daml#eMail> , ?a)");
+		rdql("SELECT ?x, ?y, ?a WHERE (?x, dc:creator, ?y), (?x, dc:title, 'Three Implementations of SquishQL, a Simple RDF Query Language'@en), (?y, foaf:mbox, ?a)");
 //		dump();
-		Map aResult = new HashMap();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper4"));
-		aResult.put("y", this.model.createResource("http://www-uk.hpl.hp.com/people#andy_seaborne"));
-		aResult.put("a", this.model.createResource("mailto:andy.seaborne@hpl.hp.com"));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/4"));
+		expectVariable("y", this.model.createResource("http://test/persons/6"));
+		expectVariable("a", this.model.createResource("mailto:andy.seaborne@hpl.hp.com"));
+		assertSolution();
 
-		aResult.put("x", this.model.createResource("http://www.conference.org/conf02004/paper#Paper4"));
-		aResult.put("y", this.model.createResource("http://reggiori.webweaving.org#Alberto Reggiori"));
-		aResult.put("a", this.model.createResource("mailto:areggiori@webweaving.org"));
-		assertResult(aResult);
+		expectVariable("x", this.model.createResource("http://test/papers/4"));
+		expectVariable("y", this.model.createResource("http://test/persons/9"));
+		expectVariable("a", this.model.createResource("mailto:areggiori@webweaving.org"));
+		assertSolution();
 
 		assertResultCount(2);
 	}
 
 	public void testGetTitleAndYearOfAllPapers() {
-		rdql("SELECT ?title, ?year WHERE " +
-				"(?paper, <http://annotation.semanticweb.org/iswc/iswc.daml#title>, ?title), "+
-				"(?paper, <http://annotation.semanticweb.org/iswc/iswc.daml#year>, ?year)");
-		Map aResult = new HashMap();
+		rdql("SELECT ?title, ?year WHERE (?paper, dc:title, ?title), (?paper, dc:date, ?year)");
+//		dump();
 
-		aResult.put("title", this.model.createLiteral("Trusting Information Sources One Citizen at a Time (Full paper)", "en"));
-		aResult.put("year", this.model.createTypedLiteral("2002", XSDDatatype.XSDgYear));
-		assertResult(aResult);
+		expectVariable("title", this.model.createLiteral("Trusting Information Sources One Citizen at a Time", "en"));
+		expectVariable("year", this.model.createTypedLiteral("2002", XSDDatatype.XSDgYear));
+		assertSolution();
 		
 		assertResultCount(4);
 	}

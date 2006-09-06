@@ -9,13 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.vocabulary.DC;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
@@ -23,12 +27,13 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: RDQLTestFramework.java,v 1.1 2006/09/03 13:03:42 cyganiak Exp $
+ * @version $Id: QueryLanguageTestFramework.java,v 1.1 2006/09/06 21:48:47 cyganiak Exp $
  */
-public class RDQLTestFramework extends TestFramework {
+public abstract class QueryLanguageTestFramework extends TestCase {
 	protected ModelD2RQ model;
 	protected Set results;
 	protected String queryString;
+	protected Map currentSolution = new HashMap();
 	
 	// compare fields
 	int nTimes=1;
@@ -67,7 +72,7 @@ public class RDQLTestFramework extends TestFramework {
 	protected Logger oldSQLResultSetSeparatorLogger;
 	protected boolean oldIsUsingD2RQQueryHandler;
 	
-	public RDQLTestFramework() {
+	public QueryLanguageTestFramework() {
 		super();
 		setUpHandlers();
 	}
@@ -104,9 +109,10 @@ public class RDQLTestFramework extends TestFramework {
 	    setUpShowWarnings();
 	}
 	
+	protected abstract String mapURL();
+	
 	protected void setUp() throws Exception {
-		super.setUp();
-		this.model = new ModelD2RQ(D2RQMap);
+		this.model = new ModelD2RQ(mapURL(), "N3", "http://test/");
 		oldIsUsingD2RQQueryHandler=GraphD2RQ.isUsingD2RQQueryHandler();
 		GraphD2RQ.setUsingD2RQQueryHandler(true);
 //		this.model.enableDebug();
@@ -228,12 +234,16 @@ public class RDQLTestFramework extends TestFramework {
 	    Arrays.sort(a);
 	    return printArray(a);
 	}
-
 	
 	protected void rdql(String rdql) {
 	    rdqlLogger.debug("RDQL-Query: " + rdql);
 	    queryString=rdql;
 		this.results = new HashSet();
+		rdql += "\nUSING\n";
+		rdql += "dc FOR <" + DC.NS + ">\n";
+		rdql += "foaf FOR <" + FOAF.NS + ">\n";
+		rdql += "skos FOR <" + SKOS.NS + ">\n";
+		rdql += "iswc FOR <" + ISWC.NS + ">\n";
 		Query query = QueryFactory.create(rdql, Syntax.syntaxRDQL);
 		ResultSet qr = QueryExecutionFactory.create(query, this.model).execSelect();
 		while (qr.hasNext()) {
@@ -242,14 +252,49 @@ public class RDQLTestFramework extends TestFramework {
 		}
 	}
 
+	protected void sparql(String sparql) {
+//	    rdqlLogger.debug("RDQL-Query: " + rdql);
+		queryString=sparql;
+		sparql = 
+				"PREFIX dc: <" + DC.NS + ">\n" +
+				"PREFIX foaf: <" + FOAF.NS + ">\n" +
+				"PREFIX skos: <" + SKOS.NS + ">\n" +
+				"PREFIX iswc: <" + ISWC.NS + ">\n" +
+				sparql;
+		Query query = QueryFactory.create(sparql);
+		QueryExecution qe = QueryExecutionFactory.create(query, this.model);
+		this.results = new HashSet();
+		ResultSet resultSet = qe.execSelect();
+		while (resultSet.hasNext()) {
+			QuerySolution solution = resultSet.nextSolution();
+			addSolution(solution);
+		}
+	}
+	
+	private void addSolution(QuerySolution solution) {
+		Map map = new HashMap();
+		Iterator it = solution.varNames();
+		while (it.hasNext()) {
+			String variable = (String) it.next();
+			RDFNode value = solution.get(variable);
+			map.put(variable, value);
+		}
+		this.results.add(map);
+	}
+
 	protected void assertResultCount(int count) {
 		assertEquals(count, this.results.size());
 	}
 
-	protected void assertResult(Map map) {
-		if (!this.results.contains(map)) {
+	protected void expectVariable(String variableName, RDFNode value) {
+		this.currentSolution.put(variableName, value);
+	}
+	
+	protected void assertSolution() {
+		if (!this.results.contains(this.currentSolution)) {
 			fail();
 		}
+		this.currentSolution.clear();
 	}
 	
 	public static Map solutionToMap(QuerySolution solution, List variables) {
@@ -271,19 +316,17 @@ public class RDQLTestFramework extends TestFramework {
 	}
 	
 	protected void dump() {
-	    if (!dumpLogger.debugEnabled())
-	        return;
-	    dumpLogger.debug("\n#Results: " + results.size() + ":");
+		System.out.println("\n#Results: " + results.size() + ":");
 		Iterator it = this.results.iterator();
 		int count = 1;
 		while (it.hasNext()) {
-		    dumpLogger.debug("Result binding " + count + ":");
+		    System.out.println("Result binding " + count + ":");
 			Map binding = (Map) it.next();
 			Iterator it2 = binding.keySet().iterator();
 			while (it2.hasNext()) {
 			    String varName = (String) it2.next();
 			    Object val = binding.get(varName);
-			    dumpLogger.debug("    " + varName + " => " + val); 
+			    System.out.println("    " + varName + " => " + val); 
 			}
 			count++;
 		}
