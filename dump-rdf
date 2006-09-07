@@ -1,0 +1,11 @@
+#!/bin/bash
+# $Id: generate-mapping,v 1.1 2006/09/07 16:57:50 cyganiak Exp $
+D2RQ_ROOT=${0%/*}
+SEP=':'
+if [ "$(uname)" = "Cygwin" ]; then SEP=';'; fi
+for jar in "$D2RQ_ROOT"/lib/*.jar "$D2RQ_ROOT"/lib/*/*.jar
+do
+  if [ "$CP" != "" ]; then CP="$CP$SEP"; fi
+  CP="$CP$jar"
+done
+exec java -cp "$CP" d2rq.dump_rdf "$@"

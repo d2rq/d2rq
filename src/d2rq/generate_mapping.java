@@ -14,10 +14,9 @@ import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
  * Command line interface for {@link MappingGenerator}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: generate_mapping.java,v 1.1 2006/09/07 16:57:50 cyganiak Exp $
+ * @version $Id: generate_mapping.java,v 1.2 2006/09/07 20:32:14 cyganiak Exp $
  */
 public class generate_mapping {
-	private final static String usage = "usage: generate-mapping [-u username] [-p password] [-d driverclass] [-o outfile.n3] jdbcURL";
 	private final static String[] includedDrivers = {
 			"com.mysql.jdbc.Driver"
 	};
@@ -27,7 +26,6 @@ public class generate_mapping {
 			Database.registerJDBCDriverIfPresent(includedDrivers[i]);
 		}
 		CommandLine cmd = new CommandLine();
-		cmd.setUsage(usage);
 		ArgDecl userArg = new ArgDecl(true, "u", "user", "username");
 		ArgDecl passArg = new ArgDecl(true, "p", "pass", "password");
 		ArgDecl driverArg = new ArgDecl(true, "d", "driver");
@@ -39,12 +37,12 @@ public class generate_mapping {
 		cmd.process(args);
 
 		if (cmd.numItems() == 0) {
-			System.err.println(usage);
+			usage();
 			System.exit(1);
 		}
 		if (cmd.numItems() > 1) {
 			System.err.println("too many arguments");
-			System.err.println(usage);
+			usage();
 			System.exit(1);
 		}
 		String jdbc = cmd.getItem(0);
@@ -76,5 +74,10 @@ public class generate_mapping {
 			System.err.println(ex.getMessage());
 			System.exit(1);
 		}
+	}
+	
+	private static void usage() {
+		System.err.println(
+				"usage: generate-mapping [-u username] [-p password] [-d driverclass] [-o outfile.n3] jdbcURL");
 	}
 }

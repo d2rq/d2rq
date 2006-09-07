@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.parser;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -37,9 +39,30 @@ import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
  * of a D2RQ mapping file. Checks the map for consistency.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.9 2006/09/02 22:49:17 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.10 2006/09/07 20:32:14 cyganiak Exp $
  */
 public class MapParser {
+
+	/**
+	 * Turns a relative URI into an absolute one, by using the
+	 * current directory's <tt>file:</tt> URI as a base. This
+	 * uses the same algorithm as Jena's Model class when reading
+	 * a file.
+	 * 
+	 * @param uri Any URI
+	 * @return An absolute URI corresponding to the input
+	 */
+	public static String absolutizeURI(String uri) {
+		String n3 = "<> a 'foo' .";
+		Model m = ModelFactory.createDefaultModel();
+		m.read(new StringReader(n3), uri, "N3");
+		String absolute = m.listStatements().nextStatement().getSubject().getURI();
+		if (uri.indexOf("#") > -1) {
+			absolute += uri.substring(uri.indexOf("#"));
+		}
+		return absolute;
+	}
+	
 	private Log log = LogFactory.getLog(MapParser.class);
 	private Model model;
 	private Graph graph;
@@ -58,7 +81,7 @@ public class MapParser {
 	public MapParser(Model mapModel, String baseURI) {
 		this.model = mapModel;
 		this.graph = mapModel.getGraph();
-		this.baseURI = baseURI;
+		this.baseURI = absolutizeURI(baseURI);
 	}
 	
 	/**

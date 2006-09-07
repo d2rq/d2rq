@@ -35,9 +35,7 @@
 		<exclude name="${tar}"/>
 	</patternset>
 
-<!--
-	<property name="execfiles" value="rdf-dump generate-mapping etc/make_classpath"/>
--->
+	<property name="execfiles" value="dump-rdf generate-mapping"/>
 
 	<target name="clean">
 		<delete dir="${build}" failonerror="false"/>
