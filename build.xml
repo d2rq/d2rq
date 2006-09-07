@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="D2RQ" default="all" basedir=".">
 
+	<property name="name" value="d2rq"/>
+	<property name="version" value="0.5-dev"/>
 	<property name="project.package" value="de.fuberlin.wiwiss.d2rq"/>
 	<property name="project.path" value="de/fuberlin/wiwiss/d2rq"/>
 	<property name="src" value="src"/>
@@ -10,8 +12,10 @@
 	<property name="lib" value="lib"/>
 	<property name="doc" value="doc"/>
 	<property name="javadoc" value="${doc}/javadoc"/>
-	<property name="jar" value="d2rq.jar"/>
-	<property name="zip" value="d2rq.zip"/>
+	<property name="distname" value="${name}-${version}"/>
+	<property name="jar" value="${lib}/${distname}.jar"/>
+	<property name="zip" value="${distname}.zip"/>
+	<property name="tar" value="${distname}.tar.gz"/>
 	<property name="junit.jar" value="${lib}/junit-4.0.jar"/>
 	
 	<path id="project.class.path">
@@ -22,12 +26,26 @@
 		<pathelement path="${java.class.path}"/>
 	</path>
 	
+	<patternset id="distfiles">
+		<include name="**/*"/>
+		<exclude name="${build}/**"/>
+		<exclude name="${build.tests}/**"/>
+		<exclude name="build/**"/>
+		<exclude name="${zip}"/>
+		<exclude name="${tar}"/>
+	</patternset>
+
+<!--
+	<property name="execfiles" value="rdf-dump generate-mapping etc/make_classpath"/>
+-->
+
 	<target name="clean">
 		<delete dir="${build}" failonerror="false"/>
 		<delete dir="${build.tests}" failonerror="false"/>
 		<delete dir="${javadoc}" failonerror="false"/>
-		<delete file="${jar}" failonerror="false"/>
-		<delete file="${zip}" failonerror="false"/>
+		<delete failonerror="false">
+			<fileset dir="." includes="${lib}/${name}-*.jar,${name}-*.zip,${name}-*.tar.gz"/>
+		</delete>
 	</target>
 	
 	<target name="init">
@@ -113,10 +131,23 @@
 	</target>
 
 	<target name="zip" depends="jar,javadoc">
-		<zip destfile="${zip}"
-			 basedir="."
-			 excludes="${build}/** ${build.tests}/** ${zip}"/>
+		<zip destfile="${zip}">
+			<zipfileset prefix="${distname}" dir=".">
+				<patternset refid="distfiles"/>
+			</zipfileset>
+		</zip>
 	</target>
 
-	<target name="all" depends="zip"/>
+	<target name="tar" depends="jar">
+		<tar destfile="${tar}" compression="gzip">
+<!--
+			<tarfileset prefix="${distname}" dir="." includes="${execfiles}" mode="755"/>
+-->
+			<tarfileset prefix="${distname}" dir="." excludes="${execfiles}">
+				<patternset refid="distfiles"/>
+			</tarfileset>
+		</tar>
+	</target>
+
+	<target name="all" depends="zip,tar"/>
 </project>
