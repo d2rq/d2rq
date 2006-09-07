@@ -51,7 +51,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.26 2006/09/03 13:45:47 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.27 2006/09/07 18:29:30 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -109,7 +109,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * Copies all prefixes from the mapping file to the D2RQ model.
 	 * This makes the output of Model.write(...) nicer. The D2RQ
 	 * prefix is dropped on the assumption that it is not wanted
-	 * in the actual data. Same for any file: prefix.
+	 * in the actual data.
 	 */ 
 	private void copyPrefixes(PrefixMapping prefixes) {
 		getPrefixMapping().setNsPrefixes(prefixes);
@@ -117,7 +117,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
 			String namespace = (String) entry.getValue();
-			if (D2RQ.uri.equals(namespace) || namespace.startsWith("file:")) {
+			if (D2RQ.uri.equals(namespace)) {
 				getPrefixMapping().removeNsPrefix((String) entry.getKey());
 			}
 		}
