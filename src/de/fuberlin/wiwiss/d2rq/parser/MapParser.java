@@ -25,13 +25,13 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.csv.CSVParser;
 import de.fuberlin.wiwiss.d2rq.map.Column;
-import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Join;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
+import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * Creates D2RQ domain classes (like {@link PropertyBridge},
@@ -39,7 +39,7 @@ import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
  * of a D2RQ mapping file. Checks the map for consistency.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.10 2006/09/07 20:32:14 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.11 2006/09/07 21:31:37 cyganiak Exp $
  */
 public class MapParser {
 
@@ -53,6 +53,9 @@ public class MapParser {
 	 * @return An absolute URI corresponding to the input
 	 */
 	public static String absolutizeURI(String uri) {
+		if (uri == null) {
+			return null;
+		}
 		String n3 = "<> a 'foo' .";
 		Model m = ModelFactory.createDefaultModel();
 		m.read(new StringReader(n3), uri, "N3");
@@ -111,7 +114,7 @@ public class MapParser {
 	}
 	
 	private void parseProcessingInstructions() {
-		Iterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.ProcessingInstructions);
+		Iterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.ProcessingInstructions.asNode());
 		while (it.hasNext()) {
 			Node instructions = ((Triple) it.next()).getSubject();
 			// predicate is key, object is value => false parameter (XML style)
@@ -120,7 +123,7 @@ public class MapParser {
 	}
 	
 	private void parseDatabases() {
-	    ExtendedIterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.Database);
+	    ExtendedIterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.Database.asNode());
 	    if (!it.hasNext()) {
 	    	throw new D2RQException("No d2rq:Database defined in the mapping file.");
 	    }
@@ -137,24 +140,24 @@ public class MapParser {
 	private static Map d2rqColumnTypeToDatabaseColumnType;
 	
 	private Database buildDatabase(Node node) {
-		String odbcDSN = findZeroOrOneLiteral(node, D2RQ.odbcDSN);
-		String jdbcDSN = findZeroOrOneLiteral(node, D2RQ.jdbcDSN);
-		String jdbcDriver = findZeroOrOneLiteral(node, D2RQ.jdbcDriver);
-		String username = findZeroOrOneLiteral(node, D2RQ.username);
-		String password = findZeroOrOneLiteral(node, D2RQ.password);
-		String allowDistinct = findZeroOrOneLiteral(node, D2RQ.allowDistinct);
-		String expressionTranslator = findZeroOrOneLiteral(node, D2RQ.expressionTranslator);
+		String odbcDSN = findZeroOrOneLiteral(node, D2RQ.odbcDSN.asNode());
+		String jdbcDSN = findZeroOrOneLiteral(node, D2RQ.jdbcDSN.asNode());
+		String jdbcDriver = findZeroOrOneLiteral(node, D2RQ.jdbcDriver.asNode());
+		String username = findZeroOrOneLiteral(node, D2RQ.username.asNode());
+		String password = findZeroOrOneLiteral(node, D2RQ.password.asNode());
+		String allowDistinct = findZeroOrOneLiteral(node, D2RQ.allowDistinct.asNode());
+		String expressionTranslator = findZeroOrOneLiteral(node, D2RQ.expressionTranslator.asNode());
 		
 		if (d2rqColumnTypeToDatabaseColumnType==null) {
 		    d2rqColumnTypeToDatabaseColumnType=new HashMap();
-		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.textColumn,Database.textColumn);
-		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.numericColumn,Database.numericColumn);
-		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.dateColumn,Database.dateColumn);		    
+		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.textColumn.asNode(),Database.textColumn);
+		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.numericColumn.asNode(),Database.numericColumn);
+		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.dateColumn.asNode(),Database.dateColumn);		    
 		}
 		Map columnTypes = new HashMap();
-		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.textColumn, d2rqColumnTypeToDatabaseColumnType));
-		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.numericColumn, d2rqColumnTypeToDatabaseColumnType));
-		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.dateColumn, d2rqColumnTypeToDatabaseColumnType));
+		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.textColumn.asNode(), d2rqColumnTypeToDatabaseColumnType));
+		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.numericColumn.asNode(), d2rqColumnTypeToDatabaseColumnType));
+		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.dateColumn.asNode(), d2rqColumnTypeToDatabaseColumnType));
 		if (jdbcDSN != null && jdbcDriver == null || jdbcDSN == null && jdbcDriver != null) {
 			throw new D2RQException("d2rq:jdbcDSN and d2rq:jdbcDriver must be used together");
 		}
@@ -173,10 +176,10 @@ public class MapParser {
 	}
 
 	private void parseClassMaps() {
-		ExtendedIterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.ClassMap);
+		ExtendedIterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.ClassMap.asNode());
 		while (it.hasNext()) {
 			Node classMapNode = ((Triple) it.next()).getSubject();
-			Node dbNode = findOneNode(classMapNode, D2RQ.dataStorage);
+			Node dbNode = findOneNode(classMapNode, D2RQ.dataStorage.asNode());
 			Database db = databaseForNode(dbNode);
 			if (db == null) {
 				throw new D2RQException("Unknown d2rq:dataStorage for d2rq:ClassMap " +
@@ -204,15 +207,15 @@ public class MapParser {
 			return (TranslationTable) this.nodesToTranslationTables.get(node);
 		}
 		TranslationTable translationTable = new TranslationTable();
-		String href = findZeroOrOneLiteralOrURI(node, D2RQ.href);
+		String href = findZeroOrOneLiteralOrURI(node, D2RQ.href.asNode());
 		if (href != null) {
 			translationTable.addAll(new CSVParser(href).parse());
 		}
-		String className = findZeroOrOneLiteral(node, D2RQ.javaClass);
+		String className = findZeroOrOneLiteral(node, D2RQ.javaClass.asNode());
 		if (className != null) {
 			translationTable.setTranslatorClass(className, toResource(node));
 		}
-		ExtendedIterator it = this.graph.find(node, D2RQ.translation, Node.ANY);
+		ExtendedIterator it = this.graph.find(node, D2RQ.translation.asNode(), Node.ANY);
 		if (href == null && className == null && !it.hasNext()) {
 			this.log.warn("TranslationTable " + node + " contains no translations");
 		}
@@ -221,8 +224,8 @@ public class MapParser {
 		}
 		while (it.hasNext()) {
 			Node translation = ((Triple) it.next()).getObject();
-			String dbValue = findOneLiteral(translation, D2RQ.databaseValue);
-			String rdfValue = findOneLiteralOrURI(translation, D2RQ.rdfValue);
+			String dbValue = findOneLiteral(translation, D2RQ.databaseValue.asNode());
+			String rdfValue = findOneLiteralOrURI(translation, D2RQ.rdfValue.asNode());
 			translationTable.addTranslation(dbValue, rdfValue);
 		}
 		this.nodesToTranslationTables.put(node, translationTable);
@@ -230,7 +233,7 @@ public class MapParser {
 	}
 
 	private void parsePropertyBridges() {
-		Iterator it = this.graph.find(Node.ANY, D2RQ.belongsToClassMap, Node.ANY);
+		Iterator it = this.graph.find(Node.ANY, D2RQ.belongsToClassMap.asNode(), Node.ANY);
 		while (it.hasNext()) {
 			Triple t = (Triple) it.next();
 			Node propBridgeNode = t.getSubject();
@@ -245,7 +248,7 @@ public class MapParser {
 			throw new D2RQException("d2rq:belongsToClassMap for " +
 					bridgeNode + " is no d2rq:ClassMap");
 		}
-		if (this.graph.find(bridgeNode, D2RQ.belongsToClassMap, Node.ANY).toList().size() > 1) {
+		if (this.graph.find(bridgeNode, D2RQ.belongsToClassMap.asNode(), Node.ANY).toList().size() > 1) {
 			throw new D2RQException("Multiple d2rq:belongsToClassMap in " + bridgeNode);
 		}
 		Set propertiesForBridge = findPropertiesForBridge(bridgeNode);
@@ -267,7 +270,7 @@ public class MapParser {
 
 	private NodeMakerSpec buildObjectSpec(Node node, Database database) {
 		NodeMakerSpec spec = buildResourceSpec(node, database, false);
-		Node refersTo = findZeroOrOneNode(node, D2RQ.refersToClassMap);
+		Node refersTo = findZeroOrOneNode(node, D2RQ.refersToClassMap.asNode());
 		if (refersTo != null) {
 			NodeMakerSpec otherSpec = classMapSpecForNode(refersTo);
 			if (otherSpec == null) {
@@ -278,7 +281,7 @@ public class MapParser {
 			}
 			spec.wrapExisting(otherSpec);
 		}
-		String columnName = findZeroOrOneLiteral(node, D2RQ.column);
+		String columnName = findZeroOrOneLiteral(node, D2RQ.column.asNode());
 		if (columnName != null) {
 			if (isObjectPropertyBridge(node)) {
 				spec.setURIColumn(columnName);
@@ -286,7 +289,7 @@ public class MapParser {
 				spec.setLiteralColumn(columnName);
 			}
 		}
-		String pattern = findZeroOrOneLiteral(node, D2RQ.pattern);
+		String pattern = findZeroOrOneLiteral(node, D2RQ.pattern.asNode());
 		if (pattern != null) {
 			if (isObjectPropertyBridge(node)) {
 				spec.setURIPattern(ensureIsAbsolute(pattern));
@@ -294,11 +297,11 @@ public class MapParser {
 				spec.setLiteralPattern(pattern);
 			}
 		}
-		String datatype = findZeroOrOneLiteralOrURI(node, D2RQ.datatype);
+		String datatype = findZeroOrOneLiteralOrURI(node, D2RQ.datatype.asNode());
 		if (datatype != null) {
 			spec.setDatatypeURI(datatype);
 		}
-		String lang = findZeroOrOneLiteral(node, D2RQ.lang);
+		String lang = findZeroOrOneLiteral(node, D2RQ.lang.asNode());
 		if (lang != null) {
 			spec.setLang(lang);
 		}
@@ -308,27 +311,27 @@ public class MapParser {
 	private NodeMakerSpec buildResourceSpec(Node node, Database database, boolean defaultToUnique) {
 		NodeMakerSpec spec = new NodeMakerSpec(node.toString());
 		spec.setDatabase(database);
-		String bNodeIdColumns = findZeroOrOneLiteral(node, D2RQ.bNodeIdColumns);
+		String bNodeIdColumns = findZeroOrOneLiteral(node, D2RQ.bNodeIdColumns.asNode());
 		if (bNodeIdColumns != null) {
 			spec.setBlankColumns(bNodeIdColumns);
 		}
-		String uriColumnName = findZeroOrOneLiteral(node, D2RQ.uriColumn);
+		String uriColumnName = findZeroOrOneLiteral(node, D2RQ.uriColumn.asNode());
 		if (uriColumnName != null) {
 			spec.setURIColumn(uriColumnName);
 		}
-		String uriPattern = findZeroOrOneLiteral(node, D2RQ.uriPattern);
+		String uriPattern = findZeroOrOneLiteral(node, D2RQ.uriPattern.asNode());
 		if (uriPattern != null) {
 			spec.setURIPattern(ensureIsAbsolute(uriPattern));
 		}
-		String valueRegex = findZeroOrOneLiteral(node, D2RQ.valueRegex);
+		String valueRegex = findZeroOrOneLiteral(node, D2RQ.valueRegex.asNode());
 		if (valueRegex != null) {
 			spec.setRegexHint(valueRegex);
 		}
-		String valueContains = findZeroOrOneLiteral(node, D2RQ.valueContains);
+		String valueContains = findZeroOrOneLiteral(node, D2RQ.valueContains.asNode());
 		if (valueContains != null) {
 			spec.setContainsHint(valueContains);
 		}
-		String valueMaxLength = findZeroOrOneLiteral(node, D2RQ.valueMaxLength);
+		String valueMaxLength = findZeroOrOneLiteral(node, D2RQ.valueMaxLength.asNode());
 		if (valueMaxLength != null) {
 			try {
 				int maxLength = Integer.parseInt(valueMaxLength);
@@ -338,7 +341,7 @@ public class MapParser {
 						valueMaxLength + "\" on " + node + " (must be an integer)");
 			}
 		}
-		Node translateWith = findZeroOrOneNode(node, D2RQ.translateWith);
+		Node translateWith = findZeroOrOneNode(node, D2RQ.translateWith.asNode());
 		if (translateWith != null) {
 			TranslationTable table = getTranslationTable(translateWith);
 			if (table == null) {
@@ -346,11 +349,11 @@ public class MapParser {
 			}
 			spec.setTranslationTable(table);
 		}
-		spec.addJoins(Join.buildJoins(findLiterals(node, D2RQ.join)));
-		spec.addConditions(findLiterals(node, D2RQ.condition));
-		spec.setAliases(findLiterals(node, D2RQ.alias));
+		spec.addJoins(Join.buildJoins(findLiterals(node, D2RQ.join.asNode())));
+		spec.addConditions(findLiterals(node, D2RQ.condition.asNode()));
+		spec.setAliases(findLiterals(node, D2RQ.alias.asNode()));
 		boolean isUnique = defaultToUnique;
-		String containsDuplicates = findZeroOrOneLiteral(node, D2RQ.containsDuplicates);
+		String containsDuplicates = findZeroOrOneLiteral(node, D2RQ.containsDuplicates.asNode());
 		if ("true".equals(containsDuplicates)) {
 			isUnique = false;
 		} else if ("false".equals(containsDuplicates)) {
@@ -365,7 +368,7 @@ public class MapParser {
 	}
 	
 	private boolean isObjectPropertyBridge(Node node) {
-		return this.graph.contains(node, RDF.Nodes.type, D2RQ.ObjectPropertyBridge);
+		return this.graph.contains(node, RDF.Nodes.type, D2RQ.ObjectPropertyBridge.asNode());
 	}
 
 	private PropertyBridge createPropertyBridge(Node classMap, Node node, 
@@ -388,12 +391,12 @@ public class MapParser {
 
 	private Set findPropertiesForBridge(Node bridge) {
 		Set results = new HashSet();
-		Iterator it = this.graph.find(Node.ANY, D2RQ.propertyBridge, bridge);
+		Iterator it = this.graph.find(Node.ANY, D2RQ.propertyBridge.asNode(), bridge);
 		while (it.hasNext()) {
 			Triple t = (Triple) it.next();
 			results.add(t.getSubject());
 		}
-		it = this.graph.find(bridge, D2RQ.property, Node.ANY);
+		it = this.graph.find(bridge, D2RQ.property.asNode(), Node.ANY);
 		while (it.hasNext()) {
 			Triple t = (Triple) it.next();
 			results.add(t.getObject());
@@ -402,7 +405,7 @@ public class MapParser {
 	}
 
 	private void parseAdditionalProperties() {
-		ExtendedIterator it = this.graph.find(Node.ANY, D2RQ.additionalProperty, Node.ANY);
+		ExtendedIterator it = this.graph.find(Node.ANY, D2RQ.additionalProperty.asNode(), Node.ANY);
 		while (it.hasNext()) {
 			Triple t = (Triple) it.next();
 			NodeMakerSpec subjectSpec = classMapSpecForNode(t.getSubject());
@@ -415,18 +418,18 @@ public class MapParser {
 					t.getSubject(),
 					t.getObject(),
 					subjectSpec,
-					NodeMakerSpec.createFixed(findOneNode(t.getObject(), D2RQ.propertyName)),
-					NodeMakerSpec.createFixed(findOneNode(t.getObject(), D2RQ.propertyValue)));
+					NodeMakerSpec.createFixed(findOneNode(t.getObject(), D2RQ.propertyName.asNode())),
+					NodeMakerSpec.createFixed(findOneNode(t.getObject(), D2RQ.propertyValue.asNode())));
 		}
 	}
 
 	private void parseClassMapTypes() {
-		ExtendedIterator it = this.graph.find(Node.ANY, D2RQ.classMap, Node.ANY);
+		ExtendedIterator it = this.graph.find(Node.ANY, D2RQ.classMap.asNode(), Node.ANY);
 		while (it.hasNext()) {
 			Triple t = (Triple) it.next();
 			addRDFTypePropertyBridge(t.getObject(), t.getSubject());
 		}
-		it = this.graph.find(Node.ANY, D2RQ.class_, Node.ANY);
+		it = this.graph.find(Node.ANY, D2RQ.class_.asNode(), Node.ANY);
 		while (it.hasNext()) {
 			Triple t = (Triple) it.next();
 			addRDFTypePropertyBridge(t.getSubject(), t.getObject());
