@@ -11,7 +11,7 @@
     <rdfs:label>Processing Instructions</rdfs:label>
   </rdfs:Class>
   <rdfs:Class rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database">
-    <rdfs:comment>Represents a database</rdfs:comment>
+    <rdfs:comment>Represents a database.</rdfs:comment>
     <rdfs:label>Database</rdfs:label>
   </rdfs:Class>
   <rdfs:Class rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge">
@@ -27,7 +27,7 @@
   </rdfs:Class>
   <rdfs:Class rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#D2RQModel">
     <ja:assembler>de.fuberlin.wiwiss.d2rq.assembler.D2RQAssembler</ja:assembler>
-    <rdfs:comment>Jena Assemler specification for a relational database, mapped to RDF using the D2RQ tool</rdfs:comment>
+    <rdfs:comment>Jena Assemler specification for a relational database, mapped to RDF using the D2RQ tool.</rdfs:comment>
     <rdfs:label>D2RQ model</rdfs:label>
     <rdfs:subClassOf rdf:resource="http://jena.hpl.hp.com/2005/11/Assembler#Object"/>
   </rdfs:Class>
@@ -36,7 +36,7 @@
     <rdfs:label>Translation</rdfs:label>
   </rdfs:Class>
   <rdfs:Class rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ResourceMap">
-    <rdfs:comment>A database-to-RDF mapping from one or more database columns to a set of RDF resources</rdfs:comment>
+    <rdfs:comment>A database-to-RDF mapping from one or more database columns to a set of RDF resources.</rdfs:comment>
     <rdfs:label>Resources map</rdfs:label>
   </rdfs:Class>
   <rdfs:Class rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ClassMap">
@@ -67,7 +67,7 @@
     <rdfs:label>java class</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#valueMaxLength">
-    <rdfs:comment>Optimizing hint: the maximum length of values of this PropertyBridge</rdfs:comment>
+    <rdfs:comment>Optimizing hint: the maximum length of values of this PropertyBridge.</rdfs:comment>
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
     <rdfs:label>value max length</rdfs:label>
   </rdf:Property>
@@ -81,7 +81,7 @@
     <rdfs:label>translation</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#valueRegex">
-    <rdfs:comment>Optimizing hint: a regular expression matching every value of this PropertyBridge</rdfs:comment>
+    <rdfs:comment>Optimizing hint: a regular expression matching every value of this PropertyBridge.</rdfs:comment>
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
     <rdfs:label>value regex</rdfs:label>
   </rdf:Property>
@@ -94,7 +94,7 @@
     <rdfs:label>property value</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#valueContains">
-    <rdfs:comment>Optimizing hint: a string contained in every value of this PropertyBridge</rdfs:comment>
+    <rdfs:comment>Optimizing hint: a string contained in every value of this PropertyBridge.</rdfs:comment>
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
     <rdfs:label>value contains</rdfs:label>
   </rdf:Property>
@@ -108,7 +108,7 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#lang">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
-    <rdfs:comment>The language tag of literals created by this bridge</rdfs:comment>
+    <rdfs:comment>The language tag of literals created by this bridge.</rdfs:comment>
     <rdfs:label>language</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#belongsToClassMap">
@@ -118,12 +118,12 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#mappingFile">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#D2RQModel"/>
-    <rdfs:comment>URL of a D2RQ mapping file</rdfs:comment>
+    <rdfs:comment>URL of a D2RQ mapping file.</rdfs:comment>
     <rdfs:label>mapping file</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#expressionTranslator">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
-    <rdfs:comment>A Java class or string null (for no expression translation</rdfs:comment>
+    <rdfs:comment>A Java class or string null (for no expression translation).</rdfs:comment>
     <rdfs:label>expression translator</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#class">
@@ -193,17 +193,17 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#datatype">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
-    <rdfs:comment>The datatype of literals created by this bridge</rdfs:comment>
+    <rdfs:comment>The datatype of literals created by this bridge.</rdfs:comment>
     <rdfs:label>datatype</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#resourceBaseURI">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#D2RQModel"/>
-    <rdfs:comment>Base URI for resources generated by relative URI patterns</rdfs:comment>
+    <rdfs:comment>Base URI for resources generated by relative URI patterns.</rdfs:comment>
     <rdfs:label>resource base URI</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#queryHandler">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ProcessingInstructions"/>
-    <rdfs:comment>a Java class name that specifies the graphs QueryHandler</rdfs:comment>
+    <rdfs:comment>a Java class name that specifies the graphs QueryHandler.</rdfs:comment>
     <rdfs:label>query handler</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#password">
@@ -216,7 +216,7 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#condition">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ResourceMap"/>
-    <rdfs:comment>SQL WHERE condition that must be satisfied for a database row to be mapped</rdfs:comment>
+    <rdfs:comment>SQL WHERE condition that must be satisfied for a database row to be mapped.</rdfs:comment>
     <rdfs:label>condition</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#jdbcDSN">
@@ -250,7 +250,7 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#bNodeIdColumns">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ResourceMap"/>
-    <rdfs:comment>Comma-separated list of database columns used for construction of blank nodes</rdfs:comment>
+    <rdfs:comment>Comma-separated list of database columns used for construction of blank nodes.</rdfs:comment>
     <rdfs:label>bNode ID columns</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#dataStorage">
@@ -268,7 +268,7 @@
     <rdfs:label>href</rdfs:label>
   </rdf:Property>
   <rdf:Description rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1">
-    <owl:versionInfo>$Id: d2rq-rdfs.rdf,v 1.2 2006/09/07 21:33:20 cyganiak Exp $</owl:versionInfo>
+    <owl:versionInfo>$Id: d2rq-rdfs.rdf,v 1.3 2006/09/07 22:04:06 cyganiak Exp $</owl:versionInfo>
     <dc:format>RDF</dc:format>
     <dc:date>2006-08-12</dc:date>
     <dc:creator>Richard Cyganiak</dc:creator>
