@@ -35,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.map.DatabaseSchemaInspector;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.7 2006/09/03 00:08:12 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.8 2006/09/07 13:26:10 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -137,6 +137,7 @@ public class MappingGenerator {
 		this.out.println("@prefix db: <" + this.instanceNamespaceURI + "> .");
 		this.out.println("@prefix vocab: <" + this.vocabNamespaceURI + "> .");
 		this.out.println("@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .");
+		this.out.println("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .");
 		this.out.println("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .");
 		this.out.println("@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .");
 		this.out.println();
@@ -177,6 +178,7 @@ public class MappingGenerator {
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
 		this.out.println("\td2rq:class vocab:" + tableName + ";");
 		this.out.println("\t.");
+		writeLabelBridge(tableName);
 		List foreignKeys = this.schema.foreignKeyColumns(tableName);
 		Iterator it = this.schema.listColumns(tableName).iterator();
 		while (it.hasNext()) {
@@ -192,6 +194,14 @@ public class MappingGenerator {
 		}
 		this.out.println();
 		createVocabularyClass(tableName);
+	}
+
+	public void writeLabelBridge(String tableName) {
+		this.out.println(propertyBridgeName(tableName + "__label") + " a d2rq:PropertyBridge;");
+		this.out.println("\td2rq:belongsToClassMap " + classMapName(tableName) + ";");
+		this.out.println("\td2rq:property rdfs:label;");
+		this.out.println("\td2rq:pattern \"" + labelPattern(tableName) + "\";");
+		this.out.println("\t.");
 	}
 	
 	public void writeColumn(Column column, String tableName, List foreignKeys) {
@@ -289,6 +299,19 @@ public class MappingGenerator {
 		while (it.hasNext()) {
 			Column column = (Column) it.next();
 			result += "/@@" + column.getQualifiedName() + "@@";
+		}
+		return result;
+	}
+	
+	private String labelPattern(String tableName) {
+		String result = tableName + " #";
+		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
+		while (it.hasNext()) {
+			Column column = (Column) it.next();
+			result += "@@" + column.getQualifiedName() + "@@";
+			if (it.hasNext()) {
+				result += "/";
+			}
 		}
 		return result;
 	}
