@@ -10,7 +10,7 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQ.java,v 1.6 2006/09/03 12:50:45 cyganiak Exp $
+ * @version $Id: D2RQ.java,v 1.7 2006/09/07 13:38:25 cyganiak Exp $
  */
 public class D2RQ {
 
@@ -91,4 +91,5 @@ public class D2RQ {
     // D2RQ assembler for Jena
     public static final Resource D2RQModel = ResourceFactory.createResource(uri + "D2RQModel");
     public static final Property mappingFile = ResourceFactory.createProperty(uri + "mappingFile");
+    public static final Property resourceBaseURI = ResourceFactory.createProperty(uri + "resourceBaseURI");
 }

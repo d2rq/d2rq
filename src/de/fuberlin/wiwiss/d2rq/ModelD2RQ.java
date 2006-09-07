@@ -16,7 +16,7 @@ import com.hp.hpl.jena.util.FileManager;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.10 2006/09/03 13:45:47 cyganiak Exp $
+ * @version $Id: ModelD2RQ.java,v 1.11 2006/09/07 13:38:25 cyganiak Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */
@@ -24,7 +24,9 @@ public class ModelD2RQ extends ModelCom implements Model {
 
 	/** 
 	 * Create a non-RDF database-based model. The model is created
-	 * from a D2RQ map that must be provided in N3 notation.
+	 * from a D2RQ map that will be loaded from the given URL.
+	 * Its serialization format will be guessed from the
+	 * file extension and defaults to RDF/XML.
 	 * @param mapURL URL of the D2RQ map to be used for this model
 	 */
 	public ModelD2RQ(String mapURL) {
@@ -36,7 +38,8 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 * from a D2RQ map that may be in "RDF/XML", "N-TRIPLES" or "N3"
 	 * format.
 	 * @param mapURL URL of the D2RQ map to be used for this model
-	 * @param serializationFormat the format of the map
+	 * @param serializationFormat the format of the map, or <tt>null</tt>
+	 * 		for guessing based on the file extension
 	 * @param baseURIForData Base URI for turning relative URI patterns into
 	 * 		absolute URIs; if <tt>null</tt>, then D2RQ will pick a base URI
 	 */

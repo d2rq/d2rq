@@ -13,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.map.D2RQ;
  * A Jena assembler that builds ModelD2RQs.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQAssembler.java,v 1.2 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: D2RQAssembler.java,v 1.3 2006/09/07 13:38:26 cyganiak Exp $
  */
 public class D2RQAssembler extends AssemblerBase {
 
@@ -25,6 +25,7 @@ public class D2RQAssembler extends AssemblerBase {
 			throw new D2RQException("Error in assembler specification " + description + ": value of d2rq:mappingFile must be a URI");
 		}
 		String mappingFileURI = ((Resource) description.getProperty(D2RQ.mappingFile).getObject()).getURI();
-		return new ModelD2RQ(mappingFileURI);
+		String resourceBaseURI = ((Resource) description.getProperty(D2RQ.resourceBaseURI).getObject()).getURI();
+		return new ModelD2RQ(mappingFileURI, null, resourceBaseURI);
 	}
 }
