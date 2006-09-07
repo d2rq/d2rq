@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * Created by Joerg Garbers on 25.02.05.
  * 
  * @author jg
- * @version $Id: D2RQPatternStage.java,v 1.6 2006/09/02 22:41:44 cyganiak Exp $
+ * @version $Id: D2RQPatternStage.java,v 1.7 2006/09/07 22:04:32 cyganiak Exp $
  */
 public class D2RQPatternStage extends CombinedPatternStage {
     // TODO keep just one instance of PatternQueryCombiner and update Property Bridges
@@ -79,7 +79,7 @@ public class D2RQPatternStage extends CombinedPatternStage {
 	}
 
 	/**
-     * Sets up {@link PatternQueryCombiner}and returns its
+     * Sets up {@link PatternQueryCombiner} and returns its
      * resultTriplesIterator. Passes stage information to the
      * PatternQueryCombiner.
      * 

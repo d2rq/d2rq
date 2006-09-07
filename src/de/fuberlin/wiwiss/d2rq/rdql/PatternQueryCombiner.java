@@ -27,10 +27,10 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * useless, if there are (Bound) variables for predicates.
  * 
  * @author jgarbers
- * @version $Id: PatternQueryCombiner.java,v 1.11 2006/09/03 17:22:50 cyganiak Exp $
+ * @version $Id: PatternQueryCombiner.java,v 1.12 2006/09/07 22:04:32 cyganiak Exp $
  * @see FindQuery
  */
-class PatternQueryCombiner {
+public class PatternQueryCombiner {
     /** if false then contradiction, no SQL query necessary. */
 	protected boolean possible=true; 
 	protected boolean careForPossible=true;

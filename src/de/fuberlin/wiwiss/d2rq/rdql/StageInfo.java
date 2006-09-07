@@ -21,7 +21,7 @@ import com.hp.hpl.jena.graph.query.ValuatorSet;
 
 /**
  * @author jgarbers
- * @version $Id: StageInfo.java,v 1.2 2006/09/02 20:59:00 cyganiak Exp $
+ * @version $Id: StageInfo.java,v 1.3 2006/09/07 22:04:32 cyganiak Exp $
  */
 public class StageInfo {
 	
@@ -68,7 +68,6 @@ public class StageInfo {
 	
 	/**
 	 * Sets up vars.
-	 * @return
 	 */
 	public VarInfos makeInitialVarInfos(boolean allocateParts) {
 		VarInfos v=new VarInfos(queryMapping,queryConstraints,queryTriples.length);
@@ -131,7 +130,7 @@ public class StageInfo {
 	}
 
 	/** Construct a set of {@link Valuator}s from RDQL expressions.
-	 * A condensed and corrected version of {@link PatternStage#makeGuards(Mapping, ExpressionSet, int)}.
+	 * A condensed and corrected version of PatternStage.
 	 * Answers an ExpressionSet that contains the prepared [against <code>map</code>]
 	 * expression that can be evaluated after the triples have matched.
 	 * By "can be evaluated" we mean that all its variables are bound.
@@ -217,7 +216,7 @@ public class StageInfo {
 	 * This is a sufficient but not a necessary condition, because in principle some
 	 * contradictions can be found even in terms with variables, such as (x=0 AND x=1).
 	 * <p>	
-	 * We redefined {@link com.hp.hpl.jena.graph.query.PatternStage#canEval(com.hp.hpl.jena.graph.query.Expression, int)} 
+	 * We redefined PatternStage 
 	 * so that it also considers variables bound in previous stages.
 	 * @param e a compiled RDQL expression
 	 * @return true iff all variables of the expression are bound in <code>map</code>

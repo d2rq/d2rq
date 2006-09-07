@@ -1,5 +1,20 @@
 package de.fuberlin.wiwiss.d2rq.sesame;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+
+import org.openrdf.sesame.admin.AdminListener;
+import org.openrdf.sesame.config.AccessDeniedException;
+import org.openrdf.sesame.constants.QueryLanguage;
+import org.openrdf.sesame.constants.RDFFormat;
+import org.openrdf.sesame.query.GraphQueryResultListener;
+import org.openrdf.sesame.query.MalformedQueryException;
+import org.openrdf.sesame.query.QueryEvaluationException;
+import org.openrdf.sesame.query.QueryResultsTable;
+import org.openrdf.sesame.query.TableQueryResultListener;
 import org.openrdf.sesame.repository.SesameRepository;
 import org.openrdf.sesame.repository.local.LocalRepository;
 import org.openrdf.sesame.repository.local.LocalService;
@@ -9,7 +24,7 @@ import org.openrdf.sesame.repository.local.LocalService;
  * to a D2RQ Source.
  *
  * @author Oliver Maresch (oliver-maresch@gmx.de)
- * @version $Id: D2RQRepository.java,v 1.6 2006/09/02 20:59:00 cyganiak Exp $
+ * @version $Id: D2RQRepository.java,v 1.7 2006/09/07 22:04:32 cyganiak Exp $
  */
 public class D2RQRepository extends LocalRepository implements SesameRepository{
     
@@ -23,67 +38,67 @@ public class D2RQRepository extends LocalRepository implements SesameRepository{
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void addData(SesameRepository sesameRepository, org.openrdf.sesame.admin.AdminListener adminListener) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void addData(SesameRepository sesameRepository, AdminListener adminListener) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void addData(java.io.File file, String str, org.openrdf.sesame.constants.RDFFormat rDFFormat, boolean param, org.openrdf.sesame.admin.AdminListener adminListener) throws java.io.FileNotFoundException, java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void addData(File file, String str, RDFFormat rDFFormat, boolean param, AdminListener adminListener) throws FileNotFoundException, IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void addData(java.io.InputStream inputStream, String str, org.openrdf.sesame.constants.RDFFormat rDFFormat, boolean param, org.openrdf.sesame.admin.AdminListener adminListener) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void addData(InputStream inputStream, String str, RDFFormat rDFFormat, boolean param, AdminListener adminListener) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void addData(java.io.Reader reader, String str, org.openrdf.sesame.constants.RDFFormat rDFFormat, boolean param, org.openrdf.sesame.admin.AdminListener adminListener) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void addData(Reader reader, String str, RDFFormat rDFFormat, boolean param, AdminListener adminListener) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void addData(String str, String str1, org.openrdf.sesame.constants.RDFFormat rDFFormat, boolean param, org.openrdf.sesame.admin.AdminListener adminListener) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void addData(String str, String str1, RDFFormat rDFFormat, boolean param, AdminListener adminListener) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void addData(java.net.URL uRL, String str, org.openrdf.sesame.constants.RDFFormat rDFFormat, boolean param, org.openrdf.sesame.admin.AdminListener adminListener) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void addData(java.net.URL uRL, String str, RDFFormat rDFFormat, boolean param, AdminListener adminListener) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void addGraph(org.openrdf.model.Graph graph) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void addGraph(org.openrdf.model.Graph graph) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void addGraph(org.openrdf.model.Graph graph, boolean param) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void addGraph(org.openrdf.model.Graph graph, boolean param) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void addGraph(org.openrdf.sesame.constants.QueryLanguage queryLanguage, String str) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void addGraph(QueryLanguage queryLanguage, String str) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void addGraph(org.openrdf.sesame.constants.QueryLanguage queryLanguage, String str, boolean param) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void addGraph(QueryLanguage queryLanguage, String str, boolean param) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void clear(org.openrdf.sesame.admin.AdminListener adminListener) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void clear(AdminListener adminListener) throws IOException, AccessDeniedException {
     }
 
     //TODO wrong documentation
@@ -97,8 +112,8 @@ public class D2RQRepository extends LocalRepository implements SesameRepository{
 	 * @param explicitOnly If <tt>true</tt>, only the explicitly added statements will be extracted.
 	 * @param niceOutput If <tt>true</tt>, the extracted statements will be sorted by their subject.
 	 **/
-    public java.io.InputStream extractRDF(org.openrdf.sesame.constants.RDFFormat rDFFormat, boolean param, boolean param2, boolean param3, boolean param4) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
-        return super.extractRDF(rDFFormat, param, param2, param3, param4);
+    public InputStream extractRDF(RDFFormat rdfDocWriter, boolean ontology, boolean instances, boolean explicitOnly, boolean niceOutput) throws IOException, AccessDeniedException {
+        return super.extractRDF(rdfDocWriter, ontology, instances, explicitOnly, niceOutput);
     }
 
     /**
@@ -114,7 +129,7 @@ public class D2RQRepository extends LocalRepository implements SesameRepository{
      * @param str the query string
      * @return the result graph
      */
-    public org.openrdf.model.Graph performGraphQuery(org.openrdf.sesame.constants.QueryLanguage queryLanguage, String str) throws java.io.IOException, org.openrdf.sesame.query.MalformedQueryException, org.openrdf.sesame.query.QueryEvaluationException, org.openrdf.sesame.config.AccessDeniedException {
+    public org.openrdf.model.Graph performGraphQuery(QueryLanguage queryLanguage, String str) throws IOException, MalformedQueryException, QueryEvaluationException, AccessDeniedException {
         return super.performGraphQuery(queryLanguage, str);
     }
 
@@ -122,9 +137,9 @@ public class D2RQRepository extends LocalRepository implements SesameRepository{
      * Executes an Query and returns the result as a graph.
      * @param queryLanguage indentifier for the used query language (SeRQL, RQL or RDQL)
      * @param str the query string
-     * @param listener the result listener
+     * @param graphQueryResultListener the result listener
      */
-    public void performGraphQuery(org.openrdf.sesame.constants.QueryLanguage queryLanguage, String str, org.openrdf.sesame.query.GraphQueryResultListener graphQueryResultListener) throws java.io.IOException, org.openrdf.sesame.query.MalformedQueryException, org.openrdf.sesame.query.QueryEvaluationException, org.openrdf.sesame.config.AccessDeniedException {
+    public void performGraphQuery(QueryLanguage queryLanguage, String str, GraphQueryResultListener graphQueryResultListener) throws IOException, MalformedQueryException, QueryEvaluationException, AccessDeniedException {
         super.performGraphQuery(queryLanguage, str, graphQueryResultListener);
     }
 
@@ -134,7 +149,7 @@ public class D2RQRepository extends LocalRepository implements SesameRepository{
      * @param str the query string
      * @return the query result table
      */
-    public org.openrdf.sesame.query.QueryResultsTable performTableQuery(org.openrdf.sesame.constants.QueryLanguage queryLanguage, String str) throws java.io.IOException, org.openrdf.sesame.query.MalformedQueryException, org.openrdf.sesame.query.QueryEvaluationException, org.openrdf.sesame.config.AccessDeniedException {
+    public QueryResultsTable performTableQuery(QueryLanguage queryLanguage, String str) throws IOException, MalformedQueryException, QueryEvaluationException, AccessDeniedException {
         return super.performTableQuery(queryLanguage, str);
     }
 
@@ -142,28 +157,28 @@ public class D2RQRepository extends LocalRepository implements SesameRepository{
      * Executes an Query and reports the resulting statements to the specified listener.
      * @param queryLanguage indentifier for the used query language (SeRQL, RQL or RDQL)
      * @param str the query string
-     * @param listener the result listener
+     * @param tableQueryResultListener the result listener
      */
-    public void performTableQuery(org.openrdf.sesame.constants.QueryLanguage queryLanguage, String str, org.openrdf.sesame.query.TableQueryResultListener tableQueryResultListener) throws java.io.IOException, org.openrdf.sesame.query.MalformedQueryException, org.openrdf.sesame.query.QueryEvaluationException, org.openrdf.sesame.config.AccessDeniedException {
+    public void performTableQuery(QueryLanguage queryLanguage, String str, TableQueryResultListener tableQueryResultListener) throws IOException, MalformedQueryException, QueryEvaluationException, AccessDeniedException {
         super.performTableQuery(queryLanguage, str, tableQueryResultListener);
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void removeGraph(org.openrdf.model.Graph graph) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void removeGraph(org.openrdf.model.Graph graph) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void removeGraph(org.openrdf.sesame.constants.QueryLanguage queryLanguage, String str) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void removeGraph(QueryLanguage queryLanguage, String str) throws IOException, AccessDeniedException {
     }
 
     /**
      * Performs no action, because D2RQRepositories are always write protected.
      */
-    public void removeStatements(org.openrdf.model.Resource resource, org.openrdf.model.URI uRI, org.openrdf.model.Value value, org.openrdf.sesame.admin.AdminListener adminListener) throws java.io.IOException, org.openrdf.sesame.config.AccessDeniedException {
+    public void removeStatements(org.openrdf.model.Resource resource, org.openrdf.model.URI uRI, org.openrdf.model.Value value, AdminListener adminListener) throws IOException, AccessDeniedException {
     }
 
 	/**

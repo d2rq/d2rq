@@ -45,7 +45,7 @@ import com.hp.hpl.jena.util.iterator.ClosableIterator;
  * build each time a binding arrives on the {@link Pipe}.
  * 
  * @author Joerg Garbers
- * @version $Id: CombinedPatternStage.java,v 1.5 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: CombinedPatternStage.java,v 1.6 2006/09/07 22:04:32 cyganiak Exp $
  */
 public abstract class CombinedPatternStage extends Stage {
 	
@@ -89,7 +89,7 @@ public abstract class CombinedPatternStage extends Stage {
 	/**
  	 * Pulls variable bindings from the previous stage adds bindings and pushes all
  	 * into the following stage.
- 	 * A more efficient version of {@link PatternStage#run(com.hp.hpl.jena.graph.query.Pipe, com.hp.hpl.jena.graph.query.Pipe)}.
+ 	 * A more efficient version of PatternStage
  	 * Includes its run(Pipe,Pipe) and nest() functionality.
  	 * Handles the case, where bindings for <code>triples</code> are not found triple by triple,
  	 * but in one step. This is the case for D2RQ.
@@ -131,8 +131,6 @@ public abstract class CombinedPatternStage extends Stage {
 	
 	/**
 	 * recursively calls findFrom until the triples.length is reached.
-	 * @param nextToMatch
-	 * @return the index nextToMatch
 	 */
 	protected void findFrom(Domain domain, int nextToFind, Pipe sink, Object aboutPrevious) {
 		// the following two methods should be called in sync
@@ -171,7 +169,6 @@ public abstract class CombinedPatternStage extends Stage {
 	 * @param resultTriples
 	 * @param from
 	 * @param to
-	 * @return
 	 */
 	protected boolean matchAndEvalGuards(Domain domain, Triple[] resultTriples, int from, int to) {
 		boolean possible = true;

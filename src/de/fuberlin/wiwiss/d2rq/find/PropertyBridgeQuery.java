@@ -36,7 +36,7 @@ import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
  * TODO: Common interface with PropertyBridge?
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PropertyBridgeQuery.java,v 1.3 2006/09/03 17:22:51 cyganiak Exp $
+ * @version $Id: PropertyBridgeQuery.java,v 1.4 2006/09/07 22:04:32 cyganiak Exp $
  */
 public class PropertyBridgeQuery {
 	private PropertyBridge bridge;
@@ -55,8 +55,7 @@ public class PropertyBridgeQuery {
 	/**
 	 * Constructs a new TripleQuery.
 	 * @param bridge We look for triples matching this property bridge
-	 * @param subject the subject node, may be {{Node.ANY}}
-	 * @param object the object node, may be {{Node.ANY}}
+	 * @param query The triple we are looking for, might contain Node.ANY
 	 */
 	public PropertyBridgeQuery(PropertyBridge bridge, Triple query) {
 		this.bridge = bridge;

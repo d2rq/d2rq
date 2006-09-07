@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
 /**
  * @author jgarbers
- * @version $Id: GraphUtils.java,v 1.4 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: GraphUtils.java,v 1.5 2006/09/07 22:04:32 cyganiak Exp $
  */
 public class GraphUtils {
 
@@ -51,7 +51,6 @@ public class GraphUtils {
 	 * @param input Database -> List of PropertyBridge
 	 * @param triples
 	 * @param skipIfNotFull if true return only List[] that have entries at each array position.
-	 * @return
 	 */
 	public static Map makeDatabaseToPrefixedPropertyBridges(Map input, Triple[] triples, boolean skipIfNotFull) {
 	    Map ret=new HashMap();
@@ -122,7 +121,6 @@ public class GraphUtils {
 	 * @param inputStart cuts everything left to position inputStart
 	 * @param onNull
 	 * @param onEmpty
-	 * @return
 	 */
 	public static List[] cutArrayOfLists(List[] input, int inputStart, boolean onNull, boolean onEmpty) {
 		int i;
@@ -144,7 +142,7 @@ public class GraphUtils {
 	
 	/**
 	 * Creates a bunch of prefixed property bridge copies for each triple.
-	 * @param graph
+	 * @param candidateBridges
 	 * @param triples
 	 * @param bridges provides store to put results
 	 * @param stopEarly if set stops at first empty PropertyBridge list.
@@ -175,10 +173,8 @@ public class GraphUtils {
 
 	/**
 	 * Refines the bridge candidate lists with refined triples.
-	 * @param graph
 	 * @param triples
 	 * @param bridges
-	 * @return
 	 */
 	public static List[] refinePropertyBridges(List[] bridges, Triple[] triples) {
 		if (bridges==null || triples==null || bridges.length!=triples.length)
@@ -195,7 +191,6 @@ public class GraphUtils {
 	 * @param triples
 	 * @param refined provides store to put results
 	 * @param stopEarly stopEarly if set stops at first empty PropertyBridge list.
-	 * @return
 	 */
 	public static boolean refinePropertyBridges(List[] bridges, Triple[] triples, List[] refined, boolean stopEarly) {
 		boolean fullSuccess=true;
@@ -217,7 +212,6 @@ public class GraphUtils {
 	/**
 	 * Checks if bridges refer to more than one database.
 	 * @param bridges
-	 * @return
 	 */
 	public static boolean refersToMultipleDatabases(List[] bridges) {
 		Database db=null;
@@ -259,7 +253,7 @@ public class GraphUtils {
 	/**
 	 * Finds all property bridges from a collection that match a triple.
 	 * @param t the triple
-	 * @param pbIt the collection iterator (elements must be of type PropertyBridge)
+	 * @param propertyListCandidates the collection (elements must be of type PropertyBridge)
 	 * @return list of items from pbIt
 	 */
 	public static ArrayList propertyBridgesForTriple(Triple t, Collection propertyListCandidates) { // PropertyBridge[]

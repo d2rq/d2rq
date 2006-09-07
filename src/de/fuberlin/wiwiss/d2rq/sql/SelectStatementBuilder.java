@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.7 2006/09/03 17:59:08 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.8 2006/09/07 22:04:32 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -51,7 +51,7 @@ public class SelectStatementBuilder {
 	/**
 	 * @param s Any String
 	 * @return <tt>true</tt> if it is an SQL reserved word
-	 * @see {@link ReservedWords}
+	 * @see ReservedWords
 	 */
 	public static boolean isReservedWord(String s) {
 		return ReservedWords.contains(s);
@@ -218,7 +218,7 @@ public class SelectStatementBuilder {
 	
 	/**
 	 * Adds a WHERE clause to the query.
-	 * @param An SQL expression
+	 * @param condition An SQL expression
 	 */
 	public void addCondition(Expression condition) {
 		if (condition.isTrue() || this.conditions.contains(condition)) {
