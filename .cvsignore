@@ -2,5 +2,5 @@
 .project
 bldsrc
 bldtests
-d2rq.jar
-d2rq.zip
+d2rq-*.tar.gz
+d2rq-*.zip
