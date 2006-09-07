@@ -13,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * Represents an SQL join between two tables, spanning one or more columns.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.5 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: Join.java,v 1.6 2006/09/07 15:14:27 cyganiak Exp $
  */
 public class Join {
 	private Set fromColumns = new HashSet(2);
@@ -150,14 +150,14 @@ public class Join {
 				result.append(" AND ");
 			}
 			result.append(((Column)from[i]).getQualifiedName());
-			result.append("=");
+			result.append(" = ");
 			result.append(((Column)otherSide.get(from[i])).getQualifiedName()); // jg was to[i]
 		}
 		sqlExpression=result.toString();
 		return sqlExpression;
 	}
-	public String toString() { // jg: was dubious! Sets do not 
-		return super.toString() + "(" + sqlExpression() + "";
+	public String toString() { 
+		return "Join(" + sqlExpression() + ")";
 	}
 		
 }

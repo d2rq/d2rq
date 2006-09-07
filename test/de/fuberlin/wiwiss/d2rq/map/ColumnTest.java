@@ -13,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * Unit test cases for {@link Column}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnTest.java,v 1.2 2006/09/03 17:22:50 cyganiak Exp $
+ * @version $Id: ColumnTest.java,v 1.3 2006/09/07 15:14:28 cyganiak Exp $
  */
 public class ColumnTest extends TestCase {
 
@@ -112,5 +112,9 @@ public class ColumnTest extends TestCase {
 				Column.renameColumnsInExpression("fooo.col1", fooAsBar));
 		assertEquals("ofoo.col1", 
 				Column.renameColumnsInExpression("ofoo.col1", fooAsBar));
+	}
+	
+	public void testColumnToString() {
+		assertEquals("Column(foo.bar)", new Column("foo.bar").toString());
 	}
 }

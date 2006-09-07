@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.find.QueryContext;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PropertyBridge.java,v 1.7 2006/09/03 17:22:49 cyganiak Exp $
+ * @version $Id: PropertyBridge.java,v 1.8 2006/09/07 15:14:27 cyganiak Exp $
  */
 public class PropertyBridge {
 	private Node id;
@@ -126,7 +126,11 @@ public class PropertyBridge {
 	}
 
 	public String toString() {
-		return super.toString() + "(" + this.id.toString() + ")";
+		return "PropertyBridge(\n" +
+				"    " + this.subjectMaker + "\n" +
+				"    " + this.predicateMaker + "\n" +
+				"    " + this.objectMaker + "\n" +
+				")";
 	}
 	
 	public PropertyBridge withPrefix(int index) {

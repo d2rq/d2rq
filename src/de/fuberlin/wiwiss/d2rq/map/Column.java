@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  *       e.g. for coumn names occuring inside string literals
  *       
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.6 2006/09/03 17:22:49 cyganiak Exp $
+ * @version $Id: Column.java,v 1.7 2006/09/07 15:14:27 cyganiak Exp $
  */
 public class Column implements ValueSource {
 	private static final java.util.regex.Pattern columnRegex = 
@@ -133,7 +133,7 @@ public class Column implements ValueSource {
 	}
 	
 	public String toString() {
-		return super.toString()+ "(" + this.qualifiedName + ")";
+		return "Column(" + this.qualifiedName + ")";
 	}
 	
 	/**

@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeIdentifier.java,v 1.7 2006/09/03 12:50:45 cyganiak Exp $
+ * @version $Id: BlankNodeIdentifier.java,v 1.8 2006/09/07 15:14:27 cyganiak Exp $
  */
 public class BlankNodeIdentifier implements ValueSource {
 	private final static String DELIMITER = "@@";
@@ -106,12 +106,15 @@ public class BlankNodeIdentifier implements ValueSource {
 	}
 	
 	public String toString() {
-		StringBuffer result = new StringBuffer("bNodeID: " + this.classMapID);
+		StringBuffer result = new StringBuffer("BlankNodeID(");
 		Iterator it = this.identifierColumns.iterator();
 		while (it.hasNext()) {
-			result.append(DELIMITER);
 			result.append(it.next());
+			if (it.hasNext()) {
+				result.append(",");
+			}
 		}
+		result.append(")");
 		return result.toString();
 	}
 }

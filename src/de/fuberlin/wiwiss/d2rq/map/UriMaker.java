@@ -13,10 +13,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UriMaker.java,v 1.6 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: UriMaker.java,v 1.7 2006/09/07 15:14:27 cyganiak Exp $
  */
 public class UriMaker extends NodeMakerBase {
-	private String id;
 	private ValueSource valueSource;
 	
 	public void matchConstraint(NodeConstraint c) {
@@ -24,15 +23,11 @@ public class UriMaker extends NodeMakerBase {
         this.valueSource.matchConstraint(c);
 	}       
 
-	public UriMaker(String id, ValueSource valueSource, boolean isUnique) {
+	public UriMaker(ValueSource valueSource, boolean isUnique) {
 		super(isUnique);
-		this.id = id;
 		this.valueSource = valueSource;
 	}
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#couldFit(com.hp.hpl.jena.graph.Node)
-	 */
 	public boolean couldFit(Node node) {
 		if (Node.ANY.equals(node)) {
 			return true;
@@ -40,16 +35,10 @@ public class UriMaker extends NodeMakerBase {
 		return node.isURI() && this.valueSource.couldFit(node.getURI());
 	}
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getColumns()
-	 */
 	public Set getColumns() {
 		return this.valueSource.getColumns();
 	}
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getColumnValues(com.hp.hpl.jena.graph.Node)
-	 */
 	public Map getColumnValues(Node node) {
 		return this.valueSource.getColumnValues(node.getURI());
 	}
@@ -63,6 +52,6 @@ public class UriMaker extends NodeMakerBase {
 	}
 	
 	public String toString() {
-		return "URIMaker@" + this.id;
+		return "URI(" + this.valueSource + ")";
 	}
 }

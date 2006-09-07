@@ -6,7 +6,9 @@ import java.util.Set;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.impl.LiteralLabel;
+import com.hp.hpl.jena.shared.PrefixMapping;
 
+import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 
 /**
@@ -14,10 +16,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: LiteralMaker.java,v 1.6 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: LiteralMaker.java,v 1.7 2006/09/07 15:14:27 cyganiak Exp $
  */
 public class LiteralMaker extends NodeMakerBase {
-	private String id;
 	private ValueSource valueSource;
 	private RDFDatatype datatype;
 	private String lang;
@@ -36,9 +37,8 @@ public class LiteralMaker extends NodeMakerBase {
         return b1 && b2;
     }        	
     
-	public LiteralMaker(String id, ValueSource valueSource, boolean isUnique, RDFDatatype datatype, String lang) {
+	public LiteralMaker(ValueSource valueSource, boolean isUnique, RDFDatatype datatype, String lang) {
 		super(isUnique);
-		this.id = id;
 		this.valueSource = valueSource;
 		this.datatype = datatype;
 		this.lang = lang;
@@ -108,6 +108,16 @@ public class LiteralMaker extends NodeMakerBase {
 	}
 	
 	public String toString() {
-		return "LiteralMaker@" + this.id;
+		StringBuffer result = new StringBuffer("Literal(");
+		result.append(this.valueSource);
+		if (this.lang != null) {
+			result.append("@" + this.lang);
+		} else if (this.datatype != null) {
+			result.append("^^");
+			result.append(PrettyPrinter.toString(Node.createURI(this.datatype.getURI()), 
+					PrefixMapping.Standard));
+		}
+		result.append(")");
+		return result.toString();
 	}
 }

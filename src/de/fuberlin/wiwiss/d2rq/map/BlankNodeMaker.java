@@ -13,10 +13,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeMaker.java,v 1.6 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: BlankNodeMaker.java,v 1.7 2006/09/07 15:14:27 cyganiak Exp $
  */
 public class BlankNodeMaker extends NodeMakerBase {
-	private String id;
 	private ValueSource valueSource;
 	
 	public void matchConstraint(NodeConstraint c) {
@@ -24,9 +23,8 @@ public class BlankNodeMaker extends NodeMakerBase {
 		this.valueSource.matchConstraint(c);
 	}       
 	
-	public BlankNodeMaker(String id, ValueSource valueSource, boolean isUnique) {
+	public BlankNodeMaker(ValueSource valueSource, boolean isUnique) {
 		super(isUnique);
-		this.id = id;
 		this.valueSource = valueSource;
 	}
 
@@ -60,6 +58,6 @@ public class BlankNodeMaker extends NodeMakerBase {
 	}
 	
 	public String toString() {
-		return "BlankNodeMaker@" + this.id;
+		return "Blank(" + this.valueSource + ")";
 	}
 }

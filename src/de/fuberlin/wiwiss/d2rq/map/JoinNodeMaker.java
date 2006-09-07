@@ -6,8 +6,10 @@ import java.util.Set;
 /**
  * A node maker that wraps another node maker and adds some join conditions.
  * 
+ * TODO: Pass in just one join instead of a set, use multiple wrapped if you have multiple joins
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinNodeMaker.java,v 1.2 2006/08/28 19:44:21 cyganiak Exp $
+ * @version $Id: JoinNodeMaker.java,v 1.3 2006/09/07 15:14:27 cyganiak Exp $
  */
 public class JoinNodeMaker extends WrappingNodeMaker {
 	private Set joins;

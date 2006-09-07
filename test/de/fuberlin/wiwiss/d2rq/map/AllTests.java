@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
  * Tests for the map package
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AllTests.java,v 1.4 2006/09/03 17:22:50 cyganiak Exp $
+ * @version $Id: AllTests.java,v 1.5 2006/09/07 15:14:28 cyganiak Exp $
  */
 public class AllTests {
 
@@ -18,9 +18,10 @@ public class AllTests {
 		suite.addTestSuite(TranslationTableTest.class);
 		suite.addTestSuite(ColumnTest.class);
 		suite.addTestSuite(AliasMapTest.class);
+		suite.addTestSuite(JoinTest.class);
 		suite.addTestSuite(NodeMakerTest.class);
-		suite.addTestSuite(ValueRestrictionTest.class);
 		suite.addTestSuite(ExpressionTest.class);
+		suite.addTestSuite(ValueRestrictionTest.class);
 		//$JUnit-END$
 		return suite;
 	}

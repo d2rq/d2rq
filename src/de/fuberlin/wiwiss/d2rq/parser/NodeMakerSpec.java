@@ -36,7 +36,7 @@ import de.fuberlin.wiwiss.d2rq.types.DateTimeTranslator;
  * through calls to the setter methods.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeMakerSpec.java,v 1.4 2006/09/03 17:22:50 cyganiak Exp $
+ * @version $Id: NodeMakerSpec.java,v 1.5 2006/09/07 15:14:28 cyganiak Exp $
  */
 public class NodeMakerSpec {
 	
@@ -240,13 +240,13 @@ public class NodeMakerSpec {
 	
 	private NodeMaker buildNodeMaker(ValueSource values) {
 		if (this.blankColumns != null) {
-			return new BlankNodeMaker(this.mapName, values, this.isUnique);
+			return new BlankNodeMaker(values, this.isUnique);
 		}
 		if (this.uriColumn != null || this.uriPattern != null) {
-			return new UriMaker(this.mapName, values, this.isUnique);
+			return new UriMaker(values, this.isUnique);
 		}
 		if (this.literalColumn != null || this.literalPattern != null) {
-			return new LiteralMaker(this.mapName, values, this.isUnique, buildDatatype(this.datatypeURI), this.lang);
+			return new LiteralMaker(values, this.isUnique, buildDatatype(this.datatypeURI), this.lang);
 		}
 		throw new D2RQException(this.mapName + " needs a column/pattern/bNodeID specification");
 	}
