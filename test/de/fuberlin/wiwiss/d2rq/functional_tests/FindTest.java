@@ -1,8 +1,10 @@
 package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.VCARD;
 
 import de.fuberlin.wiwiss.d2rq.helpers.FOAF;
 import de.fuberlin.wiwiss.d2rq.helpers.FindTestFramework;
@@ -22,10 +24,8 @@ import de.fuberlin.wiwiss.d2rq.helpers.SKOS;
  *
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  * 
- * TODO: Re-enable the two blank node tests
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTest.java,v 1.9 2006/09/06 21:48:46 cyganiak Exp $
+ * @version $Id: FindTest.java,v 1.10 2006/09/07 13:11:57 cyganiak Exp $
  */
 public class FindTest extends FindTestFramework {
     
@@ -129,62 +129,33 @@ public class FindTest extends FindTestFramework {
 		assertStatementCount(1);
     }
 
-//	public void testMatchAnonymousNode() {
-//		find(Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")),
-//				Node.createURI(NS + "name"), Node.ANY);
-////		dump();
-//		assertTriple(
-//				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")),
-//				Node.createURI(NS + "name"),
-//				Node.createLiteral("Artificial Intelligence", null, xsdString));
-//		assertTripleCount(1);
-//
-//		find(Node.ANY, Node.createURI(NS + "primaryTopic"),
-//				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")));
-////		dump();
-//		assertTriple(
-//				Node.createURI("http://www.conference.org/conf02004/paper#Paper5"),
-//				Node.createURI(NS + "primaryTopic"),
-//				Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3")));
-//		assertTripleCount(1);
-//	}
+	public void testMatchAnonymousSubject() {
+		find(
+				m.createResource(new AnonId(
+						"file:///Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.n3#PostalAddresses@@7")),
+				VCARD.Pcode, null);
+//		dump();
+		assertStatement(
+				m.createResource(new AnonId(
+						"file:///Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.n3#PostalAddresses@@7")),
+				VCARD.Pcode, m.createLiteral("BS34 8QZ"));
+		assertStatementCount(1);
+	}
+	
+	public void testMatchAnonymousObject() {
+		find(null, VCARD.ADR, m.createResource(new AnonId(
+						"file:///Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.n3#PostalAddresses@@7")));
+//		dump();
+		assertStatement(resource("organizations/7"), VCARD.ADR, m.createResource(new AnonId(
+				"file:///Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.n3#PostalAddresses@@7")));
+		assertStatementCount(1);
+	}
 
 	public void testDump() {
 		find(null, null, null);
 //		dump();
-		assertStatementCount(254);
+		assertStatementCount(270);
 	}
-
-//	public void testFetchAnonAndReverse() {
-//		Node topic3 = Node.createAnon(new AnonId("http://www.example.org/dbserver01/db01#Topic@@3"));
-//		find(topic3, Node.ANY, Node.ANY);
-////		dump();
-//		assertTriple(
-//				topic3,
-//				Node.createURI(NS + "name"),
-//				Node.createLiteral("Artificial Intelligence", null, xsdString));
-//		assertTriple(
-//				topic3,
-//				RDF.Nodes.type,
-//				Node.createURI(NS + "Topic"));
-//		assertTripleCount(2);
-//
-//		find(Node.ANY, Node.ANY, topic3);
-////		dump();
-//		assertTriple(
-//				Node.createURI("http://www.conference.org/conf02004/paper#Paper5"),
-//				Node.createURI(NS + "primaryTopic"),
-//				topic3);
-//		assertTriple(
-//				Node.createURI("http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil"),
-//				Node.createURI(NS + "research_topic"),
-//				topic3);
-//		assertTriple(
-//				Node.createURI("http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Jim Blythe"),
-//				Node.createURI(NS + "research_topic"),
-//				topic3);
-//		assertTripleCount(3);
-//	}
 
 	public void testFindPredicate() {
 		find(resource("papers/2"), null, m.createTypedLiteral("2002", XSDDatatype.XSDgYear));

@@ -1,4 +1,4 @@
-@prefix map: <file:/Users/richard/D2RQ/workspace/D2R-Server/iswc-mapping.n3#> .
+@prefix map: <file:/Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.n3#> .
 @prefix vocab: <vocab/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -10,7 +10,7 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix iswc: <http://annotation.semanticweb.org/iswc/iswc.daml#> .
-@prefix contact: <http://www.w3.org/2000/10/swap/pim/contact#> .
+@prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
 
 map:database a d2rq:Database;
 	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
@@ -76,25 +76,41 @@ map:organizations_Name a d2rq:PropertyBridge;
 	d2rq:property rdfs:label;
 	d2rq:column "organizations.Name";
 	.
-map:organizations_Address a d2rq:PropertyBridge;
-	d2rq:belongsToClassMap map:Organizations;
-	d2rq:property iswc:address;
-	d2rq:column "organizations.Address";
-	.
-map:organizations_Location a d2rq:PropertyBridge;
-	d2rq:belongsToClassMap map:Organizations;
-	d2rq:property iswc:location;
-	d2rq:column "organizations.Location";
-	.
-map:organizations_Country a d2rq:PropertyBridge;
-	d2rq:belongsToClassMap map:Organizations;
-	d2rq:property iswc:country;
-	d2rq:column "organizations.Country";
-	.
 map:organizations_Homepage a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Organizations;
 	d2rq:property foaf:homepage;
 	d2rq:uriColumn "organizations.Homepage";
+	.
+map:organizations_ADR a d2rq:PropertyBridge;
+    d2rq:belongsToClassMap map:Organizations;
+    d2rq:property vcard:ADR;
+    d2rq:refersToClassMap map:PostalAddresses;
+    .
+
+# Postal addresses of organizations
+map:PostalAddresses a d2rq:ClassMap;
+    d2rq:dataStorage map:database;
+    d2rq:bNodeIdColumns "organizations.OrgID";
+    .
+map:addresses_Address a d2rq:PropertyBridge;
+    d2rq:belongsToClassMap map:PostalAddresses;
+    d2rq:property vcard:Street;
+    d2rq:column "organizations.Address";
+    .
+map:addresses_Location a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:PostalAddresses;
+	d2rq:property vcard:Locality;
+	d2rq:column "organizations.Location";
+	.
+map:addresses_Postcode a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:PostalAddresses;
+	d2rq:property vcard:Pcode;
+	d2rq:column "organizations.Postcode";
+	.
+map:addresses_Country a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:PostalAddresses;
+	d2rq:property vcard:Country;
+	d2rq:column "organizations.Country";
 	.
 
 # Table papers
