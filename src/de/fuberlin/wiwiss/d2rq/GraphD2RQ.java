@@ -31,7 +31,6 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
-import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
@@ -41,6 +40,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
 import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
+import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * A D2RQ virtual read-only graph backed by a non-RDF database.
@@ -51,7 +51,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.27 2006/09/07 18:29:30 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.28 2006/09/07 21:33:20 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -117,7 +117,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
 			String namespace = (String) entry.getValue();
-			if (D2RQ.uri.equals(namespace)) {
+			if (D2RQ.NS.equals(namespace)) {
 				getPrefixMapping().removeNsPrefix((String) entry.getKey());
 			}
 		}

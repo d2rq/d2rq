@@ -7,13 +7,13 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
-import de.fuberlin.wiwiss.d2rq.map.D2RQ;
+import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * A Jena assembler that builds ModelD2RQs.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQAssembler.java,v 1.3 2006/09/07 13:38:26 cyganiak Exp $
+ * @version $Id: D2RQAssembler.java,v 1.4 2006/09/07 21:33:20 cyganiak Exp $
  */
 public class D2RQAssembler extends AssemblerBase {
 

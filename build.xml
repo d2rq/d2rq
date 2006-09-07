@@ -17,6 +17,11 @@
 	<property name="zip" value="${distname}.zip"/>
 	<property name="tar" value="${distname}.tar.gz"/>
 	<property name="junit.jar" value="${lib}/junit-4.0.jar"/>
+	<property name="vocab.dir" value="doc/specification"/>
+	<property name="vocab.n3" value="${vocab.dir}/d2rq-rdfs.n3"/>
+	<property name="vocab.rdf" value="${vocab.dir}/d2rq-rdfs.rdf"/>
+	<property name="vocab.java" value="${src}/${project.path}/vocab/D2RQ.java"/>
+	<property name="vocab.namespace" value="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#"/>
 	
 	<path id="project.class.path">
 		<fileset dir="${lib}">
@@ -148,4 +153,38 @@
 	</target>
 
 	<target name="all" depends="zip,tar"/>
+	
+	<target name="vocab.d2rq.schemagen">
+		<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
+				failonerror="true">
+			<arg value="-i" />
+			<arg value="file:${vocab.n3}" />
+			<arg value="-o" />
+			<arg value="${vocab.java}" />
+			<arg value="-a" />
+			<arg value="${vocab.namespace}" />
+			<arg value="-n" />
+			<arg value="D2RQ" />
+			<arg value="--package" />
+			<arg value="${project.package}.vocab" />
+			<arg value="--rdfs" />
+		</java>
+		<!-- schemagen generates broken Java code for the "class" property,
+		     we fix it by search&replace -->
+		<replace file="${vocab.java}" token="Property class" value="Property class_"/>
+		<!-- schemagen generates a field "class_Map" for d2rq:classMap for some reason,
+		     we fix it by search&replace -->
+		<replace file="${vocab.java}" token="class_Map" value="classMap"/>
+	</target>
+	
+	<target name="vocab.d2rq.toXML">
+		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
+				output="${vocab.rdf}" logError="yes" failonerror="true">
+			<arg value="${vocab.n3}"/>
+			<arg value="N3"/>
+			<arg value="RDF/XML-ABBREV"/>
+		</java>
+	</target>
+	
+	<target name="vocab.d2rq" depends="vocab.d2rq.toXML,vocab.d2rq.schemagen"/>
 </project>

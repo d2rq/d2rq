@@ -1,5 +1,5 @@
-/* CVS $Id: SKOS.java,v 1.1 2006/09/06 21:48:47 cyganiak Exp $ */
-package de.fuberlin.wiwiss.d2rq.helpers; 
+/* CVS $Id: SKOS.java,v 1.1 2006/09/07 21:33:19 cyganiak Exp $ */
+package de.fuberlin.wiwiss.d2rq.vocab; 
 import com.hp.hpl.jena.rdf.model.*;
  
 /**

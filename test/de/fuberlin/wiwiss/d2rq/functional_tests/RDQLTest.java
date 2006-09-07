@@ -5,9 +5,9 @@ import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
-import de.fuberlin.wiwiss.d2rq.helpers.ISWC;
 import de.fuberlin.wiwiss.d2rq.helpers.QueryLanguageTestFramework;
-import de.fuberlin.wiwiss.d2rq.helpers.SKOS;
+import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
+import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 
 /**
@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.helpers.SKOS;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDQLTest.java,v 1.13 2006/09/06 21:48:46 cyganiak Exp $
+ * @version $Id: RDQLTest.java,v 1.14 2006/09/07 21:33:20 cyganiak Exp $
  */
 public class RDQLTest extends QueryLanguageTestFramework {
 

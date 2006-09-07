@@ -2,10 +2,10 @@ package de.fuberlin.wiwiss.d2rq.parser;
 
 import java.util.Collections;
 
+import junit.framework.TestCase;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-
-import junit.framework.TestCase;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -15,15 +15,15 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.D2RQ;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
+import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.6 2006/09/03 17:22:51 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.7 2006/09/07 21:33:20 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -57,12 +57,12 @@ public class ParserTest extends TestCase {
 	public void testParseTranslationTable() {
 		Resource r = createTranslationTableResource();
 		addTranslationResource(r, this.model.createLiteral("foo"), this.model.createLiteral("bar"));
-		addTranslationResource(r, this.model.createLiteral("baz"), this.model.createResource(D2RQ.uri));
+		addTranslationResource(r, this.model.createLiteral("baz"), this.model.createResource(D2RQ.NS));
 		MapParser parser = new MapParser(this.model, null);
 		TranslationTable table = parser.getTranslationTable(r.asNode());
 		assertEquals(2, table.size());
 		assertEquals("bar", table.toRDFValue("foo"));
-		assertEquals(D2RQ.uri, table.toRDFValue("baz"));
+		assertEquals(D2RQ.NS, table.toRDFValue("baz"));
 	}
 
 	public void testParseAlias() {

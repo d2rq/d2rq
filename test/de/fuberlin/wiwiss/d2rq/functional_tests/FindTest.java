@@ -6,10 +6,10 @@ import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.VCARD;
 
-import de.fuberlin.wiwiss.d2rq.helpers.FOAF;
 import de.fuberlin.wiwiss.d2rq.helpers.FindTestFramework;
-import de.fuberlin.wiwiss.d2rq.helpers.ISWC;
-import de.fuberlin.wiwiss.d2rq.helpers.SKOS;
+import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
+import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
+import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 /**
  * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.GraphD2RQ}.
@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.helpers.SKOS;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTest.java,v 1.10 2006/09/07 13:11:57 cyganiak Exp $
+ * @version $Id: FindTest.java,v 1.11 2006/09/07 21:33:19 cyganiak Exp $
  */
 public class FindTest extends FindTestFramework {
     

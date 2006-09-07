@@ -23,11 +23,14 @@ import com.hp.hpl.jena.vocabulary.DC;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
+import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
+import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: QueryLanguageTestFramework.java,v 1.1 2006/09/06 21:48:47 cyganiak Exp $
+ * @version $Id: QueryLanguageTestFramework.java,v 1.2 2006/09/07 21:33:19 cyganiak Exp $
  */
 public abstract class QueryLanguageTestFramework extends TestCase {
 	protected ModelD2RQ model;
