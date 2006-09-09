@@ -10,6 +10,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * Translation table that maps a set of database values to a set of
@@ -25,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * probalby be in separate classes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTable.java,v 1.4 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: TranslationTable.java,v 1.5 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class TranslationTable implements Translator {
 	private Map db2rdf = new HashMap();
@@ -197,9 +198,8 @@ public class TranslationTable implements Translator {
 					this.translator.toDBValue(value));
 		}
 
-		public String getValue(String[] row, Map columnNames) {
-			return this.translator.toRDFValue(
-					this.valueSource.getValue(row, columnNames));
+		public String getValue(ResultRow row) {
+			return this.translator.toRDFValue(this.valueSource.getValue(row));
 		}
 		
 		public void matchConstraint(NodeConstraint c) {

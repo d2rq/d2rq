@@ -6,6 +6,7 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * UriMakers transform attribute values from a result set into URIrefs.
@@ -13,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UriMaker.java,v 1.7 2006/09/07 15:14:27 cyganiak Exp $
+ * @version $Id: UriMaker.java,v 1.8 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class UriMaker extends NodeMakerBase {
 	private ValueSource valueSource;
@@ -43,8 +44,8 @@ public class UriMaker extends NodeMakerBase {
 		return this.valueSource.getColumnValues(node.getURI());
 	}
 
-	public Node getNode(String[] row, Map columnNameNumberMap) {
-		String value = this.valueSource.getValue(row, columnNameNumberMap);
+	public Node getNode(ResultRow row) {
+		String value = this.valueSource.getValue(row);
 		if (value == null) {
 			return null;
 		}

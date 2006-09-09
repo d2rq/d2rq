@@ -6,8 +6,9 @@ import java.util.NoSuchElementException;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
-import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * Iterates over the triple stream created by applying several triple makers
@@ -16,15 +17,15 @@ import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ApplyTripleMakersIterator.java,v 1.5 2006/09/09 20:51:49 cyganiak Exp $
+ * @version $Id: ApplyTripleMakerIterator.java,v 1.1 2006/09/09 23:25:16 cyganiak Exp $
  */
-public class ApplyTripleMakersIterator implements ClosableIterator {
+public class ApplyTripleMakerIterator implements ClosableIterator {
 	private TripleMaker tripleMaker;
 	private ClosableIterator sqlIterator;
     private LinkedList tripleQueue = new LinkedList();
     private boolean explicitlyClosed = false;
 
-	public ApplyTripleMakersIterator(ClosableIterator sqlIterator, TripleMaker tripleMaker) {
+	public ApplyTripleMakerIterator(ClosableIterator sqlIterator, TripleMaker tripleMaker) {
 		this.sqlIterator = sqlIterator;
 		this.tripleMaker = tripleMaker;
 	}
@@ -65,7 +66,7 @@ public class ApplyTripleMakersIterator implements ClosableIterator {
 	 */
 	private void tryFillTripleQueue() {
 		while (this.sqlIterator.hasNext() && this.tripleQueue.isEmpty()) {
-			String[] nextRow = (String[]) this.sqlIterator.next();
+			ResultRow nextRow = (ResultRow) this.sqlIterator.next();
 			this.tripleQueue.addAll(this.tripleMaker.makeTriples(nextRow));
 		}
     }

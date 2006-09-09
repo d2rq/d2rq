@@ -11,6 +11,7 @@ import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * A respresentation of a d2rq:PropertyBridge, describing how
@@ -20,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.find.QueryContext;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PropertyBridge.java,v 1.10 2006/09/09 20:51:48 cyganiak Exp $
+ * @version $Id: PropertyBridge.java,v 1.11 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class PropertyBridge implements RDFRelation {
 	private Node id;
@@ -147,17 +148,13 @@ public class PropertyBridge implements RDFRelation {
 				this.uriMatchPolicy);
 	}
 	
-	public TripleMaker tripleMaker(final Map columnNamesToIndices) {
-		return new TripleMaker() {
-			public Collection makeTriples(String[] row) {
-				Node s = getSubjectMaker().getNode(row, columnNamesToIndices);
-				Node p = getPredicateMaker().getNode(row, columnNamesToIndices);
-				Node o = getObjectMaker().getNode(row, columnNamesToIndices);
-				if (s == null || p == null || o == null) {
-					return Collections.EMPTY_LIST;
-				}
-				return Collections.singleton(new Triple(s, p, o));
-			}
-		};
+	public Collection makeTriples(ResultRow row) {
+		Node s = getSubjectMaker().getNode(row);
+		Node p = getPredicateMaker().getNode(row);
+		Node o = getObjectMaker().getNode(row);
+		if (s == null || p == null || o == null) {
+			return Collections.EMPTY_LIST;
+		}
+		return Collections.singleton(new Triple(s, p, o));
 	}
 }

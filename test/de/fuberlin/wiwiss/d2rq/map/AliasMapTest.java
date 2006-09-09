@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.4 2006/09/09 15:40:05 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.5 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static Column foo_col1 = new Column("foo.col1");
@@ -55,7 +55,7 @@ public class AliasMapTest extends TestCase {
 		assertEquals(bar_col1, this.fooAsBar.applyTo(bar_col1));
 	}
 	
-	public void testRemoveFromColumn() {
+	public void testOriginalOfColumn() {
 		assertEquals(baz_col1, this.fooAsBar.originalOf(baz_col1));
 		assertEquals(foo_col1, this.fooAsBar.originalOf(foo_col1));
 		assertEquals(foo_col1, this.fooAsBar.originalOf(bar_col1));

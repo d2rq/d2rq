@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Join;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
-import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 public class UnionOverSameBase implements RDFRelation {
 
@@ -133,8 +133,14 @@ public class UnionOverSameBase implements RDFRelation {
 		return this.firstBase.mightContainDuplicates();
 	}
 	
-	public TripleMaker tripleMaker(Map columnNamesToIndices) {
-		return new UnionTripleMaker(columnNamesToIndices);
+	public Collection makeTriples(ResultRow row) {
+		List result = new ArrayList();
+		Iterator it = this.baseRelations.iterator();
+		while (it.hasNext()) {
+			RDFRelation relation = (RDFRelation) it.next();
+			result.addAll(relation.makeTriples(row));
+		}
+		return result;
 	}
 	
 	public NodeMaker getSubjectMaker() {
@@ -147,27 +153,5 @@ public class UnionOverSameBase implements RDFRelation {
 
 	public NodeMaker getObjectMaker() {
 		throw new UnsupportedOperationException();
-	}
-	
-	private class UnionTripleMaker implements TripleMaker {
-		private List tripleMakers = new ArrayList(baseRelations.size());
-		private int triplesPerRow = baseRelations.size();
-		UnionTripleMaker(Map columnNamesToIndices) {
-			Iterator it = baseRelations.iterator();
-			while (it.hasNext()) {
-				RDFRelation relation = (RDFRelation) it.next();
-				this.tripleMakers.add(relation.tripleMaker(columnNamesToIndices));
-			}
-		}
-		public Collection makeTriples(String[] row) {
-			List result = new ArrayList(triplesPerRow);
-			Iterator it = this.tripleMakers.iterator();
-			while (it.hasNext()) {
-				TripleMaker tripleMaker = (TripleMaker) it.next();
-				result.addAll(tripleMaker.makeTriples(row));
-			}
-			this.triplesPerRow = Math.max(this.triplesPerRow, result.size());
-			return result;
-		}
 	}
 }

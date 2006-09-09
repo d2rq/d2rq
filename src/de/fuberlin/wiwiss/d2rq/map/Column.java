@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * A database column.
@@ -17,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  *       e.g. for coumn names occuring inside string literals
  *       
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.8 2006/09/09 15:40:02 cyganiak Exp $
+ * @version $Id: Column.java,v 1.9 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class Column implements ValueSource, Comparable {
 	private static final java.util.regex.Pattern columnRegex = 
@@ -118,17 +119,11 @@ public class Column implements ValueSource, Comparable {
 
 	/**
 	 * Returns the value of this column from a database row.
-	 * 
-	 * @param row
-	 *            a database row
-	 * @param columnNameNumberMap
-	 *            a map from qualified column names to indices into the row
-	 *            array
+	 * @param row a database row
 	 * @return this column's value
 	 */
-	public String getValue(String[] row, Map columnNameNumberMap) {
-		Integer columnIndex = (Integer) columnNameNumberMap.get(this.qualifiedName); 
-		return row[columnIndex.intValue()];
+	public String getValue(ResultRow row) {
+		return row.get(this);
 	}
 	
 	public String toString() {

@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 import com.hp.hpl.jena.graph.Triple;
@@ -10,13 +9,12 @@ import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
  * Iterator for PatternQueryCombiner results.
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.8 2006/09/09 15:40:04 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.9 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
     public static int instanceCounter=1;
@@ -104,11 +102,8 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 			    continue;
 			SelectStatementBuilder sql=PatternQueryCombiner.getSQL(conjunction);
 			ch.addConstraintsToSQL(sql);
-			String statement=sql.getSQLStatement();
-			Map map=sql.getColumnNameNumberMap();
 			nextDatabase = conjunction[0].getDatabase();
-			QueryExecutionIterator it = new QueryExecutionIterator(statement, this.nextDatabase);
-			this.resultSet = new ApplyTripleMakerRowIterator(it, conjunction, map);
+			this.resultSet = new ApplyTripleMakerRowIterator(sql.execute(), conjunction);
 		} // enless while loop
 	}
 

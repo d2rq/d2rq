@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * Restriction which can be chained with another {@link ValueSource} to limit the
@@ -11,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * if a value is longer.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MaxLengthRestriction.java,v 1.4 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: MaxLengthRestriction.java,v 1.5 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class MaxLengthRestriction implements ValueSource {
 	private ValueSource valueSource;
@@ -41,7 +42,7 @@ public class MaxLengthRestriction implements ValueSource {
 		return this.valueSource.getColumnValues(value);
 	}
 
-	public String getValue(String[] row, Map columnNameNumberMap) {
-		return this.valueSource.getValue(row, columnNameNumberMap);
+	public String getValue(ResultRow row) {
+		return this.valueSource.getValue(row);
 	}
 }

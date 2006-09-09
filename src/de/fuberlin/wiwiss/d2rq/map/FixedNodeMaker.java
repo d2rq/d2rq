@@ -8,12 +8,13 @@ import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * NodeMaker that returns a fixed node.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FixedNodeMaker.java,v 1.8 2006/09/03 17:22:50 cyganiak Exp $
+ * @version $Id: FixedNodeMaker.java,v 1.9 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class FixedNodeMaker implements NodeMaker {
 	private Node fixedNode;
@@ -50,7 +51,7 @@ public class FixedNodeMaker implements NodeMaker {
 		return Collections.EMPTY_MAP;
 	}
 
-	public Node getNode(String[] row, Map columnNameNumberMap) {
+	public Node getNode(ResultRow row) {
 		return this.fixedNode;
 	}
 	

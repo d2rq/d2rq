@@ -10,13 +10,14 @@ import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraintWrapper;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * Wraps another {@link NodeMaker} and presents a view of that NodeMaker
  * where columns are renamed according to a {@link ColumnRenamer}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RenamingNodeMaker.java,v 1.1 2006/09/09 15:40:03 cyganiak Exp $
+ * @version $Id: RenamingNodeMaker.java,v 1.2 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class RenamingNodeMaker extends WrappingNodeMaker {
 
@@ -82,8 +83,8 @@ public class RenamingNodeMaker extends WrappingNodeMaker {
 		return this.aliases;
 	}
 	
-	public Node getNode(String[] row, Map columnNameNumberMap) {
-		return this.base.getNode(row, this.renames.withOriginalKeys(columnNameNumberMap));
+	public Node getNode(ResultRow row) {
+		return this.base.getNode(this.renames.applyTo(row));
 	}
 
 	public void matchConstraint(NodeConstraint c) {

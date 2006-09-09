@@ -7,13 +7,14 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * BlankNodeMakers transform attribute values from a result set into blank nodes.
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeMaker.java,v 1.7 2006/09/07 15:14:27 cyganiak Exp $
+ * @version $Id: BlankNodeMaker.java,v 1.8 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class BlankNodeMaker extends NodeMakerBase {
 	private ValueSource valueSource;
@@ -45,12 +46,11 @@ public class BlankNodeMaker extends NodeMakerBase {
 	}
 
 	/**
-	 * Creates a new blank node based on the current row of the result set
-	 * and the mapping of database column names to elements of the array.
+	 * Creates a new blank node based on the current row of the result set.
 	 * Returns null if a NULL value was retrieved from the database.
 	 */
-	public Node getNode(String[] row, Map columnNameNumberMap) {
-		String value = this.valueSource.getValue(row, columnNameNumberMap);
+	public Node getNode(ResultRow row) {
+		String value = this.valueSource.getValue(row);
 		if (value == null) {
 			return null;
 		}		

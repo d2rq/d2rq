@@ -8,7 +8,7 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Test for de.fuberlin.wiwiss.d2rq.find");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(ApplyTripleMakersIteratorTest.class);
+		suite.addTestSuite(ApplyTripleMakerIteratorTest.class);
 		//$JUnit-END$
 		return suite;
 	}

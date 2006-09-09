@@ -9,11 +9,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+
 /**
  * Something that can rename columns in various objects.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamer.java,v 1.1 2006/09/09 15:40:02 cyganiak Exp $
+ * @version $Id: ColumnRenamer.java,v 1.2 2006/09/09 23:25:14 cyganiak Exp $
  */
 public abstract class ColumnRenamer {
 	
@@ -29,7 +31,6 @@ public abstract class ColumnRenamer {
 		public Set applyToColumnSet(Set columns) { return columns; }
 		public Set applyToJoinSet(Set joins) { return joins; }
 		public Map applyToMapKeys(Map mapWithColumnKeys) { return mapWithColumnKeys; }
-		public Map withOriginalKeys(Map columnNamesToValues) { return columnNamesToValues; }
 		public String toString() { return "ColumnRenamer.NULL"; }
 	};
 	
@@ -102,9 +103,18 @@ public abstract class ColumnRenamer {
 		return result;
 	}
 
+	public ResultRow applyTo(final ResultRow row) {
+		return new ResultRow() {
+			public String get(Column column) {
+				return row.get(applyTo(column));
+			}
+			public String toString() {
+				return "[" + toString() + " <= " + row.toString() + "]";
+			}
+		};
+	}
+	
 	public abstract Map applyToMapKeys(Map mapWithColumnKeys);
-		
+
 	public abstract AliasMap applyTo(AliasMap aliases);
-		
-	public abstract Map withOriginalKeys(Map columnNamesToValues);
 }

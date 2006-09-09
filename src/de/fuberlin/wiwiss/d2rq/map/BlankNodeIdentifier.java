@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * A blank node identifier that uniquely identifies all resources generated from
@@ -20,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeIdentifier.java,v 1.8 2006/09/07 15:14:27 cyganiak Exp $
+ * @version $Id: BlankNodeIdentifier.java,v 1.9 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class BlankNodeIdentifier implements ValueSource {
 	private final static String DELIMITER = "@@";
@@ -86,21 +87,19 @@ public class BlankNodeIdentifier implements ValueSource {
 	/**
 	 * Creates an identifier from a database row.
 	 * @param row a database row
-	 * @param columnNameNumberMap a map from qualified column names to indices
-	 * 							into the row array
 	 * @return this column's blank node identifier
 	 */
-	public String getValue(String[] row, Map columnNameNumberMap) {
+	public String getValue(ResultRow row) {
 		StringBuffer result = new StringBuffer(this.classMapID);
 		Iterator it = this.identifierColumns.iterator();
 		while (it.hasNext()) {
-			String fieldName = ((Column) it.next()).getQualifiedName();
-			int fieldIndex = ((Integer) columnNameNumberMap.get(fieldName)).intValue();
-			if (row[fieldIndex] == null) {
+			Column column = (Column) it.next();
+			String value = row.get(column);
+			if (value == null) {
 				return null;
 		    }
 			result.append(DELIMITER);
-			result.append(row[fieldIndex]);
+			result.append(value);
 		}
         return result.toString();
 	}

@@ -9,13 +9,11 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.NullIterator;
-import com.hp.hpl.jena.util.iterator.SingletonIterator;
 
 import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleSelection;
 import de.fuberlin.wiwiss.d2rq.algebra.UnionOverSameBase;
-import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 
@@ -25,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.6 2006/09/09 20:51:49 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.7 2006/09/09 23:25:16 cyganiak Exp $
  */
 public class FindQuery {
 	private Triple triplePattern;
@@ -83,10 +81,6 @@ public class FindQuery {
 		sql.addCondition(relation.condition());
 		sql.addSelectColumns(relation.getSelectColumns());
 		sql.setEliminateDuplicates(relation.mightContainDuplicates());
-		ClosableIterator sqlResults = sql.isTrivial()
-				? (ClosableIterator) new SingletonIterator(new String[]{})
-				: new QueryExecutionIterator(sql.getSQLStatement(), sql.getDatabase());
-		return new ApplyTripleMakersIterator(
-				sqlResults, relation.tripleMaker(sql.getColumnNameNumberMap()));
+		return new ApplyTripleMakerIterator(sql.execute(), relation);
 	}
 }

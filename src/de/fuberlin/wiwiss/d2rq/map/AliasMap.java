@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * kinds of objects, the inverse operation is available as well. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.4 2006/09/09 15:40:02 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.5 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_MAP);
@@ -131,21 +131,6 @@ public class AliasMap extends ColumnRenamer {
 			Entry entry = (Entry) it.next();
 			Column column = (Column) entry.getKey();
 			result.put(applyTo(column), entry.getValue());
-		}
-		return result;
-	}
-	
-	public Map withOriginalKeys(Map mapWithColumnNameKeys) {
-		Map result = new HashMap();
-		Iterator it = mapWithColumnNameKeys.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			Column column = new Column((String) entry.getKey());
-			if (hasAlias(column.getTableName())) {
-				// We are overlaying this table with the back-translated alias
-				continue;
-			}
-			result.put(originalOf(column).getQualifiedName(), entry.getValue());
 		}
 		return result;
 	}

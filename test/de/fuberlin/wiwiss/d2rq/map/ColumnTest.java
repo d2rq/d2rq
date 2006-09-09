@@ -8,12 +8,13 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
 
 /**
  * Unit test cases for {@link Column}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnTest.java,v 1.4 2006/09/09 15:40:05 cyganiak Exp $
+ * @version $Id: ColumnTest.java,v 1.5 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class ColumnTest extends TestCase {
 
@@ -45,12 +46,12 @@ public class ColumnTest extends TestCase {
 	}
 	
 	public void testGetValue() {
-		Column col = new Column("table.col1");
+		Column col1 = new Column("table.col1");
+		Column col2 = new Column("table.col2");
 		Map map = new HashMap();
-		map.put("table.col2", new Integer(0));
-		map.put("table.col1", new Integer(1));
-		String[] row = {"foo", "bar", "baz"};
-		assertEquals("bar", col.getValue(row, map));
+		map.put(col1, "bar");
+		map.put(col2, "foo");
+		assertEquals("bar", col1.getValue(new ResultRowMap(map)));
 	}
 
 	public void testEquals() {

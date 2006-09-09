@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * Describes a set of strings that are obtained in some way
@@ -26,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * of a set of RDF nodes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueSource.java,v 1.3 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: ValueSource.java,v 1.4 2006/09/09 23:25:15 cyganiak Exp $
  */
 public interface ValueSource {
     
@@ -59,11 +60,9 @@ public interface ValueSource {
 	/**
 	 * Retrieves a value from a database row according to some rule or pattern.
 	 * @param row the database row
-	 * @param columnNameNumberMap a map from <tt>Table.Column</tt> style column
-	 * 							names to Integer indices into the row array
 	 * @return a value created from the row
 	 */
-	String getValue(String[] row, Map columnNameNumberMap);
+	String getValue(ResultRow row);
 	
 	void matchConstraint(NodeConstraint c);
 }

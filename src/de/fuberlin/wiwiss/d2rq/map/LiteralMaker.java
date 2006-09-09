@@ -10,13 +10,14 @@ import com.hp.hpl.jena.shared.PrefixMapping;
 
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * LiteralMakers transform attribute values from a result set into literals.
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: LiteralMaker.java,v 1.7 2006/09/07 15:14:27 cyganiak Exp $
+ * @version $Id: LiteralMaker.java,v 1.8 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class LiteralMaker extends NodeMakerBase {
 	private ValueSource valueSource;
@@ -82,11 +83,8 @@ public class LiteralMaker extends NodeMakerBase {
 		return this.valueSource.getColumnValues(node.getLiteral().getLexicalForm());
 	}
 
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.NodeMaker#getNode(java.lang.String[], java.util.Map)
-	 */
-	public Node getNode(String[] row, Map columnNameNumberMap) {
-		String value = this.valueSource.getValue(row, columnNameNumberMap);
+	public Node getNode(ResultRow row) {
+		String value = this.valueSource.getValue(row);
 		if (value == null) {
 			return null;
 		}

@@ -1,37 +1,31 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
-import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * Contains the result set from one SQL query and transforms it into triples.
  * A triple is produced for TripleMaker in TripleMaker and each row in the result set.
  *
  * @author jgarbers
- * @version $Id: ApplyTripleMakerRowIterator.java,v 1.4 2006/09/09 20:51:49 cyganiak Exp $
+ * @version $Id: ApplyTripleMakerRowIterator.java,v 1.5 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class ApplyTripleMakerRowIterator implements ClosableIterator {
-	private QueryExecutionIterator sqlIterator;
+	private ClosableIterator sqlIterator;
 	private TripleMaker[] tripleMakers = null;
 	private Triple[] prefetchedRow;
 	private boolean explicitlyClosed = false;
 
-	public ApplyTripleMakerRowIterator(QueryExecutionIterator sqlIterator, RDFRelation[] queries,
-			Map columnNameNumberMap) {
+	public ApplyTripleMakerRowIterator(ClosableIterator sqlIterator, TripleMaker[] tripleMakers) {
 		this.sqlIterator = sqlIterator;
-		this.tripleMakers = new TripleMaker[queries.length];
-		for (int i = 0; i < queries.length; i++) {
-			this.tripleMakers[i] = queries[i].tripleMaker(columnNameNumberMap);
-		}
+		this.tripleMakers = tripleMakers;
 	}
 	
 	public boolean hasNext() {
@@ -68,7 +62,7 @@ public class ApplyTripleMakerRowIterator implements ClosableIterator {
 	
 	private Triple[] tryFetchNextRow() {
 		while (this.sqlIterator.hasNext()) {
-			Triple[] nextRow = makeTripleRow(this.sqlIterator.nextRow());
+			Triple[] nextRow = makeTripleRow((ResultRow) this.sqlIterator.next());
 			if (nextRow != null) {
 				return nextRow;
 			}
@@ -77,7 +71,7 @@ public class ApplyTripleMakerRowIterator implements ClosableIterator {
 		return null;
     }
 	
-	private Triple[] makeTripleRow(String[] row) {
+	private Triple[] makeTripleRow(ResultRow row) {
 		Triple[] result = new Triple[tripleMakers.length];
 		for (int i = 0; i < tripleMakers.length; i++) {
 			Collection triples = tripleMakers[i].makeTriples(row);

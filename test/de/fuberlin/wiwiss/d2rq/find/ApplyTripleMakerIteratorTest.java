@@ -4,22 +4,23 @@ import java.util.Collection;
 import java.util.Collections;
 
 import junit.framework.TestCase;
-import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * Tests for {@link D2RQResultIterator}.
  *
- * @version $Id: ApplyTripleMakersIteratorTest.java,v 1.3 2006/09/09 20:51:49 cyganiak Exp $
+ * @version $Id: ApplyTripleMakerIteratorTest.java,v 1.1 2006/09/09 23:25:15 cyganiak Exp $
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class ApplyTripleMakersIteratorTest extends TestCase {
+public class ApplyTripleMakerIteratorTest extends TestCase {
 
-    public void testApplyTripleMakersIteratorIsLazy() {
-        ApplyTripleMakersIterator it = new ApplyTripleMakersIterator(
+    public void testApplyTripleMakerIteratorIsLazy() {
+        ApplyTripleMakerIterator it = new ApplyTripleMakerIterator(
         		new FakeQueryExecutionIterator(),
         		new TripleMaker() {
-					public Collection makeTriples(String[] row) {
+					public Collection makeTriples(ResultRow row) {
 						return Collections.EMPTY_LIST;
 					}
         		});
@@ -28,7 +29,7 @@ public class ApplyTripleMakersIteratorTest extends TestCase {
     
     private class FakeQueryExecutionIterator extends QueryExecutionIterator {
     	FakeQueryExecutionIterator() {
-    		super(null, null);
+    		super(null, null, null);
     	}
     	public boolean hasNext() {
     		fail("QueryExecutionIterator should be used lazily");

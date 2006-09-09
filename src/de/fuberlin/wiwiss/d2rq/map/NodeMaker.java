@@ -6,6 +6,7 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * NodeMakers represent the nodes of the virtual RDF graph created by
@@ -43,7 +44,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author Joerg Garbers
- * @version $Id: NodeMaker.java,v 1.5 2006/09/03 17:22:50 cyganiak Exp $
+ * @version $Id: NodeMaker.java,v 1.6 2006/09/09 23:25:14 cyganiak Exp $
  */
 public interface NodeMaker { 
     
@@ -106,13 +107,10 @@ public interface NodeMaker {
 	/**
 	 * Creates a new Node from a database result row.
 	 * @param row a database result row
-	 * @param columnNameNumberMap a map from <tt>Table.Column</tt> style column names
-	 * 							to Integers representing indices within the row array
 	 * @return a node created from the row, or <tt>null</tt> if a <tt>NULL</tt> value
-	 *			was encountered in a required field.
-	 * TODO Column names should be represented as Columns not Strings
+	 *			was encountered in a required field or no node is generated for another reason.
 	 */
-    Node getNode(String[] row, Map columnNameNumberMap);
+    Node getNode(ResultRow row);
 
 	/**
 	 * Does this NodeMaker produce unique nodes, or may there be duplicates?

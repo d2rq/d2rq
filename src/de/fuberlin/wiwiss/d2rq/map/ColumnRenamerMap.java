@@ -8,14 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import de.fuberlin.wiwiss.d2rq.D2RQException;
-
 /**
  * A {@link ColumnRenamer} based on a fixed map of
  * original and replacement columns.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerMap.java,v 1.1 2006/09/09 15:40:02 cyganiak Exp $
+ * @version $Id: ColumnRenamerMap.java,v 1.2 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class ColumnRenamerMap extends ColumnRenamer {
 	private Map originalsToReplacements;
@@ -30,7 +28,7 @@ public class ColumnRenamerMap extends ColumnRenamer {
 		}
 		return original;
 	}
-	
+
 	public Map applyToMapKeys(Map mapWithColumnKeys) {
 		Map result = new HashMap();
 		Iterator it = mapWithColumnKeys.entrySet().iterator();
@@ -50,25 +48,6 @@ public class ColumnRenamerMap extends ColumnRenamer {
 	
 	public AliasMap applyTo(AliasMap aliases) {
 		return aliases;
-	}
-	
-	public Map withOriginalKeys(Map columnNamesToValues) {
-		Map result = new HashMap(columnNamesToValues);
-		Iterator it = this.originalsToReplacements.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			Column originalColumn = (Column) entry.getKey();
-			Column replacedColumn = (Column) entry.getValue();
-			if (result.containsKey(originalColumn)) {
-				throw new D2RQException("Conflicting values while restoring original keys; " +
-						"data was: " + columnNamesToValues + "; ColumnReplacer was: " + this);
-			}
-			Object value = columnNamesToValues.get(replacedColumn.getQualifiedName());
-			if (value != null) {
-				result.put(originalColumn.getQualifiedName(), value);
-			}
-		}
-		return result;
 	}
 	
 	public String toString() {

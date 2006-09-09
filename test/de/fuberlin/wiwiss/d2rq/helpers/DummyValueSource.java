@@ -5,12 +5,13 @@ import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.map.ValueSource;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * Dummy implementation of {@link ValueSource}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DummyValueSource.java,v 1.1 2006/09/03 13:03:42 cyganiak Exp $
+ * @version $Id: DummyValueSource.java,v 1.2 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class DummyValueSource implements ValueSource {
 	private boolean couldFit = true;
@@ -54,7 +55,7 @@ public class DummyValueSource implements ValueSource {
 		return this.columnValues;
 	}
 
-	public String getValue(String[] row, Map columnNameNumberMap) {
+	public String getValue(ResultRow row) {
 		return this.returnValue;
 	}
 }

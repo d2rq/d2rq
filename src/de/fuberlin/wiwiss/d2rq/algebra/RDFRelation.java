@@ -10,7 +10,7 @@ import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
-import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
+import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * A relation, as defined in relational algebra, plus a set of NodeMakers
@@ -21,9 +21,9 @@ import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
  *       methods in the NodeMakers; refactor the interfaces to prevent this
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelation.java,v 1.2 2006/09/09 20:51:49 cyganiak Exp $
+ * @version $Id: RDFRelation.java,v 1.3 2006/09/09 23:25:15 cyganiak Exp $
  */
-public interface RDFRelation {
+public interface RDFRelation extends TripleMaker {
 	
 	/**
 	 * Checks if a given triple could match this relation without
@@ -57,6 +57,4 @@ public interface RDFRelation {
 	NodeMaker getPredicateMaker();
 
 	NodeMaker getObjectMaker();
-	
-	TripleMaker tripleMaker(Map columnNamesToIndices);
 }

@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Join;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.RenamingNodeMaker;
-import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * <p>Removes unnecessary joins from an {@link RDFRelation} in cases
@@ -50,7 +51,7 @@ import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
  * d2rq:ClassMap along an 1:1 relation. This should be considered a bug.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.2 2006/09/09 20:51:49 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.3 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class JoinOptimizer implements RDFRelation {
 	private RDFRelation base;
@@ -205,7 +206,7 @@ public class JoinOptimizer implements RDFRelation {
 		return "JoinOptimizer(" + this.base + ")";
 	}
 	
-	public TripleMaker tripleMaker(Map columnNamesToIndices) {
-		return this.base.tripleMaker(this.columnRenamer.withOriginalKeys(columnNamesToIndices));
+	public Collection makeTriples(ResultRow row) {
+		return this.base.makeTriples(this.columnRenamer.applyTo(row));
 	}
 }

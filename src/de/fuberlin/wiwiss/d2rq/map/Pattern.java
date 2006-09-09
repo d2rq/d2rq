@@ -12,13 +12,14 @@ import java.util.regex.Matcher;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * A pattern that combines one or more database columns into a String. Often
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.8 2006/09/03 12:50:45 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.9 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class Pattern implements ValueSource {
 	public final static String DELIMITER = "@@";
@@ -83,20 +84,18 @@ public class Pattern implements ValueSource {
 	/**
 	 * Constructs a String from the pattern using the given database row.
 	 * @param row a database row
-	 * @param columnNameNumberMap a map from qualified column names to indices
-	 * 							into the row array
 	 * @return the pattern's value for the given row
 	 */
-	public String getValue(String[] row, Map columnNameNumberMap) {
+	public String getValue(ResultRow row) {
 		int index = 0;
 		StringBuffer result = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {
 			Column column = (Column) this.columns.get(index);
-			Integer fieldNumber = (Integer) columnNameNumberMap.get(column.getQualifiedName());
-			if (row[fieldNumber.intValue()] == null) {
+			String value = row.get(column);
+			if (value == null) {
 				return null;
 			}
-			result.append(row[fieldNumber.intValue()]);				
+			result.append(value);				
 			result.append(this.literalParts.get(index));
 			index++;
 		}

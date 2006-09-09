@@ -5,38 +5,36 @@ import java.util.Iterator;
 import java.util.Map;
 
 import junit.framework.TestCase;
-import de.fuberlin.wiwiss.d2rq.map.Column;
-import de.fuberlin.wiwiss.d2rq.map.Pattern;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
 
 /**
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.1 2006/09/03 12:57:30 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.2 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
-	private Map map;
-	private final static String[] defaultRow = {"1", "2", "3", "4", ""};
+	private final static Column col1 = new Column("table.col1");
+	private final static Column col2 = new Column("table.col2");
+	private final static Column col3 = new Column("table.col3");
+	private final static Column col4 = new Column("table.col4");
+	private final static Column col5 = new Column("table.col5");
+
+	private ResultRow row;
 
 	public void setUp() {
-		this.map = new HashMap();
-		this.map.put("table.col1", new Integer(0));
-		this.map.put("table.col2", new Integer(1));
-		this.map.put("table.col3", new Integer(2));
-		this.map.put("table.col4", new Integer(3));
-		this.map.put("table.col5", new Integer(4));
+		this.row = row("1|2|3|4|");
 	}
 
 	public void testSimple() {
 		Pattern pattern = new Pattern("foo@@table.col1@@baz");
-		String[] row = {"1"};
-		assertEquals("foo1baz", pattern.getValue(row, this.map));
+		assertEquals("foo1baz", pattern.getValue(row("1")));
 	}
 	
 	public void testNull() {
 		Pattern pattern = new Pattern("foo@@table.col1@@bar@@table.col2@@baz");
-		String[] row = {"123", null};
-		assertNull(pattern.getValue(row, this.map));
+		assertNull(pattern.getValue(row("123")));
 	}
 	
 	public void testPatternSyntax() {
@@ -83,13 +81,13 @@ public class PatternTest extends TestCase {
 
 	public void testMatchesMiniPattern() {
 		Pattern p = new Pattern("@@table.col1@@");
-		this.map = new HashMap();
-		this.map.put("table.col1", "");
-		assertPatternValues(p, "", this.map);
-		this.map.put("table.col1", "a");
-		assertPatternValues(p, "a", this.map);
-		this.map.put("table.col1", "xyz");
-		assertPatternValues(p, "xyz", this.map);
+		Map map = new HashMap();
+		map.put("table.col1", "");
+		assertPatternValues(p, "", map);
+		map.put("table.col1", "a");
+		assertPatternValues(p, "a", map);
+		map.put("table.col1", "xyz");
+		assertPatternValues(p, "xyz", map);
 		assertNoMatch(p, null);
 	}
 
@@ -99,9 +97,9 @@ public class PatternTest extends TestCase {
 	 */
 	public void testMatchesPatternContainingNewlines() {
 		Pattern p = new Pattern("foo@@table.col1@@bar");
-		this.map = new HashMap();
-		this.map.put("table.col1", "1\n2");
-		assertPatternValues(p, "foo1\n2bar", this.map);
+		Map map = new HashMap();
+		map.put("table.col1", "1\n2");
+		assertPatternValues(p, "foo1\n2bar", map);
 	}
 
 	/**
@@ -110,21 +108,21 @@ public class PatternTest extends TestCase {
 	 */
 	public void testMagicRegexCharactersCauseNoProblems() {
 		Pattern p = new Pattern("(foo|bar)@@table.col1@@");
-		this.map = new HashMap();
-		this.map.put("table.col1", "1");
-		assertPatternValues(p, "(foo|bar)1", this.map);
+		Map map = new HashMap();
+		map.put("table.col1", "1");
+		assertPatternValues(p, "(foo|bar)1", map);
 		assertNoMatch(p, "foo1");
 	}
 
 	public void testMatchesOneColumnPattern() {
 		Pattern p = new Pattern("foo@@table.col1@@bar");
-		this.map = new HashMap();
-		this.map.put("table.col1", "1");
-		assertPatternValues(p, "foo1bar", this.map);
-		this.map.put("table.col1", "");
-		assertPatternValues(p, "foobar", this.map);
-		this.map.put("table.col1", "foofoobarbar");
-		assertPatternValues(p, "foofoofoobarbarbar", this.map);
+		Map map = new HashMap();
+		map.put("table.col1", "1");
+		assertPatternValues(p, "foo1bar", map);
+		map.put("table.col1", "");
+		assertPatternValues(p, "foobar", map);
+		map.put("table.col1", "foofoobarbar");
+		assertPatternValues(p, "foofoofoobarbarbar", map);
 		assertNoMatch(p, "fooba");
 		assertNoMatch(p, "barfoo");
 		assertNoMatch(p, "fobar");
@@ -132,19 +130,19 @@ public class PatternTest extends TestCase {
 
 	public void testMatchesTwoColumnPattern() {
 		Pattern p = new Pattern("foo@@table.col1@@-@@table.col2@@baz");
-		this.map = new HashMap();
-		this.map.put("table.col1", "");
-		this.map.put("table.col2", "");
-		assertPatternValues(p, "foo-baz", this.map);
-		this.map.put("table.col1", "1");
-		this.map.put("table.col2", "2");
-		assertPatternValues(p, "foo1-2baz", this.map);
-		this.map.put("table.col1", "baz");
-		this.map.put("table.col2", "foo");
-		assertPatternValues(p, "foobaz-foobaz", this.map);
-		this.map.put("table.col1", "XYZ");
-		this.map.put("table.col2", "XYZ-2");
-		assertPatternValues(p, "fooXYZ-XYZ-2baz", this.map);
+		Map map = new HashMap();
+		map.put("table.col1", "");
+		map.put("table.col2", "");
+		assertPatternValues(p, "foo-baz", map);
+		map.put("table.col1", "1");
+		map.put("table.col2", "2");
+		assertPatternValues(p, "foo1-2baz", map);
+		map.put("table.col1", "baz");
+		map.put("table.col2", "foo");
+		assertPatternValues(p, "foobaz-foobaz", map);
+		map.put("table.col1", "XYZ");
+		map.put("table.col2", "XYZ-2");
+		assertPatternValues(p, "fooXYZ-XYZ-2baz", map);
 		assertNoMatch(p, "foo1-");
 		assertNoMatch(p, "foobaz-");
 		assertNoMatch(p, "foo1-2baz3");
@@ -152,16 +150,16 @@ public class PatternTest extends TestCase {
 
 	public void testMatchesPatternStartingWithColumn() {
 		Pattern p = new Pattern("@@table.col1@@bar@@table.col2@@baz");
-		this.map = new HashMap();
-		this.map.put("table.col1", "");
-		this.map.put("table.col2", "");
-		assertPatternValues(p, "barbaz", this.map);
-		this.map.put("table.col1", "1");
-		this.map.put("table.col2", "2");
-		assertPatternValues(p, "1bar2baz", this.map);
-		this.map.put("table.col1", "baz");
-		this.map.put("table.col2", "foo");
-		assertPatternValues(p, "bazbarfoobaz", this.map);
+		Map map = new HashMap();
+		map.put("table.col1", "");
+		map.put("table.col2", "");
+		assertPatternValues(p, "barbaz", map);
+		map.put("table.col1", "1");
+		map.put("table.col2", "2");
+		assertPatternValues(p, "1bar2baz", map);
+		map.put("table.col1", "baz");
+		map.put("table.col2", "foo");
+		assertPatternValues(p, "bazbarfoobaz", map);
 		assertNoMatch(p, "1bar");
 		assertNoMatch(p, "bazbar");
 		assertNoMatch(p, "1bar2baz3");
@@ -169,16 +167,16 @@ public class PatternTest extends TestCase {
 
 	public void testMatchesPatternEndingWithColumn() {
 		Pattern p = new Pattern("foo@@table.col1@@bar@@table.col2@@");
-		this.map = new HashMap();
-		this.map.put("table.col1", "");
-		this.map.put("table.col2", "");
-		assertPatternValues(p, "foobar", this.map);
-		this.map.put("table.col1", "1");
-		this.map.put("table.col2", "2");
-		assertPatternValues(p, "foo1bar2", this.map);
-		this.map.put("table.col1", "baz");
-		this.map.put("table.col2", "foo");
-		assertPatternValues(p, "foobazbarfoo", this.map);
+		Map map = new HashMap();
+		map.put("table.col1", "");
+		map.put("table.col2", "");
+		assertPatternValues(p, "foobar", map);
+		map.put("table.col1", "1");
+		map.put("table.col2", "2");
+		assertPatternValues(p, "foo1bar2", map);
+		map.put("table.col1", "baz");
+		map.put("table.col2", "foo");
+		assertPatternValues(p, "foobazbarfoo", map);
 	}
 
 	public void testPartsIteratorSingleLiteral() {
@@ -246,7 +244,7 @@ public class PatternTest extends TestCase {
 	
 	private void assertPattern(String expected, String pattern) {
 		Pattern p = new Pattern(pattern);
-		assertEquals(expected, p.getValue(defaultRow, this.map));
+		assertEquals(expected, p.getValue(this.row));
 	}
 	
 	private void assertPatternValues(Pattern pattern, String value, Map expectedValues) {
@@ -270,5 +268,15 @@ public class PatternTest extends TestCase {
 	private void assertNoMatch(Pattern pattern, String value) {
 		assertFalse(pattern.couldFit(value));
 		assertTrue(pattern.getColumnValues(value).isEmpty());
+	}
+	
+	private ResultRow row(String spec) {
+		String[] parts = spec.split("\\|", -1);
+		Column[] columns = {col1, col2, col3, col4, col5};
+		Map result = new HashMap();
+		for (int i = 0; i < parts.length && i < columns.length; i++) {
+			result.put(columns[i], parts[i]);
+		}
+		return new ResultRowMap(result);
 	}
 }

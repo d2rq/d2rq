@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
-import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * Encapsulates a query for a triple pattern on a specific
@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
  * TODO: Introduce SelectingNodeMaker -- a FixedNodeMaker with ColumnValues that stelect the fixed node
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TripleSelection.java,v 1.2 2006/09/09 20:51:49 cyganiak Exp $
+ * @version $Id: TripleSelection.java,v 1.3 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class TripleSelection implements RDFRelation {
 	private RDFRelation base;
@@ -131,17 +131,13 @@ public class TripleSelection implements RDFRelation {
 				")";
 	}
 	
-	public TripleMaker tripleMaker(final Map columnNamesToIndices) {
-		return new TripleMaker() {
-			public Collection makeTriples(String[] row) {
-				Node s = getSubjectMaker().getNode(row, columnNamesToIndices);
-				Node p = getPredicateMaker().getNode(row, columnNamesToIndices);
-				Node o = getObjectMaker().getNode(row, columnNamesToIndices);
-				if (s == null || p == null || o == null) {
-					return Collections.EMPTY_LIST;
-				}
-				return Collections.singleton(new Triple(s, p, o));
-			}
-		};
+	public Collection makeTriples(final ResultRow row) {
+		Node s = getSubjectMaker().getNode(row);
+		Node p = getPredicateMaker().getNode(row);
+		Node o = getObjectMaker().getNode(row);
+		if (s == null || p == null || o == null) {
+			return Collections.EMPTY_LIST;
+		}
+		return Collections.singleton(new Triple(s, p, o));
 	}
 }

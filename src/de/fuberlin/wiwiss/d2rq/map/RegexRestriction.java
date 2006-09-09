@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * Restriction which can be chained with another {@link ValueSource} to state
@@ -12,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  * query engine can exclude sources if a value doesn't match the expression.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RegexRestriction.java,v 1.4 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: RegexRestriction.java,v 1.5 2006/09/09 23:25:14 cyganiak Exp $
  */
 public class RegexRestriction implements ValueSource {
 	private ValueSource valueSource;
@@ -38,8 +39,8 @@ public class RegexRestriction implements ValueSource {
 		return this.valueSource.getColumnValues(value);
 	}
 
-	public String getValue(String[] row, Map columnNameNumberMap) {
-		return this.valueSource.getValue(row, columnNameNumberMap);
+	public String getValue(ResultRow row) {
+		return this.valueSource.getValue(row);
 	}
 	
 	public void matchConstraint(NodeConstraint c) {

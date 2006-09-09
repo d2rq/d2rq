@@ -2,13 +2,15 @@ package de.fuberlin.wiwiss.d2rq.sql;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import com.hp.hpl.jena.util.iterator.ClosableIterator;
+import com.hp.hpl.jena.util.iterator.SingletonIterator;
 
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Column;
@@ -22,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.9 2006/09/09 15:40:06 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.10 2006/09/09 23:25:16 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -57,11 +59,8 @@ public class SelectStatementBuilder {
 	}
 	
 	private Database database;
-	private List sqlSelect = new ArrayList(10);
+	private List selectColumns = new ArrayList(10);
 	private List conditions = new ArrayList();
-	/** Maps column names from the database to columns numbers in the result set. */
-	private Map columnNameNumber = new HashMap(10);
-	private int selectColumnCount = 0;
 	private boolean eliminateDuplicates = false;
 	
 	// see SQLStatementMaker.sqlFromExpression(referredTables,aliasMap)
@@ -77,7 +76,7 @@ public class SelectStatementBuilder {
 	}
 
 	public boolean isTrivial() {
-		return this.sqlSelect.isEmpty() && this.conditions.isEmpty();
+		return this.selectColumns.isEmpty() && this.conditions.isEmpty();
 	}
 	
 	public String getSQLStatement() {
@@ -85,13 +84,13 @@ public class SelectStatementBuilder {
 		if (this.eliminateDuplicates) {
 			result.append("DISTINCT ");
 		}
-		Iterator it = this.sqlSelect.iterator();
+		Iterator it = this.selectColumns.iterator();
 		if (!it.hasNext()) {
 			result.append("1");
 		}
 		while (it.hasNext()) {
-			String columnname = (String) it.next();
-			result.append(columnname);
+			Column column = (Column) it.next();
+			result.append(column.getQualifiedName());
 			if (it.hasNext()) {
 				result.append(", ");
 			}
@@ -134,15 +133,11 @@ public class SelectStatementBuilder {
 	 * @param column the column
 	 */
 	public void addSelectColumn(Column column) {
-		String qualName=column.getQualifiedName();
-		if (this.sqlSelect.contains(qualName)) {
+		if (this.selectColumns.contains(column)) {
 			return;
 		}
-		this.sqlSelect.add(qualName);
-		this.columnNameNumber.put(qualName,
-				new Integer(this.selectColumnCount));
 		this.mentionedTables.add(column.getTableName());
-		this.selectColumnCount++;
+		this.selectColumns.add(column);
 	}
 
     /**
@@ -174,7 +169,7 @@ public class SelectStatementBuilder {
 		mentionedTables.add(column.getTableName());
 	}
 	
-	public String correctlyQuotedColumnValue(Column column, String value) {
+	private String correctlyQuotedColumnValue(Column column, String value) {
 	    return getQuotedColumnValue(value, columnType(column));
 	}
 	
@@ -250,10 +245,6 @@ public class SelectStatementBuilder {
 		this.eliminateDuplicates = eliminateDuplicates;
 	}
 
-	public Map getColumnNameNumberMap() {
-		return this.columnNameNumber;
-	}
-
 	private static String getQuotedColumnValue(String value, int columnType) {
 		if (Database.numericColumnType==columnType) {
 			// Check if it actually is a number to avoid SQL injection
@@ -272,5 +263,15 @@ public class SelectStatementBuilder {
 			return "#" + value + "#";
 		}
 		return SelectStatementBuilder.singleQuote(value);
+	}
+	
+	/**
+	 * @return An iterator over {@link ResultRow}s
+	 */
+	public ClosableIterator execute() {
+		if (isTrivial()) {
+			return new SingletonIterator(new String[]{});
+		}
+		return new QueryExecutionIterator(getSQLStatement(), this.selectColumns, this.database);		
 	}
 }

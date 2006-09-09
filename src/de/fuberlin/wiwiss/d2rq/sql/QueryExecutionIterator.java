@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.logging.LogFactory;
@@ -20,21 +21,23 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryExecutionIterator.java,v 1.2 2006/09/02 22:41:44 cyganiak Exp $
+ * @version $Id: QueryExecutionIterator.java,v 1.3 2006/09/09 23:25:16 cyganiak Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
 	public static Collection protocol=null;
 
 	private String sql;
+	private List columns;
 	private Database database;
 	private ResultSet resultSet = null;
-	private String[] prefetchedRow = null;
+	private ResultRow prefetchedRow = null;
 	private int numCols = 0;
 	private boolean queryExecuted = false;
 	private boolean explicitlyClosed = false;
 
-	public QueryExecutionIterator(String sql, Database db) {
+	public QueryExecutionIterator(String sql, List columns, Database db) {
 		this.sql = sql;
+		this.columns = columns;
 		this.database = db;
     }
 
@@ -57,19 +60,18 @@ public class QueryExecutionIterator implements ClosableIterator {
 	}
 
 	/**
-	 * Delivers the next query result row.
-	 * @return An array of strings, each representing one cell of the row.
+	 * @return The next query ResultRow.
 	 */
-	public String[] nextRow() {
+	public ResultRow nextRow() {
 		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
-		String[] result = this.prefetchedRow;
+		ResultRow result = this.prefetchedRow;
 		this.prefetchedRow = null;
 		return result;
 	}
 
-	private String[] tryFetchNextRow() {
+	private ResultRow tryFetchNextRow() {
 	    ensureQueryExecuted();
 	    if (this.resultSet == null) {
 	    	return null;
@@ -82,11 +84,7 @@ public class QueryExecutionIterator implements ClosableIterator {
 			}
 			InfoD2RQ.totalNumberOfReturnedRows++;
 			InfoD2RQ.totalNumberOfReturnedFields+=this.numCols;
-			String[] result = new String[this.numCols];
-			for (int i = 0; i < this.numCols; i++) {
-				result[i] = this.resultSet.getString(i + 1);
-			}
-			return result;
+			return ResultRowMap.fromResultSet(this.resultSet, this.columns);
 		} catch (SQLException ex) {
 			throw new D2RQException(ex.getMessage());
 		}

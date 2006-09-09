@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerTest.java,v 1.1 2006/09/09 15:40:05 cyganiak Exp $
+ * @version $Id: ColumnRenamerTest.java,v 1.2 2006/09/09 23:25:15 cyganiak Exp $
  */
 public class ColumnRenamerTest extends TestCase {
 	private final static Column col1 = new Column("foo.col1");
@@ -82,46 +82,6 @@ public class ColumnRenamerTest extends TestCase {
 		assertEquals(aliases, this.col1ToCol2.applyTo(aliases));
 	}
 	
-	public void testWithOriginalKeysDoesNotAffectUnmappedColumns() {
-		Map replaced = new HashMap();
-		replaced.put(col3.getQualifiedName(), "value3");
-		assertEquals(replaced, this.col1ToCol2.withOriginalKeys(replaced));
-	}
-	
-	public void testWithOriginalKeysAffectsMappedColumns() {
-		Map replaced = new HashMap();
-		replaced.put(col2.getQualifiedName(), "value2");
-		Map original = new HashMap();
-		original.put(col2.getQualifiedName(), "value2");
-		original.put(col1.getQualifiedName(), "value2");
-		assertEquals(original, this.col1ToCol2.withOriginalKeys(replaced));
-	}
-	
-	public void testWithOriginalKeysHandlesMultipleOriginals() {
-		Map replacements = new HashMap();
-		replacements.put(col1, col3);
-		replacements.put(col2, col3);
-		Map replaced = new HashMap();
-		replaced.put(col3.getQualifiedName(), "value3");
-		Map original = new HashMap();
-		original.put(col1.getQualifiedName(), "value3");
-		original.put(col2.getQualifiedName(), "value3");
-		original.put(col3.getQualifiedName(), "value3");
-		assertEquals(original, new ColumnRenamerMap(replacements).withOriginalKeys(replaced));
-	}
-	
-	public void testWithOriginalKeysConflictThrowsException() {
-		Map replaced = new HashMap();
-		replaced.put(col1, "value1");
-		replaced.put(col2, "value2");
-		try {
-			this.col1ToCol2.withOriginalKeys(replaced);
-			fail("Must throw exception because col1 should never occur on the replaced side");
-		} catch (Exception ex) {
-			// is expected
-		}
-	}
-
 	public void testNullRenamerToStringEmpty() {
 		assertEquals("ColumnRenamer.NULL", ColumnRenamer.NULL.toString());
 	}
