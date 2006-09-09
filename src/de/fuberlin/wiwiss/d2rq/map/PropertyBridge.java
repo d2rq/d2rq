@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.find.QueryContext;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PropertyBridge.java,v 1.9 2006/09/09 15:40:02 cyganiak Exp $
+ * @version $Id: PropertyBridge.java,v 1.10 2006/09/09 20:51:48 cyganiak Exp $
  */
 public class PropertyBridge implements RDFRelation {
 	private Node id;
@@ -144,5 +145,19 @@ public class PropertyBridge implements RDFRelation {
 				RenamingNodeMaker.prefix(getObjectMaker(), index),
 				this.database,
 				this.uriMatchPolicy);
+	}
+	
+	public TripleMaker tripleMaker(final Map columnNamesToIndices) {
+		return new TripleMaker() {
+			public Collection makeTriples(String[] row) {
+				Node s = getSubjectMaker().getNode(row, columnNamesToIndices);
+				Node p = getPredicateMaker().getNode(row, columnNamesToIndices);
+				Node o = getObjectMaker().getNode(row, columnNamesToIndices);
+				if (s == null || p == null || o == null) {
+					return Collections.EMPTY_LIST;
+				}
+				return Collections.singleton(new Triple(s, p, o));
+			}
+		};
 	}
 }

@@ -10,6 +10,7 @@ import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
 
 /**
  * A relation, as defined in relational algebra, plus a set of NodeMakers
@@ -20,15 +21,25 @@ import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
  *       methods in the NodeMakers; refactor the interfaces to prevent this
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelation.java,v 1.1 2006/09/09 15:40:05 cyganiak Exp $
+ * @version $Id: RDFRelation.java,v 1.2 2006/09/09 20:51:49 cyganiak Exp $
  */
 public interface RDFRelation {
+	
+	/**
+	 * Checks if a given triple could match this relation without
+	 * querying the database.
+	 */
+	boolean couldFit(Triple t, QueryContext context);
+
+	Database getDatabase();
+
+	Set getSelectColumns();
 
 	AliasMap getAliases();
 
-	Map getColumnValues();
+	Set getJoins();
 
-	Set getSelectColumns();
+	Map getColumnValues();
 
 	/**
 	 * Returns the SQL WHERE condition that must hold for a given
@@ -41,19 +52,11 @@ public interface RDFRelation {
 
 	boolean mightContainDuplicates();
 
-	/**
-	 * Checks if a given triple could match this relation without
-	 * querying the database.
-	 */
-	boolean couldFit(Triple t, QueryContext context);
-
-	Database getDatabase();
-
 	NodeMaker getSubjectMaker();
 
 	NodeMaker getPredicateMaker();
 
 	NodeMaker getObjectMaker();
-
-	Set getJoins();
+	
+	TripleMaker tripleMaker(Map columnNamesToIndices);
 }

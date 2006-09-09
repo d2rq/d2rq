@@ -1,11 +1,13 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
@@ -15,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
  * A triple is produced for TripleMaker in TripleMaker and each row in the result set.
  *
  * @author jgarbers
- * @version $Id: ApplyTripleMakerRowIterator.java,v 1.3 2006/09/09 15:40:03 cyganiak Exp $
+ * @version $Id: ApplyTripleMakerRowIterator.java,v 1.4 2006/09/09 20:51:49 cyganiak Exp $
  */
 public class ApplyTripleMakerRowIterator implements ClosableIterator {
 	private QueryExecutionIterator sqlIterator;
@@ -28,7 +30,7 @@ public class ApplyTripleMakerRowIterator implements ClosableIterator {
 		this.sqlIterator = sqlIterator;
 		this.tripleMakers = new TripleMaker[queries.length];
 		for (int i = 0; i < queries.length; i++) {
-			this.tripleMakers[i] = new TripleMaker(queries[i], columnNameNumberMap);
+			this.tripleMakers[i] = queries[i].tripleMaker(columnNameNumberMap);
 		}
 	}
 	
@@ -78,11 +80,15 @@ public class ApplyTripleMakerRowIterator implements ClosableIterator {
 	private Triple[] makeTripleRow(String[] row) {
 		Triple[] result = new Triple[tripleMakers.length];
 		for (int i = 0; i < tripleMakers.length; i++) {
-			Triple triple = tripleMakers[i].makeTriple(row);
-			if (triple == null) {
+			Collection triples = tripleMakers[i].makeTriples(row);
+			if (triples.isEmpty()) {
 				return null;
 			}
-			result[i] = triple;
+			if (triples.size() > 1) {
+				throw new D2RQException(
+						"Multi-triple result not supported here. Result was: " + triples);
+			}
+			result[i] = (Triple) triples.iterator().next();
 		}
 		return result;
 	}

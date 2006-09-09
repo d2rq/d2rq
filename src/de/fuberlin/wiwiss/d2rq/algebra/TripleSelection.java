@@ -1,10 +1,13 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
@@ -13,6 +16,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
 
 /**
  * Encapsulates a query for a triple pattern on a specific
@@ -21,10 +25,10 @@ import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
  * TODO: Introduce SelectingNodeMaker -- a FixedNodeMaker with ColumnValues that stelect the fixed node
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TripleSelection.java,v 1.1 2006/09/09 15:40:05 cyganiak Exp $
+ * @version $Id: TripleSelection.java,v 1.2 2006/09/09 20:51:49 cyganiak Exp $
  */
 public class TripleSelection implements RDFRelation {
-	private RDFRelation bridge;
+	private RDFRelation base;
 	private Map columnValues = new HashMap();
 	private Set selectColumns = new HashSet();
 	private NodeMaker subjectMaker = null;
@@ -33,28 +37,28 @@ public class TripleSelection implements RDFRelation {
 
 	/**
 	 * Constructs a new TripleQuery.
-	 * @param bridge We look for triples matching this property bridge
+	 * @param base We select from this relation
 	 * @param triplePattern The triple we are looking for, might contain Node.ANY
 	 */
-	public TripleSelection(RDFRelation bridge, Triple triplePattern) {
-		this.bridge = bridge;
+	public TripleSelection(RDFRelation base, Triple triplePattern) {
+		this.base = base;
 		if (triplePattern.getSubject().isConcrete()) {
-			this.columnValues.putAll(bridge.getSubjectMaker().getColumnValues(triplePattern.getSubject()));
+			this.columnValues.putAll(base.getSubjectMaker().getColumnValues(triplePattern.getSubject()));
 			this.subjectMaker = new FixedNodeMaker(triplePattern.getSubject());
 		} else {
-			this.selectColumns.addAll(bridge.getSubjectMaker().getColumns());
+			this.selectColumns.addAll(base.getSubjectMaker().getColumns());
 		}
 		if (triplePattern.getPredicate().isConcrete()) {
-			this.columnValues.putAll(bridge.getPredicateMaker().getColumnValues(triplePattern.getPredicate()));
+			this.columnValues.putAll(base.getPredicateMaker().getColumnValues(triplePattern.getPredicate()));
 			this.predicateMaker = new FixedNodeMaker(triplePattern.getPredicate());
 		} else {
-			this.selectColumns.addAll(bridge.getPredicateMaker().getColumns());
+			this.selectColumns.addAll(base.getPredicateMaker().getColumns());
 		}
 		if (triplePattern.getObject().isConcrete()) {
-			this.columnValues.putAll(bridge.getObjectMaker().getColumnValues(triplePattern.getObject()));
+			this.columnValues.putAll(base.getObjectMaker().getColumnValues(triplePattern.getObject()));
 			this.objectMaker = new FixedNodeMaker(triplePattern.getObject());
 		} else {
-			this.selectColumns.addAll(bridge.getObjectMaker().getColumns());
+			this.selectColumns.addAll(base.getObjectMaker().getColumns());
 		}
 	}
 
@@ -72,35 +76,35 @@ public class TripleSelection implements RDFRelation {
 		if (this.objectMaker != null && !this.objectMaker.couldFit(t.getSubject())) {
 			return false;
 		}
-		return this.bridge.couldFit(t, context);
+		return this.base.couldFit(t, context);
 	}
 
 	public int getEvaluationPriority() {
-		return this.bridge.getEvaluationPriority();
+		return this.base.getEvaluationPriority();
 	}
 
 	public NodeMaker getSubjectMaker() {
-		return (this.subjectMaker == null) ? this.bridge.getSubjectMaker() : this.subjectMaker;
+		return (this.subjectMaker == null) ? this.base.getSubjectMaker() : this.subjectMaker;
 	}
 	
 	public NodeMaker getPredicateMaker() {
-		return (this.predicateMaker == null) ? this.bridge.getPredicateMaker() : this.predicateMaker;
+		return (this.predicateMaker == null) ? this.base.getPredicateMaker() : this.predicateMaker;
 	}
 	
 	public NodeMaker getObjectMaker() {
-		return (this.objectMaker == null) ? this.bridge.getObjectMaker() : this.objectMaker;
+		return (this.objectMaker == null) ? this.base.getObjectMaker() : this.objectMaker;
 	}
 	
 	public Set getJoins() {
-		return this.bridge.getJoins();
+		return this.base.getJoins();
 	}
 	
 	public AliasMap getAliases() {
-		return this.bridge.getAliases();
+		return this.base.getAliases();
 	}
 	
 	public Expression condition() {
-		return this.bridge.condition();
+		return this.base.condition();
 	}
 
 	public Map getColumnValues() {
@@ -112,11 +116,11 @@ public class TripleSelection implements RDFRelation {
 	}
 
 	public Database getDatabase() {
-		return this.bridge.getDatabase();
+		return this.base.getDatabase();
 	}
 
 	public boolean mightContainDuplicates() {
-		return this.bridge.mightContainDuplicates();
+		return this.base.mightContainDuplicates();
 	}
 
 	public String toString() {
@@ -125,5 +129,19 @@ public class TripleSelection implements RDFRelation {
 				"    " + getPredicateMaker() + "\n" +
 				"    " + getObjectMaker() + "\n" +
 				")";
+	}
+	
+	public TripleMaker tripleMaker(final Map columnNamesToIndices) {
+		return new TripleMaker() {
+			public Collection makeTriples(String[] row) {
+				Node s = getSubjectMaker().getNode(row, columnNamesToIndices);
+				Node p = getPredicateMaker().getNode(row, columnNamesToIndices);
+				Node o = getObjectMaker().getNode(row, columnNamesToIndices);
+				if (s == null || p == null || o == null) {
+					return Collections.EMPTY_LIST;
+				}
+				return Collections.singleton(new Triple(s, p, o));
+			}
+		};
 	}
 }

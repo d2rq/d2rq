@@ -1,7 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.find;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
@@ -18,22 +16,21 @@ import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ApplyTripleMakersIterator.java,v 1.4 2006/09/09 15:40:05 cyganiak Exp $
+ * @version $Id: ApplyTripleMakersIterator.java,v 1.5 2006/09/09 20:51:49 cyganiak Exp $
  */
 public class ApplyTripleMakersIterator implements ClosableIterator {
-	private Collection tripleMakers;
+	private TripleMaker tripleMaker;
 	private ClosableIterator sqlIterator;
     private LinkedList tripleQueue = new LinkedList();
     private boolean explicitlyClosed = false;
 
-	public ApplyTripleMakersIterator(ClosableIterator sqlIterator, Collection tripleMakers) {
+	public ApplyTripleMakersIterator(ClosableIterator sqlIterator, TripleMaker tripleMaker) {
 		this.sqlIterator = sqlIterator;
-		this.tripleMakers = tripleMakers;
+		this.tripleMaker = tripleMaker;
 	}
 
 	public boolean hasNext() {
-		if (this.explicitlyClosed || this.tripleMakers.isEmpty()) {
-			// prevents starting up the underlying SQL iterator if we have no triple makers
+		if (this.explicitlyClosed) {
 			return false;
 		}
 		if (this.tripleQueue.isEmpty()) {
@@ -69,14 +66,7 @@ public class ApplyTripleMakersIterator implements ClosableIterator {
 	private void tryFillTripleQueue() {
 		while (this.sqlIterator.hasNext() && this.tripleQueue.isEmpty()) {
 			String[] nextRow = (String[]) this.sqlIterator.next();
-			Iterator it = this.tripleMakers.iterator();
-			while (it.hasNext()) {
-				TripleMaker tripleMaker = (TripleMaker) it.next();
-				Triple product = tripleMaker.makeTriple(nextRow);
-				if (product != null) {
-					this.tripleQueue.add(product);
-				}
-			}
+			this.tripleQueue.addAll(this.tripleMaker.makeTriples(nextRow));
 		}
     }
 }
