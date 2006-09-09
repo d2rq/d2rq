@@ -13,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * Unit test cases for {@link Column}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnTest.java,v 1.3 2006/09/07 15:14:28 cyganiak Exp $
+ * @version $Id: ColumnTest.java,v 1.4 2006/09/09 15:40:05 cyganiak Exp $
  */
 public class ColumnTest extends TestCase {
 
@@ -98,20 +98,36 @@ public class ColumnTest extends TestCase {
 				Column.findColumnsInExpression("t1.c1 + t2.c2 = 135"));
 	}
 	
-	public void testReplaceColumnsInExpression() {
+	public void testReplaceColumnsInExpressionWithAliasMap() {
 		Map map = new HashMap();
 		map.put("bar", "foo");
 		AliasMap fooAsBar = new AliasMap(map);
 		assertEquals("bar.col1", 
-				Column.renameColumnsInExpression("foo.col1", fooAsBar));
+				Column.replaceColumnsInExpression("foo.col1", fooAsBar));
 		assertEquals("LEN(bar.col1) > 0", 
-				Column.renameColumnsInExpression("LEN(foo.col1) > 0", fooAsBar));
+				Column.replaceColumnsInExpression("LEN(foo.col1) > 0", fooAsBar));
 		assertEquals("baz.col1", 
-				Column.renameColumnsInExpression("baz.col1", fooAsBar));
+				Column.replaceColumnsInExpression("baz.col1", fooAsBar));
 		assertEquals("fooo.col1", 
-				Column.renameColumnsInExpression("fooo.col1", fooAsBar));
+				Column.replaceColumnsInExpression("fooo.col1", fooAsBar));
 		assertEquals("ofoo.col1", 
-				Column.renameColumnsInExpression("ofoo.col1", fooAsBar));
+				Column.replaceColumnsInExpression("ofoo.col1", fooAsBar));
+	}
+	
+	public void testReplaceColumnsInExpressionWithColumnReplacer() {
+		Map map = new HashMap();
+		map.put(new Column("foo.col1"), new Column("foo.col2"));
+		ColumnRenamerMap col1ToCol2 = new ColumnRenamerMap(map);
+		assertEquals("foo.col2", 
+				Column.replaceColumnsInExpression("foo.col1", col1ToCol2));
+		assertEquals("LEN(foo.col2) > 0", 
+				Column.replaceColumnsInExpression("LEN(foo.col1) > 0", col1ToCol2));
+		assertEquals("foo.col3", 
+				Column.replaceColumnsInExpression("foo.col3", col1ToCol2));
+		assertEquals("foo.col11", 
+				Column.replaceColumnsInExpression("foo.col11", col1ToCol2));
+		assertEquals("ofoo.col1", 
+				Column.replaceColumnsInExpression("ofoo.col1", col1ToCol2));
 	}
 	
 	public void testColumnToString() {

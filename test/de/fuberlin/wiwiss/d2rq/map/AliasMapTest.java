@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.3 2006/09/03 17:22:50 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.4 2006/09/09 15:40:05 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static Column foo_col1 = new Column("foo.col1");
@@ -21,7 +21,6 @@ public class AliasMapTest extends TestCase {
 	private final static Column xyz_col1 = new Column("xyz.col1");
 
 	private AliasMap fooAsBar;
-	private AliasMap noAliases = new AliasMap(Collections.EMPTY_MAP);
 	
 	public void setUp() {
 		Map m = new HashMap();
@@ -33,7 +32,7 @@ public class AliasMapTest extends TestCase {
 		AliasMap aliases = new AliasMap(Collections.EMPTY_MAP);
 		assertFalse(aliases.isAlias("foo"));
 		assertFalse(aliases.hasAlias("foo"));
-		assertEquals("foo", aliases.applyTo("foo"));
+		assertEquals("foo", aliases.applyToTableName("foo"));
 		assertEquals("foo", aliases.originalOf("foo"));
 	}
 
@@ -44,8 +43,8 @@ public class AliasMapTest extends TestCase {
 		assertTrue(this.fooAsBar.hasAlias("foo"));
 		assertFalse(this.fooAsBar.hasAlias("bar"));
 		assertFalse(this.fooAsBar.hasAlias("baz"));
-		assertEquals("bar", this.fooAsBar.applyTo("foo"));
-		assertEquals("baz", this.fooAsBar.applyTo("baz"));
+		assertEquals("bar", this.fooAsBar.applyToTableName("foo"));
+		assertEquals("baz", this.fooAsBar.applyToTableName("baz"));
 		assertEquals("foo", this.fooAsBar.originalOf("bar"));
 		assertEquals("baz", this.fooAsBar.originalOf("baz"));
 	}
@@ -99,17 +98,28 @@ public class AliasMapTest extends TestCase {
 		assertEquals(new Expression("bar.col1"), 
 				fooAsBar.applyTo(new Expression("foo.col1")));
 	}
+
+	public void testNoAliasesConstantHasNoAliasesAndNoOriginals() {
+		assertTrue(AliasMap.NO_ALIASES.allAliases().isEmpty());
+		assertTrue(AliasMap.NO_ALIASES.allOriginalsWithAliases().isEmpty());
+	}
+	
+	public void testNoAliasesConstantEqualsNewEmptyAliasMap() {
+		AliasMap noAliases = new AliasMap(Collections.EMPTY_MAP);
+		assertTrue(AliasMap.NO_ALIASES.equals(noAliases));
+		assertTrue(noAliases.equals(AliasMap.NO_ALIASES));
+	}
 	
 	public void testEmptyMapEqualsItself() {
-		assertTrue(noAliases.equals(noAliases));
+		assertTrue(AliasMap.NO_ALIASES.equals(AliasMap.NO_ALIASES));
 	}
 	
 	public void testEmptyMapDoesntEqualPopulatedMap() {
-		assertFalse(noAliases.equals(fooAsBar));
+		assertFalse(AliasMap.NO_ALIASES.equals(fooAsBar));
 	}
 	
 	public void testPopulatedMapDoesntEqualEmptyMap() {
-		assertFalse(fooAsBar.equals(noAliases));
+		assertFalse(fooAsBar.equals(AliasMap.NO_ALIASES));
 	}
 	
 	public void testPopulatedMapEqualsItself() {

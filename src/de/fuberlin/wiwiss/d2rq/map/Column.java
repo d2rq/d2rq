@@ -17,9 +17,9 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
  *       e.g. for coumn names occuring inside string literals
  *       
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.7 2006/09/07 15:14:27 cyganiak Exp $
+ * @version $Id: Column.java,v 1.8 2006/09/09 15:40:02 cyganiak Exp $
  */
-public class Column implements ValueSource {
+public class Column implements ValueSource, Comparable {
 	private static final java.util.regex.Pattern columnRegex = 
 			java.util.regex.Pattern.compile("([a-zA-Z_]\\w*(?:\\.[a-zA-Z_]\\w*)*)\\.([a-zA-Z_]\\w*)");
 
@@ -32,16 +32,15 @@ public class Column implements ValueSource {
 		return results;
 	}
 
-	public static String renameColumnsInExpression(String expression, AliasMap aliases) {
+	public static String replaceColumnsInExpression(String expression, ColumnRenamer columnRenamer) {
 		StringBuffer result = new StringBuffer();
 		Matcher match = columnRegex.matcher(expression);
 		boolean matched = match.find();
 		int firstPartEnd = matched ? match.start() : expression.length();
 		result.append(expression.substring(0, firstPartEnd));
 		while (matched) {
-			result.append(aliases.applyTo(match.group(1)));
-			result.append(".");
-			result.append(match.group(2));
+			Column column = new Column(match.group(1), match.group(2));
+			result.append(columnRenamer.applyTo(column).getQualifiedName());
 			int nextPartStart = match.end();
 			matched = match.find();
 			int nextPartEnd = matched ? match.start() : expression.length();
@@ -156,5 +155,16 @@ public class Column implements ValueSource {
 	 */
 	public int hashCode() {
 		return this.qualifiedName.hashCode();
+	}
+
+	/**
+	 * Compares columns alphanumerically by qualified name, case sensitive.
+	 */
+	public int compareTo(Object other) {
+		if (!(other instanceof Column)) {
+			return 0;
+		}
+		Column otherColumn = (Column) other;
+		return getQualifiedName().compareTo(otherColumn.getQualifiedName());
 	}
 }

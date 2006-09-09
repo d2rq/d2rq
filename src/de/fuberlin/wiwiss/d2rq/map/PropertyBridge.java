@@ -1,11 +1,14 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 
 /**
@@ -16,9 +19,9 @@ import de.fuberlin.wiwiss.d2rq.find.QueryContext;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PropertyBridge.java,v 1.8 2006/09/07 15:14:27 cyganiak Exp $
+ * @version $Id: PropertyBridge.java,v 1.9 2006/09/09 15:40:02 cyganiak Exp $
  */
-public class PropertyBridge {
+public class PropertyBridge implements RDFRelation {
 	private Node id;
 	private NodeMaker subjectMaker;
 	private NodeMaker predicateMaker;
@@ -29,7 +32,8 @@ public class PropertyBridge {
 	private Expression condition;
 	private URIMatchPolicy uriMatchPolicy = new URIMatchPolicy();
 	private boolean mightContainDuplicates = false;
-
+	private Set selectColumns = new HashSet();
+	
 	public PropertyBridge(Node id, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker, Database database, URIMatchPolicy policy) {
 		this.id = id;
 		this.subjectMaker = subjectMaker;
@@ -37,6 +41,9 @@ public class PropertyBridge {
 		this.objectMaker = objectMaker;
 		this.database = database;
 		this.uriMatchPolicy = policy;
+		this.selectColumns.addAll(this.subjectMaker.getColumns());
+		this.selectColumns.addAll(this.predicateMaker.getColumns());
+		this.selectColumns.addAll(this.objectMaker.getColumns());
 		this.joins.addAll(this.subjectMaker.getJoins());
 		this.joins.addAll(this.predicateMaker.getJoins());
 		this.joins.addAll(this.objectMaker.getJoins());
@@ -57,17 +64,18 @@ public class PropertyBridge {
 				|| (joins.size() >= 1 && allUnique));
 	}
 	
-	public Object clone() throws CloneNotSupportedException {return super.clone();}
-
 	public AliasMap getAliases() {
 		return this.aliases;
 	}
+
+	public Map getColumnValues() {
+		return Collections.EMPTY_MAP;
+	}
 	
-	/**
-	 * Returns the SQL WHERE condition that must hold for a given
-	 * database row or the bridge will not generate a triple.
-	 * @return An SQL expression; {@link Expression#TRUE} indicates no condition
-	 */
+	public Set getSelectColumns() {
+		return this.selectColumns;
+	}
+
 	public Expression condition() {
 		return this.condition;
 	}
@@ -80,10 +88,6 @@ public class PropertyBridge {
 		return this.mightContainDuplicates;
 	}
 	
-	/**
-	 * Checks if a given triple could match this bridge without
-	 * querying the database.
-	 */
 	public boolean couldFit(Triple t, QueryContext context) {
 		if (!this.subjectMaker.couldFit(t.getSubject()) ||
 				!this.predicateMaker.couldFit(t.getPredicate()) ||
@@ -133,11 +137,11 @@ public class PropertyBridge {
 				")";
 	}
 	
-	public PropertyBridge withPrefix(int index) {
+	public RDFRelation withPrefix(int index) {
 		return new PropertyBridge(this.id,
-				TableRenamingNodeMaker.prefix(getSubjectMaker(), index),
-				TableRenamingNodeMaker.prefix(getPredicateMaker(), index),
-				TableRenamingNodeMaker.prefix(getObjectMaker(), index),
+				RenamingNodeMaker.prefix(getSubjectMaker(), index),
+				RenamingNodeMaker.prefix(getPredicateMaker(), index),
+				RenamingNodeMaker.prefix(getObjectMaker(), index),
 				this.database,
 				this.uriMatchPolicy);
 	}

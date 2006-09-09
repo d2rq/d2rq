@@ -6,7 +6,8 @@ import java.util.NoSuchElementException;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
-import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 
 /**
@@ -14,20 +15,21 @@ import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
  * A triple is produced for TripleMaker in TripleMaker and each row in the result set.
  *
  * @author jgarbers
- * @version $Id: ApplyTripleMakerRowIterator.java,v 1.2 2006/08/29 16:12:14 cyganiak Exp $
+ * @version $Id: ApplyTripleMakerRowIterator.java,v 1.3 2006/09/09 15:40:03 cyganiak Exp $
  */
 public class ApplyTripleMakerRowIterator implements ClosableIterator {
 	private QueryExecutionIterator sqlIterator;
-	private Map columnNameNumberMap;
-	private PropertyBridgeQuery[] tripleMakers = null;
+	private TripleMaker[] tripleMakers = null;
 	private Triple[] prefetchedRow;
 	private boolean explicitlyClosed = false;
 
-	public ApplyTripleMakerRowIterator(QueryExecutionIterator sqlIterator, PropertyBridgeQuery[] tripleMakers,
+	public ApplyTripleMakerRowIterator(QueryExecutionIterator sqlIterator, RDFRelation[] queries,
 			Map columnNameNumberMap) {
 		this.sqlIterator = sqlIterator;
-		this.tripleMakers = tripleMakers;
-		this.columnNameNumberMap = columnNameNumberMap;
+		this.tripleMakers = new TripleMaker[queries.length];
+		for (int i = 0; i < queries.length; i++) {
+			this.tripleMakers[i] = new TripleMaker(queries[i], columnNameNumberMap);
+		}
 	}
 	
 	public boolean hasNext() {
@@ -76,8 +78,7 @@ public class ApplyTripleMakerRowIterator implements ClosableIterator {
 	private Triple[] makeTripleRow(String[] row) {
 		Triple[] result = new Triple[tripleMakers.length];
 		for (int i = 0; i < tripleMakers.length; i++) {
-			PropertyBridgeQuery tripleMaker = (PropertyBridgeQuery) tripleMakers[i];
-			Triple triple = tripleMaker.makeTriple(row, this.columnNameNumberMap);
+			Triple triple = tripleMakers[i].makeTriple(row);
 			if (triple == null) {
 				return null;
 			}

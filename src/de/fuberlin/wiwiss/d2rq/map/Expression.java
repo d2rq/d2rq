@@ -10,7 +10,7 @@ import java.util.Set;
  * An SQL expression.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Expression.java,v 1.1 2006/09/03 17:22:49 cyganiak Exp $
+ * @version $Id: Expression.java,v 1.2 2006/09/09 15:40:03 cyganiak Exp $
  */
 public class Expression {
 	public static final Expression TRUE = new Expression("1");
@@ -47,8 +47,8 @@ public class Expression {
 		return this.columns;
 	}
 	
-	public Expression renameTables(AliasMap aliases) {
-		return new Expression(Column.renameColumnsInExpression(this.expression, aliases));
+	public Expression renameColumns(ColumnRenamer columnRenamer) {
+		return new Expression(Column.replaceColumnsInExpression(this.expression, columnRenamer));
 	}
 	
 	public Expression and(Expression other) {

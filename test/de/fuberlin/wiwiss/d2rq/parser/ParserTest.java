@@ -14,8 +14,8 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.7 2006/09/07 21:33:20 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.8 2006/09/09 15:40:06 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -68,7 +68,7 @@ public class ParserTest extends TestCase {
 	public void testParseAlias() {
 		MapParser parser = parse("parser/alias.n3");
 		assertEquals(1, parser.getPropertyBridges().size());
-		PropertyBridge bridge = (PropertyBridge) parser.getPropertyBridges().iterator().next();
+		RDFRelation bridge = (RDFRelation) parser.getPropertyBridges().iterator().next();
 		assertTrue(bridge.condition().isTrue());
 		AliasMap aliases = bridge.getAliases();
 		AliasMap expected = AliasMap.buildFromSQL(Collections.singleton("People AS Bosses"));

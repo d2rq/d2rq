@@ -12,8 +12,10 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
  *
+ * TODO: Make immutable
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.6 2006/09/07 15:14:27 cyganiak Exp $
+ * @version $Id: Join.java,v 1.7 2006/09/09 15:40:02 cyganiak Exp $
  */
 public class Join {
 	private Set fromColumns = new HashSet(2);
@@ -159,5 +161,15 @@ public class Join {
 	public String toString() { 
 		return "Join(" + sqlExpression() + ")";
 	}
-		
+
+	public Join renameColumns(ColumnRenamer columnRenamer) {
+		Join result = new Join();
+		Iterator it = getFirstColumns().iterator();
+		while (it.hasNext()) {
+			Column column1 = (Column) it.next();
+			Column column2 = getOtherSide(column1);
+			result.addCondition(columnRenamer.applyTo(column1), columnRenamer.applyTo(column2));
+		}
+		return result;
+	}
 }

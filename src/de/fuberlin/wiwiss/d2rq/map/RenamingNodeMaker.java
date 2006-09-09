@@ -13,13 +13,12 @@ import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraintWrapper;
 
 /**
  * Wraps another {@link NodeMaker} and presents a view of that NodeMaker
- * where its database tables are renamed according to an alias map.
- * Used in conjunction with <tt>d2rq:alias</tt>.
+ * where columns are renamed according to a {@link ColumnRenamer}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TableRenamingNodeMaker.java,v 1.2 2006/09/03 17:22:49 cyganiak Exp $
+ * @version $Id: RenamingNodeMaker.java,v 1.1 2006/09/09 15:40:03 cyganiak Exp $
  */
-public class TableRenamingNodeMaker extends WrappingNodeMaker {
+public class RenamingNodeMaker extends WrappingNodeMaker {
 
 	public static NodeMaker prefix(NodeMaker base, int index) {
 		Set tables = new HashSet();
@@ -45,16 +44,16 @@ public class TableRenamingNodeMaker extends WrappingNodeMaker {
 			String tableName = (String) it.next();
 			prefixRenames.put("T" + index + "_" + tableName, tableName);
 		}
-		return new TableRenamingNodeMaker(base, new AliasMap(prefixRenames));
+		return new RenamingNodeMaker(base, new AliasMap(prefixRenames));
 	}
 	
-	private AliasMap renames;
+	private ColumnRenamer renames;
 	private Set columns;
 	private Set joins;
 	private Expression expression;
 	private AliasMap aliases;
 
-	public TableRenamingNodeMaker(NodeMaker base, AliasMap renames) {
+	public RenamingNodeMaker(NodeMaker base, ColumnRenamer renames) {
 		super(base);
 		this.renames = renames;
 		this.columns = this.renames.applyToColumnSet(this.base.getColumns());

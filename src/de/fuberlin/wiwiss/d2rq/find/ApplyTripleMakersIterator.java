@@ -3,12 +3,12 @@ package de.fuberlin.wiwiss.d2rq.find;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
+import de.fuberlin.wiwiss.d2rq.map.TripleMaker;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 
 /**
@@ -18,20 +18,17 @@ import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ApplyTripleMakersIterator.java,v 1.3 2006/09/03 17:59:08 cyganiak Exp $
+ * @version $Id: ApplyTripleMakersIterator.java,v 1.4 2006/09/09 15:40:05 cyganiak Exp $
  */
 public class ApplyTripleMakersIterator implements ClosableIterator {
-	private Map columnNameNumberMap;
 	private Collection tripleMakers;
 	private ClosableIterator sqlIterator;
     private LinkedList tripleQueue = new LinkedList();
     private boolean explicitlyClosed = false;
 
-	public ApplyTripleMakersIterator(ClosableIterator sqlIterator, Collection tripleMakers, 
-			Map columnNameNumberMap) {
+	public ApplyTripleMakersIterator(ClosableIterator sqlIterator, Collection tripleMakers) {
 		this.sqlIterator = sqlIterator;
 		this.tripleMakers = tripleMakers;
-		this.columnNameNumberMap = columnNameNumberMap;
 	}
 
 	public boolean hasNext() {
@@ -74,8 +71,8 @@ public class ApplyTripleMakersIterator implements ClosableIterator {
 			String[] nextRow = (String[]) this.sqlIterator.next();
 			Iterator it = this.tripleMakers.iterator();
 			while (it.hasNext()) {
-				PropertyBridgeQuery tripleMaker = (PropertyBridgeQuery) it.next();
-				Triple product = tripleMaker.makeTriple(nextRow, this.columnNameNumberMap);
+				TripleMaker tripleMaker = (TripleMaker) it.next();
+				Triple product = tripleMaker.makeTriple(nextRow);
 				if (product != null) {
 					this.tripleQueue.add(product);
 				}

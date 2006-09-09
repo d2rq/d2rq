@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SPARQLTest.java,v 1.6 2006/09/07 21:33:19 cyganiak Exp $
+ * @version $Id: SPARQLTest.java,v 1.7 2006/09/09 15:40:04 cyganiak Exp $
  */
 public class SPARQLTest extends QueryLanguageTestFramework {
 
@@ -158,7 +158,7 @@ public class SPARQLTest extends QueryLanguageTestFramework {
 		expectVariable("year", this.model.createTypedLiteral("2002", XSDDatatype.XSDgYear));
 		assertSolution();
 		
-		assertResultCount(4);
+		assertResultCount(6);
 	}
 	
 	public void testRDFType(){

@@ -23,6 +23,7 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.csv.CSVParser;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -39,7 +40,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * of a D2RQ mapping file. Checks the map for consistency.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.11 2006/09/07 21:31:37 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.12 2006/09/09 15:40:06 cyganiak Exp $
  */
 public class MapParser {
 
@@ -451,7 +452,7 @@ public class MapParser {
 	private void checkColumnTypes() {
 		Iterator it = this.propertyBridges.iterator();
 		while (it.hasNext()) {
-			PropertyBridge bridge = (PropertyBridge) it.next();
+			RDFRelation bridge = (RDFRelation) it.next();
 			assertHasColumnTypes(bridge.getSubjectMaker(), bridge.getDatabase());
 			assertHasColumnTypes(bridge.getPredicateMaker(), bridge.getDatabase());
 			assertHasColumnTypes(bridge.getObjectMaker(), bridge.getDatabase());

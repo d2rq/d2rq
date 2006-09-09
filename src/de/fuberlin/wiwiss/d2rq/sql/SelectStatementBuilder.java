@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
@@ -23,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.8 2006/09/07 22:04:32 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.9 2006/09/09 15:40:06 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -130,10 +129,6 @@ public class SelectStatementBuilder {
 		this.aliases = this.aliases.applyTo(newAliases);
 	}
 	
-	private void referTable(String tableName) {
-		mentionedTables.add(tableName);
-	}
-
 	/**
 	 * Adds a column to the SELECT part of the query.
 	 * @param column the column
@@ -176,7 +171,7 @@ public class SelectStatementBuilder {
 			return;
 		}
 		this.conditions.add(condition);
-		referTable(column.getTableName());
+		mentionedTables.add(column.getTableName());
 	}
 	
 	public String correctlyQuotedColumnValue(Column column, String value) {
@@ -228,7 +223,7 @@ public class SelectStatementBuilder {
 		Iterator it = condition.columns().iterator();
 		while (it.hasNext()) {
 			Column column = (Column) it.next();
-			referTable(column.getTableName());
+			mentionedTables.add(column.getTableName());
 		}
 	}
 
@@ -241,25 +236,10 @@ public class SelectStatementBuilder {
 				continue;
 			}
 			this.conditions.add(expression);
-			referTable(join.getFirstTable());
-			referTable(join.getSecondTable());
+			mentionedTables.add(join.getFirstTable());
+			mentionedTables.add(join.getSecondTable());
         }
     }
-
-	/**
-	 * Make columns accessible through their old, pre-renaming names.
-	 * TODO: Use AliasMap instead of HashMap
-	 * @param renamedColumns
-	 */
-	public void addColumnRenames(Map renamedColumns) { 
-		Iterator it = renamedColumns.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			String oldName = ((Column) entry.getKey()).getQualifiedName();
-			String newName = ((Column) entry.getValue()).getQualifiedName();
-			this.columnNameNumber.put(oldName, this.columnNameNumber.get(newName));
-		}
-	}
 
 	/**
 	 * Sets if the SQL statement should eliminate duplicate rows

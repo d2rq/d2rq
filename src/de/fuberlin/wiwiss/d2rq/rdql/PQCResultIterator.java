@@ -8,7 +8,7 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
-import de.fuberlin.wiwiss.d2rq.find.PropertyBridgeQuery;
+import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 /** 
  * Iterator for PatternQueryCombiner results.
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.7 2006/09/02 23:10:43 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.8 2006/09/09 15:40:04 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
     public static int instanceCounter=1;
@@ -31,7 +31,7 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 	/** Iterator for TripleQuery conjunctions */
     protected ConjunctionIterator conjunctionsIterator;
     /** next TripleQuery conjunction to be processed */
-	private PropertyBridgeQuery[] conjunction; 
+	private JoinOptimizer[] conjunction; 
 	/** iterator helper */
 	protected Triple[] prefetchedResult=null;
 	/** iterator helper */
@@ -42,11 +42,11 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 	Database nextDatabase;
 											
 
-	public PQCResultIterator(PropertyBridgeQuery[][] tripleQueries, VariableBindings variableBindings, Collection constraints) { // or maybe pass conjunctionsIterator as
+	public PQCResultIterator(JoinOptimizer[][] tripleQueries, VariableBindings variableBindings, Collection constraints) { // or maybe pass conjunctionsIterator as
 		//combiner = combiner4;
 		this.variableBindings=variableBindings;
 		this.constraints=constraints;
-		conjunction=new PropertyBridgeQuery[tripleQueries.length];
+		conjunction=new JoinOptimizer[tripleQueries.length];
 		conjunctionsIterator= new ConjunctionIterator(tripleQueries, conjunction);
 	}
 	

@@ -12,13 +12,14 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
 /**
  * @author jgarbers
- * @version $Id: GraphUtils.java,v 1.5 2006/09/07 22:04:32 cyganiak Exp $
+ * @version $Id: GraphUtils.java,v 1.6 2006/09/09 15:40:04 cyganiak Exp $
  */
 public class GraphUtils {
 
@@ -218,7 +219,7 @@ public class GraphUtils {
 		for (int i=0; i<bridges.length; i++) {
 			Iterator it=bridges[i].iterator();
 			while (it.hasNext()) {
-				PropertyBridge pb=(PropertyBridge)it.next();
+				RDFRelation pb=(RDFRelation)it.next();
 				Database pbdb=pb.getDatabase();
 				if (db!=pbdb) {
 					if (db==null)

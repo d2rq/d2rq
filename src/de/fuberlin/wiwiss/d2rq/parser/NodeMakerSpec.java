@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.MaxLengthRestriction;
 import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.map.RegexRestriction;
-import de.fuberlin.wiwiss.d2rq.map.TableRenamingNodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.RenamingNodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.map.UriMaker;
 import de.fuberlin.wiwiss.d2rq.map.ValueSource;
@@ -36,7 +36,7 @@ import de.fuberlin.wiwiss.d2rq.types.DateTimeTranslator;
  * through calls to the setter methods.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeMakerSpec.java,v 1.5 2006/09/07 15:14:28 cyganiak Exp $
+ * @version $Id: NodeMakerSpec.java,v 1.6 2006/09/09 15:40:06 cyganiak Exp $
  */
 public class NodeMakerSpec {
 	
@@ -180,7 +180,7 @@ public class NodeMakerSpec {
 			this.product = this.wrapped.build();
 		}
 		if (!AliasMap.NO_ALIASES.equals(this.aliases)) {
-			this.product = new TableRenamingNodeMaker(this.product, this.aliases);
+			this.product = new RenamingNodeMaker(this.product, this.aliases);
 		}
 		if (!this.joins.isEmpty()) {
 			this.product = new JoinNodeMaker(this.product, this.joins, this.isUnique);

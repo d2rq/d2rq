@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExpressionTest.java,v 1.1 2006/09/03 17:22:50 cyganiak Exp $
+ * @version $Id: ExpressionTest.java,v 1.2 2006/09/09 15:40:05 cyganiak Exp $
  */
 public class ExpressionTest extends TestCase {
 
@@ -68,11 +68,18 @@ public class ExpressionTest extends TestCase {
 		assertFalse(new Expression("1").hashCode() == new Expression("2").hashCode());
 	}
 	
-	public void testRenameTables() {
+	public void testRenameColumnsWithAliasMap() {
 		Map map = new HashMap();
 		map.put("bar", "foo");
 		assertEquals(new Expression("bar.col1 = baz.col1"),
-				new Expression("foo.col1 = baz.col1").renameTables(new AliasMap(map)));
+				new Expression("foo.col1 = baz.col1").renameColumns(new AliasMap(map)));
+	}
+	
+	public void testRenameColumnsWithColumnReplacer() {
+		Map map = new HashMap();
+		map.put(new Column("foo.col1"), new Column("foo.col2"));
+		assertEquals(new Expression("foo.col2=foo.col3"), 
+				new Expression("foo.col1=foo.col3").renameColumns(new ColumnRenamerMap(map)));
 	}
 	
 	public void testApplyAnd() {

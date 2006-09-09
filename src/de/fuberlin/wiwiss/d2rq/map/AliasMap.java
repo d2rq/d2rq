@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +20,9 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * kinds of objects, the inverse operation is available as well. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.3 2006/09/03 17:22:49 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.4 2006/09/09 15:40:02 cyganiak Exp $
  */
-public class AliasMap {
+public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_MAP);
 	private static final Pattern aliasPattern = 
 			Pattern.compile("(.+)\\s+AS\\s+(.+)", Pattern.CASE_INSENSITIVE);
@@ -48,22 +47,6 @@ public class AliasMap {
 		return new AliasMap(m);
 	}
 
-	/**
-	 * Returns a new map with keys and values exchanged. Lossy if multiple
-	 * keys in the original map to the same value.
-	 * @param m A map
-	 * @return An inverse map
-	 */
-	private final static Map invertMap(Map m) {
-		HashMap result = new HashMap();
-		Iterator it = m.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			result.put(entry.getValue(), entry.getKey());
-		}
-		return result;
-	}
-	
 	private Map aliasesToOriginals;
 	private Map originalsToAliases;
 	
@@ -88,7 +71,7 @@ public class AliasMap {
 		return this.originalsToAliases.keySet();
 	}
 	
-	public String applyTo(String original) {
+	public String applyToTableName(String original) {
 		if (!hasAlias(original)) {
 			return original;
 		}
@@ -106,7 +89,7 @@ public class AliasMap {
 		if (!hasAlias(column.getTableName())) {
 			return column;
 		}
-		return new Column(applyTo(column.getTableName()), column.getColumnName());
+		return new Column(applyToTableName(column.getTableName()), column.getColumnName());
 	}
 	
 	public Column originalOf(Column column) {
@@ -120,20 +103,9 @@ public class AliasMap {
 		if (!hasAlias(join.getFirstTable()) && !hasAlias(join.getSecondTable())) {
 			return join;
 		}
-		Join result = new Join();
-		Iterator it = join.getFirstColumns().iterator();
-		while (it.hasNext()) {
-			Column column1 = (Column) it.next();
-			Column column2 = join.getOtherSide(column1);
-			result.addCondition(applyTo(column1), applyTo(column2));
-		}
-		return result;
+		return super.applyTo(join);
 	}
 
-	public Expression applyTo(Expression expression) {
-		return expression.renameTables(this);
-	}
-	
 	public AliasMap applyTo(AliasMap other) {
 		if (other == null) {
 			return this;
@@ -142,7 +114,7 @@ public class AliasMap {
 		Iterator it = other.allAliases().iterator();
 		while (it.hasNext()) {
 			String alias = (String) it.next();
-			newAliases.put(applyTo(alias), other.originalOf(alias));
+			newAliases.put(applyToTableName(alias), other.originalOf(alias));
 		}
 		it = allAliases().iterator();
 		while (it.hasNext()) {
@@ -174,36 +146,6 @@ public class AliasMap {
 				continue;
 			}
 			result.put(originalOf(column).getQualifiedName(), entry.getValue());
-		}
-		return result;
-	}
-	
-	public Set applyToColumnSet(Set columns) {
-		Set result = new HashSet();
-		Iterator it = columns.iterator();
-		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			result.add(applyTo(column));
-		}
-		return result;
-	}
-	
-	public List applyToColumnList(List columns) {
-		List result = new ArrayList(columns.size());
-		Iterator it = columns.iterator();
-		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			result.add(applyTo(column));
-		}
-		return result;
-	}
-	
-	public Set applyToJoinSet(Set joins) {
-		Set result = new HashSet();
-		Iterator it = joins.iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
-			result.add(applyTo(join));
 		}
 		return result;
 	}

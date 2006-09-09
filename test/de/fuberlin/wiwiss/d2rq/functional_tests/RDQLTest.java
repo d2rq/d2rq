@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDQLTest.java,v 1.14 2006/09/07 21:33:20 cyganiak Exp $
+ * @version $Id: RDQLTest.java,v 1.15 2006/09/09 15:40:04 cyganiak Exp $
  */
 public class RDQLTest extends QueryLanguageTestFramework {
 
@@ -156,6 +156,6 @@ public class RDQLTest extends QueryLanguageTestFramework {
 		expectVariable("year", this.model.createTypedLiteral("2002", XSDDatatype.XSDgYear));
 		assertSolution();
 		
-		assertResultCount(4);
+		assertResultCount(6);
 	}
 }
