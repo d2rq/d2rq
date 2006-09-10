@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * TODO: Make immutable
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.7 2006/09/09 15:40:02 cyganiak Exp $
+ * @version $Id: Join.java,v 1.8 2006/09/10 22:18:43 cyganiak Exp $
  */
 public class Join {
 	private Set fromColumns = new HashSet(2);
@@ -110,7 +110,7 @@ public class Join {
 	 * @param joinConditions a collection of strings
 	 * @return a set of Join instances
 	 */
-	public static Set buildJoins(Collection joinConditions) {
+	public static Set buildFromSQL(Collection joinConditions) {
 		Set result = new HashSet(2);
 		Iterator it = joinConditions.iterator();
 		while (it.hasNext()) {

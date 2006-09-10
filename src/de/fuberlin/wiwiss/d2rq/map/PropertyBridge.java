@@ -2,15 +2,19 @@ package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
+import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.find.QueryContext;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
@@ -21,116 +25,48 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PropertyBridge.java,v 1.11 2006/09/09 23:25:14 cyganiak Exp $
+ * @version $Id: PropertyBridge.java,v 1.12 2006/09/10 22:18:43 cyganiak Exp $
  */
 public class PropertyBridge implements RDFRelation {
-	private Node id;
 	private NodeMaker subjectMaker;
 	private NodeMaker predicateMaker;
 	private NodeMaker objectMaker; 
-	private Database database;
-	private AliasMap aliases;
-	private Set joins = new HashSet(2);
-	private Expression condition;
-	private URIMatchPolicy uriMatchPolicy = new URIMatchPolicy();
-	private boolean mightContainDuplicates = false;
-	private Set selectColumns = new HashSet();
+	private Relation baseRelation;
+	private Set projectionColumns = new HashSet();
+	private boolean isUnique;
 	
-	public PropertyBridge(Node id, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker, Database database, URIMatchPolicy policy) {
-		this.id = id;
+	public PropertyBridge(Relation baseRelation, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker) {
 		this.subjectMaker = subjectMaker;
 		this.predicateMaker = predicateMaker;
 		this.objectMaker = objectMaker;
-		this.database = database;
-		this.uriMatchPolicy = policy;
-		this.selectColumns.addAll(this.subjectMaker.getColumns());
-		this.selectColumns.addAll(this.predicateMaker.getColumns());
-		this.selectColumns.addAll(this.objectMaker.getColumns());
-		this.joins.addAll(this.subjectMaker.getJoins());
-		this.joins.addAll(this.predicateMaker.getJoins());
-		this.joins.addAll(this.objectMaker.getJoins());
-		this.condition = 
-				this.subjectMaker.condition().and(
-				this.predicateMaker.condition().and(
-				this.objectMaker.condition()));
-		this.aliases = this.subjectMaker.getAliases();
-		this.aliases = this.aliases.applyTo(this.predicateMaker.getAliases());
-		this.aliases = this.aliases.applyTo(this.objectMaker.getAliases());
-		boolean oneOrMoreUnique = this.subjectMaker.isUnique()
-				|| this.predicateMaker.isUnique()
-				|| this.objectMaker.isUnique();
-		boolean allUnique = this.subjectMaker.isUnique()
-				&& this.predicateMaker.isUnique()
-				&& this.objectMaker.isUnique();
-		this.mightContainDuplicates = !((joins.isEmpty() && oneOrMoreUnique)
-				|| (joins.size() >= 1 && allUnique));
+		this.baseRelation = baseRelation;
+		this.projectionColumns.addAll(this.subjectMaker.projectionColumns());
+		this.projectionColumns.addAll(this.predicateMaker.projectionColumns());
+		this.projectionColumns.addAll(this.objectMaker.projectionColumns());
+		this.isUnique = determineIsUnique();
 	}
 	
-	public AliasMap getAliases() {
-		return this.aliases;
-	}
-
-	public Map getColumnValues() {
-		return Collections.EMPTY_MAP;
+	public Relation baseRelation() {
+		return this.baseRelation;
 	}
 	
-	public Set getSelectColumns() {
-		return this.selectColumns;
-	}
-
-	public Expression condition() {
-		return this.condition;
-	}
-
-	public int getEvaluationPriority() {
-		return this.uriMatchPolicy.getEvaluationPriority();
-	}
-
-	public boolean mightContainDuplicates() {
-		return this.mightContainDuplicates;
+	public boolean isUnique() {
+		return this.isUnique;
 	}
 	
-	public boolean couldFit(Triple t, QueryContext context) {
-		if (!this.subjectMaker.couldFit(t.getSubject()) ||
-				!this.predicateMaker.couldFit(t.getPredicate()) ||
-				!this.objectMaker.couldFit(t.getObject())) {
-			return false;
+	public Set projectionColumns() {
+		return this.projectionColumns;
+	}
+
+	public NodeMaker nodeMaker(int index) {
+		switch (index) {
+			case 0: return this.subjectMaker; 
+			case 1: return this.predicateMaker;
+			case 2: return this.objectMaker;
+			default: throw new IllegalArgumentException(Integer.toString(index));
 		}
-		if (t.getSubject().isConcrete()) {
-			if (!this.uriMatchPolicy.couldFitSubjectInContext(context)) {
-				return false;
-			}
-			this.uriMatchPolicy.updateContextAfterSubjectMatch(context);
-		}
-		if (t.getObject().isConcrete()) {
-			if (!this.uriMatchPolicy.couldFitObjectInContext(context)) {
-				return false;
-			}
-			this.uriMatchPolicy.updateContextAfterObjectMatch(context);
-		}
-		return true;
-	}
-
-	public Database getDatabase() {
-		return this.database;
-	}
-
-	public NodeMaker getSubjectMaker() {
-		return this.subjectMaker;
-	}
-
-	public NodeMaker getPredicateMaker() {
-		return this.predicateMaker;
-	}
-
-	public NodeMaker getObjectMaker() {
-		return this.objectMaker;
 	}
     
-	public Set getJoins() {
-		return this.joins;
-	}
-
 	public String toString() {
 		return "PropertyBridge(\n" +
 				"    " + this.subjectMaker + "\n" +
@@ -140,21 +76,61 @@ public class PropertyBridge implements RDFRelation {
 	}
 	
 	public RDFRelation withPrefix(int index) {
-		return new PropertyBridge(this.id,
-				RenamingNodeMaker.prefix(getSubjectMaker(), index),
-				RenamingNodeMaker.prefix(getPredicateMaker(), index),
-				RenamingNodeMaker.prefix(getObjectMaker(), index),
-				this.database,
-				this.uriMatchPolicy);
+		Set tables = new HashSet();
+		Iterator it = this.projectionColumns.iterator();
+		while (it.hasNext()) {
+			Column column = (Column) it.next();
+			tables.add(column.getTableName());
+		}
+		it = this.baseRelation.joinConditions().iterator();
+		while (it.hasNext()) {
+			Join join = (Join) it.next();
+			tables.add(join.getFirstTable());
+			tables.add(join.getSecondTable());
+		}
+		it = this.baseRelation.condition().columns().iterator();
+		while (it.hasNext()) {
+			Column column = (Column) it.next();
+			tables.add(column.getTableName());
+		}
+		Map prefixRenames = new HashMap();
+		it = tables.iterator();
+		while (it.hasNext()) {
+			String tableName = (String) it.next();
+			prefixRenames.put("T" + index + "_" + tableName, tableName);
+		}
+		return renameColumns(new AliasMap(prefixRenames));
 	}
 	
 	public Collection makeTriples(ResultRow row) {
-		Node s = getSubjectMaker().getNode(row);
-		Node p = getPredicateMaker().getNode(row);
-		Node o = getObjectMaker().getNode(row);
+		Node s = this.subjectMaker.makeNode(row);
+		Node p = this.predicateMaker.makeNode(row);
+		Node o = this.objectMaker.makeNode(row);
 		if (s == null || p == null || o == null) {
 			return Collections.EMPTY_LIST;
 		}
 		return Collections.singleton(new Triple(s, p, o));
+	}
+	
+	public RDFRelation selectTriple(Triple t) {
+		MutableRelation newBase = new MutableRelation(this.baseRelation);
+		NodeMaker s = this.subjectMaker.selectNode(t.getSubject(), newBase);
+		if (s.equals(NodeMaker.EMPTY)) return RDFRelation.EMPTY;
+		NodeMaker p = this.predicateMaker.selectNode(t.getPredicate(), newBase);
+		if (p.equals(NodeMaker.EMPTY)) return RDFRelation.EMPTY;
+		NodeMaker o = this.objectMaker.selectNode(t.getObject(), newBase);
+		if (o.equals(NodeMaker.EMPTY)) return RDFRelation.EMPTY;
+		return new PropertyBridge(newBase.immutableSnapshot(), s, p, o);
+	}
+	
+	public RDFRelation renameColumns(ColumnRenamer renamer) {
+		NodeMaker s = this.subjectMaker.renameColumns(renamer, MutableRelation.DUMMY);
+		NodeMaker p = this.predicateMaker.renameColumns(renamer, MutableRelation.DUMMY);
+		NodeMaker o = this.objectMaker.renameColumns(renamer, MutableRelation.DUMMY);
+		return new PropertyBridge(this.baseRelation.renameColumns(renamer), s, p, o);
+	}
+	
+	private boolean determineIsUnique() {
+		return false;	// TODO Determine uniqueness
 	}
 }

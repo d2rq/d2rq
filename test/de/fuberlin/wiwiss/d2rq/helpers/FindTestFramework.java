@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTestFramework.java,v 1.2 2006/09/06 21:48:47 cyganiak Exp $
+ * @version $Id: FindTestFramework.java,v 1.3 2006/09/10 22:18:46 cyganiak Exp $
  */
 public class FindTestFramework extends TestCase {
     protected static final Model m = ModelFactory.createDefaultModel();
@@ -49,14 +49,15 @@ public class FindTestFramework extends TestCase {
 	}
 	
 	protected void dump() {
-		int count = 1;
+		int count = 0;
 		Iterator it = this.resultTriples.iterator();
 		while (it.hasNext()) {
 			Triple t = (Triple) it.next();
+			count++;
 			System.out.println("Result Triple " + count + ": " + 
 					PrettyPrinter.toString(t, this.graph.getPrefixMapping()));
-			count++;
 		}
+		System.out.println(count + " triples.");
 		System.out.println();
 	}
 

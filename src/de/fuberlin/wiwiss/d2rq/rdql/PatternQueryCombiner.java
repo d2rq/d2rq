@@ -9,7 +9,6 @@ import com.hp.hpl.jena.graph.Triple;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.TripleSelection;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
@@ -29,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * useless, if there are (Bound) variables for predicates.
  * 
  * @author jgarbers
- * @version $Id: PatternQueryCombiner.java,v 1.13 2006/09/09 15:40:03 cyganiak Exp $
+ * @version $Id: PatternQueryCombiner.java,v 1.14 2006/09/10 22:18:44 cyganiak Exp $
  * @see FindQuery
  */
 public class PatternQueryCombiner {
@@ -52,7 +51,7 @@ public class PatternQueryCombiner {
 	protected int[] bridgesCounts; 
 								  
 	/** holds for each triple its disjunctive SQL-TripleQuery Objects */
-	protected JoinOptimizer[][] tripleQueries; 
+	protected RDFRelation[][] tripleQueries; 
 	
 public PatternQueryCombiner( GraphD2RQ graph, List[] candidateBridges, Triple [] triples) {
     // alternative modelling
@@ -93,7 +92,7 @@ void makeStores() {
 		return;
 	bridges=new ArrayList[tripleCount];
 	bridgesCounts=new int[tripleCount];
-	tripleQueries=new JoinOptimizer[tripleCount][];
+	tripleQueries=new RDFRelation[tripleCount][];
 }
 
 /** 
@@ -124,10 +123,11 @@ void makeTripleQueries() {
 	for (int i=0; i<tripleCount; i++) {
 		Triple t=triples[i];
 		int bridgesCount=bridges[i].size();
-		tripleQueries[i]=new JoinOptimizer[bridgesCount];
+		tripleQueries[i]=new RDFRelation[bridgesCount];
 		bridgesCounts[i]=bridgesCount;
 		for (int j=0; j<bridgesCount; j++) {
-			tripleQueries[i][j]=new JoinOptimizer(new TripleSelection((RDFRelation)bridges[i].get(j), t));
+			tripleQueries[i][j]=new JoinOptimizer(
+					((RDFRelation)bridges[i].get(j)).selectTriple(t)).optimize();
 		}
 	}
 }
@@ -185,19 +185,14 @@ void reducePropertyBridges() {
  */
 protected static SelectStatementBuilder getSQL(RDFRelation[] conjunction) {
 	boolean possible=true;
-	Database db=conjunction[0].getDatabase();
+	Database db=conjunction[0].baseRelation().database();
 	SelectStatementBuilder sql=new SelectStatementBuilder(db);
 	sql.setEliminateDuplicates(db.correctlyHandlesDistinct());	
 	
 	for (int i=0; (i<conjunction.length) && possible; i++) {
 		RDFRelation t=conjunction[i];
-		sql.addAliasMap(t.getAliases());
-		sql.addSelectColumns(t.getSelectColumns());
-		sql.addJoins(t.getJoins());
-		sql.addColumnValues(t.getColumnValues());
-		// addConditions should be last, because checks if a textual token is likely to 
-		// be a table based on previously in select, join and column values seen tables
-		sql.addCondition(t.condition()); 
+		sql.addSelectColumns(t.projectionColumns());
+		sql.addRelation(t.baseRelation());
 	}
 	return sql;
 }

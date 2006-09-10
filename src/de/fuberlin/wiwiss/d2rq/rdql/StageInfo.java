@@ -21,7 +21,7 @@ import com.hp.hpl.jena.graph.query.ValuatorSet;
 
 /**
  * @author jgarbers
- * @version $Id: StageInfo.java,v 1.3 2006/09/07 22:04:32 cyganiak Exp $
+ * @version $Id: StageInfo.java,v 1.4 2006/09/10 22:18:44 cyganiak Exp $
  */
 public class StageInfo {
 	
@@ -40,7 +40,6 @@ public class StageInfo {
     // inter-method variables and helper variables used in compile()
 	private int tripleNr, nodeNr;
 	private Node tripleNodes[]=new Node[3]; // helper variable used for iterations
-	private Element patternElements[]=new Element[3];
 
 	// used in setup()
 	protected Mapping queryMapping; // modified by side effects
@@ -88,6 +87,7 @@ public class StageInfo {
 	protected Pattern[] compile(Mapping map, Triple[] triples) {
 		Pattern[] compiled = new Pattern[triples.length];
 		for (tripleNr = 0; tripleNr < triples.length; tripleNr++) {
+			Element[] patternElements = new Element[3];
 			Triple t = triples[tripleNr];
 			tripleNodes[0]=t.getSubject();
 			tripleNodes[1]=t.getPredicate();

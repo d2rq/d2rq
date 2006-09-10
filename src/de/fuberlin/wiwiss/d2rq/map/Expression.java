@@ -10,11 +10,12 @@ import java.util.Set;
  * An SQL expression.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Expression.java,v 1.2 2006/09/09 15:40:03 cyganiak Exp $
+ * @version $Id: Expression.java,v 1.3 2006/09/10 22:18:43 cyganiak Exp $
  */
 public class Expression {
 	public static final Expression TRUE = new Expression("1");
-	
+	public static final Expression FALSE = new Expression("0");
+
 	private String expression;
 	private Set columns = new HashSet();
 	

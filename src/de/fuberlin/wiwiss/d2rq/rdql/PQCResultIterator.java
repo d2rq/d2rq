@@ -7,14 +7,14 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
-import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
  * Iterator for PatternQueryCombiner results.
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.9 2006/09/09 23:25:15 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.10 2006/09/10 22:18:44 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
     public static int instanceCounter=1;
@@ -29,7 +29,7 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 	/** Iterator for TripleQuery conjunctions */
     protected ConjunctionIterator conjunctionsIterator;
     /** next TripleQuery conjunction to be processed */
-	private JoinOptimizer[] conjunction; 
+	private RDFRelation[] conjunction; 
 	/** iterator helper */
 	protected Triple[] prefetchedResult=null;
 	/** iterator helper */
@@ -40,11 +40,11 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 	Database nextDatabase;
 											
 
-	public PQCResultIterator(JoinOptimizer[][] tripleQueries, VariableBindings variableBindings, Collection constraints) { // or maybe pass conjunctionsIterator as
+	public PQCResultIterator(RDFRelation[][] tripleQueries, VariableBindings variableBindings, Collection constraints) { // or maybe pass conjunctionsIterator as
 		//combiner = combiner4;
 		this.variableBindings=variableBindings;
 		this.constraints=constraints;
-		conjunction=new JoinOptimizer[tripleQueries.length];
+		conjunction=new RDFRelation[tripleQueries.length];
 		conjunctionsIterator= new ConjunctionIterator(tripleQueries, conjunction);
 	}
 	
@@ -102,7 +102,7 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 			    continue;
 			SelectStatementBuilder sql=PatternQueryCombiner.getSQL(conjunction);
 			ch.addConstraintsToSQL(sql);
-			nextDatabase = conjunction[0].getDatabase();
+			nextDatabase = conjunction[0].baseRelation().database();
 			this.resultSet = new ApplyTripleMakerRowIterator(sql.execute(), conjunction);
 		} // enless while loop
 	}

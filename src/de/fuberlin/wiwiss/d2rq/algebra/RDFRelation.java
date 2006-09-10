@@ -1,15 +1,14 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
-import java.util.Map;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Triple;
 
-import de.fuberlin.wiwiss.d2rq.find.QueryContext;
-import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.Expression;
-import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
@@ -17,44 +16,36 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  * attached to the relation, plus a set of TripleMakers attached to the
  * NodeMakers. Very much work in progress.
  * 
- * TODO: Many methods, like getSelectColumns(), can contradict the corresponding
- *       methods in the NodeMakers; refactor the interfaces to prevent this
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelation.java,v 1.3 2006/09/09 23:25:15 cyganiak Exp $
+ * @version $Id: RDFRelation.java,v 1.4 2006/09/10 22:18:44 cyganiak Exp $
  */
 public interface RDFRelation extends TripleMaker {
 	
+	static final RDFRelation EMPTY = new RDFRelation() {
+		public Relation baseRelation() { return Relation.EMPTY; }
+		public Set projectionColumns() { return Collections.EMPTY_SET; }
+		public boolean isUnique() { return true; }
+		public Collection makeTriples(ResultRow row) { return Collections.EMPTY_LIST; }
+		public NodeMaker nodeMaker(int index) { return NodeMaker.EMPTY; }
+		public RDFRelation selectTriple(Triple triplePattern) { return RDFRelation.EMPTY; }
+		public RDFRelation renameColumns(ColumnRenamer renamer) { return RDFRelation.EMPTY; }
+		public String toString() { return "RDFRelation.EMPTY"; }
+	};
+
+	Relation baseRelation();
+	
+	Set projectionColumns();
+	
+	boolean isUnique();
+
 	/**
-	 * Checks if a given triple could match this relation without
-	 * querying the database.
+	 * TODO Get rid of RDFRelation.nodeMaker(index)
+	 * @param index 0, 1 or 2 
+	 * @return The subject, predicate or object NodeMaker
 	 */
-	boolean couldFit(Triple t, QueryContext context);
-
-	Database getDatabase();
-
-	Set getSelectColumns();
-
-	AliasMap getAliases();
-
-	Set getJoins();
-
-	Map getColumnValues();
-
-	/**
-	 * Returns the SQL WHERE condition that must hold for a given
-	 * database row or the bridge will not generate a triple.
-	 * @return An SQL expression; {@link Expression#TRUE} indicates no condition
-	 */
-	Expression condition();
-
-	int getEvaluationPriority();
-
-	boolean mightContainDuplicates();
-
-	NodeMaker getSubjectMaker();
-
-	NodeMaker getPredicateMaker();
-
-	NodeMaker getObjectMaker();
+	NodeMaker nodeMaker(int i);
+	
+	RDFRelation selectTriple(Triple triplePattern);
+	
+	RDFRelation renameColumns(ColumnRenamer renamer);
 }

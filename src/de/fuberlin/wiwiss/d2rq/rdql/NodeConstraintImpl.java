@@ -6,12 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Expression;
-import de.fuberlin.wiwiss.d2rq.map.LiteralMaker;
 import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.map.ValueSource;
@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * from the {@link PropertyBridge}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.4 2006/09/03 17:22:50 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.5 2006/09/10 22:18:44 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeConstraint {
 	/** true means: satisfiable. */
@@ -38,9 +38,8 @@ public class NodeConstraintImpl implements NodeConstraint {
     private Node fixedNode;
     /** What is the type, an URI, a blank node or a literal? */
     private int nodeType=NotFixedNodeType;
-    /** A literalMaker can be matched against another literalMaker. 
-     * Both literals must produce the same language or XSD-Type. */
-    private LiteralMaker literalMaker; // used by LiteralMaker only
+    private String literalLanguage = null;
+    private RDFDatatype literalDatatype = null;
 
     // ValueSource constraints
     /** valueSource condition Strings (SQL) */
@@ -89,20 +88,23 @@ public class NodeConstraintImpl implements NodeConstraint {
     	return this.columns;
     }
     
-    /** 
-     * We see a literal NodeMaker.
-     * @param m
-     */
-    public void matchLiteralMaker(LiteralMaker m) {
-        if (!possible)
-            return;
-        if (literalMaker == null) {
-            literalMaker=m;
-        } else if (possible){
-            possible=m.matchesOtherLiteralMaker(literalMaker);
-        }
-    }
-
+	public void matchLiteralType(String language, RDFDatatype datatype) {
+		if (!this.possible) return;
+		if (this.nodeType == NotFixedNodeType) {
+			matchNodeType(LiteralNodeType);
+			this.literalLanguage = language;
+			this.literalDatatype = datatype;
+			return;
+		}
+		if (this.nodeType != LiteralNodeType
+				|| (this.literalLanguage == null && language != null)
+				|| (this.literalLanguage != null && !this.literalLanguage.equals(language))
+				|| (this.literalDatatype == null && datatype != null)
+				|| (this.literalDatatype != null && !this.literalDatatype.equals(datatype))) {
+			matchImpossible();
+		}
+	}
+	
     /** 
      * We see a fixed NodeMaker.
      * @param node

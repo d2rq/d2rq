@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.pp;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.shared.PrefixMapping;
@@ -8,7 +9,7 @@ import com.hp.hpl.jena.shared.PrefixMapping;
  * Pretty printer for various kinds of objects.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PrettyPrinter.java,v 1.2 2006/09/03 00:08:12 cyganiak Exp $
+ * @version $Id: PrettyPrinter.java,v 1.3 2006/09/10 22:18:46 cyganiak Exp $
  */
 public class PrettyPrinter {
 
@@ -65,5 +66,9 @@ public class PrettyPrinter {
 		return toString(t.getSubject(), prefixes) + " "
 				+ toString(t.getPredicate(), prefixes) + " "
 				+ toString(t.getObject(), prefixes) + " .";
+	}
+	
+	public static String toString(RDFDatatype datatype) {
+		return qNameOrURI(datatype.getURI(), PrefixMapping.Standard);
 	}
 }

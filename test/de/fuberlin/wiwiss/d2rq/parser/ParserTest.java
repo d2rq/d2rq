@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.8 2006/09/09 15:40:06 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.9 2006/09/10 22:18:45 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -69,8 +69,8 @@ public class ParserTest extends TestCase {
 		MapParser parser = parse("parser/alias.n3");
 		assertEquals(1, parser.getPropertyBridges().size());
 		RDFRelation bridge = (RDFRelation) parser.getPropertyBridges().iterator().next();
-		assertTrue(bridge.condition().isTrue());
-		AliasMap aliases = bridge.getAliases();
+		assertTrue(bridge.baseRelation().condition().isTrue());
+		AliasMap aliases = bridge.baseRelation().aliases();
 		AliasMap expected = AliasMap.buildFromSQL(Collections.singleton("People AS Bosses"));
 		assertEquals(expected, aliases);
 	}

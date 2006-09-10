@@ -10,9 +10,9 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Expression;
 
-import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
@@ -21,12 +21,12 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.12 2006/09/09 15:40:03 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.13 2006/09/10 22:18:44 cyganiak Exp $
  */
 class ConstraintHandler {
     public boolean possible=true;
     public VariableBindings bindings;
-    JoinOptimizer[] conjunction;
+    RDFRelation[] conjunction;
     /** Mapping between a variable (Node) and its NodeConstraints. */
     public Map variableToConstraint=new HashMap(); 
     Collection rdqlConstraints;
@@ -36,7 +36,7 @@ class ConstraintHandler {
         this.bindings=bindings;
     }
     
-    public void setTripleQueryConjunction(JoinOptimizer[] conjunction) {
+    public void setTripleQueryConjunction(RDFRelation[] conjunction) {
         this.conjunction=conjunction;
     }
     
@@ -131,9 +131,9 @@ class ConstraintHandler {
      *
      */
 	public class NodeMakerIterator implements Iterator {
-	    JoinOptimizer[] conjunction;
+	    RDFRelation[] conjunction;
 	    Iterator indexSetIterator;
-		public NodeMakerIterator(JoinOptimizer[] conjunction, Set indexSet) {
+		public NodeMakerIterator(RDFRelation[] conjunction, Set indexSet) {
 		    this.conjunction=conjunction;
 		    this.indexSetIterator=indexSet.iterator();
 		}
@@ -144,12 +144,7 @@ class ConstraintHandler {
         }
         public NodeMaker nextNodeMaker() {
             VariableIndex i = (VariableIndex) indexSetIterator.next();
-            switch (i.nodeNr) {
-	            case 0: return conjunction[i.tripleNr].getSubjectMaker();
-	            case 1: return conjunction[i.tripleNr].getPredicateMaker();
-	            case 2: return conjunction[i.tripleNr].getObjectMaker();
-	            default: return null;
-            }
+	        return conjunction[i.tripleNr].nodeMaker(i.nodeNr);
         }
         public Object next() {
             return nextNodeMaker();

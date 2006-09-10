@@ -2,18 +2,18 @@ package de.fuberlin.wiwiss.d2rq.rdql;
 
 import java.util.List;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
 import de.fuberlin.wiwiss.d2rq.map.Column;
-import de.fuberlin.wiwiss.d2rq.map.LiteralMaker;
 import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.map.ValueSource;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
  * @author Richard Cyganiak
- * @version $Id: NodeConstraint.java,v 1.7 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: NodeConstraint.java,v 1.8 2006/09/10 22:18:44 cyganiak Exp $
  */
 public interface NodeConstraint {
 
@@ -27,12 +27,6 @@ public interface NodeConstraint {
  
     public void matchImpossible();
     
-    /** 
-     * We see a literal NodeMaker.
-     * @param m
-     */
-    public void matchLiteralMaker(LiteralMaker m);
-
     /** 
      * We see a fixed NodeMaker.
      * @param node
@@ -62,4 +56,10 @@ public interface NodeConstraint {
     public void addEqualColumn(Column c1, Column c2);
     
     public void addConstraintsToSQL(SelectStatementBuilder sql);
+
+    /**
+     * We see a NodeMaker that produces literals with the given language
+     * and datatype (possibly null).
+     */
+	public void matchLiteralType(String language, RDFDatatype datatype);
 }

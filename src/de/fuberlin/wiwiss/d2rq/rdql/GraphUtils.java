@@ -13,13 +13,12 @@ import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
 /**
  * @author jgarbers
- * @version $Id: GraphUtils.java,v 1.6 2006/09/09 15:40:04 cyganiak Exp $
+ * @version $Id: GraphUtils.java,v 1.7 2006/09/10 22:18:44 cyganiak Exp $
  */
 public class GraphUtils {
 
@@ -149,7 +148,7 @@ public class GraphUtils {
 	 * @param stopEarly if set stops at first empty PropertyBridge list.
 	 * @return the number of successful assignments (including empty lists if not stopEarly)
 	 */
-	public static int makePrefixedPropertyBridges(List candidateBridges, Triple[] triples, List[] bridges, boolean stopEarly) {
+	public static int makePrefixedPropertyBridges(Collection candidateBridges, Triple[] triples, List[] bridges, boolean stopEarly) {
 		int nonEmptyLists=0;
 		for (int i=0; i<triples.length; i++) {
 			Triple t=triples[i];
@@ -220,7 +219,7 @@ public class GraphUtils {
 			Iterator it=bridges[i].iterator();
 			while (it.hasNext()) {
 				RDFRelation pb=(RDFRelation)it.next();
-				Database pbdb=pb.getDatabase();
+				Database pbdb=pb.baseRelation().database();
 				if (db!=pbdb) {
 					if (db==null)
 						db=pbdb;
@@ -258,12 +257,11 @@ public class GraphUtils {
 	 * @return list of items from pbIt
 	 */
 	public static ArrayList propertyBridgesForTriple(Triple t, Collection propertyListCandidates) { // PropertyBridge[]
-		QueryContext context = new QueryContext();
 		ArrayList list=new ArrayList(2);
 		Iterator pbIt=propertyListCandidates.iterator();
 		while (pbIt.hasNext()) {
 			PropertyBridge bridge = (PropertyBridge) pbIt.next();
-			if (!bridge.couldFit(t, context)) {
+			if (bridge.selectTriple(t).equals(RDFRelation.EMPTY)) {
 				continue;
 			}
 			list.add(bridge);
@@ -271,12 +269,12 @@ public class GraphUtils {
 		return list;
 	}
 
-	public static Map makeDatabaseMapFromPropertyBridges(List propertyBridges) {
+	public static Map makeDatabaseMapFromPropertyBridges(Collection propertyBridges) {
 		Map ret=new HashMap();
 		Iterator it=propertyBridges.iterator();
 		while (it.hasNext()) {
 			PropertyBridge pb=(PropertyBridge)it.next();
-			Database db=pb.getDatabase();
+			Database db=pb.baseRelation().database();
 			List list=(List) ret.get(db);
 			if (list==null) {
 				list=new ArrayList();

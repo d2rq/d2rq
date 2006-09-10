@@ -1,25 +1,14 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.hp.hpl.jena.graph.Triple;
-
-import de.fuberlin.wiwiss.d2rq.find.QueryContext;
-import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Column;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
-import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Join;
-import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
-import de.fuberlin.wiwiss.d2rq.map.RenamingNodeMaker;
-import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * <p>Removes unnecessary joins from an {@link RDFRelation} in cases
@@ -51,29 +40,24 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * d2rq:ClassMap along an 1:1 relation. This should be considered a bug.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.3 2006/09/09 23:25:15 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.4 2006/09/10 22:18:44 cyganiak Exp $
  */
-public class JoinOptimizer implements RDFRelation {
-	private RDFRelation base;
-	private ColumnRenamer columnRenamer;
-	private Set joins;
-	private Set selectColumns;
-	private Map columnValues;
-	private Expression condition;
-	private NodeMaker subjectMaker;
-	private NodeMaker predicateMaker;
-	private NodeMaker objectMaker;
+public class JoinOptimizer {
+	private RDFRelation relation;
 	
 	/**
 	 * Constructs a new JoinOptimizer.
 	 * @param base The RDFRelation to be optimized
 	 */
 	public JoinOptimizer(RDFRelation base) {
-		this.base = base;
+		this.relation = base;
+	}
+	
+	public RDFRelation optimize() {
 		Map replacedColumns = new HashMap();
 		Set allRequiredColumns = allRequiredColumns();
-		Set requiredJoins = new HashSet(this.base.getJoins());
-		Iterator it = this.base.getJoins().iterator();
+		Set requiredJoins = new HashSet(this.relation.baseRelation().joinConditions());
+		Iterator it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
 			if (!isRemovableJoinSide(join.getFirstTable(), join, allRequiredColumns)) {
@@ -82,7 +66,7 @@ public class JoinOptimizer implements RDFRelation {
 			requiredJoins.remove(join);
 			replacedColumns.putAll(replacementColumns(join.getFirstColumns(), join));
 		}
-		it = this.base.getJoins().iterator();
+		it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
 			if (!isRemovableJoinSide(join.getSecondTable(), join, allRequiredColumns)) {
@@ -92,76 +76,17 @@ public class JoinOptimizer implements RDFRelation {
 			replacedColumns.putAll(replacementColumns(join.getSecondColumns(), join));
 		}
 		if (replacedColumns.isEmpty()) {
-			this.columnRenamer = ColumnRenamer.NULL;
-			this.subjectMaker = this.base.getSubjectMaker();
-			this.predicateMaker = this.base.getPredicateMaker();
-			this.objectMaker = this.base.getObjectMaker();
-		} else {
-			this.columnRenamer = new ColumnRenamerMap(replacedColumns);
-			this.subjectMaker = new RenamingNodeMaker(this.base.getSubjectMaker(), this.columnRenamer);
-			this.predicateMaker = new RenamingNodeMaker(this.base.getPredicateMaker(), this.columnRenamer);
-			this.objectMaker = new RenamingNodeMaker(this.base.getObjectMaker(), this.columnRenamer);
+			return this.relation;
 		}
-		this.joins = this.columnRenamer.applyToJoinSet(requiredJoins);
-		this.selectColumns = this.columnRenamer.applyToColumnSet(this.base.getSelectColumns());
-		this.columnValues = this.columnRenamer.applyToMapKeys(this.base.getColumnValues());
-		this.condition = this.columnRenamer.applyTo(this.base.condition());
-	}
-
-	public boolean couldFit(Triple t, QueryContext context) {
-		return this.base.couldFit(t, context);
-	}
-
-	public int getEvaluationPriority() {
-		return this.base.getEvaluationPriority();
-	}
-
-	public NodeMaker getSubjectMaker() {
-		return this.subjectMaker;
-	}
-	
-	public NodeMaker getPredicateMaker() {
-		return this.predicateMaker;
-	}
-	
-	public NodeMaker getObjectMaker() {
-		return this.objectMaker;
-	}
-	
-	public Set getJoins() {
-		return this.joins;
-	}
-	
-	public AliasMap getAliases() {
-		return this.base.getAliases();
-	}
-	
-	public Expression condition() {
-		return this.condition;
-	}
-
-	public Map getColumnValues() {
-		return this.columnValues;
-	}
-	
-	public Set getSelectColumns() {
-		return this.selectColumns;
-	}
-
-	public Database getDatabase() {
-		return this.base.getDatabase();
-	}
-
-	public boolean mightContainDuplicates() {
-		return this.base.mightContainDuplicates();
+		return this.relation.renameColumns(new ColumnRenamerMap(replacedColumns));
 	}
 
 	private Set allRequiredColumns() {
 		Set results = new HashSet();
-		results.addAll(this.base.getSelectColumns());
-		results.addAll(this.base.condition().columns());
-		results.addAll(this.base.getColumnValues().keySet());
-		Iterator it = this.base.getJoins().iterator();
+		results.addAll(this.relation.projectionColumns());
+		results.addAll(this.relation.baseRelation().condition().columns());
+		results.addAll(this.relation.baseRelation().attributeConditions().keySet());
+		Iterator it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
 			results.addAll(join.getFirstColumns());
@@ -200,13 +125,5 @@ public class JoinOptimizer implements RDFRelation {
 			result.put(originalColumn, removableJoin.getOtherSide(originalColumn));
 		}
 		return result;
-	}
-
-	public String toString() {
-		return "JoinOptimizer(" + this.base + ")";
-	}
-	
-	public Collection makeTriples(ResultRow row) {
-		return this.base.makeTriples(this.columnRenamer.applyTo(row));
 	}
 }

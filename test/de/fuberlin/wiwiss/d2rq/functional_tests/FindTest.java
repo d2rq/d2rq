@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTest.java,v 1.12 2006/09/09 15:40:04 cyganiak Exp $
+ * @version $Id: FindTest.java,v 1.13 2006/09/10 22:18:44 cyganiak Exp $
  */
 public class FindTest extends FindTestFramework {
     
@@ -129,25 +129,34 @@ public class FindTest extends FindTestFramework {
 		assertStatementCount(1);
     }
 
+	public void testFindAnonymousNode() {
+		find(null, VCARD.Pcode, m.createLiteral("BS34 8QZ"));
+//		dump();
+		assertStatement(
+				m.createResource(new AnonId("map:PostalAddresses@@7")),
+				VCARD.Pcode, m.createLiteral("BS34 8QZ"));
+		assertStatementCount(1);
+	}
+
 	public void testMatchAnonymousSubject() {
 		find(
-				m.createResource(new AnonId(
-						"file:///Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.n3#PostalAddresses@@7")),
+				m.createResource(new AnonId("map:PostalAddresses@@7")),
 				VCARD.Pcode, null);
 //		dump();
 		assertStatement(
-				m.createResource(new AnonId(
-						"file:///Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.n3#PostalAddresses@@7")),
+				m.createResource(new AnonId("map:PostalAddresses@@7")),
 				VCARD.Pcode, m.createLiteral("BS34 8QZ"));
 		assertStatementCount(1);
 	}
 	
 	public void testMatchAnonymousObject() {
-		find(null, VCARD.ADR, m.createResource(new AnonId(
-						"file:///Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.n3#PostalAddresses@@7")));
+		find(
+				null, VCARD.ADR,
+				m.createResource(new AnonId("map:PostalAddresses@@7")));
 //		dump();
-		assertStatement(resource("organizations/7"), VCARD.ADR, m.createResource(new AnonId(
-				"file:///Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.n3#PostalAddresses@@7")));
+		assertStatement(
+				resource("organizations/7"), VCARD.ADR, 
+				m.createResource(new AnonId("map:PostalAddresses@@7")));
 		assertStatementCount(1);
 	}
 
@@ -174,5 +183,12 @@ public class FindTest extends FindTestFramework {
 		find(null, null, resource("topics/11"));
 //		dump();
 		assertStatementCount(2);
+	}
+	
+	public void testFindAliasedPropertyBridge() {
+		find(null, SKOS.broader, null);
+//		dump();
+		assertStatement(resource("topics/1"), SKOS.broader, resource("topics/3"));
+		assertStatementCount(10);
 	}
 }

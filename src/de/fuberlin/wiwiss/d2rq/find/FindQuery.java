@@ -6,13 +6,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.NullIterator;
 
 import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.TripleSelection;
 import de.fuberlin.wiwiss.d2rq.algebra.UnionOverSameBase;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
@@ -23,64 +21,48 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.7 2006/09/09 23:25:16 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.8 2006/09/10 22:18:46 cyganiak Exp $
  */
 public class FindQuery {
-	private Triple triplePattern;
-	private List propertyBridges;
-	private Collection compatibleRelations;
+	private Collection compatibleRelations = new ArrayList();
 	
-	public FindQuery(Triple triplePattern, List propertyBridges) {
-		this.triplePattern = triplePattern;
-		this.propertyBridges = propertyBridges;
-	}
-
-	public ExtendedIterator iterator() {
-		this.compatibleRelations = new ArrayList();
-		findPropertyBridges();
-		ExtendedIterator result = new NullIterator();
-		Iterator it = this.compatibleRelations.iterator();
-		while (it.hasNext()) {
-			List relations = (List) it.next();
-			result = result.andThen(resultIterator(new UnionOverSameBase(relations)));
-		}
-		return result;
-	}
-	
-	private void findPropertyBridges() {
-		QueryContext context = new QueryContext();
-		Iterator it = this.propertyBridges.iterator();
+	public FindQuery(Triple triplePattern, Collection propertyBridges) {
+		Iterator it = propertyBridges.iterator();
 		while (it.hasNext()) {
 			RDFRelation bridge = (RDFRelation) it.next();
-			if (bridge.couldFit(this.triplePattern, context)) {
-				addBridge(bridge);
+			bridge = bridge.selectTriple(triplePattern);
+			if (!bridge.equals(RDFRelation.EMPTY)) {
+				addRelation(new JoinOptimizer(bridge).optimize());
 			}
 		}
 	}
 	
-	private void addBridge(RDFRelation bridge) {
-		RDFRelation newQuery = new JoinOptimizer(new TripleSelection(bridge, this.triplePattern));
+	private void addRelation(RDFRelation relation) {
 		Iterator it = this.compatibleRelations.iterator();
 		while (it.hasNext()) {
 			List queries = (List) it.next();
-			if (UnionOverSameBase.isSameBase((RDFRelation) queries.get(0), newQuery)) {
-				queries.add(newQuery);
+			if (UnionOverSameBase.isSameBase((RDFRelation) queries.get(0), relation)) {
+				queries.add(relation);
 				return;
 			}
 		}
 		List newList = new ArrayList();
-		newList.add(newQuery);
+		newList.add(relation);
 		this.compatibleRelations.add(newList);
 	}
 
-	private ClosableIterator resultIterator(RDFRelation relation) {
-		SelectStatementBuilder sql = new SelectStatementBuilder(relation.getDatabase());
-		sql.addAliasMap(relation.getAliases());
-		sql.addJoins(relation.getJoins());
-		sql.addColumnValues(relation.getColumnValues());
-		sql.addCondition(relation.condition());
-		sql.addSelectColumns(relation.getSelectColumns());
-		sql.setEliminateDuplicates(relation.mightContainDuplicates());
-		return new ApplyTripleMakerIterator(sql.execute(), relation);
+	public ExtendedIterator iterator() {
+		ExtendedIterator result = new NullIterator();
+		Iterator it = this.compatibleRelations.iterator();
+		while (it.hasNext()) {
+			List relations = (List) it.next();
+			RDFRelation union = new UnionOverSameBase(relations);
+			SelectStatementBuilder sql = new SelectStatementBuilder(union.baseRelation().database());
+			sql.setEliminateDuplicates(!union.isUnique());
+			sql.addSelectColumns(union.projectionColumns());
+			sql.addRelation(union.baseRelation());
+			result = result.andThen(new ApplyTripleMakerIterator(sql.execute(), union));
+		}
+		return result;
 	}
 }

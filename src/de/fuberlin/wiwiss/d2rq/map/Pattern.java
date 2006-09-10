@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.9 2006/09/09 23:25:14 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.10 2006/09/10 22:18:43 cyganiak Exp $
  */
 public class Pattern implements ValueSource {
 	public final static String DELIMITER = "@@";
@@ -106,6 +106,14 @@ public class Pattern implements ValueSource {
 		return "Pattern(" + this.pattern + ")";
 	}
 
+	public boolean equals(Object otherObject) {
+		if (!(otherObject instanceof Pattern)) {
+			return false;
+		}
+		Pattern other = (Pattern) otherObject;
+		return this.pattern.equals(other.pattern);
+	}
+	
 	public Pattern renameTables(AliasMap renames) {
 		int index = 0;
 		StringBuffer newPattern = new StringBuffer(this.firstLiteralPart);

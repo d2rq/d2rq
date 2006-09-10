@@ -16,7 +16,7 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 
@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * Created by Joerg Garbers on 25.02.05.
  * 
  * @author jg
- * @version $Id: D2RQPatternStage.java,v 1.8 2006/09/09 15:40:03 cyganiak Exp $
+ * @version $Id: D2RQPatternStage.java,v 1.9 2006/09/10 22:18:44 cyganiak Exp $
  */
 public class D2RQPatternStage extends CombinedPatternStage {
     // TODO keep just one instance of PatternQueryCombiner and update Property Bridges
@@ -47,7 +47,7 @@ public class D2RQPatternStage extends CombinedPatternStage {
 		super((Graph) graph, map, constraints, triples);
 		// some contraints are eaten up at this point!
 		// so use s.th. like a clone() and setter method at invocation time
-		D2RQPatternStage.this.graph = graph;
+		this.graph = graph;
 	}
 	
 	public void setup() {
@@ -125,7 +125,7 @@ public class D2RQPatternStage extends CombinedPatternStage {
                     // databases
                     if (len == maxlen
                             || multipleDatabasesMarker.get(nextToFind + len)) {
-                        JoinOptimizer[][] tripleQueries = new JoinOptimizer[len][];
+                        RDFRelation[][] tripleQueries = new RDFRelation[len][];
                         System.arraycopy(combiner.tripleQueries, 0,
                                 tripleQueries, 0, len);
                         int partEnd = nextToFind + len - 1;
@@ -150,7 +150,7 @@ public class D2RQPatternStage extends CombinedPatternStage {
 			return null;
 		return makeCombinedIterator(combiner.tripleQueries,variableBindings,constraints);
 	}
-	private PQCResultIterator makeCombinedIterator(JoinOptimizer[][] tripleQueries, VariableBindings variableBindings, Collection constraints) {
+	private PQCResultIterator makeCombinedIterator(RDFRelation[][] tripleQueries, VariableBindings variableBindings, Collection constraints) {
 		PQCResultIterator it=new PQCResultIterator(tripleQueries, 
 				variableBindings, constraints);
 		return it;

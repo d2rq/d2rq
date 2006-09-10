@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.nodes;
 
 import junit.framework.TestCase;
 
@@ -6,19 +6,22 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
+import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
+import de.fuberlin.wiwiss.d2rq.map.Column;
+
 public class NodeMakerTest extends TestCase {
 
 	public void testFixedNodeMakerToString() {
 		assertEquals("Fixed(\"foo\")", 
-				new FixedNodeMaker(Node.createLiteral("foo")).toString());
+				new FixedNodeMaker(Node.createLiteral("foo"), true).toString());
 		assertEquals("Fixed(\"foo\"@en)", 
-				new FixedNodeMaker(Node.createLiteral("foo", "en", null)).toString());
+				new FixedNodeMaker(Node.createLiteral("foo", "en", null), true).toString());
 		assertEquals("Fixed(\"1\"^^<" + XSDDatatype.XSDint.getURI() + ">)",
-				new FixedNodeMaker(Node.createLiteral("1", null, XSDDatatype.XSDint)).toString());
+				new FixedNodeMaker(Node.createLiteral("1", null, XSDDatatype.XSDint), true).toString());
 		assertEquals("Fixed(_:foo)", 
-				new FixedNodeMaker(Node.createAnon(new AnonId("foo"))).toString());
+				new FixedNodeMaker(Node.createAnon(new AnonId("foo")), true).toString());
 		assertEquals("Fixed(<http://example.org/>)", 
-				new FixedNodeMaker(Node.createURI("http://example.org/")).toString());
+				new FixedNodeMaker(Node.createURI("http://example.org/"), true).toString());
 	}
 	
 	public void testBlankNodeIDToString() {
@@ -28,35 +31,30 @@ public class NodeMakerTest extends TestCase {
 	
 	public void testBlankNodeMakerToString() {
 		BlankNodeIdentifier b = new BlankNodeIdentifier("table.col1,table.col2", "classmap1");
-		BlankNodeMaker maker = new BlankNodeMaker(b, true);
+		NodeMaker maker = new TypedNodeMaker(TypedNodeMaker.BLANK, b, true);
 		assertEquals("Blank(BlankNodeID(Column(table.col1),Column(table.col2)))", 
 				maker.toString());
 	}
 	
-	public void testConditionNodeMakerToString() {
-		ConditionNodeMaker c = new ConditionNodeMaker(
-				new FixedNodeMaker(Node.createURI("http://example.org/")),
-				new Expression("1+1=2"));
-		assertEquals("Condition(Fixed(<http://example.org/>) WHERE 1+1=2)", c.toString());
-	}
-	
 	public void testPlainLiteralMakerToString() {
-		LiteralMaker l = new LiteralMaker(new Column("foo.bar"), true, null, null);
+		TypedNodeMaker l = new TypedNodeMaker(TypedNodeMaker.PLAIN_LITERAL, new Column("foo.bar"), true);
 		assertEquals("Literal(Column(foo.bar))", l.toString());
 	}
 	
 	public void testLanguageLiteralMakerToString() {
-		LiteralMaker l = new LiteralMaker(new Column("foo.bar"), true, null, "en");
-		assertEquals("Literal(Column(foo.bar)@en)", l.toString());
+		TypedNodeMaker l = new TypedNodeMaker(TypedNodeMaker.languageLiteral("en"),
+				new Column("foo.bar"), true);
+		assertEquals("Literal@en(Column(foo.bar))", l.toString());
 	}
 	
 	public void testTypedLiteralMakerToString() {
-		LiteralMaker l = new LiteralMaker(new Column("foo.bar"), true, XSDDatatype.XSDstring, null);
-		assertEquals("Literal(Column(foo.bar)^^xsd:string)", l.toString());
+		TypedNodeMaker l = new TypedNodeMaker(TypedNodeMaker.typedLiteral(XSDDatatype.XSDstring),
+				new Column("foo.bar"), true);
+		assertEquals("Literal^^xsd:string(Column(foo.bar))", l.toString());
 	}
 	
 	public void testURIMakerToString() {
-		UriMaker u = new UriMaker(new Column("foo.bar"), true);
+		NodeMaker u = new TypedNodeMaker(TypedNodeMaker.URI, new Column("foo.bar"), true);
 		assertEquals("URI(Column(foo.bar))", u.toString());
 	}
 }

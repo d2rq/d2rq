@@ -4,7 +4,6 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,13 +28,13 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
+import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
-import de.fuberlin.wiwiss.d2rq.find.QueryContext;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.FixedNodeMaker;
-import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
-import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
+import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
@@ -51,7 +50,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.28 2006/09/07 21:33:20 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.29 2006/09/10 22:18:44 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -64,7 +63,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	private Capabilities capabilities = null;
 
     /** Collection of all PropertyBridges definded in the mapping file */
-	private List propertyBridges;
+	private Collection propertyBridges;
 	private Map propertyBridgesByDatabase;
 
 
@@ -75,11 +74,11 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		GraphD2RQ.usingD2RQQueryHandler = usingD2RQQueryHandler;
 	}
 	
-	public List getPropertyBridges() {
-		return propertyBridges;
+	public Collection getPropertyBridges() {
+		return this.propertyBridges;
 	}
-	public List getPropertyBridges(Database db) {
-		return (List)propertyBridgesByDatabase.get(db);
+	public Collection getPropertyBridges(Database db) {
+		return (Collection) this.propertyBridgesByDatabase.get(db);
 	}
 
 	/**
@@ -97,7 +96,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		}
 		MapParser parser = new MapParser(mapModel, baseURIForData);
 		parser.parse();
-		this.propertyBridges = sortPropertyBridges(parser.getPropertyBridges());
+		this.propertyBridges = parser.getPropertyBridges();
 		this.processingInstructions = parser.getProcessingInstructions();
 		this.propertyBridgesByDatabase = GraphUtils.makeDatabaseMapFromPropertyBridges(propertyBridges);
 		// TODO clean up
@@ -123,18 +122,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		}
 	}
 
-	private List sortPropertyBridges(Collection unsortedBridges) {
-		Comparator uriEvaluationOrderComparator = new Comparator() {
-			public int compare(Object policy1, Object policy2) {
-				return ((PropertyBridge) policy2).getEvaluationPriority() -
-					   ((PropertyBridge) policy1).getEvaluationPriority();
-			}
-		};
-		List result = new ArrayList(unsortedBridges);
-		Collections.sort(result, uriEvaluationOrderComparator);
-		return result;
-	}
-	
 	/**
 	 * Returns a QueryHandler for this graph.
 	 * The query handler class can be set by the mapping.
@@ -222,36 +209,30 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
 			Node classMap = (Node) entry.getKey();
+			NodeMaker resourceMaker = (NodeMaker) this.nodeMakersByClassMap.get(classMap);
+			this.classMapNodeMakers.put(toClassMapName(classMap), resourceMaker);
 			List propertyBridges = (List) entry.getValue();
 			List inventoryBridges = new ArrayList();
 			Iterator bridgeIt = propertyBridges.iterator();
 			while (bridgeIt.hasNext()) {
 				PropertyBridge bridge = (PropertyBridge) bridgeIt.next();
-				if (bridge.couldFit(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY),
-						new QueryContext())) {
+				if (!bridge.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)).equals(Relation.EMPTY)) {
 					inventoryBridges.add(bridge);
 				}
-				if (bridge.couldFit(new Triple(Node.ANY, RDFS.label.asNode(), Node.ANY),
-						new QueryContext())) {
+				if (!bridge.selectTriple(new Triple(Node.ANY, RDFS.label.asNode(), Node.ANY)).equals(Relation.EMPTY)) {
 					inventoryBridges.add(bridge);
 				}
 			}
-			NodeMaker classMapNodeMaker = new FixedNodeMaker(Node.createURI(
-					this.inventoryBaseURI + toClassMapName(classMap)));
-			NodeMaker seeAlsoNodeMaker = new FixedNodeMaker(RDFS.seeAlso.asNode());
 			if (!propertyBridges.isEmpty()) {
 				PropertyBridge aBridge = (PropertyBridge) propertyBridges.iterator().next();
-				inventoryBridges.add(new PropertyBridge(
-						Node.createAnon(),
-						classMapNodeMaker,
-						seeAlsoNodeMaker,
-						aBridge.getSubjectMaker(),
-						aBridge.getDatabase(),
-						new URIMatchPolicy()));
+				NodeMaker classMapNodeMaker = new FixedNodeMaker(
+						Node.createURI(this.inventoryBaseURI + toClassMapName(classMap)), aBridge.isUnique());
+				NodeMaker seeAlsoNodeMaker = new FixedNodeMaker(
+						RDFS.seeAlso.asNode(), aBridge.isUnique());
+				inventoryBridges.add(new PropertyBridge(aBridge.baseRelation(), 
+						classMapNodeMaker, seeAlsoNodeMaker, resourceMaker));
 			}
 			this.classMapInventoryBridges.put(toClassMapName(classMap), inventoryBridges);
-			this.classMapNodeMakers.put(toClassMapName(classMap),
-					(NodeMaker) this.nodeMakersByClassMap.get(classMap));
 		}
     }
 
@@ -285,7 +266,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			Entry entry = (Entry) it.next();
 			String classMapName = (String) entry.getKey();
 			NodeMaker nodeMaker = (NodeMaker) entry.getValue();
-			if (nodeMaker.couldFit(resource)) {
+			if (!nodeMaker.selectNode(resource, MutableRelation.DUMMY).equals(NodeMaker.EMPTY)) {
 				results.add(classMapName);
 			}
 		}

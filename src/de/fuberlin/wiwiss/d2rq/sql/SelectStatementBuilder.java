@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.SingletonIterator;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -24,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.10 2006/09/09 23:25:16 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.11 2006/09/10 22:18:46 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -67,8 +68,18 @@ public class SelectStatementBuilder {
 	protected AliasMap aliases = AliasMap.NO_ALIASES;
 	protected Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
 
+	/**
+	 * TODO: Try if we can change parameters to (Relation, projectionColumns) and make immutable
+	 */
 	public SelectStatementBuilder(Database database) {
 		this.database = database;
+	}
+	
+	public void addRelation(Relation relation) {
+		addAliasMap(relation.aliases());
+		addJoins(relation.joinConditions());
+		addColumnValues(relation.attributeConditions());
+		addCondition(relation.condition());
 	}
 	
 	public Database getDatabase() {

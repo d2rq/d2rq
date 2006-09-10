@@ -24,14 +24,15 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.csv.CSVParser;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.Join;
-import de.fuberlin.wiwiss.d2rq.map.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
-import de.fuberlin.wiwiss.d2rq.map.URIMatchPolicy;
+import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
@@ -40,7 +41,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * of a D2RQ mapping file. Checks the map for consistency.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.12 2006/09/09 15:40:06 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.13 2006/09/10 22:18:45 cyganiak Exp $
  */
 public class MapParser {
 
@@ -180,13 +181,9 @@ public class MapParser {
 		ExtendedIterator it = this.graph.find(Node.ANY, RDF.Nodes.type, D2RQ.ClassMap.asNode());
 		while (it.hasNext()) {
 			Node classMapNode = ((Triple) it.next()).getSubject();
-			Node dbNode = findOneNode(classMapNode, D2RQ.dataStorage.asNode());
-			Database db = databaseForNode(dbNode);
-			if (db == null) {
-				throw new D2RQException("Unknown d2rq:dataStorage for d2rq:ClassMap " +
-						classMapNode);
-			}
-			NodeMakerSpec spec = buildResourceSpec(classMapNode, db, true);
+			NodeMakerSpec spec = new NodeMakerSpec(toQName(classMapNode));
+			fillClassMapSpec(spec, classMapNode);
+			fillResourceSpec(spec, classMapNode, true);
 			this.nodesToClassMapSpecs.put(classMapNode, spec);
 		}
 	}
@@ -195,14 +192,11 @@ public class MapParser {
 		return (NodeMakerSpec) this.nodesToClassMapSpecs.get(node);
 	}
 
-	private void assertHasColumnTypes(NodeMaker nodeMaker, Database database) {
-		Iterator it = nodeMaker.getColumns().iterator();
-		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			database.assertHasType(nodeMaker.getAliases().originalOf(column));			
-		}
+	private void fillClassMapSpec(NodeMakerSpec spec, Node classMapNode) {
+		Node dbNode = findOneNode(classMapNode, D2RQ.dataStorage.asNode());
+		spec.setDatabase(databaseForNode(dbNode));
 	}
-
+	
 	public TranslationTable getTranslationTable(Node node) {
 		if (this.nodesToTranslationTables.containsKey(node)) {
 			return (TranslationTable) this.nodesToTranslationTables.get(node);
@@ -252,6 +246,9 @@ public class MapParser {
 		if (this.graph.find(bridgeNode, D2RQ.belongsToClassMap.asNode(), Node.ANY).toList().size() > 1) {
 			throw new D2RQException("Multiple d2rq:belongsToClassMap in " + bridgeNode);
 		}
+		NodeMakerSpec objectSpec = new NodeMakerSpec(toQName(bridgeNode), subjectSpec);
+		fillResourceSpec(objectSpec, bridgeNode, false);
+		fillPropertyBridgeSpec(objectSpec, bridgeNode);
 		Set propertiesForBridge = findPropertiesForBridge(bridgeNode);
 		if (propertiesForBridge.isEmpty()) {
 			throw new D2RQException("Missing d2rq:property for PropertyBridge " + bridgeNode);
@@ -259,28 +256,23 @@ public class MapParser {
 		Iterator it = propertiesForBridge.iterator();
 		while (it.hasNext()) {
 			Node property = (Node) it.next();
-			PropertyBridge bridge = createPropertyBridge(
+			createPropertyBridge(
 					classMapNode,
-					bridgeNode,
-					subjectSpec,
-					NodeMakerSpec.createFixed(property),
-					buildObjectSpec(bridgeNode, subjectSpec.database()));
-			registerBridgeForClassMap(classMapNode, bridge);
+					objectSpec.buildRelation(),
+					subjectSpec.buildNodeMaker(),
+					new FixedNodeMaker(property, false),
+					objectSpec.buildNodeMaker());
 		}
 	}
 
-	private NodeMakerSpec buildObjectSpec(Node node, Database database) {
-		NodeMakerSpec spec = buildResourceSpec(node, database, false);
+	private void fillPropertyBridgeSpec(NodeMakerSpec spec, Node node) {
 		Node refersTo = findZeroOrOneNode(node, D2RQ.refersToClassMap.asNode());
 		if (refersTo != null) {
 			NodeMakerSpec otherSpec = classMapSpecForNode(refersTo);
 			if (otherSpec == null) {
 				throw new D2RQException("d2rq:refersToClassMap of " + node + " is no valid d2rq:ClassMap");
 			}
-			if (database != null && !database.equals(otherSpec.database())) {
-				throw new D2RQException("d2rq:dataStorages for " + node + " don't match");
-			}
-			spec.wrapExisting(otherSpec);
+			spec.setRefersToClassMap(otherSpec);
 		}
 		String columnName = findZeroOrOneLiteral(node, D2RQ.column.asNode());
 		if (columnName != null) {
@@ -306,12 +298,9 @@ public class MapParser {
 		if (lang != null) {
 			spec.setLang(lang);
 		}
-		return spec;
 	}
 	
-	private NodeMakerSpec buildResourceSpec(Node node, Database database, boolean defaultToUnique) {
-		NodeMakerSpec spec = new NodeMakerSpec(node.toString());
-		spec.setDatabase(database);
+	private void fillResourceSpec(NodeMakerSpec spec, Node node, boolean defaultToUnique) {
 		String bNodeIdColumns = findZeroOrOneLiteral(node, D2RQ.bNodeIdColumns.asNode());
 		if (bNodeIdColumns != null) {
 			spec.setBlankColumns(bNodeIdColumns);
@@ -350,9 +339,21 @@ public class MapParser {
 			}
 			spec.setTranslationTable(table);
 		}
-		spec.addJoins(Join.buildJoins(findLiterals(node, D2RQ.join.asNode())));
-		spec.addConditions(findLiterals(node, D2RQ.condition.asNode()));
-		spec.setAliases(findLiterals(node, D2RQ.alias.asNode()));
+		Iterator it = findLiterals(node, D2RQ.join.asNode()).iterator();
+		while (it.hasNext()) {
+			String join = (String) it.next();
+			spec.addJoin(join);
+		}
+		it = findLiterals(node, D2RQ.condition.asNode()).iterator();
+		while (it.hasNext()) {
+			String condition = (String) it.next();
+			spec.addCondition(condition);
+		}
+		it = findLiterals(node, D2RQ.alias.asNode()).iterator();
+		while (it.hasNext()) {
+			String alias = (String) it.next();
+			spec.addAlias(alias);
+		}
 		boolean isUnique = defaultToUnique;
 		String containsDuplicates = findZeroOrOneLiteral(node, D2RQ.containsDuplicates.asNode());
 		if ("true".equals(containsDuplicates)) {
@@ -365,29 +366,22 @@ public class MapParser {
 		if (isUnique) {
 			spec.setIsUnique();
 		}
-		return spec;
 	}
 	
 	private boolean isObjectPropertyBridge(Node node) {
 		return this.graph.contains(node, RDF.Nodes.type, D2RQ.ObjectPropertyBridge.asNode());
 	}
 
-	private PropertyBridge createPropertyBridge(Node classMap, Node node, 
-			NodeMakerSpec subjectsSpec, NodeMakerSpec predicatesSpec, NodeMakerSpec objectsSpec) {
-		URIMatchPolicy policy = new URIMatchPolicy();
-		policy.setSubjectBasedOnURIColumn(subjectsSpec.isURIColumnSpec());
-		policy.setSubjectBasedOnURIPattern(subjectsSpec.isURIPatternSpec());
-		policy.setObjectBasedOnURIColumn(objectsSpec.isURIColumnSpec());
-		policy.setObjectBasedOnURIPattern(objectsSpec.isURIPatternSpec());
-		NodeMaker subjects = subjectsSpec.build();
-		NodeMaker predicates = predicatesSpec.build();
-		NodeMaker objects = objectsSpec.build();
-		PropertyBridge bridge = new PropertyBridge(node,
-				subjects, predicates, objects,
-				subjectsSpec.database(), policy);
+	private void createPropertyBridge(Node classMap, Relation relation, 
+			NodeMaker subjects, NodeMaker predicates, NodeMaker objects) {
+		PropertyBridge bridge = new PropertyBridge(relation, subjects, predicates, objects);
 		this.propertyBridges.add(bridge);
-		registerBridgeForClassMap(classMap, bridge);
-		return bridge;
+		List bridgeList = (List) this.nodesToClassMapBridgeLists.get(classMap);
+		if (bridgeList == null) {
+			bridgeList = new ArrayList();
+			this.nodesToClassMapBridgeLists.put(classMap, bridgeList);
+		}
+		bridgeList.add(bridge);
 	}
 
 	private Set findPropertiesForBridge(Node bridge) {
@@ -417,10 +411,10 @@ public class MapParser {
 			}
 			createPropertyBridge(
 					t.getSubject(),
-					t.getObject(),
-					subjectSpec,
-					NodeMakerSpec.createFixed(findOneNode(t.getObject(), D2RQ.propertyName.asNode())),
-					NodeMakerSpec.createFixed(findOneNode(t.getObject(), D2RQ.propertyValue.asNode())));
+					subjectSpec.buildRelation(),
+					subjectSpec.buildNodeMaker(),
+					new FixedNodeMaker(findOneNode(t.getObject(), D2RQ.propertyName.asNode()), false),
+					new FixedNodeMaker(findOneNode(t.getObject(), D2RQ.propertyValue.asNode()), false));
 		}
 	}
 
@@ -443,19 +437,27 @@ public class MapParser {
 			throw new D2RQException(toClassMap + ", referenced from " +
 					rdfsClass + ", is no d2rq:ClassMap");
 		}
-		createPropertyBridge(toClassMap, Node.createAnon(), 
-				spec,
-				NodeMakerSpec.createFixed(RDF.Nodes.type),
-				NodeMakerSpec.createFixed(rdfsClass));
+		createPropertyBridge(toClassMap,
+				spec.buildRelation(),
+				spec.buildNodeMaker(),
+				new FixedNodeMaker(RDF.Nodes.type, false),
+				new FixedNodeMaker(rdfsClass, false));
+	}
+
+	private void assertHasColumnTypes(RDFRelation relation) {
+		Iterator it = relation.projectionColumns().iterator();
+		while (it.hasNext()) {
+			Column column = (Column) it.next();
+			relation.baseRelation().database().assertHasType(
+					relation.baseRelation().aliases().originalOf(column));			
+		}
 	}
 
 	private void checkColumnTypes() {
 		Iterator it = this.propertyBridges.iterator();
 		while (it.hasNext()) {
 			RDFRelation bridge = (RDFRelation) it.next();
-			assertHasColumnTypes(bridge.getSubjectMaker(), bridge.getDatabase());
-			assertHasColumnTypes(bridge.getPredicateMaker(), bridge.getDatabase());
-			assertHasColumnTypes(bridge.getObjectMaker(), bridge.getDatabase());
+			assertHasColumnTypes(bridge);
 		}
 	}
 	
@@ -575,7 +577,7 @@ public class MapParser {
 	}
 
 	private String toQName(Node node) {
-		return node.toString(this.model);
+		return PrettyPrinter.toString(node, this.model);
 	}
 	
 	private String ensureIsAbsolute(String uriPattern) {
@@ -597,15 +599,5 @@ public class MapParser {
 
 	public Map NodeMakersByClassMap() {
 		return this.nodesToClassMapMakers;
-	}
-	
-	private void registerBridgeForClassMap(Node classMap, PropertyBridge bridge) {
-		List bridgeList = (List) this.nodesToClassMapBridgeLists.get(classMap);
-		if (bridgeList == null) {
-			bridgeList = new ArrayList();
-			this.nodesToClassMapBridgeLists.put(classMap, bridgeList);
-		}
-		bridgeList.add(bridge);
-		nodesToClassMapMakers.put(classMap, bridge.getSubjectMaker());
 	}
 }
