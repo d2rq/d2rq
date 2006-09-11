@@ -20,6 +20,7 @@ import de.fuberlin.wiwiss.d2rq.map.ValueSource;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
+import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker.NodeType;
 import de.fuberlin.wiwiss.d2rq.types.DateTimeTranslator;
 
 /**
@@ -27,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.types.DateTimeTranslator;
  * through calls to the setter methods.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeMakerSpec.java,v 1.7 2006/09/10 22:18:45 cyganiak Exp $
+ * @version $Id: NodeMakerSpec.java,v 1.8 2006/09/11 06:21:17 cyganiak Exp $
  */
 public class NodeMakerSpec {
 	
@@ -202,7 +203,7 @@ public class NodeMakerSpec {
 	
 	private NodeMaker buildNodeMakerWithoutCaching() {
 		if (this.fixed != null) {
-			return new FixedNodeMaker(this.fixed, true);
+			return new FixedNodeMaker(this.fixed, false);
 		}
 		if (this.refersToClassMap == null) {
 			return buildNodeMaker(wrapValueSource(buildValueSourceBase()), this.isUnique);
@@ -264,11 +265,15 @@ public class NodeMakerSpec {
 	}
 	
 	private NodeMaker buildNodeMaker(ValueSource values, boolean isUnique) {
+		return new TypedNodeMaker(nodeType(), values, isUnique);
+	}
+	
+	private NodeType nodeType() {
 		if (this.blankColumns != null) {
-			return new TypedNodeMaker(TypedNodeMaker.BLANK, values, isUnique);
+			return TypedNodeMaker.BLANK;
 		}
 		if (this.uriColumn != null || this.uriPattern != null) {
-			return new TypedNodeMaker(TypedNodeMaker.URI, values, isUnique);
+			return TypedNodeMaker.URI;
 		}
 		if (this.literalColumn == null && this.literalPattern == null) {
 			throw new D2RQException(this.mapName + " needs a column/pattern/bNodeID specification");
@@ -277,12 +282,12 @@ public class NodeMakerSpec {
 			throw new D2RQException(this.mapName + " has both d2rq:lang and d2rq:datatype");
 		}
 		if (this.datatypeURI != null) {
-			return new TypedNodeMaker(TypedNodeMaker.typedLiteral(buildDatatype(this.datatypeURI)), values, isUnique);
+			return TypedNodeMaker.typedLiteral(buildDatatype(this.datatypeURI));
 		}
 		if (this.lang != null) {
-			return new TypedNodeMaker(TypedNodeMaker.languageLiteral(this.lang), values, isUnique);
+			return TypedNodeMaker.languageLiteral(this.lang);
 		}
-		return new TypedNodeMaker(TypedNodeMaker.PLAIN_LITERAL, values, isUnique);
+		return TypedNodeMaker.PLAIN_LITERAL;
 	}
 	
 	private RDFDatatype buildDatatype(String datatypeURI) {

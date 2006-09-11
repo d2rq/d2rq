@@ -50,7 +50,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.29 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.30 2006/09/11 06:21:17 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -226,9 +226,9 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			if (!propertyBridges.isEmpty()) {
 				PropertyBridge aBridge = (PropertyBridge) propertyBridges.iterator().next();
 				NodeMaker classMapNodeMaker = new FixedNodeMaker(
-						Node.createURI(this.inventoryBaseURI + toClassMapName(classMap)), aBridge.isUnique());
+						Node.createURI(this.inventoryBaseURI + toClassMapName(classMap)), false);
 				NodeMaker seeAlsoNodeMaker = new FixedNodeMaker(
-						RDFS.seeAlso.asNode(), aBridge.isUnique());
+						RDFS.seeAlso.asNode(), false);
 				inventoryBridges.add(new PropertyBridge(aBridge.baseRelation(), 
 						classMapNodeMaker, seeAlsoNodeMaker, resourceMaker));
 			}

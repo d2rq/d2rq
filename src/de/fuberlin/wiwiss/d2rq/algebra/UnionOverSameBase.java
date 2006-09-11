@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UnionOverSameBase.java,v 1.3 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: UnionOverSameBase.java,v 1.4 2006/09/11 06:21:17 cyganiak Exp $
  */
 public class UnionOverSameBase implements RDFRelation {
 
@@ -37,10 +37,9 @@ public class UnionOverSameBase implements RDFRelation {
 		if (!first.baseRelation().database().equals(second.baseRelation().database())) {
 			return false;
 		}
-// TODO:  
-//		if (first.mightContainDuplicates() || second.mightContainDuplicates()) {
-//			return false;
-//		}
+		if (!first.isUnique() || !second.isUnique()) {
+			return false;
+		}
 		if (!first.baseRelation().joinConditions().equals(second.baseRelation().joinConditions())) {
 			return false;
 		}
@@ -50,11 +49,18 @@ public class UnionOverSameBase implements RDFRelation {
 		if (!first.baseRelation().attributeConditions().equals(second.baseRelation().attributeConditions())) {
 			return false;
 		}
-		if (!first.baseRelation().aliases().equals(second.baseRelation().aliases())) {
+		Set firstTables = tables(first);
+		Set secondTables = tables(second);
+		if (!firstTables.equals(secondTables)) {
 			return false;
 		}
-		if (!tables(first).equals(tables(second))) {
-			return false;
+		Iterator it = firstTables.iterator();
+		while (it.hasNext()) {
+			String tableName = (String) it.next();
+			if (!first.baseRelation().aliases().originalOf(tableName).equals(
+					second.baseRelation().aliases().originalOf(tableName))) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -111,7 +117,7 @@ public class UnionOverSameBase implements RDFRelation {
 	}
 	
 	public boolean isUnique() {
-		return false;	// TODO Determine uniqueness
+		return true;
 	}
 	
 	public Collection makeTriples(ResultRow row) {

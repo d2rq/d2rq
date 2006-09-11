@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PropertyBridge.java,v 1.12 2006/09/10 22:18:43 cyganiak Exp $
+ * @version $Id: PropertyBridge.java,v 1.13 2006/09/11 06:21:17 cyganiak Exp $
  */
 public class PropertyBridge implements RDFRelation {
 	private NodeMaker subjectMaker;
@@ -131,6 +131,9 @@ public class PropertyBridge implements RDFRelation {
 	}
 	
 	private boolean determineIsUnique() {
-		return false;	// TODO Determine uniqueness
+		if (this.baseRelation.joinConditions().isEmpty()) {
+			return this.subjectMaker.isUnique() || this.predicateMaker.isUnique() || this.objectMaker.isUnique();
+		}
+		return false;
 	}
 }

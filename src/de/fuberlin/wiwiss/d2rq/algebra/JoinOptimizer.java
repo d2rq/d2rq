@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
 import de.fuberlin.wiwiss.d2rq.map.Join;
+import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
 /**
  * <p>Removes unnecessary joins from an {@link RDFRelation} in cases
@@ -39,8 +41,10 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  * However, it will not catch cases that result from a d2rq:join on a
  * d2rq:ClassMap along an 1:1 relation. This should be considered a bug.
  * 
+ * TODO: Prune unnecessary aliases after removing joins
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.4 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.5 2006/09/11 06:21:17 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -78,7 +82,16 @@ public class JoinOptimizer {
 		if (replacedColumns.isEmpty()) {
 			return this.relation;
 		}
-		return this.relation.renameColumns(new ColumnRenamerMap(replacedColumns));
+		ColumnRenamer renamer = new ColumnRenamerMap(replacedColumns);
+		return new PropertyBridge(
+				new RelationImpl(this.relation.baseRelation().database(),
+					this.relation.baseRelation().aliases(),
+					this.relation.baseRelation().attributeConditions(),
+					this.relation.baseRelation().condition(),
+					requiredJoins).renameColumns(renamer),
+				this.relation.nodeMaker(0).renameColumns(renamer, MutableRelation.DUMMY),
+				this.relation.nodeMaker(1).renameColumns(renamer, MutableRelation.DUMMY),
+				this.relation.nodeMaker(2).renameColumns(renamer, MutableRelation.DUMMY));
 	}
 
 	private Set allRequiredColumns() {
