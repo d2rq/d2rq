@@ -13,12 +13,12 @@ import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
 /**
  * @author jgarbers
- * @version $Id: GraphUtils.java,v 1.7 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: GraphUtils.java,v 1.8 2006/09/11 22:29:19 cyganiak Exp $
  */
 public class GraphUtils {
 
@@ -164,7 +164,7 @@ public class GraphUtils {
 			}
 		    nonEmptyLists++;
 			for (int j=0; j<bridgesCount; j++) {
-				PropertyBridge bridge = (PropertyBridge) tBridges.get(j);
+				RDFRelationImpl bridge = (RDFRelationImpl) tBridges.get(j);
 				tBridges.set(j, bridge.withPrefix(i));
 			}
 		}
@@ -260,7 +260,7 @@ public class GraphUtils {
 		ArrayList list=new ArrayList(2);
 		Iterator pbIt=propertyListCandidates.iterator();
 		while (pbIt.hasNext()) {
-			PropertyBridge bridge = (PropertyBridge) pbIt.next();
+			RDFRelationImpl bridge = (RDFRelationImpl) pbIt.next();
 			if (bridge.selectTriple(t).equals(RDFRelation.EMPTY)) {
 				continue;
 			}
@@ -273,7 +273,7 @@ public class GraphUtils {
 		Map ret=new HashMap();
 		Iterator it=propertyBridges.iterator();
 		while (it.hasNext()) {
-			PropertyBridge pb=(PropertyBridge)it.next();
+			RDFRelationImpl pb=(RDFRelationImpl)it.next();
 			Database db=pb.baseRelation().database();
 			List list=(List) ret.get(db);
 			if (list==null) {

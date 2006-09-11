@@ -5,15 +5,15 @@ import java.util.List;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
-import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
 import de.fuberlin.wiwiss.d2rq.map.Column;
-import de.fuberlin.wiwiss.d2rq.map.Pattern;
-import de.fuberlin.wiwiss.d2rq.map.ValueSource;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
+import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
+import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.ValueSource;
 
 /**
  * @author Richard Cyganiak
- * @version $Id: NodeConstraint.java,v 1.8 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: NodeConstraint.java,v 1.9 2006/09/11 22:29:19 cyganiak Exp $
  */
 public interface NodeConstraint {
 
@@ -51,7 +51,7 @@ public interface NodeConstraint {
     public void matchPattern(Pattern p, List columns);
 
     public void matchBlankNodeIdentifier(
-    		BlankNodeIdentifier id, List columns);
+    		BlankNodeID id, List columns);
     
     public void addEqualColumn(Column c1, Column c2);
     

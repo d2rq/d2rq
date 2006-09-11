@@ -9,23 +9,23 @@ import java.util.Set;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
-import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
+import de.fuberlin.wiwiss.d2rq.algebra.Expression;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
 import de.fuberlin.wiwiss.d2rq.map.Column;
-import de.fuberlin.wiwiss.d2rq.map.Expression;
-import de.fuberlin.wiwiss.d2rq.map.Pattern;
-import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
-import de.fuberlin.wiwiss.d2rq.map.ValueSource;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
+import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
+import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.ValueSource;
 
 /**
  * Holds constraint information for a variable node.
  * In a query a variable node is either a result value, or a shared variable
  * or both. If it is a shared variable, we collect into a NodeConstraint 
  * all constraining information that we know about the different node positions
- * from the {@link PropertyBridge}s.
+ * from the {@link RDFRelationImpl}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.5 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.6 2006/09/11 22:29:19 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeConstraint {
 	/** true means: satisfiable. */
@@ -184,10 +184,7 @@ public class NodeConstraintImpl implements NodeConstraint {
     		return this.pattern;
     	}
     	void match(Pattern p, List otherColumns) {
-    		if (!this.pattern.equals(p)) {
-    			matchImpossible();
-    		}
-    		if (this.columns.size() != otherColumns.size()) {
+    		if (!this.pattern.isCompatibleWith(p)) {
     			matchImpossible();
     		}
     		for (int i = 0; i < this.columns.size(); i++) {
@@ -220,7 +217,7 @@ public class NodeConstraintImpl implements NodeConstraint {
         conditions.add(n1 + "=" + n2);
     }
 
-    public void matchBlankNodeIdentifier(BlankNodeIdentifier id, List columns) {
+    public void matchBlankNodeIdentifier(BlankNodeID id, List columns) {
     	// TODO Handle blank node IDs
     }
 

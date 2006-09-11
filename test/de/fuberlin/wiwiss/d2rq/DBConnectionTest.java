@@ -18,13 +18,11 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
 /**
  * @author jgarbers
- * @version $Id: DBConnectionTest.java,v 1.21 2006/09/06 21:48:47 cyganiak Exp $
+ * @version $Id: DBConnectionTest.java,v 1.22 2006/09/11 22:29:21 cyganiak Exp $
  */
 public class DBConnectionTest extends TestCase {
 
 	private Model mapModel;
-
-	private MapParser parser;
 
 	private Collection databases;
 	private Database firstDatabase;
@@ -36,9 +34,8 @@ public class DBConnectionTest extends TestCase {
 	protected void setUp() throws Exception {
 		mapModel = ModelFactory.createDefaultModel();
 		mapModel.read(D2RQTestSuite.ISWC_MAP, "http://test/", "N3");
-		parser = new MapParser(mapModel, null);
-		parser.parse();
-		databases = parser.getDatabases();
+		MapParser parser = new MapParser(mapModel, null);
+		databases = parser.parse().databases();
 		firstDatabase = (Database)databases.iterator().next();
 		simplestQuery = "SELECT 1;";
 		// mediumQuery = "SELECT PaperID from PAPERS";

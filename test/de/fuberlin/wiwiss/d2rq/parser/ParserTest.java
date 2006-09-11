@@ -16,6 +16,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
+import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
@@ -23,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.9 2006/09/10 22:18:45 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.10 2006/09/11 22:29:20 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -39,7 +40,7 @@ public class ParserTest extends TestCase {
 		MapParser parser = new MapParser(this.model, null);
 		Level save = Logger.getLogger(MapParser.class).getLevel();
 		Logger.getLogger(MapParser.class).setLevel(Level.OFF);
-		TranslationTable table = parser.getTranslationTable(r.asNode());
+		TranslationTable table = parser.getTranslationTable(r);
 		Logger.getLogger(MapParser.class).setLevel(save);
 		assertNotNull(table);
 		assertEquals(0, table.size());
@@ -49,8 +50,8 @@ public class ParserTest extends TestCase {
 		Resource r = createTranslationTableResource();
 		addTranslationResource(r, this.model.createLiteral("foo"), this.model.createLiteral("bar"));
 		MapParser parser = new MapParser(this.model, null);
-		TranslationTable table1 = parser.getTranslationTable(r.asNode());
-		TranslationTable table2 = parser.getTranslationTable(r.asNode());
+		TranslationTable table1 = parser.getTranslationTable(r);
+		TranslationTable table2 = parser.getTranslationTable(r);
 		assertSame(table1, table2);
 	}
 	
@@ -59,16 +60,16 @@ public class ParserTest extends TestCase {
 		addTranslationResource(r, this.model.createLiteral("foo"), this.model.createLiteral("bar"));
 		addTranslationResource(r, this.model.createLiteral("baz"), this.model.createResource(D2RQ.NS));
 		MapParser parser = new MapParser(this.model, null);
-		TranslationTable table = parser.getTranslationTable(r.asNode());
+		TranslationTable table = parser.getTranslationTable(r);
 		assertEquals(2, table.size());
 		assertEquals("bar", table.toRDFValue("foo"));
 		assertEquals(D2RQ.NS, table.toRDFValue("baz"));
 	}
 
 	public void testParseAlias() {
-		MapParser parser = parse("parser/alias.n3");
-		assertEquals(1, parser.getPropertyBridges().size());
-		RDFRelation bridge = (RDFRelation) parser.getPropertyBridges().iterator().next();
+		Mapping mapping = parse("parser/alias.n3").parse();
+		assertEquals(1, mapping.compiledPropertyBridges().size());
+		RDFRelation bridge = (RDFRelation) mapping.compiledPropertyBridges().iterator().next();
 		assertTrue(bridge.baseRelation().condition().isTrue());
 		AliasMap aliases = bridge.baseRelation().aliases();
 		AliasMap expected = AliasMap.buildFromSQL(Collections.singleton("People AS Bosses"));

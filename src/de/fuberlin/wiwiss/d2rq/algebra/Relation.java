@@ -8,15 +8,13 @@ import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.Expression;
-import de.fuberlin.wiwiss.d2rq.map.Join;
 
 /**
  * TODO Describe this type
  * TODO Add uniqueConstraints()
  * TODO Explicitly list tables
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Relation.java,v 1.1 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: Relation.java,v 1.2 2006/09/11 22:29:21 cyganiak Exp $
  */
 public interface Relation extends RelationalOperators {
 

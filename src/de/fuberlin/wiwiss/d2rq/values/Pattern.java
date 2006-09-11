@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -19,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.10 2006/09/10 22:18:43 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.1 2006/09/11 22:29:19 cyganiak Exp $
  */
 public class Pattern implements ValueSource {
 	public final static String DELIMITER = "@@";
@@ -48,14 +50,14 @@ public class Pattern implements ValueSource {
 		c.matchPattern(this, this.columns);
 	}
 
-	public boolean couldFit(String value) {
+	public boolean matches(String value) {
 		if (value == null) {
 			return false;
 		}
 		return this.regex.matcher(value).matches();
 	}
 
-	public Set getColumns() {
+	public Set projectionAttributes() {
 		return this.columnsAsSet;
 	}
 
@@ -64,9 +66,9 @@ public class Pattern implements ValueSource {
 	 * keys are {@link Column}s, the values are strings.
 	 * @param value value to be checked.
 	 * @return a map with <tt>Column</tt> keys and string values
-	 * @see de.fuberlin.wiwiss.d2rq.map.ValueSource#getColumnValues(java.lang.String)
+	 * @see de.fuberlin.wiwiss.d2rq.values.ValueSource#attributeConditions(java.lang.String)
 	 */
-	public Map getColumnValues(String value) {
+	public Map attributeConditions(String value) {
 		if (value == null) {
 			return Collections.EMPTY_MAP;
 		}
@@ -86,7 +88,7 @@ public class Pattern implements ValueSource {
 	 * @param row a database row
 	 * @return the pattern's value for the given row
 	 */
-	public String getValue(ResultRow row) {
+	public String makeValue(ResultRow row) {
 		int index = 0;
 		StringBuffer result = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {
@@ -114,7 +116,12 @@ public class Pattern implements ValueSource {
 		return this.pattern.equals(other.pattern);
 	}
 	
-	public Pattern renameTables(AliasMap renames) {
+	public boolean isCompatibleWith(Pattern p) {
+		return this.firstLiteralPart.equals(p.firstLiteralPart)
+				&& this.literalParts.equals(p.literalParts);
+	}
+	
+	public ValueSource replaceColumns(ColumnRenamer renames) {
 		int index = 0;
 		StringBuffer newPattern = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {

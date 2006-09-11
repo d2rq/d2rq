@@ -7,11 +7,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Expression;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
+
 import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.5 2006/09/09 23:25:15 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.6 2006/09/11 22:29:20 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static Column foo_col1 = new Column("foo.col1");

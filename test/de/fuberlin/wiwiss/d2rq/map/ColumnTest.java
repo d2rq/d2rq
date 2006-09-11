@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
  * Unit test cases for {@link Column}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnTest.java,v 1.5 2006/09/09 23:25:15 cyganiak Exp $
+ * @version $Id: ColumnTest.java,v 1.6 2006/09/11 22:29:20 cyganiak Exp $
  */
 public class ColumnTest extends TestCase {
 
@@ -51,7 +51,7 @@ public class ColumnTest extends TestCase {
 		Map map = new HashMap();
 		map.put(col1, "bar");
 		map.put(col2, "foo");
-		assertEquals("bar", col1.getValue(new ResultRowMap(map)));
+		assertEquals("bar", col1.makeValue(new ResultRowMap(map)));
 	}
 
 	public void testEquals() {

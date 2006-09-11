@@ -8,11 +8,10 @@ import com.hp.hpl.jena.rdf.model.AnonId;
 
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.map.RenamingValueSource;
-import de.fuberlin.wiwiss.d2rq.map.ValueSource;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.values.ValueSource;
 
 public class TypedNodeMaker implements NodeMaker {
 	public final static NodeType URI = new URINodeType();
@@ -36,7 +35,7 @@ public class TypedNodeMaker implements NodeMaker {
 	}
 	
 	public Set projectionColumns() {
-		return this.valueMaker.getColumns();
+		return this.valueMaker.projectionAttributes();
 	}
 	
 	public boolean isUnique() {
@@ -49,7 +48,7 @@ public class TypedNodeMaker implements NodeMaker {
 	}
 
 	public Node makeNode(ResultRow tuple) {
-		String value = this.valueMaker.getValue(tuple);
+		String value = this.valueMaker.makeValue(tuple);
 		if (value == null) {
 			return null;
 		}
@@ -64,17 +63,17 @@ public class TypedNodeMaker implements NodeMaker {
 			return NodeMaker.EMPTY;
 		}
 		String value = this.nodeType.extractValue(node);
-		if (!this.valueMaker.couldFit(value)) {
+		if (!this.valueMaker.matches(value)) {
 			return NodeMaker.EMPTY;
 		}
-		relation.select(this.valueMaker.getColumnValues(value));
+		relation.select(this.valueMaker.attributeConditions(value));
 		return new FixedNodeMaker(node, isUnique());
 	}
 	
 	public NodeMaker renameColumns(ColumnRenamer renamer, MutableRelation relation) {
 		relation.renameColumns(renamer);
 		return new TypedNodeMaker(this.nodeType, 
-				new RenamingValueSource(this.valueMaker, renamer), this.isUnique);
+				this.valueMaker.replaceColumns(renamer), this.isUnique);
 	}
 
 	public String toString() {

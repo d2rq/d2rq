@@ -9,9 +9,9 @@ import com.hp.hpl.jena.graph.Triple;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
@@ -28,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * useless, if there are (Bound) variables for predicates.
  * 
  * @author jgarbers
- * @version $Id: PatternQueryCombiner.java,v 1.14 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: PatternQueryCombiner.java,v 1.15 2006/09/11 22:29:19 cyganiak Exp $
  * @see FindQuery
  */
 public class PatternQueryCombiner {
@@ -114,7 +114,7 @@ void makePropertyBridges() {
 }
 
 /** 
- * Creates a {@link TripleSelection} for each {@link PropertyBridge}.
+ * Creates a {@link TripleSelection} for each {@link RDFRelationImpl}.
  * As a side effect we also set <code>bridgesCounts</code>.
  */
 void makeTripleQueries() {

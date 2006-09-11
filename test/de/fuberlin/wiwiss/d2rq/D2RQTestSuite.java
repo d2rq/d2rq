@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
  * Test suite for D2RQ
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQTestSuite.java,v 1.3 2006/09/10 22:18:46 cyganiak Exp $
+ * @version $Id: D2RQTestSuite.java,v 1.4 2006/09/11 22:29:21 cyganiak Exp $
  */
 public class D2RQTestSuite {
 	public static final String DIRECTORY = "file:test/de/fuberlin/wiwiss/d2rq/";
@@ -29,6 +29,7 @@ public class D2RQTestSuite {
 		suite.addTest(de.fuberlin.wiwiss.d2rq.pp.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.rdql.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.sql.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.values.AllTests.suite());
 		return suite;
 	}
 }

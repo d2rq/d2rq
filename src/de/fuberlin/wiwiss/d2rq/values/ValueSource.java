@@ -1,8 +1,11 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -14,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * of strings contained in one database column), {@link Pattern}
  * (describing the set of strings that is obtained by sticking
  * the values of several database fields into a string pattern),
- * and {@link BlankNodeIdentifier} (similar).
+ * and {@link BlankNodeID} (similar).
  * <p>
  * There are several other ValueSources that modify the behaviour
  * of another underlying ValueSource, implementing the Decorator
@@ -27,7 +30,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * of a set of RDF nodes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueSource.java,v 1.4 2006/09/09 23:25:15 cyganiak Exp $
+ * @version $Id: ValueSource.java,v 1.1 2006/09/11 22:29:19 cyganiak Exp $
  */
 public interface ValueSource {
     
@@ -35,7 +38,7 @@ public interface ValueSource {
 	 * Checks if a given value fits this source without querying the
 	 * database.
 	 */
-	boolean couldFit(String value);
+	boolean matches(String value);
 
 	/**
 	 * Returns a map of database fields and values corresponding
@@ -48,21 +51,23 @@ public interface ValueSource {
 	 * @param value a non-<tt>null</tt> value
 	 * @return a map with {@link Column} keys, and string values.
 	 */
-	Map getColumnValues(String value);
+	Map attributeConditions(String value);
 
 	/**
 	 * Returns a set of all columns containing data necessary
 	 * for this ValueSource.
 	 * @return a set of {Column}s
 	 */
-	Set getColumns();
+	Set projectionAttributes();
 
 	/**
 	 * Retrieves a value from a database row according to some rule or pattern.
 	 * @param row the database row
 	 * @return a value created from the row
 	 */
-	String getValue(ResultRow row);
+	String makeValue(ResultRow row);
 	
 	void matchConstraint(NodeConstraint c);
+
+	ValueSource replaceColumns(ColumnRenamer renamer);
 }

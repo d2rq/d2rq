@@ -7,11 +7,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Expression;
+
 import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerTest.java,v 1.2 2006/09/09 23:25:15 cyganiak Exp $
+ * @version $Id: ColumnRenamerTest.java,v 1.3 2006/09/11 22:29:20 cyganiak Exp $
  */
 public class ColumnRenamerTest extends TestCase {
 	private final static Column col1 = new Column("foo.col1");

@@ -21,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.13 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.14 2006/09/11 22:29:19 cyganiak Exp $
  */
 class ConstraintHandler {
     public boolean possible=true;
@@ -116,7 +116,7 @@ class ConstraintHandler {
             Expression e=(Expression)it.next();
             String str=rdqlTranslator.translateToString(e);
             if (str != null) {
-            	sql.addCondition(new de.fuberlin.wiwiss.d2rq.map.Expression(str));
+            	sql.addCondition(new de.fuberlin.wiwiss.d2rq.algebra.Expression(str));
             }
         }
     }

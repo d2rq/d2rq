@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +9,7 @@ import java.util.regex.Matcher;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.values.ValueSource;
 
 /**
  * A database column.
@@ -17,8 +17,9 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * TODO: findColumnsInExpression and renameColumnsInExpression will fail
  *       e.g. for coumn names occuring inside string literals
  *       
+ * TODO: Split into Column (the ValueSource part) and Attribute (the relation attribute part)?
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.9 2006/09/09 23:25:14 cyganiak Exp $
+ * @version $Id: Column.java,v 1.10 2006/09/11 22:29:18 cyganiak Exp $
  */
 public class Column implements ValueSource, Comparable {
 	private static final java.util.regex.Pattern columnRegex = 
@@ -103,18 +104,16 @@ public class Column implements ValueSource, Comparable {
 		return this.tableName;
 	}
 
-	public boolean couldFit(String value) {
+	public boolean matches(String value) {
 		return true;
 	}
 
-	public Set getColumns() {
+	public Set projectionAttributes() {
 		return Collections.singleton(this);
 	}
 
-	public Map getColumnValues(String value) {
-		Map result = new HashMap(1);
-		result.put(this, value);
-		return result;
+	public Map attributeConditions(String value) {
+		return Collections.singletonMap(this, value);
 	}
 
 	/**
@@ -122,8 +121,12 @@ public class Column implements ValueSource, Comparable {
 	 * @param row a database row
 	 * @return this column's value
 	 */
-	public String getValue(ResultRow row) {
+	public String makeValue(ResultRow row) {
 		return row.get(this);
+	}
+	
+	public ValueSource replaceColumns(ColumnRenamer renamer) {
+		return renamer.applyTo(this);
 	}
 	
 	public String toString() {

@@ -1,10 +1,11 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import junit.framework.TestCase;
+import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
 
@@ -12,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.2 2006/09/09 23:25:15 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.1 2006/09/11 22:29:18 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private final static Column col1 = new Column("table.col1");
@@ -29,12 +30,12 @@ public class PatternTest extends TestCase {
 
 	public void testSimple() {
 		Pattern pattern = new Pattern("foo@@table.col1@@baz");
-		assertEquals("foo1baz", pattern.getValue(row("1")));
+		assertEquals("foo1baz", pattern.makeValue(row("1")));
 	}
 	
 	public void testNull() {
 		Pattern pattern = new Pattern("foo@@table.col1@@bar@@table.col2@@baz");
-		assertNull(pattern.getValue(row("123")));
+		assertNull(pattern.makeValue(row("123")));
 	}
 	
 	public void testPatternSyntax() {
@@ -66,7 +67,7 @@ public class PatternTest extends TestCase {
 
 	public void testMatches() {
 		Pattern p = new Pattern("http://www.example.org/dbserver01/db01#Paper@@Papers.PaperID@@-@@Persons.PersonID@@-@@Conferences.ConfID@@.rdf");
-		assertTrue(p.couldFit("http://www.example.org/dbserver01/db01#Paper1111-2222222-333.rdf"));
+		assertTrue(p.matches("http://www.example.org/dbserver01/db01#Paper1111-2222222-333.rdf"));
 	}
 
 	public void testMatchesTrivialPattern() {
@@ -244,12 +245,12 @@ public class PatternTest extends TestCase {
 	
 	private void assertPattern(String expected, String pattern) {
 		Pattern p = new Pattern(pattern);
-		assertEquals(expected, p.getValue(this.row));
+		assertEquals(expected, p.makeValue(this.row));
 	}
 	
 	private void assertPatternValues(Pattern pattern, String value, Map expectedValues) {
-		assertTrue(pattern.couldFit(value));
-		Map actualValues = pattern.getColumnValues(value);
+		assertTrue(pattern.matches(value));
+		Map actualValues = pattern.attributeConditions(value);
 		Iterator it = expectedValues.keySet().iterator();
 		while (it.hasNext()) {
 			String name = (String) it.next();
@@ -266,8 +267,8 @@ public class PatternTest extends TestCase {
 	}
 	
 	private void assertNoMatch(Pattern pattern, String value) {
-		assertFalse(pattern.couldFit(value));
-		assertTrue(pattern.getColumnValues(value).isEmpty());
+		assertFalse(pattern.matches(value));
+		assertTrue(pattern.attributeConditions(value).isEmpty());
 	}
 	
 	private ResultRow row(String spec) {

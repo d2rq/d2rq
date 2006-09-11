@@ -1,14 +1,14 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
 import junit.framework.TestCase;
+import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Column;
-import de.fuberlin.wiwiss.d2rq.map.Expression;
 
 /**
  * Unit tests for {@link SelectStatementBuilder}.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilderTest.java,v 1.3 2006/09/03 17:59:08 cyganiak Exp $
+ * @version $Id: SelectStatementBuilderTest.java,v 1.4 2006/09/11 22:29:21 cyganiak Exp $
  */
 public class SelectStatementBuilderTest extends TestCase {
 

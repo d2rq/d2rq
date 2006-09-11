@@ -5,11 +5,11 @@ import java.util.List;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
-import de.fuberlin.wiwiss.d2rq.map.BlankNodeIdentifier;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
+import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
+import de.fuberlin.wiwiss.d2rq.values.Pattern;
 
 /**
  * A {@link NodeConstraint} that wraps another NodeConstraint and
@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * {@link ColumnRenamer}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeConstraintWrapper.java,v 1.5 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: NodeConstraintWrapper.java,v 1.6 2006/09/11 22:29:19 cyganiak Exp $
  */
 public class NodeConstraintWrapper implements NodeConstraint {
 	private NodeConstraint base;
@@ -61,7 +61,7 @@ public class NodeConstraintWrapper implements NodeConstraint {
 		this.base.matchPattern(p, this.renames.applyToColumnList(columns));
 	}
 
-    public void matchBlankNodeIdentifier(BlankNodeIdentifier id, List columns) {
+    public void matchBlankNodeIdentifier(BlankNodeID id, List columns) {
     	this.base.matchBlankNodeIdentifier(id, this.renames.applyToColumnList(columns));
     }
 

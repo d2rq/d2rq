@@ -4,12 +4,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Expression;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.Expression;
-import de.fuberlin.wiwiss.d2rq.map.Join;
 
 public class RelationBuilder {
 	private Expression condition = Expression.TRUE;
@@ -18,14 +18,13 @@ public class RelationBuilder {
 
 	public RelationBuilder() {}
 	
-	public RelationBuilder(RelationBuilder other) {
-		this();
+	public void addOther(RelationBuilder other) {
 		this.condition = this.condition.and(other.condition);
 		this.joinConditions.addAll(other.joinConditions);
 		this.aliases.addAll(other.aliases);
 	}
 	
-	public void addOther(RelationBuilder other) {
+	public void addAliased(RelationBuilder other) {
 		this.condition = this.condition.and(aliases().applyTo(other.condition));
 		this.joinConditions.addAll(aliases().applyToJoinSet(other.joinConditions));
 		// TODO: Do we have to apply our aliases to other.aliases as well?

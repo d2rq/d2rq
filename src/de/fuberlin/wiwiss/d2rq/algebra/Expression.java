@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -6,11 +6,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
+
 /**
  * An SQL expression.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Expression.java,v 1.3 2006/09/10 22:18:43 cyganiak Exp $
+ * @version $Id: Expression.java,v 1.1 2006/09/11 22:29:21 cyganiak Exp $
  */
 public class Expression {
 	public static final Expression TRUE = new Expression("1");

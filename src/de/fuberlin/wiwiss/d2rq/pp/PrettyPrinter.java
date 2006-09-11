@@ -3,15 +3,25 @@ package de.fuberlin.wiwiss.d2rq.pp;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
+
+import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * Pretty printer for various kinds of objects.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PrettyPrinter.java,v 1.3 2006/09/10 22:18:46 cyganiak Exp $
+ * @version $Id: PrettyPrinter.java,v 1.4 2006/09/11 22:29:21 cyganiak Exp $
  */
 public class PrettyPrinter {
+
+	static {
+		// Make sure that the model behind all the
+		// D2RQ vocabulary terms has the d2rq prefix
+		D2RQ.ClassMap.getModel().setNsPrefix("d2rq", D2RQ.NS);
+	}
 
 	/**
 	 * Pretty-prints an RDF node.
@@ -70,5 +80,13 @@ public class PrettyPrinter {
 	
 	public static String toString(RDFDatatype datatype) {
 		return qNameOrURI(datatype.getURI(), PrefixMapping.Standard);
+	}
+	
+	public static String toString(RDFNode n) {
+		if (n.isURIResource()) {
+			Resource r = (Resource) n;
+			return toString(r.asNode(), r.getModel());
+		}
+		return toString(n.asNode());
 	}
 }

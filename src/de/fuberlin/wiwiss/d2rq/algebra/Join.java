@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
@@ -15,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * TODO: Make immutable
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.8 2006/09/10 22:18:43 cyganiak Exp $
+ * @version $Id: Join.java,v 1.1 2006/09/11 22:29:20 cyganiak Exp $
  */
 public class Join {
 	private Set fromColumns = new HashSet(2);

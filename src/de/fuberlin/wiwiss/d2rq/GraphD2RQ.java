@@ -23,16 +23,18 @@ import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.graph.query.SimpleQueryHandler;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
@@ -50,22 +52,18 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.30 2006/09/11 06:21:17 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.31 2006/09/11 22:29:20 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
 	
 	static private boolean usingD2RQQueryHandler=false;
-	protected Map processingInstructions=null;
 	
 //	private final ReificationStyle style;
 //	private boolean closed = false;
 	private Capabilities capabilities = null;
 
-    /** Collection of all PropertyBridges definded in the mapping file */
-	private Collection propertyBridges;
-	private Map propertyBridgesByDatabase;
-
+	private Mapping mapping;
 
 	public static boolean isUsingD2RQQueryHandler() {
 		return usingD2RQQueryHandler;
@@ -75,10 +73,10 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	}
 	
 	public Collection getPropertyBridges() {
-		return this.propertyBridges;
+		return this.mapping.compiledPropertyBridges();
 	}
 	public Collection getPropertyBridges(Database db) {
-		return (Collection) this.propertyBridgesByDatabase.get(db);
+		return (Collection) this.mapping.compiledPropertyBridgesByDatabase().get(db);
 	}
 
 	/**
@@ -95,13 +93,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			baseURIForData = "http://localhost/resource/";
 		}
 		MapParser parser = new MapParser(mapModel, baseURIForData);
-		parser.parse();
-		this.propertyBridges = parser.getPropertyBridges();
-		this.processingInstructions = parser.getProcessingInstructions();
-		this.propertyBridgesByDatabase = GraphUtils.makeDatabaseMapFromPropertyBridges(propertyBridges);
-		// TODO clean up
-		this.propertyBridgesByClassMap = parser.propertyBridgesByClassMap();
-		this.nodeMakersByClassMap = parser.NodeMakersByClassMap();
+		this.mapping = parser.parse();
 	}
 
 	/**
@@ -135,7 +127,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		// on the other hand: new instance guaranties that all information with handler
 		// is up to date.
 		checkOpen();
-		String queryHandler=(String)processingInstructions.get(D2RQ.queryHandler);
+		String queryHandler = this.mapping.processingInstruction(D2RQ.queryHandler);
 		if (queryHandler!=null) {
 		    try {
 		        Class c=Class.forName(queryHandler);
@@ -170,17 +162,17 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		if (this.log.isDebugEnabled()) {
 			this.log.debug("Find: " + PrettyPrinter.toString(t, getPrefixMapping()));
 		}
-		return new FindQuery(t, this.propertyBridges).iterator();
+		return new FindQuery(t, this.mapping.compiledPropertyBridges()).iterator();
     }
 	
-	static PropertyBridge[] emptyPropertyBridgeArray=new PropertyBridge[0];
+	static RDFRelationImpl[] emptyPropertyBridgeArray=new RDFRelationImpl[0];
 	
 	// used by D2RQPatternStage
 	/**
 	 * Finds all property bridges from this graph mapping that match a triple.
 	 */
 	public ArrayList propertyBridgesForTriple(Triple t) { // PropertyBridge[]
-		return GraphUtils.propertyBridgesForTriple(t, propertyBridges);
+		return GraphUtils.propertyBridgesForTriple(t, this.mapping.compiledPropertyBridges());
 	}
 	
 	public ArrayList propertyBridgesForTriple(Triple t, Database db) {
@@ -191,31 +183,28 @@ public class GraphD2RQ extends GraphBase implements Graph {
      * @return Returns the propertyBridgesByDatabase.
      */
     public Map getPropertyBridgesByDatabase() {
-        return propertyBridgesByDatabase;
+        return this.mapping.compiledPropertyBridgesByDatabase();
     }
     
     /**
      * TODO This section was done as a quick hack for D2R Server 0.3 and really shouldn't be here
      */
     private String inventoryBaseURI = null;
-    private Map propertyBridgesByClassMap;
-    private Map nodeMakersByClassMap;
     private Map classMapInventoryBridges = new HashMap();
     private Map classMapNodeMakers = new HashMap();
     
     public void initInventory(String inventoryBaseURI) {
     	this.inventoryBaseURI = inventoryBaseURI;
-		Iterator it = this.propertyBridgesByClassMap.entrySet().iterator();
+		Iterator it = this.mapping.classMapResources().iterator();
 		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			Node classMap = (Node) entry.getKey();
-			NodeMaker resourceMaker = (NodeMaker) this.nodeMakersByClassMap.get(classMap);
+			Resource classMapResource = (Resource) it.next();
+			NodeMaker resourceMaker = (NodeMaker) this.mapping.classMap(classMapResource);
+			Node classMap = classMapResource.asNode();
 			this.classMapNodeMakers.put(toClassMapName(classMap), resourceMaker);
-			List propertyBridges = (List) entry.getValue();
 			List inventoryBridges = new ArrayList();
-			Iterator bridgeIt = propertyBridges.iterator();
+			Iterator bridgeIt = this.mapping.classMap(classMapResource).compiledPropertyBridges().iterator();
 			while (bridgeIt.hasNext()) {
-				PropertyBridge bridge = (PropertyBridge) bridgeIt.next();
+				RDFRelationImpl bridge = (RDFRelationImpl) bridgeIt.next();
 				if (!bridge.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)).equals(Relation.EMPTY)) {
 					inventoryBridges.add(bridge);
 				}
@@ -223,13 +212,13 @@ public class GraphD2RQ extends GraphBase implements Graph {
 					inventoryBridges.add(bridge);
 				}
 			}
-			if (!propertyBridges.isEmpty()) {
-				PropertyBridge aBridge = (PropertyBridge) propertyBridges.iterator().next();
+			if (!this.mapping.classMap(classMapResource).compiledPropertyBridges().isEmpty()) {
+				RDFRelationImpl aBridge = (RDFRelationImpl) this.mapping.classMap(classMapResource).compiledPropertyBridges().iterator().next();
 				NodeMaker classMapNodeMaker = new FixedNodeMaker(
 						Node.createURI(this.inventoryBaseURI + toClassMapName(classMap)), false);
 				NodeMaker seeAlsoNodeMaker = new FixedNodeMaker(
 						RDFS.seeAlso.asNode(), false);
-				inventoryBridges.add(new PropertyBridge(aBridge.baseRelation(), 
+				inventoryBridges.add(new RDFRelationImpl(aBridge.baseRelation(), 
 						classMapNodeMaker, seeAlsoNodeMaker, resourceMaker));
 			}
 			this.classMapInventoryBridges.put(toClassMapName(classMap), inventoryBridges);

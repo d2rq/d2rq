@@ -1,9 +1,11 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
 
 public class JoinTest extends TestCase {
 

@@ -9,8 +9,6 @@ import java.util.Set;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
-import de.fuberlin.wiwiss.d2rq.map.Join;
-import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
 /**
  * <p>Removes unnecessary joins from an {@link RDFRelation} in cases
@@ -44,7 +42,7 @@ import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.5 2006/09/11 06:21:17 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.6 2006/09/11 22:29:21 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -83,7 +81,7 @@ public class JoinOptimizer {
 			return this.relation;
 		}
 		ColumnRenamer renamer = new ColumnRenamerMap(replacedColumns);
-		return new PropertyBridge(
+		return new RDFRelationImpl(
 				new RelationImpl(this.relation.baseRelation().database(),
 					this.relation.baseRelation().aliases(),
 					this.relation.baseRelation().attributeConditions(),

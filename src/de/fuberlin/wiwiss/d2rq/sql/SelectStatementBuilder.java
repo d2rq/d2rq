@@ -12,12 +12,12 @@ import java.util.regex.Pattern;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.SingletonIterator;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Expression;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.Expression;
-import de.fuberlin.wiwiss.d2rq.map.Join;
 
 /**
  * Collects parts of a SELECT query and delivers a corresponding SQL statement.
@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.Join;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.11 2006/09/10 22:18:46 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.12 2006/09/11 22:29:22 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {

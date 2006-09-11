@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Expression;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
@@ -21,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *       is not really an operator in itself.
  *       
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamer.java,v 1.3 2006/09/10 22:18:43 cyganiak Exp $
+ * @version $Id: ColumnRenamer.java,v 1.4 2006/09/11 22:29:18 cyganiak Exp $
  */
 public abstract class ColumnRenamer {
 	

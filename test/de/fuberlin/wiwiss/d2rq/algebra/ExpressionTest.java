@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,10 +8,13 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
+import de.fuberlin.wiwiss.d2rq.map.AliasMap;
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExpressionTest.java,v 1.2 2006/09/09 15:40:05 cyganiak Exp $
+ * @version $Id: ExpressionTest.java,v 1.1 2006/09/11 22:29:21 cyganiak Exp $
  */
 public class ExpressionTest extends TestCase {
 

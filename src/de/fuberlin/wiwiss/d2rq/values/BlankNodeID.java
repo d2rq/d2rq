@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -21,9 +23,9 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeIdentifier.java,v 1.9 2006/09/09 23:25:14 cyganiak Exp $
+ * @version $Id: BlankNodeID.java,v 1.1 2006/09/11 22:29:19 cyganiak Exp $
  */
-public class BlankNodeIdentifier implements ValueSource {
+public class BlankNodeID implements ValueSource {
 	private final static String DELIMITER = "@@";
 	private String classMapID;
 	private List identifierColumns = new ArrayList(3);
@@ -35,7 +37,7 @@ public class BlankNodeIdentifier implements ValueSource {
 	 * @param classMapID a string that is unique for the class map
 	 * whose resources are identified by this BlankNodeIdentifier 
 	 */
-	public BlankNodeIdentifier(String columns, String classMapID) {
+	public BlankNodeID(String columns, String classMapID) {
 		this.classMapID = classMapID;
 		Iterator it = Arrays.asList(columns.split(",")).iterator();
 		while (it.hasNext()) {
@@ -47,7 +49,7 @@ public class BlankNodeIdentifier implements ValueSource {
 		c.matchBlankNodeIdentifier(this, this.identifierColumns);
 	}
 
-	public boolean couldFit(String anonID) {
+	public boolean matches(String anonID) {
 		int index = anonID.indexOf(DELIMITER);
 		// Check if given bNode was created by D2RQ
 		if (index == -1) {
@@ -60,7 +62,7 @@ public class BlankNodeIdentifier implements ValueSource {
 	/* (non-Javadoc)
 	 * @see de.fuberlin.wiwiss.d2rq.ValueSource#getColumns()
 	 */
-	public Set getColumns() {
+	public Set projectionAttributes() {
 		return new HashSet(this.identifierColumns);
 	}
 
@@ -69,9 +71,9 @@ public class BlankNodeIdentifier implements ValueSource {
 	 * keys are {@link Column}s, the values are strings.
 	 * @param anonID value to be checked.
 	 * @return a map with <tt>Column</tt> keys and string values
-	 * @see de.fuberlin.wiwiss.d2rq.map.ValueSource#getColumnValues(java.lang.String)
+	 * @see de.fuberlin.wiwiss.d2rq.values.ValueSource#attributeConditions(java.lang.String)
 	 */
-	public Map getColumnValues(String anonID) {
+	public Map attributeConditions(String anonID) {
 		String[] parts = anonID.split(DELIMITER);
 		Map result = new HashMap(3);
 		Iterator it = this.identifierColumns.iterator();
@@ -89,7 +91,7 @@ public class BlankNodeIdentifier implements ValueSource {
 	 * @param row a database row
 	 * @return this column's blank node identifier
 	 */
-	public String getValue(ResultRow row) {
+	public String makeValue(ResultRow row) {
 		StringBuffer result = new StringBuffer(this.classMapID);
 		Iterator it = this.identifierColumns.iterator();
 		while (it.hasNext()) {
@@ -102,6 +104,19 @@ public class BlankNodeIdentifier implements ValueSource {
 			result.append(value);
 		}
         return result.toString();
+	}
+	
+	public ValueSource replaceColumns(ColumnRenamer renamer) {
+		StringBuffer replacedColumns = new StringBuffer();
+		Iterator it = this.identifierColumns.iterator();
+		while (it.hasNext()) {
+			Column column = (Column) it.next();
+			replacedColumns.append(renamer.applyTo(column).getQualifiedName());
+			if (it.hasNext()) {
+				replacedColumns.append(",");
+			}
+		}
+		return new BlankNodeID(replacedColumns.toString(), this.classMapID);
 	}
 	
 	public String toString() {

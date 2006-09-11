@@ -3,15 +3,16 @@ package de.fuberlin.wiwiss.d2rq.helpers;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.map.ValueSource;
+import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.values.ValueSource;
 
 /**
  * Dummy implementation of {@link ValueSource}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DummyValueSource.java,v 1.2 2006/09/09 23:25:14 cyganiak Exp $
+ * @version $Id: DummyValueSource.java,v 1.3 2006/09/11 22:29:21 cyganiak Exp $
  */
 public class DummyValueSource implements ValueSource {
 	private boolean couldFit = true;
@@ -43,19 +44,23 @@ public class DummyValueSource implements ValueSource {
 		this.columnValues = columnValues;
 	}
 
-	public boolean couldFit(String value) {
+	public boolean matches(String value) {
 		return this.couldFit;
 	}
 
-	public Set getColumns() {
+	public Set projectionAttributes() {
 		return this.columns;
 	}
 
-	public Map getColumnValues(String value) {
+	public Map attributeConditions(String value) {
 		return this.columnValues;
 	}
 
-	public String getValue(ResultRow row) {
+	public String makeValue(ResultRow row) {
 		return this.returnValue;
+	}
+	
+	public ValueSource replaceColumns(ColumnRenamer renamer) {
+		return this;
 	}
 }

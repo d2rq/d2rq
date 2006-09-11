@@ -21,9 +21,9 @@ import com.hp.hpl.jena.rdql.parser.WorkingVar;
 
 import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.Pattern;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
+import de.fuberlin.wiwiss.d2rq.values.Pattern;
 
 /**
  * Translates an RDQL expression into a SQL expression.
@@ -43,7 +43,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  *   2) SQL dialects
  *   3) Variable translators
  * @author jgarbers
- * @version $Id: ExpressionTranslator.java,v 1.15 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: ExpressionTranslator.java,v 1.16 2006/09/11 22:29:19 cyganiak Exp $
  */
 public class ExpressionTranslator {
 	

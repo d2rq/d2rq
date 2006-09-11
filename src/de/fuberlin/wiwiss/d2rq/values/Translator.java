@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.values;
 
 /**
  * Custom translator between database values and RDF values.
@@ -26,10 +26,16 @@ package de.fuberlin.wiwiss.d2rq.map;
  * is not critical.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Translator.java,v 1.2 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: Translator.java,v 1.1 2006/09/11 22:29:19 cyganiak Exp $
  */
 public interface Translator {
 
+	public static Translator identity = new Translator() {
+		public String toRDFValue(String dbValue) { return dbValue; }
+		public String toDBValue(String rdfValue) { return rdfValue; }
+		public String toString() { return "identity"; }
+	};
+	
 	/**
 	 * Translates a value that comes from the database to an RDF value
 	 * (URI, literal label, or blank node ID). The mapping must be unique.

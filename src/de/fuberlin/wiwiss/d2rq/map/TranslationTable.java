@@ -4,13 +4,12 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
-import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.values.Translator;
+import de.fuberlin.wiwiss.d2rq.values.ValueSource;
 
 /**
  * Translation table that maps a set of database values to a set of
@@ -26,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * probalby be in separate classes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTable.java,v 1.5 2006/09/09 23:25:14 cyganiak Exp $
+ * @version $Id: TranslationTable.java,v 1.6 2006/09/11 22:29:18 cyganiak Exp $
  */
 public class TranslationTable implements Translator {
 	private Map db2rdf = new HashMap();
@@ -35,6 +34,10 @@ public class TranslationTable implements Translator {
 
 	public TranslationTable() {
 		this.translatorInstance = this;
+	}
+
+	public Translator translator() {
+		return this.translatorInstance;
 	}
 
 	/**
@@ -161,49 +164,5 @@ public class TranslationTable implements Translator {
 	 */
 	public String toRDFValue(String dbValue) {
 		return (String) this.db2rdf.get(dbValue);
-	}
-	
-	/**
-	 * Creates a new ValueSource that translates values from the
-	 * argument ValueSource according to the mappings in this
-	 * TranslationTable.
-	 * @param valueSource the ValueSource whose values should be translated
-	 * @return a new ValueSource that delivers the mapped values
-	 */
-	public ValueSource getTranslatingValueSource(ValueSource valueSource) {
-		return new TranslatingValueSource(valueSource, this.translatorInstance);
-	}
-
-	private class TranslatingValueSource implements ValueSource {
-		private ValueSource valueSource;
-		private Translator translator;
-
-		private TranslatingValueSource(ValueSource valueSource,
-				Translator translator) {
-			this.valueSource = valueSource;
-			this.translator = translator;
-		}
-
-		public boolean couldFit(String value) {
-			String dbValue = this.translator.toDBValue(value);
-			return dbValue != null && this.valueSource.couldFit(dbValue);
-		}
-
-		public Set getColumns() {
-			return this.valueSource.getColumns();
-		}
-
-		public Map getColumnValues(String value) {
-			return this.valueSource.getColumnValues(
-					this.translator.toDBValue(value));
-		}
-
-		public String getValue(ResultRow row) {
-			return this.translator.toRDFValue(this.valueSource.getValue(row));
-		}
-		
-		public void matchConstraint(NodeConstraint c) {
-			this.valueSource.matchConstraint(c);
-		}
 	}
 }
