@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -23,12 +23,12 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeID.java,v 1.1 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: BlankNodeID.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
  */
-public class BlankNodeID implements ValueSource {
+public class BlankNodeID implements ValueMaker {
 	private final static String DELIMITER = "@@";
 	private String classMapID;
-	private List identifierColumns = new ArrayList(3);
+	private List attributes = new ArrayList(3);
 	
 	/**
 	 * Constructs a new blank node identifier.
@@ -41,12 +41,12 @@ public class BlankNodeID implements ValueSource {
 		this.classMapID = classMapID;
 		Iterator it = Arrays.asList(columns.split(",")).iterator();
 		while (it.hasNext()) {
-			this.identifierColumns.add(new Column((String) it.next()));
+			this.attributes.add(new Attribute((String) it.next()));
 		}
 	}
 
 	public void matchConstraint(NodeConstraint c) {
-		c.matchBlankNodeIdentifier(this, this.identifierColumns);
+		c.matchBlankNodeIdentifier(this, this.attributes);
 	}
 
 	public boolean matches(String anonID) {
@@ -63,24 +63,24 @@ public class BlankNodeID implements ValueSource {
 	 * @see de.fuberlin.wiwiss.d2rq.ValueSource#getColumns()
 	 */
 	public Set projectionAttributes() {
-		return new HashSet(this.identifierColumns);
+		return new HashSet(this.attributes);
 	}
 
 	/**
 	 * Extracts column values from a blank node ID string. The
-	 * keys are {@link Column}s, the values are strings.
+	 * keys are {@link Attribute}s, the values are strings.
 	 * @param anonID value to be checked.
 	 * @return a map with <tt>Column</tt> keys and string values
-	 * @see de.fuberlin.wiwiss.d2rq.values.ValueSource#attributeConditions(java.lang.String)
+	 * @see de.fuberlin.wiwiss.d2rq.values.ValueMaker#attributeConditions(java.lang.String)
 	 */
 	public Map attributeConditions(String anonID) {
 		String[] parts = anonID.split(DELIMITER);
 		Map result = new HashMap(3);
-		Iterator it = this.identifierColumns.iterator();
+		Iterator it = this.attributes.iterator();
 		int i = 1;	// parts[0] is classMap identifier
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			result.put(column, parts[i]);
+			Attribute attribute = (Attribute) it.next();
+			result.put(attribute, parts[i]);
 			i++;
 		}
 		return result;
@@ -93,10 +93,10 @@ public class BlankNodeID implements ValueSource {
 	 */
 	public String makeValue(ResultRow row) {
 		StringBuffer result = new StringBuffer(this.classMapID);
-		Iterator it = this.identifierColumns.iterator();
+		Iterator it = this.attributes.iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			String value = row.get(column);
+			Attribute attribute = (Attribute) it.next();
+			String value = row.get(attribute);
 			if (value == null) {
 				return null;
 		    }
@@ -106,24 +106,25 @@ public class BlankNodeID implements ValueSource {
         return result.toString();
 	}
 	
-	public ValueSource replaceColumns(ColumnRenamer renamer) {
-		StringBuffer replacedColumns = new StringBuffer();
-		Iterator it = this.identifierColumns.iterator();
+	public ValueMaker replaceColumns(ColumnRenamer renamer) {
+		StringBuffer columns = new StringBuffer();
+		Iterator it = this.attributes.iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			replacedColumns.append(renamer.applyTo(column).getQualifiedName());
+			Attribute attribute = (Attribute) it.next();
+			columns.append(renamer.applyTo(attribute).qualifiedName());
 			if (it.hasNext()) {
-				replacedColumns.append(",");
+				columns.append(",");
 			}
 		}
-		return new BlankNodeID(replacedColumns.toString(), this.classMapID);
+		return new BlankNodeID(columns.toString(), this.classMapID);
 	}
 	
 	public String toString() {
 		StringBuffer result = new StringBuffer("BlankNodeID(");
-		Iterator it = this.identifierColumns.iterator();
+		Iterator it = this.attributes.iterator();
 		while (it.hasNext()) {
-			result.append(it.next());
+			Attribute attribute = (Attribute) it.next();
+			result.append(attribute.qualifiedName());
 			if (it.hasNext()) {
 				result.append(",");
 			}

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 
 /**
@@ -17,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
  * TODO: Make immutable
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.1 2006/09/11 22:29:20 cyganiak Exp $
+ * @version $Id: Join.java,v 1.2 2006/09/11 23:02:49 cyganiak Exp $
  */
 public class Join {
 	private Set fromColumns = new HashSet(2);
@@ -28,18 +27,18 @@ public class Join {
 	private String sqlExpression=null; // cached value
 	
 	public void addCondition(String joinCondition) {
-		Column col1 = Join.getColumn(joinCondition, true);
-		Column col2 = Join.getColumn(joinCondition, false);
+		Attribute col1 = Join.getColumn(joinCondition, true);
+		Attribute col2 = Join.getColumn(joinCondition, false);
 		addCondition(col1, col2);
 	}
 
-	public void addCondition(Column column1, Column column2) {
+	public void addCondition(Attribute column1, Attribute column2) {
 		this.sqlExpression = null;
 		if (this.fromTable == null) {
-			this.fromTable = column1.getTableName();
-			this.toTable = column2.getTableName();
-		} else if (!this.fromTable.equals(column1.getTableName())
-				|| !this.toTable.equals(column2.getTableName())) {
+			this.fromTable = column1.tableName();
+			this.toTable = column2.tableName();
+		} else if (!this.fromTable.equals(column1.tableName())
+				|| !this.toTable.equals(column2.tableName())) {
 			throw new IllegalArgumentException(
 					"Illegal join -- all conditions must go from *one* table to another *one* table");
 		}
@@ -54,7 +53,7 @@ public class Join {
 				tableName.equals(this.toTable);
 	}
 
-	public boolean containsColumn(Column column) {
+	public boolean containsColumn(Attribute column) {
 		return this.fromColumns.contains(column) ||
 				this.toColumns.contains(column);
 	}
@@ -77,7 +76,7 @@ public class Join {
 
 	/**
 	 * Checks if one side of the join is equal to the argument set of
-	 * {@link Column}s.
+	 * {@link Attribute}s.
 	 * @param columns a set of Column instances
 	 * @return <tt>true</tt> if one side of the join is equal to the column set
 	 */
@@ -85,11 +84,11 @@ public class Join {
 		return this.fromColumns.equals(columns) || this.toColumns.equals(columns);
 	}
 
-	public Column getOtherSide(Column column) {
-		return (Column) this.otherSide.get(column);
+	public Attribute getOtherSide(Attribute column) {
+		return (Attribute) this.otherSide.get(column);
 	}
 
-	private static Column getColumn(String joinCondition, boolean first) {
+	private static Attribute getColumn(String joinCondition, boolean first) {
 		int index = joinCondition.indexOf("=");
 		if (index == -1) {
 			throw new D2RQException("Illegal d2rq:join: \"" + joinCondition +
@@ -101,7 +100,7 @@ public class Join {
 		if (!first) {
 			return1 = !return1;
 		}
-		return return1 ? new Column(col1) : new Column(col2);
+		return return1 ? new Attribute(col1) : new Attribute(col2);
 	}
 
 	
@@ -117,8 +116,8 @@ public class Join {
 		Iterator it = joinConditions.iterator();
 		while (it.hasNext()) {
 			String condition = (String) it.next();
-			String table1 = Join.getColumn(condition, true).getTableName();
-			String table2 = Join.getColumn(condition, false).getTableName();
+			String table1 = Join.getColumn(condition, true).tableName();
+			String table2 = Join.getColumn(condition, false).tableName();
 			Iterator it2 = result.iterator();
 			while (it2.hasNext()) {
 				Join join = (Join) it2.next();
@@ -153,9 +152,9 @@ public class Join {
 			if (i > 0) {
 				result.append(" AND ");
 			}
-			result.append(((Column)from[i]).getQualifiedName());
+			result.append(((Attribute)from[i]).qualifiedName());
 			result.append(" = ");
-			result.append(((Column)otherSide.get(from[i])).getQualifiedName()); // jg was to[i]
+			result.append(((Attribute)otherSide.get(from[i])).qualifiedName()); // jg was to[i]
 		}
 		sqlExpression=result.toString();
 		return sqlExpression;
@@ -168,8 +167,8 @@ public class Join {
 		Join result = new Join();
 		Iterator it = getFirstColumns().iterator();
 		while (it.hasNext()) {
-			Column column1 = (Column) it.next();
-			Column column2 = getOtherSide(column1);
+			Attribute column1 = (Attribute) it.next();
+			Attribute column2 = getOtherSide(column1);
 			result.addCondition(columnRenamer.applyTo(column1), columnRenamer.applyTo(column2));
 		}
 		return result;

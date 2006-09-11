@@ -11,7 +11,6 @@ public class AllTests {
 		//$JUnit-BEGIN$
 		suite.addTestSuite(PatternTest.class);
 		suite.addTestSuite(ValueMakerTest.class);
-		suite.addTestSuite(ValueRestrictionTest.class);
 		//$JUnit-END$
 		return suite;
 	}

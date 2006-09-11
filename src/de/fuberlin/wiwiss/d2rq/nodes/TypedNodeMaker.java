@@ -11,7 +11,7 @@ import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
-import de.fuberlin.wiwiss.d2rq.values.ValueSource;
+import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
 public class TypedNodeMaker implements NodeMaker {
 	public final static NodeType URI = new URINodeType();
@@ -25,10 +25,10 @@ public class TypedNodeMaker implements NodeMaker {
 	}
 	
 	private NodeType nodeType;
-	private ValueSource valueMaker;
+	private ValueMaker valueMaker;
 	private boolean isUnique;
 	
-	public TypedNodeMaker(NodeType nodeType, ValueSource valueMaker, boolean isUnique) {
+	public TypedNodeMaker(NodeType nodeType, ValueMaker valueMaker, boolean isUnique) {
 		this.nodeType = nodeType;
 		this.valueMaker = valueMaker;
 		this.isUnique = isUnique;

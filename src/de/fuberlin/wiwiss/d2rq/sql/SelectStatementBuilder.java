@@ -12,11 +12,11 @@ import java.util.regex.Pattern;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.SingletonIterator;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.12 2006/09/11 22:29:22 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.13 2006/09/11 23:02:50 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -100,8 +100,8 @@ public class SelectStatementBuilder {
 			result.append("1");
 		}
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			result.append(column.getQualifiedName());
+			Attribute column = (Attribute) it.next();
+			result.append(column.qualifiedName());
 			if (it.hasNext()) {
 				result.append(", ");
 			}
@@ -143,22 +143,22 @@ public class SelectStatementBuilder {
 	 * Adds a column to the SELECT part of the query.
 	 * @param column the column
 	 */
-	public void addSelectColumn(Column column) {
+	public void addSelectColumn(Attribute column) {
 		if (this.selectColumns.contains(column)) {
 			return;
 		}
-		this.mentionedTables.add(column.getTableName());
+		this.mentionedTables.add(column.tableName());
 		this.selectColumns.add(column);
 	}
 
     /**
-     * Adds a list of {@link Column}s to the SELECT part of the query
+     * Adds a list of {@link Attribute}s to the SELECT part of the query
      * @param columns
      */
 	public void addSelectColumns(Set columns) {
 		Iterator it = columns.iterator();
 		while (it.hasNext()) {
-			addSelectColumn((Column) it.next());
+			addSelectColumn((Attribute) it.next());
 		}
 	}
 
@@ -169,24 +169,24 @@ public class SelectStatementBuilder {
      * @param column the column whose values are to be restricted
      * @param value the value the column must have
      */
-	public void addColumnValue(Column column, String value) {
+	public void addColumnValue(Attribute column, String value) {
 		Expression condition = new Expression(
-				column.getQualifiedName() + " = " +
+				column.qualifiedName() + " = " +
 				correctlyQuotedColumnValue(column,value));
 		if (this.conditions.contains(condition)) {
 			return;
 		}
 		this.conditions.add(condition);
-		mentionedTables.add(column.getTableName());
+		mentionedTables.add(column.tableName());
 	}
 	
-	private String correctlyQuotedColumnValue(Column column, String value) {
+	private String correctlyQuotedColumnValue(Attribute column, String value) {
 	    return getQuotedColumnValue(value, columnType(column));
 	}
 	
-	public int columnType(Column column) {
-	    Column physicalColumn = this.aliases.originalOf(column);
-	    return this.database.getColumnType(physicalColumn.getQualifiedName());
+	public int columnType(Attribute column) {
+	    Attribute physicalColumn = this.aliases.originalOf(column);
+	    return this.database.getColumnType(physicalColumn.qualifiedName());
 	}
 	
 	private String quoteTableName(String tableName) {
@@ -204,14 +204,14 @@ public class SelectStatementBuilder {
 	
 	/**
 	 * Adds multiple WHERE clauses from a map. The map keys are
-	 * {@link Column} instances. The map values are the values
+	 * {@link Attribute} instances. The map values are the values
 	 * for those columns.
 	 * @param columnsAndValues a map containing columns and their values
 	 */
 	public void addColumnValues(Map columnsAndValues) {
 		Iterator it = columnsAndValues.keySet().iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
+			Attribute column = (Attribute) it.next();
 			String value = (String) columnsAndValues.get(column);
 			addColumnValue(column, value);
 		}	
@@ -228,8 +228,8 @@ public class SelectStatementBuilder {
 		this.conditions.add(condition);
 		Iterator it = condition.columns().iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			mentionedTables.add(column.getTableName());
+			Attribute column = (Attribute) it.next();
+			mentionedTables.add(column.tableName());
 		}
 	}
 

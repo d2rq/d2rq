@@ -6,9 +6,8 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
-import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
+import de.fuberlin.wiwiss.d2rq.values.Column;
 
 public class NodeMakerTest extends TestCase {
 
@@ -27,30 +26,30 @@ public class NodeMakerTest extends TestCase {
 	
 	public void testBlankNodeMakerToString() {
 		BlankNodeID b = new BlankNodeID("table.col1,table.col2", "classmap1");
-		NodeMaker maker = new TypedNodeMaker(TypedNodeMaker.BLANK, new ValueMaker(b), true);
-		assertEquals("Blank(BlankNodeID(Column(table.col1),Column(table.col2)))", 
+		NodeMaker maker = new TypedNodeMaker(TypedNodeMaker.BLANK, b, true);
+		assertEquals("Blank(BlankNodeID(table.col1,table.col2))", 
 				maker.toString());
 	}
 	
 	public void testPlainLiteralMakerToString() {
-		TypedNodeMaker l = new TypedNodeMaker(TypedNodeMaker.PLAIN_LITERAL, new ValueMaker(new Column("foo.bar")), true);
+		TypedNodeMaker l = new TypedNodeMaker(TypedNodeMaker.PLAIN_LITERAL, new Column("foo.bar"), true);
 		assertEquals("Literal(Column(foo.bar))", l.toString());
 	}
 	
 	public void testLanguageLiteralMakerToString() {
 		TypedNodeMaker l = new TypedNodeMaker(TypedNodeMaker.languageLiteral("en"),
-				new ValueMaker(new Column("foo.bar")), true);
+				new Column("foo.bar"), true);
 		assertEquals("Literal@en(Column(foo.bar))", l.toString());
 	}
 	
 	public void testTypedLiteralMakerToString() {
 		TypedNodeMaker l = new TypedNodeMaker(TypedNodeMaker.typedLiteral(XSDDatatype.XSDstring),
-				new ValueMaker(new Column("foo.bar")), true);
+				new Column("foo.bar"), true);
 		assertEquals("Literal^^xsd:string(Column(foo.bar))", l.toString());
 	}
 	
 	public void testURIMakerToString() {
-		NodeMaker u = new TypedNodeMaker(TypedNodeMaker.URI, new ValueMaker(new Column("foo.bar")), true);
+		NodeMaker u = new TypedNodeMaker(TypedNodeMaker.URI, new Column("foo.bar"), true);
 		assertEquals("URI(Column(foo.bar))", u.toString());
 	}
 }

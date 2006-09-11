@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
 
@@ -42,7 +41,7 @@ import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.6 2006/09/11 22:29:21 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.7 2006/09/11 23:02:49 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -117,8 +116,8 @@ public class JoinOptimizer {
 	private boolean isRemovableJoinSide(String tableName, Join join, Set allRequiredColumns) {
 		Iterator it = allRequiredColumns.iterator();
 		while (it.hasNext()) {
-			Column requiredColumn = (Column) it.next();
-			if (!requiredColumn.getTableName().equals(tableName)) {
+			Attribute requiredColumn = (Attribute) it.next();
+			if (!requiredColumn.tableName().equals(tableName)) {
 				continue;		// requiredColumn is in another table
 			}
 			if (!join.containsColumn(requiredColumn)) {
@@ -132,7 +131,7 @@ public class JoinOptimizer {
 		Map result = new HashMap();
 		Iterator it = originalColumns.iterator();
 		while (it.hasNext()) {
-			Column originalColumn = (Column) it.next();
+			Attribute originalColumn = (Attribute) it.next();
 			result.put(originalColumn, removableJoin.getOtherSide(originalColumn));
 		}
 		return result;

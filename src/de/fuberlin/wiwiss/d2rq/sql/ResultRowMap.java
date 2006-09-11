@@ -9,14 +9,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 
 /**
  * A result row returned by a database query, presented as a
  * map from columns to string values.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResultRowMap.java,v 1.1 2006/09/09 23:25:16 cyganiak Exp $
+ * @version $Id: ResultRowMap.java,v 1.2 2006/09/11 23:02:50 cyganiak Exp $
  */
 public class ResultRowMap implements ResultRow {
 	
@@ -34,7 +34,7 @@ public class ResultRowMap implements ResultRow {
 		this.columnsToValues = columnsToValues;
 	}
 	
-	public String get(Column column) {
+	public String get(Attribute column) {
 		return (String) this.columnsToValues.get(column);
 	}
 
@@ -44,8 +44,8 @@ public class ResultRowMap implements ResultRow {
 		StringBuffer result = new StringBuffer("{");
 		Iterator it = columns.iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			result.append(column.getQualifiedName());
+			Attribute column = (Attribute) it.next();
+			result.append(column.qualifiedName());
 			result.append(" => '");
 			result.append(this.columnsToValues.get(column));
 			result.append("'");

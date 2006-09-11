@@ -12,7 +12,6 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -25,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelationImpl.java,v 1.1 2006/09/11 22:29:21 cyganiak Exp $
+ * @version $Id: RDFRelationImpl.java,v 1.2 2006/09/11 23:02:49 cyganiak Exp $
  */
 public class RDFRelationImpl implements RDFRelation {
 	private NodeMaker subjectMaker;
@@ -79,8 +78,8 @@ public class RDFRelationImpl implements RDFRelation {
 		Set tables = new HashSet();
 		Iterator it = this.projectionColumns.iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			tables.add(column.getTableName());
+			Attribute column = (Attribute) it.next();
+			tables.add(column.tableName());
 		}
 		it = this.baseRelation.joinConditions().iterator();
 		while (it.hasNext()) {
@@ -90,8 +89,8 @@ public class RDFRelationImpl implements RDFRelation {
 		}
 		it = this.baseRelation.condition().columns().iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			tables.add(column.getTableName());
+			Attribute column = (Attribute) it.next();
+			tables.add(column.tableName());
 		}
 		Map prefixRenames = new HashMap();
 		it = tables.iterator();

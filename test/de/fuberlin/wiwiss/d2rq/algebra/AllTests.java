@@ -11,6 +11,7 @@ public class AllTests {
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ExpressionTest.class);
 		suite.addTestSuite(JoinTest.class);
+		suite.addTestSuite(AttributeTest.class);
 		//$JUnit-END$
 		return suite;
 	}

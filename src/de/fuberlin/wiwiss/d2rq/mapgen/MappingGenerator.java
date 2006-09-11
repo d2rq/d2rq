@@ -25,7 +25,7 @@ import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
-import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.DatabaseSchemaInspector;
 
@@ -35,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.map.DatabaseSchemaInspector;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.8 2006/09/07 13:26:10 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.9 2006/09/11 23:02:50 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -182,7 +182,7 @@ public class MappingGenerator {
 		List foreignKeys = this.schema.foreignKeyColumns(tableName);
 		Iterator it = this.schema.listColumns(tableName).iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
+			Attribute column = (Attribute) it.next();
 			writeColumn(column, tableName, foreignKeys);
 		}
 		it = this.linkTables.entrySet().iterator();
@@ -204,20 +204,20 @@ public class MappingGenerator {
 		this.out.println("\t.");
 	}
 	
-	public void writeColumn(Column column, String tableName, List foreignKeys) {
+	public void writeColumn(Attribute column, String tableName, List foreignKeys) {
 		this.out.println(propertyBridgeName(toRelationName(column)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(tableName) + ";");
 		this.out.println("\td2rq:property vocab:" + toRelationName(column) + ";");
-		Column foreignKeyColumn = null;
+		Attribute foreignKeyColumn = null;
 		Iterator it = foreignKeys.iterator();
 		while (it.hasNext()) {
-			Column[] linkedColumns = (Column[]) it.next();
+			Attribute[] linkedColumns = (Attribute[]) it.next();
 			if (linkedColumns[0].equals(column)) {
 				foreignKeyColumn = linkedColumns[1];
 			}
 		}
 		if (foreignKeyColumn == null) {
-			this.out.println("\td2rq:column \"" + column.getQualifiedName() + "\";");
+			this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
 			int colType = this.schema.columnType(column);
 			String xsd = DatabaseSchemaInspector.xsdTypeFor(colType);
 			if (xsd != null && !"xsd:string".equals(xsd)) {
@@ -233,22 +233,22 @@ public class MappingGenerator {
 				createDatatypeProperty(column, TypeMapper.getInstance().getSafeTypeByName(datatypeURI));
 			}
 		} else {
-			this.out.println("\td2rq:refersToClassMap " + classMapName(foreignKeyColumn.getTableName()) + ";");
-			Column joinColumn = foreignKeyColumn;
+			this.out.println("\td2rq:refersToClassMap " + classMapName(foreignKeyColumn.tableName()) + ";");
+			Attribute joinColumn = foreignKeyColumn;
 			// Same-table join? Then we need to set up an alias for the table and join to that
-			if (column.getTableName().equals(foreignKeyColumn.getTableName())) {
-				String aliasedTableName = foreignKeyColumn.getTableName() + "__alias";
-				this.out.println("\td2rq:alias \"" + column.getTableName() + " AS " + aliasedTableName + "\";");
-				joinColumn = new Column(aliasedTableName, foreignKeyColumn.getColumnName());
+			if (column.tableName().equals(foreignKeyColumn.tableName())) {
+				String aliasedTableName = foreignKeyColumn.tableName() + "__alias";
+				this.out.println("\td2rq:alias \"" + column.tableName() + " AS " + aliasedTableName + "\";");
+				joinColumn = new Attribute(aliasedTableName, foreignKeyColumn.attributeName());
 			}
-			this.out.println("\td2rq:join \"" + column.getQualifiedName() + " = " + joinColumn.getQualifiedName() + "\";");
+			this.out.println("\td2rq:join \"" + column.qualifiedName() + " = " + joinColumn.qualifiedName() + "\";");
 			createObjectProperty(column, foreignKeyColumn);
 		}
 		this.out.println("\t.");
 	}
 
 	// TODO Factor out into its own interface & classes for different RDBMS?
-	public void writeColumnHacks(Column column, int colType) {
+	public void writeColumnHacks(Attribute column, int colType) {
 //		if (DatabaseSchemaInspector.isStringType(colType)) {
 //			// Suppress empty strings ('')
 //			out.println("\td2rq:condition \"" + column.getQualifiedName() + " != ''\";");			
@@ -256,25 +256,25 @@ public class MappingGenerator {
 		if (this.databaseType == "MySQL" && DatabaseSchemaInspector.isDateType(colType)) {
 			// Work around an issue with the MySQL driver where SELECTing a date/time
 			// column containing '0000-00-00 ...' causes an SQLException
-			this.out.println("\td2rq:condition \"" + column.getQualifiedName() + " != '0000'\";");
+			this.out.println("\td2rq:condition \"" + column.qualifiedName() + " != '0000'\";");
 		}
 	}
 	
 	private void writeLink(String linkTableName) {
 		List foreignKeys = this.schema.foreignKeyColumns(linkTableName);
-		Column firstLocalColumn = ((Column[]) foreignKeys.get(0))[0];
-		Column firstForeignColumn = ((Column[]) foreignKeys.get(0))[1];
-		Column secondLocalColumn = ((Column[]) foreignKeys.get(1))[0];
-		Column secondForeignColumn = ((Column[]) foreignKeys.get(1))[1];
+		Attribute firstLocalColumn = ((Attribute[]) foreignKeys.get(0))[0];
+		Attribute firstForeignColumn = ((Attribute[]) foreignKeys.get(0))[1];
+		Attribute secondLocalColumn = ((Attribute[]) foreignKeys.get(1))[0];
+		Attribute secondForeignColumn = ((Attribute[]) foreignKeys.get(1))[1];
 		this.out.println("# n:m table " + linkTableName);
 		this.out.println(propertyBridgeName(linkTableName) + " a d2rq:PropertyBridge;");
-		this.out.println("\td2rq:belongsToClassMap " + classMapName(firstForeignColumn.getTableName()) + ";");
+		this.out.println("\td2rq:belongsToClassMap " + classMapName(firstForeignColumn.tableName()) + ";");
 		this.out.println("\td2rq:property vocab:" + linkTableName + ";");
-		this.out.println("\td2rq:refersToClassMap " + classMapName(secondForeignColumn.getTableName()) + ";");
-		this.out.println("\td2rq:join \"" + firstForeignColumn.getQualifiedName() + " = " + firstLocalColumn.getQualifiedName() + "\";");
-		this.out.println("\td2rq:join \"" + secondLocalColumn.getQualifiedName() + " = " + secondForeignColumn.getQualifiedName() + "\";");
+		this.out.println("\td2rq:refersToClassMap " + classMapName(secondForeignColumn.tableName()) + ";");
+		this.out.println("\td2rq:join \"" + firstForeignColumn.qualifiedName() + " = " + firstLocalColumn.qualifiedName() + "\";");
+		this.out.println("\td2rq:join \"" + secondLocalColumn.qualifiedName() + " = " + secondForeignColumn.qualifiedName() + "\";");
 		this.out.println("\t.");
-		createLinkProperty(linkTableName, firstForeignColumn.getTableName(), secondForeignColumn.getTableName());
+		createLinkProperty(linkTableName, firstForeignColumn.tableName(), secondForeignColumn.tableName());
 	}
 
 	private String databaseName() {
@@ -297,8 +297,8 @@ public class MappingGenerator {
 		String result = this.instanceNamespaceURI + tableName;
 		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			result += "/@@" + column.getQualifiedName() + "@@";
+			Attribute column = (Attribute) it.next();
+			result += "/@@" + column.qualifiedName() + "@@";
 		}
 		return result;
 	}
@@ -307,8 +307,8 @@ public class MappingGenerator {
 		String result = tableName + " #";
 		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			result += "@@" + column.getQualifiedName() + "@@";
+			Attribute column = (Attribute) it.next();
+			result += "@@" + column.qualifiedName() + "@@";
 			if (it.hasNext()) {
 				result += "/";
 			}
@@ -316,8 +316,8 @@ public class MappingGenerator {
 		return result;
 	}
 	
-	private String toRelationName(Column column) {
-		return column.getTableName() + "_" + column.getColumnName();
+	private String toRelationName(Attribute column) {
+		return column.tableName() + "_" + column.attributeName();
 	}
 
 	private void identifyLinkTables() {
@@ -327,8 +327,8 @@ public class MappingGenerator {
 			if (!this.schema.isLinkTable(tableName)) {
 				continue;
 			}
-			Column[] firstForeignKey = (Column[]) this.schema.foreignKeyColumns(tableName).get(0);
-			this.linkTables.put(tableName, firstForeignKey[1].getTableName());
+			Attribute[] firstForeignKey = (Attribute[]) this.schema.foreignKeyColumns(tableName).get(0);
+			this.linkTables.put(tableName, firstForeignKey[1].tableName());
 		}
 	}
 	
@@ -353,14 +353,14 @@ public class MappingGenerator {
 		r.addProperty(RDFS.isDefinedBy, ontologyResource());
 	}
 
-	private void initProperty(Resource r, Column column) {
+	private void initProperty(Resource r, Attribute column) {
 		r.addProperty(RDF.type, RDF.Property);
 		r.addProperty(RDFS.label, toRelationName(column));
-		r.addProperty(RDFS.domain, classResource(column.getTableName()));
+		r.addProperty(RDFS.domain, classResource(column.tableName()));
 		r.addProperty(RDFS.isDefinedBy, ontologyResource());		
 	}
 	
-	private void createDatatypeProperty(Column column, RDFDatatype datatype) {
+	private void createDatatypeProperty(Attribute column, RDFDatatype datatype) {
 		Resource r = propertyResource(column);
 		initProperty(r, column);
 		r.addProperty(RDF.type, OWL.DatatypeProperty);
@@ -369,11 +369,11 @@ public class MappingGenerator {
 		}
 	}
 
-	private void createObjectProperty(Column subjectColumn, Column objectColumn) {
+	private void createObjectProperty(Attribute subjectColumn, Attribute objectColumn) {
 		Resource r = propertyResource(subjectColumn);
 		initProperty(r, subjectColumn);
 		r.addProperty(RDF.type, OWL.ObjectProperty);
-		r.addProperty(RDFS.range, classResource(objectColumn.getTableName()));
+		r.addProperty(RDFS.range, classResource(objectColumn.tableName()));
 	}
 
 	private void createLinkProperty(String linkTableName, String fromTable, String toTable) {
@@ -397,7 +397,7 @@ public class MappingGenerator {
 		return this.vocabModel.createResource(classURI);		
 	}
 
-	private Resource propertyResource(Column column) {
+	private Resource propertyResource(Attribute column) {
 		String propertyURI = this.vocabNamespaceURI + toRelationName(column);
 		return this.vocabModel.createResource(propertyURI);
 	}

@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 
 /**
@@ -21,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Join;
  * kinds of objects, the inverse operation is available as well. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.6 2006/09/11 22:29:18 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.7 2006/09/11 23:02:48 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_MAP);
@@ -86,18 +87,18 @@ public class AliasMap extends ColumnRenamer {
 		return (String) this.aliasesToOriginals.get(name);
 	}
 	
-	public Column applyTo(Column column) {
-		if (!hasAlias(column.getTableName())) {
+	public Attribute applyTo(Attribute column) {
+		if (!hasAlias(column.tableName())) {
 			return column;
 		}
-		return new Column(applyToTableName(column.getTableName()), column.getColumnName());
+		return new Attribute(applyToTableName(column.tableName()), column.attributeName());
 	}
 	
-	public Column originalOf(Column column) {
-		if (!isAlias(column.getTableName())) {
+	public Attribute originalOf(Attribute column) {
+		if (!isAlias(column.tableName())) {
 			return column;
 		}
-		return new Column(originalOf(column.getTableName()), column.getColumnName());
+		return new Attribute(originalOf(column.tableName()), column.attributeName());
 	}
 	
 	public Join applyTo(Join join) {
@@ -130,7 +131,7 @@ public class AliasMap extends ColumnRenamer {
 		Iterator it = mapWithColumnKeys.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
-			Column column = (Column) entry.getKey();
+			Attribute column = (Attribute) entry.getKey();
 			result.put(applyTo(column), entry.getValue());
 		}
 		return result;

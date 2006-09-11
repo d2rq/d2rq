@@ -7,6 +7,7 @@ import java.sql.Types;
 import java.util.Map;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 
 
 /**
@@ -15,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.10 2006/09/03 00:08:10 cyganiak Exp $
+ * @version $Id: Database.java,v 1.11 2006/09/11 23:02:48 cyganiak Exp $
  * 
  * TODO: Make a bunch of public methods private?
  */
@@ -123,15 +124,15 @@ public class Database {
     }
 
     public int getColumnType(String qualifiedColumnName) {
-    		return getColumnType(new Column(qualifiedColumnName));
+    		return getColumnType(new Attribute(qualifiedColumnName));
     }
     
     /**
      * Returns the columnType for a given database column.
      * @return Node columnType D2RQ.textColumn or D2RQ.numericColumn or D2RQ.dateColumn
      */
-    public int getColumnType(Column column) {
-		Integer t = (Integer) this.columnTypes.get(column.getQualifiedName());
+    public int getColumnType(Attribute column) {
+		Integer t = (Integer) this.columnTypes.get(column.qualifiedName());
 		if (t != null) {
 			return t.intValue();
 		}
@@ -162,7 +163,7 @@ public class Database {
 		case Types.TIMESTAMP: return Database.dateColumnType;
 		
 		default: throw new D2RQException("Unsupported database type code (" + type + ") for column "
-				+ column.getQualifiedName());
+				+ column.qualifiedName());
 		}
 	}
 
@@ -177,7 +178,7 @@ public class Database {
      * Raises a D2RQ error if there's no type information for the column.
      * @param column a database column
      */
-	public void assertHasType(Column column) {
+	public void assertHasType(Attribute column) {
 		if (getColumnType(column) == Database.noColumnType) {
 			throw new D2RQException("The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
 		}

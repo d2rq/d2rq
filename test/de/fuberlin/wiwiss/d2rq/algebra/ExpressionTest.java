@@ -9,12 +9,11 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExpressionTest.java,v 1.1 2006/09/11 22:29:21 cyganiak Exp $
+ * @version $Id: ExpressionTest.java,v 1.2 2006/09/11 23:02:49 cyganiak Exp $
  */
 public class ExpressionTest extends TestCase {
 
@@ -47,7 +46,7 @@ public class ExpressionTest extends TestCase {
 		Expression e = new Expression(Arrays.asList(
 				new String[]{"papers.publish = 1", "papers.rating > 4"}));
 		Set expectedColumns = new HashSet(Arrays.asList(
-				new Column[]{new Column("papers.publish"), new Column("papers.rating")}));
+				new Attribute[]{new Attribute("papers.publish"), new Attribute("papers.rating")}));
 		assertEquals(expectedColumns, e.columns());
 	}
 	
@@ -80,7 +79,7 @@ public class ExpressionTest extends TestCase {
 	
 	public void testRenameColumnsWithColumnReplacer() {
 		Map map = new HashMap();
-		map.put(new Column("foo.col1"), new Column("foo.col2"));
+		map.put(new Attribute("foo.col1"), new Attribute("foo.col2"));
 		assertEquals(new Expression("foo.col2=foo.col3"), 
 				new Expression("foo.col1=foo.col3").renameColumns(new ColumnRenamerMap(map)));
 	}

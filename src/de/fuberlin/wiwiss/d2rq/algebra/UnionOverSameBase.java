@@ -9,7 +9,6 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Triple;
 
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -17,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UnionOverSameBase.java,v 1.5 2006/09/11 22:29:20 cyganiak Exp $
+ * @version $Id: UnionOverSameBase.java,v 1.6 2006/09/11 23:02:49 cyganiak Exp $
  */
 public class UnionOverSameBase implements RDFRelation {
 
@@ -71,18 +70,18 @@ public class UnionOverSameBase implements RDFRelation {
 		Set results = new HashSet();
 		Iterator it = query.baseRelation().attributeConditions().keySet().iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			results.add(column.getTableName());
+			Attribute column = (Attribute) it.next();
+			results.add(column.tableName());
 		}
 		it = query.projectionColumns().iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			results.add(column.getTableName());
+			Attribute column = (Attribute) it.next();
+			results.add(column.tableName());
 		}
 		it = query.baseRelation().condition().columns().iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			results.add(column.getTableName());
+			Attribute column = (Attribute) it.next();
+			results.add(column.tableName());
 		}
 		it = query.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {

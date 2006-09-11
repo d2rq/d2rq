@@ -1,118 +1,73 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
+ * Describes a set of strings that are obtained in some way
+ * from one or more database columns.
+ * <p>
+ * Typical implementations are {@link Attribute} (describing the set
+ * of strings contained in one database column), {@link Pattern}
+ * (describing the set of strings that is obtained by sticking
+ * the values of several database fields into a string pattern),
+ * and {@link BlankNodeID} (similar).
+ * <p>
+ * There are several other ValueSources that modify the behaviour
+ * of another underlying ValueSource, implementing the Decorator
+ * pattern. This includes {@link TranslationTable}.TranslatingValueSource
+ * (translates values using a translation table or translation class)
+ * and the various value restrictions (@link RegexRestriction et. al.).
+ * <p>
+ * ValueSources are used by {@link NodeMaker}s. A node maker
+ * wraps the strings into Jena nodes, thus creating a description
+ * of a set of RDF nodes.
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueMaker.java,v 1.1 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: ValueMaker.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
  */
-public class ValueMaker implements ValueSource {
-	public static ValueConstraint maxLengthConstraint(final int maxLength) {
-		return new ValueConstraint() {
-			public boolean matches(String value) {
-				return value == null || value.length() <= maxLength;
-			}
-			public String toString() {
-				return "maxLength=" + maxLength;
-			}
-		};
-	}
-	public static ValueConstraint containsConstraint(final String containsSubstring) {
-		return new ValueConstraint() {
-			public boolean matches(String value) {
-				return value == null || value.indexOf(containsSubstring) >= 0;
-			}
-			public String toString() {
-				return "contains='" + containsSubstring + "'";
-			}
-		};
-	}
-	public static ValueConstraint regexConstraint(final String regex) {
-		final Pattern pattern = Pattern.compile(regex);
-		return new ValueConstraint() {
-			public boolean matches(String value) {
-				return value == null || pattern.matcher(value).matches();
-			}
-			public String toString() {
-				return "regex='" + regex + "'";
-			}
-		};
-	}
-	
-	private ValueSource base;
-	private List constraints;
-	private Translator translator;
-	
-	public ValueMaker(ValueSource base) {
-		this(base, Collections.EMPTY_LIST);
-	}
-	
-	public ValueMaker(ValueSource base, List constraints) {
-		this(base, constraints, Translator.identity);
-	}
+public interface ValueMaker {
+    
+	/**
+	 * Checks if a given value fits this source without querying the
+	 * database.
+	 */
+	boolean matches(String value);
 
-	public ValueMaker(ValueSource base, List constraints, Translator translator) {
-		this.base = base;
-		this.constraints = constraints;
-		this.translator = translator;
-	}
-	
-	public Map attributeConditions(String value) {
-		return this.base.attributeConditions(this.translator.toDBValue(value));
-	}
+	/**
+	 * Returns a map of database fields and values corresponding
+	 * to the argument.
+	 * 
+	 * <p>For example, a ValueSource that corresponds directly
+	 * to a single DB column would return a single-entry map with that
+	 * column as the key, and value as the value.
+	 * 
+	 * @param value a non-<tt>null</tt> value
+	 * @return a map with {@link Attribute} keys, and string values.
+	 */
+	Map attributeConditions(String value);
 
-	public String makeValue(ResultRow row) {
-		return this.translator.toRDFValue(this.base.makeValue(row));
-	}
+	/**
+	 * Returns a set of all columns containing data necessary
+	 * for this ValueSource.
+	 * @return a set of {Column}s
+	 */
+	Set projectionAttributes();
 
-	public void matchConstraint(NodeConstraint c) {
-		this.base.matchConstraint(c);
-	}
+	/**
+	 * Retrieves a value from a database row according to some rule or pattern.
+	 * @param row the database row
+	 * @return a value created from the row
+	 */
+	String makeValue(ResultRow row);
+	
+	void matchConstraint(NodeConstraint c);
 
-	public boolean matches(String value) {
-		Iterator it = this.constraints.iterator();
-		while (it.hasNext()) {
-			ValueConstraint constraint = (ValueConstraint) it.next();
-			if (!constraint.matches(value)) {
-				return false;
-			}
-		}
-		return this.base.matches(this.translator.toDBValue(value));
-	}
-
-	public Set projectionAttributes() {
-		return this.base.projectionAttributes();
-	}
-	
-	public ValueSource replaceColumns(ColumnRenamer renamer) {
-		return new ValueMaker(this.base.replaceColumns(renamer), this.constraints, this.translator);
-	}
-	
-	public interface ValueConstraint {
-		boolean matches(String value);
-	}
-	
-	public String toString() {
-		StringBuffer result = new StringBuffer(this.base.toString());
-		Iterator it = this.constraints.iterator();
-		if (it.hasNext()) {
-			result.append(":");
-		}
-		while (it.hasNext()) {
-			result.append(it.next());
-			if (it.hasNext()) {
-				result.append("&&");
-			}
-		}
-		return result.toString();
-	}
+	ValueMaker replaceColumns(ColumnRenamer renamer);
 }

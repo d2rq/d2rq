@@ -9,13 +9,13 @@ import java.util.Set;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
-import de.fuberlin.wiwiss.d2rq.values.ValueSource;
+import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
 /**
  * Holds constraint information for a variable node.
@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueSource;
  * from the {@link RDFRelationImpl}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.6 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.7 2006/09/11 23:02:49 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeConstraint {
 	/** true means: satisfiable. */
@@ -141,10 +141,10 @@ public class NodeConstraintImpl implements NodeConstraint {
     /** 
      * Constraints given on Nodes that are equal to Columns
      * can be directly translated to Column constraints.
-     * NodeMakers with an attached {@link ValueSource} call this.
+     * NodeMakers with an attached {@link ValueMaker} call this.
      * @param c
      */
-    public void matchColumn(Column c) {
+    public void matchColumn(Attribute c) {
         if (!possible)
             return;
     	if (!this.patternConstraints.isEmpty()) {
@@ -155,7 +155,7 @@ public class NodeConstraintImpl implements NodeConstraint {
         
     /** 
      * Pattern-Constraints can be translated to column constraints.
-     * NodeMakers with an attached {@link ValueSource} call this.
+     * NodeMakers with an attached {@link ValueMaker} call this.
      * @param p
      */
     public void matchPattern(Pattern p, List columns) {
@@ -188,15 +188,15 @@ public class NodeConstraintImpl implements NodeConstraint {
     			matchImpossible();
     		}
     		for (int i = 0; i < this.columns.size(); i++) {
-    			Column col1 = (Column) this.columns.get(i);
-    			Column col2 = (Column) otherColumns.get(i);
+    			Attribute col1 = (Attribute) this.columns.get(i);
+    			Attribute col2 = (Attribute) otherColumns.get(i);
     			addEqualColumn(col1, col2);
     		}
     	}
     }
     
-    public void addEqualColumn(Column c1, Column c2) {
-        conditionsAddEqual(c1.getQualifiedName(),c2.getQualifiedName());
+    public void addEqualColumn(Attribute c1, Attribute c2) {
+        conditionsAddEqual(c1.qualifiedName(),c2.qualifiedName());
     }
     
     /** 
@@ -234,8 +234,8 @@ public class NodeConstraintImpl implements NodeConstraint {
             value=fixedNode.toString(); // TODO what is a clean way to extract uri or literal value?
         Iterator it=columns.iterator();
         while (it.hasNext()) {
-            Column col=(Column)it.next();
-            String colString=col.getQualifiedName();
+            Attribute col=(Attribute)it.next();
+            String colString=col.qualifiedName();
             if (value==null) {
                 if (firstCol==null) {
                     firstCol=colString;

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 
@@ -14,14 +15,14 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.6 2006/09/11 22:29:20 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.7 2006/09/11 23:02:50 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
-	private final static Column foo_col1 = new Column("foo.col1");
-	private final static Column bar_col1 = new Column("bar.col1");
-	private final static Column baz_col1 = new Column("baz.col1");
-	private final static Column abc_col1 = new Column("abc.col1");
-	private final static Column xyz_col1 = new Column("xyz.col1");
+	private final static Attribute foo_col1 = new Attribute("foo.col1");
+	private final static Attribute bar_col1 = new Attribute("bar.col1");
+	private final static Attribute baz_col1 = new Attribute("baz.col1");
+	private final static Attribute abc_col1 = new Attribute("abc.col1");
+	private final static Attribute xyz_col1 = new Attribute("xyz.col1");
 
 	private AliasMap fooAsBar;
 	
@@ -75,8 +76,8 @@ public class AliasMapTest extends TestCase {
 	}
 	
 	public void testApplyToColumnSet() {
-		Set data = new HashSet(Arrays.asList(new Column[]{foo_col1, baz_col1}));
-		Set expected = new HashSet(Arrays.asList(new Column[]{bar_col1, baz_col1}));
+		Set data = new HashSet(Arrays.asList(new Attribute[]{foo_col1, baz_col1}));
+		Set expected = new HashSet(Arrays.asList(new Attribute[]{bar_col1, baz_col1}));
 		assertEquals(expected, this.fooAsBar.applyToColumnSet(data));
 	}
 	

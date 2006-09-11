@@ -6,15 +6,15 @@ import java.util.Set;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
-import de.fuberlin.wiwiss.d2rq.values.ValueSource;
+import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
 /**
- * Dummy implementation of {@link ValueSource}
+ * Dummy implementation of {@link ValueMaker}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DummyValueSource.java,v 1.3 2006/09/11 22:29:21 cyganiak Exp $
+ * @version $Id: DummyValueSource.java,v 1.4 2006/09/11 23:02:49 cyganiak Exp $
  */
-public class DummyValueSource implements ValueSource {
+public class DummyValueSource implements ValueMaker {
 	private boolean couldFit = true;
 	private String returnValue = null;
 	private Set columns;
@@ -60,7 +60,7 @@ public class DummyValueSource implements ValueSource {
 		return this.returnValue;
 	}
 	
-	public ValueSource replaceColumns(ColumnRenamer renamer) {
+	public ValueMaker replaceColumns(ColumnRenamer renamer) {
 		return this;
 	}
 }

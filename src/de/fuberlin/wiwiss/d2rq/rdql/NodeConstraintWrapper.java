@@ -5,7 +5,7 @@ import java.util.List;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
-import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * {@link ColumnRenamer}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeConstraintWrapper.java,v 1.6 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: NodeConstraintWrapper.java,v 1.7 2006/09/11 23:02:49 cyganiak Exp $
  */
 public class NodeConstraintWrapper implements NodeConstraint {
 	private NodeConstraint base;
@@ -36,7 +36,7 @@ public class NodeConstraintWrapper implements NodeConstraint {
 		this.base.matchImpossible();
 	}
 	
-	public void addEqualColumn(Column c1, Column c2) {
+	public void addEqualColumn(Attribute c1, Attribute c2) {
 		this.base.addEqualColumn(
 				this.renames.applyTo(c1), this.renames.applyTo(c2));
 	}
@@ -53,7 +53,7 @@ public class NodeConstraintWrapper implements NodeConstraint {
 		this.base.matchLiteralType(language, datatype);
 	}
 	
-	public void matchColumn(Column c) {
+	public void matchColumn(Attribute c) {
 		this.base.matchColumn(this.renames.applyTo(c));
 	}
 

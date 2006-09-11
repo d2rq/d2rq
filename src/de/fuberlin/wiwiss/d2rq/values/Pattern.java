@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -21,9 +21,9 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.1 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
  */
-public class Pattern implements ValueSource {
+public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";
 	private final static java.util.regex.Pattern embeddedColumnRegex = 
 		java.util.regex.Pattern.compile("@@([^@]+)@@");
@@ -63,10 +63,10 @@ public class Pattern implements ValueSource {
 
 	/**
 	 * Extracts column values according to the pattern from a value string. The
-	 * keys are {@link Column}s, the values are strings.
+	 * keys are {@link Attribute}s, the values are strings.
 	 * @param value value to be checked.
 	 * @return a map with <tt>Column</tt> keys and string values
-	 * @see de.fuberlin.wiwiss.d2rq.values.ValueSource#attributeConditions(java.lang.String)
+	 * @see de.fuberlin.wiwiss.d2rq.values.ValueMaker#attributeConditions(java.lang.String)
 	 */
 	public Map attributeConditions(String value) {
 		if (value == null) {
@@ -92,7 +92,7 @@ public class Pattern implements ValueSource {
 		int index = 0;
 		StringBuffer result = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {
-			Column column = (Column) this.columns.get(index);
+			Attribute column = (Attribute) this.columns.get(index);
 			String value = row.get(column);
 			if (value == null) {
 				return null;
@@ -121,13 +121,13 @@ public class Pattern implements ValueSource {
 				&& this.literalParts.equals(p.literalParts);
 	}
 	
-	public ValueSource replaceColumns(ColumnRenamer renames) {
+	public ValueMaker replaceColumns(ColumnRenamer renames) {
 		int index = 0;
 		StringBuffer newPattern = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {
-			Column column = (Column) this.columns.get(index);
+			Attribute column = (Attribute) this.columns.get(index);
 			newPattern.append(DELIMITER);
-			newPattern.append(renames.applyTo(column).getQualifiedName());
+			newPattern.append(renames.applyTo(column).qualifiedName());
 			newPattern.append(DELIMITER);
 			newPattern.append(this.literalParts.get(index));
 			index++;
@@ -142,7 +142,7 @@ public class Pattern implements ValueSource {
 		this.firstLiteralPart = this.pattern.substring(0, firstLiteralEnd);
 		String regexPattern = "\\Q" + this.firstLiteralPart + "\\E";
 		while (matched) {
-			this.columns.add(new Column(match.group(1)));
+			this.columns.add(new Attribute(match.group(1)));
 			int nextLiteralStart = match.end();
 			matched = match.find();
 			int nextLiteralEnd = matched ? match.start() : this.pattern.length();

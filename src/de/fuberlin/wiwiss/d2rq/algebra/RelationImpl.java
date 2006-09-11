@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
@@ -55,7 +54,7 @@ public class RelationImpl implements Relation {
 		Iterator it = newConditions.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
-			Column attribute = (Column) entry.getKey();
+			Attribute attribute = (Attribute) entry.getKey();
 			String value = (String) entry.getValue();
 			if (this.attributeConditions.containsKey(attribute)) {
 				if (value.equals(this.attributeConditions.get(attribute))) {

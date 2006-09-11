@@ -19,7 +19,7 @@ import com.hp.hpl.jena.rdql.parser.Q_UnaryNot;
 import com.hp.hpl.jena.rdql.parser.Q_Var;
 import com.hp.hpl.jena.rdql.parser.WorkingVar;
 
-import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
@@ -43,7 +43,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  *   2) SQL dialects
  *   3) Variable translators
  * @author jgarbers
- * @version $Id: ExpressionTranslator.java,v 1.16 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: ExpressionTranslator.java,v 1.17 2006/09/11 23:02:49 cyganiak Exp $
  */
 public class ExpressionTranslator {
 	
@@ -307,7 +307,7 @@ public class ExpressionTranslator {
         }
         it=c.columns().iterator();
         while (it.hasNext()) {
-            Column col=(Column)it.next();
+            Attribute col=(Attribute)it.next();
             Result res=translateColumn(col);
             if (res!=null)
                 return res;
@@ -322,8 +322,8 @@ public class ExpressionTranslator {
         return null;
     }
     
-    public Result translateColumn(Column col) {
-        String columnName=col.getQualifiedName();
+    public Result translateColumn(Attribute col) {
+        String columnName=col.qualifiedName();
         int columnType=statementMaker.columnType(col);
         if (columnType==Database.numericColumnType) {
             return newResult(columnName,NumberType);
@@ -355,7 +355,7 @@ public class ExpressionTranslator {
         	if (o instanceof String) {
                 list.add(translateString((String) o));
             } else {	// o instanceof Column
-                Result res=castToString(translateColumn((Column) o));
+                Result res=castToString(translateColumn((Attribute) o));
                 if (res==null)
                     return null;
                 list.add(res);

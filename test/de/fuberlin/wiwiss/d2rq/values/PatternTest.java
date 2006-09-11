@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import junit.framework.TestCase;
-import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
 
@@ -13,14 +13,14 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.1 2006/09/11 22:29:18 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
-	private final static Column col1 = new Column("table.col1");
-	private final static Column col2 = new Column("table.col2");
-	private final static Column col3 = new Column("table.col3");
-	private final static Column col4 = new Column("table.col4");
-	private final static Column col5 = new Column("table.col5");
+	private final static Attribute col1 = new Attribute("table.col1");
+	private final static Attribute col2 = new Attribute("table.col2");
+	private final static Attribute col3 = new Attribute("table.col3");
+	private final static Attribute col4 = new Attribute("table.col4");
+	private final static Attribute col5 = new Attribute("table.col5");
 
 	private ResultRow row;
 
@@ -192,7 +192,7 @@ public class PatternTest extends TestCase {
 		assertTrue(it.hasNext());
 		assertEquals("foo", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Column("table.col1"), it.next());
+		assertEquals(new Attribute("table.col1"), it.next());
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertFalse(it.hasNext());
@@ -203,7 +203,7 @@ public class PatternTest extends TestCase {
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Column("table.col1"), it.next());
+		assertEquals(new Attribute("table.col1"), it.next());
 		assertTrue(it.hasNext());
 		assertEquals("foo", it.next());
 		assertFalse(it.hasNext());
@@ -214,11 +214,11 @@ public class PatternTest extends TestCase {
 		assertTrue(it.hasNext());
 		assertEquals("foo", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Column("table.col1"), it.next());
+		assertEquals(new Attribute("table.col1"), it.next());
 		assertTrue(it.hasNext());
 		assertEquals("bar", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Column("table.col2"), it.next());
+		assertEquals(new Attribute("table.col2"), it.next());
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertFalse(it.hasNext());
@@ -229,11 +229,11 @@ public class PatternTest extends TestCase {
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Column("table.col1"), it.next());
+		assertEquals(new Attribute("table.col1"), it.next());
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Column("table.col2"), it.next());
+		assertEquals(new Attribute("table.col2"), it.next());
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertFalse(it.hasNext());
@@ -254,15 +254,15 @@ public class PatternTest extends TestCase {
 		Iterator it = expectedValues.keySet().iterator();
 		while (it.hasNext()) {
 			String name = (String) it.next();
-			Column column = new Column(name);
+			Attribute column = new Attribute(name);
 			assertTrue("missing column " + column, actualValues.containsKey(column));
 			assertEquals(expectedValues.get(name), actualValues.get(column));
 		}
 		it = actualValues.keySet().iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			assertTrue("unexpected column " + column, expectedValues.containsKey(column.getQualifiedName()));
-			assertEquals(expectedValues.get(column.getQualifiedName()), actualValues.get(column));
+			Attribute column = (Attribute) it.next();
+			assertTrue("unexpected column " + column, expectedValues.containsKey(column.qualifiedName()));
+			assertEquals(expectedValues.get(column.qualifiedName()), actualValues.get(column));
 		}
 	}
 	
@@ -273,7 +273,7 @@ public class PatternTest extends TestCase {
 	
 	private ResultRow row(String spec) {
 		String[] parts = spec.split("\\|", -1);
-		Column[] columns = {col1, col2, col3, col4, col5};
+		Attribute[] columns = {col1, col2, col3, col4, col5};
 		Map result = new HashMap();
 		for (int i = 0; i < parts.length && i < columns.length; i++) {
 			result.put(columns[i], parts[i]);

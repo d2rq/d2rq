@@ -14,7 +14,6 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.map.ClassMap;
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
@@ -22,14 +21,15 @@ import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker.NodeType;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
+import de.fuberlin.wiwiss.d2rq.values.Column;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.ValueDecorator;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
-import de.fuberlin.wiwiss.d2rq.values.ValueSource;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.1 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
  */
 public abstract class ResourceMap {
 	protected static final Property valueProperty = 
@@ -169,13 +169,13 @@ public abstract class ResourceMap {
 	}
 
 	public NodeMaker buildNodeMakerForReferringPropertyBridge(ResourceMap other, boolean unique) {
-		ValueSource values = other.wrapValueSource(
+		ValueMaker values = other.wrapValueSource(
 				wrapValueSource(buildValueSourceBase())).replaceColumns(
 						other.relationBuilder().aliases());
 		return buildNodeMaker(values, unique); 
 	}
 	
-	private ValueSource buildValueSourceBase() {
+	private ValueMaker buildValueSourceBase() {
 		if (this.bNodeIdColumns != null) {
 			return new BlankNodeID(this.bNodeIdColumns, this.mapName);
 		}
@@ -194,31 +194,31 @@ public abstract class ResourceMap {
 		throw new D2RQException(this.mapName + " needs a column/pattern/bNodeID specification");
 	}
 
-	public ValueSource wrapValueSource(ValueSource values) {
+	public ValueMaker wrapValueSource(ValueMaker values) {
 		List constraints = new ArrayList();
 		if (this.valueMaxLength != Integer.MAX_VALUE) {
-			constraints.add(ValueMaker.maxLengthConstraint(this.valueMaxLength));
+			constraints.add(ValueDecorator.maxLengthConstraint(this.valueMaxLength));
 		}
 		Iterator it = this.valueContainses.iterator();
 		while (it.hasNext()) {
 			String contains = (String) it.next();
-			constraints.add(ValueMaker.containsConstraint(contains));
+			constraints.add(ValueDecorator.containsConstraint(contains));
 		}
 		it = this.valueRegexes.iterator();
 		while (it.hasNext()) {
 			String regex = (String) it.next();
-			constraints.add(ValueMaker.regexConstraint(regex));
+			constraints.add(ValueDecorator.regexConstraint(regex));
 		}
 		if (this.translateWith == null) {
 			if (constraints.isEmpty()) {
 				return values;
 			}
-			return new ValueMaker(values, constraints);
+			return new ValueDecorator(values, constraints);
 		}
-		return new ValueMaker(values, constraints, this.translateWith.translator());
+		return new ValueDecorator(values, constraints, this.translateWith.translator());
 	}
 	
-	private NodeMaker buildNodeMaker(ValueSource values, boolean isUnique) {
+	private NodeMaker buildNodeMaker(ValueMaker values, boolean isUnique) {
 		return new TypedNodeMaker(nodeType(), values, isUnique);
 	}
 	

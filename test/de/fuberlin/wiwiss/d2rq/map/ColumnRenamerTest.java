@@ -7,18 +7,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 
 import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerTest.java,v 1.3 2006/09/11 22:29:20 cyganiak Exp $
+ * @version $Id: ColumnRenamerTest.java,v 1.4 2006/09/11 23:02:50 cyganiak Exp $
  */
 public class ColumnRenamerTest extends TestCase {
-	private final static Column col1 = new Column("foo.col1");
-	private final static Column col2 = new Column("foo.col2");
-	private final static Column col3 = new Column("foo.col3");
+	private final static Attribute col1 = new Attribute("foo.col1");
+	private final static Attribute col2 = new Attribute("foo.col2");
+	private final static Attribute col3 = new Attribute("foo.col3");
 
 	private ColumnRenamerMap col1ToCol2;
 
@@ -41,8 +42,8 @@ public class ColumnRenamerTest extends TestCase {
 	}
 	
 	public void testApplyToColumnSetReplacesMappedColumns() {
-		Set originals = new HashSet(Arrays.asList(new Column[]{col1, col2, col3}));
-		Set expected = new HashSet(Arrays.asList(new Column[]{col2, col3}));
+		Set originals = new HashSet(Arrays.asList(new Attribute[]{col1, col2, col3}));
+		Set expected = new HashSet(Arrays.asList(new Attribute[]{col2, col3}));
 		assertEquals(expected, col1ToCol2.applyToColumnSet(originals));
 	}
 	

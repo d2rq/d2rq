@@ -5,15 +5,15 @@ import java.util.List;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
-import de.fuberlin.wiwiss.d2rq.map.Column;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
-import de.fuberlin.wiwiss.d2rq.values.ValueSource;
+import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
 /**
  * @author Richard Cyganiak
- * @version $Id: NodeConstraint.java,v 1.9 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: NodeConstraint.java,v 1.10 2006/09/11 23:02:49 cyganiak Exp $
  */
 public interface NodeConstraint {
 
@@ -43,17 +43,17 @@ public interface NodeConstraint {
     /** 
      * Constraints given on Nodes that are equal to Columns
      * can be directly translated to Column constraints.
-     * NodeMakers with an attached {@link ValueSource} call this.
+     * NodeMakers with an attached {@link ValueMaker} call this.
      * @param c
      */
-    public void matchColumn(Column c);
+    public void matchColumn(Attribute c);
 
     public void matchPattern(Pattern p, List columns);
 
     public void matchBlankNodeIdentifier(
     		BlankNodeID id, List columns);
     
-    public void addEqualColumn(Column c1, Column c2);
+    public void addEqualColumn(Attribute c1, Attribute c2);
     
     public void addConstraintsToSQL(SelectStatementBuilder sql);
 

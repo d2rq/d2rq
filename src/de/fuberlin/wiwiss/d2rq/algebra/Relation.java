@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
@@ -14,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * TODO Add uniqueConstraints()
  * TODO Explicitly list tables
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Relation.java,v 1.2 2006/09/11 22:29:21 cyganiak Exp $
+ * @version $Id: Relation.java,v 1.3 2006/09/11 23:02:49 cyganiak Exp $
  */
 public interface Relation extends RelationalOperators {
 
@@ -65,7 +64,7 @@ public interface Relation extends RelationalOperators {
 	/**
 	 * All tuples in the relation must have a certain value for an
 	 * attribute if present in this map.
-	 * @return A map from {@link Column}n to strings
+	 * @return A map from {@link Attribute}n to strings
 	 */
 	Map attributeConditions();
 }

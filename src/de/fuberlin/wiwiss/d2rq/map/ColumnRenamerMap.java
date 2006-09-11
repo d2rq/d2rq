@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+
 /**
  * A {@link ColumnRenamer} based on a fixed map of
  * original and replacement columns.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerMap.java,v 1.2 2006/09/09 23:25:14 cyganiak Exp $
+ * @version $Id: ColumnRenamerMap.java,v 1.3 2006/09/11 23:02:48 cyganiak Exp $
  */
 public class ColumnRenamerMap extends ColumnRenamer {
 	private Map originalsToReplacements;
@@ -22,9 +24,9 @@ public class ColumnRenamerMap extends ColumnRenamer {
 		this.originalsToReplacements = originalsToReplacements;
 	}
 	
-	public Column applyTo(Column original) {
+	public Attribute applyTo(Attribute original) {
 		if (this.originalsToReplacements.containsKey(original)) {
-			return (Column) this.originalsToReplacements.get(original);
+			return (Attribute) this.originalsToReplacements.get(original);
 		}
 		return original;
 	}
@@ -34,9 +36,9 @@ public class ColumnRenamerMap extends ColumnRenamer {
 		Iterator it = mapWithColumnKeys.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
-			Column originalColumn = (Column) entry.getKey();
+			Attribute originalColumn = (Attribute) entry.getKey();
 			Object originalValue = entry.getValue();
-			Column replacedColumn = applyTo(originalColumn);
+			Attribute replacedColumn = applyTo(originalColumn);
 			if (result.containsKey(replacedColumn)
 					&& !originalValue.equals(result.get(replacedColumn))) {
 				return null;
@@ -57,10 +59,10 @@ public class ColumnRenamerMap extends ColumnRenamer {
 		Collections.sort(columns);
 		Iterator it = columns.iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
-			result.append(column.getQualifiedName());
+			Attribute column = (Attribute) it.next();
+			result.append(column.qualifiedName());
 			result.append(" => ");
-			result.append(((Column) this.originalsToReplacements.get(column)).getQualifiedName());
+			result.append(((Attribute) this.originalsToReplacements.get(column)).qualifiedName());
 			if (it.hasNext()) {
 				result.append(", ");
 			}

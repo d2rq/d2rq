@@ -9,12 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 
 /**
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.3 2006/08/28 19:44:21 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.4 2006/09/11 23:02:48 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -66,9 +67,9 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public int columnType(Column column) {
+	public int columnType(Attribute column) {
 		try {
-			ResultSet rs = this.schema.getColumns(null, null, column.getTableName(), column.getColumnName());
+			ResultSet rs = this.schema.getColumns(null, null, column.tableName(), column.attributeName());
 			if (!rs.next()) {
 				throw new D2RQException("Column " + column + " not found in database");
 			}
@@ -96,7 +97,7 @@ public class DatabaseSchemaInspector {
 		try {
 			ResultSet rs = this.schema.getColumns(null, null, tableName, null);
 			while (rs.next()) {
-				result.add(new Column(tableName, rs.getString("COLUMN_NAME")));
+				result.add(new Attribute(tableName, rs.getString("COLUMN_NAME")));
 			}
 			return result;
 		} catch (SQLException ex) {
@@ -109,7 +110,7 @@ public class DatabaseSchemaInspector {
 		try {
 			ResultSet rs = this.schema.getPrimaryKeys(null, null, tableName);
 			while (rs.next()) {
-				result.add(new Column(tableName, rs.getString("COLUMN_NAME")));
+				result.add(new Attribute(tableName, rs.getString("COLUMN_NAME")));
 			}
 			return result;
 		} catch (SQLException ex) {
@@ -124,11 +125,11 @@ public class DatabaseSchemaInspector {
 			while (rs.next()) {
 				String pkTableName = rs.getString("PKTABLE_NAME");
 				String pkColumnName = rs.getString("PKCOLUMN_NAME");
-				Column primaryColumn = new Column(pkTableName, pkColumnName);
+				Attribute primaryColumn = new Attribute(pkTableName, pkColumnName);
 				String fkTableName = rs.getString("FKTABLE_NAME");
 				String fkColumnName = rs.getString("FKCOLUMN_NAME");
-				Column foreignColumn = new Column(fkTableName, fkColumnName);
-				result.add(new Column[]{foreignColumn, primaryColumn});
+				Attribute foreignColumn = new Attribute(fkTableName, fkColumnName);
+				result.add(new Attribute[]{foreignColumn, primaryColumn});
 			}
 			return result;
 		} catch (SQLException ex) {

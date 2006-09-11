@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -23,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *       is not really an operator in itself.
  *       
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamer.java,v 1.4 2006/09/11 22:29:18 cyganiak Exp $
+ * @version $Id: ColumnRenamer.java,v 1.5 2006/09/11 23:02:48 cyganiak Exp $
  */
 public abstract class ColumnRenamer {
 	
@@ -32,7 +33,7 @@ public abstract class ColumnRenamer {
 	 */
 	public final static ColumnRenamer NULL = new ColumnRenamer() {
 		public AliasMap applyTo(AliasMap aliases) { return aliases; }
-		public Column applyTo(Column original) { return original; }
+		public Attribute applyTo(Attribute original) { return original; }
 		public Expression applyTo(Expression original) { return original; }
 		public Join applyTo(Join original) { return original; }
 		public List applyToColumnList(List columns) { return columns; }
@@ -63,7 +64,7 @@ public abstract class ColumnRenamer {
 	 * @return The renamed version of that column, or the same column if the renamer
 	 * 		does not apply to this argument
 	 */
-	public abstract Column applyTo(Column original);
+	public abstract Attribute applyTo(Attribute original);
 
 	/**
 	 * @param original A join
@@ -85,7 +86,7 @@ public abstract class ColumnRenamer {
 		Set result = new HashSet();
 		Iterator it = columns.iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
+			Attribute column = (Attribute) it.next();
 			result.add(applyTo(column));
 		}
 		return result;
@@ -95,7 +96,7 @@ public abstract class ColumnRenamer {
 		List result = new ArrayList(columns.size());
 		Iterator it = columns.iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
+			Attribute column = (Attribute) it.next();
 			result.add(applyTo(column));
 		}
 		return result;
@@ -113,7 +114,7 @@ public abstract class ColumnRenamer {
 
 	public ResultRow applyTo(final ResultRow row) {
 		return new ResultRow() {
-			public String get(Column column) {
+			public String get(Attribute column) {
 				return row.get(applyTo(column));
 			}
 			public String toString() {

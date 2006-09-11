@@ -9,12 +9,12 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.values.Translator;
-import de.fuberlin.wiwiss.d2rq.values.ValueSource;
+import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
 /**
  * Translation table that maps a set of database values to a set of
  * RDF literals or URIs. The {@link #getTranslatingValueSource} method creates
- * a {@link ValueSource} that can be chained with other ValueSources.
+ * a {@link ValueMaker} that can be chained with other ValueSources.
  * The RDF values can be either literals or URIs. The type of the
  * node that is actually generated is determined by a NodeMaker
  * that should sit on top of the translator. Mappings can be explicitly
@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueSource;
  * probalby be in separate classes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTable.java,v 1.6 2006/09/11 22:29:18 cyganiak Exp $
+ * @version $Id: TranslationTable.java,v 1.7 2006/09/11 23:02:48 cyganiak Exp $
  */
 public class TranslationTable implements Translator {
 	private Map db2rdf = new HashMap();

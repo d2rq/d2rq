@@ -2,7 +2,6 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.Map;
 
-import de.fuberlin.wiwiss.d2rq.map.Column;
 import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 
 public interface RelationalOperators {
@@ -17,7 +16,7 @@ public interface RelationalOperators {
 	 * considered to be always <tt>false</tt> and will cause an empty
 	 * relation.</p>
 	 * 
-	 * @param attributeConditions A map from {@link Column}s to Strings
+	 * @param attributeConditions A map from {@link Attribute}s to Strings
 	 * @return A relation whose tuples satisfy the conditions
 	 */
 	Relation select(Map attributeConditions);

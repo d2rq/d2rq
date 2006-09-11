@@ -12,6 +12,7 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
 
@@ -22,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.1 2006/09/11 22:29:18 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
  */
 public class Mapping {
 	private Model model = ModelFactory.createDefaultModel();
@@ -70,7 +71,7 @@ public class Mapping {
 	private void assertHasColumnTypes(RDFRelation relation) {
 		Iterator it = relation.projectionColumns().iterator();
 		while (it.hasNext()) {
-			Column column = (Column) it.next();
+			Attribute column = (Attribute) it.next();
 			relation.baseRelation().database().assertHasType(
 					relation.baseRelation().aliases().originalOf(column));			
 		}
