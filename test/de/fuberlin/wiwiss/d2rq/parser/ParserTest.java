@@ -14,8 +14,8 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.10 2006/09/11 22:29:20 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.11 2006/09/11 23:22:25 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";

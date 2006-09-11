@@ -2,7 +2,6 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.Map;
 
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 
 public interface RelationalOperators {
 

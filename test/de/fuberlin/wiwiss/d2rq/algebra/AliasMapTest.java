@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
@@ -15,7 +16,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.7 2006/09/11 23:02:50 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.1 2006/09/11 23:22:26 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static Attribute foo_col1 = new Attribute("foo.col1");

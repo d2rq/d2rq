@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,14 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 
 /**
  * A {@link ColumnRenamer} based on a fixed map of
  * original and replacement columns.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerMap.java,v 1.3 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: ColumnRenamerMap.java,v 1.1 2006/09/11 23:22:24 cyganiak Exp $
  */
 public class ColumnRenamerMap extends ColumnRenamer {
 	private Map originalsToReplacements;

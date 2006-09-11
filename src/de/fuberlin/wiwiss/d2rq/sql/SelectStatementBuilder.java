@@ -12,11 +12,11 @@ import java.util.regex.Pattern;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.SingletonIterator;
 
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.map.AliasMap;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.13 2006/09/11 23:02:50 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.14 2006/09/11 23:22:25 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {

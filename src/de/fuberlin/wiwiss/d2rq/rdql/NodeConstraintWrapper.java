@@ -6,7 +6,7 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * {@link ColumnRenamer}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeConstraintWrapper.java,v 1.7 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: NodeConstraintWrapper.java,v 1.8 2006/09/11 23:22:27 cyganiak Exp $
  */
 public class NodeConstraintWrapper implements NodeConstraint {
 	private NodeConstraint base;

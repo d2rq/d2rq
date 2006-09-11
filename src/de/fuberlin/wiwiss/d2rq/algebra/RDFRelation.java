@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Triple;
 
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
@@ -17,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  * NodeMakers. Very much work in progress.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelation.java,v 1.4 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: RDFRelation.java,v 1.5 2006/09/11 23:22:24 cyganiak Exp $
  */
 public interface RDFRelation extends TripleMaker {
 	

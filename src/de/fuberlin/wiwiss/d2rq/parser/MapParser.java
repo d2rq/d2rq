@@ -28,6 +28,7 @@ import de.fuberlin.wiwiss.d2rq.map.ClassMap;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+import de.fuberlin.wiwiss.d2rq.map.ResourceMap;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
@@ -40,7 +41,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * TODO: Clean up TranslationTable section
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.14 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.15 2006/09/11 23:22:25 cyganiak Exp $
  */
 public class MapParser {
 

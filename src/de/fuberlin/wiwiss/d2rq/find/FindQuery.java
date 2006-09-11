@@ -12,6 +12,7 @@ import com.hp.hpl.jena.util.iterator.NullIterator;
 import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.UnionOverSameBase;
+import de.fuberlin.wiwiss.d2rq.sql.ApplyTripleMakerIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 
@@ -21,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.8 2006/09/10 22:18:46 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.9 2006/09/11 23:22:25 cyganiak Exp $
  */
 public class FindQuery {
 	private Collection compatibleRelations = new ArrayList();

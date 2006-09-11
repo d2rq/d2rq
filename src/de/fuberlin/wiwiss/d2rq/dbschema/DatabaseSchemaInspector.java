@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.dbschema;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.4 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.1 2006/09/11 23:22:27 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
 	

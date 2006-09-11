@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
@@ -13,7 +11,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * TODO Add uniqueConstraints()
  * TODO Explicitly list tables
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Relation.java,v 1.3 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: Relation.java,v 1.4 2006/09/11 23:22:24 cyganiak Exp $
  */
 public interface Relation extends RelationalOperators {
 

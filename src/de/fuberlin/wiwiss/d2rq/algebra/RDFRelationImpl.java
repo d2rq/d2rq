@@ -11,8 +11,6 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
-import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -24,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelationImpl.java,v 1.2 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: RDFRelationImpl.java,v 1.3 2006/09/11 23:22:24 cyganiak Exp $
  */
 public class RDFRelationImpl implements RDFRelation {
 	private NodeMaker subjectMaker;

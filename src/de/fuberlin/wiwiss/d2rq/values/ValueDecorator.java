@@ -6,13 +6,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueDecorator.java,v 1.1 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: ValueDecorator.java,v 1.2 2006/09/11 23:22:24 cyganiak Exp $
  */
 public class ValueDecorator implements ValueMaker {
 	public static ValueConstraint maxLengthConstraint(final int maxLength) {

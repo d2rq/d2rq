@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.parser;
+package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,12 +13,11 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.map.ClassMap;
-import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker.NodeType;
+import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Column;
@@ -29,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.1 2006/09/11 23:22:24 cyganiak Exp $
  */
 public abstract class ResourceMap {
 	protected static final Property valueProperty = 

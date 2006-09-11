@@ -6,13 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 
 /**
  * An SQL expression.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Expression.java,v 1.2 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: Expression.java,v 1.3 2006/09/11 23:22:24 cyganiak Exp $
  */
 public class Expression {
 	public static final Expression TRUE = new Expression("1");

@@ -9,14 +9,13 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Triple;
 
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UnionOverSameBase.java,v 1.6 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: UnionOverSameBase.java,v 1.7 2006/09/11 23:22:24 cyganiak Exp $
  */
 public class UnionOverSameBase implements RDFRelation {
 

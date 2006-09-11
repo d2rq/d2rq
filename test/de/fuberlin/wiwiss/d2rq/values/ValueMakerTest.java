@@ -2,7 +2,6 @@ package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.Collections;
 
-import de.fuberlin.wiwiss.d2rq.helpers.DummyValueSource;
 import junit.framework.TestCase;
 
 public class ValueMakerTest extends TestCase {

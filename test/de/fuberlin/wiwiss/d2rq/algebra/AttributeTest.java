@@ -8,14 +8,12 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
 
 /**
  * Unit test cases for {@link Attribute}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AttributeTest.java,v 1.1 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: AttributeTest.java,v 1.2 2006/09/11 23:22:26 cyganiak Exp $
  */
 public class AttributeTest extends TestCase {
 

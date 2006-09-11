@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.find;
+package de.fuberlin.wiwiss.d2rq.sql;
 
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -6,9 +6,6 @@ import java.util.NoSuchElementException;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
-import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
-import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
-import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * Iterates over the triple stream created by applying several triple makers
@@ -17,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ApplyTripleMakerIterator.java,v 1.1 2006/09/09 23:25:16 cyganiak Exp $
+ * @version $Id: ApplyTripleMakerIterator.java,v 1.1 2006/09/11 23:22:25 cyganiak Exp $
  */
 public class ApplyTripleMakerIterator implements ClosableIterator {
 	private TripleMaker tripleMaker;

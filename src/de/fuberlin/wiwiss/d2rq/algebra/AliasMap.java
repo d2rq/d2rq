@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,8 +13,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.Join;
 
 /**
  * A map from table names to aliases. A table must have at most one alias. Can be applied
@@ -22,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Join;
  * kinds of objects, the inverse operation is available as well. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.7 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.1 2006/09/11 23:22:24 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_MAP);

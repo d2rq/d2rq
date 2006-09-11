@@ -23,6 +23,7 @@ import com.hp.hpl.jena.vocabulary.DC;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.sql.BeanCounter;
 import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
 import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
 import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
@@ -30,7 +31,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: QueryLanguageTestFramework.java,v 1.2 2006/09/07 21:33:19 cyganiak Exp $
+ * @version $Id: QueryLanguageTestFramework.java,v 1.3 2006/09/11 23:22:26 cyganiak Exp $
  */
 public abstract class QueryLanguageTestFramework extends TestCase {
 	protected ModelD2RQ model;
@@ -40,10 +41,10 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	
 	// compare fields
 	int nTimes=1;
-	InfoD2RQ startInst;
+	BeanCounter startInst;
 	boolean compareQueryHandlers=false;
     int configs;
-	InfoD2RQ diffInfo[];
+	BeanCounter diffInfo[];
 	Set resultMaps[];
 	String printed[];
 	String handlerDescription[];
@@ -53,7 +54,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	
 	protected void setUpHandlers() {
 	    configs=2;
-		diffInfo=new InfoD2RQ[configs];
+		diffInfo=new BeanCounter[configs];
 		resultMaps= new HashSet[configs];
 		printed = new String[configs];
 		handlerDescription= new String[] { "SimpleQueryHandler", "D2RQQueryHandler"};
@@ -148,7 +149,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 			    rdqlLogger.setDebug(verbatim[i] && oldRDQLLoggerState);
 			    sqlResultSetLogger.setDebug(verbatim[i] && oldSqlResultSetLoggerState);
 			    usingLogger.debug("using " + handlerDescription[i] + " ...");
-			    startInst=InfoD2RQ.instance();
+			    startInst=BeanCounter.instance();
 			    for (int j=0; j< nTimes; j++) {
 			        if (j>0) {
 					    rdqlLogger.setDebug(false);
@@ -156,7 +157,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 			        }
 			        super.runTest();
 			    }
-				diffInfo[i]=InfoD2RQ.instanceMinus(startInst);
+				diffInfo[i]=BeanCounter.instanceMinus(startInst);
 				diffInfo[i].div(nTimes);
 				resultMaps[i]=results;
 			}

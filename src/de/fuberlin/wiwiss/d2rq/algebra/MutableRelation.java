@@ -2,7 +2,6 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.Map;
 
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 
 /**
  * Wraps a relation and allows it to be modified by relational
@@ -11,7 +10,7 @@ import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
  * The MutableRelation solves this problem.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MutableRelation.java,v 1.1 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: MutableRelation.java,v 1.2 2006/09/11 23:22:24 cyganiak Exp $
  */
 public class MutableRelation implements RelationalOperators {
 

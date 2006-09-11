@@ -26,8 +26,8 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.DatabaseSchemaInspector;
 
 /**
  * Generates a D2RQ mapping by introspecting a database schema.
@@ -35,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.map.DatabaseSchemaInspector;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.9 2006/09/11 23:02:50 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.10 2006/09/11 23:22:26 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";

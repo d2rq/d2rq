@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
 
 public class JoinTest extends TestCase {
 

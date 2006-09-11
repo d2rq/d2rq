@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 
 /**
  * A database column.
@@ -14,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
  *       e.g. for coumn names occuring inside string literals
  *       
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Attribute.java,v 1.1 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: Attribute.java,v 1.2 2006/09/11 23:22:24 cyganiak Exp $
  */
 public class Attribute implements Comparable {
 	private static final java.util.regex.Pattern columnRegex = 

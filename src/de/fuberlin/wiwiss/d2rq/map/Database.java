@@ -8,6 +8,7 @@ import java.util.Map;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 
 
 /**
@@ -16,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.11 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: Database.java,v 1.12 2006/09/11 23:22:24 cyganiak Exp $
  * 
  * TODO: Make a bunch of public methods private?
  */

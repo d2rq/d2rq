@@ -8,12 +8,10 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
-import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExpressionTest.java,v 1.2 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: ExpressionTest.java,v 1.3 2006/09/11 23:22:26 cyganiak Exp $
  */
 public class ExpressionTest extends TestCase {
 

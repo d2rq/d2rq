@@ -12,7 +12,6 @@ import org.apache.commons.logging.LogFactory;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.helpers.InfoD2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
@@ -21,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryExecutionIterator.java,v 1.3 2006/09/09 23:25:16 cyganiak Exp $
+ * @version $Id: QueryExecutionIterator.java,v 1.4 2006/09/11 23:22:25 cyganiak Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
 	public static Collection protocol=null;
@@ -82,8 +81,8 @@ public class QueryExecutionIterator implements ClosableIterator {
 				this.resultSet = null;
 				return null;
 			}
-			InfoD2RQ.totalNumberOfReturnedRows++;
-			InfoD2RQ.totalNumberOfReturnedFields+=this.numCols;
+			BeanCounter.totalNumberOfReturnedRows++;
+			BeanCounter.totalNumberOfReturnedFields+=this.numCols;
 			return ResultRowMap.fromResultSet(this.resultSet, this.columns);
 		} catch (SQLException ex) {
 			throw new D2RQException(ex.getMessage());
@@ -116,7 +115,7 @@ public class QueryExecutionIterator implements ClosableIterator {
 	    }
     	this.queryExecuted = true;
     	LogFactory.getLog(QueryExecutionIterator.class).debug(this.sql);
-    	InfoD2RQ.totalNumberOfExecutedSQLQueries++;
+    	BeanCounter.totalNumberOfExecutedSQLQueries++;
     	if (protocol!=null)
     	    protocol.add(this.sql);
         try {

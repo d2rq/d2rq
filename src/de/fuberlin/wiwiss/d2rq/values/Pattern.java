@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -21,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.3 2006/09/11 23:22:24 cyganiak Exp $
  */
 public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";

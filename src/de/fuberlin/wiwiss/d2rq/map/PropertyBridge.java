@@ -16,7 +16,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
-import de.fuberlin.wiwiss.d2rq.parser.ResourceMap;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.types.DateTimeTranslator;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;

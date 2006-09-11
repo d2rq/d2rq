@@ -1,9 +1,10 @@
-package de.fuberlin.wiwiss.d2rq.find;
+package de.fuberlin.wiwiss.d2rq.sql;
 
 import java.util.Collection;
 import java.util.Collections;
 
 import junit.framework.TestCase;
+import de.fuberlin.wiwiss.d2rq.sql.ApplyTripleMakerIterator;
 import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
@@ -11,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 /**
  * Tests for {@link D2RQResultIterator}.
  *
- * @version $Id: ApplyTripleMakerIteratorTest.java,v 1.1 2006/09/09 23:25:15 cyganiak Exp $
+ * @version $Id: ApplyTripleMakerIteratorTest.java,v 1.1 2006/09/11 23:22:26 cyganiak Exp $
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class ApplyTripleMakerIteratorTest extends TestCase {

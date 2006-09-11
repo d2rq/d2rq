@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.map;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,9 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.Expression;
-import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
@@ -24,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *       is not really an operator in itself.
  *       
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamer.java,v 1.5 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: ColumnRenamer.java,v 1.1 2006/09/11 23:22:24 cyganiak Exp $
  */
 public abstract class ColumnRenamer {
 	

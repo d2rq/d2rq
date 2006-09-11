@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import de.fuberlin.wiwiss.d2rq.map.AliasMap;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 public class RelationImpl implements Relation {

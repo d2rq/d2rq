@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.helpers;
+package de.fuberlin.wiwiss.d2rq;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,15 +9,13 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.WrappedIterator;
 
-import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
 /**
  * A GraphD2RQ that caches the results of the most recently performed
  * queries on an LRU basis.
  * 
  * @author Holger Knublauch (holger@topquadrant.com)
- * @version $Id: CachingGraphD2RQ.java,v 1.3 2006/08/31 01:50:47 cyganiak Exp $
+ * @version $Id: CachingGraphD2RQ.java,v 1.1 2006/09/11 23:22:25 cyganiak Exp $
  */
 public class CachingGraphD2RQ extends GraphD2RQ {
 

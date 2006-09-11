@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
 
 /**
  * <p>Removes unnecessary joins from an {@link RDFRelation} in cases
@@ -41,7 +39,7 @@ import de.fuberlin.wiwiss.d2rq.map.ColumnRenamerMap;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.7 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.8 2006/09/11 23:22:24 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;

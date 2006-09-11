@@ -1,13 +1,13 @@
-package de.fuberlin.wiwiss.d2rq.helpers;
+package de.fuberlin.wiwiss.d2rq.sql;
 
 /**
  * A class for capturing performance information.
  * We grant read/write access to instance variables.
  * 
  * @author jgarbers
- * @version $Id: InfoD2RQ.java,v 1.2 2006/09/03 00:08:12 cyganiak Exp $
+ * @version $Id: BeanCounter.java,v 1.1 2006/09/11 23:22:25 cyganiak Exp $
  */
-public class InfoD2RQ implements Cloneable {
+public class BeanCounter implements Cloneable {
     
     // Static global state information to be copied into an instance with update(). 
     public static int totalNumberOfExecutedSQLQueries = 0; 
@@ -36,7 +36,7 @@ public class InfoD2RQ implements Cloneable {
      * <code>This = This - minus </code>.
      * The difference between this and a <code>start</code> value.
      */
-    public void subtract(InfoD2RQ minus) {
+    public void subtract(BeanCounter minus) {
     		numberOfExecutedSQLQueries-=minus.numberOfExecutedSQLQueries;
     		numberOfReturnedRows-=minus.numberOfReturnedRows;
     		numberOfReturnedFields-=minus.numberOfReturnedFields;
@@ -54,7 +54,7 @@ public class InfoD2RQ implements Cloneable {
     
     // Creating Instances (convenience methods)
     
-    public InfoD2RQ() {
+    public BeanCounter() {
     }
     public Object clone() {
     	  try {	
@@ -68,8 +68,8 @@ public class InfoD2RQ implements Cloneable {
      * Get a copy of the static fields.
      * @return an instance
      */
-    public static InfoD2RQ instance() {
-  	   InfoD2RQ inst=new InfoD2RQ();
+    public static BeanCounter instance() {
+  	   BeanCounter inst=new BeanCounter();
   	   inst.update();
   	   return inst;
     }
@@ -77,8 +77,8 @@ public class InfoD2RQ implements Cloneable {
      * Get a difference instance.
      * @return a new (static - minus) instance
      */ 
-    public static InfoD2RQ instanceMinus(InfoD2RQ minus) {
-   	   InfoD2RQ inst=instance();
+    public static BeanCounter instanceMinus(BeanCounter minus) {
+   	   BeanCounter inst=instance();
   	   inst.subtract(minus);
   	   return inst;    	
     }
@@ -86,8 +86,8 @@ public class InfoD2RQ implements Cloneable {
      * Get a difference instance.
      * @return a new (this - minus) instance
      */ 
-    public InfoD2RQ minus(InfoD2RQ minus) {
-  	   InfoD2RQ clone=(InfoD2RQ) clone();
+    public BeanCounter minus(BeanCounter minus) {
+  	   BeanCounter clone=(BeanCounter) clone();
   	   clone.subtract(minus);
   	   return clone;
      }
