@@ -6,7 +6,7 @@ import com.hp.hpl.jena.shared.JenaException;
  * Exception used to signal most D2RQ errors.
  *
  * @author Chris Bizer chris@bizer.de
- * @version $Id: D2RQException.java,v 1.3 2006/09/11 22:29:20 cyganiak Exp $
+ * @version $Id: D2RQException.java,v 1.4 2006/09/12 12:06:18 cyganiak Exp $
  */
 
 public class D2RQException extends JenaException {
@@ -38,6 +38,13 @@ public class D2RQException extends JenaException {
 	public static final int PROPERTYBRIDGE_LANG_AND_DATATYPE = 25;
 	public static final int PROPERTYBRIDGE_NONLITERAL_WITH_DATATYPE = 26;
 	public static final int PROPERTYBRIDGE_NONLITERAL_WITH_LANG = 27;
+	public static final int TRANSLATIONTABLE_TRANSLATION_AND_JAVACLASS = 28;
+	public static final int TRANSLATIONTABLE_TRANSLATION_AND_HREF = 29;
+	public static final int TRANSLATIONTABLE_HREF_AND_JAVACLASS = 30;
+	public static final int TRANSLATIONTABLE_DUPLICATE_JAVACLASS = 31;
+	public static final int TRANSLATIONTABLE_DUPLICATE_HREF = 32;
+	public static final int TRANSLATION_MISSING_DBVALUE = 33;
+	public static final int TRANSLATION_MISSING_RDFVALUE = 34;
 	
 	private int code;
 	

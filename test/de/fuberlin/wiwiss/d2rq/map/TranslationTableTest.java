@@ -1,48 +1,77 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
-import com.hp.hpl.jena.graph.Node;
-
-import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
-
 import junit.framework.TestCase;
+
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
+
+import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
+import de.fuberlin.wiwiss.d2rq.values.Translator;
 
 /**
  * Tests the TranslationTable functionality
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTableTest.java,v 1.1 2006/09/03 12:57:30 cyganiak Exp $
+ * @version $Id: TranslationTableTest.java,v 1.2 2006/09/12 12:06:17 cyganiak Exp $
  */
 public class TranslationTableTest extends TestCase {
+	Resource table1 = ResourceFactory.createResource("http://test/table1");
 
-	public void testCreation() {
-		TranslationTable table = new TranslationTable();
+	public void testNewTranslationTableIsEmpty() {
+		TranslationTable table = new TranslationTable(table1);
 		assertEquals(0, table.size());
-		table.addTranslation("key1", Node.createLiteral("value1", null, null).getLiteral().getLexicalForm());
+	}
+	
+	public void testTranslationTableIsSizeOneAfterAddingOneTranslation() {
+		TranslationTable table = new TranslationTable(table1);
+		table.addTranslation("key1", "value1");
 		assertEquals(1, table.size());
 	}
 
-	public void testTranslation() {
-		TranslationTable table = new TranslationTable();
-		table.addTranslation("key1", Node.createLiteral("value1", null, null).getLiteral().getLexicalForm());
-		table.addTranslation("key2", Node.createLiteral("value2", null, null).getLiteral().getLexicalForm());
-		table.addTranslation("key3", Node.createLiteral("value3", null, null).getLiteral().getLexicalForm());
-		assertEquals(Node.createLiteral("value1", null, null).getLiteral().getLexicalForm(), table.toRDFValue("key1"));
-		assertEquals(Node.createLiteral("value2", null, null).getLiteral().getLexicalForm(), table.toRDFValue("key2"));
-		assertEquals("key1", table.toDBValue(Node.createLiteral("value1", null, null).getLiteral().getLexicalForm()));
-		assertEquals("key2", table.toDBValue(Node.createLiteral("value2", null, null).getLiteral().getLexicalForm()));
+	public void testTranslationTableTranslator() {
+		TranslationTable table = new TranslationTable(table1);
+		table.addTranslation("key1", "value1");
+		table.addTranslation("key2", "value2");
+		table.addTranslation("key3", "value3");
+		Translator translator = table.translator();
+		assertEquals("value1", translator.toRDFValue("key1"));
+		assertEquals("value2", translator.toRDFValue("key2"));
+		assertEquals("key1", translator.toDBValue("value1"));
+		assertEquals("key2", translator.toDBValue("value2"));
 	}
 
 	public void testUndefinedTranslation() {
-		TranslationTable table = new TranslationTable();
-		table.addTranslation("key1", Node.createLiteral("value1", null, null).getLiteral().getLexicalForm());
-		assertNull(table.toRDFValue("unknownKey"));
-		assertNull(table.toDBValue(Node.createURI("http://example.org/").getURI()));
+		TranslationTable table = new TranslationTable(table1);
+		table.addTranslation("key1", "value1");
+		Translator translator = table.translator();
+		assertNull(translator.toRDFValue("unknownKey"));
+		assertNull(translator.toDBValue("http://example.org/"));
 	}
 	
 	public void testNullTranslation() {
-		TranslationTable table = new TranslationTable();
-		table.addTranslation("key1", Node.createLiteral("value1", null, null).getLiteral().getLexicalForm());
-		assertNull(table.toRDFValue(null));
-		assertNull(table.toDBValue(null));
+		TranslationTable table = new TranslationTable(table1);
+		table.addTranslation("key1", "value1");
+		Translator translator = table.translator();
+		assertNull(translator.toRDFValue(null));
+		assertNull(translator.toDBValue(null));
+	}
+	
+	public void testTranslationsWithSameValuesAreEqual() {
+		Translation t1 = new Translation("foo", "bar");
+		Translation t2 = new Translation("foo", "bar");
+		assertEquals(t1, t2);
+		assertEquals(t1.hashCode(), t2.hashCode());
+	}
+	
+	public void testTranslationsWithDifferentValuesAreNotEqual() {
+		Translation t1 = new Translation("foo", "bar");
+		Translation t2 = new Translation("foo", "bar2");
+		Translation t3 = new Translation("foo2", "bar");
+		assertFalse(t1.equals(t2));
+		assertFalse(t2.equals(t1));
+		assertFalse(t1.hashCode() == t2.hashCode());
+		assertFalse(t1.equals(t3));
+		assertFalse(t3.equals(t1));
+		assertFalse(t1.hashCode() == t3.hashCode());
 	}
 }

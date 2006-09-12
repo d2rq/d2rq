@@ -2,8 +2,10 @@ package de.fuberlin.wiwiss.d2rq.parser;
 
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +25,6 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.csv.CSVParser;
 import de.fuberlin.wiwiss.d2rq.map.ClassMap;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
@@ -38,10 +39,9 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * of a D2RQ mapping file.
  * 
  * TODO: Clean up Database section
- * TODO: Clean up TranslationTable section
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.15 2006/09/11 23:22:25 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.16 2006/09/12 12:06:18 cyganiak Exp $
  */
 public class MapParser {
 
@@ -72,7 +72,6 @@ public class MapParser {
 	private OntModel model;
 	private Graph graph;
 	private String baseURI;
-	private Map nodesToTranslationTables = new HashMap();
 	private Mapping mapping;
 	
 	/**
@@ -97,6 +96,7 @@ public class MapParser {
 		this.mapping = new Mapping();
 	    parseProcessingInstructions();
 		parseDatabases();
+		parseTranslationTables();
 		parseClassMaps();
 		parsePropertyBridges();
 		return this.mapping;
@@ -162,6 +162,57 @@ public class MapParser {
 		return db;
 	}
 
+	private void parseTranslationTables() {
+		Set translationTableResources = new HashSet();
+		Iterator it = this.model.listIndividuals(D2RQ.TranslationTable);
+		while (it.hasNext()) {
+			translationTableResources.add(it.next());
+		}
+		StmtIterator stmts;
+		stmts = this.model.listStatements(null, D2RQ.translateWith, (Resource) null);
+		while (stmts.hasNext()) {
+			translationTableResources.add(stmts.nextStatement().getResource());
+		}
+		stmts = this.model.listStatements(null, D2RQ.translation, (RDFNode) null);
+		while (stmts.hasNext()) {
+			translationTableResources.add(stmts.nextStatement().getSubject());
+		}
+		stmts = this.model.listStatements(null, D2RQ.javaClass, (RDFNode) null);
+		while (stmts.hasNext()) {
+			translationTableResources.add(stmts.nextStatement().getSubject());
+		}
+		stmts = this.model.listStatements(null, D2RQ.href, (RDFNode) null);
+		while (stmts.hasNext()) {
+			translationTableResources.add(stmts.nextStatement().getSubject());
+		}
+		it = translationTableResources.iterator();
+		while (it.hasNext()) {
+			Resource r = (Resource) it.next();
+			TranslationTable table = new TranslationTable(r);
+			parseTranslationTable(table, r);
+			this.mapping.addTranslationTable(table);
+		}
+	}
+
+	private void parseTranslationTable(TranslationTable table, Resource r) {
+		StmtIterator stmts;
+		stmts = r.listProperties(D2RQ.href);
+		while (stmts.hasNext()) {
+			table.setHref(stmts.nextStatement().getResource().getURI());
+		}
+		stmts = r.listProperties(D2RQ.javaClass);
+		while (stmts.hasNext()) {
+			table.setJavaClass(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.translation);
+		while (stmts.hasNext()) {
+			Resource translation = stmts.nextStatement().getResource();
+			String db = translation.getProperty(D2RQ.databaseValue).getString();
+			String rdf = translation.getProperty(D2RQ.rdfValue).getString();
+			table.addTranslation(db, rdf);
+		}
+	}
+	
 	private void parseClassMaps() {
 		Iterator it = this.model.listIndividuals(D2RQ.ClassMap);
 		while (it.hasNext()) {
@@ -232,8 +283,7 @@ public class MapParser {
 		}
 		stmts = r.listProperties(D2RQ.translateWith);
 		while (stmts.hasNext()) {
-			TranslationTable table = getTranslationTable(stmts.nextStatement().getResource());
-			resourceMap.setTranslateWith(table);
+			resourceMap.setTranslateWith(this.mapping.translationTable(stmts.nextStatement().getResource()));
 		}
 	}
 	
@@ -318,37 +368,6 @@ public class MapParser {
 		}
 	}
 
-	public TranslationTable getTranslationTable(Resource r) {
-		Node node = r.asNode();
-		if (this.nodesToTranslationTables.containsKey(node)) {
-			return (TranslationTable) this.nodesToTranslationTables.get(node);
-		}
-		TranslationTable translationTable = new TranslationTable();
-		String href = findZeroOrOneLiteralOrURI(node, D2RQ.href.asNode());
-		if (href != null) {
-			translationTable.addAll(new CSVParser(href).parse());
-		}
-		String className = findZeroOrOneLiteral(node, D2RQ.javaClass.asNode());
-		if (className != null) {
-			translationTable.setTranslatorClass(className, this.model.getResource(node.getURI()));
-		}
-		ExtendedIterator it = this.graph.find(node, D2RQ.translation.asNode(), Node.ANY);
-		if (href == null && className == null && !it.hasNext()) {
-			this.log.warn("TranslationTable " + node + " contains no translations");
-		}
-		if (className != null && (href != null || it.hasNext())) {
-			throw new D2RQException("Can't combine d2rq:javaClass with d2rq:translation or d2rq:href on " + node);
-		}
-		while (it.hasNext()) {
-			Node translation = ((Triple) it.next()).getObject();
-			String dbValue = findOneLiteral(translation, D2RQ.databaseValue.asNode());
-			String rdfValue = findOneLiteralOrURI(translation, D2RQ.rdfValue.asNode());
-			translationTable.addTranslation(dbValue, rdfValue);
-		}
-		this.nodesToTranslationTables.put(node, translationTable);
-		return translationTable;
-	}
-
 	private String findZeroOrOneLiteral(Node subject, Node predicate) {
 		Node node = findZeroOrOneNode(subject, predicate);
 		if (node == null) {
@@ -358,19 +377,6 @@ public class MapParser {
 			throw new D2RQException(toQName(predicate) + " for " + subject + " must be literal");
 		}
 		return node.getLiteral().getLexicalForm();
-	}
-
-	private String findZeroOrOneLiteralOrURI(Node subject, Node predicate) {
-		Node node = findZeroOrOneNode(subject, predicate);
-		if (node == null) {
-			return null;
-		}
-		if (node.isLiteral()) {
-			return node.getLiteral().getLexicalForm();
-		} else if (node.isURI()) {
-			return node.getURI();
-		}
-		throw new D2RQException(toQName(predicate) + " for " + subject + " must be literal or URI");
 	}
 
 	private Node findZeroOrOneNode(Node subject, Node predicate) {
@@ -383,37 +389,6 @@ public class MapParser {
 			throw new D2RQException("Ignoring multiple " + toQName(predicate) + " on " + subject);
 		}
 		return result;
-	}
-
-	private Node findOneNode(Node subject, Node predicate) {
-		ExtendedIterator it = this.graph.find(subject, predicate, Node.ANY);
-		if (!it.hasNext()) {
-			throw new D2RQException("Missing " + toQName(predicate) +
-					" in " + toQName(subject));
-		}
-		Node result = ((Triple) it.next()).getObject();
-		if (it.hasNext()) {
-			this.log.warn("Ignoring multiple " + toQName(predicate) + " on " + subject);
-		}
-		return result;
-	}
-
-	private String findOneLiteral(Node subject, Node predicate) {
-		Node node = findOneNode(subject, predicate);
-		if (!node.isLiteral()) {
-			throw new D2RQException(toQName(predicate) + " for " + subject + " must be literal");
-		}
-		return node.getLiteral().getLexicalForm();
-	}
-
-	private String findOneLiteralOrURI(Node subject, Node predicate) {
-		Node node = findOneNode(subject, predicate);
-		if (node.isLiteral()) {
-			return node.getLiteral().getLexicalForm();
-		} else if (node.isURI()) {
-			return node.getURI();
-		}
-		throw new D2RQException(toQName(predicate) + " for " + subject + " must be literal or URI");
 	}
 
 	private Map findLiteralsAsMap(Node subject, Node predicate, Map predicateToObjectMap) {

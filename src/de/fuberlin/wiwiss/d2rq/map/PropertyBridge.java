@@ -17,7 +17,6 @@ import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
-import de.fuberlin.wiwiss.d2rq.types.DateTimeTranslator;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class PropertyBridge extends ResourceMap {
@@ -26,7 +25,7 @@ public class PropertyBridge extends ResourceMap {
 	private Collection properties = new HashSet();
 	
 	public PropertyBridge(Resource resource) {
-		super(PrettyPrinter.toString(resource), true);
+		super(resource, true);
 		this.resource = resource;
 	}
 	
@@ -77,7 +76,6 @@ public class PropertyBridge extends ResourceMap {
 	}
 
 	public void validate() throws D2RQException {
-		super.validate();
 		if (this.refersToClassMap != null) {
 			if (!this.refersToClassMap.database().equals(this.belongsToClassMap.database())) {
 				throw new D2RQException(toString() + 
@@ -121,8 +119,8 @@ public class PropertyBridge extends ResourceMap {
 				&& this.datatype.equals(XSDDatatype.XSDdateTime.getURI())
 				&& this.column != null
 				&& this.belongsToClassMap.database().getColumnType(this.column) == Database.dateColumnType) {
-			this.translateWith = new TranslationTable();
-			this.translateWith.setTranslator(new DateTimeTranslator());
+//			this.translateWith = new TranslationTable();
+//			this.translateWith.setTranslator(new DateTimeTranslator());
 		}
 		return super.nodeMaker();
 	}

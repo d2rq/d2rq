@@ -4,27 +4,23 @@ import java.util.Collections;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
+import de.fuberlin.wiwiss.d2rq.values.Translator;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.11 2006/09/11 23:22:25 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.12 2006/09/12 12:06:19 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -36,34 +32,30 @@ public class ParserTest extends TestCase {
 	}
 
 	public void testEmptyTranslationTable() {
-		Resource r = createTranslationTableResource();
-		MapParser parser = new MapParser(this.model, null);
-		Level save = Logger.getLogger(MapParser.class).getLevel();
-		Logger.getLogger(MapParser.class).setLevel(Level.OFF);
-		TranslationTable table = parser.getTranslationTable(r);
-		Logger.getLogger(MapParser.class).setLevel(save);
+		Resource r = addTranslationTableResource();
+		Mapping mapping = new MapParser(this.model, null).parse();
+		TranslationTable table = mapping.translationTable(r);
 		assertNotNull(table);
 		assertEquals(0, table.size());
 	}
 
 	public void testGetSameTranslationTable() {
-		Resource r = createTranslationTableResource();
-		addTranslationResource(r, this.model.createLiteral("foo"), this.model.createLiteral("bar"));
-		MapParser parser = new MapParser(this.model, null);
-		TranslationTable table1 = parser.getTranslationTable(r);
-		TranslationTable table2 = parser.getTranslationTable(r);
+		Resource r = addTranslationTableResource();
+		addTranslationResource(r, "foo", "bar");
+		Mapping mapping = new MapParser(this.model, null).parse();
+		TranslationTable table1 = mapping.translationTable(r);
+		TranslationTable table2 = mapping.translationTable(r);
 		assertSame(table1, table2);
 	}
 	
 	public void testParseTranslationTable() {
-		Resource r = createTranslationTableResource();
-		addTranslationResource(r, this.model.createLiteral("foo"), this.model.createLiteral("bar"));
-		addTranslationResource(r, this.model.createLiteral("baz"), this.model.createResource(D2RQ.NS));
-		MapParser parser = new MapParser(this.model, null);
-		TranslationTable table = parser.getTranslationTable(r);
-		assertEquals(2, table.size());
-		assertEquals("bar", table.toRDFValue("foo"));
-		assertEquals(D2RQ.NS, table.toRDFValue("baz"));
+		Resource r = addTranslationTableResource();
+		addTranslationResource(r, "foo", "bar");
+		Mapping mapping = new MapParser(this.model, null).parse();
+		TranslationTable table = mapping.translationTable(r);
+		assertEquals(1, table.size());
+		Translator translator = table.translator();
+		assertEquals("bar", translator.toRDFValue("foo"));
 	}
 
 	public void testParseAlias() {
@@ -84,16 +76,15 @@ public class ParserTest extends TestCase {
 		return result;
 	}
 	
-	private Resource createTranslationTableResource() {
-		Resource result = this.model.createResource(TABLE_URI);
-		result.addProperty(RDF.type, this.model.createResource(D2RQ.TranslationTable.getURI()));
-		return result;
+	private Resource addTranslationTableResource() {
+		return this.model.createResource(TABLE_URI, D2RQ.TranslationTable);
 	}
 	
-	private void addTranslationResource(Resource table, RDFNode dbValue, RDFNode rdfValue) {
+	private Resource addTranslationResource(Resource table, String dbValue, String rdfValue) {
 		Resource translation = this.model.createResource();
-		translation.addProperty(this.model.createProperty(D2RQ.databaseValue.getURI()), dbValue);
-		translation.addProperty(this.model.createProperty(D2RQ.rdfValue.getURI()), rdfValue);
-		table.addProperty(this.model.createProperty(D2RQ.translation.getURI()), translation);
+		translation.addProperty(D2RQ.databaseValue, dbValue);
+		translation.addProperty(D2RQ.rdfValue, rdfValue);
+		table.addProperty(D2RQ.translation, translation);
+		return translation;
 	}
 }

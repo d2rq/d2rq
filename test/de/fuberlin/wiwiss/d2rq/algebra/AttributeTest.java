@@ -13,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * Unit test cases for {@link Attribute}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AttributeTest.java,v 1.2 2006/09/11 23:22:26 cyganiak Exp $
+ * @version $Id: AttributeTest.java,v 1.3 2006/09/12 12:06:18 cyganiak Exp $
  */
 public class AttributeTest extends TestCase {
 
@@ -122,6 +122,6 @@ public class AttributeTest extends TestCase {
 	}
 	
 	public void testColumnToString() {
-		assertEquals("Column(foo.bar)", new Attribute("foo.bar").toString());
+		assertEquals("@@foo.bar@@", new Attribute("foo.bar").toString());
 	}
 }

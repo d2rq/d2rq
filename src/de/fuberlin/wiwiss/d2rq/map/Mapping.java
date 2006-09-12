@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.3 2006/09/12 12:06:18 cyganiak Exp $
  */
 public class Mapping {
 	private Model model = ModelFactory.createDefaultModel();
@@ -31,6 +31,7 @@ public class Mapping {
 
 	private Map databases = new HashMap();
 	private Map classMaps = new HashMap();
+	private Map translationTables = new HashMap();
 	private Map processingInstructions = new HashMap();
 	private Collection compiledPropertyBridges;
 	private Map compiledPropertyBridgesByDatabase;
@@ -101,6 +102,22 @@ public class Mapping {
 		return (ClassMap) this.classMaps.get(name);
 	}
 	
+	public void addTranslationTable(TranslationTable table) {
+		this.translationTables.put(table.resource(), table);
+	}
+	
+	public TranslationTable translationTable(Resource name) {
+		return (TranslationTable) this.translationTables.get(name);
+	}
+	
+	public void setProcessingInstruction(Property key, String value) {
+		this.processingInstructions.put(key, value);
+	}
+	
+	public String processingInstruction(Property property) {
+		return (String) this.processingInstructions.get(property);
+	}
+	
 	/**
 	 * @return A collection of {@link RDFRelation}s corresponding to each
 	 * 		of the property bridges
@@ -129,13 +146,5 @@ public class Mapping {
 			compilePropertyBridges();
 		}
 		return this.compiledPropertyBridgesByDatabase;
-	}
-
-	public String processingInstruction(Property property) {
-		return (String) this.processingInstructions.get(property);
-	}
-	
-	public void setProcessingInstruction(Property key, String value) {
-		this.processingInstructions.put(key, value);
 	}
 }

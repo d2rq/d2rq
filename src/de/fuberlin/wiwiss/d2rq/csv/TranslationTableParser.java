@@ -8,33 +8,36 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
 
 /**
- * Parses the contents of a CSV file into a Map. The CVS
- * file must contain exactly two columns. Keys come from the
- * first, values from the second.
+ * Parses the contents of a CSV file into a collection of
+ * {@link Translation}s. The CVS file must contain exactly
+ * two columns. DB values come from the first, RDF values
+ * from the second.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: CSVParser.java,v 1.1 2006/09/02 22:49:17 cyganiak Exp $
+ * @version $Id: TranslationTableParser.java,v 1.1 2006/09/12 12:06:17 cyganiak Exp $
  */
-public class CSVParser {
-	private Log log = LogFactory.getLog(CSVParser.class);
+public class TranslationTableParser {
+	private Log log = LogFactory.getLog(TranslationTableParser.class);
 	private BufferedReader reader;
 	private CSV csvLineParser = new CSV();
 	private String url;
 
-	public CSVParser(Reader reader) {
+	public TranslationTableParser(Reader reader) {
 		this.reader = new BufferedReader(reader);
 	}
 	
-	public CSVParser(String url) {
+	public TranslationTableParser(String url) {
 		try {
 			this.reader = new BufferedReader(new FileReader(new File(new URI(url))));
 			this.url = url;
@@ -45,9 +48,9 @@ public class CSVParser {
 		}
 	}
 	
-	public Map parse() {
+	public Collection parseTranslations() {
 		try {
-			Map result = new HashMap();
+			List result = new ArrayList();
 			while (true) {
 				String line = this.reader.readLine();
 				if (line == null) {
@@ -59,7 +62,7 @@ public class CSVParser {
 							fields.length + " instead of 2 columns in CSV file " + this.url);
 					continue;
 				}
-				result.put(fields[0], fields[1]);
+				result.add(new Translation(fields[0], fields[1]));
 			}
 			return result;
 		} catch (IOException iex) {

@@ -22,7 +22,7 @@ public class ClassMap extends ResourceMap {
 	private Collection compiledPropertyBridges = null;
 	
 	public ClassMap(Resource classMapResource) {
-		super(PrettyPrinter.toString(classMapResource), false);
+		super(classMapResource, false);
 		this.resource = classMapResource;
 	}
 	
@@ -71,7 +71,6 @@ public class ClassMap extends ResourceMap {
 					" has no d2rq:PropertyBridges and no d2rq:class",
 					D2RQException.CLASSMAP_NO_PROPERTYBRIDGES);
 		}
-		super.validate();
 		// TODO
 	}
 	

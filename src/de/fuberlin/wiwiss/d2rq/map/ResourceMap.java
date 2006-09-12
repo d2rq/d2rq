@@ -10,6 +10,7 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
@@ -28,14 +29,12 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.1 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.2 2006/09/12 12:06:18 cyganiak Exp $
  */
-public abstract class ResourceMap {
+public abstract class ResourceMap extends MapObject {
 	protected static final Property valueProperty = 
 		D2RQ.ClassMap.getModel().createProperty(D2RQ.NS + "x-value");
 	
-	private String mapName;
-
 	// These can be set on PropertyBridges and ClassMaps
 	protected String bNodeIdColumns = null;	// comma-separated list
 	protected String uriColumn = null;
@@ -60,8 +59,8 @@ public abstract class ResourceMap {
 	private NodeMaker cachedNodeMaker;
 	private Relation cachedRelation;
 	
-	public ResourceMap(String mapName, boolean defaultContainsDuplicate) {
-		this.mapName = mapName;
+	public ResourceMap(Resource resource, boolean defaultContainsDuplicate) {
+		super(resource);
 		this.containsDuplicates = defaultContainsDuplicate;
 	}
 	
@@ -176,7 +175,8 @@ public abstract class ResourceMap {
 	
 	private ValueMaker buildValueSourceBase() {
 		if (this.bNodeIdColumns != null) {
-			return new BlankNodeID(this.bNodeIdColumns, this.mapName);
+			return new BlankNodeID(this.bNodeIdColumns, 
+					PrettyPrinter.toString(this.resource()));
 		}
 		if (this.uriColumn != null) {
 			return new Column(this.uriColumn);
@@ -190,7 +190,7 @@ public abstract class ResourceMap {
 		if (this.pattern != null) {
 			return new Pattern(this.pattern);
 		}
-		throw new D2RQException(this.mapName + " needs a column/pattern/bNodeID specification");
+		throw new D2RQException(this + " needs a column/pattern/bNodeID specification");
 	}
 
 	public ValueMaker wrapValueSource(ValueMaker values) {
@@ -229,10 +229,10 @@ public abstract class ResourceMap {
 			return TypedNodeMaker.URI;
 		}
 		if (this.column == null && this.pattern == null) {
-			throw new D2RQException(this.mapName + " needs a column/pattern/bNodeID specification");
+			throw new D2RQException(this + " needs a column/pattern/bNodeID specification");
 		}
 		if (this.datatype != null && this.lang != null) {
-			throw new D2RQException(this.mapName + " has both d2rq:lang and d2rq:datatype");
+			throw new D2RQException(this + " has both d2rq:lang and d2rq:datatype");
 		}
 		if (this.datatype != null) {
 			return TypedNodeMaker.typedLiteral(buildDatatype(this.datatype));
@@ -285,32 +285,4 @@ public abstract class ResourceMap {
 		if (property.equals(valueProperty)) return this.value != null;
 		throw new D2RQException("No primary spec: " + property);
 	}
-
-	protected void assertNotYetDefined(Object object, Property property, int errorCode) {
-		if (object == null) {
-			return;
-		}
-		throw new D2RQException("Duplicate " + PrettyPrinter.toString(property) + 
-				" for " + this, errorCode);
-	}
-	
-	protected void assertHasBeenDefined(Object object, Property property, int errorCode) {
-		if (object != null) {
-			return;
-		}
-		throw new D2RQException("Missing " + PrettyPrinter.toString(property) + 
-				" for " + this, errorCode);
-	}
-	
-	protected void assertArgumentNotNull(Object object, Property property, int errorCode) {
-		if (object != null) {
-			return;
-		}
-		throw new D2RQException("Object for " + PrettyPrinter.toString(property) + 
-				" not found at " + this, errorCode);
-	}
-	
-	public void validate() {
-		// Nothing to flag here yet ... subclasses do it
-	}	
 }
