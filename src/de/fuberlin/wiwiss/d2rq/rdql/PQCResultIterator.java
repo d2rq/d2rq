@@ -8,13 +8,13 @@ import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
  * Iterator for PatternQueryCombiner results.
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.10 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.11 2006/09/13 14:06:23 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
     public static int instanceCounter=1;
@@ -37,8 +37,7 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 	/** iterator that returns triple arrays for database rows */
 	ApplyTripleMakerRowIterator resultSet=null; 
 	
-	Database nextDatabase;
-											
+	ConnectedDB nextDatabase;
 
 	public PQCResultIterator(RDFRelation[][] tripleQueries, VariableBindings variableBindings, Collection constraints) { // or maybe pass conjunctionsIterator as
 		//combiner = combiner4;

@@ -17,6 +17,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class PropertyBridge extends ResourceMap {
@@ -108,7 +109,7 @@ public class PropertyBridge extends ResourceMap {
 		if (this.refersToClassMap != null) {
 			builder.addOther(this.refersToClassMap.relationBuilder());
 		}
-		return builder.buildRelation(this.belongsToClassMap.database()); 
+		return builder.buildRelation(this.belongsToClassMap.database().connectedDB()); 
 	}
 
 	public NodeMaker nodeMaker() {
@@ -118,7 +119,7 @@ public class PropertyBridge extends ResourceMap {
 				&& this.datatype != null
 				&& this.datatype.equals(XSDDatatype.XSDdateTime.getURI())
 				&& this.column != null
-				&& this.belongsToClassMap.database().getColumnType(this.column) == Database.dateColumnType) {
+				&& this.belongsToClassMap.database().connectedDB().columnType(this.column) == ConnectedDB.DATE_COLUMN) {
 //			this.translateWith = new TranslationTable();
 //			this.translateWith.setTranslator(new DateTimeTranslator());
 		}

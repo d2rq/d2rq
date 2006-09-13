@@ -14,11 +14,11 @@ import com.hp.hpl.jena.graph.Triple;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
-import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * @author jgarbers
- * @version $Id: GraphUtils.java,v 1.8 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: GraphUtils.java,v 1.9 2006/09/13 14:06:22 cyganiak Exp $
  */
 public class GraphUtils {
 
@@ -35,7 +35,7 @@ public class GraphUtils {
 		return bridges;
 	}
 
-	public static List[] makePrefixedPropertyBridges(GraphD2RQ graph, Triple[] triples, Database db) {
+	public static List[] makePrefixedPropertyBridges(GraphD2RQ graph, Triple[] triples, ConnectedDB db) {
 		List[] bridges=new List[triples.length];
 		if (triples.length!=makePrefixedPropertyBridges(graph.getPropertyBridges(db),triples,bridges,true))
 			return null;
@@ -57,7 +57,7 @@ public class GraphUtils {
 	    Iterator it=input.entrySet().iterator();
 	    while (it.hasNext()) {
 	        Map.Entry e=(Map.Entry)it.next();
-	        Database db=(Database)e.getKey();
+	        ConnectedDB db=(ConnectedDB)e.getKey();
 	        List pbCand=(List)e.getValue();
 			List[] bridges=new List[triples.length];
 			int len=makePrefixedPropertyBridges(pbCand,triples,bridges,false);
@@ -214,12 +214,12 @@ public class GraphUtils {
 	 * @param bridges
 	 */
 	public static boolean refersToMultipleDatabases(List[] bridges) {
-		Database db=null;
+		ConnectedDB db=null;
 		for (int i=0; i<bridges.length; i++) {
 			Iterator it=bridges[i].iterator();
 			while (it.hasNext()) {
 				RDFRelation pb=(RDFRelation)it.next();
-				Database pbdb=pb.baseRelation().database();
+				ConnectedDB pbdb=pb.baseRelation().database();
 				if (db!=pbdb) {
 					if (db==null)
 						db=pbdb;
@@ -274,7 +274,7 @@ public class GraphUtils {
 		Iterator it=propertyBridges.iterator();
 		while (it.hasNext()) {
 			RDFRelationImpl pb=(RDFRelationImpl)it.next();
-			Database db=pb.baseRelation().database();
+			ConnectedDB db=pb.baseRelation().database();
 			List list=(List) ret.get(db);
 			if (list==null) {
 				list=new ArrayList();

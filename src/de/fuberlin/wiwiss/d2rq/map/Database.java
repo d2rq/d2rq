@@ -1,30 +1,23 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 
 /**
  * Representation of a d2rq:Database from the mapping file.
- * It contains the connection information for the database and the column types of all database columns used.
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.13 2006/09/13 06:37:07 cyganiak Exp $
- * 
- * TODO: Factor out the live, non-mapping part
- * TODO: Make a bunch of public methods private?
+ * @version $Id: Database.java,v 1.14 2006/09/13 14:06:23 cyganiak Exp $
  */
 public class Database extends MapObject {
 
@@ -40,49 +33,62 @@ public class Database extends MapObject {
 			// not present, just ignore this driver
 		}
 	}
+
+	/**
+	 * Registers a JDBC driver class.
+	 * @param driverClassName Fully qualified class name of a JDBC driver
+	 * @throws D2RQException If the class could not be found
+	 */
+	public static void registerJDBCDriver(String driverClassName) {
+		try {
+			Class.forName(driverClassName);
+		} catch (ClassNotFoundException ex) {
+			throw new D2RQException("Database driver class not found: " + driverClassName,
+					D2RQException.DATABASE_JDBCDRIVER_CLASS_NOT_FOUND);
+		}
+	}
 	
-    /** Flag that the database connection has been established */
-    private boolean connectedToDatabase = false;
-
-    /** 
-     * Types of all columns used from this database.
-     * Possible values are d2rq:numericColumn, d2rq:textColumn and d2rq:dateColumn.
-     */
-    private Map columnTypes = new HashMap();
-
-    private String odbc;
-    private String jdbc;
-    private String jdbcDriver;
-    private String databaseUsername;
-    private String databasePassword;
-    private Connection con;
-    
-    public static final int invalidColumnType=-1;
-    public static final int noColumnType = 0;
-    public static final int numericColumnType = 1;
-    public static final int textColumnType = 2;
-    public static final int dateColumnType = 3;
-    public static final Integer numericColumn = new Integer(1);
-    public static final Integer textColumn = new Integer(2);
-    public static final Integer dateColumn = new Integer(3);
-
-	private DatabaseSchemaInspector schemaInspector = null;
-	private String rdbmsType = null;
-
+	/**
+	 * Tries to guess the class name of a suitable JDBC driver from a JDBC URL.
+	 * This only works in the unlikely case that the driver has been registered
+	 * earlier using Class.forName(classname).
+	 * @param jdbcURL A JDBC URL
+	 * @return The corresponding JDBC driver class name, or <tt>null</tt> if not known
+	 */
+	public static String guessJDBCDriverClass(String jdbcURL) {
+		try {
+			return DriverManager.getDriver(jdbcURL).getClass().getName();
+		} catch (SQLException ex) {
+			return null;
+		}
+	}
+		
+	private String odbcDSN;
+	private String jdbcDSN;
+	private String jdbcDriver;
+	private String username;
+	private String password;
+	private Set textColumns = new HashSet();
+	private Set numericColumns = new HashSet();
+	private Set dateColumns = new HashSet();
+    private String expressionTranslator = null;		// class name
+	private boolean allowDistinct = true;
+	private ConnectedDB connection = null;
+	
 	public Database(Resource resource) {
 		super(resource);
 	}
 
 	public void setODBCDSN(String odbcDSN) {
-		assertNotYetDefined(this.odbc, D2RQ.odbcDSN, 
+		assertNotYetDefined(this.odbcDSN, D2RQ.odbcDSN, 
 				D2RQException.DATABASE_DUPLICATE_ODBCDSN);
-		this.odbc = odbcDSN;
+		this.odbcDSN = odbcDSN;
 	}
 
 	public void setJDBCDSN(String jdbcDSN) {
-		assertNotYetDefined(this.jdbc, D2RQ.jdbcDSN,
+		assertNotYetDefined(this.jdbcDSN, D2RQ.jdbcDSN,
 				D2RQException.DATABASE_DUPLICATE_JDBCDSN);
-		this.jdbc = jdbcDSN;
+		this.jdbcDSN = jdbcDSN;
 	}
 
 	public void setJDBCDriver(String jdbcDriver) {
@@ -92,219 +98,57 @@ public class Database extends MapObject {
 	}
 
 	public void setUsername(String username) {
-		assertNotYetDefined(this.databaseUsername, D2RQ.username,
+		assertNotYetDefined(this.username, D2RQ.username,
 				D2RQException.DATABASE_DUPLICATE_USERNAME);
-		this.databaseUsername = username;
+		this.username = username;
 	}
 
 	public void setPassword(String password) {
-		assertNotYetDefined(this.databasePassword, D2RQ.password,
+		assertNotYetDefined(this.password, D2RQ.password,
 				D2RQException.DATABASE_DUPLICATE_PASSWORD);
-		this.databasePassword = password;
+		this.password = password;
 	}
 
 	public void addTextColumn(String column) {
-		this.columnTypes.put(column, textColumn);
+		this.textColumns.add(column);
 	}
 	
 	public void addNumericColumn(String column) {
-		this.columnTypes.put(column, numericColumn);
+		this.numericColumns.add(column);
 	}
 	
 	public void addDateColumn(String column) {
-		this.columnTypes.put(column, dateColumn);
+		this.dateColumns.add(column);
 	}
 	
-    /**
-     * Returns a connection to this database.
-     * @return connection
-     */
-    public Connection getConnnection() {
-    		if(!this.connectedToDatabase) {
-    			connectToDatabase();
-        }
-        return this.con;
-    }
-
-    /**
-     * Returns the ODBC data source name.
-     * @return odbcDSN
-     */
-    public String getOdbc() {
-        return this.odbc;
-    }
-
-    /**
-     * Returns the JDBC data source name.
-     * @return jdbcDSN
-     */
-    public String getJdbc() {
-        return this.jdbc;
-    }
-
-    /**
-     * Returns the JDBC driver.
-     * @return jdbcDriver
-     */
-    public String getJdbcDriver() {
-        return this.jdbcDriver;
-    }
-
-    /**
-     * Returns the database username.
-     * @return username
-     */
-    public String getDatabaseUsername() {
-        return this.databaseUsername;
-    }
-
-    /**
-     * Returns the database password.
-     * @return password
-     */
-    public String getDatabasePassword() {
-        return this.databasePassword;
-    }
-
-    public int getColumnType(String qualifiedColumnName) {
-    		return getColumnType(new Attribute(qualifiedColumnName));
-    }
-    
-    /**
-     * Returns the columnType for a given database column.
-     * @return Node columnType D2RQ.textColumn or D2RQ.numericColumn or D2RQ.dateColumn
-     */
-    public int getColumnType(Attribute column) {
-		Integer t = (Integer) this.columnTypes.get(column.qualifiedName());
-		if (t != null) {
-			return t.intValue();
-		}
-		int type = schemaInspector().columnType(column);
-		switch (type) {
-		// TODO There are a bunch of others, see http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Types.html
-		case Types.CHAR: return Database.textColumnType;
-		case Types.VARCHAR: return Database.textColumnType;
-		case Types.LONGVARCHAR: return Database.textColumnType;
-		case Types.NUMERIC: return Database.numericColumnType;
-		case Types.DECIMAL: return Database.numericColumnType;
-		case Types.BIT: return Database.numericColumnType;
-		case Types.TINYINT: return Database.numericColumnType;
-		case Types.SMALLINT: return Database.numericColumnType;
-		case Types.INTEGER: return Database.numericColumnType;
-		case Types.BIGINT: return Database.numericColumnType;
-		case Types.REAL: return Database.numericColumnType;
-		case Types.FLOAT: return Database.numericColumnType;
-		case Types.DOUBLE: return Database.numericColumnType;
-
-		// TODO: What to do with binary columns?
-		case Types.BINARY: return Database.textColumnType;
-		case Types.VARBINARY: return Database.textColumnType;
-		case Types.LONGVARBINARY: return Database.textColumnType;
-
-		case Types.DATE: return Database.dateColumnType;
-		case Types.TIME: return Database.dateColumnType;
-		case Types.TIMESTAMP: return Database.dateColumnType;
-		
-		default: throw new D2RQException("Unsupported database type code (" + type + ") for column "
-				+ column.qualifiedName());
-		}
-	}
-
-	private DatabaseSchemaInspector schemaInspector() {
-		if (this.schemaInspector == null) {
-			this.schemaInspector = new DatabaseSchemaInspector(getConnnection());
-		}
-		return this.schemaInspector;
+	public void setExpressionTranslator(String expressionTranslator) {
+		this.expressionTranslator = expressionTranslator;
 	}
 	
-    /**
-     * Raises a D2RQ error if there's no type information for the column.
-     * @param column a database column
-     */
-	public void assertHasType(Attribute column) {
-		if (getColumnType(column) == Database.noColumnType) {
-			throw new D2RQException("The column " + column + " doesn't have a corresponding d2rq:numericColumn or d2rq:textColumn statement");
+	public void setAllowDistinct(boolean b) {
+		this.allowDistinct = b;
+	}
+
+	public ConnectedDB connectedDB() {
+		if (this.connection != null) {
+			return this.connection;
 		}
-    }
-
-    private void connectToDatabase() {
-       try {
-            // Connect to database
-            if (this.odbc != null) {
-                this.jdbc = "jdbc:odbc:" + this.odbc;
-                this.jdbcDriver = "sun.jdbc.odbc.JdbcOdbcDriver";
-            }
-            if (this.jdbc == null) {
-                throw new D2RQException("Could not connect to database because of missing URL.");
-            }
-            if (this.jdbcDriver != null) {
-                Class.forName(this.jdbcDriver);
-            } else {
-                this.jdbcDriver = DriverManager.getDriver(this.jdbc).getClass().getName();
-            }
-            if (this.getDatabaseUsername() != null || this.getDatabasePassword() != null) {
-            		this.con = DriverManager.getConnection(this.jdbc, this.getDatabaseUsername(), this.getDatabasePassword());
-            } else {
-            		this.con = DriverManager.getConnection(this.jdbc);
-            }
-            this.connectedToDatabase = true;
-        } catch (SQLException ex) {
-            throw new D2RQException(ex.getMessage(), ex);
-        } catch (ClassNotFoundException ex) {
-            throw new D2RQException("Database driver class not found in the lib directory: " + ex.getMessage(), ex);
-        }
-    }
-    
-   public boolean databaseMayUseDistinct=true;
-
-   public void setAllowDistinct(boolean b) {
-        databaseMayUseDistinct=b;
-    }
-
-    /** 
-     * Some Databases do not handle large entries correctly.
-     * For example MSAccess cuts strings larger than 256 bytes when queried
-     * with the DISTINCT keyword.
-     * TODO We would need some assertions about a database or specific columns.
-     * @return databaseMayUseDistinct 
-     */
-    public boolean correctlyHandlesDistinct() {
-        return databaseMayUseDistinct;
-    }
-    
-    private String expressionTranslator=null; // class name, if given
- 
-    public void setExpressionTranslator(String expressionTranslator) {
-        this.expressionTranslator=expressionTranslator;
-    }
-    public String getExpressionTranslator() {
-        return this.expressionTranslator;
-    }
-
-    /**
-     * Connects to the database and reports the brand of RDBMS.
-     * Will currently report one of these:
-     * 
-     * <ul>
-     * <li>MySQL</li>
-     * <li>Other</li>
-     * </ul>
-     * @return The brand of RDBMS
-     */
-	public String getType() {
-		if (this.rdbmsType == null) {
-			connectToDatabase();
-			try {
-				if (this.con.getMetaData().getDriverName().toLowerCase().indexOf("mysql") >= 0) {
-					this.rdbmsType = "MySQL";
-				} else {
-					this.rdbmsType = "Other";
-				}
-			} catch (SQLException ex) {
-				throw new D2RQException("Database exception", ex);
-			}
+		String url;
+		String driver = null;
+		if (this.odbcDSN != null) {
+			driver = "sun.jdbc.odbc.JdbcOdbcDriver";
+			url = "jdbc:odbc:" + this.odbcDSN;
+		} else {
+			driver = this.jdbcDriver;
+			url = this.jdbcDSN;
 		}
-		return this.rdbmsType;
+		if (driver != null) {
+			registerJDBCDriver(driver);
+		}
+		this.connection = new ConnectedDB(url, this.username, this.password,
+				this.expressionTranslator, this.allowDistinct,
+				this.textColumns, this.numericColumns, this.dateColumns);
+		return this.connection;
 	}
 
 	public String toString() {
@@ -312,15 +156,15 @@ public class Database extends MapObject {
 	}
 
 	public void validate() throws D2RQException {
-		if (this.jdbc != null && this.odbc != null) {
+		if (this.jdbcDSN != null && this.odbcDSN != null) {
 			throw new D2RQException("Can't combine d2rq:odbcDSN with d2rq:jdbcDSN",
 					D2RQException.DATABASE_ODBC_WITH_JDBC);
 		}
-		if (this.jdbc != null && this.jdbcDriver == null) {
+		if (this.jdbcDSN != null && this.jdbcDriver == null) {
 			throw new D2RQException("Missing d2rq:jdbcDriver",
 					D2RQException.DATABASE_MISSING_JDBCDRIVER);
 		}
-		if (this.odbc != null && this.jdbcDriver != null) {
+		if (this.odbcDSN != null && this.jdbcDriver != null) {
 			throw new D2RQException("Can't use d2rq:jdbcDriver with jdbc:odbcDSN",
 					D2RQException.DATABASE_ODBC_WITH_JDBCDRIVER);
 		}

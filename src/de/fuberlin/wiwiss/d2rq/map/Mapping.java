@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.4 2006/09/13 06:37:07 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.5 2006/09/13 14:06:23 cyganiak Exp $
  */
 public class Mapping {
 	private Model model = ModelFactory.createDefaultModel();
@@ -72,18 +72,13 @@ public class Mapping {
 			ClassMap classMap = (ClassMap) it.next();
 			classMap.validate();	// Also validates attached bridges
 		}
-		it = this.compiledPropertyBridges.iterator();
-		while (it.hasNext()) {
-			RDFRelation bridge = (RDFRelation) it.next();
-			assertHasColumnTypes(bridge);
-		}
 	}
 
 	private void assertHasColumnTypes(RDFRelation relation) {
 		Iterator it = relation.projectionColumns().iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			relation.baseRelation().database().assertHasType(
+			relation.baseRelation().database().columnType(
 					relation.baseRelation().aliases().originalOf(column));			
 		}
 	}
@@ -145,6 +140,11 @@ public class Mapping {
 		while (it.hasNext()) {
 			ClassMap classMap = (ClassMap) it.next();
 			this.compiledPropertyBridges.addAll(classMap.compiledPropertyBridges());
+		}
+		it = this.compiledPropertyBridges.iterator();
+		while (it.hasNext()) {
+			RDFRelation bridge = (RDFRelation) it.next();
+			assertHasColumnTypes(bridge);
 		}
 		this.compiledPropertyBridgesByDatabase = 
 				GraphUtils.makeDatabaseMapFromPropertyBridges(

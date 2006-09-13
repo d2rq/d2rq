@@ -4,19 +4,19 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * TODO Describe this type
  * TODO Add uniqueConstraints()
  * TODO Explicitly list tables
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Relation.java,v 1.4 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: Relation.java,v 1.5 2006/09/13 14:06:23 cyganiak Exp $
  */
 public interface Relation extends RelationalOperators {
 
 	static Relation EMPTY = new Relation() {
-		public Database database() { return null; }
+		public ConnectedDB database() { return null; }
 		public AliasMap aliases() { return AliasMap.NO_ALIASES; }
 		public Set joinConditions() { return Collections.EMPTY_SET; }
 		public Expression condition() { return Expression.FALSE; }
@@ -26,7 +26,7 @@ public interface Relation extends RelationalOperators {
 		public String toString() { return "Relation.EMPTY"; }
 	};
 	static Relation TRUE = new Relation() {
-		public Database database() { return null; }
+		public ConnectedDB database() { return null; }
 		public AliasMap aliases() { return AliasMap.NO_ALIASES; }
 		public Set joinConditions() { return Collections.EMPTY_SET; }
 		public Expression condition() { return Expression.TRUE; }
@@ -36,7 +36,7 @@ public interface Relation extends RelationalOperators {
 		public String toString() { return "Relation.TRUE"; }
 	};
 	
-	Database database();
+	ConnectedDB database();
 	
 	/**
 	 * The tables that are used to set up this relation, both in

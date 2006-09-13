@@ -11,7 +11,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
-import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
@@ -28,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * useless, if there are (Bound) variables for predicates.
  * 
  * @author jgarbers
- * @version $Id: PatternQueryCombiner.java,v 1.15 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: PatternQueryCombiner.java,v 1.16 2006/09/13 14:06:23 cyganiak Exp $
  * @see FindQuery
  */
 public class PatternQueryCombiner {
@@ -185,9 +185,9 @@ void reducePropertyBridges() {
  */
 protected static SelectStatementBuilder getSQL(RDFRelation[] conjunction) {
 	boolean possible=true;
-	Database db=conjunction[0].baseRelation().database();
+	ConnectedDB db=conjunction[0].baseRelation().database();
 	SelectStatementBuilder sql=new SelectStatementBuilder(db);
-	sql.setEliminateDuplicates(db.correctlyHandlesDistinct());	
+	sql.setEliminateDuplicates(db.allowDistinct());	
 	
 	for (int i=0; (i<conjunction.length) && possible; i++) {
 		RDFRelation t=conjunction[i];

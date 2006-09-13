@@ -35,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.11 2006/09/13 06:37:08 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.12 2006/09/13 14:06:24 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -58,6 +58,7 @@ public class MappingGenerator {
 		this.mapNamespaceURI = "#";
 		this.instanceNamespaceURI = this.jdbcURL + "#";
 		this.vocabNamespaceURI = this.jdbcURL + "/vocab#";
+		this.driverClass = Database.guessJDBCDriverClass(this.jdbcURL);
 	}
 
 	private void connectToDatabase() {
@@ -67,11 +68,8 @@ public class MappingGenerator {
 		db.setJDBCDriver(this.driverClass);
 		db.setUsername(this.databaseUser);
 		db.setPassword(this.databasePassword);
-		this.schema = new DatabaseSchemaInspector(db.getConnnection());
-		if (this.driverClass == null) {
-			this.driverClass = db.getJdbcDriver();
-		}
-		this.databaseType = db.getType();
+		this.schema = db.connectedDB().schemaInspector();
+		this.databaseType = db.connectedDB().dbType();
 	}
 	
 	public void setMapNamespaceURI(String uri) {

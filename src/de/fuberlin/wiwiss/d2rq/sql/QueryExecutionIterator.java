@@ -12,7 +12,6 @@ import org.apache.commons.logging.LogFactory;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * Executes an SQL query and delivers result rows as an iterator over arrays
@@ -20,21 +19,21 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryExecutionIterator.java,v 1.4 2006/09/11 23:22:25 cyganiak Exp $
+ * @version $Id: QueryExecutionIterator.java,v 1.5 2006/09/13 14:06:23 cyganiak Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
 	public static Collection protocol=null;
 
 	private String sql;
 	private List columns;
-	private Database database;
+	private ConnectedDB database;
 	private ResultSet resultSet = null;
 	private ResultRow prefetchedRow = null;
 	private int numCols = 0;
 	private boolean queryExecuted = false;
 	private boolean explicitlyClosed = false;
 
-	public QueryExecutionIterator(String sql, List columns, Database db) {
+	public QueryExecutionIterator(String sql, List columns, ConnectedDB db) {
 		this.sql = sql;
 		this.columns = columns;
 		this.database = db;
@@ -119,7 +118,7 @@ public class QueryExecutionIterator implements ClosableIterator {
     	if (protocol!=null)
     	    protocol.add(this.sql);
         try {
-			Connection con = this.database.getConnnection();
+			Connection con = this.database.connection();
 			java.sql.Statement stmt = con.createStatement();
 			this.resultSet = stmt.executeQuery(this.sql);
 			this.numCols = this.resultSet.getMetaData().getColumnCount();

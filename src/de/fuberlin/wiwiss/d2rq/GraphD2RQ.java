@@ -33,7 +33,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
-import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
@@ -41,6 +40,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
 import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
@@ -52,7 +52,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.31 2006/09/11 22:29:20 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.32 2006/09/13 14:06:24 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -75,7 +75,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	public Collection getPropertyBridges() {
 		return this.mapping.compiledPropertyBridges();
 	}
-	public Collection getPropertyBridges(Database db) {
+	public Collection getPropertyBridges(ConnectedDB db) {
 		return (Collection) this.mapping.compiledPropertyBridgesByDatabase().get(db);
 	}
 
@@ -94,8 +94,19 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		}
 		MapParser parser = new MapParser(mapModel, baseURIForData);
 		this.mapping = parser.parse();
+		this.mapping.validate();
 	}
 
+	/**
+	 * Creates a new D2RQ graph from a previously prepared {@link Mapping} instance.
+	 * @param mapping A D2RQ mapping
+	 * @throws D2RQException If the mapping is invalid
+	 */
+	public GraphD2RQ(Mapping mapping) throws D2RQException {
+		this.mapping = mapping;
+		this.mapping.validate();
+	}
+	
 	/**
 	 * Copies all prefixes from the mapping file to the D2RQ model.
 	 * This makes the output of Model.write(...) nicer. The D2RQ
@@ -175,7 +186,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		return GraphUtils.propertyBridgesForTriple(t, this.mapping.compiledPropertyBridges());
 	}
 	
-	public ArrayList propertyBridgesForTriple(Triple t, Database db) {
+	public ArrayList propertyBridgesForTriple(Triple t, ConnectedDB db) {
 		return GraphUtils.propertyBridgesForTriple(t, getPropertyBridges(db));
 	}	
 	

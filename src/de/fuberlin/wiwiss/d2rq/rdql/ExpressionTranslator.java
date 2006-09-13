@@ -20,8 +20,8 @@ import com.hp.hpl.jena.rdql.parser.Q_Var;
 import com.hp.hpl.jena.rdql.parser.WorkingVar;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 
@@ -43,7 +43,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  *   2) SQL dialects
  *   3) Variable translators
  * @author jgarbers
- * @version $Id: ExpressionTranslator.java,v 1.17 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: ExpressionTranslator.java,v 1.18 2006/09/13 14:06:23 cyganiak Exp $
  */
 public class ExpressionTranslator {
 	
@@ -325,9 +325,9 @@ public class ExpressionTranslator {
     public Result translateColumn(Attribute col) {
         String columnName=col.qualifiedName();
         int columnType=statementMaker.columnType(col);
-        if (columnType==Database.numericColumnType) {
+        if (columnType == ConnectedDB.NUMERIC_COLUMN) {
             return newResult(columnName,NumberType);
-        } else if (columnType==Database.textColumnType) {
+        } else if (columnType == ConnectedDB.TEXT_COLUMN) {
             return newResult(columnName,StringType);
         } 
         return null;

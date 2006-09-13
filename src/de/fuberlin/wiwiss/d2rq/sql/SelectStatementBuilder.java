@@ -17,7 +17,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * Collects parts of a SELECT query and delivers a corresponding SQL statement.
@@ -25,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.14 2006/09/11 23:22:25 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.15 2006/09/13 14:06:23 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -59,19 +58,17 @@ public class SelectStatementBuilder {
 		return ReservedWords.contains(s);
 	}
 	
-	private Database database;
+	private ConnectedDB database;
 	private List selectColumns = new ArrayList(10);
 	private List conditions = new ArrayList();
 	private boolean eliminateDuplicates = false;
-	
-	// see SQLStatementMaker.sqlFromExpression(referredTables,aliasMap)
-	protected AliasMap aliases = AliasMap.NO_ALIASES;
-	protected Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
+	private AliasMap aliases = AliasMap.NO_ALIASES;
+	private Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
 
 	/**
 	 * TODO: Try if we can change parameters to (Relation, projectionColumns) and make immutable
 	 */
-	public SelectStatementBuilder(Database database) {
+	public SelectStatementBuilder(ConnectedDB database) {
 		this.database = database;
 	}
 	
@@ -82,7 +79,7 @@ public class SelectStatementBuilder {
 		addCondition(relation.condition());
 	}
 	
-	public Database getDatabase() {
+	public ConnectedDB getDatabase() {
 	    return this.database;
 	}
 
@@ -185,8 +182,7 @@ public class SelectStatementBuilder {
 	}
 	
 	public int columnType(Attribute column) {
-	    Attribute physicalColumn = this.aliases.originalOf(column);
-	    return this.database.getColumnType(physicalColumn.qualifiedName());
+	    return this.database.columnType(this.aliases.originalOf(column));
 	}
 	
 	private String quoteTableName(String tableName) {
@@ -194,7 +190,7 @@ public class SelectStatementBuilder {
 			// No need to quote
 			return tableName;
 		}
-		if ("MySQL".equals(this.database.getType())) {
+		if (this.database.dbTypeIs(ConnectedDB.MySQL)) {
 			return backtickQuote(tableName);
 		}
 		// Not MySQL -- We just return the plain table name without
@@ -257,7 +253,7 @@ public class SelectStatementBuilder {
 	}
 
 	private static String getQuotedColumnValue(String value, int columnType) {
-		if (Database.numericColumnType==columnType) {
+		if (columnType == ConnectedDB.NUMERIC_COLUMN) {
 			// Check if it actually is a number to avoid SQL injection
 			try {
 				return Integer.toString(Integer.parseInt(value));
@@ -270,7 +266,7 @@ public class SelectStatementBuilder {
 					return SelectStatementBuilder.singleQuote(value);
 				}
 			}
-		} else if (Database.dateColumnType==columnType) {
+		} else if (columnType == ConnectedDB.DATE_COLUMN) {
 			return "#" + value + "#";
 		}
 		return SelectStatementBuilder.singleQuote(value);

@@ -1,6 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,7 +10,6 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Expression;
 
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
@@ -21,9 +19,9 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.14 2006/09/11 22:29:19 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.15 2006/09/13 14:06:23 cyganiak Exp $
  */
-class ConstraintHandler {
+public class ConstraintHandler {
     public boolean possible=true;
     public VariableBindings bindings;
     RDFRelation[] conjunction;
@@ -93,24 +91,10 @@ class ConstraintHandler {
      * ExpressionTranslator. This is likely to change in the future.
      * @param sql contains information about the SQL dialect of the database and aliases.
      */
-    void addRDQLConstraints(SelectStatementBuilder sql) {
-        if (rdqlTranslator==null) {
-            Database db=sql.getDatabase();
-    		String tranlatorClassName=db.getExpressionTranslator();
-    		if (tranlatorClassName!=null) {
-    		    if (tranlatorClassName.equals("null"))
-    		        return;
-    		    try {
-    		        Class c=Class.forName(tranlatorClassName);
-    		        Constructor con=c.getConstructor(new Class[]{this.getClass(),sql.getClass()});
-    		        rdqlTranslator=(ExpressionTranslator)con.newInstance(new Object[]{this,sql});
-    		    } catch (Exception e) {
-    		        throw new RuntimeException(e);
-    		    }
-    		} else {
-    		    rdqlTranslator=new ExpressionTranslator(this,sql);
-    		}
-        }
+	void addRDQLConstraints(SelectStatementBuilder sql) {
+		if (this.rdqlTranslator == null) {
+			this.rdqlTranslator = sql.getDatabase().expressionTranslator(this, sql);
+		}
         Iterator it=rdqlConstraints.iterator();
         while (possible && it.hasNext()) {
             Expression e=(Expression)it.next();

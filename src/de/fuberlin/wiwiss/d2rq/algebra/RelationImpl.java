@@ -6,16 +6,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 public class RelationImpl implements Relation {
-	private Database database;
+	private ConnectedDB database;
 	private AliasMap aliases;
 	private Map attributeConditions;
 	private Expression condition;
 	private Set joinConditions;
 	
-	public RelationImpl(Database database, AliasMap aliases, Map attributeConditions, 
+	public RelationImpl(ConnectedDB database, AliasMap aliases, Map attributeConditions, 
 			Expression condition, Set joinConditions) {
 		this.database = database;
 		this.aliases = aliases;
@@ -24,7 +24,7 @@ public class RelationImpl implements Relation {
 		this.joinConditions = joinConditions;
 	}
 
-	public Database database() {
+	public ConnectedDB database() {
 		return this.database;
 	}
 	

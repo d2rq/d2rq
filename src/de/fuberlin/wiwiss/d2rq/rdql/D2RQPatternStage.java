@@ -17,7 +17,7 @@ import com.hp.hpl.jena.util.iterator.NiceIterator;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 
 /**
@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * Created by Joerg Garbers on 25.02.05.
  * 
  * @author jg
- * @version $Id: D2RQPatternStage.java,v 1.9 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: D2RQPatternStage.java,v 1.10 2006/09/13 14:06:22 cyganiak Exp $
  */
 public class D2RQPatternStage extends CombinedPatternStage {
     // TODO keep just one instance of PatternQueryCombiner and update Property Bridges
@@ -99,7 +99,7 @@ public class D2RQPatternStage extends CombinedPatternStage {
             if (aboutPrevious == null)
                 reducedCandidateBridgeLists = candidateBridgeLists;
             else {
-                Database previousDatabase = (Database) aboutPrevious;
+            	ConnectedDB previousDatabase = (ConnectedDB) aboutPrevious;
                 reducedCandidateBridgeLists = new HashMap();
                 reducedCandidateBridgeLists.putAll(candidateBridgeLists);
                 reducedCandidateBridgeLists.remove(previousDatabase);

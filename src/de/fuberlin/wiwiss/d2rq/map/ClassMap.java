@@ -105,7 +105,7 @@ public class ClassMap extends ResourceMap {
 	}
 	
 	protected Relation buildRelation() {
-		return this.relationBuilder().buildRelation(this.database);
+		return this.relationBuilder().buildRelation(this.database.connectedDB());
 	}
 	
 	public String toString() {

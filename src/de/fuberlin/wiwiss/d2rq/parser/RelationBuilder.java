@@ -9,7 +9,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
-import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 public class RelationBuilder {
 	private Expression condition = Expression.TRUE;
@@ -43,7 +43,7 @@ public class RelationBuilder {
 		this.joinConditions.add(joinCondition);
 	}
 	
-	public Relation buildRelation(Database database) {
+	public Relation buildRelation(ConnectedDB database) {
 		return new RelationImpl(
 				database,
 				aliases(), 
