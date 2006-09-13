@@ -13,7 +13,8 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class MappingTest extends TestCase {
-	private final static Resource myDB = ResourceFactory.createResource("http://test/db");
+	private final static Resource database1 = ResourceFactory.createResource("http://test/db");
+	private final static Resource database2 = ResourceFactory.createResource("http://test/db2");
 	private final static Resource classMap1 = ResourceFactory.createResource("http://test/classMap1");
 	
 	public void testNewMappingWithResource() {
@@ -36,15 +37,15 @@ public class MappingTest extends TestCase {
 	public void testNoDatabasesInitially() {
 		Mapping m = new Mapping();
 		assertTrue(m.databases().isEmpty());
-		assertNull(m.database(myDB));
+		assertNull(m.database(database1));
 	}
 	
 	public void testReturnAddedDatabase() {
 		Mapping m = new Mapping();
-		Database db = new Database("odbc", null, null, null, null, Collections.EMPTY_MAP);
-		m.addDatabase(myDB, db);
+		Database db = new Database(database1);
+		m.addDatabase(db);
 		assertEquals(Collections.singletonList(db), new ArrayList(m.databases()));
-		assertEquals(db, m.database(myDB));
+		assertEquals(db, m.database(database1));
 	}
 	
 	public void testNoDatabaseCausesValidationError() {
@@ -67,7 +68,7 @@ public class MappingTest extends TestCase {
 	}
 	
 	public void testClassMapReturnsAssignedDatabase() {
-		Database db = new Database("odbc", null, null, null, null, Collections.EMPTY_MAP);
+		Database db = new Database(database1);
 		ClassMap c = new ClassMap(classMap1);
 		c.setDatabase(db);
 		assertEquals(db, c.database());
@@ -77,9 +78,9 @@ public class MappingTest extends TestCase {
 		Mapping m = new Mapping();
 		ClassMap c = new ClassMap(classMap1);
 		try {
-			Database db1 = new Database("odbc1", null, null, null, null, Collections.EMPTY_MAP);
+			Database db1 = new Database(database1);
 			c.setDatabase(db1);
-			Database db2 = new Database("odbc2", null, null, null, null, Collections.EMPTY_MAP);
+			Database db2 = new Database(database2);
 			c.setDatabase(db2);
 			m.addClassMap(c);
 			m.validate();
@@ -92,8 +93,8 @@ public class MappingTest extends TestCase {
 		Mapping m = new Mapping();
 		ClassMap c = new ClassMap(classMap1);
 		try {
-			Database db1 = new Database("odbc1", null, null, null, null, Collections.EMPTY_MAP);
-			m.addDatabase(myDB, db1);
+			Database db1 = new Database(database1);
+			m.addDatabase(db1);
 			m.addClassMap(c);
 			m.validate();
 		} catch (D2RQException ex) {

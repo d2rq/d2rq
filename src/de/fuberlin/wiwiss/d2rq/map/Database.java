@@ -4,11 +4,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.Map;
+
+import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
+import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 
 /**
@@ -17,11 +21,12 @@ import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.12 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: Database.java,v 1.13 2006/09/13 06:37:07 cyganiak Exp $
  * 
+ * TODO: Factor out the live, non-mapping part
  * TODO: Make a bunch of public methods private?
  */
-public class Database {
+public class Database extends MapObject {
 
 	/**
 	 * Pre-registers a JDBC driver if its class can be found on the
@@ -39,10 +44,11 @@ public class Database {
     /** Flag that the database connection has been established */
     private boolean connectedToDatabase = false;
 
-    /** Types of all columns used from this database.
+    /** 
+     * Types of all columns used from this database.
      * Possible values are d2rq:numericColumn, d2rq:textColumn and d2rq:dateColumn.
-    */
-    private Map columnTypes;
+     */
+    private Map columnTypes = new HashMap();
 
     private String odbc;
     private String jdbc;
@@ -63,15 +69,52 @@ public class Database {
 	private DatabaseSchemaInspector schemaInspector = null;
 	private String rdbmsType = null;
 
-    public Database(String odbc, String jdbc, String jdbcDriver, String databaseUsername, String databasePassword, Map columnTypes) {
-        this.odbc = odbc;
-        this.jdbc =  jdbc;
-        this.jdbcDriver = jdbcDriver;
-        this.databaseUsername = databaseUsername;
-        this.databasePassword = databasePassword;
-        this.columnTypes = columnTypes;
-    }
+	public Database(Resource resource) {
+		super(resource);
+	}
 
+	public void setODBCDSN(String odbcDSN) {
+		assertNotYetDefined(this.odbc, D2RQ.odbcDSN, 
+				D2RQException.DATABASE_DUPLICATE_ODBCDSN);
+		this.odbc = odbcDSN;
+	}
+
+	public void setJDBCDSN(String jdbcDSN) {
+		assertNotYetDefined(this.jdbc, D2RQ.jdbcDSN,
+				D2RQException.DATABASE_DUPLICATE_JDBCDSN);
+		this.jdbc = jdbcDSN;
+	}
+
+	public void setJDBCDriver(String jdbcDriver) {
+		assertNotYetDefined(this.jdbcDriver, D2RQ.jdbcDriver,
+				D2RQException.DATABASE_DUPLICATE_JDBCDRIVER);
+		this.jdbcDriver = jdbcDriver;
+	}
+
+	public void setUsername(String username) {
+		assertNotYetDefined(this.databaseUsername, D2RQ.username,
+				D2RQException.DATABASE_DUPLICATE_USERNAME);
+		this.databaseUsername = username;
+	}
+
+	public void setPassword(String password) {
+		assertNotYetDefined(this.databasePassword, D2RQ.password,
+				D2RQException.DATABASE_DUPLICATE_PASSWORD);
+		this.databasePassword = password;
+	}
+
+	public void addTextColumn(String column) {
+		this.columnTypes.put(column, textColumn);
+	}
+	
+	public void addNumericColumn(String column) {
+		this.columnTypes.put(column, numericColumn);
+	}
+	
+	public void addDateColumn(String column) {
+		this.columnTypes.put(column, dateColumn);
+	}
+	
     /**
      * Returns a connection to this database.
      * @return connection
@@ -82,7 +125,6 @@ public class Database {
         }
         return this.con;
     }
-
 
     /**
      * Returns the ODBC data source name.
@@ -264,11 +306,24 @@ public class Database {
 		}
 		return this.rdbmsType;
 	}
-    
-    public String toString() {
-    	  return super.toString() + "(" + 
-		  (odbc!=null ? odbc : "") + 
-		  (jdbc!=null ? jdbc : "") +
-		   ")";
-    }
+
+	public String toString() {
+		return "d2rq:Database " + super.toString();
+	}
+
+	public void validate() throws D2RQException {
+		if (this.jdbc != null && this.odbc != null) {
+			throw new D2RQException("Can't combine d2rq:odbcDSN with d2rq:jdbcDSN",
+					D2RQException.DATABASE_ODBC_WITH_JDBC);
+		}
+		if (this.jdbc != null && this.jdbcDriver == null) {
+			throw new D2RQException("Missing d2rq:jdbcDriver",
+					D2RQException.DATABASE_MISSING_JDBCDRIVER);
+		}
+		if (this.odbc != null && this.jdbcDriver != null) {
+			throw new D2RQException("Can't use d2rq:jdbcDriver with jdbc:odbcDSN",
+					D2RQException.DATABASE_ODBC_WITH_JDBCDRIVER);
+		}
+		// TODO
+	}
 }

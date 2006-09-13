@@ -6,7 +6,7 @@ import com.hp.hpl.jena.shared.JenaException;
  * Exception used to signal most D2RQ errors.
  *
  * @author Chris Bizer chris@bizer.de
- * @version $Id: D2RQException.java,v 1.4 2006/09/12 12:06:18 cyganiak Exp $
+ * @version $Id: D2RQException.java,v 1.5 2006/09/13 06:37:05 cyganiak Exp $
  */
 
 public class D2RQException extends JenaException {
@@ -45,6 +45,14 @@ public class D2RQException extends JenaException {
 	public static final int TRANSLATIONTABLE_DUPLICATE_HREF = 32;
 	public static final int TRANSLATION_MISSING_DBVALUE = 33;
 	public static final int TRANSLATION_MISSING_RDFVALUE = 34;
+	public static final int DATABASE_DUPLICATE_ODBCDSN = 35;
+	public static final int DATABASE_DUPLICATE_JDBCDSN = 35;
+	public static final int DATABASE_DUPLICATE_JDBCDRIVER = 36;
+	public static final int DATABASE_MISSING_JDBCDRIVER = 37;
+	public static final int DATABASE_DUPLICATE_USERNAME = 38;
+	public static final int DATABASE_DUPLICATE_PASSWORD = 39;
+	public static final int DATABASE_ODBC_WITH_JDBC = 40;
+	public static final int DATABASE_ODBC_WITH_JDBCDRIVER = 41;
 	
 	private int code;
 	

@@ -71,6 +71,11 @@ public class ClassMap extends ResourceMap {
 					" has no d2rq:PropertyBridges and no d2rq:class",
 					D2RQException.CLASSMAP_NO_PROPERTYBRIDGES);
 		}
+		Iterator it = this.propertyBridges.iterator();
+		while (it.hasNext()) {
+			PropertyBridge bridge = (PropertyBridge) it.next();
+			bridge.validate();
+		}
 		// TODO
 	}
 	

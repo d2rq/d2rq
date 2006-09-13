@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.3 2006/09/12 12:06:18 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.4 2006/09/13 06:37:07 cyganiak Exp $
  */
 public class Mapping {
 	private Model model = ModelFactory.createDefaultModel();
@@ -57,10 +57,20 @@ public class Mapping {
 			throw new D2RQException("No d2rq:Database defined in the mapping", 
 					D2RQException.MAPPING_NO_DATABASE);
 		}
-		Iterator it = this.classMaps.values().iterator();
+		Iterator it = this.databases.values().iterator();
+		while (it.hasNext()) {
+			Database db = (Database) it.next();
+			db.validate();
+		}
+		it = this.translationTables.values().iterator();
+		while (it.hasNext()) {
+			TranslationTable table = (TranslationTable) it.next();
+			table.validate();
+		}
+		it = this.classMaps.values().iterator();
 		while (it.hasNext()) {
 			ClassMap classMap = (ClassMap) it.next();
-			classMap.validate();
+			classMap.validate();	// Also validates attached bridges
 		}
 		it = this.compiledPropertyBridges.iterator();
 		while (it.hasNext()) {
@@ -78,8 +88,8 @@ public class Mapping {
 		}
 	}
 	
-	public void addDatabase(Resource name, Database database) {
-		this.databases.put(name, database);
+	public void addDatabase(Database database) {
+		this.databases.put(database.resource(), database);
 	}
 	
 	public Collection databases() {

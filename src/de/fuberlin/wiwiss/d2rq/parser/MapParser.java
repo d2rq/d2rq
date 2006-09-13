@@ -1,18 +1,10 @@
 package de.fuberlin.wiwiss.d2rq.parser;
 
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -21,7 +13,6 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
@@ -38,10 +29,8 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Creates a {@link Mapping} from a Jena model representation
  * of a D2RQ mapping file.
  * 
- * TODO: Clean up Database section
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.16 2006/09/12 12:06:18 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.17 2006/09/13 06:37:08 cyganiak Exp $
  */
 public class MapParser {
 
@@ -68,9 +57,7 @@ public class MapParser {
 		return absolute;
 	}
 	
-	private Log log = LogFactory.getLog(MapParser.class);
 	private OntModel model;
-	private Graph graph;
 	private String baseURI;
 	private Mapping mapping;
 	
@@ -81,7 +68,6 @@ public class MapParser {
 	 */
 	public MapParser(Model mapModel, String baseURI) {
 		this.model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, mapModel);
-		this.graph = mapModel.getGraph();
 		this.baseURI = absolutizeURI(baseURI);
 	}
 	
@@ -117,49 +103,64 @@ public class MapParser {
 	}
 	
 	private void parseDatabases() {
-		ExtendedIterator it = this.model.listIndividuals(D2RQ.Database);
+		Iterator it = this.model.listIndividuals(D2RQ.Database);
 		while (it.hasNext()) {
-			Resource database = (Resource) it.next();
-			this.mapping.addDatabase(database, buildDatabase(database.asNode()));
+			Resource dbResource = (Resource) it.next();
+			Database database = new Database(dbResource);
+			parseDatabase(database, dbResource);
+			this.mapping.addDatabase(database);
 		}
 	}
 	
-	private static Map d2rqColumnTypeToDatabaseColumnType;
-	
-	private Database buildDatabase(Node node) {
-		String odbcDSN = findZeroOrOneLiteral(node, D2RQ.odbcDSN.asNode());
-		String jdbcDSN = findZeroOrOneLiteral(node, D2RQ.jdbcDSN.asNode());
-		String jdbcDriver = findZeroOrOneLiteral(node, D2RQ.jdbcDriver.asNode());
-		String username = findZeroOrOneLiteral(node, D2RQ.username.asNode());
-		String password = findZeroOrOneLiteral(node, D2RQ.password.asNode());
-		String allowDistinct = findZeroOrOneLiteral(node, D2RQ.allowDistinct.asNode());
-		String expressionTranslator = findZeroOrOneLiteral(node, D2RQ.expressionTranslator.asNode());
-		
-		if (d2rqColumnTypeToDatabaseColumnType==null) {
-		    d2rqColumnTypeToDatabaseColumnType=new HashMap();
-		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.textColumn.asNode(),Database.textColumn);
-		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.numericColumn.asNode(),Database.numericColumn);
-		    d2rqColumnTypeToDatabaseColumnType.put(D2RQ.dateColumn.asNode(),Database.dateColumn);		    
+	private void parseDatabase(Database database, Resource r) {
+		StmtIterator stmts;
+		stmts = r.listProperties(D2RQ.odbcDSN);
+		while (stmts.hasNext()) {
+			database.setODBCDSN(stmts.nextStatement().getString());
 		}
-		Map columnTypes = new HashMap();
-		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.textColumn.asNode(), d2rqColumnTypeToDatabaseColumnType));
-		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.numericColumn.asNode(), d2rqColumnTypeToDatabaseColumnType));
-		columnTypes.putAll(findLiteralsAsMap(node, D2RQ.dateColumn.asNode(), d2rqColumnTypeToDatabaseColumnType));
-		if (jdbcDSN != null && jdbcDriver == null || jdbcDSN == null && jdbcDriver != null) {
-			throw new D2RQException("d2rq:jdbcDSN and d2rq:jdbcDriver must be used together");
+		stmts = r.listProperties(D2RQ.jdbcDSN);
+		while (stmts.hasNext()) {
+			database.setJDBCDSN(stmts.nextStatement().getString());
 		}
-		Database db = new Database(odbcDSN, jdbcDSN, jdbcDriver, username, password, columnTypes);
-		if (allowDistinct!=null) {
-		    if (allowDistinct.equals("true"))
-		        db.setAllowDistinct(true);
-		    else if (allowDistinct.equals("false"))
-		        db.setAllowDistinct(false);
-		    else 
-		    	throw new D2RQException("d2rq:allowDistinct value must be true or false");			
+		stmts = r.listProperties(D2RQ.jdbcDriver);
+		while (stmts.hasNext()) {
+			database.setJDBCDriver(stmts.nextStatement().getString());
 		}
-		if (expressionTranslator!=null)
-		    db.setExpressionTranslator(expressionTranslator);
-		return db;
+		stmts = r.listProperties(D2RQ.username);
+		while (stmts.hasNext()) {
+			database.setUsername(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.password);
+		while (stmts.hasNext()) {
+			database.setPassword(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.allowDistinct);
+		while (stmts.hasNext()) {
+			String allowDistinct = stmts.nextStatement().getString();
+			if (allowDistinct.equals("true")) {
+				database.setAllowDistinct(true);
+			} else if (allowDistinct.equals("false")) {
+				database.setAllowDistinct(false);
+			} else {
+				throw new D2RQException("d2rq:allowDistinct value must be true or false");
+			}
+		}
+		stmts = r.listProperties(D2RQ.expressionTranslator);
+		while (stmts.hasNext()) {
+			database.setExpressionTranslator(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.textColumn);
+		while (stmts.hasNext()) {
+			database.addTextColumn(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.numericColumn);
+		while (stmts.hasNext()) {
+			database.addNumericColumn(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.dateColumn);
+		while (stmts.hasNext()) {
+			database.addDateColumn(stmts.nextStatement().getString());
+		}
 	}
 
 	private void parseTranslationTables() {
@@ -368,64 +369,7 @@ public class MapParser {
 		}
 	}
 
-	private String findZeroOrOneLiteral(Node subject, Node predicate) {
-		Node node = findZeroOrOneNode(subject, predicate);
-		if (node == null) {
-			return null;
-		}
-		if (!node.isLiteral()) {
-			throw new D2RQException(toQName(predicate) + " for " + subject + " must be literal");
-		}
-		return node.getLiteral().getLexicalForm();
-	}
-
-	private Node findZeroOrOneNode(Node subject, Node predicate) {
-		ExtendedIterator it = this.graph.find(subject, predicate, Node.ANY);
-		if (!it.hasNext()) {
-			return null;
-		}
-		Node result = ((Triple) it.next()).getObject();
-		if (it.hasNext()) {
-			throw new D2RQException("Ignoring multiple " + toQName(predicate) + " on " + subject);
-		}
-		return result;
-	}
-
-	private Map findLiteralsAsMap(Node subject, Node predicate, Map predicateToObjectMap) {
-	    return findLiteralsAsMap(subject, predicate, predicateToObjectMap, true, true);
-	}
-	private Map findLiteralsAsMap(Node subject, Node predicate, Map predicateToObjectMap, boolean objectIsKey, boolean warnIfNotLiteral) {
-		Map result = new HashMap();
-		ExtendedIterator itColText = this.graph.find(subject, predicate, Node.ANY);
-		while (itColText.hasNext()) {
-			Triple t = (Triple) itColText.next();
-			subject=t.getSubject();
-			predicate=t.getPredicate();
-			Node object=t.getObject();
-			if (!object.isLiteral()) {
-			    if (warnIfNotLiteral) {
-			        this.log.warn("Ignoring non-literal " + toQName(predicate) +
-						" for " + subject + " (\"" + object + "\")");
-			    }
-				continue;
-			}
-			String objectString=object.getLiteral().getLexicalForm();
-			Object predicateValue=(predicateToObjectMap==null)? predicate : predicateToObjectMap.get(predicate);
-//			if (value==null) {
-//			    throw new RuntimeException("Unmapped database type " + predicate);
-//			}
-			if (objectIsKey) // most cases
-			    result.put(objectString, predicateValue); // put(key, value)
-			else // xml style
-			    result.put(predicateValue, objectString); 
-		}
-		return result;
-	}
-
-	private String toQName(Node node) {
-		return PrettyPrinter.toString(node, this.model);
-	}
-	
+	// TODO: I guess this should be done at map compile time
 	private String ensureIsAbsolute(String uriPattern) {
 		if (uriPattern.indexOf(":") == -1) {
 			return this.baseURI + uriPattern;
