@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.1 2006/09/13 14:06:23 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.2 2006/09/13 14:18:16 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -182,6 +182,17 @@ public class ConnectedDB {
 		return this.allowDistinct;
 	}
 
+	public void close() {
+		if (this.connection == null) {
+			return;
+		}
+		try {
+			this.connection.close();
+		} catch (SQLException ex) {
+			throw new D2RQException(ex);
+		}
+	}
+	
     public boolean equals(Object otherObject) {
     	if (!(otherObject instanceof ConnectedDB)) {
     		return false;

@@ -33,6 +33,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
+import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
@@ -52,7 +53,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.32 2006/09/13 14:06:24 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.33 2006/09/13 14:18:16 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -159,6 +160,11 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * @see com.hp.hpl.jena.graph.Graph#close()
 	 */
 	public void close() {
+		Iterator it = this.mapping.databases().iterator();
+		while (it.hasNext()) {
+			Database db = (Database) it.next();
+			db.connectedDB().close();
+		}
 		this.closed = true;
 	}
 

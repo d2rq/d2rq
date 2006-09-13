@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.1 2006/09/11 23:22:27 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.2 2006/09/13 14:18:16 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -73,7 +73,9 @@ public class DatabaseSchemaInspector {
 			if (!rs.next()) {
 				throw new D2RQException("Column " + column + " not found in database");
 			}
-			return rs.getInt("DATA_TYPE");
+			int type = rs.getInt("DATA_TYPE");
+			rs.close();
+			return type;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
 		}
@@ -86,6 +88,7 @@ public class DatabaseSchemaInspector {
 			while (rs.next()) {
 				result.add(rs.getString("TABLE_NAME"));
 			}
+			rs.close();
 			return result;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
@@ -99,6 +102,7 @@ public class DatabaseSchemaInspector {
 			while (rs.next()) {
 				result.add(new Attribute(tableName, rs.getString("COLUMN_NAME")));
 			}
+			rs.close();
 			return result;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
@@ -112,6 +116,7 @@ public class DatabaseSchemaInspector {
 			while (rs.next()) {
 				result.add(new Attribute(tableName, rs.getString("COLUMN_NAME")));
 			}
+			rs.close();
 			return result;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
@@ -131,6 +136,7 @@ public class DatabaseSchemaInspector {
 				Attribute foreignColumn = new Attribute(fkTableName, fkColumnName);
 				result.add(new Attribute[]{foreignColumn, primaryColumn});
 			}
+			rs.close();
 			return result;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
