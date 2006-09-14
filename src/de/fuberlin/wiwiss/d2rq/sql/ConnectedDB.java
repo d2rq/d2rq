@@ -16,10 +16,12 @@ import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.2 2006/09/13 14:18:16 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.3 2006/09/14 13:12:45 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
+	public static final String PostgreSQL = "PostgreSQL";
+	public static final String Oracle = "Oracle";
 	public static final String Other = "Other";
 	public static final int TEXT_COLUMN = 1;
 	public static final int NUMERIC_COLUMN = 2;
@@ -71,7 +73,7 @@ public class ConnectedDB {
 	
 	public DatabaseSchemaInspector schemaInspector() {
 		if (this.schemaInspector == null) {
-			this.schemaInspector = new DatabaseSchemaInspector(connection());
+			this.schemaInspector = new DatabaseSchemaInspector(this);
 		}
 		return this.schemaInspector;
 	}
@@ -89,8 +91,13 @@ public class ConnectedDB {
 	public String dbType() {
 		if (this.dbType == null) {
 			try {
-				if (connection().getMetaData().getDriverName().toLowerCase().indexOf("mysql") >= 0) {
+				String productName = connection().getMetaData().getDatabaseProductName().toLowerCase();
+				if (productName.indexOf("mysql") >= 0) {
 					this.dbType = ConnectedDB.MySQL;
+				} else if (productName.indexOf("postgresql") >= 0) {
+					this.dbType = ConnectedDB.PostgreSQL;
+				} else if (productName.indexOf("oracle") >= 0) {
+					this.dbType = ConnectedDB.Oracle;
 				} else {
 					this.dbType = ConnectedDB.Other;
 				}

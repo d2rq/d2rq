@@ -1,23 +1,26 @@
 package de.fuberlin.wiwiss.d2rq.dbschema;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.2 2006/09/13 14:18:16 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.3 2006/09/14 13:12:45 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
+	private static Pattern schemaAndTableRegex = Pattern.compile("(?:(.*)\\.)?(.*?)");
 	
 	public static boolean isStringType(int columnType) {
 		return columnType == Types.CHAR || columnType == Types.VARCHAR || columnType == Types.LONGVARCHAR;
@@ -57,11 +60,13 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
+	private ConnectedDB db;
 	private DatabaseMetaData schema;
 	
-	public DatabaseSchemaInspector(Connection connection) {
+	public DatabaseSchemaInspector(ConnectedDB db) {
 		try {
-			this.schema = connection.getMetaData();
+			this.db = db;
+			this.schema = db.connection().getMetaData();
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
 		}
@@ -69,7 +74,8 @@ public class DatabaseSchemaInspector {
 	
 	public int columnType(Attribute column) {
 		try {
-			ResultSet rs = this.schema.getColumns(null, null, column.tableName(), column.attributeName());
+			ResultSet rs = this.schema.getColumns(null, schemaName(column.tableName()), 
+					tableName(column.tableName()), column.attributeName());
 			if (!rs.next()) {
 				throw new D2RQException("Column " + column + " not found in database");
 			}
@@ -84,9 +90,28 @@ public class DatabaseSchemaInspector {
 	public List listTableNames() {
 		List result = new ArrayList();
 		try {
-			ResultSet rs = this.schema.getTables(null, null, null, null);
+			String searchInSchema = null;
+			if (this.db.dbTypeIs(ConnectedDB.Oracle)) {
+				searchInSchema = this.schema.getUserName();
+			}
+			ResultSet rs = this.schema.getTables(
+					null, searchInSchema, null, new String[] {"TABLE", "VIEW"});
 			while (rs.next()) {
-				result.add(rs.getString("TABLE_NAME"));
+				String schema = rs.getString("TABLE_SCHEM");
+				String table = rs.getString("TABLE_NAME");
+				if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) 
+						&& ("information_schema".equals(schema)
+								|| "pg_catalog".equals(schema))) {
+					// PostgreSQL has schemas "information_schema" and "pg_catalog" in every DB
+					continue;
+				}
+				if (this.db.dbTypeIs(ConnectedDB.Oracle)
+						&& table.startsWith("BIN$")) {
+					// Skip deleted tables in Oracle's Recycling Bin.
+					// They have names like MYSCHEMA.BIN$FoHqtx6aQ4mBaMQmlTCPTQ==$0
+					continue;
+				}
+				result.add(createQualifiedTableName(schema, table));
 			}
 			rs.close();
 			return result;
@@ -94,13 +119,14 @@ public class DatabaseSchemaInspector {
 			throw new D2RQException("Database exception", ex);
 		}
 	}
-	
-	public List listColumns(String tableName) {
+
+	public List listColumns(String qualifiedTableName) {
 		List result = new ArrayList();
 		try {
-			ResultSet rs = this.schema.getColumns(null, null, tableName, null);
+			ResultSet rs = this.schema.getColumns(
+					null, schemaName(qualifiedTableName), tableName(qualifiedTableName), null);
 			while (rs.next()) {
-				result.add(new Attribute(tableName, rs.getString("COLUMN_NAME")));
+				result.add(new Attribute(qualifiedTableName, rs.getString("COLUMN_NAME")));
 			}
 			rs.close();
 			return result;
@@ -109,12 +135,13 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public List primaryKeyColumns(String tableName) {
+	public List primaryKeyColumns(String qualifiedTableName) {
 		List result = new ArrayList();
 		try {
-			ResultSet rs = this.schema.getPrimaryKeys(null, null, tableName);
+			ResultSet rs = this.schema.getPrimaryKeys(
+					null, schemaName(qualifiedTableName), tableName(qualifiedTableName));
 			while (rs.next()) {
-				result.add(new Attribute(tableName, rs.getString("COLUMN_NAME")));
+				result.add(new Attribute(qualifiedTableName, rs.getString("COLUMN_NAME")));
 			}
 			rs.close();
 			return result;
@@ -123,15 +150,18 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public List foreignKeyColumns(String tableName) {
+	public List foreignKeyColumns(String qualifiedTableName) {
 		try {
 			List result = new ArrayList();
-			ResultSet rs = this.schema.getImportedKeys(null, null, tableName);
+			ResultSet rs = this.schema.getImportedKeys(
+					null, schemaName(qualifiedTableName), tableName(qualifiedTableName));
 			while (rs.next()) {
-				String pkTableName = rs.getString("PKTABLE_NAME");
+				String pkTableName = createQualifiedTableName(
+						rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
 				String pkColumnName = rs.getString("PKCOLUMN_NAME");
 				Attribute primaryColumn = new Attribute(pkTableName, pkColumnName);
-				String fkTableName = rs.getString("FKTABLE_NAME");
+				String fkTableName = createQualifiedTableName(
+						rs.getString("FKTABLE_SCHEM"), rs.getString("FKTABLE_NAME"));
 				String fkColumnName = rs.getString("FKCOLUMN_NAME");
 				Attribute foreignColumn = new Attribute(fkTableName, fkColumnName);
 				result.add(new Attribute[]{foreignColumn, primaryColumn});
@@ -143,10 +173,37 @@ public class DatabaseSchemaInspector {
 		}
 	}
 
-	public boolean isLinkTable(String tableName) {
-		if (listColumns(tableName).size() != 2) {
+	public boolean isLinkTable(String qualifiedTableName) {
+		if (listColumns(qualifiedTableName).size() != 2) {
 			return false;
 		}
-		return foreignKeyColumns(tableName).size() == 2;
+		return foreignKeyColumns(qualifiedTableName).size() == 2;
+	}
+	
+	private String schemaName(String qualifiedTableName) {
+		Matcher match = schemaAndTableRegex.matcher(qualifiedTableName);
+		match.matches();
+		if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) && match.group(1) == null) {
+			// The default schema is known as "public" in PostgreSQL 
+			return "public";
+		}
+		return match.group(1);
+	}
+	
+	private String tableName(String qualifiedTableName) {
+		Matcher match = schemaAndTableRegex.matcher(qualifiedTableName);
+		match.matches();
+		return match.group(2);
+	}
+
+	private String createQualifiedTableName(String schema, String table) {
+		if (schema == null) {
+			// Table without schema
+			return table;
+		} else if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) && "public".equals(schema)) {
+			// Table in PostgreSQL default schema -- call the table "foo", not "public.foo"
+			return table;
+		}
+		return schema + "." + table;
 	}
 }

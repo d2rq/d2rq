@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Relation;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.15 2006/09/13 14:06:23 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.16 2006/09/14 13:12:45 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -277,7 +277,7 @@ public class SelectStatementBuilder {
 	 */
 	public ClosableIterator execute() {
 		if (isTrivial()) {
-			return new SingletonIterator(new String[]{});
+			return new SingletonIterator(ResultRow.NO_ATTRIBUTES);
 		}
 		return new QueryExecutionIterator(getSQLStatement(), this.selectColumns, this.database);		
 	}

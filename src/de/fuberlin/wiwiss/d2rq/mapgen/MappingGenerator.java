@@ -35,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.12 2006/09/13 14:06:24 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.13 2006/09/14 13:12:45 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -178,7 +178,7 @@ public class MappingGenerator {
 			this.out.println("\t# because the table doesn't have a primary key");
 		}
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
-		this.out.println("\td2rq:class vocab:" + tableName + ";");
+		this.out.println("\td2rq:class vocab:" + qNameEscape(tableName) + ";");
 		this.out.println("\t.");
 		writeLabelBridge(tableName);
 		List foreignKeys = this.schema.foreignKeyColumns(tableName);
@@ -209,7 +209,7 @@ public class MappingGenerator {
 	public void writeColumn(Attribute column, String tableName, List foreignKeys) {
 		this.out.println(propertyBridgeName(toRelationName(column)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(tableName) + ";");
-		this.out.println("\td2rq:property vocab:" + toRelationName(column) + ";");
+		this.out.println("\td2rq:property vocab:" + qNameEscape(toRelationName(column)) + ";");
 		Attribute foreignKeyColumn = null;
 		Iterator it = foreignKeys.iterator();
 		while (it.hasNext()) {
@@ -271,7 +271,7 @@ public class MappingGenerator {
 		this.out.println("# n:m table " + linkTableName);
 		this.out.println(propertyBridgeName(linkTableName) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(firstForeignColumn.tableName()) + ";");
-		this.out.println("\td2rq:property vocab:" + linkTableName + ";");
+		this.out.println("\td2rq:property vocab:" + qNameEscape(linkTableName) + ";");
 		this.out.println("\td2rq:refersToClassMap " + classMapName(secondForeignColumn.tableName()) + ";");
 		this.out.println("\td2rq:join \"" + firstForeignColumn.qualifiedName() + " = " + firstLocalColumn.qualifiedName() + "\";");
 		this.out.println("\td2rq:join \"" + secondLocalColumn.qualifiedName() + " = " + secondForeignColumn.qualifiedName() + "\";");
@@ -284,11 +284,16 @@ public class MappingGenerator {
 	}
 	
 	private String classMapName(String tableName) {
-		return "map:" + tableName;
+		return "map:" + qNameEscape(tableName);
 	}
 	
 	private String propertyBridgeName(String relationName) {
-		return "map:" + relationName;
+		return "map:" + qNameEscape(relationName);
+	}
+	
+	private String qNameEscape(String s) {
+		// The Jena N3 parser can't deal with dots in QNames
+		return s.replace('.', '_');
 	}
 	
 	private boolean hasPrimaryKey(String tableName) {
