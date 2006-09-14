@@ -16,42 +16,45 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.1 2006/09/11 23:22:26 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.2 2006/09/14 16:22:48 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
-	private final static Attribute foo_col1 = new Attribute("foo.col1");
-	private final static Attribute bar_col1 = new Attribute("bar.col1");
-	private final static Attribute baz_col1 = new Attribute("baz.col1");
-	private final static Attribute abc_col1 = new Attribute("abc.col1");
-	private final static Attribute xyz_col1 = new Attribute("xyz.col1");
+	private final static RelationName foo = new RelationName(null, "foo");
+	private final static RelationName bar = new RelationName(null, "bar");
+	private final static RelationName baz = new RelationName(null, "baz");
+	private final static Attribute foo_col1 = new Attribute(null, "foo", "col1");
+	private final static Attribute bar_col1 = new Attribute(null, "bar", "col1");
+	private final static Attribute baz_col1 = new Attribute(null, "baz", "col1");
+	private final static Attribute abc_col1 = new Attribute(null, "abc", "col1");
+	private final static Attribute xyz_col1 = new Attribute(null, "xyz", "col1");
 
 	private AliasMap fooAsBar;
 	
 	public void setUp() {
 		Map m = new HashMap();
-		m.put("bar", "foo");
+		m.put(bar, foo);
 		this.fooAsBar = new AliasMap(m);
 	}
 	
 	public void testEmptyMapDoesIdentityTranslation() {
 		AliasMap aliases = new AliasMap(Collections.EMPTY_MAP);
-		assertFalse(aliases.isAlias("foo"));
-		assertFalse(aliases.hasAlias("foo"));
-		assertEquals("foo", aliases.applyToTableName("foo"));
-		assertEquals("foo", aliases.originalOf("foo"));
+		assertFalse(aliases.isAlias(foo));
+		assertFalse(aliases.hasAlias(foo));
+		assertEquals(foo, aliases.applyTo(foo));
+		assertEquals(foo, aliases.originalOf(foo));
 	}
 
 	public void testAliasIsTranslated() {
-		assertFalse(this.fooAsBar.isAlias("foo"));
-		assertTrue(this.fooAsBar.isAlias("bar"));
-		assertFalse(this.fooAsBar.isAlias("baz"));
-		assertTrue(this.fooAsBar.hasAlias("foo"));
-		assertFalse(this.fooAsBar.hasAlias("bar"));
-		assertFalse(this.fooAsBar.hasAlias("baz"));
-		assertEquals("bar", this.fooAsBar.applyToTableName("foo"));
-		assertEquals("baz", this.fooAsBar.applyToTableName("baz"));
-		assertEquals("foo", this.fooAsBar.originalOf("bar"));
-		assertEquals("baz", this.fooAsBar.originalOf("baz"));
+		assertFalse(this.fooAsBar.isAlias(foo));
+		assertTrue(this.fooAsBar.isAlias(bar));
+		assertFalse(this.fooAsBar.isAlias(baz));
+		assertTrue(this.fooAsBar.hasAlias(foo));
+		assertFalse(this.fooAsBar.hasAlias(bar));
+		assertFalse(this.fooAsBar.hasAlias(baz));
+		assertEquals(bar, this.fooAsBar.applyTo(foo));
+		assertEquals(baz, this.fooAsBar.applyTo(baz));
+		assertEquals(foo, this.fooAsBar.originalOf(bar));
+		assertEquals(baz, this.fooAsBar.originalOf(baz));
 	}
 	
 	public void testApplyToColumn() {
@@ -104,11 +107,6 @@ public class AliasMapTest extends TestCase {
 				fooAsBar.applyTo(new Expression("foo.col1")));
 	}
 
-	public void testNoAliasesConstantHasNoAliasesAndNoOriginals() {
-		assertTrue(AliasMap.NO_ALIASES.allAliases().isEmpty());
-		assertTrue(AliasMap.NO_ALIASES.allOriginalsWithAliases().isEmpty());
-	}
-	
 	public void testNoAliasesConstantEqualsNewEmptyAliasMap() {
 		AliasMap noAliases = new AliasMap(Collections.EMPTY_MAP);
 		assertTrue(AliasMap.NO_ALIASES.equals(noAliases));
@@ -129,7 +127,7 @@ public class AliasMapTest extends TestCase {
 	
 	public void testPopulatedMapEqualsItself() {
 		Map m = new HashMap();
-		m.put("bar", "foo");
+		m.put(bar, foo);
 		AliasMap fooAsBar2 = new AliasMap(m);
 		assertTrue(fooAsBar.equals(fooAsBar2));
 		assertTrue(fooAsBar2.equals(fooAsBar));
@@ -137,7 +135,7 @@ public class AliasMapTest extends TestCase {
 	
 	public void testPopulatedMapDoesNotEqualDifferentMap() {
 		Map m = new HashMap();
-		m.put("baz", "foo");
+		m.put(baz, foo);
 		AliasMap fooAsBaz = new AliasMap(m);
 		assertFalse(fooAsBar.equals(fooAsBaz));
 		assertFalse(fooAsBaz.equals(fooAsBar));
@@ -165,25 +163,18 @@ public class AliasMapTest extends TestCase {
 	
 	public void testToStringTwoAliases() {
 		Map m = new HashMap();
-		m.put("bar", "foo");
-		m.put("xyz", "abc");
+		m.put(bar, foo);
+		m.put(new RelationName(null, "xyz"), new RelationName(null, "abc"));
 		// Order is alphabetical by table name
 		assertEquals("AliasMap(abc AS xyz, foo AS bar)", new AliasMap(m).toString());
 	}
 	
-	public void testAllAliasesIsEmptyForNoAliases() {
-		assertTrue(AliasMap.NO_ALIASES.allAliases().isEmpty());
-	}
-	
-	public void testAllAliasesContainsAliasForSingleAlias() {
-		assertEquals(Collections.singleton("bar"), fooAsBar.allAliases());
-	}
-	
-	public void testAllAliasesContainsBothForTwoAliases() {
-		Map m = new HashMap();
-		m.put("bar", "foo");
-		m.put("xyz", "abc");
-		Set expected = new HashSet(Arrays.asList(new String[]{"bar", "xyz"}));
-		assertEquals(expected, new AliasMap(m).allAliases());
+	public void testWithSchema() {
+		RelationName table = new RelationName(null, "table");
+		RelationName schema_table = new RelationName("schema", "table");
+		RelationName schema_alias = new RelationName("schema", "alias");
+		AliasMap m = new AliasMap(Collections.singletonMap(schema_alias, schema_table));
+		assertEquals(schema_alias, m.applyTo(schema_table));
+		assertEquals(table, m.applyTo(table));
 	}
 }

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * kinds of objects, the inverse operation is available as well. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.1 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.2 2006/09/14 16:22:48 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_MAP);
@@ -42,7 +41,8 @@ public class AliasMap extends ColumnRenamer {
 				throw new D2RQException("d2rq:alias '" + s +
 						"' is not in 'table AS alias' form");
 			}
-			m.put(matcher.group(2), matcher.group(1));
+			m.put(new RelationName(matcher.group(2)),
+					new RelationName(matcher.group(1)));
 		}
 		return new AliasMap(m);
 	}
@@ -55,48 +55,40 @@ public class AliasMap extends ColumnRenamer {
 		this.originalsToAliases = invertMap(aliasesToOriginals);
 	}
 	
-	public boolean isAlias(String name) {
+	public boolean isAlias(RelationName name) {
 		return this.aliasesToOriginals.containsKey(name);
 	}
 
-	public boolean hasAlias(String original) {
+	public boolean hasAlias(RelationName original) {
 		return this.originalsToAliases.containsKey(original);
 	}
 	
-	public Set allAliases() {
-		return this.aliasesToOriginals.keySet();
-	}
-
-	public Set allOriginalsWithAliases() {
-		return this.originalsToAliases.keySet();
-	}
-	
-	public String applyToTableName(String original) {
+	public RelationName applyTo(RelationName original) {
 		if (!hasAlias(original)) {
 			return original;
 		}
-		return (String) this.originalsToAliases.get(original);
+		return (RelationName) this.originalsToAliases.get(original);
 	}
 	
-	public String originalOf(String name) {
+	public RelationName originalOf(RelationName name) {
 		if (!isAlias(name)) {
 			return name;
 		}
-		return (String) this.aliasesToOriginals.get(name);
+		return (RelationName) this.aliasesToOriginals.get(name);
 	}
 	
 	public Attribute applyTo(Attribute column) {
-		if (!hasAlias(column.tableName())) {
+		if (!hasAlias(column.relationName())) {
 			return column;
 		}
-		return new Attribute(applyToTableName(column.tableName()), column.attributeName());
+		return new Attribute(applyTo(column.relationName()) + "." + column.attributeName());
 	}
 	
 	public Attribute originalOf(Attribute column) {
-		if (!isAlias(column.tableName())) {
+		if (!isAlias(column.relationName())) {
 			return column;
 		}
-		return new Attribute(originalOf(column.tableName()), column.attributeName());
+		return new Attribute(originalOf(column.relationName()) + "." + column.attributeName());
 	}
 	
 	public Join applyTo(Join join) {
@@ -111,22 +103,22 @@ public class AliasMap extends ColumnRenamer {
 			return this;
 		}
 		Map newAliases = new HashMap();
-		Iterator it = other.allAliases().iterator();
+		Iterator it = other.aliasesToOriginals.keySet().iterator();
 		while (it.hasNext()) {
-			String alias = (String) it.next();
-			newAliases.put(applyToTableName(alias), other.originalOf(alias));
+			RelationName alias = (RelationName) it.next();
+			newAliases.put(applyTo(alias), other.originalOf(alias));
 		}
-		it = allAliases().iterator();
+		it = this.aliasesToOriginals.keySet().iterator();
 		while (it.hasNext()) {
-			String alias = (String) it.next();
+			RelationName alias = (RelationName) it.next();
 			newAliases.put(alias, originalOf(alias));
 		}
 		return new AliasMap(newAliases);
 	}
 	
-	public Map applyToMapKeys(Map mapWithColumnKeys) {
+	public Map applyToMapKeys(Map mapWithAttributeKeys) {
 		Map result = new HashMap();
-		Iterator it = mapWithColumnKeys.entrySet().iterator();
+		Iterator it = mapWithAttributeKeys.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
 			Attribute column = (Attribute) entry.getKey();
@@ -154,7 +146,7 @@ public class AliasMap extends ColumnRenamer {
 		Collections.sort(tables);
 		Iterator it = tables.iterator();
 		while (it.hasNext()) {
-			String table = (String) it.next();
+			RelationName table = (RelationName) it.next();
 			result.append(table);
 			result.append(" AS ");
 			result.append(this.originalsToAliases.get(table));

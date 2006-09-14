@@ -12,17 +12,17 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
  *
- * TODO: Make immutable
+ * TODO: Make immutable; turn getFirstColumns, getSecondColumns into lists?
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.3 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: Join.java,v 1.4 2006/09/14 16:22:48 cyganiak Exp $
  */
 public class Join {
 	private Set fromColumns = new HashSet(2);
 	private Set toColumns = new HashSet(2);
 	private Map otherSide = new HashMap(4); 
-	private String fromTable = null;
-	private String toTable = null;
+	private RelationName fromTable = null;
+	private RelationName toTable = null;
 	private String sqlExpression=null; // cached value
 	
 	public void addCondition(String joinCondition) {
@@ -34,10 +34,10 @@ public class Join {
 	public void addCondition(Attribute column1, Attribute column2) {
 		this.sqlExpression = null;
 		if (this.fromTable == null) {
-			this.fromTable = column1.tableName();
-			this.toTable = column2.tableName();
-		} else if (!this.fromTable.equals(column1.tableName())
-				|| !this.toTable.equals(column2.tableName())) {
+			this.fromTable = column1.relationName();
+			this.toTable = column2.relationName();
+		} else if (!this.fromTable.equals(column1.relationName())
+				|| !this.toTable.equals(column2.relationName())) {
 			throw new IllegalArgumentException(
 					"Illegal join -- all conditions must go from *one* table to another *one* table");
 		}
@@ -47,7 +47,7 @@ public class Join {
 		this.otherSide.put(column2, column1);
 	}
 	
-	public boolean containsTable(String tableName) {
+	public boolean containsTable(RelationName tableName) {
 		return tableName.equals(this.fromTable) ||
 				tableName.equals(this.toTable);
 	}
@@ -57,11 +57,11 @@ public class Join {
 				this.toColumns.contains(column);
 	}
 
-	public String getFirstTable() {
+	public RelationName getFirstTable() {
 		return this.fromTable;
 	}
 	
-	public String getSecondTable() {
+	public RelationName getSecondTable() {
 		return this.toTable;
 	}
 
@@ -115,8 +115,8 @@ public class Join {
 		Iterator it = joinConditions.iterator();
 		while (it.hasNext()) {
 			String condition = (String) it.next();
-			String table1 = Join.getColumn(condition, true).tableName();
-			String table2 = Join.getColumn(condition, false).tableName();
+			RelationName table1 = Join.getColumn(condition, true).relationName();
+			RelationName table2 = Join.getColumn(condition, false).relationName();
 			Iterator it2 = result.iterator();
 			while (it2.hasNext()) {
 				Join join = (Join) it2.next();
@@ -139,8 +139,8 @@ public class Join {
 		join.addCondition(condition);
 		return join;
 	}
-	
-	
+
+	// TODO: Shouldn't be done here; Inline into toString()
 	public String sqlExpression() {
 		if (sqlExpression!=null) 
 			return sqlExpression;

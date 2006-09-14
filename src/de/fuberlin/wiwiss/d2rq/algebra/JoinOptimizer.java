@@ -39,7 +39,7 @@ import java.util.Set;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.8 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.9 2006/09/14 16:22:48 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -111,11 +111,11 @@ public class JoinOptimizer {
 	 * @return <tt>true</tt> iff all columns from that table are covered by
 	 * 		the join's condition
 	 */
-	private boolean isRemovableJoinSide(String tableName, Join join, Set allRequiredColumns) {
+	private boolean isRemovableJoinSide(RelationName tableName, Join join, Set allRequiredColumns) {
 		Iterator it = allRequiredColumns.iterator();
 		while (it.hasNext()) {
 			Attribute requiredColumn = (Attribute) it.next();
-			if (!requiredColumn.tableName().equals(tableName)) {
+			if (!requiredColumn.relationName().equals(tableName)) {
 				continue;		// requiredColumn is in another table
 			}
 			if (!join.containsColumn(requiredColumn)) {

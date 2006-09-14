@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelationImpl.java,v 1.3 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: RDFRelationImpl.java,v 1.4 2006/09/14 16:22:48 cyganiak Exp $
  */
 public class RDFRelationImpl implements RDFRelation {
 	private NodeMaker subjectMaker;
@@ -72,12 +72,13 @@ public class RDFRelationImpl implements RDFRelation {
 				")";
 	}
 	
+	// TODO: Some duplication with UnionOverSameBase.tables()
 	public RDFRelation withPrefix(int index) {
 		Set tables = new HashSet();
 		Iterator it = this.projectionColumns.iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			tables.add(column.tableName());
+			tables.add(column.relationName());
 		}
 		it = this.baseRelation.joinConditions().iterator();
 		while (it.hasNext()) {
@@ -88,13 +89,17 @@ public class RDFRelationImpl implements RDFRelation {
 		it = this.baseRelation.condition().columns().iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			tables.add(column.tableName());
+			tables.add(column.relationName());
 		}
 		Map prefixRenames = new HashMap();
 		it = tables.iterator();
+		// TODO Move code to RelationName.withPrefix
 		while (it.hasNext()) {
-			String tableName = (String) it.next();
-			prefixRenames.put("T" + index + "_" + tableName, tableName);
+			RelationName tableName = (RelationName) it.next();
+			prefixRenames.put(
+					new RelationName(null,
+							"T" + index + "_" + tableName.qualifiedName().replace('.', '_')), 
+					tableName);
 		}
 		return renameColumns(new AliasMap(prefixRenames));
 	}

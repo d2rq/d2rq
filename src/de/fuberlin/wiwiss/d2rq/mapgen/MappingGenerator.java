@@ -34,8 +34,10 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * Result is available as a high-quality N3 serialization, or
  * as a parsed model.
  * 
+ * TODO: Use RelationNames instead of Strings
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.13 2006/09/14 13:12:45 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.14 2006/09/14 16:22:48 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -235,13 +237,13 @@ public class MappingGenerator {
 				createDatatypeProperty(column, TypeMapper.getInstance().getSafeTypeByName(datatypeURI));
 			}
 		} else {
-			this.out.println("\td2rq:refersToClassMap " + classMapName(foreignKeyColumn.tableName()) + ";");
+			this.out.println("\td2rq:refersToClassMap " + classMapName(foreignKeyColumn.relationName().qualifiedName()) + ";");
 			Attribute joinColumn = foreignKeyColumn;
 			// Same-table join? Then we need to set up an alias for the table and join to that
-			if (column.tableName().equals(foreignKeyColumn.tableName())) {
-				String aliasedTableName = foreignKeyColumn.tableName() + "__alias";
-				this.out.println("\td2rq:alias \"" + column.tableName() + " AS " + aliasedTableName + "\";");
-				joinColumn = new Attribute(aliasedTableName, foreignKeyColumn.attributeName());
+			if (column.relationName().equals(foreignKeyColumn.relationName())) {
+				String aliasName = foreignKeyColumn.relationName().qualifiedName().replace('.', '_') + "__alias";
+				this.out.println("\td2rq:alias \"" + column.relationName().qualifiedName() + " AS " + aliasName + "\";");
+				joinColumn = new Attribute(null, aliasName, foreignKeyColumn.attributeName());
 			}
 			this.out.println("\td2rq:join \"" + column.qualifiedName() + " = " + joinColumn.qualifiedName() + "\";");
 			createObjectProperty(column, foreignKeyColumn);
@@ -270,9 +272,9 @@ public class MappingGenerator {
 		Attribute secondForeignColumn = ((Attribute[]) foreignKeys.get(1))[1];
 		this.out.println("# n:m table " + linkTableName);
 		this.out.println(propertyBridgeName(linkTableName) + " a d2rq:PropertyBridge;");
-		this.out.println("\td2rq:belongsToClassMap " + classMapName(firstForeignColumn.tableName()) + ";");
+		this.out.println("\td2rq:belongsToClassMap " + classMapName(firstForeignColumn.relationName().qualifiedName()) + ";");
 		this.out.println("\td2rq:property vocab:" + qNameEscape(linkTableName) + ";");
-		this.out.println("\td2rq:refersToClassMap " + classMapName(secondForeignColumn.tableName()) + ";");
+		this.out.println("\td2rq:refersToClassMap " + classMapName(secondForeignColumn.relationName().qualifiedName()) + ";");
 		this.out.println("\td2rq:join \"" + firstForeignColumn.qualifiedName() + " = " + firstLocalColumn.qualifiedName() + "\";");
 		this.out.println("\td2rq:join \"" + secondLocalColumn.qualifiedName() + " = " + secondForeignColumn.qualifiedName() + "\";");
 		this.out.println("\t.");
@@ -335,7 +337,7 @@ public class MappingGenerator {
 				continue;
 			}
 			Attribute[] firstForeignKey = (Attribute[]) this.schema.foreignKeyColumns(tableName).get(0);
-			this.linkTables.put(tableName, firstForeignKey[1].tableName());
+			this.linkTables.put(tableName, firstForeignKey[1].relationName().qualifiedName());
 		}
 	}
 	
@@ -363,7 +365,7 @@ public class MappingGenerator {
 	private void initProperty(Resource r, Attribute column) {
 		r.addProperty(RDF.type, RDF.Property);
 		r.addProperty(RDFS.label, toRelationName(column));
-		r.addProperty(RDFS.domain, classResource(column.tableName()));
+		r.addProperty(RDFS.domain, classResource(column.relationName().qualifiedName()));
 		r.addProperty(RDFS.isDefinedBy, ontologyResource());		
 	}
 	
@@ -380,7 +382,7 @@ public class MappingGenerator {
 		Resource r = propertyResource(subjectColumn);
 		initProperty(r, subjectColumn);
 		r.addProperty(RDF.type, OWL.ObjectProperty);
-		r.addProperty(RDFS.range, classResource(objectColumn.tableName()));
+		r.addProperty(RDFS.range, classResource(objectColumn.relationName().qualifiedName()));
 	}
 
 	private void createLinkProperty(String linkTableName, String fromTable, String toTable) {
@@ -400,7 +402,7 @@ public class MappingGenerator {
 	}
 	
 	private Resource classResource(String tableName) {
-		String classURI = this.vocabNamespaceURI + tableName;
+		String classURI = this.vocabNamespaceURI + tableName.replace('.', '_');
 		return this.vocabModel.createResource(classURI);		
 	}
 

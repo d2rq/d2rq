@@ -17,6 +17,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 
 /**
  * Collects parts of a SELECT query and delivers a corresponding SQL statement.
@@ -24,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Relation;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.16 2006/09/14 13:12:45 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.17 2006/09/14 16:22:48 cyganiak Exp $
  */
 
 public class SelectStatementBuilder {
@@ -108,7 +109,7 @@ public class SelectStatementBuilder {
 			result.append(" FROM ");
 		}
 		while (it.hasNext()) {			
-			String tableName = (String) it.next();
+			RelationName tableName = (RelationName) it.next();
 			if (this.aliases.isAlias(tableName)) {
 				result.append(quoteTableName(this.aliases.originalOf(tableName)));
 				result.append(" AS ");
@@ -144,7 +145,7 @@ public class SelectStatementBuilder {
 		if (this.selectColumns.contains(column)) {
 			return;
 		}
-		this.mentionedTables.add(column.tableName());
+		this.mentionedTables.add(column.relationName());
 		this.selectColumns.add(column);
 	}
 
@@ -174,7 +175,7 @@ public class SelectStatementBuilder {
 			return;
 		}
 		this.conditions.add(condition);
-		mentionedTables.add(column.tableName());
+		this.mentionedTables.add(column.relationName());
 	}
 	
 	private String correctlyQuotedColumnValue(Attribute column, String value) {
@@ -184,8 +185,11 @@ public class SelectStatementBuilder {
 	public int columnType(Attribute column) {
 	    return this.database.columnType(this.aliases.originalOf(column));
 	}
-	
-	private String quoteTableName(String tableName) {
+
+	// TODO: Do proper quoting of schema name and table name
+	// individually; also move this method into ConnectedDB?
+	private String quoteTableName(RelationName relationName) {
+		String tableName = relationName.qualifiedName();
 		if (!isReservedWord(tableName)) {
 			// No need to quote
 			return tableName;
@@ -225,10 +229,11 @@ public class SelectStatementBuilder {
 		Iterator it = condition.columns().iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			mentionedTables.add(column.tableName());
+			this.mentionedTables.add(column.relationName());
 		}
 	}
 
+	// TODO: Do SQL building here; the method in Join doesn't quote identifiers!
 	public void addJoins(Set joins) {
 		Iterator it = joins.iterator();
 		while (it.hasNext()) {
@@ -238,8 +243,8 @@ public class SelectStatementBuilder {
 				continue;
 			}
 			this.conditions.add(expression);
-			mentionedTables.add(join.getFirstTable());
-			mentionedTables.add(join.getSecondTable());
+			this.mentionedTables.add(join.getFirstTable());
+			this.mentionedTables.add(join.getSecondTable());
         }
     }
 

@@ -17,7 +17,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerTest.java,v 1.1 2006/09/11 23:22:26 cyganiak Exp $
+ * @version $Id: ColumnRenamerTest.java,v 1.2 2006/09/14 16:22:48 cyganiak Exp $
  */
 public class ColumnRenamerTest extends TestCase {
 	private final static Attribute col1 = new Attribute("foo.col1");
@@ -107,5 +107,14 @@ public class ColumnRenamerTest extends TestCase {
 		// Order is alphabetical by original column name
 		assertEquals("ColumnRenamerMap(foo.col1 => foo.col3, foo.col2 => foo.col3)", 
 				new ColumnRenamerMap(m).toString());
+	}
+	
+	public void testRenameWithSchema() {
+		Attribute foo_c1 = new Attribute("schema.foo.col1");
+		Attribute bar_c2 = new Attribute("schema.bar.col2");
+		ColumnRenamer renamer = new ColumnRenamerMap(
+				Collections.singletonMap(foo_c1, bar_c2));
+		assertEquals(bar_c2, renamer.applyTo(foo_c1));
+		assertEquals(col1, renamer.applyTo(col1));
 	}
 }

@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UnionOverSameBase.java,v 1.7 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: UnionOverSameBase.java,v 1.8 2006/09/14 16:22:48 cyganiak Exp $
  */
 public class UnionOverSameBase implements RDFRelation {
 
@@ -53,7 +53,7 @@ public class UnionOverSameBase implements RDFRelation {
 		}
 		Iterator it = firstTables.iterator();
 		while (it.hasNext()) {
-			String tableName = (String) it.next();
+			RelationName tableName = (RelationName) it.next();
 			if (!first.baseRelation().aliases().originalOf(tableName).equals(
 					second.baseRelation().aliases().originalOf(tableName))) {
 				return false;
@@ -63,24 +63,26 @@ public class UnionOverSameBase implements RDFRelation {
 	}
 
 	/**
-	 * @return All table names used in the argument
+	 * Collects all table names used in the argument.
+	 * TODO: Should be a method on Relation?
+	 * @return A Set of {@link RelationName}s
 	 */
 	private static Set tables(RDFRelation query) {
 		Set results = new HashSet();
 		Iterator it = query.baseRelation().attributeConditions().keySet().iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			results.add(column.tableName());
+			results.add(column.relationName());
 		}
 		it = query.projectionColumns().iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			results.add(column.tableName());
+			results.add(column.relationName());
 		}
 		it = query.baseRelation().condition().columns().iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			results.add(column.tableName());
+			results.add(column.relationName());
 		}
 		it = query.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
