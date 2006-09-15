@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.4 2006/09/15 15:31:22 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.5 2006/09/15 17:53:37 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static RelationName foo = new RelationName(null, "foo");
@@ -156,6 +156,14 @@ public class AliasMapTest extends TestCase {
 	
 	public void testAliasToString() {
 		assertEquals("foo AS bar", fooAsBar.toString());
+	}
+	
+	public void testApplyToAliasEmpty() {
+		assertEquals(fooAsBar, AliasMap.NO_ALIASES.applyTo(fooAsBar));
+	}
+	
+	public void testApplyToAlias() {
+		assertEquals(new Alias(baz, bar), fooAsBarMap.applyTo(new Alias(baz, foo)));
 	}
 	
 	public void testOriginalOfAliasEmpty() {

@@ -14,14 +14,8 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 /**
  * Something that can rename columns in various objects.
  * 
- * TODO: Its subclasses, ColumnRenamerMap and AliasMap, shouldn't be so closely related
- *       because in terms of the relational algebra, AliasMap really renames tables,
- *       while ColumnRenamerMap should really be called ColumnReplacer as it replaces
- *       all occurences of one column with another throughout the operator tree and therefore
- *       is not really an operator in itself.
- *       
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamer.java,v 1.1 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: ColumnRenamer.java,v 1.2 2006/09/15 17:53:37 cyganiak Exp $
  */
 public abstract class ColumnRenamer {
 	

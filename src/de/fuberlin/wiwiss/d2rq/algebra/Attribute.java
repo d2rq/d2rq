@@ -4,7 +4,7 @@ package de.fuberlin.wiwiss.d2rq.algebra;
  * A database column.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Attribute.java,v 1.5 2006/09/15 15:31:23 cyganiak Exp $
+ * @version $Id: Attribute.java,v 1.6 2006/09/15 17:53:37 cyganiak Exp $
  */
 public class Attribute implements Comparable {
 	private String attributeName;
@@ -19,11 +19,13 @@ public class Attribute implements Comparable {
 	 * @param attributeName The column name
 	 */
 	public Attribute(String schemaName, String tableName, String attributeName) {
-		this.qualifiedName = (schemaName == null)
-				? tableName + "." + attributeName
-				: schemaName + "." + tableName + "." + attributeName;
-		this.relationName = new RelationName(schemaName, tableName);
+		this(new RelationName(schemaName, tableName), attributeName);
+	}
+	
+	public Attribute(RelationName relationName, String attributeName) {
 		this.attributeName = attributeName;
+		this.relationName = relationName;
+		this.qualifiedName = this.relationName.qualifiedName() + "." + this.attributeName;
 	}
 	
 	/**

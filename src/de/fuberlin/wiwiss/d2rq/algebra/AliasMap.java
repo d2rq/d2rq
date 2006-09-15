@@ -9,17 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import de.fuberlin.wiwiss.d2rq.sql.SQL;
-
 /**
  * A map from table names to aliases. A table must have at most one alias. Can be applied
  * to various objects and will replace all mentions of a table with its alias. For some
  * kinds of objects, the inverse operation is available as well. 
  *
- * TODO: Reframe from "Map" to "Collection of Aliases"
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.4 2006/09/15 15:31:23 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.5 2006/09/15 17:53:37 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_SET);
@@ -49,52 +45,61 @@ public class AliasMap extends ColumnRenamer {
 		}
 	}
 	
-	private Map aliasesToOriginals = new HashMap();
-	private Map originalsToAliases = new HashMap();
+	private Map byAlias = new HashMap();
+	private Map byOriginal = new HashMap();
 	
 	public AliasMap(Collection aliases) {
 		Iterator it = aliases.iterator();
 		while (it.hasNext()) {
 			Alias alias = (Alias) it.next();
-			this.aliasesToOriginals.put(alias.alias(), alias.original());
-			this.originalsToAliases.put(alias.original(), alias.alias());
+			this.byAlias.put(alias.alias(), alias);
+			this.byOriginal.put(alias.original(), alias);
 		}
 	}
 	
 	public boolean isAlias(RelationName name) {
-		return this.aliasesToOriginals.containsKey(name);
+		return this.byAlias.containsKey(name);
 	}
 
 	public boolean hasAlias(RelationName original) {
-		return this.originalsToAliases.containsKey(original);
+		return this.byOriginal.containsKey(original);
 	}
 	
 	public RelationName applyTo(RelationName original) {
 		if (!hasAlias(original)) {
 			return original;
 		}
-		return (RelationName) this.originalsToAliases.get(original);
+		Alias alias = (Alias) this.byOriginal.get(original);
+		return alias.alias();
 	}
 	
 	public RelationName originalOf(RelationName name) {
 		if (!isAlias(name)) {
 			return name;
 		}
-		return (RelationName) this.aliasesToOriginals.get(name);
+		Alias alias = (Alias) this.byAlias.get(name);
+		return alias.original();
 	}
 	
-	public Attribute applyTo(Attribute column) {
-		if (!hasAlias(column.relationName())) {
-			return column;
+	public Attribute applyTo(Attribute attribute) {
+		if (!hasAlias(attribute.relationName())) {
+			return attribute;
 		}
-		return SQL.parseAttribute(applyTo(column.relationName()) + "." + column.attributeName());
+		return new Attribute(applyTo(attribute.relationName()), attribute.attributeName());
 	}
 	
-	public Attribute originalOf(Attribute column) {
-		if (!isAlias(column.relationName())) {
-			return column;
+	public Attribute originalOf(Attribute attribute) {
+		if (!isAlias(attribute.relationName())) {
+			return attribute;
 		}
-		return SQL.parseAttribute(originalOf(column.relationName()) + "." + column.attributeName());
+		return new Attribute(originalOf(attribute.relationName()), attribute.attributeName());
+	}
+	
+	public Alias applyTo(Alias alias) {
+		if (!hasAlias(alias.alias())) {
+			return alias;
+		}
+		return new Alias(alias.original(), applyTo(alias.alias()));
 	}
 	
 	public Alias originalOf(Alias alias) {
@@ -113,20 +118,19 @@ public class AliasMap extends ColumnRenamer {
 	}
 
 	public AliasMap applyTo(AliasMap other) {
-		if (other == null) {
+		if (this.byAlias.isEmpty()) {
+			return other;
+		}
+		if (other.byAlias.isEmpty()) {
 			return this;
 		}
 		Collection newAliases = new ArrayList();
-		Iterator it = other.aliasesToOriginals.keySet().iterator();
+		Iterator it = other.byAlias.values().iterator();
 		while (it.hasNext()) {
-			RelationName alias = (RelationName) it.next();
-			newAliases.add(new Alias(other.originalOf(alias), applyTo(alias)));
+			Alias otherAlias = (Alias) it.next();
+			newAliases.add(applyTo(otherAlias));
 		}
-		it = this.aliasesToOriginals.keySet().iterator();
-		while (it.hasNext()) {
-			RelationName alias = (RelationName) it.next();
-			newAliases.add(new Alias(originalOf(alias), alias));
-		}
+		newAliases.addAll(this.byAlias.values());
 		return new AliasMap(newAliases);
 	}
 	
@@ -146,24 +150,21 @@ public class AliasMap extends ColumnRenamer {
 			return false;
 		}
 		AliasMap otherAliasMap = (AliasMap) other;
-		return this.aliasesToOriginals.equals(otherAliasMap.aliasesToOriginals);
+		return this.byAlias.equals(otherAliasMap.byAlias);
 	}
 	
 	public int hashCode() {
-		return this.aliasesToOriginals.hashCode();
+		return this.byAlias.hashCode();
 	}
 	
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		result.append("AliasMap(");
-		List tables = new ArrayList(this.aliasesToOriginals.keySet());
+		List tables = new ArrayList(this.byAlias.keySet());
 		Collections.sort(tables);
 		Iterator it = tables.iterator();
 		while (it.hasNext()) {
-			RelationName alias = (RelationName) it.next();
-			result.append(this.aliasesToOriginals.get(alias));
-			result.append(" AS ");
-			result.append(alias);
+			result.append(this.byAlias.get(it.next()));
 			if (it.hasNext()) {
 				result.append(", ");
 			}

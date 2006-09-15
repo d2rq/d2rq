@@ -6,24 +6,19 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 /**
  * Inspects a database to retrieve schema information. 
  * 
- * TODO: Input and output RelationNames instead of Strings
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.5 2006/09/15 15:31:23 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.6 2006/09/15 17:53:37 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
-	private static Pattern schemaAndTableRegex = Pattern.compile("(?:(.*)\\.)?(.*?)");
 	
 	public static boolean isStringType(int columnType) {
 		return columnType == Types.CHAR || columnType == Types.VARCHAR || columnType == Types.LONGVARCHAR;
@@ -114,7 +109,7 @@ public class DatabaseSchemaInspector {
 					// They have names like MYSCHEMA.BIN$FoHqtx6aQ4mBaMQmlTCPTQ==$0
 					continue;
 				}
-				result.add(createQualifiedTableName(schema, table));
+				result.add(toRelationName(schema, table));
 			}
 			rs.close();
 			return result;
@@ -123,13 +118,13 @@ public class DatabaseSchemaInspector {
 		}
 	}
 
-	public List listColumns(String qualifiedTableName) {
+	public List listColumns(RelationName tableName) {
 		List result = new ArrayList();
 		try {
 			ResultSet rs = this.schema.getColumns(
-					null, schemaName(qualifiedTableName), tableName(qualifiedTableName), null);
+					null, schemaName(tableName), tableName(tableName), null);
 			while (rs.next()) {
-				result.add(SQL.parseAttribute(qualifiedTableName + "." + rs.getString("COLUMN_NAME")));
+				result.add(new Attribute(tableName, rs.getString("COLUMN_NAME")));
 			}
 			rs.close();
 			return result;
@@ -138,13 +133,13 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public List primaryKeyColumns(String qualifiedTableName) {
+	public List primaryKeyColumns(RelationName tableName) {
 		List result = new ArrayList();
 		try {
 			ResultSet rs = this.schema.getPrimaryKeys(
-					null, schemaName(qualifiedTableName), tableName(qualifiedTableName));
+					null, schemaName(tableName), tableName(tableName));
 			while (rs.next()) {
-				result.add(SQL.parseAttribute(qualifiedTableName + "." + rs.getString("COLUMN_NAME")));
+				result.add(new Attribute(tableName, rs.getString("COLUMN_NAME")));
 			}
 			rs.close();
 			return result;
@@ -153,20 +148,18 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public List foreignKeyColumns(String qualifiedTableName) {
+	public List foreignKeyColumns(RelationName tableName) {
 		try {
 			List result = new ArrayList();
 			ResultSet rs = this.schema.getImportedKeys(
-					null, schemaName(qualifiedTableName), tableName(qualifiedTableName));
+					null, schemaName(tableName), tableName(tableName));
 			while (rs.next()) {
-				String pkTableName = createQualifiedTableName(
+				RelationName pkTable = toRelationName(
 						rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
-				String pkColumnName = rs.getString("PKCOLUMN_NAME");
-				Attribute primaryColumn = SQL.parseAttribute(pkTableName + "." + pkColumnName);
-				String fkTableName = createQualifiedTableName(
+				Attribute primaryColumn = new Attribute(pkTable, rs.getString("PKCOLUMN_NAME"));
+				RelationName fkTable = toRelationName(
 						rs.getString("FKTABLE_SCHEM"), rs.getString("FKTABLE_NAME"));
-				String fkColumnName = rs.getString("FKCOLUMN_NAME");
-				Attribute foreignColumn = SQL.parseAttribute(fkTableName + "." + fkColumnName);
+				Attribute foreignColumn = new Attribute(fkTable, rs.getString("FKCOLUMN_NAME"));
 				result.add(new Attribute[]{foreignColumn, primaryColumn});
 			}
 			rs.close();
@@ -176,37 +169,33 @@ public class DatabaseSchemaInspector {
 		}
 	}
 
-	public boolean isLinkTable(String qualifiedTableName) {
-		if (listColumns(qualifiedTableName).size() != 2) {
+	public boolean isLinkTable(RelationName tableName) {
+		if (listColumns(tableName).size() != 2) {
 			return false;
 		}
-		return foreignKeyColumns(qualifiedTableName).size() == 2;
+		return foreignKeyColumns(tableName).size() == 2;
 	}
 	
-	private String schemaName(String qualifiedTableName) {
-		Matcher match = schemaAndTableRegex.matcher(qualifiedTableName);
-		match.matches();
-		if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) && match.group(1) == null) {
+	private String schemaName(RelationName tableName) {
+		if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) && tableName.schemaName() == null) {
 			// The default schema is known as "public" in PostgreSQL 
 			return "public";
 		}
-		return match.group(1);
+		return tableName.schemaName();
 	}
 	
-	private String tableName(String qualifiedTableName) {
-		Matcher match = schemaAndTableRegex.matcher(qualifiedTableName);
-		match.matches();
-		return match.group(2);
+	private String tableName(RelationName tableName) {
+		return tableName.tableName();
 	}
 
-	private String createQualifiedTableName(String schema, String table) {
+	private RelationName toRelationName(String schema, String table) {
 		if (schema == null) {
 			// Table without schema
-			return table;
+			return new RelationName(null, table);
 		} else if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) && "public".equals(schema)) {
 			// Table in PostgreSQL default schema -- call the table "foo", not "public.foo"
-			return table;
+			return new RelationName(null, table);
 		}
-		return schema + "." + table;
+		return new RelationName(schema, table);
 	}
 }
