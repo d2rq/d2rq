@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelationImpl.java,v 1.5 2006/09/15 15:31:23 cyganiak Exp $
+ * @version $Id: RDFRelationImpl.java,v 1.6 2006/09/15 19:36:45 cyganiak Exp $
  */
 public class RDFRelationImpl implements RDFRelation {
 	private NodeMaker subjectMaker;
@@ -83,8 +83,8 @@ public class RDFRelationImpl implements RDFRelation {
 		it = this.baseRelation.joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			tables.add(join.getFirstTable());
-			tables.add(join.getSecondTable());
+			tables.add(join.table1());
+			tables.add(join.table2());
 		}
 		it = this.baseRelation.condition().columns().iterator();
 		while (it.hasNext()) {

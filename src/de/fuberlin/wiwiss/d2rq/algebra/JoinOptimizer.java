@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,7 +40,7 @@ import java.util.Set;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.9 2006/09/14 16:22:48 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.10 2006/09/15 19:36:45 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -59,20 +60,20 @@ public class JoinOptimizer {
 		Iterator it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			if (!isRemovableJoinSide(join.getFirstTable(), join, allRequiredColumns)) {
+			if (!isRemovableJoinSide(join.table1(), join, allRequiredColumns)) {
 				continue;
 			}
 			requiredJoins.remove(join);
-			replacedColumns.putAll(replacementColumns(join.getFirstColumns(), join));
+			replacedColumns.putAll(replacementColumns(join.attributes1(), join));
 		}
 		it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			if (!isRemovableJoinSide(join.getSecondTable(), join, allRequiredColumns)) {
+			if (!isRemovableJoinSide(join.table2(), join, allRequiredColumns)) {
 				continue;
 			}
 			requiredJoins.remove(join);
-			replacedColumns.putAll(replacementColumns(join.getSecondColumns(), join));
+			replacedColumns.putAll(replacementColumns(join.attributes2(), join));
 		}
 		if (replacedColumns.isEmpty()) {
 			return this.relation;
@@ -97,8 +98,8 @@ public class JoinOptimizer {
 		Iterator it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			results.addAll(join.getFirstColumns());
-			results.addAll(join.getSecondColumns());
+			results.addAll(join.attributes1());
+			results.addAll(join.attributes2());
 		}
 		return results;
 	}
@@ -125,12 +126,12 @@ public class JoinOptimizer {
 		return true;	// all columns from our table are in the join condition
 	}
 	
-	private Map replacementColumns(Set originalColumns, Join removableJoin) {
+	private Map replacementColumns(Collection originalColumns, Join removableJoin) {
 		Map result = new HashMap();
 		Iterator it = originalColumns.iterator();
 		while (it.hasNext()) {
 			Attribute originalColumn = (Attribute) it.next();
-			result.put(originalColumn, removableJoin.getOtherSide(originalColumn));
+			result.put(originalColumn, removableJoin.equalAttribute(originalColumn));
 		}
 		return result;
 	}

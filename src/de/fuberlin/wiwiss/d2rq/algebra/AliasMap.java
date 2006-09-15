@@ -15,7 +15,7 @@ import java.util.Map.Entry;
  * kinds of objects, the inverse operation is available as well. 
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.5 2006/09/15 17:53:37 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.6 2006/09/15 19:36:44 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_SET);
@@ -111,7 +111,7 @@ public class AliasMap extends ColumnRenamer {
 	}
 	
 	public Join applyTo(Join join) {
-		if (!hasAlias(join.getFirstTable()) && !hasAlias(join.getSecondTable())) {
+		if (!hasAlias(join.table1()) && !hasAlias(join.table2())) {
 			return join;
 		}
 		return super.applyTo(join);

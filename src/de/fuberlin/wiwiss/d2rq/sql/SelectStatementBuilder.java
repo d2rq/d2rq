@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.18 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.19 2006/09/15 19:36:44 cyganiak Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -193,8 +193,8 @@ public class SelectStatementBuilder {
 				continue;
 			}
 			this.conditions.add(sql);
-			this.mentionedTables.add(join.getFirstTable());
-			this.mentionedTables.add(join.getSecondTable());
+			this.mentionedTables.add(join.table1());
+			this.mentionedTables.add(join.table2());
         }
     }
 
@@ -209,12 +209,12 @@ public class SelectStatementBuilder {
 
 	private String toSQL(Join join) {
 		StringBuffer result = new StringBuffer();
-		Iterator it = join.getFirstColumns().iterator();
+		Iterator it = join.attributes1().iterator();
 		while (it.hasNext()) {
 			Attribute attribute = (Attribute) it.next();
 			result.append(this.database.quoteAttribute(attribute));
 			result.append(" = ");
-			result.append(this.database.quoteAttribute(join.getOtherSide(attribute)));
+			result.append(this.database.quoteAttribute(join.equalAttribute(attribute)));
 			if (it.hasNext()) {
 				result.append(" AND ");
 			}

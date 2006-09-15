@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.5 2006/09/15 17:53:37 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.6 2006/09/15 19:36:45 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static RelationName foo = new RelationName(null, "foo");
@@ -81,20 +81,18 @@ public class AliasMapTest extends TestCase {
 	}
 	
 	public void testApplyToJoinSetDoesNotModifyUnaliasedJoin() {
-		Join join = new Join();
-		join.addCondition(abc_col1, xyz_col1);
+		Join join = new Join(abc_col1, xyz_col1);
 		Set joins = Collections.singleton(join);
 		assertEquals(joins, this.fooAsBarMap.applyToJoinSet(joins));
 	}
 	
 	public void testApplyToJoinSetDoesModifyAliasedJoin() {
-		Join join = new Join();
-		join.addCondition(foo_col1, foo_col1);
+		Join join = new Join(foo_col1, foo_col1);
 		Set aliasedSet = this.fooAsBarMap.applyToJoinSet(Collections.singleton(join));
 		assertEquals(1, aliasedSet.size());
 		Join aliased = (Join) aliasedSet.iterator().next();
-		assertEquals(Collections.singleton(bar_col1), aliased.getFirstColumns());
-		assertEquals(Collections.singleton(bar_col1), aliased.getSecondColumns());
+		assertEquals(Collections.singletonList(bar_col1), aliased.attributes1());
+		assertEquals(Collections.singletonList(bar_col1), aliased.attributes2());
 	}
 	
 	public void testApplyToExpression() {

@@ -18,6 +18,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class PropertyBridge extends ResourceMap {
@@ -119,7 +120,8 @@ public class PropertyBridge extends ResourceMap {
 				&& this.datatype != null
 				&& this.datatype.equals(XSDDatatype.XSDdateTime.getURI())
 				&& this.column != null
-				&& this.belongsToClassMap.database().connectedDB().columnType(this.column) == ConnectedDB.DATE_COLUMN) {
+				&& this.belongsToClassMap.database().connectedDB().columnType(
+						SQL.parseAttribute(this.column)) == ConnectedDB.DATE_COLUMN) {
 //			this.translateWith = new TranslationTable();
 //			this.translateWith.setTranslator(new DateTimeTranslator());
 		}

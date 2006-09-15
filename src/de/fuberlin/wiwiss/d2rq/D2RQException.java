@@ -6,7 +6,7 @@ import com.hp.hpl.jena.shared.JenaException;
  * Exception used to signal most D2RQ errors.
  *
  * @author Chris Bizer chris@bizer.de
- * @version $Id: D2RQException.java,v 1.7 2006/09/15 15:31:23 cyganiak Exp $
+ * @version $Id: D2RQException.java,v 1.8 2006/09/15 19:36:45 cyganiak Exp $
  */
 
 public class D2RQException extends JenaException {
@@ -58,6 +58,7 @@ public class D2RQException extends JenaException {
 	public static final int SQL_INVALID_RELATIONNAME = 44;
 	public static final int SQL_INVALID_ATTRIBUTENAME = 45;
 	public static final int SQL_INVALID_ALIAS = 46;
+	public static final int SQL_INVALID_JOIN = 47;
 	
 	private int code;
 	

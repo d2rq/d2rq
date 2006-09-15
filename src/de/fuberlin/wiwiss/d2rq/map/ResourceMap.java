@@ -31,7 +31,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.4 2006/09/15 15:31:22 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.5 2006/09/15 19:36:44 cyganiak Exp $
  */
 public abstract class ResourceMap extends MapObject {
 	protected static final Property valueProperty = 
@@ -123,7 +123,7 @@ public abstract class ResourceMap extends MapObject {
 	
 	public RelationBuilder relationBuilder() {
 		RelationBuilder result = new RelationBuilder();
-		Iterator it = Join.buildFromSQL(this.joins).iterator();
+		Iterator it = SQL.parseJoins(this.joins).iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
 			result.addJoinCondition(join);

@@ -1,156 +1,79 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
  *
- * TODO: turn getFirstColumns, getSecondColumns into lists
- * TODO: Make immutable
- * TODO: Implement equals/hashCode
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.6 2006/09/15 15:31:23 cyganiak Exp $
+ * @version $Id: Join.java,v 1.7 2006/09/15 19:36:45 cyganiak Exp $
  */
 public class Join {
-	private Set fromColumns = new HashSet(2);
-	private Set toColumns = new HashSet(2);
+	private List attributes1 = new ArrayList();
+	private List attributes2 = new ArrayList();
+	private RelationName table1 = null;
+	private RelationName table2 = null;
 	private Map otherSide = new HashMap(4); 
-	private RelationName fromTable = null;
-	private RelationName toTable = null;
-	
-	public void addCondition(String joinCondition) {
-		Attribute col1 = Join.getColumn(joinCondition, true);
-		Attribute col2 = Join.getColumn(joinCondition, false);
-		addCondition(col1, col2);
-	}
 
-	public void addCondition(Attribute column1, Attribute column2) {
-		if (this.fromTable == null) {
-			this.fromTable = column1.relationName();
-			this.toTable = column2.relationName();
-		} else if (!this.fromTable.equals(column1.relationName())
-				|| !this.toTable.equals(column2.relationName())) {
-			throw new IllegalArgumentException(
-					"Illegal join -- all conditions must go from *one* table to another *one* table");
+	public Join(Attribute oneSide, Attribute otherSide) {
+		this(Collections.singletonList(oneSide), Collections.singletonList(otherSide));
+	}
+	
+	public Join(List oneSideAttributes, List otherSideAttributes) {
+		RelationName oneRelation = ((Attribute) oneSideAttributes.get(0)).relationName();
+		RelationName otherRelation = ((Attribute) otherSideAttributes.get(0)).relationName();
+		if (oneRelation.compareTo(otherRelation) < 0) {
+			this.attributes1 = oneSideAttributes;
+			this.attributes2 = otherSideAttributes;
+			this.table1 = oneRelation;
+			this.table2 = otherRelation;
+		} else {
+			this.attributes1 = otherSideAttributes;
+			this.attributes2 = oneSideAttributes;
+			this.table1 = otherRelation;
+			this.table2 = oneRelation;
 		}
-		this.fromColumns.add(column1);
-		this.toColumns.add(column2);
-		this.otherSide.put(column1, column2);
-		this.otherSide.put(column2, column1);
+		for (int i = 0; i < this.attributes1.size(); i++) {
+			Attribute a1 = (Attribute) this.attributes1.get(i);
+			Attribute a2 = (Attribute) this.attributes2.get(i);
+			this.otherSide.put(a1, a2);
+			this.otherSide.put(a2, a1);
+		}
 	}
 	
-	public boolean containsTable(RelationName tableName) {
-		return tableName.equals(this.fromTable) ||
-				tableName.equals(this.toTable);
-	}
-
 	public boolean containsColumn(Attribute column) {
-		return this.fromColumns.contains(column) ||
-				this.toColumns.contains(column);
+		return this.attributes1.contains(column) ||
+				this.attributes2.contains(column);
 	}
 
-	public RelationName getFirstTable() {
-		return this.fromTable;
+	public RelationName table1() {
+		return this.table1;
 	}
 	
-	public RelationName getSecondTable() {
-		return this.toTable;
+	public RelationName table2() {
+		return this.table2;
 	}
 
-	public Set getFirstColumns() {
-		return this.fromColumns;
+	public List attributes1() {
+		return this.attributes1;
 	}
 
-	public Set getSecondColumns() {
-		return this.toColumns;
+	public List attributes2() {
+		return this.attributes2;
 	}
 
-	/**
-	 * Checks if one side of the join is equal to the argument set of
-	 * {@link Attribute}s.
-	 * @param columns a set of Column instances
-	 * @return <tt>true</tt> if one side of the join is equal to the column set
-	 */
-	public boolean isOneSide(Set columns) {
-		return this.fromColumns.equals(columns) || this.toColumns.equals(columns);
-	}
-
-	public Attribute getOtherSide(Attribute column) {
+	public Attribute equalAttribute(Attribute column) {
 		return (Attribute) this.otherSide.get(column);
 	}
-
-	private static Attribute getColumn(String joinCondition, boolean first) {
-		int index = joinCondition.indexOf("=");
-		if (index == -1) {
-			throw new D2RQException("Illegal d2rq:join: \"" + joinCondition +
-					"\" (must be in \"Table1.Col1 = Table2.Col2\" form)");
-		}
-		String col1 = joinCondition.substring(0, index).trim();
-		String col2 = joinCondition.substring(index + 1).trim();
-		boolean return1 = col1.compareTo(col2) < 0;
-		if (!first) {
-			return1 = !return1;
-		}
-		return return1 ? SQL.parseAttribute(col1) : SQL.parseAttribute(col2);
-	}
-
-	/**
-	 * Builds a list of Join objects from a list of join condition
-	 * strings. Groups multiple condition that connect the same
-	 * two table (multi-column keys) into a single join.
-	 * @param joinConditions a collection of strings
-	 * @return a set of Join instances
-	 */
-	public static Set buildFromSQL(Collection joinConditions) {
-		Set result = new HashSet(2);
-		Iterator it = joinConditions.iterator();
-		while (it.hasNext()) {
-			String condition = (String) it.next();
-			RelationName table1 = Join.getColumn(condition, true).relationName();
-			RelationName table2 = Join.getColumn(condition, false).relationName();
-			Iterator it2 = result.iterator();
-			while (it2.hasNext()) {
-				Join join = (Join) it2.next();
-				if (join.containsTable(table1) && join.containsTable(table2)) {
-					join.addCondition(condition);
-					condition = null;
-					break;
-				}
-			}
-			if (condition != null) {
-				Join join = new Join();
-				join.addCondition(condition);
-				result.add(join);
-			}
-		}
-		return result;
-	}
 	
-	public static Join buildJoin(String condition) {
-		Join join = new Join();
-		join.addCondition(condition);
-		return join;
-	}
-
 	public String toString() {
-		List attributes = (this.fromTable.compareTo(this.toTable) < 1)
-				? new ArrayList(getFirstColumns())
-				: new ArrayList(getSecondColumns());
-		Collections.sort(attributes);
 		StringBuffer result = new StringBuffer("Join(");
-		Iterator it = attributes.iterator();
+		Iterator it = this.attributes1.iterator();
 		while (it.hasNext()) {
 			Attribute attribute = (Attribute) it.next();
 			result.append(attribute.qualifiedName());
@@ -159,10 +82,10 @@ public class Join {
 			}
 		}
 		result.append(" <=> ");
-		it = attributes.iterator();
+		it = this.attributes2.iterator();
 		while (it.hasNext()) {
 			Attribute attribute = (Attribute) it.next();
-			result.append(getOtherSide(attribute).qualifiedName());
+			result.append(attribute.qualifiedName());
 			if (it.hasNext()) {
 				result.append(", ");
 			}
@@ -171,14 +94,28 @@ public class Join {
 		return result.toString();
 	}
 
-	public Join renameColumns(ColumnRenamer columnRenamer) {
-		Join result = new Join();
-		Iterator it = getFirstColumns().iterator();
-		while (it.hasNext()) {
-			Attribute column1 = (Attribute) it.next();
-			Attribute column2 = getOtherSide(column1);
-			result.addCondition(columnRenamer.applyTo(column1), columnRenamer.applyTo(column2));
+	public int hashCode() {
+		return this.attributes1.hashCode() ^ this.attributes2.hashCode();
+	}
+	
+	public boolean equals(Object otherObject) {
+		if (!(otherObject instanceof Join)) {
+			return false;
 		}
-		return result;
+		Join otherJoin = (Join) otherObject;
+		return this.attributes1.equals(otherJoin.attributes1)
+				&& this.attributes2.equals(otherJoin.attributes2);
+	}
+	
+	public Join renameColumns(ColumnRenamer columnRenamer) {
+		List oneSide = new ArrayList();
+		List otherSide = new ArrayList();
+		Iterator it = attributes1().iterator();
+		while (it.hasNext()) {
+			Attribute column = (Attribute) it.next();
+			oneSide.add(columnRenamer.applyTo(column));
+			otherSide.add(columnRenamer.applyTo(equalAttribute(column)));
+		}
+		return new Join(oneSide, otherSide);
 	}
 }

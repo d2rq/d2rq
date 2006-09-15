@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UnionOverSameBase.java,v 1.8 2006/09/14 16:22:48 cyganiak Exp $
+ * @version $Id: UnionOverSameBase.java,v 1.9 2006/09/15 19:36:44 cyganiak Exp $
  */
 public class UnionOverSameBase implements RDFRelation {
 
@@ -87,8 +87,8 @@ public class UnionOverSameBase implements RDFRelation {
 		it = query.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			results.add(join.getFirstTable());
-			results.add(join.getSecondTable());
+			results.add(join.table1());
+			results.add(join.table2());
 		}
 		return results;
 	}

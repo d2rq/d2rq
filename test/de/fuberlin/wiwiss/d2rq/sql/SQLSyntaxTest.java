@@ -5,18 +5,23 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamerMap;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 
 public class SQLSyntaxTest extends TestCase {
 	private final static Attribute foo_col1 = new Attribute(null, "foo", "col1");
+	private final static Attribute foo_col2 = new Attribute(null, "foo", "col2");
+	private final static Attribute bar_col1 = new Attribute(null, "bar", "col1");
 	private final static Attribute bar_col2 = new Attribute(null, "bar", "col2");
+	private final static Attribute baz_col1 = new Attribute(null, "baz", "col1");
 	private final static Alias fooAsBar = new Alias(
 			new RelationName(null, "foo"),
 			new RelationName(null, "bar"));
@@ -131,5 +136,43 @@ public class SQLSyntaxTest extends TestCase {
 		} catch (D2RQException ex) {
 			assertEquals(D2RQException.SQL_INVALID_ALIAS, ex.errorCode());
 		}
+	}
+	
+	public void testParseInvalidJoin() {
+		try {
+			SQL.parseJoins(Collections.singleton("asdf"));
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.SQL_INVALID_JOIN, ex.errorCode());
+		}
+	}
+	
+	public void testParseJoinOneCondition() {
+		Set joins = SQL.parseJoins(Collections.singleton("foo.col1 = bar.col2"));
+		assertEquals(1, joins.size());
+		Join join = (Join) joins.iterator().next();
+		assertEquals(Collections.singletonList(bar_col2), join.attributes1());
+		assertEquals(Collections.singletonList(foo_col1), join.attributes2());
+	}
+	
+	public void testParseJoinTwoConditionsOnSameTables() {
+		Set joins = SQL.parseJoins(Arrays.asList(new String[]{
+				"foo.col1 = bar.col1", "foo.col2 = bar.col2"}));
+		assertEquals(1, joins.size());
+		Join join = (Join) joins.iterator().next();
+		assertEquals(Arrays.asList(new Attribute[]{bar_col1, bar_col2}),
+				join.attributes1());
+		assertEquals(Arrays.asList(new Attribute[]{foo_col1, foo_col2}),
+				join.attributes2());
+		assertEquals(foo_col1, join.equalAttribute(bar_col1));
+	}
+	
+	public void testParseJoinTwoConditionsOnDifferentTables() {
+		Set joins = SQL.parseJoins(Arrays.asList(new String[]{
+				"foo.col1 = bar.col1", "foo.col2 = baz.col1"}));
+		assertEquals(2, joins.size());
+		assertEquals(new HashSet(Arrays.asList(new Join[]{
+				new Join(bar_col1, foo_col1),
+				new Join(baz_col1, foo_col2)})),
+				joins);
 	}
 }
