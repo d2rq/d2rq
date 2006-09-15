@@ -2,6 +2,8 @@ package de.fuberlin.wiwiss.d2rq.pp;
 
 import junit.framework.TestCase;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -69,5 +71,14 @@ public class PrettyPrinterTest extends TestCase {
 	
 	public void testD2RQTermsHaveD2RQPrefix() {
 		assertEquals("d2rq:ClassMap", PrettyPrinter.toString(D2RQ.ClassMap));
+	}
+	
+	public void testSomeRDFDatatypeToString() {
+		RDFDatatype someDatatype = TypeMapper.getInstance().getSafeTypeByName("http://example.org/mytype");
+		assertEquals("<http://example.org/mytype>", PrettyPrinter.toString(someDatatype));
+	}
+	
+	public void testXSDTypeToString() {
+		assertEquals("xsd:string", PrettyPrinter.toString(XSDDatatype.XSDstring));
 	}
 }

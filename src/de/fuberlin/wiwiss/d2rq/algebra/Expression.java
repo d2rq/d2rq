@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * TODO: Shouldn't call to SQL so much
  *  
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Expression.java,v 1.5 2006/09/15 15:31:23 cyganiak Exp $
+ * @version $Id: Expression.java,v 1.6 2006/09/15 20:38:05 cyganiak Exp $
  */
 public class Expression {
 	public static final Expression TRUE = new Expression("1");
@@ -64,6 +64,9 @@ public class Expression {
 		}
 		if (other.isTrue()) {
 			return this;
+		}
+		if (equals(Expression.FALSE) || other.equals(Expression.FALSE)) {
+			return Expression.FALSE;
 		}
 		return new Expression(this.expression + " AND " + other.expression);
 	}

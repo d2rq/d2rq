@@ -9,10 +9,12 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerTest.java,v 1.3 2006/09/15 15:31:22 cyganiak Exp $
+ * @version $Id: ColumnRenamerTest.java,v 1.4 2006/09/15 20:38:04 cyganiak Exp $
  */
 public class ColumnRenamerTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "foo", "col1");
@@ -80,6 +82,25 @@ public class ColumnRenamerTest extends TestCase {
 		AliasMap aliases = new AliasMap(Collections.singleton(new Alias(
 				new RelationName(null, "foo"), new RelationName(null, "bar"))));
 		assertEquals(aliases, this.col1ToCol2.applyTo(aliases));
+	}
+	
+	public void testApplyToResultRowUnaffectedAttribute() {
+		ResultRow row = col1ToCol2.applyTo(new ResultRowMap(Collections.singletonMap(col3, "foo")));
+		assertEquals("foo", row.get(col3));
+		assertNull(row.get(col1));
+		assertNull(row.get(col2));
+	}
+	
+	public void testApplyToResultRowAffectedAttribute() {
+		ResultRow row = col1ToCol2.applyTo(new ResultRowMap(Collections.singletonMap(col2, "foo")));
+		assertEquals("foo", row.get(col1));
+		assertEquals("foo", row.get(col2));
+	}
+	
+	public void testApplyToResultRowReplacedAttribute() {
+		ResultRow row = col1ToCol2.applyTo(new ResultRowMap(Collections.singletonMap(col1, "foo")));
+		assertNull(row.get(col1));
+		assertNull(row.get(col2));
 	}
 	
 	public void testNullRenamerToStringEmpty() {

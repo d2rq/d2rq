@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.3 2006/09/15 15:31:22 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.4 2006/09/15 20:38:04 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "table", "col1");
@@ -244,6 +244,30 @@ public class PatternTest extends TestCase {
 		assertEquals("Pattern(foo@@table.col1@@)", new Pattern("foo@@table.col1@@").toString());
 	}
 	
+	public void testSamePatternsAreEqual() {
+		Pattern p1 = new Pattern("foo@@table.col1@@");
+		Pattern p2 = new Pattern("foo@@table.col1@@");
+		assertEquals(p1, p2);
+		assertEquals(p2, p1);
+		assertEquals(p1.hashCode(), p2.hashCode());
+	}
+	
+	public void testPatternsWithDifferentColumnsAreNotEquals() {
+		Pattern p1 = new Pattern("foo@@table.col1@@");
+		Pattern p2 = new Pattern("foo@@table.col2@@");
+		assertFalse(p1.equals(p2));
+		assertFalse(p2.equals(p1));
+		assertFalse(p1.hashCode() == p2.hashCode());
+	}
+
+	public void testPatternsWithDifferentLiteralPartsAreNotEquals() {
+		Pattern p1 = new Pattern("foo@@table.col1@@");
+		Pattern p2 = new Pattern("bar@@table.col1@@");
+		assertFalse(p1.equals(p2));
+		assertFalse(p2.equals(p1));
+		assertFalse(p1.hashCode() == p2.hashCode());
+	}
+
 	private void assertPattern(String expected, String pattern) {
 		Pattern p = new Pattern(pattern);
 		assertEquals(expected, p.makeValue(this.row));

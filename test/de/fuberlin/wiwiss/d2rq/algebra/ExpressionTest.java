@@ -13,7 +13,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExpressionTest.java,v 1.6 2006/09/15 15:31:22 cyganiak Exp $
+ * @version $Id: ExpressionTest.java,v 1.7 2006/09/15 20:38:04 cyganiak Exp $
  */
 public class ExpressionTest extends TestCase {
 
@@ -95,5 +95,13 @@ public class ExpressionTest extends TestCase {
 	
 	public void testTrueAndFooIsFoo() {
 		assertEquals(new Expression("foo"), Expression.TRUE.and(new Expression("foo")));
+	}
+	
+	public void testFalseAndFooIsFalse() {
+		assertEquals(Expression.FALSE, Expression.FALSE.and(new Expression("foo")));
+	}
+	
+	public void testFooAndFalseIsFalse() {
+		assertEquals(Expression.FALSE, new Expression("foo").and(Expression.FALSE));
 	}
 }

@@ -6,6 +6,13 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 
+/**
+ * Abstract base class for classes that represent things in
+ * the mapping file.
+ * 
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: MapObject.java,v 1.2 2006/09/15 20:38:04 cyganiak Exp $
+ */
 public abstract class MapObject {
 	private Resource resource;
 	
