@@ -22,7 +22,6 @@ import com.hp.hpl.jena.rdql.parser.WorkingVar;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 
 /**
@@ -43,12 +42,12 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  *   2) SQL dialects
  *   3) Variable translators
  * @author jgarbers
- * @version $Id: ExpressionTranslator.java,v 1.18 2006/09/13 14:06:23 cyganiak Exp $
+ * @version $Id: ExpressionTranslator.java,v 1.19 2006/09/15 12:25:25 cyganiak Exp $
  */
 public class ExpressionTranslator {
 	
     ConstraintHandler handler;
-    SelectStatementBuilder statementMaker; // provides database and escaper
+    ConnectedDB database;
     VariableBindings variableBindings;
     Map variableNameToNodeConstraint=new HashMap();
     
@@ -72,10 +71,10 @@ public class ExpressionTranslator {
     public static final int RightType=-2;
     public static final int SameType=-3;
 
-    public ExpressionTranslator(ConstraintHandler handler, SelectStatementBuilder sql) {
+    public ExpressionTranslator(ConstraintHandler handler, ConnectedDB database) {
         super();
         this.handler=handler;
-        this.statementMaker=sql;
+        this.database = database;
         variableBindings=handler.bindings;
         // variableNameToNodes=variableBindings.variableNameToNodeMap;
         setupOperatorMap();
@@ -226,7 +225,7 @@ public class ExpressionTranslator {
         return translateString(s,StringType);
     }
     public Result translateString(String s, int resultType) {
-        return newResult(SelectStatementBuilder.singleQuote(s),resultType);
+        return newResult(this.database.singleQuote(s),resultType);
     }
     
     // the case where "?x=?y" should be handled before triples are checked for shared variables
@@ -324,7 +323,7 @@ public class ExpressionTranslator {
     
     public Result translateColumn(Attribute col) {
         String columnName=col.qualifiedName();
-        int columnType=statementMaker.columnType(col);
+        int columnType = this.database.columnType(col);
         if (columnType == ConnectedDB.NUMERIC_COLUMN) {
             return newResult(columnName,NumberType);
         } else if (columnType == ConnectedDB.TEXT_COLUMN) {

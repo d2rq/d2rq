@@ -11,32 +11,32 @@ import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExpressionTest.java,v 1.4 2006/09/14 16:22:48 cyganiak Exp $
+ * @version $Id: ExpressionTest.java,v 1.5 2006/09/15 12:25:25 cyganiak Exp $
  */
 public class ExpressionTest extends TestCase {
 
 	public void testCreateWithoutExpression() {
 		Expression e = new Expression(Collections.EMPTY_LIST);
-		assertEquals("1", e.toSQL());
+		assertEquals("Expression(1)", e.toString());
 		assertTrue(e.isTrue());
 	}
 	
 	public void testCreateWithOneExpression() {
 		Expression e = new Expression("papers.publish = 1");
-		assertEquals("papers.publish = 1", e.toSQL());
+		assertEquals("Expression(papers.publish = 1)", e.toString());
 		assertFalse(e.isTrue());
 	}
 	
 	public void testCreateWithSingletonExpressionSet() {
 		Expression e = new Expression(Collections.singletonList("papers.publish = 1"));
-		assertEquals("papers.publish = 1", e.toSQL());
+		assertEquals("Expression(papers.publish = 1)", e.toString());
 		assertFalse(e.isTrue());
 	}
 	
 	public void testCreateWithMultipleExpressions() {
 		Expression e = new Expression(Arrays.asList(
 				new String[]{"papers.publish = 1", "papers.rating > 4"}));
-		assertEquals("papers.publish = 1 AND papers.rating > 4", e.toSQL());		
+		assertEquals("Expression(papers.publish = 1 AND papers.rating > 4)", e.toString());		
 		assertFalse(e.isTrue());
 	}
 	

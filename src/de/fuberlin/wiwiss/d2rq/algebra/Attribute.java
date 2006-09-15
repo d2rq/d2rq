@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * A database column.
@@ -15,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * TODO: Extract a RelationName class that encapsulates table and schema name.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Attribute.java,v 1.3 2006/09/14 16:22:48 cyganiak Exp $
+ * @version $Id: Attribute.java,v 1.4 2006/09/15 12:25:25 cyganiak Exp $
  */
 public class Attribute implements Comparable {
 	private static final java.util.regex.Pattern attributeRegex = 
@@ -45,6 +46,24 @@ public class Attribute implements Comparable {
 		while (matched) {
 			Attribute column = new Attribute(match.group(1), match.group(2), match.group(3));
 			result.append(columnRenamer.applyTo(column).qualifiedName());
+			int nextPartStart = match.end();
+			matched = match.find();
+			int nextPartEnd = matched ? match.start() : expression.length();
+			result.append(expression.substring(nextPartStart, nextPartEnd));
+		}
+		return result.toString();
+	}
+
+	// TODO: This really should happen in Expression and without string munging
+	public static String quoteColumnsInExpression(String expression, ConnectedDB database) {
+		StringBuffer result = new StringBuffer();
+		Matcher match = attributeRegex.matcher(expression);
+		boolean matched = match.find();
+		int firstPartEnd = matched ? match.start() : expression.length();
+		result.append(expression.substring(0, firstPartEnd));
+		while (matched) {
+			result.append(database.quoteAttribute(
+					new Attribute(match.group(1), match.group(2), match.group(3))));
 			int nextPartStart = match.end();
 			matched = match.find();
 			int nextPartEnd = matched ? match.start() : expression.length();

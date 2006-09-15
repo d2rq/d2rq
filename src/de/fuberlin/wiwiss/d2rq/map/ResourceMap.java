@@ -13,6 +13,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
@@ -29,7 +30,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.2 2006/09/12 12:06:18 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.3 2006/09/15 12:25:25 cyganiak Exp $
  */
 public abstract class ResourceMap extends MapObject {
 	protected static final Property valueProperty = 
@@ -121,9 +122,9 @@ public abstract class ResourceMap extends MapObject {
 	
 	public RelationBuilder relationBuilder() {
 		RelationBuilder result = new RelationBuilder();
-		Iterator it = this.joins.iterator();
+		Iterator it = Join.buildFromSQL(this.joins).iterator();
 		while (it.hasNext()) {
-			String join = (String) it.next();
+			Join join = (Join) it.next();
 			result.addJoinCondition(join);
 		}
 		it = this.conditions.iterator();

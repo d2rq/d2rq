@@ -1,9 +1,12 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,10 +15,12 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
  *
- * TODO: Make immutable; turn getFirstColumns, getSecondColumns into lists?
+ * TODO: turn getFirstColumns, getSecondColumns into lists
+ * TODO: Make immutable
+ * TODO: Implement equals/hashCode
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.4 2006/09/14 16:22:48 cyganiak Exp $
+ * @version $Id: Join.java,v 1.5 2006/09/15 12:25:25 cyganiak Exp $
  */
 public class Join {
 	private Set fromColumns = new HashSet(2);
@@ -23,7 +28,6 @@ public class Join {
 	private Map otherSide = new HashMap(4); 
 	private RelationName fromTable = null;
 	private RelationName toTable = null;
-	private String sqlExpression=null; // cached value
 	
 	public void addCondition(String joinCondition) {
 		Attribute col1 = Join.getColumn(joinCondition, true);
@@ -32,7 +36,6 @@ public class Join {
 	}
 
 	public void addCondition(Attribute column1, Attribute column2) {
-		this.sqlExpression = null;
 		if (this.fromTable == null) {
 			this.fromTable = column1.relationName();
 			this.toTable = column2.relationName();
@@ -102,7 +105,6 @@ public class Join {
 		return return1 ? new Attribute(col1) : new Attribute(col2);
 	}
 
-	
 	/**
 	 * Builds a list of Join objects from a list of join condition
 	 * strings. Groups multiple condition that connect the same
@@ -134,32 +136,38 @@ public class Join {
 		}
 		return result;
 	}
+	
 	public static Join buildJoin(String condition) {
 		Join join = new Join();
 		join.addCondition(condition);
 		return join;
 	}
 
-	// TODO: Shouldn't be done here; Inline into toString()
-	public String sqlExpression() {
-		if (sqlExpression!=null) 
-			return sqlExpression;
-		Object[] from = this.fromColumns.toArray();
-		// jg was Object[] to = this.toColumns.toArray();
-		StringBuffer result = new StringBuffer();
-		for (int i = 0; i < from.length; i++) {
-			if (i > 0) {
-				result.append(" AND ");
+	public String toString() {
+		List attributes = (this.fromTable.compareTo(this.toTable) < 1)
+				? new ArrayList(getFirstColumns())
+				: new ArrayList(getSecondColumns());
+		Collections.sort(attributes);
+		StringBuffer result = new StringBuffer("Join(");
+		Iterator it = attributes.iterator();
+		while (it.hasNext()) {
+			Attribute attribute = (Attribute) it.next();
+			result.append(attribute.qualifiedName());
+			if (it.hasNext()) {
+				result.append(", ");
 			}
-			result.append(((Attribute)from[i]).qualifiedName());
-			result.append(" = ");
-			result.append(((Attribute)otherSide.get(from[i])).qualifiedName()); // jg was to[i]
 		}
-		sqlExpression=result.toString();
-		return sqlExpression;
-	}
-	public String toString() { 
-		return "Join(" + sqlExpression() + ")";
+		result.append(" <=> ");
+		it = attributes.iterator();
+		while (it.hasNext()) {
+			Attribute attribute = (Attribute) it.next();
+			result.append(getOtherSide(attribute).qualifiedName());
+			if (it.hasNext()) {
+				result.append(", ");
+			}
+		}
+		result.append(")");
+		return result.toString();
 	}
 
 	public Join renameColumns(ColumnRenamer columnRenamer) {

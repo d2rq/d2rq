@@ -107,7 +107,7 @@ public class PropertyBridge extends ResourceMap {
 		RelationBuilder builder = relationBuilder();
 		builder.addOther(this.belongsToClassMap.relationBuilder());
 		if (this.refersToClassMap != null) {
-			builder.addOther(this.refersToClassMap.relationBuilder());
+			builder.addAliased(this.refersToClassMap.relationBuilder());
 		}
 		return builder.buildRelation(this.belongsToClassMap.database().connectedDB()); 
 	}

@@ -6,12 +6,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+
 
 /**
  * An SQL expression.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Expression.java,v 1.3 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: Expression.java,v 1.4 2006/09/15 12:25:25 cyganiak Exp $
  */
 public class Expression {
 	public static final Expression TRUE = new Expression("1");
@@ -60,15 +62,15 @@ public class Expression {
 		if (other.isTrue()) {
 			return this;
 		}
-		return new Expression(toSQL() + " AND " + other.toSQL());
+		return new Expression(this.expression + " AND " + other.expression);
 	}
 	
-	public String toSQL() {
-		return this.expression;
+	public String toSQL(ConnectedDB database) {
+		return Attribute.quoteColumnsInExpression(this.expression, database);
 	}
 	
 	public String toString() {
-		return "Expression(" + toSQL() + ")";
+		return "Expression(" + this.expression + ")";
 	}
 	
 	/**

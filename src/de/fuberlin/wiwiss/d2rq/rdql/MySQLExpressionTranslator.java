@@ -1,16 +1,16 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * @author jgarbers
- * @version $Id: MySQLExpressionTranslator.java,v 1.3 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: MySQLExpressionTranslator.java,v 1.4 2006/09/15 12:25:25 cyganiak Exp $
  */
 public class MySQLExpressionTranslator extends ExpressionTranslator {
 
     public MySQLExpressionTranslator(ConstraintHandler handler,
-            SelectStatementBuilder sql) {
-        super(handler, sql);
+            ConnectedDB database) {
+        super(handler, database);
         putOp(concatenateOp,"CONCAT",StringType).functional=true; // mySQL
     }
     

@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
  * Tests for the map package
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AllTests.java,v 1.10 2006/09/11 23:22:27 cyganiak Exp $
+ * @version $Id: AllTests.java,v 1.11 2006/09/15 12:25:26 cyganiak Exp $
  */
 public class AllTests {
 
@@ -16,6 +16,7 @@ public class AllTests {
 		//$JUnit-BEGIN$
 		suite.addTestSuite(TranslationTableTest.class);
 		suite.addTestSuite(MappingTest.class);
+		suite.addTestSuite(CompileTest.class);
 		//$JUnit-END$
 		return suite;
 	}

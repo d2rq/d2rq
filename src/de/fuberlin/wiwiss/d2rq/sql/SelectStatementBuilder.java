@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.SingletonIterator;
@@ -25,43 +24,12 @@ import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.17 2006/09/14 16:22:48 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.18 2006/09/15 12:25:25 cyganiak Exp $
  */
-
 public class SelectStatementBuilder {
-	private final static Pattern singleQuoteEscapePattern = Pattern.compile("([\\\\'])");
-	private final static String singleQuoteEscapeReplacement = "\\\\$1";
-	private final static Pattern backtickEscapePattern = Pattern.compile("([\\\\`])");
-	private final static String backtickEscapeReplacement = "$1$1";
-	
-	/**
-	 * Wraps s in single quotes and escapes special characters to avoid SQL injection
-	 */
-	public static String singleQuote(String s) {
-		return "'" + SelectStatementBuilder.singleQuoteEscapePattern.matcher(s).
-				replaceAll(SelectStatementBuilder.singleQuoteEscapeReplacement) + "'";
-	}
-
-	/**
-	 * Wraps s in backticks and escapes special characters to avoid SQL injection
-	 */
-	public static String backtickQuote(String s) {
-		return "`" + SelectStatementBuilder.backtickEscapePattern.matcher(s).
-				replaceAll(SelectStatementBuilder.backtickEscapeReplacement) + "`";
-	}
-
-	/**
-	 * @param s Any String
-	 * @return <tt>true</tt> if it is an SQL reserved word
-	 * @see ReservedWords
-	 */
-	public static boolean isReservedWord(String s) {
-		return ReservedWords.contains(s);
-	}
-	
 	private ConnectedDB database;
 	private List selectColumns = new ArrayList(10);
-	private List conditions = new ArrayList();
+	private List conditions = new ArrayList();		// as Strings
 	private boolean eliminateDuplicates = false;
 	private AliasMap aliases = AliasMap.NO_ALIASES;
 	private Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
@@ -89,6 +57,9 @@ public class SelectStatementBuilder {
 	}
 	
 	public String getSQLStatement() {
+		if (isTrivial()) {
+			return null;
+		}
 		StringBuffer result = new StringBuffer("SELECT ");
 		if (this.eliminateDuplicates) {
 			result.append("DISTINCT ");
@@ -99,22 +70,24 @@ public class SelectStatementBuilder {
 		}
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			result.append(column.qualifiedName());
+			result.append(this.database.quoteAttribute(column));
 			if (it.hasNext()) {
 				result.append(", ");
 			}
 		}
+		result.append(" FROM ");
 		it = mentionedTables.iterator();
-		if (it.hasNext()) {
-			result.append(" FROM ");
-		}
 		while (it.hasNext()) {			
 			RelationName tableName = (RelationName) it.next();
 			if (this.aliases.isAlias(tableName)) {
-				result.append(quoteTableName(this.aliases.originalOf(tableName)));
-				result.append(" AS ");
+				result.append(this.database.quoteRelationName(this.aliases.originalOf(tableName)));
+				if (this.database.dbTypeIs(ConnectedDB.Oracle)) {
+					result.append(" ");
+				} else {
+					result.append(" AS ");
+				}
 			}
-			result.append(quoteTableName(tableName));
+			result.append(this.database.quoteRelationName(tableName));
 			if (it.hasNext()) {
 				result.append(", ");
 			}
@@ -123,8 +96,7 @@ public class SelectStatementBuilder {
 		if (it.hasNext()) {
 			result.append(" WHERE ");
 			while (it.hasNext()) {
-				Expression condition = (Expression) it.next();
-				result.append(condition.toSQL());
+				result.append((String) it.next());
 				if (it.hasNext()) {
 					result.append(" AND ");
 				}
@@ -168,38 +140,13 @@ public class SelectStatementBuilder {
      * @param value the value the column must have
      */
 	public void addColumnValue(Attribute column, String value) {
-		Expression condition = new Expression(
-				column.qualifiedName() + " = " +
-				correctlyQuotedColumnValue(column,value));
+		String condition = this.database.quoteAttribute(column) + " = " + 
+				this.database.quoteValue(value, this.aliases.originalOf(column));
 		if (this.conditions.contains(condition)) {
 			return;
 		}
 		this.conditions.add(condition);
 		this.mentionedTables.add(column.relationName());
-	}
-	
-	private String correctlyQuotedColumnValue(Attribute column, String value) {
-	    return getQuotedColumnValue(value, columnType(column));
-	}
-	
-	public int columnType(Attribute column) {
-	    return this.database.columnType(this.aliases.originalOf(column));
-	}
-
-	// TODO: Do proper quoting of schema name and table name
-	// individually; also move this method into ConnectedDB?
-	private String quoteTableName(RelationName relationName) {
-		String tableName = relationName.qualifiedName();
-		if (!isReservedWord(tableName)) {
-			// No need to quote
-			return tableName;
-		}
-		if (this.database.dbTypeIs(ConnectedDB.MySQL)) {
-			return backtickQuote(tableName);
-		}
-		// Not MySQL -- We just return the plain table name without
-		// quoting because I'm not sure how other RDBMSes handle this
-		return tableName;
 	}
 	
 	/**
@@ -222,10 +169,14 @@ public class SelectStatementBuilder {
 	 * @param condition An SQL expression
 	 */
 	public void addCondition(Expression condition) {
-		if (condition.isTrue() || this.conditions.contains(condition)) {
+		if (condition.isTrue()) {
 			return;
 		}
-		this.conditions.add(condition);
+		String sql = condition.toSQL(this.database);
+		if (this.conditions.contains(sql)) {
+			return;
+		}
+		this.conditions.add(sql);
 		Iterator it = condition.columns().iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
@@ -233,16 +184,15 @@ public class SelectStatementBuilder {
 		}
 	}
 
-	// TODO: Do SQL building here; the method in Join doesn't quote identifiers!
 	public void addJoins(Set joins) {
 		Iterator it = joins.iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			Expression expression = new Expression(join.sqlExpression());
-			if (this.conditions.contains(expression)) {
+			String sql = toSQL(join);
+			if (this.conditions.contains(sql)) {
 				continue;
 			}
-			this.conditions.add(expression);
+			this.conditions.add(sql);
 			this.mentionedTables.add(join.getFirstTable());
 			this.mentionedTables.add(join.getSecondTable());
         }
@@ -257,24 +207,19 @@ public class SelectStatementBuilder {
 		this.eliminateDuplicates = eliminateDuplicates;
 	}
 
-	private static String getQuotedColumnValue(String value, int columnType) {
-		if (columnType == ConnectedDB.NUMERIC_COLUMN) {
-			// Check if it actually is a number to avoid SQL injection
-			try {
-				return Integer.toString(Integer.parseInt(value));
-			} catch (NumberFormatException nfex) {
-				try {
-					return Double.toString(Double.parseDouble(value));
-				} catch (NumberFormatException nfex2) {
-					// No number -- return as quoted string
-					// DBs seem to interpret non-number strings as 0
-					return SelectStatementBuilder.singleQuote(value);
-				}
+	private String toSQL(Join join) {
+		StringBuffer result = new StringBuffer();
+		Iterator it = join.getFirstColumns().iterator();
+		while (it.hasNext()) {
+			Attribute attribute = (Attribute) it.next();
+			result.append(this.database.quoteAttribute(attribute));
+			result.append(" = ");
+			result.append(this.database.quoteAttribute(join.getOtherSide(attribute)));
+			if (it.hasNext()) {
+				result.append(" AND ");
 			}
-		} else if (columnType == ConnectedDB.DATE_COLUMN) {
-			return "#" + value + "#";
 		}
-		return SelectStatementBuilder.singleQuote(value);
+		return result.toString();
 	}
 	
 	/**

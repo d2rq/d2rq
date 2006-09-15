@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.15 2006/09/13 14:06:23 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.16 2006/09/15 12:25:25 cyganiak Exp $
  */
 public class ConstraintHandler {
     public boolean possible=true;
@@ -93,7 +93,7 @@ public class ConstraintHandler {
      */
 	void addRDQLConstraints(SelectStatementBuilder sql) {
 		if (this.rdqlTranslator == null) {
-			this.rdqlTranslator = sql.getDatabase().expressionTranslator(this, sql);
+			this.rdqlTranslator = sql.getDatabase().expressionTranslator(this);
 		}
         Iterator it=rdqlConstraints.iterator();
         while (possible && it.hasNext()) {

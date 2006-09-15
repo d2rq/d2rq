@@ -37,7 +37,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * TODO: Use RelationNames instead of Strings
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.14 2006/09/14 16:22:48 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.15 2006/09/15 12:25:26 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -65,13 +65,13 @@ public class MappingGenerator {
 
 	private void connectToDatabase() {
 		// TODO What URI to use here?
-		Database db = new Database(ResourceFactory.createResource());
-		db.setJDBCDSN(this.jdbcURL);
-		db.setJDBCDriver(this.driverClass);
-		db.setUsername(this.databaseUser);
-		db.setPassword(this.databasePassword);
-		this.schema = db.connectedDB().schemaInspector();
-		this.databaseType = db.connectedDB().dbType();
+		Database database = new Database(ResourceFactory.createResource());
+		database.setJDBCDSN(this.jdbcURL);
+		database.setJDBCDriver(this.driverClass);
+		database.setUsername(this.databaseUser);
+		database.setPassword(this.databasePassword);
+		this.schema = database.connectedDB().schemaInspector();
+		this.databaseType = database.connectedDB().dbType();
 	}
 	
 	public void setMapNamespaceURI(String uri) {

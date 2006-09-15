@@ -9,8 +9,8 @@ public class AllTests {
 		TestSuite suite = new TestSuite("Test for de.fuberlin.wiwiss.d2rq.sql");
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ApplyTripleMakerIteratorTest.class);
-		suite.addTestSuite(SelectStatementBuilderTest.class);
 		suite.addTestSuite(ResultRowTest.class);
+		suite.addTestSuite(SQLBuildingTest.class);
 		//$JUnit-END$
 		return suite;
 	}

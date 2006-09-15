@@ -10,7 +10,20 @@ public class JoinTest extends TestCase {
 	public void testToString() {
 		Join join = new Join();
 		join.addCondition(new Attribute("table1.foo"), new Attribute("table2.foo"));
-		assertEquals("Join(table1.foo = table2.foo)", join.toString());
+		assertEquals("Join(table1.foo <=> table2.foo)", join.toString());
+	}
+	
+	public void testToStringSmallerTableFirst() {
+		Join join = new Join();
+		join.addCondition(new Attribute("table2.foo"), new Attribute("table1.foo"));
+		assertEquals("Join(table1.foo <=> table2.foo)", join.toString());
+	}
+	
+	public void testToStringSmallerAttributeFirst() {
+		Join join = new Join();
+		join.addCondition(new Attribute("table1.foo"), new Attribute("table2.col1"));
+		join.addCondition(new Attribute("table1.bar"), new Attribute("table2.col2"));
+		assertEquals("Join(table1.bar, table1.foo <=> table2.col2, table2.col1)", join.toString());
 	}
 	
 	public void testRenameColumns() {
@@ -18,6 +31,6 @@ public class JoinTest extends TestCase {
 		map.put(new Attribute("foo.col1"), new Attribute("foo.col2"));
 		Join join = new Join();
 		join.addCondition(new Attribute("foo.col1"), new Attribute("bar.col1"));
-		assertEquals("Join(foo.col2 = bar.col1)", join.renameColumns(new ColumnRenamerMap(map)).toString());
+		assertEquals("Join(bar.col1 <=> foo.col2)", join.renameColumns(new ColumnRenamerMap(map)).toString());
 	}
 }
