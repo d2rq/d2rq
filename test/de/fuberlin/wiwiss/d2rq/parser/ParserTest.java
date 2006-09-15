@@ -8,6 +8,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
@@ -21,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.13 2006/09/15 15:31:23 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.14 2006/09/15 20:55:56 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -67,6 +68,22 @@ public class ParserTest extends TestCase {
 		AliasMap aliases = bridge.baseRelation().aliases();
 		AliasMap expected = new AliasMap(Collections.singleton(SQL.parseAlias("People AS Bosses")));
 		assertEquals(expected, aliases);
+	}
+	
+	public void testParseResourceInsteadOfLiteral() {
+		try {
+			parse("parser/resource-instead-of-literal.n3").parse();
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.MAPPING_RESOURCE_INSTEADOF_LITERAL, ex.errorCode());
+		}
+	}
+	
+	public void testParseLiteralInsteadOfResource() {
+		try {
+			parse("parser/literal-instead-of-resource.n3").parse();
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.MAPPING_LITERAL_INSTEADOF_RESOURCE, ex.errorCode());
+		}
 	}
 	
 	private MapParser parse(String testFileName) {

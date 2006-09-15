@@ -7,10 +7,12 @@ import java.util.Set;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.rdf.model.LiteralRequiredException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceRequiredException;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -30,7 +32,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.17 2006/09/13 06:37:08 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.18 2006/09/15 20:55:56 cyganiak Exp $
  */
 public class MapParser {
 
@@ -80,11 +82,19 @@ public class MapParser {
 			return this.mapping;
 		}
 		this.mapping = new Mapping();
-	    parseProcessingInstructions();
-		parseDatabases();
-		parseTranslationTables();
-		parseClassMaps();
-		parsePropertyBridges();
+		try {
+		    parseProcessingInstructions();
+			parseDatabases();
+			parseTranslationTables();
+			parseClassMaps();
+			parsePropertyBridges();
+		} catch (LiteralRequiredException ex) {
+			throw new D2RQException("Expected URI resource, found literal instead: " + ex.getMessage(),
+					D2RQException.MAPPING_RESOURCE_INSTEADOF_LITERAL);
+		} catch (ResourceRequiredException ex) {
+			throw new D2RQException("Expected literal, found URI resource instead: " + ex.getMessage(),
+					D2RQException.MAPPING_LITERAL_INSTEADOF_RESOURCE);
+		}
 		return this.mapping;
 	}
 
