@@ -9,11 +9,11 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResultRowTest.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: ResultRowTest.java,v 1.3 2006/09/15 15:31:21 cyganiak Exp $
  */
 public class ResultRowTest extends TestCase {
-	private static final Attribute col1 = new Attribute("foo.col1");
-	private static final Attribute col2 = new Attribute("foo.col2");
+	private static final Attribute col1 = new Attribute(null, "foo", "col1");
+	private static final Attribute col2 = new Attribute(null, "foo", "col2");
 	
 	public void testGetUndefinedReturnsNull() {
 		ResultRow r = new ResultRowMap(Collections.EMPTY_MAP);

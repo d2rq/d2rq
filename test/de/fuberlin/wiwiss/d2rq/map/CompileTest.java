@@ -12,6 +12,8 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 public class CompileTest extends TestCase {
 	private Model model;
@@ -70,7 +72,9 @@ public class CompileTest extends TestCase {
 	public void testAliasesInRefersToClassMapAreRenamed() {
 		RDFRelation relation = (RDFRelation) this.managerBridge.toRDFRelations().iterator().next();
 		assertEquals(
-				AliasMap.buildFromSQL(Arrays.asList(new String[]{"employees AS e", "employees AS m"})),
+				new AliasMap(Arrays.asList(new Alias[]{
+						SQL.parseAlias("employees AS e"), 
+						SQL.parseAlias("employees AS m")})),
 				relation.baseRelation().aliases());
 	}
 }

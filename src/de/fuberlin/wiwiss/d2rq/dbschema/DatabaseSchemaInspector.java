@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 /**
  * Inspects a database to retrieve schema information. 
@@ -19,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO: Input and output RelationNames instead of Strings
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.4 2006/09/14 16:22:48 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.5 2006/09/15 15:31:23 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
 	private static Pattern schemaAndTableRegex = Pattern.compile("(?:(.*)\\.)?(.*?)");
@@ -128,7 +129,7 @@ public class DatabaseSchemaInspector {
 			ResultSet rs = this.schema.getColumns(
 					null, schemaName(qualifiedTableName), tableName(qualifiedTableName), null);
 			while (rs.next()) {
-				result.add(new Attribute(qualifiedTableName + "." + rs.getString("COLUMN_NAME")));
+				result.add(SQL.parseAttribute(qualifiedTableName + "." + rs.getString("COLUMN_NAME")));
 			}
 			rs.close();
 			return result;
@@ -143,7 +144,7 @@ public class DatabaseSchemaInspector {
 			ResultSet rs = this.schema.getPrimaryKeys(
 					null, schemaName(qualifiedTableName), tableName(qualifiedTableName));
 			while (rs.next()) {
-				result.add(new Attribute(qualifiedTableName + "." + rs.getString("COLUMN_NAME")));
+				result.add(SQL.parseAttribute(qualifiedTableName + "." + rs.getString("COLUMN_NAME")));
 			}
 			rs.close();
 			return result;
@@ -161,11 +162,11 @@ public class DatabaseSchemaInspector {
 				String pkTableName = createQualifiedTableName(
 						rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
 				String pkColumnName = rs.getString("PKCOLUMN_NAME");
-				Attribute primaryColumn = new Attribute(pkTableName + "." + pkColumnName);
+				Attribute primaryColumn = SQL.parseAttribute(pkTableName + "." + pkColumnName);
 				String fkTableName = createQualifiedTableName(
 						rs.getString("FKTABLE_SCHEM"), rs.getString("FKTABLE_NAME"));
 				String fkColumnName = rs.getString("FKCOLUMN_NAME");
-				Attribute foreignColumn = new Attribute(fkTableName + "." + fkColumnName);
+				Attribute foreignColumn = SQL.parseAttribute(fkTableName + "." + fkColumnName);
 				result.add(new Attribute[]{foreignColumn, primaryColumn});
 			}
 			rs.close();

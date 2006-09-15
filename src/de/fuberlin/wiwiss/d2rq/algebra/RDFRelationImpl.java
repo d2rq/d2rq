@@ -1,16 +1,16 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelationImpl.java,v 1.4 2006/09/14 16:22:48 cyganiak Exp $
+ * @version $Id: RDFRelationImpl.java,v 1.5 2006/09/15 15:31:23 cyganiak Exp $
  */
 public class RDFRelationImpl implements RDFRelation {
 	private NodeMaker subjectMaker;
@@ -91,17 +91,15 @@ public class RDFRelationImpl implements RDFRelation {
 			Attribute column = (Attribute) it.next();
 			tables.add(column.relationName());
 		}
-		Map prefixRenames = new HashMap();
+		Collection newAliases = new ArrayList();
 		it = tables.iterator();
 		// TODO Move code to RelationName.withPrefix
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
-			prefixRenames.put(
-					new RelationName(null,
-							"T" + index + "_" + tableName.qualifiedName().replace('.', '_')), 
-					tableName);
+			newAliases.add(new Alias(tableName, new RelationName(null,
+							"T" + index + "_" + tableName.qualifiedName().replace('.', '_'))));
 		}
-		return renameColumns(new AliasMap(prefixRenames));
+		return renameColumns(new AliasMap(newAliases));
 	}
 	
 	public Collection makeTriples(ResultRow row) {

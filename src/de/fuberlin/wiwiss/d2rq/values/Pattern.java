@@ -15,13 +15,14 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 /**
  * A pattern that combines one or more database columns into a String. Often
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.3 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.4 2006/09/15 15:31:22 cyganiak Exp $
  */
 public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";
@@ -142,7 +143,7 @@ public class Pattern implements ValueMaker {
 		this.firstLiteralPart = this.pattern.substring(0, firstLiteralEnd);
 		String regexPattern = "\\Q" + this.firstLiteralPart + "\\E";
 		while (matched) {
-			this.columns.add(new Attribute(match.group(1)));
+			this.columns.add(SQL.parseAttribute(match.group(1)));
 			int nextLiteralStart = match.end();
 			matched = match.find();
 			int nextLiteralEnd = matched ? match.start() : this.pattern.length();

@@ -7,22 +7,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
-import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamerMap;
-import de.fuberlin.wiwiss.d2rq.algebra.Expression;
-
 import junit.framework.TestCase;
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerTest.java,v 1.2 2006/09/14 16:22:48 cyganiak Exp $
+ * @version $Id: ColumnRenamerTest.java,v 1.3 2006/09/15 15:31:22 cyganiak Exp $
  */
 public class ColumnRenamerTest extends TestCase {
-	private final static Attribute col1 = new Attribute("foo.col1");
-	private final static Attribute col2 = new Attribute("foo.col2");
-	private final static Attribute col3 = new Attribute("foo.col3");
+	private final static Attribute col1 = new Attribute(null, "foo", "col1");
+	private final static Attribute col2 = new Attribute(null, "foo", "col2");
+	private final static Attribute col3 = new Attribute(null, "foo", "col3");
 
 	private ColumnRenamerMap col1ToCol2;
 
@@ -82,9 +77,8 @@ public class ColumnRenamerTest extends TestCase {
 	}
 	
 	public void testApplyToAliasMapReturnsOriginal() {
-		Map map = new HashMap();
-		map.put("bar", "foo");
-		AliasMap aliases = new AliasMap(map);
+		AliasMap aliases = new AliasMap(Collections.singleton(new Alias(
+				new RelationName(null, "foo"), new RelationName(null, "bar"))));
 		assertEquals(aliases, this.col1ToCol2.applyTo(aliases));
 	}
 	
@@ -110,8 +104,8 @@ public class ColumnRenamerTest extends TestCase {
 	}
 	
 	public void testRenameWithSchema() {
-		Attribute foo_c1 = new Attribute("schema.foo.col1");
-		Attribute bar_c2 = new Attribute("schema.bar.col2");
+		Attribute foo_c1 = new Attribute("schema", "foo", "col1");
+		Attribute bar_c2 = new Attribute("schema", "bar", "col2");
 		ColumnRenamer renamer = new ColumnRenamerMap(
 				Collections.singletonMap(foo_c1, bar_c2));
 		assertEquals(bar_c2, renamer.applyTo(foo_c1));

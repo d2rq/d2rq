@@ -7,11 +7,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
+
 import junit.framework.TestCase;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExpressionTest.java,v 1.5 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: ExpressionTest.java,v 1.6 2006/09/15 15:31:22 cyganiak Exp $
  */
 public class ExpressionTest extends TestCase {
 
@@ -44,7 +46,8 @@ public class ExpressionTest extends TestCase {
 		Expression e = new Expression(Arrays.asList(
 				new String[]{"papers.publish = 1", "papers.rating > 4"}));
 		Set expectedColumns = new HashSet(Arrays.asList(
-				new Attribute[]{new Attribute("papers.publish"), new Attribute("papers.rating")}));
+				new Attribute[]{new Attribute(null, "papers", "publish"), 
+						new Attribute(null, "papers", "rating")}));
 		assertEquals(expectedColumns, e.columns());
 	}
 	
@@ -69,15 +72,14 @@ public class ExpressionTest extends TestCase {
 	}
 	
 	public void testRenameColumnsWithAliasMap() {
-		Map map = new HashMap();
-		map.put(new RelationName(null, "bar"), new RelationName(null, "foo"));
+		Alias a = new Alias(new RelationName(null, "foo"), new RelationName(null, "bar"));
 		assertEquals(new Expression("bar.col1 = baz.col1"),
-				new Expression("foo.col1 = baz.col1").renameColumns(new AliasMap(map)));
+				new Expression("foo.col1 = baz.col1").renameColumns(new AliasMap(Collections.singleton(a))));
 	}
 	
 	public void testRenameColumnsWithColumnReplacer() {
 		Map map = new HashMap();
-		map.put(new Attribute("foo.col1"), new Attribute("foo.col2"));
+		map.put(new Attribute(null, "foo", "col1"), new Attribute(null, "foo", "col2"));
 		assertEquals(new Expression("foo.col2=foo.col3"), 
 				new Expression("foo.col1=foo.col3").renameColumns(new ColumnRenamerMap(map)));
 	}

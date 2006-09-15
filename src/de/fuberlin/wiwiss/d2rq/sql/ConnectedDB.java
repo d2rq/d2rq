@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.4 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.5 2006/09/15 15:31:23 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -115,7 +115,7 @@ public class ConnectedDB {
 	}
 	
     public int columnType(String qualifiedColumnName) {
-		return columnType(new Attribute(qualifiedColumnName));
+		return columnType(SQL.parseAttribute(qualifiedColumnName));
     }
     
     /**

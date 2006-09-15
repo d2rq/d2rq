@@ -1,23 +1,20 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
-import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.Expression;
-import de.fuberlin.wiwiss.d2rq.algebra.Join;
-import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
-
 import junit.framework.TestCase;
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.3 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.4 2006/09/15 15:31:22 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static RelationName foo = new RelationName(null, "foo");
@@ -32,16 +29,10 @@ public class AliasMapTest extends TestCase {
 	private Alias fooAsBar = new Alias(foo, bar);
 	private Alias fooAsBaz = new Alias(foo, baz);
 	private Alias bazAsBar = new Alias(baz, bar);
-	private AliasMap fooAsBarMap;
-	
-	public void setUp() {
-		Map m = new HashMap();
-		m.put(bar, foo);
-		this.fooAsBarMap = new AliasMap(m);
-	}
+	private AliasMap fooAsBarMap = new AliasMap(Collections.singleton(new Alias(foo, bar)));
 	
 	public void testEmptyMapDoesIdentityTranslation() {
-		AliasMap aliases = new AliasMap(Collections.EMPTY_MAP);
+		AliasMap aliases = AliasMap.NO_ALIASES;
 		assertFalse(aliases.isAlias(foo));
 		assertFalse(aliases.hasAlias(foo));
 		assertEquals(foo, aliases.applyTo(foo));
@@ -112,7 +103,7 @@ public class AliasMapTest extends TestCase {
 	}
 
 	public void testNoAliasesConstantEqualsNewEmptyAliasMap() {
-		AliasMap noAliases = new AliasMap(Collections.EMPTY_MAP);
+		AliasMap noAliases = new AliasMap(Collections.EMPTY_LIST);
 		assertTrue(AliasMap.NO_ALIASES.equals(noAliases));
 		assertTrue(noAliases.equals(AliasMap.NO_ALIASES));
 	}
@@ -130,39 +121,23 @@ public class AliasMapTest extends TestCase {
 	}
 	
 	public void testPopulatedMapEqualsItself() {
-		Map m = new HashMap();
-		m.put(bar, foo);
-		AliasMap fooAsBar2 = new AliasMap(m);
+		AliasMap fooAsBar2 = new AliasMap(Collections.singleton(new Alias(foo, bar)));
 		assertTrue(fooAsBarMap.equals(fooAsBar2));
 		assertTrue(fooAsBar2.equals(fooAsBarMap));
 	}
 	
 	public void testPopulatedMapDoesNotEqualDifferentMap() {
-		Map m = new HashMap();
-		m.put(baz, foo);
-		AliasMap fooAsBaz = new AliasMap(m);
+		AliasMap fooAsBaz = new AliasMap(Collections.singleton(new Alias(foo, baz)));
 		assertFalse(fooAsBarMap.equals(fooAsBaz));
 		assertFalse(fooAsBaz.equals(fooAsBarMap));
 	}
 	
 	public void testEqualMapsHaveSameHashCode() {
-		AliasMap m1 = new AliasMap(new HashMap());
-		AliasMap m2 = new AliasMap(new HashMap());
+		AliasMap m1 = new AliasMap(new ArrayList());
+		AliasMap m2 = new AliasMap(new ArrayList());
 		assertEquals(m1.hashCode(), m2.hashCode());
 	}
 	
-	public void testBuildFromSQL() {
-		assertEquals(AliasMap.NO_ALIASES, AliasMap.buildFromSQL(Collections.EMPTY_SET));
-		assertEquals(fooAsBarMap, AliasMap.buildFromSQL(Collections.singleton("foo AS bar")));
-		assertEquals(fooAsBarMap, AliasMap.buildFromSQL(Collections.singleton("foo as bar")));
-	}
-
-	public void testParseSQL() {
-		assertEquals(
-				new Alias(new RelationName(null, "table1"), new RelationName("schema", "table2")),
-				AliasMap.buildAlias("table1 AS schema.table2"));
-	}
-
 	public void testAliasEquals() {
 		Alias fooAsBar2 = new Alias(foo, bar);
 		assertEquals(fooAsBar, fooAsBar2);
@@ -200,18 +175,18 @@ public class AliasMapTest extends TestCase {
 	}
 	
 	public void testToStringTwoAliases() {
-		Map m = new HashMap();
-		m.put(bar, foo);
-		m.put(new RelationName(null, "xyz"), new RelationName(null, "abc"));
+		Collection aliases = new ArrayList();
+		aliases.add(fooAsBar);
+		aliases.add(new Alias(new RelationName(null, "abc"), new RelationName(null, "xyz")));
 		// Order is alphabetical by alias
-		assertEquals("AliasMap(foo AS bar, abc AS xyz)", new AliasMap(m).toString());
+		assertEquals("AliasMap(foo AS bar, abc AS xyz)", new AliasMap(aliases).toString());
 	}
 	
 	public void testWithSchema() {
 		RelationName table = new RelationName(null, "table");
 		RelationName schema_table = new RelationName("schema", "table");
 		RelationName schema_alias = new RelationName("schema", "alias");
-		AliasMap m = new AliasMap(Collections.singletonMap(schema_alias, schema_table));
+		AliasMap m = new AliasMap(Collections.singleton(new Alias(schema_table, schema_alias)));
 		assertEquals(schema_alias, m.applyTo(schema_table));
 		assertEquals(table, m.applyTo(table));
 	}

@@ -8,9 +8,10 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Test for de.fuberlin.wiwiss.d2rq.sql");
 		//$JUnit-BEGIN$
+		suite.addTestSuite(SQLBuildingTest.class);
 		suite.addTestSuite(ApplyTripleMakerIteratorTest.class);
 		suite.addTestSuite(ResultRowTest.class);
-		suite.addTestSuite(SQLBuildingTest.class);
+		suite.addTestSuite(SQLSyntaxTest.class);
 		//$JUnit-END$
 		return suite;
 	}

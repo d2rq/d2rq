@@ -8,19 +8,20 @@ import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 /**
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.2 2006/09/11 23:02:48 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.3 2006/09/15 15:31:22 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
-	private final static Attribute col1 = new Attribute("table.col1");
-	private final static Attribute col2 = new Attribute("table.col2");
-	private final static Attribute col3 = new Attribute("table.col3");
-	private final static Attribute col4 = new Attribute("table.col4");
-	private final static Attribute col5 = new Attribute("table.col5");
+	private final static Attribute col1 = new Attribute(null, "table", "col1");
+	private final static Attribute col2 = new Attribute(null, "table", "col2");
+	private final static Attribute col3 = new Attribute(null, "table", "col3");
+	private final static Attribute col4 = new Attribute(null, "table", "col4");
+	private final static Attribute col5 = new Attribute(null, "table", "col5");
 
 	private ResultRow row;
 
@@ -192,7 +193,7 @@ public class PatternTest extends TestCase {
 		assertTrue(it.hasNext());
 		assertEquals("foo", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Attribute("table.col1"), it.next());
+		assertEquals(col1, it.next());
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertFalse(it.hasNext());
@@ -203,7 +204,7 @@ public class PatternTest extends TestCase {
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Attribute("table.col1"), it.next());
+		assertEquals(col1, it.next());
 		assertTrue(it.hasNext());
 		assertEquals("foo", it.next());
 		assertFalse(it.hasNext());
@@ -214,11 +215,11 @@ public class PatternTest extends TestCase {
 		assertTrue(it.hasNext());
 		assertEquals("foo", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Attribute("table.col1"), it.next());
+		assertEquals(col1, it.next());
 		assertTrue(it.hasNext());
 		assertEquals("bar", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Attribute("table.col2"), it.next());
+		assertEquals(col2, it.next());
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertFalse(it.hasNext());
@@ -229,11 +230,11 @@ public class PatternTest extends TestCase {
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Attribute("table.col1"), it.next());
+		assertEquals(col1, it.next());
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertTrue(it.hasNext());
-		assertEquals(new Attribute("table.col2"), it.next());
+		assertEquals(col2, it.next());
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertFalse(it.hasNext());
@@ -254,7 +255,7 @@ public class PatternTest extends TestCase {
 		Iterator it = expectedValues.keySet().iterator();
 		while (it.hasNext()) {
 			String name = (String) it.next();
-			Attribute column = new Attribute(name);
+			Attribute column = SQL.parseAttribute(name);
 			assertTrue("missing column " + column, actualValues.containsKey(column));
 			assertEquals(expectedValues.get(name), actualValues.get(column));
 		}

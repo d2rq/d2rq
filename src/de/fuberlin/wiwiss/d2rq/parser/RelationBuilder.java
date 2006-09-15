@@ -44,8 +44,8 @@ public class RelationBuilder {
 		this.condition = this.condition.and(new Expression(condition));
 	}
 	
-	public void addAlias(String aliasExpression) {
-		this.aliases.add(AliasMap.buildAlias(aliasExpression));
+	public void addAlias(Alias alias) {
+		this.aliases.add(alias);
 	}
 	
 	public void addJoinCondition(Join joinCondition) {

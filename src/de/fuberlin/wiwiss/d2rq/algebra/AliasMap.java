@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 /**
  * A map from table names to aliases. A table must have at most one alias. Can be applied
@@ -22,12 +19,10 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * TODO: Reframe from "Map" to "Collection of Aliases"
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.3 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.4 2006/09/15 15:31:23 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_SET);
-	private static final Pattern aliasPattern = 
-			Pattern.compile("(.+)\\s+AS\\s+(.+)", Pattern.CASE_INSENSITIVE);
 	
 	public static class Alias {
 		private RelationName original;
@@ -54,41 +49,10 @@ public class AliasMap extends ColumnRenamer {
 		}
 	}
 	
-	public static Alias buildAlias(String aliasExpression) {
-		Matcher matcher = aliasPattern.matcher(aliasExpression);
-		if (!matcher.matches()) {
-			throw new D2RQException("d2rq:alias '" + aliasExpression +
-					"' is not in 'table AS alias' form");
-		}
-		return new Alias(new RelationName(matcher.group(1)), new RelationName(matcher.group(2)));
-	}
-	
-	/**
-	 * Builds an AliasMap from a collection of "Table AS Alias" expressions.
-	 * @param aliasExpressions a Collection of Strings
-	 * @return a corresponding AliasMap
-	 */	
-	public static AliasMap buildFromSQL(Collection aliasExpressions) {
-		Collection aliases = new HashSet();
-		Iterator it = aliasExpressions.iterator();
-		while (it.hasNext()) {
-			aliases.add(buildAlias((String) it.next()));
-		}
-		return new AliasMap(aliases);
-	}
-
-	private Map aliasesToOriginals;
-	private Map originalsToAliases;
-	
-	// TODO: Kill this constructor
-	public AliasMap(Map aliasesToOriginals) {
-		this.aliasesToOriginals = new HashMap(aliasesToOriginals);
-		this.originalsToAliases = invertMap(aliasesToOriginals);
-	}
+	private Map aliasesToOriginals = new HashMap();
+	private Map originalsToAliases = new HashMap();
 	
 	public AliasMap(Collection aliases) {
-		this.aliasesToOriginals = new HashMap();
-		this.originalsToAliases = new HashMap();
 		Iterator it = aliases.iterator();
 		while (it.hasNext()) {
 			Alias alias = (Alias) it.next();
@@ -123,14 +87,14 @@ public class AliasMap extends ColumnRenamer {
 		if (!hasAlias(column.relationName())) {
 			return column;
 		}
-		return new Attribute(applyTo(column.relationName()) + "." + column.attributeName());
+		return SQL.parseAttribute(applyTo(column.relationName()) + "." + column.attributeName());
 	}
 	
 	public Attribute originalOf(Attribute column) {
 		if (!isAlias(column.relationName())) {
 			return column;
 		}
-		return new Attribute(originalOf(column.relationName()) + "." + column.attributeName());
+		return SQL.parseAttribute(originalOf(column.relationName()) + "." + column.attributeName());
 	}
 	
 	public Alias originalOf(Alias alias) {
@@ -152,16 +116,16 @@ public class AliasMap extends ColumnRenamer {
 		if (other == null) {
 			return this;
 		}
-		Map newAliases = new HashMap();
+		Collection newAliases = new ArrayList();
 		Iterator it = other.aliasesToOriginals.keySet().iterator();
 		while (it.hasNext()) {
 			RelationName alias = (RelationName) it.next();
-			newAliases.put(applyTo(alias), other.originalOf(alias));
+			newAliases.add(new Alias(other.originalOf(alias), applyTo(alias)));
 		}
 		it = this.aliasesToOriginals.keySet().iterator();
 		while (it.hasNext()) {
 			RelationName alias = (RelationName) it.next();
-			newAliases.put(alias, originalOf(alias));
+			newAliases.add(new Alias(originalOf(alias), alias));
 		}
 		return new AliasMap(newAliases);
 	}

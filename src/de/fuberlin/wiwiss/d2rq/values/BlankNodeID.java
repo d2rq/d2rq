@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,26 +22,24 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeID.java,v 1.3 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: BlankNodeID.java,v 1.4 2006/09/15 15:31:22 cyganiak Exp $
  */
 public class BlankNodeID implements ValueMaker {
 	private final static String DELIMITER = "@@";
+
 	private String classMapID;
-	private List attributes = new ArrayList(3);
+	private List attributes;
 	
 	/**
 	 * Constructs a new blank node identifier.
-	 * @param columns a comma-seperated list of column names uniquely
-	 * identifying the nodes
-	 * @param classMapID a string that is unique for the class map
-	 * whose resources are identified by this BlankNodeIdentifier 
+	 * @param classMapID A string that is unique for the class map
+	 * 		whose resources are identified by this BlankNodeIdentifier 
+	 * @param attributes A set of {@link Attribute}s that uniquely
+	 * 		identify the nodes
 	 */
-	public BlankNodeID(String columns, String classMapID) {
+	public BlankNodeID(String classMapID, List attributes) {
 		this.classMapID = classMapID;
-		Iterator it = Arrays.asList(columns.split(",")).iterator();
-		while (it.hasNext()) {
-			this.attributes.add(new Attribute((String) it.next()));
-		}
+		this.attributes = attributes;
 	}
 
 	public void matchConstraint(NodeConstraint c) {
@@ -107,16 +104,13 @@ public class BlankNodeID implements ValueMaker {
 	}
 	
 	public ValueMaker replaceColumns(ColumnRenamer renamer) {
-		StringBuffer columns = new StringBuffer();
+		List replacedAttributes = new ArrayList();
 		Iterator it = this.attributes.iterator();
 		while (it.hasNext()) {
 			Attribute attribute = (Attribute) it.next();
-			columns.append(renamer.applyTo(attribute).qualifiedName());
-			if (it.hasNext()) {
-				columns.append(",");
-			}
+			replacedAttributes.add(renamer.applyTo(attribute));
 		}
-		return new BlankNodeID(columns.toString(), this.classMapID);
+		return new BlankNodeID(this.classMapID, replacedAttributes);
 	}
 	
 	public String toString() {

@@ -7,7 +7,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLBuildingTest.java,v 1.1 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: SQLBuildingTest.java,v 1.2 2006/09/15 15:31:21 cyganiak Exp $
  */
 public class SQLBuildingTest extends TestCase {
 
@@ -107,7 +107,7 @@ public class SQLBuildingTest extends TestCase {
 
 	public void testQueryWithSelectColumnsIsNotTrivial() {
 		SelectStatementBuilder builder = new SelectStatementBuilder(createFakeDatabase());
-		builder.addSelectColumn(new Attribute("foo.bar"));
+		builder.addSelectColumn(new Attribute(null, "foo", "bar"));
 		assertFalse(builder.isTrivial());
 	}
 	

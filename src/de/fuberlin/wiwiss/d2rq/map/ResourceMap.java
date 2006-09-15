@@ -21,6 +21,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker.NodeType;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Column;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
@@ -30,7 +31,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.3 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.4 2006/09/15 15:31:22 cyganiak Exp $
  */
 public abstract class ResourceMap extends MapObject {
 	protected static final Property valueProperty = 
@@ -135,7 +136,7 @@ public abstract class ResourceMap extends MapObject {
 		it = this.aliases.iterator();
 		while (it.hasNext()) {
 			String alias = (String) it.next();
-			result.addAlias(alias);
+			result.addAlias(SQL.parseAlias(alias));
 		}
 		return result;
 	}
@@ -176,17 +177,17 @@ public abstract class ResourceMap extends MapObject {
 	
 	private ValueMaker buildValueSourceBase() {
 		if (this.bNodeIdColumns != null) {
-			return new BlankNodeID(this.bNodeIdColumns, 
-					PrettyPrinter.toString(this.resource()));
+			return new BlankNodeID(PrettyPrinter.toString(this.resource()),
+					parseColumnList(this.bNodeIdColumns));
 		}
 		if (this.uriColumn != null) {
-			return new Column(this.uriColumn);
+			return new Column(SQL.parseAttribute(this.uriColumn));
 		}
 		if (this.uriPattern != null) {
 			return new Pattern(this.uriPattern);
 		}
 		if (this.column != null) {
-			return new Column(this.column);
+			return new Column(SQL.parseAttribute(this.column));
 		}
 		if (this.pattern != null) {
 			return new Pattern(this.pattern);
@@ -248,6 +249,15 @@ public abstract class ResourceMap extends MapObject {
 		return TypeMapper.getInstance().getSafeTypeByName(datatypeURI);		
 	}
 
+	private List parseColumnList(String commaSeperated) {
+		List result = new ArrayList();
+		Iterator it = Arrays.asList(commaSeperated.split(",")).iterator();
+		while (it.hasNext()) {
+			result.add(SQL.parseAttribute((String) it.next()));
+		}
+		return result;
+	}
+	
 	protected void assertHasPrimarySpec(Property[] allowedSpecs) {
 		List definedSpecs = new ArrayList();
 		Iterator it = Arrays.asList(allowedSpecs).iterator();

@@ -14,16 +14,12 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * column.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.2 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: Column.java,v 1.3 2006/09/15 15:31:22 cyganiak Exp $
  */
 public class Column implements ValueMaker {
 	private Attribute attribute;
 	private Set attributeAsSet;
 	
-	public Column(String qualifiedName) {
-		this(new Attribute(qualifiedName));
-	}
-
 	public Column(Attribute attribute) {
 		this.attribute = attribute;
 		this.attributeAsSet = Collections.singleton(this.attribute);

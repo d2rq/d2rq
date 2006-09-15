@@ -1,99 +1,15 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
-
-import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-
 /**
  * A database column.
  *
- * TODO: findColumnsInExpression and renameColumnsInExpression will fail
- *       e.g. for coumn names occuring inside string literals
- *
- * TODO: Extract a RelationName class that encapsulates table and schema name.
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Attribute.java,v 1.4 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: Attribute.java,v 1.5 2006/09/15 15:31:23 cyganiak Exp $
  */
 public class Attribute implements Comparable {
-	private static final java.util.regex.Pattern attributeRegex = 
-			java.util.regex.Pattern.compile(
-					// Optional schema name and dot, group 1 is schema name
-					"(?:([a-zA-Z_]\\w*)\\.)?" +
-					// Required table name and dot, group 2 is table name
-					"([a-zA-Z_]\\w*)\\." +
-					// Required column name, is group 3
-					"([a-zA-Z_]\\w*)");
-
-	public static Set findColumnsInExpression(String expression) {
-		Set results = new HashSet();
-		Matcher match = attributeRegex.matcher(expression);
-		while (match.find()) {
-			results.add(new Attribute(match.group(1), match.group(2), match.group(3)));
-		}
-		return results;
-	}
-
-	public static String replaceColumnsInExpression(String expression, ColumnRenamer columnRenamer) {
-		StringBuffer result = new StringBuffer();
-		Matcher match = attributeRegex.matcher(expression);
-		boolean matched = match.find();
-		int firstPartEnd = matched ? match.start() : expression.length();
-		result.append(expression.substring(0, firstPartEnd));
-		while (matched) {
-			Attribute column = new Attribute(match.group(1), match.group(2), match.group(3));
-			result.append(columnRenamer.applyTo(column).qualifiedName());
-			int nextPartStart = match.end();
-			matched = match.find();
-			int nextPartEnd = matched ? match.start() : expression.length();
-			result.append(expression.substring(nextPartStart, nextPartEnd));
-		}
-		return result.toString();
-	}
-
-	// TODO: This really should happen in Expression and without string munging
-	public static String quoteColumnsInExpression(String expression, ConnectedDB database) {
-		StringBuffer result = new StringBuffer();
-		Matcher match = attributeRegex.matcher(expression);
-		boolean matched = match.find();
-		int firstPartEnd = matched ? match.start() : expression.length();
-		result.append(expression.substring(0, firstPartEnd));
-		while (matched) {
-			result.append(database.quoteAttribute(
-					new Attribute(match.group(1), match.group(2), match.group(3))));
-			int nextPartStart = match.end();
-			matched = match.find();
-			int nextPartEnd = matched ? match.start() : expression.length();
-			result.append(expression.substring(nextPartStart, nextPartEnd));
-		}
-		return result.toString();
-	}
-	
 	private String attributeName;
 	private RelationName relationName;
 	private String qualifiedName;
-
-	/**
-	 * Constructs a new Column from a fully qualified column name in <tt>Table.Column</tt>
-	 * or <tt>Schema.Table.Column</tt> notation.
-	 * 
-	 * TODO: This constructor shouldn't be used except when parsing stuff from the mapping file
-	 *       to reduce potential problems with funky column names. Move to a helper method closer to the parser?
-	 * 
-	 * @param qualifiedName The column's name
-	 */
-	public Attribute(String qualifiedName) {
-		Matcher match = attributeRegex.matcher(qualifiedName);
-		if (!match.matches()) {
-			throw new D2RQException("\"" + qualifiedName + "\" is not in \"[schema.]table.column\" notation");
-		}
-		this.qualifiedName = qualifiedName;
-		this.relationName = new RelationName(match.group(1), match.group(2));
-		this.attributeName =  match.group(3);
-	}
 
 	/**
 	 * Constructs a new attribute from a schema name, table name

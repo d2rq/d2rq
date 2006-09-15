@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 
 /**
  * An SQL expression.
  * 
+ * TODO: Shouldn't call to SQL so much
+ *  
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Expression.java,v 1.4 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: Expression.java,v 1.5 2006/09/15 15:31:23 cyganiak Exp $
  */
 public class Expression {
 	public static final Expression TRUE = new Expression("1");
@@ -40,7 +43,7 @@ public class Expression {
 				}
 			}
 		}
-		this.columns = Attribute.findColumnsInExpression(this.expression);
+		this.columns = SQL.findColumnsInExpression(this.expression);
 	}
 
 	public boolean isTrue() {
@@ -52,7 +55,7 @@ public class Expression {
 	}
 	
 	public Expression renameColumns(ColumnRenamer columnRenamer) {
-		return new Expression(Attribute.replaceColumnsInExpression(this.expression, columnRenamer));
+		return new Expression(SQL.replaceColumnsInExpression(this.expression, columnRenamer));
 	}
 	
 	public Expression and(Expression other) {
@@ -66,7 +69,7 @@ public class Expression {
 	}
 	
 	public String toSQL(ConnectedDB database) {
-		return Attribute.quoteColumnsInExpression(this.expression, database);
+		return SQL.quoteColumnsInExpression(this.expression, database);
 	}
 	
 	public String toString() {

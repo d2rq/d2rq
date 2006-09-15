@@ -1,18 +1,23 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
+import java.util.Arrays;
 import java.util.Collections;
+
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 
 import junit.framework.TestCase;
 
 public class ValueMakerTest extends TestCase {
-
+	private final static Attribute foo_col1 = new Attribute(null, "foo", "col1");
+	private final static Attribute foo_col2 = new Attribute(null, "foo", "col2");
+	
 	public void testBlankNodeIDToString() {
-		BlankNodeID b = new BlankNodeID("table.col1,table.col2", "classmap1");
-		assertEquals("BlankNodeID(table.col1,table.col2)", b.toString());
+		BlankNodeID b = new BlankNodeID("classmap1", Arrays.asList(new Attribute[]{foo_col1, foo_col2}));
+		assertEquals("BlankNodeID(foo.col1,foo.col2)", b.toString());
 	}
 
 	public void testColumnToString() {
-		assertEquals("Column(foo.bar)", new Column("foo.bar").toString());
+		assertEquals("Column(foo.col1)", new Column(foo_col1).toString());
 	}
 	
 	public void testPatternToString() {
@@ -20,9 +25,9 @@ public class ValueMakerTest extends TestCase {
 	}
 	
 	public void testValueDecoratorWithoutTranslatorToString() {
-		assertEquals("Column(foo.bar):maxLength=10",
+		assertEquals("Column(foo.col1):maxLength=10",
 				new ValueDecorator(
-						new Column("foo.bar"), 
+						new Column(foo_col1), 
 						Collections.singletonList(ValueDecorator.maxLengthConstraint(10))).toString());
 	}
 	

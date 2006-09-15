@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
@@ -20,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * TODO: Implement equals/hashCode
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.5 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: Join.java,v 1.6 2006/09/15 15:31:23 cyganiak Exp $
  */
 public class Join {
 	private Set fromColumns = new HashSet(2);
@@ -102,7 +103,7 @@ public class Join {
 		if (!first) {
 			return1 = !return1;
 		}
-		return return1 ? new Attribute(col1) : new Attribute(col2);
+		return return1 ? SQL.parseAttribute(col1) : SQL.parseAttribute(col2);
 	}
 
 	/**

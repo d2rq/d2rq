@@ -13,6 +13,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.values.Translator;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
@@ -20,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.12 2006/09/12 12:06:19 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.13 2006/09/15 15:31:23 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -64,7 +65,7 @@ public class ParserTest extends TestCase {
 		RDFRelation bridge = (RDFRelation) mapping.compiledPropertyBridges().iterator().next();
 		assertTrue(bridge.baseRelation().condition().isTrue());
 		AliasMap aliases = bridge.baseRelation().aliases();
-		AliasMap expected = AliasMap.buildFromSQL(Collections.singleton("People AS Bosses"));
+		AliasMap expected = new AliasMap(Collections.singleton(SQL.parseAlias("People AS Bosses")));
 		assertEquals(expected, aliases);
 	}
 	
