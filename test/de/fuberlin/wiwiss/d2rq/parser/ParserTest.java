@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.14 2006/09/15 20:55:56 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.15 2006/09/16 13:22:29 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -88,7 +88,7 @@ public class ParserTest extends TestCase {
 	
 	private MapParser parse(String testFileName) {
 		Model m = ModelFactory.createDefaultModel();
-		m.read(D2RQTestSuite.DIRECTORY + testFileName, "N3");
+		m.read(D2RQTestSuite.DIRECTORY_URL + testFileName, "N3");
 		MapParser result = new MapParser(m, null);
 		result.parse();
 		return result;

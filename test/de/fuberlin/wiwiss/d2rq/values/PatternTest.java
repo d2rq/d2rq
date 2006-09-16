@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.4 2006/09/15 20:38:04 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.5 2006/09/16 13:22:29 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "table", "col1");
@@ -252,7 +252,7 @@ public class PatternTest extends TestCase {
 		assertEquals(p1.hashCode(), p2.hashCode());
 	}
 	
-	public void testPatternsWithDifferentColumnsAreNotEquals() {
+	public void testPatternsWithDifferentColumnsAreNotEqual() {
 		Pattern p1 = new Pattern("foo@@table.col1@@");
 		Pattern p2 = new Pattern("foo@@table.col2@@");
 		assertFalse(p1.equals(p2));
@@ -260,7 +260,7 @@ public class PatternTest extends TestCase {
 		assertFalse(p1.hashCode() == p2.hashCode());
 	}
 
-	public void testPatternsWithDifferentLiteralPartsAreNotEquals() {
+	public void testPatternsWithDifferentLiteralPartsAreNotEqual() {
 		Pattern p1 = new Pattern("foo@@table.col1@@");
 		Pattern p2 = new Pattern("bar@@table.col1@@");
 		assertFalse(p1.equals(p2));
@@ -268,6 +268,34 @@ public class PatternTest extends TestCase {
 		assertFalse(p1.hashCode() == p2.hashCode());
 	}
 
+	public void testIdenticalPatternsAreCompatible() {
+		Pattern p1 = new Pattern("foo@@table.col1@@");
+		Pattern p2 = new Pattern("foo@@table.col1@@");
+		assertTrue(p1.isCompatibleWith(p2));
+		assertTrue(p2.isCompatibleWith(p1));
+	}
+	
+	public void testPatternsWithDifferentColumnNamesAreCompatible() {
+		Pattern p1 = new Pattern("foo@@table.col1@@");
+		Pattern p2 = new Pattern("foo@@table.col2@@");
+		assertTrue(p1.isCompatibleWith(p2));
+		assertTrue(p2.isCompatibleWith(p1));
+	}
+	
+	public void testPatternsWithDifferentLiteralPartsAreNotCompatible() {
+		Pattern p1 = new Pattern("foo@@table.col1@@");
+		Pattern p2 = new Pattern("bar@@table.col1@@");
+		assertFalse(p1.isCompatibleWith(p2));
+		assertFalse(p2.isCompatibleWith(p1));
+	}
+	
+	public void testMultiColumnPatternsWithDifferentLiteralPartsAreNotCompatible() {
+		Pattern p1 = new Pattern("foo@@table.col1@@bar@@table.col2@@abc");
+		Pattern p2 = new Pattern("foo@@table.col1@@bar@@table.col2@@xyz");
+		assertFalse(p1.isCompatibleWith(p2));
+		assertFalse(p2.isCompatibleWith(p1));
+	}
+	
 	private void assertPattern(String expected, String pattern) {
 		Pattern p = new Pattern(pattern);
 		assertEquals(expected, p.makeValue(this.row));

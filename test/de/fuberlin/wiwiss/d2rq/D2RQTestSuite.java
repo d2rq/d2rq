@@ -7,10 +7,11 @@ import junit.framework.TestSuite;
  * Test suite for D2RQ
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQTestSuite.java,v 1.6 2006/09/12 12:06:18 cyganiak Exp $
+ * @version $Id: D2RQTestSuite.java,v 1.7 2006/09/16 13:22:28 cyganiak Exp $
  */
 public class D2RQTestSuite {
-	public static final String DIRECTORY = "file:test/de/fuberlin/wiwiss/d2rq/";
+	public static final String DIRECTORY = "test/de/fuberlin/wiwiss/d2rq/";
+	public static final String DIRECTORY_URL = "file:" + DIRECTORY;
 	public static final String ISWC_MAP = "file:doc/example/mapping-iswc.n3"; 
 
 	public static void main(String[] args) {

@@ -15,6 +15,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.hp.hpl.jena.query.util.RelURI;
+
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
 
@@ -25,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
  * from the second.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTableParser.java,v 1.1 2006/09/12 12:06:17 cyganiak Exp $
+ * @version $Id: TranslationTableParser.java,v 1.2 2006/09/16 13:22:29 cyganiak Exp $
  */
 public class TranslationTableParser {
 	private Log log = LogFactory.getLog(TranslationTableParser.class);
@@ -39,12 +41,12 @@ public class TranslationTableParser {
 	
 	public TranslationTableParser(String url) {
 		try {
-			this.reader = new BufferedReader(new FileReader(new File(new URI(url))));
-			this.url = url;
+			this.url = RelURI.resolve(url);;
+			this.reader = new BufferedReader(new FileReader(new File(new URI(this.url))));
 		} catch (FileNotFoundException fnfex) {
-			throw new D2RQException("File not found: " + url);
+			throw new D2RQException("File not found at URL: " + this.url);
 		} catch (URISyntaxException usynex) {
-			throw new D2RQException("Malformed URI: " + url);
+			throw new D2RQException("Malformed URI: " + this.url);
 		}
 	}
 	

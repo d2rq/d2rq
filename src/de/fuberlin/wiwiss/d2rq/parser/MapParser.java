@@ -1,12 +1,12 @@
 package de.fuberlin.wiwiss.d2rq.parser;
 
-import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.query.util.RelURI;
 import com.hp.hpl.jena.rdf.model.LiteralRequiredException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -32,7 +32,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.18 2006/09/15 20:55:56 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.19 2006/09/16 13:22:29 cyganiak Exp $
  */
 public class MapParser {
 
@@ -49,14 +49,7 @@ public class MapParser {
 		if (uri == null) {
 			return null;
 		}
-		String n3 = "<> a 'foo' .";
-		Model m = ModelFactory.createDefaultModel();
-		m.read(new StringReader(n3), uri, "N3");
-		String absolute = m.listStatements().nextStatement().getSubject().getURI();
-		if (uri.indexOf("#") > -1) {
-			absolute += uri.substring(uri.indexOf("#"));
-		}
-		return absolute;
+		return RelURI.resolve(uri);
 	}
 	
 	private OntModel model;
