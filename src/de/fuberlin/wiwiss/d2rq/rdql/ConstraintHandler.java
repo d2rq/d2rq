@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.16 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.17 2006/09/16 14:19:20 cyganiak Exp $
  */
 public class ConstraintHandler {
     public boolean possible=true;
@@ -58,7 +58,7 @@ public class ConstraintHandler {
                 NodeMakerIterator e=makeNodeMakerIterator(varIndices);
                  while (possible && e.hasNext()) {
                     NodeMaker n = e.nextNodeMaker();
-                    n.matchConstraint(c);
+                    n.describeSelf(c);
                     possible = c.isPossible();
                 }
             } while (possible && c.infoAdded());
@@ -74,7 +74,7 @@ public class ConstraintHandler {
     public void addConstraintsToSQL(SelectStatementBuilder sql) {
         Iterator it=variableToConstraint.values().iterator();
         while (it.hasNext()) {
-            NodeConstraint c=(NodeConstraint)it.next();
+            NodeConstraintImpl c=(NodeConstraintImpl)it.next();
             c.addConstraintsToSQL(sql);
         }
         addRDQLConstraints(sql);

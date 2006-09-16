@@ -42,7 +42,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  *   2) SQL dialects
  *   3) Variable translators
  * @author jgarbers
- * @version $Id: ExpressionTranslator.java,v 1.19 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: ExpressionTranslator.java,v 1.20 2006/09/16 14:19:20 cyganiak Exp $
  */
 public class ExpressionTranslator {
 	
@@ -288,7 +288,7 @@ public class ExpressionTranslator {
                 if (e.hasNext()) { // it is not shared, so we do not have to check next occourence
                     NodeMaker m=e.nextNodeMaker();
                     c=new NodeConstraintImpl();
-                    m.matchConstraint(c);
+                    m.describeSelf(c);
                 } else
                     return null;
             }

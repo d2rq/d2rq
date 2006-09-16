@@ -10,7 +10,7 @@ import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeID.java,v 1.4 2006/09/15 15:31:22 cyganiak Exp $
+ * @version $Id: BlankNodeID.java,v 1.5 2006/09/16 14:19:20 cyganiak Exp $
  */
 public class BlankNodeID implements ValueMaker {
 	private final static String DELIMITER = "@@";
@@ -42,8 +42,12 @@ public class BlankNodeID implements ValueMaker {
 		this.attributes = attributes;
 	}
 
-	public void matchConstraint(NodeConstraint c) {
-		c.matchBlankNodeIdentifier(this, this.attributes);
+	public List attributes() {
+		return this.attributes;
+	}
+	
+	public void describeSelf(NodeSetFilter c) {
+		c.limitValuesToBlankNodeID(this);
 	}
 
 	public boolean matches(String anonID) {

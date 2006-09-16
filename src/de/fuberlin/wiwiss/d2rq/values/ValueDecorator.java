@@ -7,12 +7,12 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueDecorator.java,v 1.2 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: ValueDecorator.java,v 1.3 2006/09/16 14:19:20 cyganiak Exp $
  */
 public class ValueDecorator implements ValueMaker {
 	public static ValueConstraint maxLengthConstraint(final int maxLength) {
@@ -69,8 +69,8 @@ public class ValueDecorator implements ValueMaker {
 		return this.translator.toRDFValue(this.base.makeValue(row));
 	}
 
-	public void matchConstraint(NodeConstraint c) {
-		this.base.matchConstraint(c);
+	public void describeSelf(NodeSetFilter c) {
+		this.base.describeSelf(c);
 	}
 
 	public boolean matches(String value) {

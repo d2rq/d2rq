@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
@@ -12,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * Dummy implementation of {@link ValueMaker}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DummyValueSource.java,v 1.1 2006/09/11 23:22:26 cyganiak Exp $
+ * @version $Id: DummyValueSource.java,v 1.2 2006/09/16 14:19:20 cyganiak Exp $
  */
 public class DummyValueSource implements ValueMaker {
 	private boolean couldFit = true;
@@ -25,7 +25,7 @@ public class DummyValueSource implements ValueMaker {
 		this.couldFit = couldFit;
 	}
 
-	public void matchConstraint(NodeConstraint c) {
+	public void describeSelf(NodeSetFilter c) {
 	}
 
 	public void setCouldFit(boolean couldFit) {

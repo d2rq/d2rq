@@ -7,7 +7,6 @@ import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
-import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 public interface NodeMaker {
@@ -15,7 +14,7 @@ public interface NodeMaker {
 	static NodeMaker EMPTY = new NodeMaker() {
 		public boolean isUnique() { return true; }
 		public Node makeNode(ResultRow tuple) { return null; }
-		public void matchConstraint(NodeConstraint c) { c.matchImpossible(); }
+		public void describeSelf(NodeSetFilter c) { c.limitToEmptySet(); }
 		public Set projectionColumns() { return Collections.EMPTY_SET; }
 		public NodeMaker selectNode(Node node, MutableRelation relation) { return this; }
 		public NodeMaker renameColumns(ColumnRenamer renamer, MutableRelation relation) { return this; }
@@ -25,7 +24,7 @@ public interface NodeMaker {
 
 	boolean isUnique();
 
-	void matchConstraint(NodeConstraint c);
+	void describeSelf(NodeSetFilter c);
 	
 	Node makeNode(ResultRow tuple);
 

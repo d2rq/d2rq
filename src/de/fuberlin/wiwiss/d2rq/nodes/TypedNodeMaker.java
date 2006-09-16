@@ -9,7 +9,6 @@ import com.hp.hpl.jena.rdf.model.AnonId;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
-import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
@@ -42,9 +41,9 @@ public class TypedNodeMaker implements NodeMaker {
 		return this.isUnique;
 	}
 
-	public void matchConstraint(NodeConstraint c) {
+	public void describeSelf(NodeSetFilter c) {
 		this.nodeType.matchConstraint(c);
-		this.valueMaker.matchConstraint(c);
+		this.valueMaker.describeSelf(c);
 	}
 
 	public Node makeNode(ResultRow tuple) {
@@ -83,14 +82,14 @@ public class TypedNodeMaker implements NodeMaker {
 	public interface NodeType {
 		String extractValue(Node node);
 		Node makeNode(String value);
-		void matchConstraint(NodeConstraint c);
+		void matchConstraint(NodeSetFilter c);
 		boolean matches(Node node);
 	}
 	
 	private static class URINodeType implements NodeType {
 		public String extractValue(Node node) { return node.getURI(); }
 		public Node makeNode(String value) { return Node.createURI(value); }
-		public void matchConstraint(NodeConstraint c) { c.matchNodeType(NodeConstraint.UriNodeType); }
+		public void matchConstraint(NodeSetFilter c) { c.limitToURIs(); }
 		public boolean matches(Node node) { return node.isURI(); }
 		public String toString() { return "URI"; }
 	}
@@ -98,7 +97,7 @@ public class TypedNodeMaker implements NodeMaker {
 	private static class BlankNodeType implements NodeType {
 		public String extractValue(Node node) { return node.getBlankNodeLabel(); }
 		public Node makeNode(String value) { return Node.createAnon(new AnonId(value)); }
-		public void matchConstraint(NodeConstraint c) { c.matchNodeType(NodeConstraint.BlankNodeType); }
+		public void matchConstraint(NodeSetFilter c) { c.limitToBlankNodes(); }
 		public boolean matches(Node node) { return node.isBlank(); }
 		public String toString() { return "Blank"; }
 	}
@@ -116,8 +115,8 @@ public class TypedNodeMaker implements NodeMaker {
 		public Node makeNode(String value) {
 			return Node.createLiteral(value, this.language, this.datatype);
 		}
-		public void matchConstraint(NodeConstraint c) {
-	        c.matchLiteralType(this.language, this.datatype);
+		public void matchConstraint(NodeSetFilter c) {
+	        c.limitToLiterals(this.language, this.datatype);
 		}
 		public boolean matches(Node node) { 
 			return node.isLiteral()

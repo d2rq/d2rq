@@ -12,6 +12,7 @@ import com.hp.hpl.jena.graph.Node;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
@@ -25,9 +26,14 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * from the {@link RDFRelationImpl}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.7 2006/09/11 23:02:49 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.8 2006/09/16 14:19:20 cyganiak Exp $
  */
-public class NodeConstraintImpl implements NodeConstraint {
+public class NodeConstraintImpl implements NodeSetFilter {
+    public static final int NotFixedNodeType = 0;
+    public static final int BlankNodeType = 1;
+    public static final int UriNodeType = 2;
+    public static final int LiteralNodeType = 4;    
+    
 	/** true means: satisfiable. */
     private boolean possible=true;
     /** a flag that shows, if constraint information was added. */
@@ -58,7 +64,7 @@ public class NodeConstraintImpl implements NodeConstraint {
     	return this.possible;
     }
     
-    public void matchImpossible() {
+    public void limitToEmptySet() {
     	this.possible = false;
     }
     
@@ -88,7 +94,7 @@ public class NodeConstraintImpl implements NodeConstraint {
     	return this.columns;
     }
     
-	public void matchLiteralType(String language, RDFDatatype datatype) {
+	public void limitToLiterals(String language, RDFDatatype datatype) {
 		if (!this.possible) return;
 		if (this.nodeType == NotFixedNodeType) {
 			matchNodeType(LiteralNodeType);
@@ -101,7 +107,7 @@ public class NodeConstraintImpl implements NodeConstraint {
 				|| (this.literalLanguage != null && !this.literalLanguage.equals(language))
 				|| (this.literalDatatype == null && datatype != null)
 				|| (this.literalDatatype != null && !this.literalDatatype.equals(datatype))) {
-			matchImpossible();
+			limitToEmptySet();
 		}
 	}
 	
@@ -109,7 +115,7 @@ public class NodeConstraintImpl implements NodeConstraint {
      * We see a fixed NodeMaker.
      * @param node
      */
-    public void matchFixedNode(Node node) {
+    public void limitTo(Node node) {
         if (!possible)
             return;
        if (fixedNode == null) {
@@ -121,13 +127,21 @@ public class NodeConstraintImpl implements NodeConstraint {
         }
         possible = fixedNode.equals(node);
     }
- 
+
+	public void limitToURIs() {
+		matchNodeType(UriNodeType);
+	}
+	
+	public void limitToBlankNodes() {
+		matchNodeType(BlankNodeType);
+	}
+	
     /**
      * We see a NodeMaker, that produces nodes of type 
      * BlankNodeType, UriNodeType or LiteralNodeType. 
      * @param t
      */
-    public void matchNodeType(int t) {
+    private void matchNodeType(int t) {
         if (!possible)
             return;
        if (nodeType == NotFixedNodeType) {
@@ -144,11 +158,11 @@ public class NodeConstraintImpl implements NodeConstraint {
      * NodeMakers with an attached {@link ValueMaker} call this.
      * @param c
      */
-    public void matchColumn(Attribute c) {
+    public void limitValuesToAttribute(Attribute c) {
         if (!possible)
             return;
     	if (!this.patternConstraints.isEmpty()) {
-    		matchImpossible();
+    		limitToEmptySet();
     	}
         columns.add(c);
     }
@@ -158,19 +172,19 @@ public class NodeConstraintImpl implements NodeConstraint {
      * NodeMakers with an attached {@link ValueMaker} call this.
      * @param p
      */
-    public void matchPattern(Pattern p, List columns) {
+    public void limitValuesToPattern(Pattern p) {
     	if (!isPossible()) {
     		return;
     	}
     	if (!this.columns.isEmpty()) {
-    		matchImpossible();
+    		limitToEmptySet();
     	}
         Iterator it = this.patternConstraints.iterator();
         while (it.hasNext()) {
             PatternConstraint constraint = (PatternConstraint) it.next();
-            constraint.match(p, columns);
+            constraint.match(p, p.attributes());
         }
-        this.patternConstraints.add(new PatternConstraint(p, columns));
+        this.patternConstraints.add(new PatternConstraint(p, p.attributes()));
     }
 
     private class PatternConstraint {
@@ -185,7 +199,7 @@ public class NodeConstraintImpl implements NodeConstraint {
     	}
     	void match(Pattern p, List otherColumns) {
     		if (!this.pattern.isCompatibleWith(p)) {
-    			matchImpossible();
+    			limitToEmptySet();
     		}
     		for (int i = 0; i < this.columns.size(); i++) {
     			Attribute col1 = (Attribute) this.columns.get(i);
@@ -217,7 +231,7 @@ public class NodeConstraintImpl implements NodeConstraint {
         conditions.add(n1 + "=" + n2);
     }
 
-    public void matchBlankNodeIdentifier(BlankNodeID id, List columns) {
+    public void limitValuesToBlankNodeID(BlankNodeID id) {
     	// TODO Handle blank node IDs
     }
 

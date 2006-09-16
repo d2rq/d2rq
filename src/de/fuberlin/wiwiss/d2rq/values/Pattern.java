@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.rdql.NodeConstraint;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.5 2006/09/15 20:38:05 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.6 2006/09/16 14:19:20 cyganiak Exp $
  */
 public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";
@@ -47,8 +47,12 @@ public class Pattern implements ValueMaker {
 		this.columnsAsSet = new HashSet(this.columns);
 	}
 
-	public void matchConstraint(NodeConstraint c) {
-		c.matchPattern(this, this.columns);
+	public List attributes() {
+		return this.columns;
+	}
+	
+	public void describeSelf(NodeSetFilter c) {
+		c.limitValuesToPattern(this);
 	}
 
 	public boolean matches(String value) {
