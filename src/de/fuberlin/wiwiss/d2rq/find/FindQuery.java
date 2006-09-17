@@ -12,6 +12,7 @@ import com.hp.hpl.jena.util.iterator.NullIterator;
 import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.UnionOverSameBase;
+import de.fuberlin.wiwiss.d2rq.find.URIMakerRule.URIMakerRuleChecker;
 import de.fuberlin.wiwiss.d2rq.sql.ApplyTripleMakerIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
@@ -22,18 +23,26 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.9 2006/09/11 23:22:25 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.10 2006/09/17 00:36:27 cyganiak Exp $
  */
 public class FindQuery {
 	private Collection compatibleRelations = new ArrayList();
 	
 	public FindQuery(Triple triplePattern, Collection propertyBridges) {
+		URIMakerRule rule = new URIMakerRule();
+		propertyBridges = rule.sortRDFRelations(propertyBridges);
+		URIMakerRuleChecker subjectChecker = rule.createRuleChecker(triplePattern.getSubject());
+		URIMakerRuleChecker objectChecker = rule.createRuleChecker(triplePattern.getObject());
 		Iterator it = propertyBridges.iterator();
 		while (it.hasNext()) {
 			RDFRelation bridge = (RDFRelation) it.next();
-			bridge = bridge.selectTriple(triplePattern);
-			if (!bridge.equals(RDFRelation.EMPTY)) {
-				addRelation(new JoinOptimizer(bridge).optimize());
+			RDFRelation selectionBridge = bridge.selectTriple(triplePattern);
+			if (!selectionBridge.equals(RDFRelation.EMPTY)
+					&& subjectChecker.canMatch(bridge.nodeMaker(0))
+					&& objectChecker.canMatch(bridge.nodeMaker(2))) {
+				subjectChecker.addPotentialMatch(bridge.nodeMaker(0));
+				objectChecker.addPotentialMatch(bridge.nodeMaker(2));
+				addRelation(new JoinOptimizer(selectionBridge).optimize());
 			}
 		}
 	}
