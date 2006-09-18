@@ -22,12 +22,12 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
 
 /**
  * Parses the contents of a CSV file into a collection of
- * {@link Translation}s. The CVS file must contain exactly
+ * <tt>Translation</tt>s. The CVS file must contain exactly
  * two columns. DB values come from the first, RDF values
  * from the second.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTableParser.java,v 1.2 2006/09/16 13:22:29 cyganiak Exp $
+ * @version $Id: TranslationTableParser.java,v 1.3 2006/09/18 08:54:59 cyganiak Exp $
  */
 public class TranslationTableParser {
 	private Log log = LogFactory.getLog(TranslationTableParser.class);

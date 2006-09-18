@@ -118,6 +118,7 @@
 				private="false"
 				use="true"
 				splitindex="true"
+				breakiterator="yes"
 				windowtitle="D2RQ"
 				doctitle="D2RQ">
 			<link href="http://jena.sourceforge.net/javadoc/"/>

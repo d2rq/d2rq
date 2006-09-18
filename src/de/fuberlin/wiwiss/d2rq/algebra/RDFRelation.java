@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  * NodeMakers. Very much work in progress.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelation.java,v 1.5 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: RDFRelation.java,v 1.6 2006/09/18 08:55:00 cyganiak Exp $
  */
 public interface RDFRelation extends TripleMaker {
 	
@@ -42,7 +42,7 @@ public interface RDFRelation extends TripleMaker {
 	 * @param index 0, 1 or 2 
 	 * @return The subject, predicate or object NodeMaker
 	 */
-	NodeMaker nodeMaker(int i);
+	NodeMaker nodeMaker(int index);
 	
 	RDFRelation selectTriple(Triple triplePattern);
 	

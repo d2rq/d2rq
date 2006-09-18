@@ -162,7 +162,7 @@
     <rdfs:comment>Has to be used if a join refers to a different classMap.</rdfs:comment>
     <rdfs:domain>
       <owl:DeprecatedClass rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ObjectPropertyBridge">
-        <rdfs:comment>!Deprecated! Maps an object property to one or more database columns.</rdfs:comment>
+        <rdfs:comment>(Deprecated) Maps an object property to one or more database columns.</rdfs:comment>
         <rdfs:subClassOf rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
         <rdfs:label>Object Property Bridge</rdfs:label>
         <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
@@ -268,7 +268,7 @@
     <rdfs:label>href</rdfs:label>
   </rdf:Property>
   <rdf:Description rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1">
-    <owl:versionInfo>$Id: d2rq-rdfs.rdf,v 1.3 2006/09/07 22:04:06 cyganiak Exp $</owl:versionInfo>
+    <owl:versionInfo>$Id: d2rq-rdfs.rdf,v 1.4 2006/09/18 08:55:00 cyganiak Exp $</owl:versionInfo>
     <dc:format>RDF</dc:format>
     <dc:date>2006-08-12</dc:date>
     <dc:creator>Richard Cyganiak</dc:creator>
@@ -277,7 +277,7 @@
     <rdfs:label>D2RQ - Language Specification V0.4</rdfs:label>
   </rdf:Description>
   <owl:DeprecatedClass rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#DatatypePropertyBridge">
-    <rdfs:comment>!Deprecated! Maps a datatype property to one or more database columns.</rdfs:comment>
+    <rdfs:comment>(Deprecated) Maps a datatype property to one or more database columns.</rdfs:comment>
     <rdfs:subClassOf rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
     <rdfs:label>Datatype Property Bridge</rdfs:label>
     <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>

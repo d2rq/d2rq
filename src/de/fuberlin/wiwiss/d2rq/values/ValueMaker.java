@@ -25,12 +25,12 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * (translates values using a translation table or translation class)
  * and the various value restrictions (@link RegexRestriction et. al.).
  * <p>
- * ValueSources are used by {@link NodeMaker}s. A node maker
+ * ValueSources are used by <tt>NodeMaker</tt>s. A node maker
  * wraps the strings into Jena nodes, thus creating a description
  * of a set of RDF nodes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueMaker.java,v 1.4 2006/09/16 14:19:20 cyganiak Exp $
+ * @version $Id: ValueMaker.java,v 1.5 2006/09/18 08:54:58 cyganiak Exp $
  */
 public interface ValueMaker {
     

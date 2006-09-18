@@ -22,7 +22,7 @@
    				dc:creator       "Richard Cyganiak" ;
    				dc:date          "2006-08-12" ;
    				dc:format        "RDF";
-   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.12 2006/09/07 22:04:06 cyganiak Exp $";
+   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.13 2006/09/18 08:54:59 cyganiak Exp $";
    				.
 
 
@@ -246,7 +246,7 @@ d2rq:DatatypePropertyBridge
 				a owl:DeprecatedClass;
 				rdfs:label "Datatype Property Bridge" ;
 				rdfs:subClassOf d2rq:PropertyBridge;
-				rdfs:comment "!Deprecated! Maps a datatype property to one or more database columns.";
+				rdfs:comment "(Deprecated) Maps a datatype property to one or more database columns.";
 				.
 
 d2rq:ObjectPropertyBridge
@@ -254,7 +254,7 @@ d2rq:ObjectPropertyBridge
 				a owl:DeprecatedClass;
 				rdfs:label "Object Property Bridge" ;
 				rdfs:subClassOf d2rq:PropertyBridge;
-				rdfs:comment "!Deprecated! Maps an object property to one or more database columns.";
+				rdfs:comment "(Deprecated) Maps an object property to one or more database columns.";
 				.
 
 
