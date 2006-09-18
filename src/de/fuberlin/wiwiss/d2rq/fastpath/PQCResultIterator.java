@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * Iterator for PatternQueryCombiner results.
  * 
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.2 2006/09/18 19:06:54 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
     public static int instanceCounter=1;
@@ -100,7 +100,7 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 			ch.makeConstraints();
 			if (!ch.possible)
 			    continue;
-			SelectStatementBuilder sql=PatternQueryCombiner.getSQL(conjunction);
+			SelectStatementBuilder sql=getSQL();
 			ch.addConstraintsToSQL(sql);
 			nextDatabase = conjunction[0].baseRelation().database();
 			this.resultSet = new ApplyTripleMakerRowIterator(sql.execute(), conjunction);
@@ -136,4 +136,22 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
     public void setAdditionalLogInfo(String additionalLogInfo) {
         this.additionalLogInfo = additionalLogInfo;
     }
+    
+	/**
+	 * produces an SQL statement for a conjunction of triples that refer to
+	 * the same database.
+	 */
+	private SelectStatementBuilder getSQL() {
+		boolean possible=true;
+		ConnectedDB db=conjunction[0].baseRelation().database();
+		SelectStatementBuilder sql=new SelectStatementBuilder(db);
+		sql.setEliminateDuplicates(db.allowDistinct());	
+
+		for (int i=0; (i<conjunction.length) && possible; i++) {
+			RDFRelation t=conjunction[i];
+			sql.addSelectColumns(t.projectionColumns());
+			sql.addRelation(t.baseRelation());
+		}
+		return sql;
+	}
 }

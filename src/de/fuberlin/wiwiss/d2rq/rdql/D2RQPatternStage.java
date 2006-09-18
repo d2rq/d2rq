@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
+import java.util.Collection;
+
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.query.Bind;
 import com.hp.hpl.jena.graph.query.Bound;
@@ -11,7 +13,6 @@ import com.hp.hpl.jena.graph.query.PatternStage;
 import com.hp.hpl.jena.graph.query.Pipe;
 import com.hp.hpl.jena.graph.query.Stage;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.fastpath.FastpathEngine;
 
 /**
@@ -62,18 +63,18 @@ import de.fuberlin.wiwiss.d2rq.fastpath.FastpathEngine;
  *  x,y,z are checked by p.match() the second time they are seen. (Bound)
  *  
  * @author jg
- * @version $Id: D2RQPatternStage.java,v 1.11 2006/09/18 16:59:26 cyganiak Exp $
+ * @version $Id: D2RQPatternStage.java,v 1.12 2006/09/18 19:06:54 cyganiak Exp $
  */
 public class D2RQPatternStage extends Stage {
-	private GraphD2RQ graph;
+	private Collection rdfRelations;
 	private Mapping map;
 	private ExpressionSet expressions;
 	private Triple[] triplePattern;
 	private FastpathEngine fastpathEngine;
 
-	public D2RQPatternStage(GraphD2RQ graph, Mapping map,
+	public D2RQPatternStage(Collection rdfRelations, Mapping map,
 			ExpressionSet expressions, Triple[] triplePattern) {
-		this.graph = graph;
+		this.rdfRelations = rdfRelations;
 		this.map = map;
 		this.expressions = expressions;
 		this.triplePattern = triplePattern;
@@ -89,7 +90,7 @@ public class D2RQPatternStage extends Stage {
 		this.previous.deliver(input);
 		this.fastpathEngine = new FastpathEngine(
 				input, output,
-				this.graph, this.map, this.expressions, this.triplePattern);
+				this.rdfRelations, this.map, this.expressions, this.triplePattern);
 		// TODO Don't start the thread if FastpathEngine.mayYieldResults is false
 		new Thread() {
 			public void run() {

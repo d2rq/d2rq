@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import com.hp.hpl.jena.rdf.model.Model;
@@ -15,7 +14,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * A D2RQ mapping. Consists of {@link ClassMap}s,
@@ -24,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.6 2006/09/18 16:59:27 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.7 2006/09/18 19:06:54 cyganiak Exp $
  */
 public class Mapping {
 	private Model model = ModelFactory.createDefaultModel();
@@ -35,7 +33,6 @@ public class Mapping {
 	private Map translationTables = new HashMap();
 	private Map processingInstructions = new HashMap();
 	private Collection compiledPropertyBridges;
-	private Map compiledPropertyBridgesByDatabase;
 	
 	public Mapping() {
 		this(null);
@@ -147,25 +144,5 @@ public class Mapping {
 			RDFRelation bridge = (RDFRelation) it.next();
 			assertHasColumnTypes(bridge);
 		}
-		this.compiledPropertyBridgesByDatabase = new HashMap();
-		it = this.compiledPropertyBridges.iterator();
-		while (it.hasNext()) {
-			RDFRelation bridge = (RDFRelation) it.next();
-			ConnectedDB db = bridge.baseRelation().database();
-			List list = (List) this.compiledPropertyBridgesByDatabase.get(db);
-			if (list == null) {
-				list = new ArrayList();
-				this.compiledPropertyBridgesByDatabase.put(db, list);
-			}
-			list.add(bridge);
-		}
-	}
-
-	// TODO This is ugly -- shouldn't use ConnectedDBs as map keys
-	public Map compiledPropertyBridgesByDatabase() {
-		if (this.compiledPropertyBridgesByDatabase == null) {
-			compilePropertyBridges();
-		}
-		return this.compiledPropertyBridgesByDatabase;
 	}
 }

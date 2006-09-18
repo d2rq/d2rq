@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.query.Domain;
 import com.hp.hpl.jena.graph.query.Expression;
 import com.hp.hpl.jena.graph.query.ExpressionSet;
 import com.hp.hpl.jena.graph.query.Mapping;
@@ -18,52 +17,36 @@ import com.hp.hpl.jena.graph.query.Mapping;
 
 /**
  * @author jgarbers
- * @version $Id: VarInfos.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
+ * @version $Id: VarInfos.java,v 1.2 2006/09/18 19:06:54 cyganiak Exp $
  */
 public class VarInfos {
-    /**
-     * variable bindings from inputDomain
-     */
-//    private Domain inputDomain;
-	
-	protected int tripleCount;
-	/**
-	 * All variables from ExpressionSet.
-	 */
-	protected Set constraintVariableNodes;
-	protected List constraintVariableNodeSets;
-	/**
-	 * Variables from ExpressionSet that are bound by previous stage.
-	 */
-	protected Set constraintVariableNodesFromInitialMapping;
-
+	private final int tripleCount;
 	/**
 	 * Variables that are bound at position i for the first time.
 	 * Returns VariableIndex
 	 */
-	protected Map[] bindVariables;
-	
+	private final Map[] bindVariables;
 	/**
 	 * Variables from ExpressionSet that are bound when ith triple was matched.
 	 * Note: boundVariables[i] contains also all Variables from boundVariables[i-1],
 	 * etc. and from previous stages
 	 */
-	protected Set[] boundVariables;
-	
-	/** Fast lookup information for different types of variables (shared, bind, bound). */
-    public VariableBindings allBindings=new VariableBindings();
-    public VariableBindings[][] partBindings; // partBindings[i][j]: starting from i, ending in j
-    protected boolean partBindingVariableIndicesArePartRelative=true;
-    
-    public Collection allExpressions=new ArrayList();
-    public Collection[][] partExpressions;
+	private Set[] boundVariables;
 
-	public VarInfos(Mapping queryMapping, ExpressionSet queryConstraints, int tripleCount) {
-		this.tripleCount=tripleCount;
-		constraintVariableNodes=new HashSet();
-		constraintVariableNodeSets=new ArrayList();
+	/** Fast lookup information for different types of variables (shared, bind, bound). */
+	public final VariableBindings allBindings;
+	public final VariableBindings[][] partBindings; // partBindings[i][j]: starting from i, ending in j
+
+	public final Collection allExpressions;
+	public final Collection[][] partExpressions;
+
+	public VarInfos(Mapping queryMapping, ExpressionSet queryConstraints, 
+			int tripleCount, boolean partsProcessing) {
+		this.tripleCount = tripleCount;
+		Set constraintVariableNodes = new HashSet();
+		List constraintVariableNodeSets = new ArrayList();
 		addVariableNodes(queryConstraints,constraintVariableNodes,constraintVariableNodeSets);
-		constraintVariableNodesFromInitialMapping=new HashSet();
+		Set constraintVariableNodesFromInitialMapping = new HashSet();
 		Iterator it=constraintVariableNodes.iterator();
 		while (it.hasNext()) {
 			Node var=(Node)it.next();
@@ -71,13 +54,34 @@ public class VarInfos {
 				constraintVariableNodesFromInitialMapping.add(var);
 			}
 		}
-		boundVariables=new Set[tripleCount];
+		this.boundVariables = new Set[tripleCount];
 		for (int i=0; i<tripleCount; i++) {
-			boundVariables[i]=new HashSet(constraintVariableNodesFromInitialMapping);
+			this.boundVariables[i] = new HashSet(constraintVariableNodesFromInitialMapping);
 		}
-		bindVariables=new HashMap[tripleCount];
+		this.bindVariables = new HashMap[tripleCount];
+		if (partsProcessing) {
+			this.partBindings = new VariableBindings[tripleCount][tripleCount];
+			this.partExpressions = new Collection[tripleCount][tripleCount];
+			for (int i=0; i<=tripleCount; i++) {
+				for (int j=i; j<tripleCount; j++) {
+					this.partBindings[i][j]=new VariableBindings();
+					this.partExpressions[i][j]=new ArrayList();
+				}
+			}
+			this.allBindings = null;
+			this.allExpressions = null;
+		} else {
+			this.allBindings = new VariableBindings();
+			this.allExpressions = new ArrayList();
+			this.partBindings = null;
+			this.partExpressions = null;
+		}
 	}
 
+	public Set boundVariables(int index) {
+		return this.boundVariables[index];
+	}
+	
 	public void addBindNode(Node node, int domainIndex, int tripleNr, int nodeNr) {
 		if (bindVariables[tripleNr]==null)
 			bindVariables[tripleNr]=new HashMap();
@@ -100,18 +104,8 @@ public class VarInfos {
 	    if (partExpressions!=null)
 	        addPartExpressions(e,tripleNr);
 	}
-
-	public void allocParts() {
-		partBindings=new VariableBindings[tripleCount][tripleCount];
-		partExpressions=new Collection[tripleCount][tripleCount];
-		for (int i=0; i<=tripleCount; i++) 
-			for (int j=i; j<tripleCount; j++) {
-				partBindings[i][j]=new VariableBindings();
-				partExpressions[i][j]=new ArrayList();
-			}
-	}
 	
-	public void addPartExpressions(Expression e, int tripleNr) {
+	private void addPartExpressions(Expression e, int tripleNr) {
 		// tripleNr must be in range i..j
 		for (int i=0; i<=tripleNr; i++) {
 			for (int j=tripleNr; j<tripleCount; j++) {
@@ -119,10 +113,11 @@ public class VarInfos {
 			}
 		}
 	}
-	public void addPartBindings(Node node, int domainIndex, int tripleNr, int nodeNr, boolean isBind) {
+	
+	private void addPartBindings(Node node, int domainIndex, int tripleNr, int nodeNr, boolean isBind) {
 		// tripleNr must be in range i..j
 		for (int i=0; i<=tripleNr; i++) {
-			int relative=partBindingVariableIndicesArePartRelative?(tripleNr-i):i;
+			int relative=true?(tripleNr-i):i;
 			for (int j=tripleNr; j<tripleCount; j++) {
 				if (isBind)
 					partBindings[i][j].addBindNode(node,domainIndex,relative,nodeNr);				
@@ -131,27 +126,11 @@ public class VarInfos {
 			}
 		}	
 	}
-	protected void updateBoundVariables(Node node, int tripleNr) {
+	
+	private void updateBoundVariables(Node node, int tripleNr) {
 		for (int i=tripleNr; i<tripleCount;i++)
 			boundVariables[i].add(node);
 	}
-
-	
-	public void setInputDomain(Domain d) {
-// Was never read, so I commented it out -- RC
-//		inputDomain=d;
-		// TODO add to variableBindings?
-	}
-
-	public Set getBindVariables(int index, boolean nullIfNone) {
-		if (bindVariables[index]!=null)
-			return bindVariables[index].entrySet();
-		else if (nullIfNone)
-			return null;
-		else
-			return new HashSet();
-	}
-
 
 	private void addVariableNodes(ExpressionSet s, Collection nodes, List listOfNodes) {
 		Set names=null;

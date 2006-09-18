@@ -21,61 +21,39 @@ import com.hp.hpl.jena.graph.query.ValuatorSet;
 
 /**
  * @author jgarbers
- * @version $Id: StageInfo.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
+ * @version $Id: StageInfo.java,v 1.2 2006/09/18 19:06:54 cyganiak Exp $
  */
 public class StageInfo {
-	
-	public VarInfos vars;
-	
-	/** For each query triple the compiled node binding information ({@link Bind}, {@link Bound}, {@link Fixed}). */
-	public Pattern[] compiled; // triples with binding information
-	/** Condition checkers for the conditions that come with the query. They can
+	private final Mapping mapping; // modified by side effects
+	private final VarInfos vars;
+	/** For each query triple the compiled node binding information 
+	 * ({@link Bind}, {@link Bound}, {@link Fixed}). 
+	 */
+	private final Pattern[] compiled; // triples with binding information
+	/** 
+	 * Condition checkers for the conditions that come with the query. They can
 	 * be checked after this stage found a matching solution for the variables, 
 	 * for example (?x < ?y).
 	 * guard[i] is evaluable when the ith triple has matched.
 	 */
-	public ValuatorSet guard; // a guard that checks the evaluable expressions from conditions
-	public ValuatorSet[] guards; 
+	private final ValuatorSet guard; // a guard that checks the evaluable expressions from conditions
+	private final ValuatorSet[] guards; 
 	
-    // inter-method variables and helper variables used in compile()
-	private int tripleNr, nodeNr;
-	private Node tripleNodes[]=new Node[3]; // helper variable used for iterations
-
-	// used in setup()
-	protected Mapping queryMapping; // modified by side effects
-	public Triple[] queryTriples;
-	protected ExpressionSet queryConstraints; // modified by side effects
-	
-	public StageInfo(Mapping map,
-			ExpressionSet constraints, Triple[] triples) {
-	    this.queryMapping=map;
-	    this.queryConstraints=constraints;
-	    this.queryTriples=triples;
-	}
-		
-	public void setupForPartsProcessing() {
-		vars=makeInitialVarInfos(true);
-		vars.allocParts();
-		compiled = compile(queryMapping, queryTriples);
-		guards = makeGuards(queryMapping, queryConstraints,queryTriples.length);	    
-	}
-	public void setupForAllProcessing() {
-		vars=makeInitialVarInfos(false);
-		compiled = compile(queryMapping, queryTriples);
-		guard = makeGuard(queryMapping, queryConstraints);	    
-	}
-	
-	/**
-	 * Sets up vars.
-	 */
-	public VarInfos makeInitialVarInfos(boolean allocateParts) {
-		VarInfos v=new VarInfos(queryMapping,queryConstraints,queryTriples.length);
-		if (allocateParts) {
-			v.allocParts();
+	public StageInfo(Mapping map, ExpressionSet constraints, 
+			Triple[] triples, boolean partsProcessing) {
+		this.mapping = map;
+		this.vars = new VarInfos(
+				this.mapping, constraints, triples.length,
+				partsProcessing);
+		this.compiled = compile(triples);
+		if (partsProcessing) {
+			this.guards = makeGuards(constraints, triples.length);
+			this.guard = null;
+		} else {
+			this.guard = makeGuard(constraints, triples.length - 1);
+			this.guards = null;
 		}
-		return v;
 	}
-	
 	
 	/** Compiles <code>triples</code> into <code>compiled</code>. 
 	 * A clarified and optimized version of {@link PatternStage}.<code>compile</code>.
@@ -84,22 +62,26 @@ public class StageInfo {
 	 * @return for each triple its {@link Pattern} form, where each {@link Node} is
 	 * either a {@link Bind}, {@link Bound} or {@link Fixed} {@link Element}.
 	 */
-	protected Pattern[] compile(Mapping map, Triple[] triples) {
+	private Pattern[] compile(Triple[] triples) {
 		Pattern[] compiled = new Pattern[triples.length];
-		for (tripleNr = 0; tripleNr < triples.length; tripleNr++) {
-			Element[] patternElements = new Element[3];
+		for (int tripleNr = 0; tripleNr < triples.length; tripleNr++) {
 			Triple t = triples[tripleNr];
-			tripleNodes[0]=t.getSubject();
-			tripleNodes[1]=t.getPredicate();
-			tripleNodes[2]=t.getObject();
-			for (nodeNr=0; nodeNr<3; nodeNr++) {
-				patternElements[nodeNr]=compileNode(tripleNodes[nodeNr], map);
-			}
-			compiled[tripleNr] = new Pattern(patternElements[0],patternElements[1],patternElements[2]);
+			compiled[tripleNr] = new Pattern(
+					compileNode(t.getSubject(), tripleNr, 0),					
+					compileNode(t.getPredicate(), tripleNr, 1),					
+					compileNode(t.getObject(), tripleNr, 2));
 		}
 		return compiled;
 	}
 
+	public Pattern compiled(int index) {
+		return this.compiled[index];
+	}
+	
+	public VarInfos vars() {
+		return this.vars;
+	}
+	
 	/** 
 	 * Gets the binding information for a fixed or variable {@link Node}.
 	 * This is a condensed version of {@link PatternStageCompiler}'s functionality.
@@ -110,18 +92,16 @@ public class StageInfo {
 	 * @param varOrFixedNode the node
 	 * @param map the {@link Mapping} which is given by previous stages
 	 * @return the compiled {@link Element}.
-	 * @see #compiled
-	 * @see #vars
 	 */
-	protected Element compileNode(Node varOrFixedNode, Mapping map) {
+	private Element compileNode(Node varOrFixedNode, int tripleNr, int nodeNr) {
 		if (varOrFixedNode.equals(Query.ANY))
 			return Element.ANY;
 		if (varOrFixedNode.isVariable()) {
-			if (map.hasBound(varOrFixedNode)) {
-				vars.addBoundNode(varOrFixedNode,map.indexOf(varOrFixedNode),tripleNr,nodeNr);
-				return new Bound(map.indexOf(varOrFixedNode));
+			if (this.mapping.hasBound(varOrFixedNode)) {
+				vars.addBoundNode(varOrFixedNode,this.mapping.indexOf(varOrFixedNode),tripleNr,nodeNr);
+				return new Bound(this.mapping.indexOf(varOrFixedNode));
 			} else {
-				int domainIndex=map.newIndex(varOrFixedNode);
+				int domainIndex=this.mapping.newIndex(varOrFixedNode);
 				vars.addBindNode(varOrFixedNode,domainIndex,tripleNr,nodeNr);
 				return new Bind(domainIndex);
 			}
@@ -148,24 +128,28 @@ public class StageInfo {
 	 * @param constraints the set of (RDQL) constraint expressions
 	 * @return the prepared ExpressionSet
 	 */
-	protected ValuatorSet makeGuard(Mapping map, ExpressionSet constraints) {
+	private ValuatorSet makeGuard(ExpressionSet constraints, int index) {
 		ValuatorSet es = new ValuatorSet();
 		Iterator it = constraints.iterator();
-		int i=queryTriples.length-1;
 		while (it.hasNext()) {
 			Expression e = (Expression) it.next();
-			boolean evaluable=canEval(e,i);
-			if (evaluable) { 
-			    vars.addExpression(e,i);
-				Valuator prepared = e.prepare(map);
+			if (canEval(e, index)) { 
+				this.vars.addExpression(e, index);
+				Valuator prepared = e.prepare(this.mapping);
 				es.add(prepared);
 				it.remove();
 			}
 		}
 		return es;
 	}
-	
 
+	public boolean evalGuard(Domain domain) {
+		if (this.guard == null) {
+			return true;
+		}
+		return this.guard.evalBool(domain);
+	}
+	
     /**
     Answer an array of ExpressionSets exactly as long as the supplied length.
     The i'th ExpressionSet contains the prepared [against <code>map</code>]
@@ -174,31 +158,35 @@ public class StageInfo {
     The original ExpressionSet is updated by removing those elements that can
     be so evaluated.
     
- 	@param map the Mapping to prepare Expressions against
  	@param constraints the set of constraint expressions to plant
- 	@param length the number of evaluation slots available
  	@return the array of prepared ExpressionSets
  	*/
-	protected ValuatorSet[] makeGuards(Mapping map, ExpressionSet constraints,
-			int length) {
-		ValuatorSet[] result = new ValuatorSet[length];
-		for (int i = 0; i < length; i += 1)
+	private ValuatorSet[] makeGuards(ExpressionSet constraints, int size) {
+		ValuatorSet[] result = new ValuatorSet[size];
+		for (int i = 0; i < size; i += 1)
 			result[i] = new ValuatorSet();
 		Iterator it = constraints.iterator();
 		while (it.hasNext())
-			plantWhereFullyBound((Expression) it.next(), it, map, result);
+			plantWhereFullyBound((Expression) it.next(), it, this.mapping, result, size);
 		return result;
 	}
 	
+	public boolean evalGuard(int index, Domain domain) {
+		if (this.guards == null) {
+			return true;
+		}
+		return this.guards[index].evalBool(domain);
+	}
+
     /**
     Find the earliest triple index where this expression can be evaluated, add it
     to the appropriate expression set, and remove it from the original via the
     iterator.
     Note: Side effects on ValuatorSet represented by iterator.
     */
-	protected void plantWhereFullyBound(Expression e, Iterator it, Mapping map,
-			ValuatorSet[] es) {
-		for (int i = 0; i < vars.boundVariables.length; i += 1) {
+	private void plantWhereFullyBound(Expression e, Iterator it, Mapping map,
+			ValuatorSet[] es, int size) {
+		for (int i = 0; i < size; i ++) {
 			boolean evaluable=canEval(e,i);
 			if (evaluable) { 
 			    vars.addExpression(e,i);
@@ -221,9 +209,7 @@ public class StageInfo {
 	 * @param e a compiled RDQL expression
 	 * @return true iff all variables of the expression are bound in <code>map</code>
 	 */
-    protected boolean canEval( Expression e, int index )
-    { 
-    	return Expression.Util.containsAllVariablesOf( vars.boundVariables[index], e ); 
-    }
-    	
+	private boolean canEval(Expression e, int index) { 
+		return Expression.Util.containsAllVariablesOf(vars.boundVariables(index), e); 
+	}
 }

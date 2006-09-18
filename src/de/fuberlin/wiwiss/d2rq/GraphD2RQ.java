@@ -51,7 +51,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.35 2006/09/18 16:59:27 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.36 2006/09/18 19:06:54 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -179,13 +179,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	
 	static RDFRelationImpl[] emptyPropertyBridgeArray=new RDFRelationImpl[0];
 	
-    /**
-     * @return Returns the propertyBridgesByDatabase.
-     */
-    public Map getPropertyBridgesByDatabase() {
-        return this.mapping.compiledPropertyBridgesByDatabase();
-    }
-    
     /**
      * TODO This section was done as a quick hack for D2R Server 0.3 and really shouldn't be here
      */

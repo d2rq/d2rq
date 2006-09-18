@@ -11,34 +11,47 @@ import java.util.Map;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * @author jgarbers
- * @version $Id: GraphUtils.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
+ * @version $Id: GraphUtils.java,v 1.2 2006/09/18 19:06:54 cyganiak Exp $
  */
 public class GraphUtils {
 
 	/**
 	 * Creates a bunch of prefixed property bridge copies for each triple.
-	 * @param graph
-	 * @param triples
 	 * @return a list array that has a nonempty list at each position or null
 	 */
-	public static List[] makePrefixedPropertyBridges(GraphD2RQ graph, Triple[] triples) {
+	public static List[] makePrefixedPropertyBridges(Collection rdfRelations, Triple[] triples) {
 		List[] bridges=new List[triples.length];
-		if (triples.length!=makePrefixedPropertyBridges(graph.getPropertyBridges(),triples,bridges,true))
+		if (triples.length!=makePrefixedPropertyBridges(rdfRelations,triples,bridges,true))
 			return null;
 		return bridges;
 	}
 
-	public static Map makeDatabaseToPrefixedPropertyBridges(GraphD2RQ graph, Triple[] triples, boolean skipIfNotFull) {
-	    return makeDatabaseToPrefixedPropertyBridges(graph.getPropertyBridgesByDatabase(),triples,skipIfNotFull);
+	public static Map makeDatabaseToPrefixedPropertyBridges(Collection rdfRelations, Triple[] triples, boolean skipIfNotFull) {
+		return makeDatabaseToPrefixedPropertyBridges(byDatabase(rdfRelations), triples, skipIfNotFull);
 	}
 
+	private static Map byDatabase(Collection rdfRelations) {
+		Map result = new HashMap();
+		Iterator it = rdfRelations.iterator();
+		while (it.hasNext()) {
+			RDFRelation bridge = (RDFRelation) it.next();
+			ConnectedDB db = bridge.baseRelation().database();
+			List list = (List) result.get(db);
+			if (list == null) {
+				list = new ArrayList();
+				result.put(db, list);
+			}
+			list.add(bridge);
+		}
+		return result;
+	}
+	
 	/**
 	 * Creates a map from database to List[] of prefixed PropertyBridges.
 	 * @param input Database -> List of PropertyBridge
