@@ -13,7 +13,6 @@
 			<attribute value="jar:file:/Users/richard/D2RQ/workspace/D2R-Server/servlet-2_2-doc.zip!/servlet-2_2-doc" name="javadoc_location"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry sourcepath="/D2RQ-CVS/src" kind="lib" path="lib/d2rq.jar"/>
 	<classpathentry kind="lib" path="lib/concurrent.jar"/>
 	<classpathentry kind="lib" path="lib/arq.jar"/>
 	<classpathentry kind="lib" path="lib/antlr-2.7.5.jar"/>
@@ -26,5 +25,6 @@
 	<classpathentry kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="lib" path="lib/velocity-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/velocity-dep-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/d2rq-0.5-dev.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
