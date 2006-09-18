@@ -36,7 +36,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.16 2006/09/15 17:53:37 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.17 2006/09/18 11:46:17 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -344,7 +344,7 @@ public class MappingGenerator {
 				continue;
 			}
 			Attribute[] firstForeignKey = (Attribute[]) this.schema.foreignKeyColumns(tableName).get(0);
-			this.linkTables.put(tableName, firstForeignKey[1].relationName().qualifiedName());
+			this.linkTables.put(tableName, firstForeignKey[1].relationName());
 		}
 	}
 	

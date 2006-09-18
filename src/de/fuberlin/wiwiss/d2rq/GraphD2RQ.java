@@ -53,7 +53,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.33 2006/09/13 14:18:16 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.34 2006/09/18 11:46:17 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -215,7 +215,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		Iterator it = this.mapping.classMapResources().iterator();
 		while (it.hasNext()) {
 			Resource classMapResource = (Resource) it.next();
-			NodeMaker resourceMaker = (NodeMaker) this.mapping.classMap(classMapResource);
+			NodeMaker resourceMaker = this.mapping.classMap(classMapResource).nodeMaker();
 			Node classMap = classMapResource.asNode();
 			this.classMapNodeMakers.put(toClassMapName(classMap), resourceMaker);
 			List inventoryBridges = new ArrayList();
