@@ -65,7 +65,7 @@
 	</target>
 
 	<target name="compile.tests" depends="init.tests,compile">
-		<javac srcdir="${src.tests}" destdir="${build.tests}" debug="on">
+		<javac srcdir="${src.tests}" destdir="${build.tests}" debug="on" source="1.4" target="1.4">
 			<classpath>
 				<path refid="project.class.path"/>
 				<pathelement path="${build}"/>
