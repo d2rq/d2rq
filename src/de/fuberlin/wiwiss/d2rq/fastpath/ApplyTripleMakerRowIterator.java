@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -11,11 +11,13 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
- * Contains the result set from one SQL query and transforms it into triples.
- * A triple is produced for TripleMaker in TripleMaker and each row in the result set.
+ * Iterates over the {@link ResultRow}s from one SQL query and transforms them into
+ * triples. Has a collection of TripleMakers. Each TripleMaker is applied to
+ * each row in the result set. This produces an array of triples for each result
+ * row. The class is an iterator over these triple arrays.
  *
  * @author jgarbers
- * @version $Id: ApplyTripleMakerRowIterator.java,v 1.5 2006/09/09 23:25:15 cyganiak Exp $
+ * @version $Id: ApplyTripleMakerRowIterator.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class ApplyTripleMakerRowIterator implements ClosableIterator {
 	private ClosableIterator sqlIterator;

@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * @author jgarbers
- * @version $Id: GraphUtils.java,v 1.9 2006/09/13 14:06:22 cyganiak Exp $
+ * @version $Id: GraphUtils.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class GraphUtils {
 
@@ -35,13 +35,6 @@ public class GraphUtils {
 		return bridges;
 	}
 
-	public static List[] makePrefixedPropertyBridges(GraphD2RQ graph, Triple[] triples, ConnectedDB db) {
-		List[] bridges=new List[triples.length];
-		if (triples.length!=makePrefixedPropertyBridges(graph.getPropertyBridges(db),triples,bridges,true))
-			return null;
-		return bridges;
-	}
-	
 	public static Map makeDatabaseToPrefixedPropertyBridges(GraphD2RQ graph, Triple[] triples, boolean skipIfNotFull) {
 	    return makeDatabaseToPrefixedPropertyBridges(graph.getPropertyBridgesByDatabase(),triples,skipIfNotFull);
 	}
@@ -209,28 +202,6 @@ public class GraphUtils {
 		return fullSuccess;
 	}
 	
-	/**
-	 * Checks if bridges refer to more than one database.
-	 * @param bridges
-	 */
-	public static boolean refersToMultipleDatabases(List[] bridges) {
-		ConnectedDB db=null;
-		for (int i=0; i<bridges.length; i++) {
-			Iterator it=bridges[i].iterator();
-			while (it.hasNext()) {
-				RDFRelation pb=(RDFRelation)it.next();
-				ConnectedDB pbdb=pb.baseRelation().database();
-				if (db!=pbdb) {
-					if (db==null)
-						db=pbdb;
-					else
-						return true;
-				}
-			}
-		}
-		return false;
-	}
-	
 	public static Node varToANY(Node node) {
 		if (node.isVariable())
 			return Node.ANY;
@@ -267,21 +238,5 @@ public class GraphUtils {
 			list.add(bridge);
 		}
 		return list;
-	}
-
-	public static Map makeDatabaseMapFromPropertyBridges(Collection propertyBridges) {
-		Map ret=new HashMap();
-		Iterator it=propertyBridges.iterator();
-		while (it.hasNext()) {
-			RDFRelationImpl pb=(RDFRelationImpl)it.next();
-			ConnectedDB db=pb.baseRelation().database();
-			List list=(List) ret.get(db);
-			if (list==null) {
-				list=new ArrayList();
-				ret.put(db,list);
-			}
-			list.add(pb);
-		}
-		return ret;
 	}
 }

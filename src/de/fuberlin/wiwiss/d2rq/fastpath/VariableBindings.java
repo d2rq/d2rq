@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import com.hp.hpl.jena.graph.query.Domain;
  * - information if and where these bind variables are used again in bound positions.
  * 
  * @author jgarbers
- * @version $Id: VariableBindings.java,v 1.5 2006/09/02 23:10:43 cyganiak Exp $
+ * @version $Id: VariableBindings.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class VariableBindings {
     

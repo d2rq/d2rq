@@ -13,12 +13,12 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
-import de.fuberlin.wiwiss.d2rq.rdql.ConstraintHandler;
+import de.fuberlin.wiwiss.d2rq.fastpath.ConstraintHandler;
 import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.6 2006/09/15 19:36:44 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.7 2006/09/18 16:59:27 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -240,6 +240,7 @@ public class ConnectedDB {
 	}
 
 	// TODO Better if we didn't have to pass the parameters in, and use a non-arg constructor
+	// Maybe return an ExpressionTranslatorFactory?
 	public ExpressionTranslator expressionTranslator(ConstraintHandler handler) {
 		if (this.expressionTranslator == null) {
 			return new ExpressionTranslator(handler, this);

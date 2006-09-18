@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +18,7 @@ import com.hp.hpl.jena.graph.query.Mapping;
 
 /**
  * @author jgarbers
- * @version $Id: VarInfos.java,v 1.4 2006/09/02 23:10:43 cyganiak Exp $
+ * @version $Id: VarInfos.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class VarInfos {
     /**
@@ -51,18 +51,18 @@ public class VarInfos {
 	protected Set[] boundVariables;
 	
 	/** Fast lookup information for different types of variables (shared, bind, bound). */
-    protected VariableBindings allBindings=new VariableBindings();
-    protected VariableBindings[][] partBindings; // partBindings[i][j]: starting from i, ending in j
+    public VariableBindings allBindings=new VariableBindings();
+    public VariableBindings[][] partBindings; // partBindings[i][j]: starting from i, ending in j
     protected boolean partBindingVariableIndicesArePartRelative=true;
     
-    protected Collection allExpressions=new ArrayList();
-    protected Collection[][] partExpressions;
+    public Collection allExpressions=new ArrayList();
+    public Collection[][] partExpressions;
 
 	public VarInfos(Mapping queryMapping, ExpressionSet queryConstraints, int tripleCount) {
 		this.tripleCount=tripleCount;
 		constraintVariableNodes=new HashSet();
 		constraintVariableNodeSets=new ArrayList();
-		JenaUtils.addVariableNodes(queryConstraints,constraintVariableNodes,constraintVariableNodeSets);
+		addVariableNodes(queryConstraints,constraintVariableNodes,constraintVariableNodeSets);
 		constraintVariableNodesFromInitialMapping=new HashSet();
 		Iterator it=constraintVariableNodes.iterator();
 		while (it.hasNext()) {
@@ -137,7 +137,7 @@ public class VarInfos {
 	}
 
 	
-	void setInputDomain(Domain d) {
+	public void setInputDomain(Domain d) {
 // Was never read, so I commented it out -- RC
 //		inputDomain=d;
 		// TODO add to variableBindings?
@@ -150,5 +150,50 @@ public class VarInfos {
 			return null;
 		else
 			return new HashSet();
+	}
+
+
+	private void addVariableNodes(ExpressionSet s, Collection nodes, List listOfNodes) {
+		Set names=null;
+		if (nodes!=null)
+			names=new HashSet();
+		List namesList=null;
+		if (listOfNodes!=null) {
+			namesList=new ArrayList();
+		}
+		Iterator it=s.iterator();
+		while (it.hasNext()) {
+			Expression e=(Expression)it.next();
+			Set s2;
+			if (namesList!=null) {
+				s2=new HashSet();
+			} else {
+				s2=names;
+			}
+			Expression.Util.addVariablesOf( s2, e );
+			if (names!=null && s2!=names) {
+				names.addAll(s2);
+			}
+		}
+		if (nodes!=null)
+			namesToNodes(names,nodes);
+		if (listOfNodes!=null) {
+			it=namesList.iterator();
+			while (it.hasNext()) {
+				Collection in=(Collection)it.next();
+				Collection out=new HashSet();
+				namesToNodes(in,out);
+				listOfNodes.add(out);
+			}
+		}
+	}
+
+	private void namesToNodes(Collection names,Collection nodes) {
+		Iterator it=names.iterator();
+		while (it.hasNext()) {
+			String name=(String)it.next();
+			Node node=Node.createVariable( name );
+			nodes.add(node);
+		}    	  
 	}
 }

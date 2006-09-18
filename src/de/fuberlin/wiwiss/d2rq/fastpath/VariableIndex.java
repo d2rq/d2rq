@@ -1,10 +1,10 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 /** 
  * Helper class for storing the index of a node within a query.
  * 
  * @author jgarbers
- * @version $Id: VariableIndex.java,v 1.1 2006/09/02 23:10:43 cyganiak Exp $
+ * @version $Id: VariableIndex.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class VariableIndex implements Comparable {
 	public int tripleNr; // >=0

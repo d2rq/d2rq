@@ -3,8 +3,8 @@ package de.fuberlin.wiwiss.d2rq.rdql;
 import java.util.Iterator;
 import java.util.List;
 
-import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator.Result;
 import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
+import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator.Result;
 
 /**
  * OperatorMap describes an Operator mapping from <it>rdqlOperator</it> to <it>sqlOperator</it>.
@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
  * If returnType=RightType then the actual rightType.
  * 
  * @author jgarbers
- * @version $Id: OperatorMap.java,v 1.6 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: OperatorMap.java,v 1.7 2006/09/18 16:59:26 cyganiak Exp $
  */
 class OperatorMap {
     public String rdqlOperator; // unqualified class name

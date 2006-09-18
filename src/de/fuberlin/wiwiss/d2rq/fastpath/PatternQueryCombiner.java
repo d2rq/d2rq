@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,12 +28,12 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * useless, if there are (Bound) variables for predicates.
  * 
  * @author jgarbers
- * @version $Id: PatternQueryCombiner.java,v 1.16 2006/09/13 14:06:23 cyganiak Exp $
+ * @version $Id: PatternQueryCombiner.java,v 1.1 2006/09/18 16:59:27 cyganiak Exp $
  * @see FindQuery
  */
 public class PatternQueryCombiner {
     /** if false then contradiction, no SQL query necessary. */
-	protected boolean possible=true; 
+	public boolean possible=true; 
 	protected boolean careForPossible=true;
 	// protected Database database;
 	protected GraphD2RQ graph;
@@ -51,7 +51,7 @@ public class PatternQueryCombiner {
 	protected int[] bridgesCounts; 
 								  
 	/** holds for each triple its disjunctive SQL-TripleQuery Objects */
-	protected RDFRelation[][] tripleQueries; 
+	public RDFRelation[][] tripleQueries; 
 	
 public PatternQueryCombiner( GraphD2RQ graph, List[] candidateBridges, Triple [] triples) {
     // alternative modelling
@@ -67,7 +67,7 @@ private boolean cont() {
 	return possible || !careForPossible;
 }
 
-void setup() {
+public void setup() {
 	if (!cont())
 		return;
 	makeStores();
@@ -132,7 +132,7 @@ void makeTripleQueries() {
 	}
 }
 
-int possibleLength() {
+public int possibleLength() {
 	for (int i=0; i<bridgesCounts.length; i++)
 		if (bridgesCounts[i]<1)
 			return i+1;

@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -13,8 +13,9 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
  * Iterator for PatternQueryCombiner results.
+ * 
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.11 2006/09/13 14:06:23 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
     public static int instanceCounter=1;
@@ -67,7 +68,7 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 		prefetchedResult=null;
 		didPrefetch=false;
         returnedTriplePatternNr++;
-		return new CombinedPatternStage.IteratorResult(ret,nextDatabase);
+		return new FastpathEngine.IteratorResult(ret,nextDatabase);
 	}
 	
 	/**

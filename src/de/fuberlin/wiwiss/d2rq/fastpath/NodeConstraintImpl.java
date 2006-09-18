@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * from the {@link RDFRelationImpl}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.8 2006/09/16 14:19:20 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeSetFilter {
     public static final int NotFixedNodeType = 0;

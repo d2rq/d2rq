@@ -1,6 +1,7 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.Iterator;
+
 
 /** 
  * Iterates over the elements of a cross product of a set of sets.
@@ -11,7 +12,7 @@ import java.util.Iterator;
  * We can expect to get M1 * ... * Mn factors {@link #estimatedNumberOfResults}.
  * 
  * @author jgarbers
- * @version $Id: ConjunctionIterator.java,v 1.1 2006/09/02 23:10:43 cyganiak Exp $
+ * @version $Id: ConjunctionIterator.java,v 1.1 2006/09/18 16:59:27 cyganiak Exp $
  */
 public class ConjunctionIterator implements Iterator { 
     

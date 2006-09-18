@@ -1,11 +1,11 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 /**
  * An IndexArray is an array of (wrapped) counters. 
  * It can be used like an iterator.
  * 
  * @author jgarbers
- * @version $Id: IndexArray.java,v 1.1 2006/09/02 23:10:43 cyganiak Exp $
+ * @version $Id: IndexArray.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class IndexArray {
 
@@ -67,19 +67,4 @@ public class IndexArray {
 		} while (idx<n);
 		return n;
 	}
-	
-	
-	public static void test(){
-	    IndexArray a=new IndexArray(new int[]{2,3,4});
-	    for (int i=0; i<50; i++) {
-	        System.out.print(a.next());
-	        System.out.print(": ");
-	        for (int j=0; j<a.counters.length; j++) {
-	            System.out.print(a.counters[j]);
-	            System.out.print(" ");
-	        }	            
-	        System.out.println(";");
-	    }
-	}
-
 }

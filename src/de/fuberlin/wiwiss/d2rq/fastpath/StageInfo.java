@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.Iterator;
 
@@ -21,21 +21,21 @@ import com.hp.hpl.jena.graph.query.ValuatorSet;
 
 /**
  * @author jgarbers
- * @version $Id: StageInfo.java,v 1.4 2006/09/10 22:18:44 cyganiak Exp $
+ * @version $Id: StageInfo.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class StageInfo {
 	
-	protected VarInfos vars;
+	public VarInfos vars;
 	
 	/** For each query triple the compiled node binding information ({@link Bind}, {@link Bound}, {@link Fixed}). */
-	protected Pattern[] compiled; // triples with binding information
+	public Pattern[] compiled; // triples with binding information
 	/** Condition checkers for the conditions that come with the query. They can
 	 * be checked after this stage found a matching solution for the variables, 
 	 * for example (?x < ?y).
 	 * guard[i] is evaluable when the ith triple has matched.
 	 */
-	protected ValuatorSet guard; // a guard that checks the evaluable expressions from conditions
-	protected ValuatorSet[] guards; 
+	public ValuatorSet guard; // a guard that checks the evaluable expressions from conditions
+	public ValuatorSet[] guards; 
 	
     // inter-method variables and helper variables used in compile()
 	private int tripleNr, nodeNr;
@@ -43,7 +43,7 @@ public class StageInfo {
 
 	// used in setup()
 	protected Mapping queryMapping; // modified by side effects
-	protected Triple[] queryTriples;
+	public Triple[] queryTriples;
 	protected ExpressionSet queryConstraints; // modified by side effects
 	
 	public StageInfo(Mapping map,

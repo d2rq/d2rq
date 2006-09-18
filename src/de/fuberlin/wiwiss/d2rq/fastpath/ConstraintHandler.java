@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import com.hp.hpl.jena.graph.query.Expression;
 
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
@@ -19,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.17 2006/09/16 14:19:20 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class ConstraintHandler {
     public boolean possible=true;

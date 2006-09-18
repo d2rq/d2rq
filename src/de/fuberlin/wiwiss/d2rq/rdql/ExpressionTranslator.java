@@ -20,6 +20,9 @@ import com.hp.hpl.jena.rdql.parser.Q_Var;
 import com.hp.hpl.jena.rdql.parser.WorkingVar;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.fastpath.ConstraintHandler;
+import de.fuberlin.wiwiss.d2rq.fastpath.NodeConstraintImpl;
+import de.fuberlin.wiwiss.d2rq.fastpath.VariableBindings;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
@@ -42,7 +45,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  *   2) SQL dialects
  *   3) Variable translators
  * @author jgarbers
- * @version $Id: ExpressionTranslator.java,v 1.20 2006/09/16 14:19:20 cyganiak Exp $
+ * @version $Id: ExpressionTranslator.java,v 1.21 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class ExpressionTranslator {
 	

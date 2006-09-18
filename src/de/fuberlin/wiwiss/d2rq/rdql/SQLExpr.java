@@ -1,10 +1,11 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
+
 /**
  * Implementation for ExpressionTranslator Result.
  *  
  * @author jgarbers
- * @version $Id: SQLExpr.java,v 1.4 2006/09/03 00:08:11 cyganiak Exp $
+ * @version $Id: SQLExpr.java,v 1.5 2006/09/18 16:59:25 cyganiak Exp $
  */
     public class SQLExpr implements ExpressionTranslator.Result {
         int type;

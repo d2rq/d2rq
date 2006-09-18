@@ -40,8 +40,6 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
-import de.fuberlin.wiwiss.d2rq.rdql.GraphUtils;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
@@ -53,7 +51,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.34 2006/09/18 11:46:17 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.35 2006/09/18 16:59:27 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -75,9 +73,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	
 	public Collection getPropertyBridges() {
 		return this.mapping.compiledPropertyBridges();
-	}
-	public Collection getPropertyBridges(ConnectedDB db) {
-		return (Collection) this.mapping.compiledPropertyBridgesByDatabase().get(db);
 	}
 
 	/**
@@ -183,18 +178,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
     }
 	
 	static RDFRelationImpl[] emptyPropertyBridgeArray=new RDFRelationImpl[0];
-	
-	// used by D2RQPatternStage
-	/**
-	 * Finds all property bridges from this graph mapping that match a triple.
-	 */
-	public ArrayList propertyBridgesForTriple(Triple t) { // PropertyBridge[]
-		return GraphUtils.propertyBridgesForTriple(t, this.mapping.compiledPropertyBridges());
-	}
-	
-	public ArrayList propertyBridgesForTriple(Triple t, ConnectedDB db) {
-		return GraphUtils.propertyBridgesForTriple(t, getPropertyBridges(db));
-	}	
 	
     /**
      * @return Returns the propertyBridgesByDatabase.

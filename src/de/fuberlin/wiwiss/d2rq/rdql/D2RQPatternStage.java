@@ -1,159 +1,121 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.graph.query.Bind;
+import com.hp.hpl.jena.graph.query.Bound;
+import com.hp.hpl.jena.graph.query.BufferPipe;
 import com.hp.hpl.jena.graph.query.ExpressionSet;
+import com.hp.hpl.jena.graph.query.Fixed;
 import com.hp.hpl.jena.graph.query.Mapping;
-import com.hp.hpl.jena.util.iterator.ClosableIterator;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
-import com.hp.hpl.jena.util.iterator.NiceIterator;
+import com.hp.hpl.jena.graph.query.PatternStage;
+import com.hp.hpl.jena.graph.query.Pipe;
+import com.hp.hpl.jena.graph.query.Stage;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-
+import de.fuberlin.wiwiss.d2rq.fastpath.FastpathEngine;
 
 /**
+ * TODO Review comments
+ *  
  * Instances of this {@link com.hp.hpl.jena.graph.query.Stage} are created by {@link D2RQQueryHandler} to handle 
  * a set of query triples that by D2RQ-mapping refer to the same database.
  * Created by Joerg Garbers on 25.02.05.
+ *
+ * A CombinedPatternStage is a {@link Stage} that handles a conjunction of triples (a pattern). 
+ * This class is a corrected, clarified and optimized version of {@link PatternStage}.
+ * In the following we try to document the logic and machinery behind it:
+ * <p>
+ * An RDQL query (<code>triples</code>) contains nodes, some of which are
+ * (shared) variables (a-z) which will be bound by successive Stages. 
+ * This Stage for example sees variables a,b,c,i,j,k,x,y,z in <code>triples</code>.
+ * The type of the triple nodes (fixed, bound or bind Element) is 
+ * <code>compiled</code> according to the following schema:
+ * <p>
+ * The mapping <code>map</code> lists variables a,b,c...h (pointers to Domain indices)
+ * that will be bound by a previous stage and put into the Pipe. ({@link Bound})
+ * This stage will pick up each binding (on its own thread), 
+ * substitute variables with existing bindings, and produce additional bindings.
+ * This stage is first to bind some variables i,j,k,x,y,z (1st time {@link Bind})
+ * Some variables x,y,z are used in more than one triple/node => (2nd time: {@link Bound}) 
+ * <p>
+ * Some variables l,m,n...u,v,w will still not be bound by this stage and left over 
+ * for the next stage.
  * 
+ * compiled: for each query triple the compiled node binding information ({@link Bind}, {@link Bound}, {@link Fixed})
+ * guard: a condition checker for the conditions that come with the query and can
+ * be checked after this stage found a matching solution for the variables, 
+ * for example (?x < ?y)
+ * varInfo: fast lookup information for different types of variables (shared, bind, bound)
+ * triples: list of find-triples with inserted bindings by previous stages, 
+ * build each time a binding arrives on the {@link Pipe}.
+ * 
+ * Pulls variable bindings from the previous stage adds bindings and pushes all
+ * into the following stage.
+ * A more efficient version of PatternStage
+ * Includes its run(Pipe,Pipe) and nest() functionality.
+ * Handles the case, where bindings for <code>triples</code> are not found triple by triple,
+ * but in one step. This is the case for D2RQ.
+ * <p>
+ * In our example:
+ *  a,b,c get bound by source. They are substituted by asTripleMatch(). (Bound)
+ *  i,j,k,x,y,z  are bound by p.match() the first time they are seen. (Bind)
+ *  x,y,z are checked by p.match() the second time they are seen. (Bound)
+ *  
  * @author jg
- * @version $Id: D2RQPatternStage.java,v 1.10 2006/09/13 14:06:22 cyganiak Exp $
+ * @version $Id: D2RQPatternStage.java,v 1.11 2006/09/18 16:59:26 cyganiak Exp $
  */
-public class D2RQPatternStage extends CombinedPatternStage {
-    // TODO keep just one instance of PatternQueryCombiner and update Property Bridges
-    // only when updated with previous stage (see varInfo.boundDomainIndexToShared)
-
+public class D2RQPatternStage extends Stage {
 	private GraphD2RQ graph;
-	protected Map candidateBridgeLists; // Database -> List[] 
-	protected List[] soleCandidateBridgeLists;
-	boolean refersToMultipleDatabases;
-    BitSet multipleDatabasesMarker;
-
-
-	// instanciate just one PatternQueryCombiner? it could do some caching
-	// or leave the caching for graph? e.g. triple -> list of bridges
+	private Mapping map;
+	private ExpressionSet expressions;
+	private Triple[] triplePattern;
+	private FastpathEngine fastpathEngine;
 
 	public D2RQPatternStage(GraphD2RQ graph, Mapping map,
-			ExpressionSet constraints, Triple[] triples) {
-		super((Graph) graph, map, constraints, triples);
-		// some contraints are eaten up at this point!
-		// so use s.th. like a clone() and setter method at invocation time
+			ExpressionSet expressions, Triple[] triplePattern) {
 		this.graph = graph;
-	}
-	
-	public void setup() {
-		Triple[] query=stageInfo.queryTriples;
-		Triple[] mostGeneral=GraphUtils.varsToANY(query);
-		candidateBridgeLists=GraphUtils.makeDatabaseToPrefixedPropertyBridges(graph,mostGeneral,false);
-		multipleDatabasesMarker=new BitSet(query.length);
-		mayYieldResults=GraphUtils.existsEntryInEveryPosition(candidateBridgeLists,query.length,multipleDatabasesMarker);
-		if (!mayYieldResults)
-			return;
-		refersToMultipleDatabases=candidateBridgeLists.size()>1;
-		if (refersToMultipleDatabases) 
-			stageInfo.setupForPartsProcessing();
-		else
-			stageInfo.setupForAllProcessing();
-	}
-	
-	private List[] getSoleCandidateBridgeLists() {
-		if (soleCandidateBridgeLists==null) {
-			Iterator it=candidateBridgeLists.values().iterator();
-			List[] first=null;
-			if (it.hasNext())
-				first=(List[])it.next();
-			if (it.hasNext())
-				throw new RuntimeException("more than one element");
-			soleCandidateBridgeLists=first;
-		}
-		return soleCandidateBridgeLists;
+		this.map = map;
+		this.expressions = expressions;
+		this.triplePattern = triplePattern;
 	}
 
 	/**
-     * Sets up {@link PatternQueryCombiner} and returns its
-     * resultTriplesIterator. Passes stage information to the
-     * PatternQueryCombiner.
-     * 
-     * @param triples
-     *            identical to this.triples
-     * @return an iterator. Each result is a possible and full instanciation of
-     *         triples according to D2RQ.
-     */
-    protected ClosableIterator resultIteratorForTriplePattern(Triple[] triples,
-            int nextToFind, Object aboutPrevious) {
-        if (!refersToMultipleDatabases) {
-            List[] candidates = getSoleCandidateBridgeLists();
-            return makeCombinedIterator(candidates, triples,
-                    stageInfo.vars.allBindings, stageInfo.vars.allExpressions);
-        } else {
-            Map reducedCandidateBridgeLists;
-            if (aboutPrevious == null)
-                reducedCandidateBridgeLists = candidateBridgeLists;
-            else {
-            	ConnectedDB previousDatabase = (ConnectedDB) aboutPrevious;
-                reducedCandidateBridgeLists = new HashMap();
-                reducedCandidateBridgeLists.putAll(candidateBridgeLists);
-                reducedCandidateBridgeLists.remove(previousDatabase);
-            }
-            Map cuttedCandidateBridgeLists = new HashMap();
-            GraphUtils.cutLists(reducedCandidateBridgeLists, nextToFind,
-                    cuttedCandidateBridgeLists, true);
-            ExtendedIterator ret = NiceIterator.emptyIterator();
-            Iterator it = cuttedCandidateBridgeLists.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry e = (Map.Entry) it.next();
-                List[] dbBridges = (List[]) e.getValue();
-                Triple[] triplesCut = new Triple[dbBridges.length];
-                System.arraycopy(triples, nextToFind, triplesCut, 0,
-                        triplesCut.length);
-                PatternQueryCombiner combiner = new PatternQueryCombiner(
-                        graph, dbBridges, triplesCut);
-                combiner.setCareForPossible(false);
-                combiner.setup();
-                int maxlen = combiner.possibleLength();
-                for (int len = maxlen; len > 0; len--) {
-                    // either full length or devide where options from other
-                    // databases
-                    if (len == maxlen
-                            || multipleDatabasesMarker.get(nextToFind + len)) {
-                        RDFRelation[][] tripleQueries = new RDFRelation[len][];
-                        System.arraycopy(combiner.tripleQueries, 0,
-                                tripleQueries, 0, len);
-                        int partEnd = nextToFind + len - 1;
-                        PQCResultIterator item = makeCombinedIterator(
-                                tripleQueries,
-                                stageInfo.vars.partBindings[nextToFind][partEnd],
-                                stageInfo.vars.partExpressions[nextToFind][partEnd]);
-                        if (item != null)
-                            ret = ret.andThen(item);
-                    }
-                }
-            }
-            return ret;
-        }
-    }
-
-
-	private PQCResultIterator makeCombinedIterator(List[] candidates, Triple[] triples, VariableBindings variableBindings, Collection constraints) {
-		PatternQueryCombiner combiner = new PatternQueryCombiner(graph, candidates, triples); 
-		combiner.setup();
-		if (!combiner.possible)
-			return null;
-		return makeCombinedIterator(combiner.tripleQueries,variableBindings,constraints);
+	 * Realizes the piping between the previous, this and the following {@link Stage}.
+	 * A new thread is created for this stage.
+	 * @see PatternStage
+	 */
+	public Pipe deliver(final Pipe output) {
+		Pipe input = new BufferPipe();
+		this.previous.deliver(input);
+		this.fastpathEngine = new FastpathEngine(
+				input, output,
+				this.graph, this.map, this.expressions, this.triplePattern);
+		// TODO Don't start the thread if FastpathEngine.mayYieldResults is false
+		new Thread() {
+			public void run() {
+				try {
+					fastpathEngine.execute();
+					output.close();
+				} catch (Exception ex) {
+					// Hand the exception up to the next stage;
+					// it will be re-thrown there and eventually
+					// be thrown into the caller code. If we
+					// didn't do this, the stage thread would just
+					// die, and the caller thread would wait
+					// indefinitely.
+					output.close(ex);
+				}
+			}
+		}.start();
+		return output;
 	}
-	private PQCResultIterator makeCombinedIterator(RDFRelation[][] tripleQueries, VariableBindings variableBindings, Collection constraints) {
-		PQCResultIterator it=new PQCResultIterator(tripleQueries, 
-				variableBindings, constraints);
-		return it;
+
+	/**
+	 * Cancel operation of this stage. May be called asynchronously
+	 * while the engine is running.  
+	 */
+	public void close() {
+		this.fastpathEngine.cancel();
+		super.close();
 	}
-	
-} // class
+}

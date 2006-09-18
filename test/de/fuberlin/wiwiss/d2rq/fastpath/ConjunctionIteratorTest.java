@@ -1,14 +1,14 @@
-package de.fuberlin.wiwiss.d2rq.rdql;
+package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.Arrays;
 
-import de.fuberlin.wiwiss.d2rq.rdql.ConjunctionIterator;
+import de.fuberlin.wiwiss.d2rq.fastpath.ConjunctionIterator;
 
 import junit.framework.TestCase;
 
 /**
  * @author jg
- * @version $Id: ConjunctionIteratorTest.java,v 1.1 2006/09/02 23:10:43 cyganiak Exp $
+ * @version $Id: ConjunctionIteratorTest.java,v 1.1 2006/09/18 16:59:27 cyganiak Exp $
  */
 public class ConjunctionIteratorTest extends TestCase {
 	

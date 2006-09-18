@@ -1,10 +1,11 @@
 package de.fuberlin.wiwiss.d2rq.rdql;
 
+import de.fuberlin.wiwiss.d2rq.fastpath.ConstraintHandler;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * @author jgarbers
- * @version $Id: MySQLExpressionTranslator.java,v 1.4 2006/09/15 12:25:25 cyganiak Exp $
+ * @version $Id: MySQLExpressionTranslator.java,v 1.5 2006/09/18 16:59:26 cyganiak Exp $
  */
 public class MySQLExpressionTranslator extends ExpressionTranslator {
 
