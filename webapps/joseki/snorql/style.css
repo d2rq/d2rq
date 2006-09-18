@@ -19,6 +19,7 @@ img { border: none; }
 .uri { white-space: nowrap; }
 .uri a, a.uri { text-decoration: none; }
 .unbound { color: #888; }
+.queryresults a small { font-size: 100%; color: #55a; }
 .queryresults small { font-size: 100%; color: #666; }
 .queryresults .property { white-space: nowrap; }
 #rdficon { float: right; margin: 0.6em 1em; }
