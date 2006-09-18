@@ -8,6 +8,7 @@ import com.hp.hpl.jena.query.engine1.ExecutionContext;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -20,7 +21,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * TODO Is this thread-safe? ARQ uses just a single instance of this class.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindDescribeHandler.java,v 1.4 2006/09/02 16:14:15 cyganiak Exp $
+ * @version $Id: FindDescribeHandler.java,v 1.5 2006/09/18 12:19:36 cyganiak Exp $
  */
 public class FindDescribeHandler implements DescribeHandler {
 	private Model dataModel;
@@ -41,6 +42,7 @@ public class FindDescribeHandler implements DescribeHandler {
 		Model seeAlsos = ModelFactory.createDefaultModel();
 		description.add(this.dataModel.listStatements(resource, null, (RDFNode) null));
 		description.add(this.dataModel.listStatements(null, null, resource));
+		description.add(this.dataModel.listStatements(null, (Property) resource.as(Property.class), (RDFNode) null));
 		ResIterator rit = description.listSubjects();
 		while (rit.hasNext()) {
 			addSeeAlsoStatement(rit.nextResource(), seeAlsos, resource.getURI());
