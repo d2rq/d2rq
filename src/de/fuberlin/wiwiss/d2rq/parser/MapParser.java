@@ -32,7 +32,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.19 2006/09/16 13:22:29 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.20 2006/09/28 12:15:54 cyganiak Exp $
  */
 public class MapParser {
 
@@ -98,7 +98,7 @@ public class MapParser {
 			StmtIterator it2 = instructions.listProperties();
 			while (it2.hasNext()) {
 				Statement stmt = (Statement) it2.next();
-				if (!stmt.getObject().isLiteral()) {
+				if (stmt.getObject().isLiteral()) {
 					this.mapping.setProcessingInstruction(stmt.getPredicate(), stmt.getString());
 				}
 			}
