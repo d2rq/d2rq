@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SPARQLTest.java,v 1.7 2006/09/09 15:40:04 cyganiak Exp $
+ * @version $Id: SPARQLTest.java,v 1.8 2006/09/28 14:00:22 cyganiak Exp $
  */
 public class SPARQLTest extends QueryLanguageTestFramework {
 
@@ -76,7 +76,7 @@ public class SPARQLTest extends QueryLanguageTestFramework {
 		expectVariable("y", this.model.createResource("mailto:varunr@isi.edu"));
 		assertSolution();
 
-		assertResultCount(7);
+		assertResultCount(8);
 	}
 
 	public void testSPARQLGetAuthorsAndEmailsWithCondition() {
@@ -95,7 +95,7 @@ public class SPARQLTest extends QueryLanguageTestFramework {
 		expectVariable("y", this.model.createResource("mailto:varunr@isi.edu"));
 		assertSolution();
 
-		assertResultCount(7);
+		assertResultCount(8);
 	}
 
 	

@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelAPITest.java,v 1.9 2006/09/09 15:40:04 cyganiak Exp $
+ * @version $Id: ModelAPITest.java,v 1.10 2006/09/28 14:00:22 cyganiak Exp $
  */
 public class ModelAPITest extends TestCase {
 	private ModelD2RQ model;
@@ -42,7 +42,7 @@ public class ModelAPITest extends TestCase {
 //			dumpStatement(stmt);
 			count++;
 		}
-		assertEquals(288, count);
+		assertEquals(296, count);
 	}
 
 	public void testHasProperty() {
