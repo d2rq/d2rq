@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
  * {@link MappingGenerator} or a mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: dump_rdf.java,v 1.2 2006/09/18 11:56:52 cyganiak Exp $
+ * @version $Id: dump_rdf.java,v 1.3 2006/09/28 12:11:17 cyganiak Exp $
  */
 public class dump_rdf {
 	private final static String[] includedDrivers = {
@@ -156,7 +156,8 @@ public class dump_rdf {
 			Model d2rqModel = new ModelD2RQ(mapModel, baseURI());
 			PrintStream out = makeDestinationStream();
 			RDFWriter writer = d2rqModel.getWriter(this.format);
-			if (this.baseURI != null) {
+			if (this.baseURI != null && 
+					(this.format.equals("RDF/XML") || this.format.equals("RDF/XML-ABBREV"))) {
 				writer.setProperty("xmlbase", this.baseURI);
 			}
 			writer.write(d2rqModel, out, MapParser.absolutizeURI(baseURI()));
