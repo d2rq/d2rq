@@ -51,12 +51,12 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.37 2006/09/28 12:17:44 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.38 2006/09/28 12:18:20 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
 	
-	static private boolean usingD2RQQueryHandler = false;
+	static private boolean usingD2RQQueryHandler = true;
 	
 //	private final ReificationStyle style;
 //	private boolean closed = false;
