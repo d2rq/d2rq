@@ -12,12 +12,12 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * @author jgarbers
- * @version $Id: GraphUtils.java,v 1.2 2006/09/18 19:06:54 cyganiak Exp $
+ * @version $Id: GraphUtils.java,v 1.3 2006/09/28 12:17:43 cyganiak Exp $
  */
 public class GraphUtils {
 
@@ -170,7 +170,7 @@ public class GraphUtils {
 			}
 		    nonEmptyLists++;
 			for (int j=0; j<bridgesCount; j++) {
-				RDFRelationImpl bridge = (RDFRelationImpl) tBridges.get(j);
+				TripleRelation bridge = (TripleRelation) tBridges.get(j);
 				tBridges.set(j, bridge.withPrefix(i));
 			}
 		}
@@ -244,7 +244,7 @@ public class GraphUtils {
 		ArrayList list=new ArrayList(2);
 		Iterator pbIt=propertyListCandidates.iterator();
 		while (pbIt.hasNext()) {
-			RDFRelationImpl bridge = (RDFRelationImpl) pbIt.next();
+			TripleRelation bridge = (TripleRelation) pbIt.next();
 			if (bridge.selectTriple(t).equals(RDFRelation.EMPTY)) {
 				continue;
 			}

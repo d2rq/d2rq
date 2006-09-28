@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  * NodeMakers. Very much work in progress.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelation.java,v 1.6 2006/09/18 08:55:00 cyganiak Exp $
+ * @version $Id: RDFRelation.java,v 1.7 2006/09/28 12:17:44 cyganiak Exp $
  */
 public interface RDFRelation extends TripleMaker {
 	
@@ -28,6 +28,8 @@ public interface RDFRelation extends TripleMaker {
 		public NodeMaker nodeMaker(int index) { return NodeMaker.EMPTY; }
 		public RDFRelation selectTriple(Triple triplePattern) { return RDFRelation.EMPTY; }
 		public RDFRelation renameColumns(ColumnRenamer renamer) { return RDFRelation.EMPTY; }
+		public Collection names() { return Collections.EMPTY_LIST; }
+		public NodeMaker namedNodeMaker(String name) { return null; }
 		public String toString() { return "RDFRelation.EMPTY"; }
 	};
 
@@ -47,4 +49,8 @@ public interface RDFRelation extends TripleMaker {
 	RDFRelation selectTriple(Triple triplePattern);
 	
 	RDFRelation renameColumns(ColumnRenamer renamer);
+	
+	Collection names();
+	
+	NodeMaker namedNodeMaker(String name);
 }

@@ -40,7 +40,7 @@ import java.util.Set;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.10 2006/09/15 19:36:45 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.11 2006/09/28 12:17:44 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -79,7 +79,7 @@ public class JoinOptimizer {
 			return this.relation;
 		}
 		ColumnRenamer renamer = new ColumnRenamerMap(replacedColumns);
-		return new RDFRelationImpl(
+		return new TripleRelation(
 				new RelationImpl(this.relation.baseRelation().database(),
 					this.relation.baseRelation().aliases(),
 					this.relation.baseRelation().attributeConditions(),

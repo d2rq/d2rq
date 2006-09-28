@@ -30,7 +30,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -51,12 +51,12 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.36 2006/09/18 19:06:54 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.37 2006/09/28 12:17:44 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
 	
-	static private boolean usingD2RQQueryHandler=false;
+	static private boolean usingD2RQQueryHandler = false;
 	
 //	private final ReificationStyle style;
 //	private boolean closed = false;
@@ -177,7 +177,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		return new FindQuery(t, this.mapping.compiledPropertyBridges()).iterator();
     }
 	
-	static RDFRelationImpl[] emptyPropertyBridgeArray=new RDFRelationImpl[0];
+	static TripleRelation[] emptyPropertyBridgeArray=new TripleRelation[0];
 	
     /**
      * TODO This section was done as a quick hack for D2R Server 0.3 and really shouldn't be here
@@ -197,7 +197,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			List inventoryBridges = new ArrayList();
 			Iterator bridgeIt = this.mapping.classMap(classMapResource).compiledPropertyBridges().iterator();
 			while (bridgeIt.hasNext()) {
-				RDFRelationImpl bridge = (RDFRelationImpl) bridgeIt.next();
+				TripleRelation bridge = (TripleRelation) bridgeIt.next();
 				if (!bridge.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)).equals(Relation.EMPTY)) {
 					inventoryBridges.add(bridge);
 				}
@@ -206,12 +206,12 @@ public class GraphD2RQ extends GraphBase implements Graph {
 				}
 			}
 			if (!this.mapping.classMap(classMapResource).compiledPropertyBridges().isEmpty()) {
-				RDFRelationImpl aBridge = (RDFRelationImpl) this.mapping.classMap(classMapResource).compiledPropertyBridges().iterator().next();
+				TripleRelation aBridge = (TripleRelation) this.mapping.classMap(classMapResource).compiledPropertyBridges().iterator().next();
 				NodeMaker classMapNodeMaker = new FixedNodeMaker(
 						Node.createURI(this.inventoryBaseURI + toClassMapName(classMap)), false);
 				NodeMaker seeAlsoNodeMaker = new FixedNodeMaker(
 						RDFS.seeAlso.asNode(), false);
-				inventoryBridges.add(new RDFRelationImpl(aBridge.baseRelation(), 
+				inventoryBridges.add(new TripleRelation(aBridge.baseRelation(), 
 						classMapNodeMaker, seeAlsoNodeMaker, resourceMaker));
 			}
 			this.classMapInventoryBridges.put(toClassMapName(classMap), inventoryBridges);

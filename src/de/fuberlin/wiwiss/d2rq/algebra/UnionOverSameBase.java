@@ -2,6 +2,7 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UnionOverSameBase.java,v 1.9 2006/09/15 19:36:44 cyganiak Exp $
+ * @version $Id: UnionOverSameBase.java,v 1.10 2006/09/28 12:17:44 cyganiak Exp $
  */
 public class UnionOverSameBase implements RDFRelation {
 
@@ -139,5 +140,13 @@ public class UnionOverSameBase implements RDFRelation {
 	
 	public RDFRelation renameColumns(ColumnRenamer renamer) {
 		throw new UnsupportedOperationException();
+	}
+
+	public Collection names() {
+		return Collections.EMPTY_LIST;
+	}
+	
+	public NodeMaker namedNodeMaker(String name) {
+		return null;
 	}
 }

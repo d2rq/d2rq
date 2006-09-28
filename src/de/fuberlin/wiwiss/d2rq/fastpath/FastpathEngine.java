@@ -29,7 +29,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  *
  * @author jg
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FastpathEngine.java,v 1.2 2006/09/18 19:06:54 cyganiak Exp $
+ * @version $Id: FastpathEngine.java,v 1.3 2006/09/28 12:17:43 cyganiak Exp $
  */
 public class FastpathEngine {
 	private final Pipe input;
@@ -60,8 +60,6 @@ public class FastpathEngine {
 		this.mayYieldResults = GraphUtils.existsEntryInEveryPosition(
 				this.candidateBridgeLists, triples.length,
 				this.multipleDatabasesMarker);
-		if (!mayYieldResults)
-			return;
 	}
 
 	public void execute() {

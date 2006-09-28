@@ -11,7 +11,7 @@ import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
@@ -23,10 +23,10 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * In a query a variable node is either a result value, or a shared variable
  * or both. If it is a shared variable, we collect into a NodeConstraint 
  * all constraining information that we know about the different node positions
- * from the {@link RDFRelationImpl}s.
+ * from the {@link TripleRelation}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.2 2006/09/28 12:17:43 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeSetFilter {
     public static final int NotFixedNodeType = 0;

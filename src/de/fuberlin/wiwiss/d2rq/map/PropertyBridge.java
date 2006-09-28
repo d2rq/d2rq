@@ -11,7 +11,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
@@ -134,7 +134,7 @@ public class PropertyBridge extends ResourceMap {
 		Iterator it = this.properties.iterator();
 		while (it.hasNext()) {
 			Property property = (Property) it.next();
-			results.add(new RDFRelationImpl(
+			results.add(new TripleRelation(
 					buildRelation(),
 					this.belongsToClassMap.nodeMaker(),
 					new FixedNodeMaker(property.asNode(), false),

@@ -8,7 +8,7 @@ import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 
 /** 
@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.find.FindQuery;
  * useless, if there are (Bound) variables for predicates.
  * 
  * @author jgarbers
- * @version $Id: PatternQueryCombiner.java,v 1.2 2006/09/18 19:06:54 cyganiak Exp $
+ * @version $Id: PatternQueryCombiner.java,v 1.3 2006/09/28 12:17:43 cyganiak Exp $
  * @see FindQuery
  */
 public class PatternQueryCombiner {
@@ -67,7 +67,7 @@ public class PatternQueryCombiner {
 			return null;
 		this.bridges = new ArrayList[this.tripleCount];
 		this.bridgesCounts = new int[this.tripleCount];
-		tripleQueries = new RDFRelation[this.tripleCount][];
+		this.tripleQueries = new RDFRelation[this.tripleCount][];
 		makePropertyBridges(); // -> setsOfPossiblePropertyBridges
 		// reducePropertyBridges();
 		makeTripleQueries();
@@ -107,19 +107,20 @@ public class PatternQueryCombiner {
 	 *  triple in the overall query.
 	 */
 	private void makePropertyBridges() {
-		if (!cont())
-			return;
-		if (candidateBridges==null)
+		if (this.candidateBridges==null) {
 			this.bridges = GraphUtils.makePrefixedPropertyBridges(
 					this.rdfRelations, this.triples);
-		else
-			bridges=GraphUtils.refinePropertyBridges(candidateBridges,triples);
-		if (bridges==null)
-			possible=false;
+		} else {
+			this.bridges = GraphUtils.refinePropertyBridges(
+					this.candidateBridges, this.triples);
+		}
+		if (this.bridges == null) {
+			this.possible = false;
+		}
 	}
 
 	/** 
-	 * Creates a {@link TripleSelection} for each {@link RDFRelationImpl}.
+	 * Creates a {@link TripleSelection} for each {@link TripleRelation}.
 	 * As a side effect we also set <code>bridgesCounts</code>.
 	 */
 	private void makeTripleQueries() {

@@ -1,6 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,9 +23,11 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelationImpl.java,v 1.6 2006/09/15 19:36:45 cyganiak Exp $
+ * @version $Id: TripleRelation.java,v 1.1 2006/09/28 12:17:44 cyganiak Exp $
  */
-public class RDFRelationImpl implements RDFRelation {
+public class TripleRelation implements RDFRelation {
+	private final static Set S_P_O = new HashSet(Arrays.asList(new String[] {"S", "P", "O"}));
+	
 	private NodeMaker subjectMaker;
 	private NodeMaker predicateMaker;
 	private NodeMaker objectMaker; 
@@ -32,7 +35,7 @@ public class RDFRelationImpl implements RDFRelation {
 	private Set projectionColumns = new HashSet();
 	private boolean isUnique;
 	
-	public RDFRelationImpl(Relation baseRelation, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker) {
+	public TripleRelation(Relation baseRelation, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker) {
 		this.subjectMaker = subjectMaker;
 		this.predicateMaker = predicateMaker;
 		this.objectMaker = objectMaker;
@@ -120,16 +123,33 @@ public class RDFRelationImpl implements RDFRelation {
 		if (p.equals(NodeMaker.EMPTY)) return RDFRelation.EMPTY;
 		NodeMaker o = this.objectMaker.selectNode(t.getObject(), newBase);
 		if (o.equals(NodeMaker.EMPTY)) return RDFRelation.EMPTY;
-		return new RDFRelationImpl(newBase.immutableSnapshot(), s, p, o);
+		return new TripleRelation(newBase.immutableSnapshot(), s, p, o);
 	}
 	
 	public RDFRelation renameColumns(ColumnRenamer renamer) {
 		NodeMaker s = this.subjectMaker.renameColumns(renamer, MutableRelation.DUMMY);
 		NodeMaker p = this.predicateMaker.renameColumns(renamer, MutableRelation.DUMMY);
 		NodeMaker o = this.objectMaker.renameColumns(renamer, MutableRelation.DUMMY);
-		return new RDFRelationImpl(this.baseRelation.renameColumns(renamer), s, p, o);
+		return new TripleRelation(this.baseRelation.renameColumns(renamer), s, p, o);
+	}
+
+	public Collection names() {
+		return S_P_O;
 	}
 	
+	public NodeMaker namedNodeMaker(String name) {
+		if ("S".equals(name)) {
+			return this.subjectMaker;
+		}
+		if ("P".equals(name)) {
+			return this.predicateMaker;
+		}
+		if ("O".equals(name)) {
+			return this.objectMaker;
+		}
+		return null;
+	}
+
 	private boolean determineIsUnique() {
 		if (this.baseRelation.joinConditions().isEmpty()) {
 			return this.subjectMaker.isUnique() || this.predicateMaker.isUnique() || this.objectMaker.isUnique();

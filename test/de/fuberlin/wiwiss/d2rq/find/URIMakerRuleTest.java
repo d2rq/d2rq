@@ -12,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelationImpl;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
 import de.fuberlin.wiwiss.d2rq.find.URIMakerRule.URIMakerRuleChecker;
@@ -41,7 +41,7 @@ import junit.framework.TestCase;
  *     d2rq:class foaf:Document;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRuleTest.java,v 1.1 2006/09/17 00:36:27 cyganiak Exp $
+ * @version $Id: URIMakerRuleTest.java,v 1.2 2006/09/28 12:17:44 cyganiak Exp $
  */
 public class URIMakerRuleTest extends TestCase {
 	private RDFRelation withURIPatternSubject;
@@ -54,23 +54,23 @@ public class URIMakerRuleTest extends TestCase {
 	public void setUp() {
 		Relation base = new RelationImpl(null, AliasMap.NO_ALIASES, 
 				Collections.EMPTY_MAP, Expression.TRUE, Collections.EMPTY_SET);
-		this.withURIPatternSubject = new RDFRelationImpl(base,
+		this.withURIPatternSubject = new TripleRelation(base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new Pattern("http://test/person@@employees.ID@@"), true),
 				new FixedNodeMaker(RDF.type.asNode(), false),
 				new FixedNodeMaker(FOAF.Person.asNode(), false));
-		this.withURIPatternSubjectAndObject = new RDFRelationImpl(base,
+		this.withURIPatternSubjectAndObject = new TripleRelation(base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new Pattern("http://test/person@@employees.ID@@"), true),
 				new FixedNodeMaker(FOAF.knows.asNode(), false),
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new Pattern("http://test/person@@employees.manager@@"), true));
-		this.withURIColumnSubject = new RDFRelationImpl(base,
+		this.withURIColumnSubject = new TripleRelation(base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new Column(new Attribute(null, "employees", "homepage")), false),
 				new FixedNodeMaker(RDF.type.asNode(), false),
 				new FixedNodeMaker(FOAF.Document.asNode(), false));
-		this.withURIPatternSubjectAndURIColumnObject = new RDFRelationImpl(base,
+		this.withURIPatternSubjectAndURIColumnObject = new TripleRelation(base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new Pattern("http://test/person@@employees.ID@@"), true),
 				new FixedNodeMaker(FOAF.homepage.asNode(), false),
