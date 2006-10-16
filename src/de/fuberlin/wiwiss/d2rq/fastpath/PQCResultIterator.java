@@ -1,6 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.fastpath;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import com.hp.hpl.jena.graph.Triple;
@@ -15,60 +16,37 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * Iterator for PatternQueryCombiner results.
  * 
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.2 2006/09/18 19:06:54 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.3 2006/10/16 12:46:00 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
-    public static int instanceCounter=1;
-    public int instanceNr=instanceCounter++;
-    public int returnedTriplePatternNr=0;
-    
-    private String additionalLogInfo;
-
 	private final VariableBindings variableBindings;
 	private final Collection constraints;
+	private final RDFRelation[] conjunction;
+	private final Iterator conjunctionsIterator;
+	private ApplyTripleMakerRowIterator resultSet; 
+	private Triple[] nextRow = null;
 	
-	/** Iterator for TripleQuery conjunctions */
-    protected ConjunctionIterator conjunctionsIterator;
-    /** next TripleQuery conjunction to be processed */
-	private RDFRelation[] conjunction; 
-	/** iterator helper */
-	protected Triple[] prefetchedResult=null;
-	/** iterator helper */
-	protected boolean didPrefetch=false;
-	/** iterator that returns triple arrays for database rows */
-	ApplyTripleMakerRowIterator resultSet=null; 
-	
-	ConnectedDB nextDatabase;
-
-	public PQCResultIterator(RDFRelation[][] tripleQueries, VariableBindings variableBindings, Collection constraints) { // or maybe pass conjunctionsIterator as
-		//combiner = combiner4;
+	public PQCResultIterator(RDFRelation[][] tripleQueries, VariableBindings variableBindings, Collection constraints) {
 		this.variableBindings=variableBindings;
 		this.constraints=constraints;
-		conjunction=new RDFRelation[tripleQueries.length];
-		conjunctionsIterator= new ConjunctionIterator(tripleQueries, conjunction);
+		this.conjunction = new RDFRelation[tripleQueries.length];
+		this.conjunctionsIterator= new CombinationIterator(tripleQueries);
 	}
 	
 	public boolean hasNext() {
-		// if (!possible)
-		//	return false;
-		if (!didPrefetch) {
-			prefetch();
-			didPrefetch=true;
+		if (this.nextRow == null) {
+			this.nextRow = tryFetchNextRow();
 		}
-		return (prefetchedResult!=null);
+		return (this.nextRow != null);
 	}
 
 	public Object next() {
-		if (!didPrefetch) {
-			prefetch();
-		}
-		if (prefetchedResult==null)
+		if (!hasNext()) {
 			throw new NoSuchElementException();
-		Triple[] ret=prefetchedResult;
-		prefetchedResult=null;
-		didPrefetch=false;
-        returnedTriplePatternNr++;
-		return new FastpathEngine.IteratorResult(ret,nextDatabase);
+		}
+		Triple[] result = this.nextRow;
+		this.nextRow = null;
+		return result;
 	}
 	
 	/**
@@ -79,79 +57,51 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 	 * Only those TripleQuery conjunctions are considered that may have
 	 * solutions in terms of NodeConstraints on shared variables.
 	 */
-	protected void prefetch() {
-		prefetchedResult=null;
+	private Triple[] tryFetchNextRow() {
 		while (true) {
-			if ((resultSet!=null) && (resultSet.hasNext())) {
-				prefetchedResult = resultSet.nextRow();
-				return;
+			if ((this.resultSet != null) && (this.resultSet.hasNext())) {
+				return this.resultSet.nextRow();
 			}
-			if (!conjunctionsIterator.hasNext())
-				return;
-			conjunctionsIterator.next();
-			// TODO partition conjunction and conditions into parts
-			// that can be handled by separate databases.
-			// keep intermediate results and perform cross-products
-			// in java.
-			ConstraintHandler ch=new ConstraintHandler();
-			ch.setVariableBindings(variableBindings);
-			ch.setTripleQueryConjunction(conjunction);
-			ch.setRDQLConstraints(constraints);
+			if (!this.conjunctionsIterator.hasNext()) {
+				return null;
+			}
+			Object[] combination = (Object[]) this.conjunctionsIterator.next();
+			for (int i = 0; i < combination.length; i++) {
+				this.conjunction[i] = (RDFRelation) combination[i];
+			}
+			ConstraintHandler ch = new ConstraintHandler();
+			ch.setVariableBindings(this.variableBindings);
+			ch.setTripleQueryConjunction(this.conjunction);
+			ch.setRDQLConstraints(this.constraints);
 			ch.makeConstraints();
-			if (!ch.possible)
-			    continue;
-			SelectStatementBuilder sql=getSQL();
-			ch.addConstraintsToSQL(sql);
-			nextDatabase = conjunction[0].baseRelation().database();
-			this.resultSet = new ApplyTripleMakerRowIterator(sql.execute(), conjunction);
+			if (!ch.possible) {
+				continue;
+			}
+			this.resultSet = new ApplyTripleMakerRowIterator(
+					getSQL(ch).execute(), this.conjunction);
 		} // enless while loop
 	}
 
-	/* 
-	 * Closes query to database.
-	 * @see com.hp.hpl.jena.util.iterator.ClosableIterator#close()
-	 */
-	public void close() {
-		if (resultSet!=null)
-		    resultSet.close();
-	}
-
-	/* 
-	 * Not supported.
-	 * @see java.util.Iterator#remove()
-	 */
-	public void remove() {
-		throw new UnsupportedOperationException();
-	}
-
-    /**
-     * @return Returns the additionalLogInfo.
-     */
-    public String getAdditionalLogInfo() {
-        return additionalLogInfo;
-    }
-    /**
-     * @param additionalLogInfo The additionalLogInfo to set.
-     */
-    public void setAdditionalLogInfo(String additionalLogInfo) {
-        this.additionalLogInfo = additionalLogInfo;
-    }
-    
-	/**
-	 * produces an SQL statement for a conjunction of triples that refer to
-	 * the same database.
-	 */
-	private SelectStatementBuilder getSQL() {
-		boolean possible=true;
-		ConnectedDB db=conjunction[0].baseRelation().database();
-		SelectStatementBuilder sql=new SelectStatementBuilder(db);
+	private SelectStatementBuilder getSQL(ConstraintHandler ch) {
+		ConnectedDB db = this.conjunction[0].baseRelation().database();
+		SelectStatementBuilder sql = new SelectStatementBuilder(db);
 		sql.setEliminateDuplicates(db.allowDistinct());	
-
-		for (int i=0; (i<conjunction.length) && possible; i++) {
-			RDFRelation t=conjunction[i];
+		for (int i=0; i < this.conjunction.length; i++) {
+			RDFRelation t = this.conjunction[i];
 			sql.addSelectColumns(t.projectionColumns());
 			sql.addRelation(t.baseRelation());
 		}
+		ch.addConstraintsToSQL(sql);
 		return sql;
+	}
+
+	public void close() {
+		if (this.resultSet != null) {
+			this.resultSet.close();
+		}
+	}
+
+	public void remove() {
+		throw new UnsupportedOperationException();
 	}
 }

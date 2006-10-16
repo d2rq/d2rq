@@ -16,14 +16,14 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * A D2RQQueryHandler handles queries on behalf of a {@link GraphD2RQ}.
  * 
  * @author jgarbers
- * @version $Id: D2RQQueryHandler.java,v 1.9 2006/09/18 19:06:54 cyganiak Exp $
+ * @version $Id: D2RQQueryHandler.java,v 1.10 2006/10/16 12:46:01 cyganiak Exp $
  */
 public class D2RQQueryHandler extends SimpleQueryHandler implements QueryHandler {
 	private Collection rdfRelations;
 
-	public D2RQQueryHandler(Graph graph) {
+	public D2RQQueryHandler(Graph graph, Collection rdfRelations) {
 		super(graph);
-		this.rdfRelations = ((GraphD2RQ) graph).getPropertyBridges();
+		this.rdfRelations = rdfRelations;
 	}     
 
 	public Stage patternStage(Mapping map, ExpressionSet constraints, Triple [] t) { 

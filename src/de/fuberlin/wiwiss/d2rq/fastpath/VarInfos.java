@@ -17,7 +17,7 @@ import com.hp.hpl.jena.graph.query.Mapping;
 
 /**
  * @author jgarbers
- * @version $Id: VarInfos.java,v 1.2 2006/09/18 19:06:54 cyganiak Exp $
+ * @version $Id: VarInfos.java,v 1.3 2006/10/16 12:46:00 cyganiak Exp $
  */
 public class VarInfos {
 	private final int tripleCount;
@@ -35,13 +35,11 @@ public class VarInfos {
 
 	/** Fast lookup information for different types of variables (shared, bind, bound). */
 	public final VariableBindings allBindings;
-	public final VariableBindings[][] partBindings; // partBindings[i][j]: starting from i, ending in j
 
 	public final Collection allExpressions;
-	public final Collection[][] partExpressions;
 
 	public VarInfos(Mapping queryMapping, ExpressionSet queryConstraints, 
-			int tripleCount, boolean partsProcessing) {
+			int tripleCount) {
 		this.tripleCount = tripleCount;
 		Set constraintVariableNodes = new HashSet();
 		List constraintVariableNodeSets = new ArrayList();
@@ -59,23 +57,8 @@ public class VarInfos {
 			this.boundVariables[i] = new HashSet(constraintVariableNodesFromInitialMapping);
 		}
 		this.bindVariables = new HashMap[tripleCount];
-		if (partsProcessing) {
-			this.partBindings = new VariableBindings[tripleCount][tripleCount];
-			this.partExpressions = new Collection[tripleCount][tripleCount];
-			for (int i=0; i<=tripleCount; i++) {
-				for (int j=i; j<tripleCount; j++) {
-					this.partBindings[i][j]=new VariableBindings();
-					this.partExpressions[i][j]=new ArrayList();
-				}
-			}
-			this.allBindings = null;
-			this.allExpressions = null;
-		} else {
-			this.allBindings = new VariableBindings();
-			this.allExpressions = new ArrayList();
-			this.partBindings = null;
-			this.partExpressions = null;
-		}
+		this.allBindings = new VariableBindings();
+		this.allExpressions = new ArrayList();
 	}
 
 	public Set boundVariables(int index) {
@@ -87,44 +70,15 @@ public class VarInfos {
 			bindVariables[tripleNr]=new HashMap();
 		bindVariables[tripleNr].put(node,new VariableIndex(tripleNr,nodeNr));
 		updateBoundVariables(node,tripleNr);
-		if (allBindings!=null)
-			allBindings.addBindNode(node, domainIndex, tripleNr, nodeNr);
-		if (partBindings!=null)
-			addPartBindings(node, domainIndex, tripleNr, nodeNr,true);
+		allBindings.addBindNode(node, domainIndex, tripleNr, nodeNr);
 	}
+	
 	public void addBoundNode(Node node, int domainIndex, int tripleNr, int nodeNr) {
-		if (allBindings!=null)
-			allBindings.addBoundNode(node, domainIndex, tripleNr, nodeNr);
-		if (partBindings!=null)
-			addPartBindings(node, domainIndex, tripleNr, nodeNr,false);
+		allBindings.addBoundNode(node, domainIndex, tripleNr, nodeNr);
 	}
+
 	public void addExpression(Expression e, int tripleNr) {
-	    if (allExpressions!=null)
-	        allExpressions.add(e);
-	    if (partExpressions!=null)
-	        addPartExpressions(e,tripleNr);
-	}
-	
-	private void addPartExpressions(Expression e, int tripleNr) {
-		// tripleNr must be in range i..j
-		for (int i=0; i<=tripleNr; i++) {
-			for (int j=tripleNr; j<tripleCount; j++) {
-			    partExpressions[i][j].add(e);
-			}
-		}
-	}
-	
-	private void addPartBindings(Node node, int domainIndex, int tripleNr, int nodeNr, boolean isBind) {
-		// tripleNr must be in range i..j
-		for (int i=0; i<=tripleNr; i++) {
-			int relative=true?(tripleNr-i):i;
-			for (int j=tripleNr; j<tripleCount; j++) {
-				if (isBind)
-					partBindings[i][j].addBindNode(node,domainIndex,relative,nodeNr);				
-				else 
-					partBindings[i][j].addBoundNode(node,domainIndex,relative,nodeNr);
-			}
-		}	
+        allExpressions.add(e);
 	}
 	
 	private void updateBoundVariables(Node node, int tripleNr) {

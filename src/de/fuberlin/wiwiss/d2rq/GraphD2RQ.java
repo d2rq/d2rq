@@ -51,7 +51,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.38 2006/09/28 12:18:20 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.39 2006/10/16 12:46:01 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -71,10 +71,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		GraphD2RQ.usingD2RQQueryHandler = usingD2RQQueryHandler;
 	}
 	
-	public Collection getPropertyBridges() {
-		return this.mapping.compiledPropertyBridges();
-	}
-
 	/**
 	 * Creates a new D2RQ graph from a Jena model containing a D2RQ
 	 * mapping.
@@ -145,7 +141,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		        throw new RuntimeException(e);
 		    }
 		} else if (usingD2RQQueryHandler) {
-			return new D2RQQueryHandler(this);
+			return new D2RQQueryHandler(this, this.mapping.compiledPropertyBridges());
 		} else {
 		    return new SimpleQueryHandler(this);
 		}

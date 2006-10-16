@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * from the {@link TripleRelation}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.2 2006/09/28 12:17:43 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.3 2006/10/16 12:46:00 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeSetFilter {
     public static final int NotFixedNodeType = 0;
@@ -34,8 +34,7 @@ public class NodeConstraintImpl implements NodeSetFilter {
     public static final int UriNodeType = 2;
     public static final int LiteralNodeType = 4;    
     
-	/** true means: satisfiable. */
-    private boolean possible=true;
+    private boolean possible = true;
     /** a flag that shows, if constraint information was added. */
     private boolean infoAdded = false;
 

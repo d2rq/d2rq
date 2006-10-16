@@ -9,7 +9,7 @@ public class AllTests {
 		TestSuite suite = new TestSuite(
 				"Test for de.fuberlin.wiwiss.d2rq.fastpath");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(ConjunctionIteratorTest.class);
+		suite.addTestSuite(CombinationIteratorTest.class);
 		//$JUnit-END$
 		return suite;
 	}

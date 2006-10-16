@@ -21,7 +21,7 @@ import com.hp.hpl.jena.graph.query.ValuatorSet;
 
 /**
  * @author jgarbers
- * @version $Id: StageInfo.java,v 1.2 2006/09/18 19:06:54 cyganiak Exp $
+ * @version $Id: StageInfo.java,v 1.3 2006/10/16 12:46:00 cyganiak Exp $
  */
 public class StageInfo {
 	private final Mapping mapping; // modified by side effects
@@ -37,22 +37,14 @@ public class StageInfo {
 	 * guard[i] is evaluable when the ith triple has matched.
 	 */
 	private final ValuatorSet guard; // a guard that checks the evaluable expressions from conditions
-	private final ValuatorSet[] guards; 
 	
 	public StageInfo(Mapping map, ExpressionSet constraints, 
-			Triple[] triples, boolean partsProcessing) {
+			Triple[] triples) {
 		this.mapping = map;
 		this.vars = new VarInfos(
-				this.mapping, constraints, triples.length,
-				partsProcessing);
+				this.mapping, constraints, triples.length);
 		this.compiled = compile(triples);
-		if (partsProcessing) {
-			this.guards = makeGuards(constraints, triples.length);
-			this.guard = null;
-		} else {
-			this.guard = makeGuard(constraints, triples.length - 1);
-			this.guards = null;
-		}
+		this.guard = makeGuard(constraints, triples.length - 1);
 	}
 	
 	/** Compiles <code>triples</code> into <code>compiled</code>. 
@@ -144,58 +136,7 @@ public class StageInfo {
 	}
 
 	public boolean evalGuard(Domain domain) {
-		if (this.guard == null) {
-			return true;
-		}
 		return this.guard.evalBool(domain);
-	}
-	
-    /**
-    Answer an array of ExpressionSets exactly as long as the supplied length.
-    The i'th ExpressionSet contains the prepared [against <code>map</code>]
-    expressions that can be evaluated as soon as the i'th triple has been matched.
-    By "can be evaluated as soon as" we mean that all its variables are bound.
-    The original ExpressionSet is updated by removing those elements that can
-    be so evaluated.
-    
- 	@param constraints the set of constraint expressions to plant
- 	@return the array of prepared ExpressionSets
- 	*/
-	private ValuatorSet[] makeGuards(ExpressionSet constraints, int size) {
-		ValuatorSet[] result = new ValuatorSet[size];
-		for (int i = 0; i < size; i += 1)
-			result[i] = new ValuatorSet();
-		Iterator it = constraints.iterator();
-		while (it.hasNext())
-			plantWhereFullyBound((Expression) it.next(), it, this.mapping, result, size);
-		return result;
-	}
-	
-	public boolean evalGuard(int index, Domain domain) {
-		if (this.guards == null) {
-			return true;
-		}
-		return this.guards[index].evalBool(domain);
-	}
-
-    /**
-    Find the earliest triple index where this expression can be evaluated, add it
-    to the appropriate expression set, and remove it from the original via the
-    iterator.
-    Note: Side effects on ValuatorSet represented by iterator.
-    */
-	private void plantWhereFullyBound(Expression e, Iterator it, Mapping map,
-			ValuatorSet[] es, int size) {
-		for (int i = 0; i < size; i ++) {
-			boolean evaluable=canEval(e,i);
-			if (evaluable) { 
-			    vars.addExpression(e,i);
-				Valuator prepared = e.prepare(map);
-				es[i].add(prepared);
-				it.remove();
-				return;
-			}
-		}
 	}
 	
 	/**
