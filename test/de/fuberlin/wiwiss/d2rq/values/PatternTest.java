@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.5 2006/09/16 13:22:29 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.6 2006/10/23 15:39:14 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "table", "col1");
@@ -294,6 +294,26 @@ public class PatternTest extends TestCase {
 		Pattern p2 = new Pattern("foo@@table.col1@@bar@@table.col2@@xyz");
 		assertFalse(p1.isCompatibleWith(p2));
 		assertFalse(p2.isCompatibleWith(p1));
+	}
+	
+	public void testLiteralPatternsMatchTrivialRegex() {
+		assertTrue(new Pattern("asdf").literalPartsMatchRegex(".*"));
+	}
+	
+	public void testLiteralPatternsDontMatchTrivialRegex() {
+		assertFalse(new Pattern("asdf").literalPartsMatchRegex("foo"));
+	}
+	
+	public void testLiteralPatternRegexIsAnchored() {
+		assertFalse(new Pattern("aaa").literalPartsMatchRegex("b*"));
+	}
+	
+	public void testLiteralPatternRegexMultipleParts() {
+		assertTrue(new Pattern("aaa@@aaa.aaa@@aaa").literalPartsMatchRegex("aaa"));
+	}
+	
+	public void testLiteralPatternRegexMatchesOnlyLiteralParts() {
+		assertTrue(new Pattern("aaa@@bbb.ccc@@aaa").literalPartsMatchRegex("a+"));
 	}
 	
 	private void assertPattern(String expected, String pattern) {

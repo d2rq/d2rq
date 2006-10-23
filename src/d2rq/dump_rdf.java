@@ -10,8 +10,10 @@ import jena.cmdline.CommandLine;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
+import com.hp.hpl.jena.shared.NotFoundException;
 import com.hp.hpl.jena.util.FileManager;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
@@ -22,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
  * {@link MappingGenerator} or a mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: dump_rdf.java,v 1.3 2006/09/28 12:11:17 cyganiak Exp $
+ * @version $Id: dump_rdf.java,v 1.4 2006/10/23 15:39:14 cyganiak Exp $
  */
 public class dump_rdf {
 	private final static String[] includedDrivers = {
@@ -84,6 +86,16 @@ public class dump_rdf {
 		try {
 			dump.doDump();
 		} catch (DumpParameterException ex) {
+			System.err.println(ex.getMessage());
+			System.exit(1);
+		} catch (D2RQException ex) {
+			if (ex.getCause() != null) {
+				System.err.println(ex.getCause().getMessage());
+			} else {
+				System.err.println(ex.getMessage());
+			}
+			System.exit(1);
+		} catch (NotFoundException ex) {
 			System.err.println(ex.getMessage());
 			System.exit(1);
 		}

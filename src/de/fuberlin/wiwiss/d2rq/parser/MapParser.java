@@ -32,9 +32,14 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.20 2006/09/28 12:15:54 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.21 2006/10/23 15:39:14 cyganiak Exp $
  */
 public class MapParser {
+
+	/**
+	 * A regular expression that matches zero or more characters that are allowed inside URIs
+	 */
+	public static final String URI_CHAR_REGEX = "[:/?#\\[\\]@!$&'()*+,;=a-zA-Z0-9._~-]*";	
 
 	/**
 	 * Turns a relative URI into an absolute one, by using the
@@ -51,7 +56,7 @@ public class MapParser {
 		}
 		return RelURI.resolve(uri);
 	}
-	
+
 	private OntModel model;
 	private String baseURI;
 	private Mapping mapping;

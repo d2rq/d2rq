@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.6 2006/09/16 14:19:20 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.7 2006/10/23 15:39:14 cyganiak Exp $
  */
 public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";
@@ -47,6 +47,20 @@ public class Pattern implements ValueMaker {
 		this.columnsAsSet = new HashSet(this.columns);
 	}
 
+	public boolean literalPartsMatchRegex(String regex) {
+		if (!this.firstLiteralPart.matches(regex)) {
+			return false;
+		}
+		Iterator it = this.literalParts.iterator();
+		while (it.hasNext()) {
+			String literalPart = (String) it.next();
+			if (!literalPart.matches(regex)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public List attributes() {
 		return this.columns;
 	}

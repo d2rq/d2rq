@@ -19,6 +19,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker.NodeType;
+import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
@@ -31,12 +32,12 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.5 2006/09/15 19:36:44 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.6 2006/10/23 15:39:14 cyganiak Exp $
  */
 public abstract class ResourceMap extends MapObject {
 	protected static final Property valueProperty = 
 		D2RQ.ClassMap.getModel().createProperty(D2RQ.NS + "x-value");
-	
+
 	// These can be set on PropertyBridges and ClassMaps
 	protected String bNodeIdColumns = null;	// comma-separated list
 	protected String uriColumn = null;
@@ -184,7 +185,13 @@ public abstract class ResourceMap extends MapObject {
 			return new Column(SQL.parseAttribute(this.uriColumn));
 		}
 		if (this.uriPattern != null) {
-			return new Pattern(this.uriPattern);
+			Pattern p = new Pattern(this.uriPattern);
+			if (!p.literalPartsMatchRegex(MapParser.URI_CHAR_REGEX)) {
+				throw new D2RQException("d2rq:uriPattern '"
+						+ this.uriPattern + "' contains characters not allowed in URIs",
+						D2RQException.RESOURCEMAP_ILLEGAL_URIPATTERN);
+			}
+			return p;
 		}
 		if (this.column != null) {
 			return new Column(SQL.parseAttribute(this.column));
