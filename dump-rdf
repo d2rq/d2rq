@@ -1,5 +1,4 @@
 #!/bin/bash
-# $Id: dump-rdf,v 1.2 2006/09/18 11:58:34 cyganiak Exp $
 D2RQ_ROOT=${0%/*}
 CP="$D2RQ_ROOT/build"
 SEP=':'
