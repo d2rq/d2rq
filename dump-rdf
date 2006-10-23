@@ -1,12 +1,13 @@
 #!/bin/bash
-# $Id: dump-rdf,v 1.1 2006/09/07 20:32:14 cyganiak Exp $
+# $Id: dump-rdf,v 1.2 2006/09/18 11:58:34 cyganiak Exp $
 D2RQ_ROOT=${0%/*}
+CP="$D2RQ_ROOT/build"
 SEP=':'
 if [ "$(uname)" = "Cygwin" ]; then SEP=';'; fi
 for jar in "$D2RQ_ROOT"/lib/*.jar "$D2RQ_ROOT"/lib/*/*.jar
 do
   if [ ! -e "$jar" ]; then continue; fi
-  if [ "$CP" != "" ]; then CP="$CP$SEP"; fi
-  CP="$CP$jar"
+  CP="$CP$SEP$jar"
 done
-exec java -cp "$CP" d2rq.dump_rdf "$@"
+LOGCONFIG=${LOGCONFIG:-file:$D2RQ_ROOT/etc/log4j.properties}
+exec java -cp "$CP" "-Dlog4j.configuration=${LOGCONFIG}" d2rq.dump_rdf "$@"

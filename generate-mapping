@@ -1,13 +1,13 @@
 #!/bin/bash
-# $Id: generate-mapping,v 1.1 2006/09/07 16:57:50 cyganiak Exp $
+# $Id: generate-mapping,v 1.2 2006/09/18 11:58:33 cyganiak Exp $
 D2RQ_ROOT=${0%/*}
+CP="$D2RQ_ROOT/build"
 SEP=':'
 if [ "$(uname)" = "Cygwin" ]; then SEP=';'; fi
 for jar in "$D2RQ_ROOT"/lib/*.jar "$D2RQ_ROOT"/lib/*/*.jar
 do
   if [ ! -e "$jar" ]; then continue; fi
-  if [ "$CP" != "" ]; then CP="$CP$SEP"; fi
-  CP="$CP$jar"
+  CP="$CP$SEP$jar"
 done
 LOGCONFIG=${LOGCONFIG:-file:$D2RQ_ROOT/etc/log4j.properties}
 exec java -cp "$CP" "-Dlog4j.configuration=${LOGCONFIG}" d2rq.generate_mapping "$@"
