@@ -12,7 +12,7 @@ import com.hp.hpl.jena.graph.query.Domain;
 
 /** 
  * A class for capturing binding information for variables that occour in a
- * {@link CombinedPatternStage}.
+ * D2RQPatternStage.
  * It provides for a stage, a set of triples or nodes:
  * - all occuring variable names and nodes.
  * - all positions where a variable is accessed that was bound before 
@@ -21,7 +21,7 @@ import com.hp.hpl.jena.graph.query.Domain;
  * - information if and where these bind variables are used again in bound positions.
  * 
  * @author jgarbers
- * @version $Id: VariableBindings.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
+ * @version $Id: VariableBindings.java,v 1.2 2006/10/23 14:33:50 cyganiak Exp $
  */
 public class VariableBindings {
     
