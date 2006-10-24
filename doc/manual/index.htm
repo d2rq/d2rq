@@ -222,7 +222,7 @@ P.footer {
       Jena model API</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.2. <a href="#usingfind">Using find(spo) and 
       D2RQ</a> 
-    <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.3. <a href="#usingrdql">Using RDQL and D2RQ</a> 
+    <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.3. <a href="#sparql">Using SPARQL and D2RQ</a> 
     <li>&nbsp;&nbsp;&nbsp;&nbsp;4.4. <a href="#jena-assembler">The D2RQ Assembler</a></li>
     <LI>5. <a href="#usingSesame">Using D2RQ within Sesame</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;5.1. <a href="#usingSesameRepository">Using D2RQ as Sesame repository</a> 
@@ -243,7 +243,7 @@ P.footer {
   [<a href="#DAWG">DAWG</a>].</P>
 <p>Using D2RQ you can:</p>
 <ul>
-  <li>query a non-RDF database using RDQL [<a href="#rdql">RDQL</a>] or find(spo).</li>
+  <li>query a non-RDF database using <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> or find(spo).</li>
   <li>publish the content of a non-RDF database on the Semantic Web using the 
     Joseki RDF server [<a href="#joseki">Joseki</a>].</li>
   <li>access information in a non-RDF database using the Jena model API [<a href="#jena">Jena</a>] or the Sesame API [<a href="#sesame">Sesame</a>].</li>
@@ -253,7 +253,7 @@ P.footer {
 <p>D2RQ is implemented as a Jena graph, the basic information representation object 
   within the Jena framework. A D2RQ graph wraps one or more local relational databases 
   into a virtual, read-only RDF graph. It rewrites Jena API calls, find() and 
-  RDQL queries to application-data-model specific SQL queries. The result sets 
+  SPARQL queries to application-data-model specific SQL queries. The result sets 
   of these SQL queries are transformed into RDF triples which are passed up to 
   the higher layers of the Jena framework.</p>
 <p>The D2RQ Sesame interface wraps the D2RQ Jena graph implementation behind a Sesame
@@ -272,7 +272,7 @@ P.footer {
     query results as RDF triples up to the higher layers of the Jena framework or alternatively to the higher levels of the Sesame framework.</li>
 </ul>
 <p><img src="architecture.gif" width="450" height="207"></p>
-<p>Since V0.3 D2RQ provides an new experimental D2RQQueryHandler  which speeds up complex RDQL queries significantly by rewriting groups of RDQL     patterns into single SQL statements and by rewriting RDQL AND conditions into SQL WHERE clauses. You can switch between the new query handler      and Jena's standard SimpleQueryHandler using the <a href="#processing">d2rq:queryHandler</a> directive.</p>
+<p>Since V0.3 D2RQ provides an new experimental D2RQQueryHandler  which speeds up complex queries significantly by rewriting groups of triple patterns into single SQL statements and by rewriting RDQL AND conditions into SQL WHERE clauses. You can switch between the new query handler      and Jena's standard SimpleQueryHandler using the <a href="#processing">d2rq:queryHandler</a> directive.</p>
 <p>The D2RQ V0.4 contains a Sesame wrapper for the D2RQGraph implementation. The Jena graph interface is wrapped behind a Sesame RDF source            interface. Relational databases can be queried as virtual Sesame RDF sources using the reasoning and querying facilities of the Sesame             API.</p>
 <p><strong>D2RQ Example</strong></p>
 <p>We are using an example database which stores information about conferences, 
@@ -1084,25 +1084,28 @@ ExtendedIterator resultiterator = d2rqGraph.find(pattern);<br>
 // Output the query results
 while (resultiterator.hasNext()) {<br>    System.out.println(&quot;Result Triple :&quot; + ((Triple) resultiterator.next()).toString());<br>}</pre>
 
-<h2><a name="usingrdql" id="usingrdql"></a>4.3 Using RDQL and D2RQ</h2>
-<P>The following example shows how RDQL is used to get all information about the 
-  paper with the URI &quot;http://www.conference.org/conf02004/paper#Paper1&quot;. 
-  The results are displayed using a QueryResultsFormatter.</P>
-  <pre>import com.hp.hpl.jena.rdf.model.* ;
-import com.hp.hpl.jena.rdql.*;
-import java.io.PrintWriter;
-import de.fuberlin.wiwiss.d2rq.*;
+<h2 id="sparql">4.3 Using SPARQL and D2RQ</h2>
+<p>D2RQ can answer SPARQL queries against a D2RQ model. The SPARQL queries
+are processed by Jena's ARQ query engine. The example shows how a D2RQ model
+is set up, how a SPARQL query is executed, and how the results are written
+to the console.</p>
 
-...
-
-String D2RQMap = &quot;file:///C:/D2RQ/maps/ISWC-d2rq.n3&quot;;<br>ModelD2RQ d2rqModel = null;<br>
-// Create D2RQ Model
-try {<br>    d2rqModel = new ModelD2RQ(D2RQMap);<br>} catch  (D2RQException ex) {<br>    System.out.println(ex.toString());<br>}
-
-// Query the model 
-String rdql = &quot;SELECT ?x, ?y WHERE (&lt;http://www.conference.org/conf02004/paper#Paper1&gt;, ?x, ?y)&quot;;<br>Query query = new Query(rdql);<br>query.setSource(d2rqModel);<br>QueryExecution qe = new QueryEngine(query) ;<br>QueryResults results = qe.exec() ;<br>
-// Output the query results using a QueryResultsFormatter
-QueryResultsFormatter fmt = new QueryResultsFormatter(results) ;<br>PrintWriter pw = new PrintWriter(System.out) ;<br>fmt.printAll(pw, &quot; | &quot;) ;<br>pw.flush() ;<br>fmt.close() ;	<br>results.close() ;</pre>
+<pre>ModelD2RQ m = new ModelD2RQ("file:doc/example/mapping-iswc.n3");
+String sparql = 
+    "PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
+    "PREFIX foaf: <http://xmlns.com/foaf/0.1/>" +
+    "SELECT ?title ?author WHERE {" +
+    "    ?paper dc:title ?title . " +
+    "    ?paper dc:creator ?author ." +
+    "    ?author foaf:name ?name ." +
+    "}";
+Query q = QueryFactory.create(sparql); 
+ResultSet rs = QueryExecutionFactory.create(q, m).execSelect();
+while (rs.hasNext()) {
+    QuerySolution row = rs.nextSolution();
+    System.out.println("Title: " + row.getLiteral("paperTitle").getString());
+    System.out.println("Author: " + row.getLiteral("authorName").getString());
+}</pre>
 
 <h2 id="jena-assembler">4.4 The D2RQ Assembler</h2>
 <p>D2RQ comes with a Jena assembler. Jena assembler specifications are RDF
@@ -1228,10 +1231,6 @@ try{
   <DD> Efficient RDF Storage and Retrieval in Jena2 , Kevin Wilkinson et all, 
     <a href="http://www.hpl.hp.com/techreports/2003/HPL-2003-266.html" target="_blank">http://www.hpl.hp.com/techreports/2003/HPL-2003-266.html 
     </a> 
-  <DT><A id=rdql name=rdql>[RDQL]</A> 
-  <DD> RDQL - A Query Language for RDF, Andy Seaborne, W3C Member Submission, 
-    <a href="http://www.w3.org/Submission/2004/SUBM-RDQL-20040109/" target="_blank">http://www.w3.org/Submission/2004/SUBM-RDQL-20040109/</a> 
-  <DT> 
   <DT><A id=joseki name=joseki>[Joseki]</A> 
   <DD> Joseki - the Jena RDF Server, Andy Seaborne,<a href="http://www.joseki.org/" target="_blank">http://www.joseki.org/</a> 
   <DT> 
