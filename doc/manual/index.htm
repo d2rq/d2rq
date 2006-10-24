@@ -1120,7 +1120,7 @@ information on Jena assemblers, see the
 
 :myModel
   a d2rq:D2RQModel;
-  d2rq:mappingFile &lt;file:my-mapping.n3&gt;;
+  d2rq:mappingFile &lt;file:doc/example/mapping-iswc.n3&gt;;
   d2rq:resourceBaseURI &lt;http://localhost:2020/&gt;;
   .</pre>
 
@@ -1137,7 +1137,7 @@ information on Jena assemblers, see the
 <p>This usage example will create a D2RQ model from a model specification, and write it to the console:</p>
 
 <pre>// Load assembler specification from file
-Model assemblerSpec = FileManager.get().loadModel("my_assembler.n3");
+Model assemblerSpec = FileManager.get().loadModel("doc/example/assembler.n3");
 
 // Get the model resource
 Resource modelSpec = assemblerSpec.createResource(assemblerSpec.expandPrefix(":myModel"));
