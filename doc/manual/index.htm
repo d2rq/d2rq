@@ -1,4 +1,3 @@
-<!-- saved from url=(0022)http://internet.e-mail -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <?xml version="1.0" encoding="utf-8"?><HTML lang=en xml:lang="en" 
 xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>D2RQ V0.4  -  User Manual</TITLE>
@@ -181,16 +180,17 @@ P.footer {
 <P>&nbsp;</P>
 <HR title="Separator for header">
 </DIV>
+
 <h2><A id=abstract name=abstract></A>Abstract</h2>
 <P>As Semantic Web technologies are getting mature, there is a growing need for 
   RDF applications to access the content of huge, live, non-RDF, legacy databases 
   without having to replicate the whole database into RDF. This document describes 
-  D2RQ V0.4, a declarative mapping language for treating non-RDF relational databases 
-  as virtual RDF graphs within the <a href="http://jena.sourceforge.net/" target="_blank">Jena</a> and <a href="http://www.openrdf.org/" target="_blank">Sesame</a> Semantic Web development toolkits. </P>
-<DIV class=status>
-  <P>    <!-- End Status-Of-This-Document Text -->
-</P>
-</DIV>
+  D2RQ, a declarative mapping language and implementation for treating non-RDF
+  relational databases as virtual RDF graphs within the
+  <a href="http://jena.sourceforge.net/" target="_blank">Jena</a> and
+  <a href="http://www.openrdf.org/" target="_blank">Sesame</a>
+  Semantic Web development toolkits.</P>
+
 <h2 class=notoc><A id=toc name=toc>Table of Contents</A></h2>
 <DIV class=contents> 
   <UL class=toc>
@@ -216,10 +216,7 @@ P.footer {
     <li>&nbsp;&nbsp;&nbsp;&nbsp;4.4. <a href="#jena-assembler">The D2RQ Assembler</a></li>
     <LI>5. <a href="#usingSesame">Using D2RQ within Sesame</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;5.1. <a href="#usingSesameRepository">Using D2RQ as Sesame repository</a> 
-    <LI class=tocline>6. <A 
-  href="#references">References</A> 
-    <LI class=tocline>7. <A 
-  href="#change_log">Change Log</A> </LI>
+    <li>6. <a href="#change_log">Change Log</a></li>
   </UL>
 </DIV>
 <HR>
@@ -228,18 +225,15 @@ P.footer {
 <P>This document describes D2RQ V0.4, a declarative mapping language for treating 
   non-RDF, relational databases as virtual, read-only RDF graphs within the <a href="http://jena.sourceforge.net/" target="_blank">Jena</a> and <a href="http://www.openrdf.org/" target="_blank">Sesame</a> Semantic Web development toolkits. D2RQ offers a flexible access mechanism 
   to the content of huge, non-RDF databases without having to replicate the database 
-  into RDF. Thus, it allows the integration of legazy databases into the data 
-  access architecture currently standardized by the W3C Data Access Working Group 
-  [<a href="#DAWG">DAWG</a>].</P>
+  into RDF.</P>
+
 <p>Using D2RQ you can:</p>
 <ul>
-  <li>query a non-RDF database using <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> or find(spo).</li>
-  <li>publish the content of a non-RDF database on the Semantic Web using the 
-    Joseki RDF server [<a href="#joseki">Joseki</a>].</li>
-  <li>access information in a non-RDF database using the Jena model API [<a href="#jena">Jena</a>] or the Sesame API [<a href="#sesame">Sesame</a>].</li>
-  <li>do RDFS and OWL inferencing over the content of a non-RDF database using 
-    the Jena ontology API.</li>
+  <li>query a non-RDF database using <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> or find(spo),</li>
+  <li>access information in a non-RDF database using the <a href="http://jena.sourceforge.net/">Jena</a> Model API or the <a href="http://www.openrdf.org/">Sesame</a> API,</li>
+  <li>do RDFS and OWL inferencing over the content of a non-RDF database using Jena's inference engine.</li>
 </ul>
+
 <p>D2RQ is implemented as a Jena graph, the basic information representation object 
   within the Jena framework. A D2RQ graph wraps one or more local relational databases 
   into a virtual, read-only RDF graph. It rewrites Jena API calls, find() and 
@@ -1239,54 +1233,17 @@ try{
 }
   </pre>
 
-<H1><A id=references name=references>6. References</A></H1>
+<hr />
 
-<DL>
-  <DT><A id=jena name=jena>[Jena]</A> 
-  <DD>Jena: Implementing the Semantic Web Recommendations, Jeremy Carroll et all, 
-    <a href="http://www.hpl.hp.com/techreports/2003/HPL-2003-146.html" target="_blank">http://www.hpl.hp.com/techreports/2003/HPL-2003-146.html</a> 
-  <DT><A id=TriG name=TriG>[JenaDB]</A> 
-  <DD> Efficient RDF Storage and Retrieval in Jena2 , Kevin Wilkinson et all, 
-    <a href="http://www.hpl.hp.com/techreports/2003/HPL-2003-266.html" target="_blank">http://www.hpl.hp.com/techreports/2003/HPL-2003-266.html 
-    </a> 
-  <DT><A id=joseki name=joseki>[Joseki]</A> 
-  <DD> Joseki - the Jena RDF Server, Andy Seaborne,<a href="http://www.joseki.org/" target="_blank">http://www.joseki.org/</a> 
-  <DT> 
-  <DT> 
-  <DT><A id=TriG name=TriG>[D2R]</A> 
-  <DD> D2R MAP - A Database to RDF Mapping Language, Christian Bizer, <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/pub/www2003-D2R-Map.pdf" target="_blank">http://www.wiwiss.fu-berlin.de/suhl/bizer/pub/www2003-D2R-Map.pdf</a> 
-  <DT><A id=TriG name=TriG>[RDF2SQL]</A> 
-  <DD> RDF to SQL Mapping, Eric Prud'hommeaux, <a href="http://www.w3.org/2003/01/21-RDF-RDB-access/" target="_blank">http://www.w3.org/2003/01/21-RDF-RDB-access/</a> 
-  <DT> 
-  <DT><A id=ref-rdf-syntax name=ref-rdf-syntax></A>[RDF-SYNTAX] 
-  <DD><CITE>RDF/XML Syntax Specification (Revised)</CITE>, Beckett D. (Editor), 
-    W3C Recommendation, <a href="http://www.w3.org/TR/rdf-syntax-grammar/" target="_blank">http://www.w3.org/TR/rdf-syntax-grammar/</a> 
-  </DD>
-  <DT>
-  <DT><A id=DAWG name=DAWG></A>[DAWG] 
-  <DD><CITE>W3C Data Access Working Group</CITE> Website: <a href="http://www.w3.org/2001/sw/DataAccess/" target="_blank">http://www.w3.org/2001/sw/DataAccess/</a> 
-  </DD>
-  <DT><A id=sesame name=sesame></A>[Sesame] 
-  <DD><CITE> Sesame - open source Java framework for storing, querying and reasoning with RDF and RDF Schema</CITE> Website: <a href="http://www.openrdf.org/" target="_blank">http://www.openrdf.org/</a> 
-  </DD>
-  <DT> 
-</DL>
-<DL>
-  <DT> 
-</DL>
-<P></P>
-<HR>
-<H1><A id=change_log 
-name=change_log>7. Change Log</A></H1>
-
+<h1 id="change_log">6. Change Log</h1>
 <ul>
-  <li>2004-06-15: Initial version of this document.</li>
-  <li>2004-08-03: Updated reflecting changes in D2RQ v0.2.</li>
-  <li>2005-04-29: Updated for D2RQ v0.3.</li>
   <li>2005-10-21: Updated for D2RQ v0.4.</li>
+  <li>2005-04-29: Updated for D2RQ v0.3.</li>
+  <li>2004-08-03: Updated reflecting changes in D2RQ v0.2.</li>
+  <li>2004-06-15: Initial version of this document.</li>
 </ul>
-<P>&nbsp;</P>
-<HR>
+<hr>
+<p>$Id: index.htm,v 1.21 2006/10/24 14:38:24 cyganiak Exp $</p>
 
 </BODY>
 </HTML>
