@@ -42,9 +42,6 @@ TD {
 H1 {
 	TEXT-ALIGN: left
 }
-H3 {
-	TEXT-ALIGN: left
-}
 H4 {
 	TEXT-ALIGN: left
 }
@@ -57,14 +54,8 @@ H6 {
 H1 {
 	BACKGROUND: white; COLOR: #005a9c
 }
-H3 {
-	BACKGROUND: white; COLOR: #005a9c
-}
 H1 {
 	FONT: 170% sans-serif
-}
-H3 {
-	FONT: 120% sans-serif
 }
 H4 {
 	FONT: bold 100% sans-serif
@@ -142,6 +133,7 @@ PRE {
 }
 
 h2 { background: white; color: #005a9c; font: 140% sans-serif; margin-top: 3em; text-align: left; }
+h3 { background: white; color: #005a9c; font: 120% sans-serif; margin-top: 3em; text-align: left; }
 pre { background: #ffec8b; line-height: 1.25em; padding: 1.3em 2em;}
 #doctype { margin-top: 1em; }
 
@@ -218,11 +210,9 @@ P.footer {
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;3.8 <a href="#processing">d2rq:ProcessingInstructions</a>
       
     <LI>4. <a href="#usingD2RQ">Using D2RQ within Jena</a> 
-    <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.1. <a href="#usingmodel">Using D2RQ with the 
-      Jena model API</a> 
-    <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.2. <a href="#usingfind">Using find(spo) and 
-      D2RQ</a> 
-    <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.3. <a href="#sparql">Using SPARQL and D2RQ</a> 
+    <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.1. <a href="#usingmodel">Using Jena's Model API</a> 
+    <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.2. <a href="#usingfind">Using Jena's Graph API</a> 
+    <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.3. <a href="#sparql">Using SPARQL</a> 
     <li>&nbsp;&nbsp;&nbsp;&nbsp;4.4. <a href="#jena-assembler">The D2RQ Assembler</a></li>
     <LI>5. <a href="#usingSesame">Using D2RQ within Sesame</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;5.1. <a href="#usingSesameRepository">Using D2RQ as Sesame repository</a> 
@@ -603,7 +593,8 @@ map:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
     <td width="20%" valign="top"><strong>d2rq:property</strong></td>
     <td width="80%" valign="top">The RDF property that connects the ClassMap
       with the object or literal created by the bridge. Must be specified for
-      every property bridge.</td>
+      every property bridge. If multiple <tt>d2rq:properties</tt> are
+      specified, then one triple with each property is generated per resource.</td>
   </tr>
   <tr>
     <td valign="top"><strong>d2rq:join</strong></td>
@@ -666,7 +657,6 @@ map:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
       different class maps.</td>
   </tr>
 </table>
-<h3>&nbsp;</h3>
 <P><strong>Example</strong></P>
   <pre>:title rdf:type rdf:Property .
 
@@ -677,8 +667,6 @@ map:inProceedingsTitle rdf:type d2rq:DatatypePropertyBridge;
 <p>This generates RDF triples whose subjects come from the map:InProceedings
   ClassMap, the predicate is :title, and the objects are taken from the
   Papers.Title column.</p>
-
-<P>&nbsp;</P>
 
 <h3>3.3.1 DatatypePropertyBridge</h3>
 <P>Datatype property bridges are used to construct literal property values from 
@@ -739,7 +727,6 @@ map:authorNameBridge rdf:type d2rq:DatatypePropertyBridge ;
   Because of the n:m relation between InProceedings and Persons, the d2rq:join 
   clauses join the tables Papers and Persons over the table Rel_Person_Paper. 
 </p>
-<p>&nbsp; </p>
 
 <h3>3.3.2 ObjectPropertyBridge</h3>
 <P>Object property bridges are used to construct URIs and to refer to instances 
@@ -848,7 +835,6 @@ map:SeeAlsoStatement rdf:type d2rq:AdditionalProperty;
       in the D2RQ javadocs.</td>
   </tr>
 </table>
-<p>&nbsp;</p>
 
 <h3><a name="translation"></a>3.5.1 Translation</h3>
 <p>A <strong>d2rq:Translation</strong> is a single entry in a
@@ -1042,49 +1028,81 @@ map:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
         "de.fuberlin.wiwiss.ng4j.d2rq").setLevel(
                 org.apache.log4j.Level.ALL);</pre>
 
-<h2><a name="usingmodel" id="usingmodel"></a>4.1 Using D2RQ with the Jena model 
-  API</h2>
-<P>The following example shows how the Jena model API is used to check if the 
-  paper with the URI &quot;http://www.conference.org/conf02004/paper#Paper1&quot; 
-  has an iswc:author property.</P>
-  <pre>import com.hp.hpl.jena.rdf.model.* ;
-import de.fuberlin.wiwiss.d2rq.*;
+<h2 id="usingmodel">4.1 Using Jena's Model API</h2>
 
-...
+<p>The ModelD2RQ class provides a Jena
+<a href="http://jena.sourceforge.net/javadoc/com/hp/hpl/jena/rdf/model/Model.html">Model</a>
+view on the data
+in a D2RQ-mapped database. The example shows how a ModelD2RQ is set up
+using a mapping file, and how Jena API calls are used to extract
+information about papers and their authors from the model.</p>
 
-String D2RQMap = &quot;file:///C:/D2RQ/maps/ISWC-d2rq.n3&quot;;<br>ModelD2RQ d2rqModel = null;<br>
-// Create D2RQ Model
-try {<br>    d2rqModel = new ModelD2RQ(D2RQMap);<br>} catch  (D2RQException ex) {<br>    System.out.println(ex.toString());<br>}
+<p>The ISWC and FOAF classes have been created with Jena's
+<a href="http://jena.sourceforge.net/how-to/schemagen.html">schemagen</a>
+tool. The DC and RDF classes are part of Jena.</p>
 
-// Get the ressource Paper 1
-String paperURI = &quot;http://www.conference.org/conf02004/paper#Paper1&quot;;<br>Resource paperRessource = d2rqModel.getResource(paperURI);<br>
-// Check if Paper 1 has an auhor property
-Property author = d2rqModel.createProperty(&quot;http://annotation.semanticweb.org/iswc/iswc.daml#author&quot;);<br>if (paperRessource.hasProperty(author)) 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot;The paper has an author.&quot;);</pre>
-</P>
+<pre>// Set up the ModelD2RQ using a mapping file
+Model m = new ModelD2RQ("file:doc/example/mapping-iswc.n3");
 
-<h2><a name="usingfind" id="usingfind"></a>4.2 Using find(spo) and D2RQ </h2>
-<P>The following example shows how the Jena graph API is used to get all papers 
-  which have been published in 2003.</P>
-  <pre>import com.hp.hpl.jena.graph.* ;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;<br>import com.hp.hpl.jena.datatypes.*;
-import de.fuberlin.wiwiss.d2rq.*;
+// Find anything with an rdf:type of iswc:InProceedings
+StmtIterator paperIt = m.listStatements(null, RDF.type, ISWC.InProceedings);
 
-...
+// List found papers and print their titles
+while (paperIt.hasNext()) {
+    Resource paper = paperIt.nextStatement().getSubject();
+    System.out.println("Paper: " + paper.getProperty(DC.title).getString());
 
-String D2RQMap = &quot;file:///C:/D2RQ/maps/ISWC-d2rq.n3&quot;;<br>GraphD2RQ d2rqGraph = null;<br>
-// Create D2RQ Graph
-try {<br>    d2rqGraph = new GraphD2RQ(D2RQMap);<br>} catch  (D2RQException ex) {<br>    System.out.println(ex.toString());<br>}
+    // List authors of the paper and print their names
+    StmtIterator authorIt = paper.listProperties(DC.creator);
+    while (authorIt.hasNext()) {
+        Resource author = authorIt.nextStatement().getResource();
+        System.out.println("Author: " + author.getProperty(FOAF.name).getString());
+    }
+    System.out.println();
+}</pre>
+
+
+<h2 id="usingfind">4.2 Using Jena's Graph API</h2>
+
+<p>In some situations, it is better to use Jena's low-level
+<a href="http://jena.sourceforge.net/javadoc/com/hp/hpl/jena/graph/Graph.html">Graph</a>
+API instead of the Model API. D2RQ provides an implementation
+of the Graph interface, the GraphD2RQ.</p>
+
+<p>The following example shows how the Graph API is used to find all papers
+that have been published in 2003.</p>
+
+<pre>// Load mapping file
+Model mapping = FileManager.get().loadModel("doc/example/mapping-iswc.n3");
+
+// Set up the GraphD2RQ
+GraphD2RQ g = new GraphD2RQ(mapping, "http://localhost:2020/");
 
 // Create a find(spo) pattern 
-Node subject = Node.ANY;<br>Node predicate = Node.createURI(&quot;http://annotation.semanticweb.org/iswc/iswc.daml#year&quot;);<br>RDFDatatype dtYear = TypeMapper.getInstance().getSafeTypeByName(&quot;http://www.w3.org/2001/XMLSchema#gYear&quot;);<br>Node object = Node.createLiteral(&quot;2003&quot;, null, dtYear);<br>Triple pattern = new Triple(subject, predicate, object);
-<br>
-// Query the graph
-ExtendedIterator resultiterator = d2rqGraph.find(pattern);<br>
-// Output the query results
-while (resultiterator.hasNext()) {<br>    System.out.println(&quot;Result Triple :&quot; + ((Triple) resultiterator.next()).toString());<br>}</pre>
+Node subject = Node.ANY;
+Node predicate = DC.date.asNode();
+Node object = Node.createLiteral("2003", null, XSDDatatype.XSDgYear);
+Triple pattern = new Triple(subject, predicate, object);
 
-<h2 id="sparql">4.3 Using SPARQL and D2RQ</h2>
+// Query the graph
+Iterator it = g.find(pattern);
+
+// Output query results
+while (it.hasNext()) {
+    Triple t = (Triple) it.next();
+    System.out.println("Published in 2003: " + t.getSubject());
+}</pre>
+
+<h3 id="cachinggraph">4.2.1 The CachingGraphD2RQ</h3>
+
+<p>In addition to the GraphD2RQ, there is a CachingGraphD2RQ which supports
+the same API and uses a LRU cache to remember a number of recent query
+results. This will improve performance for repeated queries, but will
+report inconsistent results if the database is updated during the lifetime
+of the CachingGraphD2RQ.</p>
+
+
+<h2 id="sparql">4.3 Using SPARQL</h2>
 <p>D2RQ can answer SPARQL queries against a D2RQ model. The SPARQL queries
 are processed by Jena's ARQ query engine. The example shows how a D2RQ model
 is set up, how a SPARQL query is executed, and how the results are written
