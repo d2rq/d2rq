@@ -4,6 +4,7 @@ import com.hp.hpl.jena.assembler.Assembler;
 import com.hp.hpl.jena.assembler.Mode;
 import com.hp.hpl.jena.assembler.assemblers.AssemblerBase;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
@@ -13,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * A Jena assembler that builds ModelD2RQs.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQAssembler.java,v 1.4 2006/09/07 21:33:20 cyganiak Exp $
+ * @version $Id: D2RQAssembler.java,v 1.5 2006/10/24 11:58:06 cyganiak Exp $
  */
 public class D2RQAssembler extends AssemblerBase {
 
@@ -25,7 +26,14 @@ public class D2RQAssembler extends AssemblerBase {
 			throw new D2RQException("Error in assembler specification " + description + ": value of d2rq:mappingFile must be a URI");
 		}
 		String mappingFileURI = ((Resource) description.getProperty(D2RQ.mappingFile).getObject()).getURI();
-		String resourceBaseURI = ((Resource) description.getProperty(D2RQ.resourceBaseURI).getObject()).getURI();
+		String resourceBaseURI = null;
+		Statement stmt = description.getProperty(D2RQ.resourceBaseURI);
+		if (stmt != null) {
+			if (!stmt.getObject().isURIResource()) {
+				throw new D2RQException("Error in assembler specification " + description + ": value of d2rq:resourceBaseURI must be a URI");
+			}
+			resourceBaseURI = ((Resource) stmt.getObject()).getURI();
+		}
 		return new ModelD2RQ(mappingFileURI, null, resourceBaseURI);
 	}
 }

@@ -42,9 +42,6 @@ TD {
 H1 {
 	TEXT-ALIGN: left
 }
-H2 {
-	TEXT-ALIGN: left
-}
 H3 {
 	TEXT-ALIGN: left
 }
@@ -60,17 +57,11 @@ H6 {
 H1 {
 	BACKGROUND: white; COLOR: #005a9c
 }
-H2 {
-	BACKGROUND: white; COLOR: #005a9c
-}
 H3 {
 	BACKGROUND: white; COLOR: #005a9c
 }
 H1 {
 	FONT: 170% sans-serif
-}
-H2 {
-	FONT: 140% sans-serif
 }
 H3 {
 	FONT: 120% sans-serif
@@ -130,7 +121,7 @@ UL.toc {
 H1 {
 	stress: 20; richness: 90
 }
-H2 {
+h2 {
 	stress: 20; richness: 90
 }
 H3 {
@@ -150,7 +141,9 @@ PRE {
 }
 }
 
-pre { background: #ffec8b; line-height: 1.25em; padding: 1em 2em;}
+h2 { background: white; color: #005a9c; font: 140% sans-serif; margin-top: 3em; text-align: left; }
+pre { background: #ffec8b; line-height: 1.25em; padding: 1.3em 2em;}
+#doctype { margin-top: 1em; }
 
 DIV.exampleInner PRE {
 	MARGIN-TOP: 0em; MARGIN-BOTTOM: 0em; MARGIN-LEFT: 0em; FONT-FAMILY: monospace
@@ -171,7 +164,7 @@ P.footer {
 <DIV class=head> 
   <H1 id=title>D2RQ V0.4 - Treating Non-RDF Relational Databases as Virtual RDF 
     Graphs</H1>
-  <H2 id=doctype>User Manual and Language Specification</H2>
+  <h2 id=doctype>User Manual and Language Specification</h2>
 <DL>
   <DT>This Version: 
     <DD><A 
@@ -196,7 +189,7 @@ P.footer {
 <P>&nbsp;</P>
 <HR title="Separator for header">
 </DIV>
-<H2><A id=abstract name=abstract></A>Abstract</H2>
+<h2><A id=abstract name=abstract></A>Abstract</h2>
 <P>As Semantic Web technologies are getting mature, there is a growing need for 
   RDF applications to access the content of huge, live, non-RDF, legacy databases 
   without having to replicate the whole database into RDF. This document describes 
@@ -206,7 +199,7 @@ P.footer {
   <P>    <!-- End Status-Of-This-Document Text -->
 </P>
 </DIV>
-<H2 class=notoc><A id=toc name=toc>Table of Contents</A></H2>
+<h2 class=notoc><A id=toc name=toc>Table of Contents</A></h2>
 <DIV class=contents> 
   <UL class=toc>
     <LI class=tocline>1. <A 
@@ -230,6 +223,7 @@ P.footer {
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.2. <a href="#usingfind">Using find(spo) and 
       D2RQ</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;4.3. <a href="#usingrdql">Using RDQL and D2RQ</a> 
+    <li>&nbsp;&nbsp;&nbsp;&nbsp;4.4. <a href="#jena-assembler">The D2RQ Assembler</a></li>
     <LI>5. <a href="#usingSesame">Using D2RQ within Sesame</a> 
     <LI>&nbsp;&nbsp;&nbsp;&nbsp;5.1. <a href="#usingSesameRepository">Using D2RQ as Sesame repository</a> 
     <LI class=tocline>6. <A 
@@ -325,8 +319,8 @@ P.footer {
 # Namespace of the ontology
 @prefix : &lt;http://annotation.semanticweb.org/iswc/iswc.daml#&gt; .
 
-# Namespace of the database
-@prefix db1: &lt;http://www.example.org/dbserver01/db01#&gt; .
+# Namespace of the mapping file; not used 
+@prefix map: &lt;file:///Users/d2r/example.n3#&gt; .
 
 # Other namespaces
 @prefix rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .
@@ -336,7 +330,7 @@ P.footer {
 # -----------------------------------------------
 # Database
 
-db1:Database1 rdf:type d2rq:Database;
+map:Database1 rdf:type d2rq:Database;
               d2rq:jdbcDSN &quot;jdbc:mysql://localhost/iswc&quot;;
               d2rq:jdbcDriver &quot;com.mysql.jdbc.Driver&quot;;
               d2rq:username &quot;user&quot;;
@@ -354,25 +348,24 @@ db1:Database1 rdf:type d2rq:Database;
 # Location text
 #) TYPE=MyISAM;
 
-db1:Conference rdf:type d2rq:ClassMap ;
+map:Conference rdf:type d2rq:ClassMap ;
             d2rq:class :Conference ;
             d2rq:uriPattern &quot;http://conferences.org/comp/confno@@Conferences.ConfID@@&quot; ;
-            d2rq:dataStorage db1:Database1 .
+            d2rq:dataStorage map:Database1 .
 
-db1:eventTitle rdf:type d2rq:DatatypePropertyBridge ;
+map:eventTitle rdf:type d2rq:DatatypePropertyBridge ;
             d2rq:property :eventTitle ;
             d2rq:column &quot;Conferences.Name&quot; ;
-            d2rq:belongsToClassMap db1:Conference ;
+            d2rq:belongsToClassMap map:Conference ;
             d2rq:datatype xsd:string .
 
-db1:location rdf:type d2rq:DatatypePropertyBridge ;
+map:location rdf:type d2rq:DatatypePropertyBridge ;
             d2rq:property :location ;
             d2rq:column &quot;Conferences.Location&quot; ; 
-            d2rq:belongsToClassMap db1:Conference ;
+            d2rq:belongsToClassMap map:Conference ;
             d2rq:datatype xsd:string . 
 </pre>
 <P>The D2RQ language constructs are described in detail below:</P>
-<P>&nbsp;</P>
 <h2><a name="database"></a>3.1 Database</h2>
 <P>A <strong>d2rq:Database</strong> defines a JDBC or ODBC connection to a local relational database 
   and specifies the type of the database columns used by D2RQ. A D2RQ map can 
@@ -437,7 +430,7 @@ db1:location rdf:type d2rq:DatatypePropertyBridge ;
   and d2rq:bNodeIdColumns statements. You don't have to define the type for
   columns that are only used in d2rq:join or d2rq:condition statements.</P>
 <P><strong>Example</strong></P>
-  <pre>db1:Database1 rdf:type d2rq:Database;
+  <pre>map:Database1 rdf:type d2rq:Database;
               d2rq:jdbcDSN &quot;jdbc:mysql://localhost/iswc&quot;;
               d2rq:jdbcDriver &quot;com.mysql.jdbc.Driver&quot;;
               d2rq:username &quot;user&quot;;
@@ -451,7 +444,6 @@ db1:location rdf:type d2rq:DatatypePropertyBridge ;
 one database by having a property bridge with d2rq:belongsToClassMap in one database
 and d2rq:refersToClassMap in the other. Instead, define class maps in both databases
 that create the same URIs or blank node IDs.</P>
-<P>&nbsp;</P>
 
 <h2><a name="classmap"></a>3.2 ClassMap</h2>
 <P>A <strong>d2rq:ClassMap</strong> represents a class or a group of similar classes 
@@ -547,19 +539,19 @@ that create the same URIs or blank node IDs.</P>
   <pre>:InProceedings rdf:type rdfs:Class ;
      rdfs:comment &quot;The class Inproceedings (Papers) in the RDF-S schema.&quot; .
 
-db1:InProceedingsClassMap rdf:type d2rq:ClassMap ;
+map:InProceedingsClassMap rdf:type d2rq:ClassMap ;
     d2rq:uriPattern &quot;http://www.conference.org/conf02004/paper#Paper@@Papers.PaperID@@&quot; ;
     d2rq:class :InProceedings ;
-    d2rq:dataStorage db1:Database1 .</pre>
+    d2rq:dataStorage map:Database1 .</pre>
 <P>The d2rq:class property is used to state that all resources generated by the 
   d2rq:ClassMap are instances of an RDFS or OWL class. D2RQ automatically creates 
   the necessary rdf:type triples.</P>
 <P>&nbsp;</P>
 <P><strong>Example: ClassMap where instances are identified using blank nodes</strong></P>
-  <pre>db1:Topic rdf:type d2rq:ClassMap ;
+  <pre>map:Topic rdf:type d2rq:ClassMap ;
     d2rq:bNodeIdColumns &quot;Topics.TopicID&quot; ;
     d2rq:class :Topic ;
-    d2rq:dataStorage db1:Database1 .</pre>
+    d2rq:dataStorage map:Database1 .</pre>
   
 <p>In order to recognize bNodes across several find() calls and to be able to 
   map bNodes to instance data in the database, D2RQ encodes the classMap name 
@@ -574,19 +566,18 @@ db1:InProceedingsClassMap rdf:type d2rq:ClassMap ;
   (like Person, Professor, Researcher, Student) that all come from the same table,
   you must create the rdf:type statements with an object property bridge instead of
   using d2rq:class.</P>
-  <pre>db1:PersonsClassMap rdf:type d2rq:ClassMap ;
+  <pre>map:PersonsClassMap rdf:type d2rq:ClassMap ;
        d2rq:uriColumn &quot;Persons.URI&quot; ;
-       d2rq:dataStorage db1:Database1 .
+       d2rq:dataStorage map:Database1 .
 
-db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
+map:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
       d2rq:property rdf:type ;
       d2rq:pattern &quot;http://annotation.semanticweb.org/iswc/iswc.daml#@@Persons.Type@@&quot; ; 
-      d2rq:belongsToClassMap db1:PersonsClassMap .</pre>
+      d2rq:belongsToClassMap map:PersonsClassMap .</pre>
 <P>Here, the class of each person is obtained by prefixing the values of the Persons.Type 
   column with an ontology namespace. If the class names within the ontology can't 
   be constructed directly from values of the Persons.Type column, then a <a href="#translationtable">TranslationTable</a> 
   could be used for aligning class names and database values.</P>
-<P>&nbsp;</P>
   
 <h2><a name="propertybridge"></a>3.3 Property Bridges</h2>
 <P>Property Bridges relate database table columns to RDF properties. They are 
@@ -679,11 +670,11 @@ db1:PersonsType rdf:type d2rq:ObjectPropertyBridge ;
 <P><strong>Example</strong></P>
   <pre>:title rdf:type rdf:Property .
 
-db1:inProceedingsTitle rdf:type d2rq:DatatypePropertyBridge;
-       d2rq:belongsToClassMap db1:InProceedings ;
+map:inProceedingsTitle rdf:type d2rq:DatatypePropertyBridge;
+       d2rq:belongsToClassMap map:InProceedings ;
        d2rq:property :title ;
        d2rq:column &quot;Papers.Title&quot; .</pre>
-<p>This generates RDF triples whose subjects come from the db1:InProceedings
+<p>This generates RDF triples whose subjects come from the map:InProceedings
   ClassMap, the predicate is :title, and the objects are taken from the
   Papers.Title column.</p>
 
@@ -724,20 +715,20 @@ db1:inProceedingsTitle rdf:type d2rq:DatatypePropertyBridge;
   as the class map </strong></P>
   <pre>:abstract   rdf:type rdf:Property .
 
-db1:inProceedingsAbstract rdf:type d2rq:DatatypePropertyBridge ;
-            d2rq:belongsToClassMap db1:InProceedings ;
+map:inProceedingsAbstract rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:belongsToClassMap map:InProceedings ;
             d2rq:property :abstract ;
             d2rq:column &quot;Papers.Abstract&quot; ; 
             d2rq:lang &quot;en&quot; .</pre>
 <P>The values of the column &quot;Papers.Abstract&quot; is used to create the 
   property abstract. The language is set to English and the property bridge belongs 
-  to the class map db1:InProceedings. </P>
+  to the class map map:InProceedings. </P>
 <P><strong><a name="exjoin"></a>Example: Datatype property bridge using information 
   from different database tables </strong></P>
   <pre>:authorName rdf:type rdf:Property .
 
-db1:authorNameBridge rdf:type d2rq:DatatypePropertyBridge ;
-            d2rq:belongsToClassMap db1:Papers ;
+map:authorNameBridge rdf:type d2rq:DatatypePropertyBridge ;
+            d2rq:belongsToClassMap map:Papers ;
             d2rq:property :authorName ;
             d2rq:column &quot;Persons.Name&quot;;
             d2rq:join &quot;Papers.PaperID = Rel_Person_Paper.PaperID&quot; ;
@@ -780,27 +771,27 @@ db1:authorNameBridge rdf:type d2rq:DatatypePropertyBridge ;
   as the class map </strong></P>
   <pre>:eMail rdf:type rdf:Property ,
             
-db1:PersonsClassEmail rdf:type d2rq:ObjectPropertyBridge ;
-            d2rq:belongsToClassMap db1:PersonsClassMap ;
+map:PersonsClassEmail rdf:type d2rq:ObjectPropertyBridge ;
+            d2rq:belongsToClassMap map:PersonsClassMap ;
             d2rq:property :email ;
             d2rq:pattern &quot;mailto:@@Persons.Email@@&quot; .</pre>
 <P>The pattern &quot;mailto:@@Persons.Email@@&quot; is used together with the 
   values of the column &quot;Persons.Email&quot; to create email property values. 
-  The property bridge belongs to the class map db1:PersonsClassMap. </P>
+  The property bridge belongs to the class map map:PersonsClassMap. </P>
 <P><strong><a name="exjoin2"></a>Example: Object property bridge using information 
   from two database tables </strong></P>
   <pre>:conference rdf:type rdf:Property .
 
-db1:conferenceBridge rdf:type d2rq:ObjectPropertyBridge ;
-            d2rq:belongsToClassMap db1:Papers ;
+map:conferenceBridge rdf:type d2rq:ObjectPropertyBridge ;
+            d2rq:belongsToClassMap map:Papers ;
             d2rq:property :conference ;
-            d2rq:refersToClassMap db1:Conference ;
+            d2rq:refersToClassMap map:Conference ;
             d2rq:join &quot;Papers.Conference = Conferences.ConfID&quot; .</pre>
 <p>There is a 1:n relation between conferences and papers, which is expressed 
   by the d2rq:join property. The :conference property refers to instances of the 
-  class map db1:Conference. D2RQ uses the uriPattern of this class map to construct 
+  class map map:Conference. D2RQ uses the uriPattern of this class map to construct 
   the property values.</DIV> 
-<p>&nbsp;</p>
+
 <h2><a name="additionalproperty"></a>3.4 AdditionalProperty</h2>
 <p>A <strong>d2rq:AdditionalProperty</strong> can be used to add a fixed statement 
   to all instances generated by a class map. The statement is added to the result 
@@ -820,15 +811,14 @@ db1:conferenceBridge rdf:type d2rq:ObjectPropertyBridge ;
   </tr>
 </table>
 <P><strong>Example:</strong></P>
-  <pre>db1:PersonsClassMap rdf:type d2rq:ClassMap;
+  <pre>map:PersonsClassMap rdf:type d2rq:ClassMap;
         d2rq:class :Person;
-        d2rq:additionalProperty db1:SeeAlsoStatement.
+        d2rq:additionalProperty map:SeeAlsoStatement.
 
-db1:SeeAlsoStatement rdf:type d2rq:AdditionalProperty;
+map:SeeAlsoStatement rdf:type d2rq:AdditionalProperty;
         d2rq:propertyName rdfs:seeAlso;
         d2rq:propertyValue &lt;http://annotation.semanticweb.org/iswc2003/>.</pre>
 <p>This adds an rdfs:seeAlso statement with a fixed URL object to every instance of the class map.</p>
-<p>&nbsp;</p>
 
 <h2><a name="translationtable"></a>3.5 Translation Tables</h2>
 <p>A <strong>d2rq:TranslationTable</strong> is an additional layer between the 
@@ -887,27 +877,26 @@ db1:SeeAlsoStatement rdf:type d2rq:AdditionalProperty;
 # ... more colors omitted ...
 :blue rdf:type :Color;
 
-db1:ColorBridge rdf:type d2rq:ObjectPropertyBridge;
-        d2rq:belongsToClassMap db1:ShinyObjectMap;
+map:ColorBridge rdf:type d2rq:ObjectPropertyBridge;
+        d2rq:belongsToClassMap map:ShinyObjectMap;
         d2rq:property :color;
         d2rq:column "ShinyObject.Color";
-        d2rq:translateWith db1:ColorTable.
+        d2rq:translateWith map:ColorTable.
 
-db1:ColorTable rdf:type d2rq:TranslationTable;
+map:ColorTable rdf:type d2rq:TranslationTable;
         d2rq:translation [ d2rq:databaseValue "R"; d2rq:rdfValue :red; ];
         d2rq:translation [ d2rq:databaseValue "G"; d2rq:rdfValue :green; ];
         # ... more translations omitted ...
         d2rq:translation [ d2rq:databaseValue "B"; d2rq:rdfValue :blue; ].</pre>
 <p>The d2rq:translateWith statement tells D2RQ to look up database values in the 
-  db1:ColorTable. There, a translation must be given for each possible value. 
+  map:ColorTable. There, a translation must be given for each possible value. 
   If the database contains values which are not in the translation table, D2RQ 
   will not generate a :color statement for that :ShinyObject instance.</p>
 <p>Note that the type of the resulting node is determined by the type of the bridge 
-  and not by the node type of the rdfValues. db1:ColorBridge is a d2rq:ObjectPropertyBridge. 
+  and not by the node type of the rdfValues. map:ColorBridge is a d2rq:ObjectPropertyBridge. 
   Thus, the translation will create resources. If it would be a d2rq:DatatypePropertyBridge 
   then literals would be created.</p>
 
-<p>&nbsp;</p>
 <h2><a name="conditional" id="conditional"></a>3.6 Conditional Mappings</h2>
 <p>Sometimes only certain information from a database should be accessible, because 
   parts of the database might be confidential or outdated. Using <strong>d2rq:condition</strong> 
@@ -919,11 +908,11 @@ db1:ColorTable rdf:type d2rq:TranslationTable;
   SQL result set row, then no triples will be generated from that row.</p>
 
 <p><strong>Example: Using d2rq:condition on a d2rq:ClassMap</strong></p>
-  <pre>db1:InProceedings rdf:type d2rq:ClassMap;
+  <pre>map:InProceedings rdf:type d2rq:ClassMap;
             d2rq:class :InProceedings;
             d2rq:uriPattern "http://www.conference.org/conf02004/paper#Paper@@Papers.PaperID@@";
             d2rq:condition "Papers.Publish = 1";
-            d2rq:dataStorage db1:Database1.</pre>
+            d2rq:dataStorage map:Database1.</pre>
 <p>Only those papers with a value of 1 in the Papers.Publish column will be accessible. 
   All other papers are ignored.</p>
 <p><strong>Example: Filtering zero-length strings</strong>
@@ -934,10 +923,10 @@ db1:ColorTable rdf:type d2rq:TranslationTable;
   statements like <tt>:Person123 :firstName "".</tt> if the person's first name 
   is a zero-length string. In oder to suppress these statements, a d2rq:condition 
   can be added to the property bridge:</p>
-  <pre>db1:PersonsClassFirstName rdf:type d2rq:DatatypePropertyBridge;
+  <pre>map:PersonsClassFirstName rdf:type d2rq:DatatypePropertyBridge;
             d2rq:property :firstName;
             d2rq:column "Persons.FirstName";
-            d2rq:belongsToClassMap db1:PersonsClassMap;
+            d2rq:belongsToClassMap map:PersonsClassMap;
             d2rq:condition "Persons.FirstName <> ''".</pre>
 <br>
 <p><strong>Example: Relationship type codes</strong></p>
@@ -952,42 +941,41 @@ db1:ColorTable rdf:type d2rq:TranslationTable;
   One for :primaryTopic, one for :secondaryTopic. We add a d2rq:condition
   to both bridges to suppress those statements where the RelationshipType
   column doesn't have the correct value.</p>
-  <pre>db1:primaryTopic rdf:type d2rq:ObjectPropertyBridge;
-            d2rq:belongsToClassMap db1:InProceedings;
+  <pre>map:primaryTopic rdf:type d2rq:ObjectPropertyBridge;
+            d2rq:belongsToClassMap map:InProceedings;
             d2rq:property :primaryTopic;
-            d2rq:refersToClassMap db1:Topic;
+            d2rq:refersToClassMap map:Topic;
             d2rq:join "Papers.PaperID = Rel_Paper_Topic.PaperID";
             d2rq:join "Rel_Paper_Topic.TopicID = Topics.TopicID";
             d2rq:condition "Rel_Paper_Topic.RelationType = 1".
 
-db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
-            d2rq:belongsToClassMap db1:InProceedings;
+map:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
+            d2rq:belongsToClassMap map:InProceedings;
             d2rq:property :secondaryTopic;
-            d2rq:refersToClassMap db1:Topic;
+            d2rq:refersToClassMap map:Topic;
             d2rq:join "Papers.PaperID = Rel_Paper_Topic.PaperID";
             d2rq:join "Rel_Paper_Topic.TopicID = Topics.TopicID";
             d2rq:condition "Rel_Paper_Topic.RelationType = 2".</pre>
-<p>&nbsp;</p>
 
 <h2><a name="hint" id="hint"></a>3.7 Performance Optimization using Hint Properties</h2>
 <p>This section covers hint properties that can be added to property bridges in 
   order to speed up queries: d2rq:valueMaxLength, d2rq:valueRegex and d2rq:valueContains.</p>
 
 <p><strong>Example: Providing a maximum length</strong></p>
-  <pre>db1:PersonsClassFirstName rdf:type d2rq:DatatypePropertyBridge;
+  <pre>map:PersonsClassFirstName rdf:type d2rq:DatatypePropertyBridge;
             d2rq:property :firstName;
             d2rq:column "Persons.FirstName";
-            d2rq:belongsToClassMap db1:PersonsClassMap;
+            d2rq:belongsToClassMap map:PersonsClassMap;
             d2rq:valueMaxLength "15".</pre>
 <p>The d2rq:valueMaxLength property can be used to tell D2RQ that the length of 
   Persons.FirstName values is limited to 15 characters. Using this information, 
   D2RQ doesn't have to look in the database anymore to figure out, that a given 
   FirstName which is longer than 15 characters isn't fitting. 
 <p><strong>Example: Providing a regular expression</strong></p>
-  <pre>db1:inProceedingsYear rdf:type d2rq:DatatypePropertyBridge;
+  <pre>map:inProceedingsYear rdf:type d2rq:DatatypePropertyBridge;
             d2rq:property :year;
             d2rq:column "Papers.Year";
-            d2rq:belongsToClassMap db1:InProceedings;
+            d2rq:belongsToClassMap map:InProceedings;
             d2rq:datatype xsd:gYear;
             d2rq:valueRegex "^[0-9]{4}$".</pre>
 <p>Here, the d2rq:valueRegex property is used to provide a <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regular 
@@ -1013,7 +1001,6 @@ db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
   (URI, ANY, ANY) are used. In oder to filter values, use <a href="#conditional">d2rq:condition</a> 
   or a <a href="#translationtable">translation table</a> with a custom Java class 
   that returns <tt>null</tt> for unwanted database values.</p>
-<p>&nbsp;</p>
 
 <h2><a name="processing" id="processing"></a>3.8 Processing Instructions</h2>
 <p>You can configure  D2RQ by providing d2rq:ProcessingInstructions. Up till now D2RQ V0.4 only supports the queryHandler processing instruction. The d2rq:queryHandler processing instruction can be used to specify a query handler that is different from the default query handler which is D2RQQueryHandler. </p>
@@ -1054,7 +1041,7 @@ db1:secondaryTopic rdf:type d2rq:ObjectPropertyBridge;
 <pre>org.apache.log4j.Logger.getLogger(
         "de.fuberlin.wiwiss.ng4j.d2rq").setLevel(
                 org.apache.log4j.Level.ALL);</pre>
-<P>&nbsp;</P>
+
 <h2><a name="usingmodel" id="usingmodel"></a>4.1 Using D2RQ with the Jena model 
   API</h2>
 <P>The following example shows how the Jena model API is used to check if the 
@@ -1075,7 +1062,7 @@ String paperURI = &quot;http://www.conference.org/conf02004/paper#Paper1&quot;;<
 Property author = d2rqModel.createProperty(&quot;http://annotation.semanticweb.org/iswc/iswc.daml#author&quot;);<br>if (paperRessource.hasProperty(author)) 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot;The paper has an author.&quot;);</pre>
 </P>
-<P>&nbsp;</P>
+
 <h2><a name="usingfind" id="usingfind"></a>4.2 Using find(spo) and D2RQ </h2>
 <P>The following example shows how the Jena graph API is used to get all papers 
   which have been published in 2003.</P>
@@ -1095,10 +1082,8 @@ Node subject = Node.ANY;<br>Node predicate = Node.createURI(&quot;http://annotat
 // Query the graph
 ExtendedIterator resultiterator = d2rqGraph.find(pattern);<br>
 // Output the query results
-while (resultiterator.hasNext()) {<br>    System.out.println(&quot;Result Triple :&quot; + ((Triple) resultiterator.next()).toString());<br>}
-</pre>
-</P>
-<P>&nbsp;</P>
+while (resultiterator.hasNext()) {<br>    System.out.println(&quot;Result Triple :&quot; + ((Triple) resultiterator.next()).toString());<br>}</pre>
+
 <h2><a name="usingrdql" id="usingrdql"></a>4.3 Using RDQL and D2RQ</h2>
 <P>The following example shows how RDQL is used to get all information about the 
   paper with the URI &quot;http://www.conference.org/conf02004/paper#Paper1&quot;. 
@@ -1118,8 +1103,51 @@ try {<br>    d2rqModel = new ModelD2RQ(D2RQMap);<br>} catch  (D2RQException ex) 
 String rdql = &quot;SELECT ?x, ?y WHERE (&lt;http://www.conference.org/conf02004/paper#Paper1&gt;, ?x, ?y)&quot;;<br>Query query = new Query(rdql);<br>query.setSource(d2rqModel);<br>QueryExecution qe = new QueryEngine(query) ;<br>QueryResults results = qe.exec() ;<br>
 // Output the query results using a QueryResultsFormatter
 QueryResultsFormatter fmt = new QueryResultsFormatter(results) ;<br>PrintWriter pw = new PrintWriter(System.out) ;<br>fmt.printAll(pw, &quot; | &quot;) ;<br>pw.flush() ;<br>fmt.close() ;	<br>results.close() ;</pre>
-</P>
-<P>&nbsp;</P>
+
+<h2 id="jena-assembler">4.4 The D2RQ Assembler</h2>
+<p>D2RQ comes with a Jena assembler. Jena assembler specifications are RDF
+configuration files that describe how to construct a Jena model. For more
+information on Jena assemblers, see the
+<a href="http://jena.sourceforge.net/assembler/index.html">Jena Assembler quickstart page</a>.</p>
+
+<p>The following example shows an assembler specification for a D2RQ model:</p>
+
+<pre>@prefix : &lt;#&gt; .
+@prefix ja: &lt;http://jena.hpl.hp.com/2005/11/Assembler#&gt; .
+@prefix d2rq: &lt;http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#&gt; .
+
+&lt;&gt; ja:imports d2rq: .
+
+:myModel
+  a d2rq:D2RQModel;
+  d2rq:mappingFile &lt;file:my-mapping.n3&gt;;
+  d2rq:resourceBaseURI &lt;http://localhost:2020/&gt;;
+  .</pre>
+
+<p>D2RQ model specifications support these two properties:
+
+<dl>
+  <dt><tt>d2rq:mappingFile</tt> (required)</dt>
+  <dd>The URI of a D2RQ mapping file to use for setting up the model</dd>
+  <dt><tt>d2rq:resourceBaseURI</tt> (optional)<dt>
+  <dd>The base URI for turning relative URI patterns into full URIs.
+  If not specified, D2RQ will pick an appropriate base URI.</dd>
+</dl>
+
+<p>This usage example will create a D2RQ model from a model specification, and write it to the console:</p>
+
+<pre>// Load assembler specification from file
+Model assemblerSpec = FileManager.get().loadModel("my_assembler.n3");
+
+// Get the model resource
+Resource modelSpec = assemblerSpec.createResource(assemblerSpec.expandPrefix(":myModel"));
+
+// Assemble a model
+Model m = Assembler.general.openModel(modelSpec);
+
+// Write it to System.out
+m.write(System.out);</pre>
+
 <P>&nbsp;</P>
 <HR>
 <H1><A id=ntrip_grammar name=usingSesame>5.</A> Using D2RQ within Sesame</H1>
@@ -1144,6 +1172,7 @@ QueryResultsFormatter fmt = new QueryResultsFormatter(results) ;<br>PrintWriter 
     <li>and xml-apis.jar</li>
   </ul>
   from the &quot;lib&quot; folder of the Jena 2.3 distribution are required.</P>
+
 <h2><a name="usingSesameRepository" id="usingSesameRepository"></a>5.1 Using D2RQ as Sesame repository</h2>
 <p>The following example shows how RDQL is used to get all information about the paper with the URI
   "http://www.conference.org/conf02004/paper#Paper1" out of a D2RQRepository.</p>
