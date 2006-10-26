@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
  * {@link MappingGenerator} or a mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: dump_rdf.java,v 1.4 2006/10/23 15:39:14 cyganiak Exp $
+ * @version $Id: dump_rdf.java,v 1.5 2006/10/26 13:50:42 cyganiak Exp $
  */
 public class dump_rdf {
 	private final static String[] includedDrivers = {
@@ -113,8 +113,8 @@ public class dump_rdf {
 		System.out.println("  RDF output parameters");
 		System.out.println("    -m mapURL       URL of a D2RQ mapping file (optional)");
 		System.out.println("    -b baseURI      Base URI for generated RDF (optional)");
-		System.out.println("    -f format       One of RDF/XML, RDF/XML-ABBREV, N3, N-TRIPLE (default: RDF/XML)");
-		System.out.println("    -o outfile      Output file name (default: stdout");
+		System.out.println("    -f format       One of RDF/XML (default), RDF/XML-ABBREV, N3, N-TRIPLE");
+		System.out.println("    -o outfile      Output file name (default: stdout)");
 		System.out.println();
 	}
 	
