@@ -51,7 +51,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.39 2006/10/16 12:46:01 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.40 2006/10/27 15:59:17 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -172,6 +172,20 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		}
 		return new FindQuery(t, this.mapping.compiledPropertyBridges()).iterator();
     }
+
+	/**
+	 * Connects all databases. This is done automatically if
+	 * needed. The method can be used to test the connections
+	 * earlier.
+	 * @throws D2RQException on connection failure
+	 */
+	public void connect() {
+		Iterator it = this.mapping.databases().iterator();
+		while (it.hasNext()) {
+			Database db = (Database) it.next();
+			db.connectedDB().connection();
+		}
+	}
 	
 	static TripleRelation[] emptyPropertyBridgeArray=new TripleRelation[0];
 	
