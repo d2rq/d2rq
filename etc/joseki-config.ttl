@@ -25,7 +25,7 @@
         joseki:defaultGraph [
             rdfs:label "D2RQ-mapped database";
             a d2rq:D2RQModel;
-            d2rq:mappingFile <example-mapping.ttl>;
+            d2rq:mappingFile <example-mapping.n3>;
         ];
     ];
     .

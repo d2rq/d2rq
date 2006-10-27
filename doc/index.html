@@ -347,20 +347,20 @@ Accept: text/html</pre>
     already included with D2R Server.</p></li>
   <li><p><strong>Generate a mapping file</strong> for your database schema.
     Change into the D2R Server directory and run:</p>
-    <pre>generate-mapping -o <em>mapping.ttl</em> -d <em>driver.class.name</em>
+    <pre>generate-mapping -o <em>mapping.n3</em> -d <em>driver.class.name</em>
     -u <em>db-user</em> -p <em>db-password</em> <em>jdbc:url:...</em></pre>
     <p>Replace the parts in italics with appropriate values.
-    <tt><em>mapping.ttl</em></tt> is the name for the new mapping file.
+    <tt><em>mapping.n3</em></tt> is the name for the new mapping file.
     <tt>-d</tt> can be skipped for MySQL.</p></li>
   <li><p><strong>Start the server:</strong></p>
-    <pre>d2r-server <em>mapping.ttl</em></pre>
+    <pre>d2r-server <em>mapping.n3</em></pre>
     <p>The SPARQL endpoint is at
     <a href="http://localhost:2020/sparql">http://localhost:2020/sparql</a>
     and can now be queried by any SPARQL client.</p>
     <p>The server can be started with the <tt>-p &lt;port&gt;</tt> option to run
       it on a port other than the default 2020, and with the <tt>-b &lt;baseURI&gt;</tt>
       option if the server's name is different from <tt>localhost</tt>:</p>
-    <pre>d2r-server -p <em>80</em> -b <em>http://www3.wiwiss.fu-berlin.de:2020/</em> <em>mapping.ttl</em></pre>
+    <pre>d2r-server -p <em>80</em> -b <em>http://www3.wiwiss.fu-berlin.de:2020/</em> <em>mapping.n3</em></pre>
     </li>
   <li>
     <p><strong>Testing the Server: </strong> Open <a href="http://localhost:2020/">http://localhost:2020/</a>
@@ -427,7 +427,7 @@ Accept: text/html</pre>
 
 
 <div id="footer">
-  <small>$Id: index.html,v 1.15 2006/10/27 14:21:50 cyganiak Exp $</small>
+  <small>$Id: index.html,v 1.16 2006/10/27 14:25:19 cyganiak Exp $</small>
 </div>
 </div>
 
