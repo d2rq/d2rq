@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.14 2006/09/13 14:06:23 cyganiak Exp $
+ * @version $Id: Database.java,v 1.15 2006/10/27 15:58:46 cyganiak Exp $
  */
 public class Database extends MapObject {
 
@@ -156,6 +156,10 @@ public class Database extends MapObject {
 	}
 
 	public void validate() throws D2RQException {
+		if (this.jdbcDSN == null && this.odbcDSN == null) {
+			throw new D2RQException("d2rq:Database must have either d2rq:jdbcDSN or d2rq:odbcDSN",
+					D2RQException.DATABASE_MISSING_DSN);
+		}
 		if (this.jdbcDSN != null && this.odbcDSN != null) {
 			throw new D2RQException("Can't combine d2rq:odbcDSN with d2rq:jdbcDSN",
 					D2RQException.DATABASE_ODBC_WITH_JDBC);
