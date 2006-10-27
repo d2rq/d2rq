@@ -1,25 +1,19 @@
 @echo off
-@REM $Id: generate-mapping.bat,v 1.1 2006/09/07 16:57:50 cyganiak Exp $
-if NOT EXIST .\lib\d2rq.jar (
-  echo "Please cd into the D2R Server directory to run the server
-  exit
+if NOT EXIST .\d2r-server.bat (
+  echo Please cd into the D2R Server directory to run the server
+  exit /B
 )
-set D2RQ_ROOT=%0
-set CP=
-pushd %D2RQ_ROOT%
-for %%f in (lib\*.jar lib\*\*.jar) do call :oneStep %%f
-popd
-goto noMore
-
-:oneStep
-if "%CP%" == "" (set CP=%D2RQ_ROOT%\%1) ELSE (set CP=%CP%;%D2RQ_ROOT%\%1)
+set D2RQ_ROOT=%~p0
+set CP=%D2RQ_ROOT%build
+call :findjars %D2RQ_ROOT%lib
+set LOGCONFIG=file:%D2RQ_ROOT%etc/log4j.properties
+java -cp "%CP%" "-Dlog4j.configuration=%LOGCONFIG%" d2r.server %1 %2 %3 %4 %5 %6 %7 %8 %9
 exit /B
 
-:noMore
-set LOGCONFIG=file:%D2RQ_ROOT%\etc\log4j.properties
-java -cp "%CP%" "-Dlog4j.configuration=%LOGCONFIG%" d2r.server %1 %2 %3 %4 %5 %6 %7 %8 %9
+:findjars
+for %%j in (%1\*.jar) do call :addjar %%j
+for /D %%d in (%1\*) do call :findjars %%d
+exit /B
 
-
-
-echo Please run the D2R Server from its root directory
-goto theEnd
+:addjar
+set CP=%CP%;%1
