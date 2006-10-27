@@ -6,11 +6,11 @@
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/org.mortbay.jetty.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-3.1.12-bin.jar"/>
-	<classpathentry sourcepath="/Joseki-3.0-beta-2/src" kind="lib" path="lib/joseki.jar"/>
-	<classpathentry sourcepath="/Jena-2.4/src" kind="lib" path="lib/jena.jar"/>
+	<classpathentry kind="lib" path="lib/joseki.jar" sourcepath="/Joseki-3.0-beta-2/src"/>
+	<classpathentry kind="lib" path="lib/jena.jar" sourcepath="/Jena-2.4/src"/>
 	<classpathentry kind="lib" path="lib/javax.servlet.jar">
 		<attributes>
-			<attribute value="jar:file:/Users/richard/D2RQ/workspace/D2R-Server/servlet-2_2-doc.zip!/servlet-2_2-doc" name="javadoc_location"/>
+			<attribute name="javadoc_location" value="jar:file:/Users/richard/D2RQ/workspace/D2R-Server/servlet-2_2-doc.zip!/servlet-2_2-doc"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/concurrent.jar"/>
@@ -25,6 +25,6 @@
 	<classpathentry kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="lib" path="lib/velocity-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/velocity-dep-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/d2rq-0.5-dev.jar"/>
+	<classpathentry kind="lib" path="lib/d2rq-0.5.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
