@@ -53,7 +53,7 @@
 #if ($property.propertyPrefix())
             <a class="uri" href="$property.propertyURI()" title="$property.propertyURI()"><small>$property.propertyPrefix()</small>$property.propertyLocalName()</a>
 #else
-            <a class="uri" href="$property.propertyURI()" title="$property.propertyURI()">$property.propertyQName()</a>
+            <a class="uri" href="$property.propertyURI()" title="$property.propertyURI()"><small>?:</small>$property.propertyLocalName()</a>
 #end
 #if ($property.isInverse())
             <small>of</small>

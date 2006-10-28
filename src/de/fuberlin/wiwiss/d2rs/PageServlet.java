@@ -124,7 +124,7 @@ public class PageServlet extends VelocityServlet {
 		public String propertyLocalName() {
 			String qname = propertyQName();
 			if (qname.startsWith("<")) {
-				return null;
+				return this.property.getLocalName();
 			}
 			return qname.substring(qname.indexOf(":") + 1);
 		}
