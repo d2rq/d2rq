@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
@@ -40,7 +41,10 @@ public class ClassMapServlet extends HttpServlet {
 		response.addHeader("Content-Type", "application/rdf+xml; charset=utf-8");
 		response.addHeader("Cache-Control", "no-cache");
 		response.addHeader("Pragma", "no-cache");
-		m.write(response.getOutputStream(), "RDF/XML");
+		RDFWriter w = m.getWriter("RDF/XML");
+		// Add this so IE6 will identify the contents as XML
+		w.setProperty("showXmlDeclaration", "true");
+		w.write(m, response.getOutputStream(), null);
 	}
 
 	private GraphD2RQ graphD2RQ() {
