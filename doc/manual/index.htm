@@ -136,7 +136,7 @@ ul.toc li li { font-weight: normal; }
 <DL>
   <DT>This Version: 
     <DD><A 
-  href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20051025/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20051025/</A> 
+  href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20061030/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20061030/</A> 
     <DT>Latest Version: 
     <DD><A 
   href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/</A>
@@ -244,8 +244,7 @@ ul.toc li li { font-weight: normal; }
     query results as RDF triples up to the higher layers of the Jena framework or alternatively to the higher levels of the Sesame framework.</li>
 </ul>
 <p><img src="architecture.gif" width="450" height="207"></p>
-<p>Since V0.3 D2RQ provides an new experimental D2RQQueryHandler  which speeds up complex queries significantly by rewriting groups of triple patterns into single SQL statements and by rewriting RDQL AND conditions into SQL WHERE clauses. You can switch between the new query handler      and Jena's standard SimpleQueryHandler using the <a href="#processing">d2rq:queryHandler</a> directive.</p>
-<p>Since V0.4, D2RQ contains a Sesame wrapper for the D2RQGraph implementation. The Jena graph interface is wrapped behind a Sesame RDF source            interface. Relational databases can be queried as virtual Sesame RDF sources using the reasoning and querying facilities of the Sesame             API.</p>
+
 <p><strong>D2RQ Example</strong></p>
 <p>We are using an example database which stores information about conferences, 
   papers, authors and topics throughout this manual. The database is mapped to the 
@@ -1391,7 +1390,7 @@ try{
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr>
-<p>$Id: index.htm,v 1.22 2006/10/26 15:33:40 cyganiak Exp $</p>
+<p>$Id: index.htm,v 1.23 2006/10/28 19:08:56 cyganiak Exp $</p>
 
 </BODY>
 </HTML>
