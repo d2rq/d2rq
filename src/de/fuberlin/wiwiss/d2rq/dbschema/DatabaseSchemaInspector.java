@@ -5,7 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -16,9 +18,10 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.6 2006/09/15 17:53:37 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.7 2006/11/01 14:51:04 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
+	private Map cachedColumnTypes = new HashMap();
 	
 	public static boolean isStringType(int columnType) {
 		return columnType == Types.CHAR || columnType == Types.VARCHAR || columnType == Types.LONGVARCHAR;
@@ -71,6 +74,9 @@ public class DatabaseSchemaInspector {
 	}
 	
 	public int columnType(Attribute column) {
+		if (this.cachedColumnTypes.containsKey(column)) {
+			return ((Integer) this.cachedColumnTypes.get(column)).intValue();
+		}
 		try {
 			ResultSet rs = this.schema.getColumns(null, column.schemaName(), 
 					column.tableName(), column.attributeName());
@@ -79,6 +85,7 @@ public class DatabaseSchemaInspector {
 			}
 			int type = rs.getInt("DATA_TYPE");
 			rs.close();
+			this.cachedColumnTypes.put(column, new Integer(type));
 			return type;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
