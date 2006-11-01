@@ -22,7 +22,7 @@
    				dc:creator       "Richard Cyganiak" ;
    				dc:date          "2006-08-12" ;
    				dc:format        "RDF";
-   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.13 2006/09/18 08:54:59 cyganiak Exp $";
+   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.14 2006/11/01 15:26:58 cyganiak Exp $";
    				.
 
 
@@ -77,6 +77,11 @@ d2rq:expressionTranslator rdf:type rdf:Property ;
 				rdfs:comment "A Java class or string null (for no expression translation).";
                 rdfs:domain d2rq:Database
                 .
+d2rq:resultSizeLimit a rdf:Property;
+				rdfs:label "result size limit";
+				rdfs:comment "Enforced upper limit for the size of SQL result sets.";
+				rdfs:domain d2rq:Database;
+				.
 
 
 # -----------------------------------------------
@@ -339,7 +344,6 @@ d2rq:queryHandler	rdf:type rdf:Property ;
 				rdfs:comment "a Java class name that specifies the graphs QueryHandler.";
 	   			rdfs:domain d2rq:ProcessingInstructions
         		.
-
 
 # -----------------------------------------------
 # Jena Assembler

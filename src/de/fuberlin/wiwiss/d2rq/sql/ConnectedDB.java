@@ -14,11 +14,12 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.fastpath.ConstraintHandler;
+import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.7 2006/09/18 16:59:27 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.8 2006/11/01 15:26:58 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -40,14 +41,16 @@ public class ConnectedDB {
 	private Connection connection = null;
 	private DatabaseSchemaInspector schemaInspector = null;
 	private String dbType = null;
+	private int limit;
 	
 	public ConnectedDB(String jdbcURL, String username, String password) {
 		this(jdbcURL, username, password, null, true,
-				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET);
+				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET, Database.NO_LIMIT);
 	}
 	
 	public ConnectedDB(String jdbcURL, String username, String password, String expressionTranslator,
-			boolean allowDistinct, Set textColumns, Set numericColumns, Set dateColumns) {
+			boolean allowDistinct, Set textColumns, Set numericColumns, Set dateColumns,
+			int limit) {
 		this.jdbcURL = jdbcURL;
 		this.expressionTranslator = expressionTranslator;
 		this.allowDistinct = allowDistinct;
@@ -56,6 +59,7 @@ public class ConnectedDB {
 		this.textColumns = textColumns;
 		this.numericColumns = numericColumns;
 		this.dateColumns = dateColumns;
+		this.limit = limit;
 	}
 	
 	public Connection connection() {
@@ -63,6 +67,10 @@ public class ConnectedDB {
 			this.connection = connect();
 		}
 		return this.connection;
+	}
+	
+	public int limit() {
+		return this.limit;
 	}
 	
 	private Connection connect() {

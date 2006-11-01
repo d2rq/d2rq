@@ -17,6 +17,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
+import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * Collects parts of a SELECT query and delivers a corresponding SQL statement.
@@ -24,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.19 2006/09/15 19:36:44 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.20 2006/11/01 15:26:58 cyganiak Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -101,6 +102,9 @@ public class SelectStatementBuilder {
 					result.append(" AND ");
 				}
 			}
+		}
+		if (this.database.limit() != Database.NO_LIMIT) {
+			result.append(" LIMIT " + this.database.limit());
 		}
 		return result.toString();
 	}

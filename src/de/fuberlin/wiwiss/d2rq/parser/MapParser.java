@@ -32,7 +32,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.22 2006/11/01 13:17:50 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.23 2006/11/01 15:26:58 cyganiak Exp $
  */
 public class MapParser {
 
@@ -156,6 +156,15 @@ public class MapParser {
 		stmts = r.listProperties(D2RQ.expressionTranslator);
 		while (stmts.hasNext()) {
 			database.setExpressionTranslator(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.resultSizeLimit);
+		while (stmts.hasNext()) {
+			try {
+				int limit = Integer.parseInt(stmts.nextStatement().getString());
+				database.setResultSizeLimit(limit);
+			} catch (NumberFormatException ex) {
+				throw new D2RQException("Value of d2rq:resultSizeLimit must be numeric", D2RQException.MUST_BE_NUMERIC);
+			}
 		}
 		stmts = r.listProperties(D2RQ.textColumn);
 		while (stmts.hasNext()) {

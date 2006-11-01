@@ -6,7 +6,7 @@ import com.hp.hpl.jena.shared.JenaException;
  * Exception used to signal most D2RQ errors.
  *
  * @author Chris Bizer chris@bizer.de
- * @version $Id: D2RQException.java,v 1.11 2006/10/27 15:58:46 cyganiak Exp $
+ * @version $Id: D2RQException.java,v 1.12 2006/11/01 15:26:57 cyganiak Exp $
  */
 
 public class D2RQException extends JenaException {
@@ -63,6 +63,7 @@ public class D2RQException extends JenaException {
 	public static final int MAPPING_LITERAL_INSTEADOF_RESOURCE = 49;
 	public static final int RESOURCEMAP_ILLEGAL_URIPATTERN = 50;
 	public static final int DATABASE_MISSING_DSN = 51;
+	public static final int MUST_BE_NUMERIC = 52;
 	
 	private int code;
 	

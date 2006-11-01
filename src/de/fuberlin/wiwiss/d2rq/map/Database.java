@@ -17,10 +17,11 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.15 2006/10/27 15:58:46 cyganiak Exp $
+ * @version $Id: Database.java,v 1.16 2006/11/01 15:26:58 cyganiak Exp $
  */
 public class Database extends MapObject {
-
+	public static final int NO_LIMIT = -1;
+	
 	/**
 	 * Pre-registers a JDBC driver if its class can be found on the
 	 * classpath. If the class is not found, nothing will happen.
@@ -72,6 +73,7 @@ public class Database extends MapObject {
 	private Set numericColumns = new HashSet();
 	private Set dateColumns = new HashSet();
     private String expressionTranslator = null;		// class name
+    private int limit = NO_LIMIT;
 	private boolean allowDistinct = true;
 	private ConnectedDB connection = null;
 	
@@ -129,6 +131,10 @@ public class Database extends MapObject {
 		this.allowDistinct = b;
 	}
 
+	public void setResultSizeLimit(int limit) {
+		this.limit = limit;
+	}
+	
 	public ConnectedDB connectedDB() {
 		if (this.connection != null) {
 			return this.connection;
@@ -147,7 +153,7 @@ public class Database extends MapObject {
 		}
 		this.connection = new ConnectedDB(url, this.username, this.password,
 				this.expressionTranslator, this.allowDistinct,
-				this.textColumns, this.numericColumns, this.dateColumns);
+				this.textColumns, this.numericColumns, this.dateColumns, this.limit);
 		return this.connection;
 	}
 
