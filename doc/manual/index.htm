@@ -355,7 +355,7 @@ parameter is omitted, the mapping will be written to standard out.</dd>
 <pre>generate-mapping -d com.mysql.jdbc.Driver -u root jdbc:mysql://127.0.0.1/iswc</pre>
 
 
-<h2 id="dumprdf">Dumping the Database to an RDF File</h2>
+<h2 id="dumprdf">4.2 Dumping the Database to an RDF File</h2>
 
 <p>The <tt>dump-rdf</tt> script provides a way of dumping the contents of the
 whole database into a single RDF file. This can be done with or without a
@@ -394,7 +394,250 @@ same as for the <a href="#generatemapping"><tt>generate-mapping</tt> script</a>.
 <hr />
 
 
-<h1><A id=specification name=specification>3.</A> Language Specification</h1>
+<h1 id="usingD2RQ">5. Using D2RQ within Jena</h1>
+<P>This section describes how D2RQ is used within the <a href="http://jena.sourceforge.net/">Jena 2 Semantic Web framework</a>. 
+</P>
+<P><strong>Download</strong></P>
+<P>D2RQ can be downloaded from <a href="http://sourceforge.net/projects/d2rq-map/" target="_blank">http://sourceforge.net/projects/d2rq-map/</a></P>
+<P><strong>Jena Versions</strong></P>
+<p>At the time of writing, the latest Jena release is version 2.4. D2RQ requires
+  a more recent custom-built version of Jena, the version that ships with
+  <a href="http://jena.sourceforge.net/ARQ/">ARQ 1.4</a>. All required jar files
+  are included in the D2RQ distribution. (Jena 2.4 and 2.3 <em>may</em>
+  work to some extent.)</p>
+
+<P><strong>Installation</strong></P>
+<ol>
+<li>Add the <tt>d2rq-X.X.jar</tt> file from D2RQ's <tt>/lib</tt> directory to your
+  application's classpath.</li>
+<li>Add all jar files from the <tt>/lib/arq-1.4</tt> directory
+  to your application's classpath.</li>
+<li>Add a JDBC driver for your database to your application's
+  classpath. Drivers for some popular databases are found
+  in D2RQ's <tt>/lib/db-drivers</tt> directory.</li>
+</ol>
+
+<p><strong>Debugging</strong></p>
+<p>D2RQ uses the <a href="http://jakarta.apache.org/commons/logging/">Apache Commons - Logging</a>
+  API for logging. To enable D2RQ debug messages, set the log level for logger
+  <tt>de.fuberlin.wiwiss.d2rq</tt> to <tt>ALL</tt>. An easy way to do this is:
+<pre>org.apache.log4j.Logger.getLogger(
+        "de.fuberlin.wiwiss.ng4j.d2rq").setLevel(
+                org.apache.log4j.Level.ALL);</pre>
+
+<h2 id="usingmodel">5.1 Using Jena's Model API</h2>
+
+<p>The ModelD2RQ class provides a Jena
+<a href="http://jena.sourceforge.net/javadoc/com/hp/hpl/jena/rdf/model/Model.html">Model</a>
+view on the data
+in a D2RQ-mapped database. The example shows how a ModelD2RQ is set up
+using a mapping file, and how Jena API calls are used to extract
+information about papers and their authors from the model.</p>
+
+<p>The ISWC and FOAF classes have been created with Jena's
+<a href="http://jena.sourceforge.net/how-to/schemagen.html">schemagen</a>
+tool. The DC and RDF classes are part of Jena.</p>
+
+<pre>// Set up the ModelD2RQ using a mapping file
+Model m = new ModelD2RQ("file:doc/example/mapping-iswc.n3");
+
+// Find anything with an rdf:type of iswc:InProceedings
+StmtIterator paperIt = m.listStatements(null, RDF.type, ISWC.InProceedings);
+
+// List found papers and print their titles
+while (paperIt.hasNext()) {
+    Resource paper = paperIt.nextStatement().getSubject();
+    System.out.println("Paper: " + paper.getProperty(DC.title).getString());
+
+    // List authors of the paper and print their names
+    StmtIterator authorIt = paper.listProperties(DC.creator);
+    while (authorIt.hasNext()) {
+        Resource author = authorIt.nextStatement().getResource();
+        System.out.println("Author: " + author.getProperty(FOAF.name).getString());
+    }
+    System.out.println();
+}</pre>
+
+
+<h2 id="usingfind">5.2 Using Jena's Graph API</h2>
+
+<p>In some situations, it is better to use Jena's low-level
+<a href="http://jena.sourceforge.net/javadoc/com/hp/hpl/jena/graph/Graph.html">Graph</a>
+API instead of the Model API. D2RQ provides an implementation
+of the Graph interface, the GraphD2RQ.</p>
+
+<p>The following example shows how the Graph API is used to find all papers
+that have been published in 2003.</p>
+
+<pre>// Load mapping file
+Model mapping = FileManager.get().loadModel("doc/example/mapping-iswc.n3");
+
+// Set up the GraphD2RQ
+GraphD2RQ g = new GraphD2RQ(mapping, "http://localhost:2020/");
+
+// Create a find(spo) pattern 
+Node subject = Node.ANY;
+Node predicate = DC.date.asNode();
+Node object = Node.createLiteral("2003", null, XSDDatatype.XSDgYear);
+Triple pattern = new Triple(subject, predicate, object);
+
+// Query the graph
+Iterator it = g.find(pattern);
+
+// Output query results
+while (it.hasNext()) {
+    Triple t = (Triple) it.next();
+    System.out.println("Published in 2003: " + t.getSubject());
+}</pre>
+
+<h3 id="cachinggraph">5.2.1 The CachingGraphD2RQ</h3>
+
+<p>In addition to the GraphD2RQ, there is a CachingGraphD2RQ which supports
+the same API and uses a LRU cache to remember a number of recent query
+results. This will improve performance for repeated queries, but will
+report inconsistent results if the database is updated during the lifetime
+of the CachingGraphD2RQ.</p>
+
+
+<h2 id="sparql">5.3 Using SPARQL</h2>
+<p>D2RQ can answer SPARQL queries against a D2RQ model. The SPARQL queries
+are processed by Jena's ARQ query engine. The example shows how a D2RQ model
+is set up, how a SPARQL query is executed, and how the results are written
+to the console.</p>
+
+<pre>ModelD2RQ m = new ModelD2RQ("file:doc/example/mapping-iswc.n3");
+String sparql = 
+    "PREFIX dc: &lt;http://purl.org/dc/elements/1.1/>" +
+    "PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/>" +
+    "SELECT ?title ?author WHERE {" +
+    "    ?paper dc:title ?title . " +
+    "    ?paper dc:creator ?author ." +
+    "    ?author foaf:name ?name ." +
+    "}";
+Query q = QueryFactory.create(sparql); 
+ResultSet rs = QueryExecutionFactory.create(q, m).execSelect();
+while (rs.hasNext()) {
+    QuerySolution row = rs.nextSolution();
+    System.out.println("Title: " + row.getLiteral("paperTitle").getString());
+    System.out.println("Author: " + row.getLiteral("authorName").getString());
+}</pre>
+
+<h2 id="jena-assembler">5.4 The D2RQ Assembler</h2>
+<p>D2RQ comes with a Jena assembler. Jena assembler specifications are RDF
+configuration files that describe how to construct a Jena model. For more
+information on Jena assemblers, see the
+<a href="http://jena.sourceforge.net/assembler/index.html">Jena Assembler quickstart page</a>.</p>
+
+<p>The following example shows an assembler specification for a D2RQ model:</p>
+
+<pre>@prefix : &lt;#&gt; .
+@prefix ja: &lt;http://jena.hpl.hp.com/2005/11/Assembler#&gt; .
+@prefix d2rq: &lt;http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#&gt; .
+
+&lt;&gt; ja:imports d2rq: .
+
+:myModel
+  a d2rq:D2RQModel;
+  d2rq:mappingFile &lt;file:doc/example/mapping-iswc.n3&gt;;
+  d2rq:resourceBaseURI &lt;http://localhost:2020/&gt;;
+  .</pre>
+
+<p>D2RQ model specifications support these two properties:
+
+<dl>
+  <dt><tt>d2rq:mappingFile</tt> (required)</dt>
+  <dd>The URI of a D2RQ mapping file to use for setting up the model</dd>
+  <dt><tt>d2rq:resourceBaseURI</tt> (optional)<dt>
+  <dd>The base URI for turning relative URI patterns into full URIs.
+  If not specified, D2RQ will pick an appropriate base URI.</dd>
+</dl>
+
+<p>This usage example will create a D2RQ model from a model specification, and write it to the console:</p>
+
+<pre>// Load assembler specification from file
+Model assemblerSpec = FileManager.get().loadModel("doc/example/assembler.n3");
+
+// Get the model resource
+Resource modelSpec = assemblerSpec.createResource(assemblerSpec.expandPrefix(":myModel"));
+
+// Assemble a model
+Model m = Assembler.general.openModel(modelSpec);
+
+// Write it to System.out
+m.write(System.out);</pre>
+
+<HR>
+<h1 id="usingSesame">6. Using D2RQ within Sesame</h1>
+<P>This section describes how D2RQ is used within the Sesame 1.2 RDF API. 
+</P>
+<P><strong>Download</strong></P>
+<P>You have to download the following packages: </P>
+<ul>
+  <li>Sesame 1.2 can be downloaded form <a href="http://www.openrdf.org/" target="_blank">http://www.openrdf.org/</a></li>
+<li>Jena 2 can be downloaded from <a href="http://jena.sourceforge.net/downloads.html" target="_blank">http://jena.sourceforge.net/downloads.html </a> (The Jena package is neccessary, because the Sesame interface is just providing a wrapper around the Jena D2RQ interface)</li>
+<li>D2RQ can be downloaded from <a href="http://sourceforge.net/projects/d2rq-map/" target="_blank">http://sourceforge.net/projects/d2rq-map/</a></li>
+</ul>
+<P><strong>Installation</strong></P>
+<P> You have to add the &quot;d2rq.jar&quot; and &quot;d2rq-to-sesame.jar&quot; files from the &quot;bin&quot; directory 
+  of the D2RQ distribution together with the Jena 2 and Sesame 1.2 jar files to your classpath. To run D2RQ only the jar files
+  <ul>
+    <li>jena.jar</li>
+    <li>antlr-2.7.5.jar</li>
+    <li>commons-logging.jar</li>
+    <li>concurrent.jar</li>
+    <li>xercesImpl.jar</li>
+    <li>and xml-apis.jar</li>
+  </ul>
+  from the &quot;lib&quot; folder of the Jena 2.3 distribution are required.</P>
+
+<h2><a name="usingSesameRepository" id="usingSesameRepository"></a>6.1 Using D2RQ as Sesame repository</h2>
+<p>The following example shows how RDQL is used to get all information about the paper with the URI
+  "http://www.conference.org/conf02004/paper#Paper1" out of a D2RQRepository.</p>
+  <pre>
+import de.fuberlin.wiwiss.d2rq.sesame.D2RQRepository;
+import de.fuberlin.wiwiss.d2rq.sesame.D2RQSource;
+
+import org.openrdf.model.Value;
+import org.openrdf.sesame.Sesame;
+import org.openrdf.sesame.constants.QueryLanguage;
+import org.openrdf.sesame.query.QueryResultsTable;
+import org.openrdf.sesame.repository.SesameRepository;
+
+...
+
+try{
+    // Initialize repository
+    D2RQSource source = new D2RQSource("file:///where/you/stored/the/d2rq-mapping.n3", "N3");
+    SesameRepository repos = new D2RQRepository("urn:youRepository", source, Sesame.getService());
+
+    // Query the repository
+    String query = "SELECT ?x, ?y WHERE (&lt;http://www.conference.org/conf02004/paper#Paper1&gt;, ?x, ?y)";        
+    QueryResultsTable result = repos.performTableQuery(QueryLanguage.RDQL, query);
+
+    // print the result
+    int rows = result.getRowCount();
+    int cols = result.getColumnCount();
+    for(int i = 0; i &lt; rows; i++){
+        for(int j = 0; j &lt; cols; j++){
+            Value v = result.getValue(i,j);
+            System.out.print(v.toString() + "    ");                  
+        }
+        System.out.println();
+    }
+} catch(Exception e){
+    // catches D2RQException from D2RQSource construcor
+    // catches java.io.IOException,
+    //         org.openrdf.sesame.query.MalformedQueryException,
+    //         org.openrdf.sesame.query.QueryEvaluationException, 
+    //         org.openrdf.sesame.config.AccessDeniedException
+    //         from performTableQuery
+    e.printStackTrace();
+}
+  </pre>
+
+<hr />
+
+<h1 id="specification">7. Language Specification</h1>
 <P>D2RQ is a declarative mapping language for describing the relation between 
   relational database schemata and OWL/RDFS ontologies. A D2RQ map is an RDF document. 
 </P>
@@ -456,7 +699,7 @@ map:location a d2rq:PropertyBridge;
 <p>The D2RQ language constructs are described in detail below.</p>
 
 
-<h2><a name="database"></a>3.1 Database</h2>
+<h2><a name="database"></a>7.1 Database</h2>
 <P>A <strong>d2rq:Database</strong> defines a JDBC or ODBC connection to a local relational database 
   and specifies the type of the database columns used by D2RQ. A D2RQ map can 
   contain several d2rq:Databases for accessing different local databases.</P>
@@ -527,13 +770,13 @@ one database by having a property bridge with d2rq:belongsToClassMap in one data
 and d2rq:refersToClassMap in the other. Instead, define class maps in both databases
 that create the same URIs or blank node IDs.</P>
 
-<h2><a name="classmap"></a>3.2 ClassMap</h2>
+<h2><a name="classmap"></a>7.2 ClassMap</h2>
 <p>A <strong>d2rq:ClassMap</strong> represents a class or a group of similar classes 
   of an OWL ontology or RDFS schema. A class map defines how instances of the 
   class are identified. It is connected to a <tt>d2rq:Database</tt> and has
   a set of <tt>d2rq:PropertyBridges</tt> which attach properties to the instances.</p>
 
-<h3>3.2.1 Resource Identity</h3>
+<h3>7.2.1 Resource Identity</h3>
 
 <p>D2RQ provides four different mechanisms of assigning identifiers to the instances
   in the database:</p>
@@ -613,8 +856,8 @@ mailto:@@<em>Persons.email</em>@@</pre>
     <td valign="top"><strong>d2rq:translateWith</strong></td>
     <td valign="top">Assigns a d2rq:TranslationTable to the class map. Values 
       from the d2rq:uriColumn or d2rq:uriPattern will be translated by the table 
-      before a resource is generated. See <a href="#translationtable">section 
-      3.5</a> for details.</td>
+      before a resource is generated. See <a href="#translationtable">below</a>
+      for details.</td>
   </tr>
   <tr> 
     <td valign="top"><strong>d2rq:containsDuplicates</strong></td>
@@ -691,7 +934,7 @@ map:PersonsType a d2rq:PropertyBridge ;
   be constructed directly from values of the Persons.Type column, then a <a href="#translationtable">TranslationTable</a> 
   could be used for aligning class names and database values.</P>
   
-<h2><a name="propertybridge"></a>3.3 Property Bridges</h2>
+<h2><a name="propertybridge"></a>7.3 Property Bridges</h2>
 
 <p>Property Bridges relate database table columns to RDF properties. They are 
   used to attach properties to the RDF resources created by a class map.
@@ -902,7 +1145,7 @@ map:PersonsType a d2rq:PropertyBridge ;
   aliased table. This pattern is typical for hierarchical
   or graph-style relationships.</p>
 
-<h2><a name="additionalproperty"></a>3.4 AdditionalProperty</h2>
+<h2><a name="additionalproperty"></a>7.4 AdditionalProperty</h2>
 <p>A <strong>d2rq:AdditionalProperty</strong> can be used to add a fixed statement 
   to all instances generated by a class map. The statement is added to the result 
   sets, if patterns like (ANY, ANY, ANY), (URI, ANY, ANY) or (URI, additionalPropertyName, 
@@ -930,7 +1173,7 @@ map:SeeAlsoStatement a d2rq:AdditionalProperty;
         d2rq:propertyValue &lt;http://annotation.semanticweb.org/iswc2003/>.</pre>
 <p>This adds an rdfs:seeAlso statement with a fixed URL object to every instance of the class map.</p>
 
-<h2><a name="translationtable"></a>3.5 Translation Tables</h2>
+<h2><a name="translationtable"></a>7.5 Translation Tables</h2>
 <p>A <strong>d2rq:TranslationTable</strong> is an additional layer between the 
   database and the RDF world. It translates back and forth between values taken 
   from the database and RDF URIs or literals. A translation table can be attached 
@@ -959,7 +1202,7 @@ map:SeeAlsoStatement a d2rq:AdditionalProperty;
   </tr>
 </table>
 
-<h3><a name="translation"></a>3.5.1 Translation</h3>
+<h3><a name="translation"></a>7.5.1 Translation</h3>
 <p>A <strong>d2rq:Translation</strong> is a single entry in a
   d2rq:TranslationTable.
   
@@ -1006,7 +1249,7 @@ map:ColorTable a d2rq:TranslationTable;
   Thus, the translation will create URI nodes. If it used d2rq:column,
   then literals would be created.</p>
 
-<h2><a name="conditional" id="conditional"></a>3.6 Conditional Mappings</h2>
+<h2><a name="conditional" id="conditional"></a>7.6 Conditional Mappings</h2>
 <p>Sometimes only certain information from a database should be accessible, because 
   parts of the database might be confidential or outdated. Using <strong>d2rq:condition</strong> 
   you can specify conditions, which must be satisfied by all accessible data.</p>
@@ -1066,7 +1309,7 @@ map:secondaryTopic a d2rq:PropertyBridge;
             d2rq:join "Rel_Paper_Topic.TopicID = Topics.TopicID";
             d2rq:condition "Rel_Paper_Topic.RelationType = 2".</pre>
 
-<h2><a name="hint" id="hint"></a>3.7 Performance Optimization using Hint Properties</h2>
+<h2><a name="hint" id="hint"></a>7.7 Performance Optimization using Hint Properties</h2>
 <p>This section covers hint properties that can be added to property bridges in 
   order to speed up queries: d2rq:valueMaxLength, d2rq:valueRegex and d2rq:valueContains.</p>
 
@@ -1111,19 +1354,19 @@ map:secondaryTopic a d2rq:PropertyBridge;
   or a <a href="#translationtable">translation table</a> with a custom Java class 
   that returns <tt>null</tt> for unwanted database values.</p>
 
-<h2><a name="processing" id="processing"></a>3.8 Processing Instructions</h2>
+<h2><a name="processing" id="processing"></a>7.8 Processing Instructions</h2>
 <p>You can configure  D2RQ by providing d2rq:ProcessingInstructions. Up till now D2RQ V0.4 only supports the queryHandler processing instruction. The d2rq:queryHandler processing instruction can be used to specify a query handler that is different from the default query handler which is D2RQQueryHandler. </p>
 <p><strong>Example: Switch back to Jena's standard query handler </strong></p>
 <pre>:ProcessingInstructions1 a d2rq:ProcessingInstructions;
             d2rq:queryHandler "com.hp.hpl.jena.graph.query.SimpleQueryHandler".</pre>
 
-<h2 id="deprecated">3.9. Deprecated Language Constructs</h2>
+<h2 id="deprecated">7.9 Deprecated Language Constructs</h2>
 
 <p>This section lists several language constructs from older versions
 of the D2RQ mapping language that have been replaced by better
 alternatives and should no longer be used.</p>
 
-<h3 id="datatype-object">3.9.1 <tt>d2rq:DatatypePropertyBridge</tt> and <tt>d2rq:ObjectPropertyBridge</tt></h3>
+<h3 id="datatype-object">5.9.1 <tt>d2rq:DatatypePropertyBridge</tt> and <tt>d2rq:ObjectPropertyBridge</tt></h3>
 
 <p>Older versions of the language used two different classes to
 distinguish between property bridges that produce literals, and
@@ -1138,250 +1381,7 @@ is made by using an appropriate property on the bridge declaration:
 
 <hr />
 
-<h1><A id=ntrip_grammar name=usingD2RQ>4.</A> Using D2RQ within Jena</h1>
-<P>This section describes how D2RQ is used within the <a href="http://jena.sourceforge.net/">Jena 2 Semantic Web framework</a>. 
-</P>
-<P><strong>Download</strong></P>
-<P>D2RQ can be downloaded from <a href="http://sourceforge.net/projects/d2rq-map/" target="_blank">http://sourceforge.net/projects/d2rq-map/</a></P>
-<P><strong>Jena Versions</strong></P>
-<p>At the time of writing, the latest Jena release is version 2.4. D2RQ requires
-  a more recent custom-built version of Jena, the version that ships with
-  <a href="http://jena.sourceforge.net/ARQ/">ARQ 1.4</a>. All required jar files
-  are included in the D2RQ distribution. (Jena 2.4 and 2.3 <em>may</em>
-  work to some extent.)</p>
-
-<P><strong>Installation</strong></P>
-<ol>
-<li>Add the <tt>d2rq-X.X.jar</tt> file from D2RQ's <tt>/lib</tt> directory to your
-  application's classpath.</li>
-<li>Add all jar files from the <tt>/lib/arq-1.4</tt> directory
-  to your application's classpath.</li>
-<li>Add a JDBC driver for your database to your application's
-  classpath. Drivers for some popular databases are found
-  in D2RQ's <tt>/lib/db-drivers</tt> directory.</li>
-</ol>
-
-<p><strong>Debugging</strong></p>
-<p>D2RQ uses the <a href="http://jakarta.apache.org/commons/logging/">Apache Commons - Logging</a>
-  API for logging. To enable D2RQ debug messages, set the log level for logger
-  <tt>de.fuberlin.wiwiss.d2rq</tt> to <tt>ALL</tt>. An easy way to do this is:
-<pre>org.apache.log4j.Logger.getLogger(
-        "de.fuberlin.wiwiss.ng4j.d2rq").setLevel(
-                org.apache.log4j.Level.ALL);</pre>
-
-<h2 id="usingmodel">4.1 Using Jena's Model API</h2>
-
-<p>The ModelD2RQ class provides a Jena
-<a href="http://jena.sourceforge.net/javadoc/com/hp/hpl/jena/rdf/model/Model.html">Model</a>
-view on the data
-in a D2RQ-mapped database. The example shows how a ModelD2RQ is set up
-using a mapping file, and how Jena API calls are used to extract
-information about papers and their authors from the model.</p>
-
-<p>The ISWC and FOAF classes have been created with Jena's
-<a href="http://jena.sourceforge.net/how-to/schemagen.html">schemagen</a>
-tool. The DC and RDF classes are part of Jena.</p>
-
-<pre>// Set up the ModelD2RQ using a mapping file
-Model m = new ModelD2RQ("file:doc/example/mapping-iswc.n3");
-
-// Find anything with an rdf:type of iswc:InProceedings
-StmtIterator paperIt = m.listStatements(null, RDF.type, ISWC.InProceedings);
-
-// List found papers and print their titles
-while (paperIt.hasNext()) {
-    Resource paper = paperIt.nextStatement().getSubject();
-    System.out.println("Paper: " + paper.getProperty(DC.title).getString());
-
-    // List authors of the paper and print their names
-    StmtIterator authorIt = paper.listProperties(DC.creator);
-    while (authorIt.hasNext()) {
-        Resource author = authorIt.nextStatement().getResource();
-        System.out.println("Author: " + author.getProperty(FOAF.name).getString());
-    }
-    System.out.println();
-}</pre>
-
-
-<h2 id="usingfind">4.2 Using Jena's Graph API</h2>
-
-<p>In some situations, it is better to use Jena's low-level
-<a href="http://jena.sourceforge.net/javadoc/com/hp/hpl/jena/graph/Graph.html">Graph</a>
-API instead of the Model API. D2RQ provides an implementation
-of the Graph interface, the GraphD2RQ.</p>
-
-<p>The following example shows how the Graph API is used to find all papers
-that have been published in 2003.</p>
-
-<pre>// Load mapping file
-Model mapping = FileManager.get().loadModel("doc/example/mapping-iswc.n3");
-
-// Set up the GraphD2RQ
-GraphD2RQ g = new GraphD2RQ(mapping, "http://localhost:2020/");
-
-// Create a find(spo) pattern 
-Node subject = Node.ANY;
-Node predicate = DC.date.asNode();
-Node object = Node.createLiteral("2003", null, XSDDatatype.XSDgYear);
-Triple pattern = new Triple(subject, predicate, object);
-
-// Query the graph
-Iterator it = g.find(pattern);
-
-// Output query results
-while (it.hasNext()) {
-    Triple t = (Triple) it.next();
-    System.out.println("Published in 2003: " + t.getSubject());
-}</pre>
-
-<h3 id="cachinggraph">4.2.1 The CachingGraphD2RQ</h3>
-
-<p>In addition to the GraphD2RQ, there is a CachingGraphD2RQ which supports
-the same API and uses a LRU cache to remember a number of recent query
-results. This will improve performance for repeated queries, but will
-report inconsistent results if the database is updated during the lifetime
-of the CachingGraphD2RQ.</p>
-
-
-<h2 id="sparql">4.3 Using SPARQL</h2>
-<p>D2RQ can answer SPARQL queries against a D2RQ model. The SPARQL queries
-are processed by Jena's ARQ query engine. The example shows how a D2RQ model
-is set up, how a SPARQL query is executed, and how the results are written
-to the console.</p>
-
-<pre>ModelD2RQ m = new ModelD2RQ("file:doc/example/mapping-iswc.n3");
-String sparql = 
-    "PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
-    "PREFIX foaf: <http://xmlns.com/foaf/0.1/>" +
-    "SELECT ?title ?author WHERE {" +
-    "    ?paper dc:title ?title . " +
-    "    ?paper dc:creator ?author ." +
-    "    ?author foaf:name ?name ." +
-    "}";
-Query q = QueryFactory.create(sparql); 
-ResultSet rs = QueryExecutionFactory.create(q, m).execSelect();
-while (rs.hasNext()) {
-    QuerySolution row = rs.nextSolution();
-    System.out.println("Title: " + row.getLiteral("paperTitle").getString());
-    System.out.println("Author: " + row.getLiteral("authorName").getString());
-}</pre>
-
-<h2 id="jena-assembler">4.4 The D2RQ Assembler</h2>
-<p>D2RQ comes with a Jena assembler. Jena assembler specifications are RDF
-configuration files that describe how to construct a Jena model. For more
-information on Jena assemblers, see the
-<a href="http://jena.sourceforge.net/assembler/index.html">Jena Assembler quickstart page</a>.</p>
-
-<p>The following example shows an assembler specification for a D2RQ model:</p>
-
-<pre>@prefix : &lt;#&gt; .
-@prefix ja: &lt;http://jena.hpl.hp.com/2005/11/Assembler#&gt; .
-@prefix d2rq: &lt;http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#&gt; .
-
-&lt;&gt; ja:imports d2rq: .
-
-:myModel
-  a d2rq:D2RQModel;
-  d2rq:mappingFile &lt;file:doc/example/mapping-iswc.n3&gt;;
-  d2rq:resourceBaseURI &lt;http://localhost:2020/&gt;;
-  .</pre>
-
-<p>D2RQ model specifications support these two properties:
-
-<dl>
-  <dt><tt>d2rq:mappingFile</tt> (required)</dt>
-  <dd>The URI of a D2RQ mapping file to use for setting up the model</dd>
-  <dt><tt>d2rq:resourceBaseURI</tt> (optional)<dt>
-  <dd>The base URI for turning relative URI patterns into full URIs.
-  If not specified, D2RQ will pick an appropriate base URI.</dd>
-</dl>
-
-<p>This usage example will create a D2RQ model from a model specification, and write it to the console:</p>
-
-<pre>// Load assembler specification from file
-Model assemblerSpec = FileManager.get().loadModel("doc/example/assembler.n3");
-
-// Get the model resource
-Resource modelSpec = assemblerSpec.createResource(assemblerSpec.expandPrefix(":myModel"));
-
-// Assemble a model
-Model m = Assembler.general.openModel(modelSpec);
-
-// Write it to System.out
-m.write(System.out);</pre>
-
-<HR>
-<h1><A id=ntrip_grammar name=usingSesame>5.</A> Using D2RQ within Sesame</h1>
-<P>This section describes how D2RQ is used within the Sesame 1.2 RDF API. 
-</P>
-<P><strong>Download</strong></P>
-<P>You have to download the following packages: </P>
-<ul>
-  <li>Sesame 1.2 can be downloaded form <a href="http://www.openrdf.org/" target="_blank">http://www.openrdf.org/</a></li>
-<li>Jena 2 can be downloaded from <a href="http://jena.sourceforge.net/downloads.html" target="_blank">http://jena.sourceforge.net/downloads.html </a> (The Jena package is neccessary, because the Sesame interface is just providing a wrapper around the Jena D2RQ interface)</li>
-<li>D2RQ can be downloaded from <a href="http://sourceforge.net/projects/d2rq-map/" target="_blank">http://sourceforge.net/projects/d2rq-map/</a></li>
-</ul>
-<P><strong>Installation</strong></P>
-<P> You have to add the &quot;d2rq.jar&quot; and &quot;d2rq-to-sesame.jar&quot; files from the &quot;bin&quot; directory 
-  of the D2RQ distribution together with the Jena 2 and Sesame 1.2 jar files to your classpath. To run D2RQ only the jar files
-  <ul>
-    <li>jena.jar</li>
-    <li>antlr-2.7.5.jar</li>
-    <li>commons-logging.jar</li>
-    <li>concurrent.jar</li>
-    <li>xercesImpl.jar</li>
-    <li>and xml-apis.jar</li>
-  </ul>
-  from the &quot;lib&quot; folder of the Jena 2.3 distribution are required.</P>
-
-<h2><a name="usingSesameRepository" id="usingSesameRepository"></a>5.1 Using D2RQ as Sesame repository</h2>
-<p>The following example shows how RDQL is used to get all information about the paper with the URI
-  "http://www.conference.org/conf02004/paper#Paper1" out of a D2RQRepository.</p>
-  <pre>
-import de.fuberlin.wiwiss.d2rq.sesame.D2RQRepository;
-import de.fuberlin.wiwiss.d2rq.sesame.D2RQSource;
-
-import org.openrdf.model.Value;
-import org.openrdf.sesame.Sesame;
-import org.openrdf.sesame.constants.QueryLanguage;
-import org.openrdf.sesame.query.QueryResultsTable;
-import org.openrdf.sesame.repository.SesameRepository;
-
-...
-
-try{
-    // Initialize repository
-    D2RQSource source = new D2RQSource("file:///where/you/stored/the/d2rq-mapping.n3", "N3");
-    SesameRepository repos = new D2RQRepository("urn:youRepository", source, Sesame.getService());
-
-    // Query the repository
-    String query = "SELECT ?x, ?y WHERE (&lt;http://www.conference.org/conf02004/paper#Paper1&gt;, ?x, ?y)";        
-    QueryResultsTable result = repos.performTableQuery(QueryLanguage.RDQL, query);
-
-    // print the result
-    int rows = result.getRowCount();
-    int cols = result.getColumnCount();
-    for(int i = 0; i &lt; rows; i++){
-        for(int j = 0; j &lt; cols; j++){
-            Value v = result.getValue(i,j);
-            System.out.print(v.toString() + "    ");                  
-        }
-        System.out.println();
-    }
-} catch(Exception e){
-    // catches D2RQException from D2RQSource construcor
-    // catches java.io.IOException,
-    //         org.openrdf.sesame.query.MalformedQueryException,
-    //         org.openrdf.sesame.query.QueryEvaluationException, 
-    //         org.openrdf.sesame.config.AccessDeniedException
-    //         from performTableQuery
-    e.printStackTrace();
-}
-  </pre>
-
-<hr />
-
-<h1 id="change_log">6. Change Log</h1>
+<h1 id="change_log">8. Change Log</h1>
 <ul>
   <li>2006-10-26: Updated for D2RQ v0.5.</li>
   <li>2005-10-21: Updated for D2RQ v0.4.</li>
@@ -1389,8 +1389,8 @@ try{
   <li>2004-08-03: Updated reflecting changes in D2RQ v0.2.</li>
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
-<hr>
-<p>$Id: index.htm,v 1.23 2006/10/28 19:08:56 cyganiak Exp $</p>
+<hr />
+<p>$Id: index.htm,v 1.24 2006/11/01 16:49:17 cyganiak Exp $</p>
 
 </BODY>
 </HTML>
