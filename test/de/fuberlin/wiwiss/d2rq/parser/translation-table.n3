@@ -1,0 +1,20 @@
+@prefix : <http://example.org/> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+
+:database a d2rq:Database;
+    d2rq:jdbcDriver "com.mysql.jdbc.Driver";
+    d2rq:jdbcDSN "jdbc:mysql:///db";
+    d2rq:numericColumn "People.ID";
+    d2rq:numericColumn "People.boss";
+    .
+
+:tt a d2rq:TranslationTable;
+	d2rq:translation [
+		d2rq:databaseValue "literal";
+		d2rq:rdfValue "http://example.org/foo";
+	];
+	d2rq:translation [
+		d2rq:databaseValue "uri";
+		d2rq:rdfValue :foo;
+	];
+	.

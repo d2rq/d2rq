@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
@@ -22,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.15 2006/09/16 13:22:29 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.16 2006/11/01 13:17:50 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -84,6 +85,18 @@ public class ParserTest extends TestCase {
 		} catch (D2RQException ex) {
 			assertEquals(D2RQException.MAPPING_LITERAL_INSTEADOF_RESOURCE, ex.errorCode());
 		}
+	}
+
+	public void testTranslationTableRDFValueCanBeLiteral() {
+		Mapping m = parse("parser/translation-table.n3").parse();
+		TranslationTable tt = m.translationTable(ResourceFactory.createResource("http://example.org/tt"));
+		assertEquals("http://example.org/foo", tt.translator().toRDFValue("literal"));
+	}
+	
+	public void testTranslationTableRDFValueCanBeURI() {
+		Mapping m = parse("parser/translation-table.n3").parse();
+		TranslationTable tt = m.translationTable(ResourceFactory.createResource("http://example.org/tt"));
+		assertEquals("http://example.org/foo", tt.translator().toRDFValue("uri"));
 	}
 	
 	private MapParser parse(String testFileName) {
