@@ -5,11 +5,11 @@
     <title>
       Start Page | D2R Server
     </title>
-    <link rel="stylesheet" type="text/css" href="${home_link}snorql/style.css" />
+    <link rel="stylesheet" type="text/css" href="snorql/style.css" />
     <link rel="alternate" type="application/rdf+xml" href="$rdf_link" title="RDF" />
   </head>
   <body>
-    <div id="rdficon"><a href="$rdf_link" title="RDF data"><img src="/snorql/rdf_flyer.24.gif" alt="[RDF data]" /></a></div>
+    <div id="rdficon"><a href="$rdf_link" title="RDF data"><img src="snorql/rdf_flyer.24.gif" alt="[RDF data]" /></a></div>
     <div class="browser">
     <div id="header">
       <h1 id="title">
@@ -50,7 +50,7 @@
         <h2>3. SPARQL Endpoint</h2>
         <p>SPARQL clients can query the database at this SPARQL endpoint:</p>
         <p style="text-align: center"><strong>${home_link}sparql</strong></p>
-        <p>The database can also be explored using <a href="/snorql/">this AJAX-based SPARQL Explorer</a>.</p>
+        <p>The database can also be explored using <a href="snorql/">this AJAX-based SPARQL Explorer</a>.</p>
       </div>
     </div>
 
