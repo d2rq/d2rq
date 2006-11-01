@@ -20,6 +20,10 @@ public class RootServlet extends VelocityServlet {
 	public Template handleRequest(HttpServletRequest request,
 			HttpServletResponse response,
 			Context context) throws IOException, ServletException {
+		if (request.getPathInfo() != null) {
+			response.sendError(404);
+			return null;
+		}
 		Map classMapLinks = new TreeMap();
 		Iterator it = graphD2RQ().classMapNames().iterator();
 		while (it.hasNext()) {
