@@ -24,7 +24,7 @@
 	<classpathentry kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="lib" path="lib/velocity-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/velocity-dep-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/mysql-connector-java-5.0.4-bin.jar"/>
 	<classpathentry kind="lib" path="lib/d2rq-0.5.1-dev.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-3.1.12-bin.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
