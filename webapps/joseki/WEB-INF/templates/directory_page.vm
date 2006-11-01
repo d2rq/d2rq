@@ -9,7 +9,7 @@
     <link rel="alternate" type="application/rdf+xml" href="$rdf_link" title="RDF" />
   </head>
   <body>
-    <div id="rdficon"><a href="$rdf_link" title="RDF data"><img src="/snorql/rdf_flyer.24.gif" alt="[RDF data]" /></a></div>
+    <div id="rdficon"><a href="$rdf_link" title="RDF data"><img src="${home_link}snorql/rdf_flyer.24.gif" alt="[RDF data]" /></a></div>
     <div id="header">
       <h1 id="title">
         All $classmap
