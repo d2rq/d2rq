@@ -1,24 +1,23 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
-import java.util.Map;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
 
 public interface RelationalOperators {
 
 	/**
-	 * <p>Applies the selection operator to this relation, using equality
-	 * conditions on a number of attributes as the selection expression.
-	 * The new relation will contain only tuples whose attribute values
-	 * are equal to the string values in the argument map.</p>
+	 * <p>Applies the selection operator to this relation.
+	 * The new relation will contain only the tuples for which
+	 * the expression evaluates to <tt>true</tt>.</p>
 	 * 
 	 * <p>Selection on attributes that don't exist in the relation are
 	 * considered to be always <tt>false</tt> and will cause an empty
 	 * relation.</p>
 	 * 
-	 * @param attributeConditions A map from {@link Attribute}s to Strings
-	 * @return A relation whose tuples satisfy the conditions
+	 * @param condition A boolean expression
+	 * @return A relation whose tuples satisfy the condition
 	 */
-	Relation select(Map attributeConditions);
+	Relation select(Expression condition);
 	
 	/**
 	 * <p>Applies the rename operator to this relation.</p>

@@ -11,8 +11,8 @@ import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
-import de.fuberlin.wiwiss.d2rq.expr.ColumnEquality;
-import de.fuberlin.wiwiss.d2rq.expr.ColumnValue;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeEquality;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeValue;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
@@ -28,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * from the {@link TripleRelation}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.4 2006/11/02 20:46:45 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.5 2006/11/02 21:15:44 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeSetFilter {
     public static final int NotFixedNodeType = 0;
@@ -205,7 +205,7 @@ public class NodeConstraintImpl implements NodeSetFilter {
     		for (int i = 0; i < this.columns.size(); i++) {
     			Attribute col1 = (Attribute) this.columns.get(i);
     			Attribute col2 = (Attribute) otherColumns.get(i);
-    			conditions.add(ColumnEquality.create(col1, col2));
+    			conditions.add(AttributeEquality.create(col1, col2));
     		}
     	}
     }
@@ -232,10 +232,10 @@ public class NodeConstraintImpl implements NodeSetFilter {
                 if (firstCol == null) {
                     firstCol = col;
                 } else {
-                    sql.addCondition(ColumnEquality.create(firstCol,col));
+                    sql.addCondition(AttributeEquality.create(firstCol,col));
                 }
             } else {
-                sql.addCondition(ColumnValue.create(col,value));
+                sql.addCondition(AttributeValue.create(col,value));
             }
         }
         it = this.conditions.iterator();

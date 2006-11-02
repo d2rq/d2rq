@@ -40,7 +40,7 @@ import java.util.Set;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.11 2006/09/28 12:17:44 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.12 2006/11/02 21:15:43 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -82,7 +82,6 @@ public class JoinOptimizer {
 		return new TripleRelation(
 				new RelationImpl(this.relation.baseRelation().database(),
 					this.relation.baseRelation().aliases(),
-					this.relation.baseRelation().attributeConditions(),
 					this.relation.baseRelation().condition(),
 					requiredJoins).renameColumns(renamer),
 				this.relation.nodeMaker(0).renameColumns(renamer, MutableRelation.DUMMY),
@@ -94,7 +93,6 @@ public class JoinOptimizer {
 		Set results = new HashSet();
 		results.addAll(this.relation.projectionColumns());
 		results.addAll(this.relation.baseRelation().condition().columns());
-		results.addAll(this.relation.baseRelation().attributeConditions().keySet());
 		Iterator it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();

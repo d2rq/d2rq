@@ -2,7 +2,6 @@ package de.fuberlin.wiwiss.d2rq.parser;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -57,7 +56,6 @@ public class RelationBuilder {
 		return new RelationImpl(
 				database,
 				aliases(), 
-				Collections.EMPTY_MAP, 
 				this.condition, 
 				this.joinConditions);
 	}

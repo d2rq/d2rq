@@ -1,13 +1,20 @@
 package de.fuberlin.wiwiss.d2rq.nodes;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeValue;
+import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
@@ -65,7 +72,13 @@ public class TypedNodeMaker implements NodeMaker {
 		if (!this.valueMaker.matches(value)) {
 			return NodeMaker.EMPTY;
 		}
-		relation.select(this.valueMaker.attributeConditions(value));
+		List conditions = new ArrayList();
+		Iterator it = this.valueMaker.attributeConditions(value).entrySet().iterator();
+		while (it.hasNext()) {
+			Entry entry = (Entry) it.next();
+			conditions.add(AttributeValue.create((Attribute) entry.getKey(), (String) entry.getValue()));
+		}
+		relation.select(Conjunction.create(conditions));
 		return new FixedNodeMaker(node, isUnique());
 	}
 	

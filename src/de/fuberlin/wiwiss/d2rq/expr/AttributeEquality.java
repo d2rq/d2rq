@@ -8,15 +8,15 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
-public class ColumnEquality extends Expression {
+public class AttributeEquality extends Expression {
 
 	public static Expression create(Attribute attribute1, Attribute attribute2) {
 		if (attribute1.equals(attribute2)) {
 			return Expression.TRUE;
 		}
 		return (attribute1.compareTo(attribute2) < 0)
-				? new ColumnEquality(attribute1, attribute2)
-				: new ColumnEquality(attribute2, attribute1);
+				? new AttributeEquality(attribute1, attribute2)
+				: new AttributeEquality(attribute2, attribute1);
 	}
 	
 	private Attribute attribute1;
@@ -24,7 +24,7 @@ public class ColumnEquality extends Expression {
 	private Set attributes = new HashSet();
 	
 	// arguments MUST be ordered!
-	private ColumnEquality(Attribute attribute1, Attribute attribute2) {
+	private AttributeEquality(Attribute attribute1, Attribute attribute2) {
 		this.attribute1 = attribute1;
 		this.attribute2 = attribute2;
 		attributes.add(attribute1);
@@ -44,7 +44,7 @@ public class ColumnEquality extends Expression {
 	}
 
 	public Expression renameColumns(ColumnRenamer columnRenamer) {
-		return ColumnEquality.create(
+		return AttributeEquality.create(
 				columnRenamer.applyTo(this.attribute1), 
 				columnRenamer.applyTo(this.attribute2));
 	}
@@ -58,10 +58,10 @@ public class ColumnEquality extends Expression {
 	}
 	
 	public boolean equals(Object other) {
-		if (!(other instanceof ColumnEquality)) {
+		if (!(other instanceof AttributeEquality)) {
 			return false;
 		}
-		ColumnEquality otherExpression = (ColumnEquality) other;
+		AttributeEquality otherExpression = (AttributeEquality) other;
 		return this.attributes.equals(otherExpression.attributes);
 	}
 	

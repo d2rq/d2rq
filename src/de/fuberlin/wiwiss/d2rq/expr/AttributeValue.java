@@ -8,16 +8,16 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
-public class ColumnValue extends Expression {
+public class AttributeValue extends Expression {
 
 	public static Expression create(Attribute attribute, String value) {
-		return new ColumnValue(attribute, value);
+		return new AttributeValue(attribute, value);
 	}
 	
 	private Attribute attribute;
 	private String value;
 	
-	private ColumnValue(Attribute attribute, String value) {
+	private AttributeValue(Attribute attribute, String value) {
 		this.attribute = attribute;
 		this.value = value;
 	}
@@ -35,7 +35,7 @@ public class ColumnValue extends Expression {
 	}
 
 	public Expression renameColumns(ColumnRenamer columnRenamer) {
-		return ColumnValue.create(columnRenamer.applyTo(this.attribute), this.value);
+		return AttributeValue.create(columnRenamer.applyTo(this.attribute), this.value);
 	}
 
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
@@ -48,10 +48,10 @@ public class ColumnValue extends Expression {
 	}
 	
 	public boolean equals(Object other) {
-		if (!(other instanceof ColumnValue)) {
+		if (!(other instanceof AttributeValue)) {
 			return false;
 		}
-		ColumnValue otherExpression = (ColumnValue) other;
+		AttributeValue otherExpression = (AttributeValue) other;
 		return this.attribute.equals(otherExpression.attribute) 
 				&& this.value.equals(otherExpression.value);
 	}

@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UnionOverSameBase.java,v 1.10 2006/09/28 12:17:44 cyganiak Exp $
+ * @version $Id: UnionOverSameBase.java,v 1.11 2006/11/02 21:15:43 cyganiak Exp $
  */
 public class UnionOverSameBase implements RDFRelation {
 
@@ -44,9 +44,6 @@ public class UnionOverSameBase implements RDFRelation {
 		if (!first.baseRelation().condition().equals(second.baseRelation().condition())) {
 			return false;
 		}
-		if (!first.baseRelation().attributeConditions().equals(second.baseRelation().attributeConditions())) {
-			return false;
-		}
 		Set firstTables = tables(first);
 		Set secondTables = tables(second);
 		if (!firstTables.equals(secondTables)) {
@@ -70,12 +67,7 @@ public class UnionOverSameBase implements RDFRelation {
 	 */
 	private static Set tables(RDFRelation query) {
 		Set results = new HashSet();
-		Iterator it = query.baseRelation().attributeConditions().keySet().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			results.add(column.relationName());
-		}
-		it = query.projectionColumns().iterator();
+		Iterator it = query.projectionColumns().iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
 			results.add(column.relationName());

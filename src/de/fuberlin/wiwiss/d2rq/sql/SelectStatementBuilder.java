@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NullIterator;
@@ -17,8 +16,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
-import de.fuberlin.wiwiss.d2rq.expr.ColumnEquality;
-import de.fuberlin.wiwiss.d2rq.expr.ColumnValue;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeEquality;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -29,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.21 2006/11/02 20:46:47 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.22 2006/11/02 21:15:44 cyganiak Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -54,11 +52,6 @@ public class SelectStatementBuilder {
 			Join join = (Join) it.next();
 			addJoin(join);
 		}
-		it = relation.attributeConditions().entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next(); 
-			addCondition(ColumnValue.create((Attribute) entry.getKey(), (String) entry.getValue()));
-		}	
 		addCondition(relation.condition());
 	}
 	
@@ -177,7 +170,7 @@ public class SelectStatementBuilder {
 		while (it.hasNext()) {
 			Attribute attribute1 = (Attribute) it.next();
 			Attribute attribute2 = join.equalAttribute(attribute1);
-			addCondition(ColumnEquality.create(attribute1, attribute2));
+			addCondition(AttributeEquality.create(attribute1, attribute2));
 		}
     }
 

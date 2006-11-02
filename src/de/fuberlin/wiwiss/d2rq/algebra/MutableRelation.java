@@ -1,6 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
-import java.util.Map;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
 
 /**
@@ -10,13 +10,13 @@ import java.util.Map;
  * The MutableRelation solves this problem.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MutableRelation.java,v 1.2 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: MutableRelation.java,v 1.3 2006/11/02 21:15:43 cyganiak Exp $
  */
 public class MutableRelation implements RelationalOperators {
 
 	public final static MutableRelation DUMMY = new MutableRelation(null) {
 		public Relation renameColumns(ColumnRenamer renamer) { return null; }
-		public Relation select(Map attributeConditions) { return null; }
+		public Relation select(Expression condition) { return null; }
 	};
 	
 	private Relation relation;
@@ -33,7 +33,7 @@ public class MutableRelation implements RelationalOperators {
 		return this.relation = this.relation.renameColumns(renamer);
 	}
 
-	public Relation select(Map attributeConditions) {
-		return this.relation = this.relation.select(attributeConditions);
+	public Relation select(Expression condition) {
+		return this.relation = this.relation.select(condition);
 	}
 }

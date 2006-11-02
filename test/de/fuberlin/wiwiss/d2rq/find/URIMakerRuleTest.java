@@ -41,7 +41,7 @@ import junit.framework.TestCase;
  *     d2rq:class foaf:Document;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRuleTest.java,v 1.3 2006/11/02 20:46:47 cyganiak Exp $
+ * @version $Id: URIMakerRuleTest.java,v 1.4 2006/11/02 21:15:44 cyganiak Exp $
  */
 public class URIMakerRuleTest extends TestCase {
 	private RDFRelation withURIPatternSubject;
@@ -53,7 +53,7 @@ public class URIMakerRuleTest extends TestCase {
 
 	public void setUp() {
 		Relation base = new RelationImpl(null, AliasMap.NO_ALIASES, 
-				Collections.EMPTY_MAP, Expression.TRUE, Collections.EMPTY_SET);
+				Expression.TRUE, Collections.EMPTY_SET);
 		this.withURIPatternSubject = new TripleRelation(base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new Pattern("http://test/person@@employees.ID@@"), true),
