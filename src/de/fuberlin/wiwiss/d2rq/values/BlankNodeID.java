@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeID.java,v 1.5 2006/09/16 14:19:20 cyganiak Exp $
+ * @version $Id: BlankNodeID.java,v 1.6 2006/11/02 13:01:16 cyganiak Exp $
  */
 public class BlankNodeID implements ValueMaker {
 	private final static String DELIMITER = "@@";
@@ -51,6 +51,9 @@ public class BlankNodeID implements ValueMaker {
 	}
 
 	public boolean matches(String anonID) {
+		if (anonID == null) {
+			return false;
+		}
 		int index = anonID.indexOf(DELIMITER);
 		// Check if given bNode was created by D2RQ
 		if (index == -1) {

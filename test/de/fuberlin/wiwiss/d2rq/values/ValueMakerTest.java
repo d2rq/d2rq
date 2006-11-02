@@ -68,4 +68,19 @@ public class ValueMakerTest extends TestCase {
 		source.setCouldFit(false);
 		assertFalse(values.matches("12345"));
 	}
+	
+	public void testColumnDoesNotMatchNull() {
+		Column column = new Column(foo_col1);
+		assertFalse(column.matches(null));
+	}
+	
+	public void testPatternDoesNotMatchNull() {
+		Pattern pattern = new Pattern("foo/@@foo.bar@@");
+		assertFalse(pattern.matches(null));
+	}
+	
+	public void testBlankNodeIDDoesNotMatchNull() {
+		BlankNodeID bNodeID = new BlankNodeID("classmap", Collections.singletonList(foo_col1));
+		assertFalse(bNodeID.matches(null));
+	}
 }

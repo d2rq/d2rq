@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * column.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.4 2006/09/16 14:19:20 cyganiak Exp $
+ * @version $Id: Column.java,v 1.5 2006/11/02 13:01:16 cyganiak Exp $
  */
 public class Column implements ValueMaker {
 	private Attribute attribute;
@@ -38,7 +38,7 @@ public class Column implements ValueMaker {
 	}
 
 	public boolean matches(String value) {
-		return true;
+		return value != null;
 	}
 
 	public Set projectionAttributes() {
