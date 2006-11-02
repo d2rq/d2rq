@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 public class RelationImpl implements Relation {

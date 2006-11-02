@@ -8,11 +8,12 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
-import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 public class RelationBuilder {
@@ -41,7 +42,7 @@ public class RelationBuilder {
 	}
 	
 	public void addCondition(String condition) {
-		this.condition = this.condition.and(new Expression(condition));
+		this.condition = this.condition.and(SQLExpression.create(condition));
 	}
 	
 	public void addAlias(Alias alias) {

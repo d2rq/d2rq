@@ -10,8 +10,10 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.expr.ColumnEquality;
+import de.fuberlin.wiwiss.d2rq.expr.ColumnValue;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
@@ -26,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * from the {@link TripleRelation}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.3 2006/10/16 12:46:00 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.4 2006/11/02 20:46:45 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeSetFilter {
     public static final int NotFixedNodeType = 0;
@@ -47,8 +49,8 @@ public class NodeConstraintImpl implements NodeSetFilter {
     private RDFDatatype literalDatatype = null;
 
     // ValueSource constraints
-    /** valueSource condition Strings (SQL) */
-    private Set conditions=new HashSet(); 
+    /** Expressions */
+    private Set conditions = new HashSet(); 
     /** set of columns that are equal with this node */
     private Set columns=new HashSet(); 
     /** all patterns to be matched against */
@@ -203,31 +205,9 @@ public class NodeConstraintImpl implements NodeSetFilter {
     		for (int i = 0; i < this.columns.size(); i++) {
     			Attribute col1 = (Attribute) this.columns.get(i);
     			Attribute col2 = (Attribute) otherColumns.get(i);
-    			addEqualColumn(col1, col2);
+    			conditions.add(ColumnEquality.create(col1, col2));
     		}
     	}
-    }
-    
-    public void addEqualColumn(Attribute c1, Attribute c2) {
-        conditionsAddEqual(c1.qualifiedName(),c2.qualifiedName());
-    }
-    
-    /** 
-     * Adds a textual equivalence condition to <code>conditions</code>.
-     * We avoid adding both "x=y" and "y=x" by sorting the arguments <code>n1</code> and <code>n2</code> first.
-     * @param n1
-     * @param n2
-     */
-    private void conditionsAddEqual(String n1, String n2) {
-        int cmp=n1.compareTo(n2);
-        if (cmp==0)
-            return;
-        else if (cmp==1){
-            String n3=n1;
-            n1=n2;
-            n2=n3;
-        }
-        conditions.add(n1 + "=" + n2);
     }
 
     public void limitValuesToBlankNodeID(BlankNodeID id) {
@@ -241,28 +221,26 @@ public class NodeConstraintImpl implements NodeSetFilter {
      * database columns.
      */
     public void addConstraintsToSQL(SelectStatementBuilder sql) {
-        String value=null;
-        String firstCol=null;
-        if (fixedNode!=null)
-            value=fixedNode.toString(); // TODO what is a clean way to extract uri or literal value?
-        Iterator it=columns.iterator();
+        String value = null;
+        Attribute firstCol = null;
+        if (fixedNode != null)
+            value = fixedNode.toString(); // TODO what is a clean way to extract uri or literal value?
+        Iterator it = columns.iterator();
         while (it.hasNext()) {
-            Attribute col=(Attribute)it.next();
-            String colString=col.qualifiedName();
-            if (value==null) {
-                if (firstCol==null) {
-                    firstCol=colString;
+            Attribute col = (Attribute) it.next();
+            if (value == null) {
+                if (firstCol == null) {
+                    firstCol = col;
                 } else {
-                    conditionsAddEqual(firstCol,colString);
+                    sql.addCondition(ColumnEquality.create(firstCol,col));
                 }
             } else {
-                sql.addColumnValue(col,value);
+                sql.addCondition(ColumnValue.create(col,value));
             }
         }
         it = this.conditions.iterator();
         while (it.hasNext()) {
-			String condition = (String) it.next();
-			sql.addCondition(new Expression(condition));
+			sql.addCondition((Expression) it.next());
 		}
     }
 }

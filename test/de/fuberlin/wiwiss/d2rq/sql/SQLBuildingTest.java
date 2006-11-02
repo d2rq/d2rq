@@ -2,12 +2,13 @@ package de.fuberlin.wiwiss.d2rq.sql;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLBuildingTest.java,v 1.2 2006/09/15 15:31:21 cyganiak Exp $
+ * @version $Id: SQLBuildingTest.java,v 1.3 2006/11/02 20:46:46 cyganiak Exp $
  */
 public class SQLBuildingTest extends TestCase {
 
@@ -101,7 +102,7 @@ public class SQLBuildingTest extends TestCase {
 	
 	public void testConditionWithNoSelectColumnsIsNotTrivial() {
 		SelectStatementBuilder builder = new SelectStatementBuilder(createFakeDatabase());
-		builder.addCondition(new Expression("foo.bar = 1"));
+		builder.addCondition(SQLExpression.create("foo.bar = 1"));
 		assertFalse(builder.isTrivial());
 	}
 
@@ -109,6 +110,14 @@ public class SQLBuildingTest extends TestCase {
 		SelectStatementBuilder builder = new SelectStatementBuilder(createFakeDatabase());
 		builder.addSelectColumn(new Attribute(null, "foo", "bar"));
 		assertFalse(builder.isTrivial());
+	}
+	
+	public void testQueryWithFalseConditionIsEmpty() {
+		SelectStatementBuilder builder = new SelectStatementBuilder(createFakeDatabase());
+		builder.addSelectColumn(new Attribute(null, "foo", "bar"));
+		builder.addCondition(Expression.FALSE);
+		assertNull(builder.getSQLStatement());
+		assertTrue(builder.isEmpty());
 	}
 	
 	private ConnectedDB createFakeDatabase() {

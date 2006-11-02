@@ -9,13 +9,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * Something that can rename columns in various objects.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamer.java,v 1.2 2006/09/15 17:53:37 cyganiak Exp $
+ * @version $Id: ColumnRenamer.java,v 1.3 2006/11/02 20:46:47 cyganiak Exp $
  */
 public abstract class ColumnRenamer {
 	

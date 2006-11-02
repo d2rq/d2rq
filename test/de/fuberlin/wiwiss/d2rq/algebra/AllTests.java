@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import de.fuberlin.wiwiss.d2rq.expr.ExpressionTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

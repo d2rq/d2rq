@@ -11,10 +11,11 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
+import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.6 2006/09/15 19:36:45 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.7 2006/11/02 20:46:46 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static RelationName foo = new RelationName(null, "foo");
@@ -95,9 +96,9 @@ public class AliasMapTest extends TestCase {
 		assertEquals(Collections.singletonList(bar_col1), aliased.attributes2());
 	}
 	
-	public void testApplyToExpression() {
-		assertEquals(new Expression("bar.col1"), 
-				fooAsBarMap.applyTo(new Expression("foo.col1")));
+	public void testApplyToSQLExpression() {
+		assertEquals(SQLExpression.create("bar.col1 = 1"), 
+				fooAsBarMap.applyTo(SQLExpression.create("foo.col1 = 1")));
 	}
 
 	public void testNoAliasesConstantEqualsNewEmptyAliasMap() {

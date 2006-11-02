@@ -9,12 +9,14 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerTest.java,v 1.4 2006/09/15 20:38:04 cyganiak Exp $
+ * @version $Id: ColumnRenamerTest.java,v 1.5 2006/11/02 20:46:46 cyganiak Exp $
  */
 public class ColumnRenamerTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "foo", "col1");
@@ -74,8 +76,8 @@ public class ColumnRenamerTest extends TestCase {
 	}
 	
 	public void testApplyToExpressionReplacesMappedColumns() {
-		Expression e = new Expression("foo.col1=foo.col3");
-		assertEquals(new Expression("foo.col2=foo.col3"), this.col1ToCol2.applyTo(e));
+		Expression e = SQLExpression.create("foo.col1=foo.col3");
+		assertEquals(SQLExpression.create("foo.col2=foo.col3"), this.col1ToCol2.applyTo(e));
 	}
 	
 	public void testApplyToAliasMapReturnsOriginal() {

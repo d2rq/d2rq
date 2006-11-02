@@ -10,11 +10,11 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.Expression;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.find.URIMakerRule.URIMakerRuleChecker;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
@@ -41,7 +41,7 @@ import junit.framework.TestCase;
  *     d2rq:class foaf:Document;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRuleTest.java,v 1.2 2006/09/28 12:17:44 cyganiak Exp $
+ * @version $Id: URIMakerRuleTest.java,v 1.3 2006/11/02 20:46:47 cyganiak Exp $
  */
 public class URIMakerRuleTest extends TestCase {
 	private RDFRelation withURIPatternSubject;

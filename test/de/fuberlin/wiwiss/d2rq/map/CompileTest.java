@@ -65,7 +65,7 @@ public class CompileTest extends TestCase {
 	
 	public void testConditionInRefersToClassMapIsRenamed() {
 		RDFRelation relation = (RDFRelation) this.managerBridge.toRDFRelations().iterator().next();
-		assertEquals("Expression(e.status = 'active' AND m.status = 'active')",
+		assertEquals("Conjunction(SQL(e.status = 'active'), SQL(m.status = 'active'))",
 				relation.baseRelation().condition().toString());
 	}
 

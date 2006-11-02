@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
@@ -11,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO Add uniqueConstraints()
  * TODO Explicitly list tables
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Relation.java,v 1.5 2006/09/13 14:06:23 cyganiak Exp $
+ * @version $Id: Relation.java,v 1.6 2006/11/02 20:46:47 cyganiak Exp $
  */
 public interface Relation extends RelationalOperators {
 

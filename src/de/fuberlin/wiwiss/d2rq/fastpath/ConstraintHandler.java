@@ -10,6 +10,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.query.Expression;
 
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
@@ -20,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.1 2006/09/18 16:59:26 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.2 2006/11/02 20:46:45 cyganiak Exp $
  */
 public class ConstraintHandler {
     public boolean possible=true;
@@ -101,7 +102,7 @@ public class ConstraintHandler {
             Expression e=(Expression)it.next();
             String str=rdqlTranslator.translateToString(e);
             if (str != null) {
-            	sql.addCondition(new de.fuberlin.wiwiss.d2rq.algebra.Expression(str));
+            	sql.addCondition(SQLExpression.create(str));
             }
         }
     }
