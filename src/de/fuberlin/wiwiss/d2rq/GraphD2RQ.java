@@ -51,7 +51,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.40 2006/10/27 15:59:17 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.41 2006/11/04 22:31:43 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -192,12 +192,10 @@ public class GraphD2RQ extends GraphBase implements Graph {
     /**
      * TODO This section was done as a quick hack for D2R Server 0.3 and really shouldn't be here
      */
-    private String inventoryBaseURI = null;
     private Map classMapInventoryBridges = new HashMap();
     private Map classMapNodeMakers = new HashMap();
     
     public void initInventory(String inventoryBaseURI) {
-    	this.inventoryBaseURI = inventoryBaseURI;
 		Iterator it = this.mapping.classMapResources().iterator();
 		while (it.hasNext()) {
 			Resource classMapResource = (Resource) it.next();
@@ -215,14 +213,13 @@ public class GraphD2RQ extends GraphBase implements Graph {
 					inventoryBridges.add(bridge);
 				}
 			}
-			if (!this.mapping.classMap(classMapResource).compiledPropertyBridges().isEmpty()) {
+			if (inventoryBridges.isEmpty() && !this.mapping.classMap(classMapResource).compiledPropertyBridges().isEmpty()) {
 				TripleRelation aBridge = (TripleRelation) this.mapping.classMap(classMapResource).compiledPropertyBridges().iterator().next();
-				NodeMaker classMapNodeMaker = new FixedNodeMaker(
-						Node.createURI(this.inventoryBaseURI + toClassMapName(classMap)), false);
-				NodeMaker seeAlsoNodeMaker = new FixedNodeMaker(
-						RDFS.seeAlso.asNode(), false);
+				NodeMaker typeNodeMaker = new FixedNodeMaker(
+						RDF.type.asNode(), false);
+				NodeMaker resourceNodeMaker = new FixedNodeMaker(RDFS.Resource.asNode(), false);
 				inventoryBridges.add(new TripleRelation(aBridge.baseRelation(), 
-						classMapNodeMaker, seeAlsoNodeMaker, resourceMaker));
+						resourceMaker, typeNodeMaker, resourceNodeMaker));
 			}
 			this.classMapInventoryBridges.put(toClassMapName(classMap), inventoryBridges);
 		}
