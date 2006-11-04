@@ -22,10 +22,11 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * TODO Is this thread-safe? ARQ uses just a single instance of this class.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindDescribeHandler.java,v 1.6 2006/11/04 22:36:36 cyganiak Exp $
+ * @version $Id: FindDescribeHandler.java,v 1.7 2006/11/04 23:30:15 cyganiak Exp $
  */
 public class FindDescribeHandler implements DescribeHandler {
-	private final static Property moreData = ResourceFactory.createProperty("http://dowhatimean.net/2006/link#moreData");
+	private final static Property moreData = ResourceFactory.createProperty(
+			"http://richard.cyganiak.de/2006/link#moreData");
 	
 	private Model dataModel;
 	private Model resultModel;
