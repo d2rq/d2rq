@@ -12,6 +12,7 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
@@ -21,9 +22,11 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * TODO Is this thread-safe? ARQ uses just a single instance of this class.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindDescribeHandler.java,v 1.5 2006/09/18 12:19:36 cyganiak Exp $
+ * @version $Id: FindDescribeHandler.java,v 1.6 2006/11/04 22:36:36 cyganiak Exp $
  */
 public class FindDescribeHandler implements DescribeHandler {
+	private final static Property moreData = ResourceFactory.createProperty("http://dowhatimean.net/2006/link#moreData");
+	
 	private Model dataModel;
 	private Model resultModel;
 	
@@ -58,7 +61,7 @@ public class FindDescribeHandler implements DescribeHandler {
 				Iterator it = classMapNames.iterator();
 				while (it.hasNext()) {
 					String classMapName = (String) it.next();
-					r2.addProperty(RDFS.seeAlso, seeAlsos.createResource(D2RServer.instance().baseURI() + "all/" + classMapName));
+					r2.addProperty(moreData, seeAlsos.createResource(D2RServer.instance().baseURI() + "all/" + classMapName));
 				}
 			}
 		}
