@@ -510,9 +510,9 @@ String sparql =
     "PREFIX dc: &lt;http://purl.org/dc/elements/1.1/>" +
     "PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/>" +
     "SELECT ?title ?author WHERE {" +
-    "    ?paper dc:title ?title . " +
+    "    ?paper dc:title ?paperTitle . " +
     "    ?paper dc:creator ?author ." +
-    "    ?author foaf:name ?name ." +
+    "    ?author foaf:name ?authorName ." +
     "}";
 Query q = QueryFactory.create(sparql); 
 ResultSet rs = QueryExecutionFactory.create(q, m).execSelect();
@@ -1390,7 +1390,7 @@ is made by using an appropriate property on the bridge declaration:
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.24 2006/11/01 16:49:17 cyganiak Exp $</p>
+<p>$Id: index.htm,v 1.25 2006/12/04 14:59:09 cyganiak Exp $</p>
 
 </BODY>
 </HTML>
