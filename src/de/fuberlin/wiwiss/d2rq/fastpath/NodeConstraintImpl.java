@@ -28,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * from the {@link TripleRelation}s.
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.5 2006/11/02 21:15:44 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.6 2006/12/06 11:25:50 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeSetFilter {
     public static final int NotFixedNodeType = 0;
@@ -201,6 +201,7 @@ public class NodeConstraintImpl implements NodeSetFilter {
     	void match(Pattern p, List otherColumns) {
     		if (!this.pattern.isCompatibleWith(p)) {
     			limitToEmptySet();
+    			return;
     		}
     		for (int i = 0; i < this.columns.size(); i++) {
     			Attribute col1 = (Attribute) this.columns.get(i);
