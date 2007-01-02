@@ -18,10 +18,9 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.7 2006/11/01 14:51:04 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.8 2007/01/02 10:48:59 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
-	private Map cachedColumnTypes = new HashMap();
 	
 	public static boolean isStringType(int columnType) {
 		return columnType == Types.CHAR || columnType == Types.VARCHAR || columnType == Types.LONGVARCHAR;
@@ -63,6 +62,8 @@ public class DatabaseSchemaInspector {
 	
 	private ConnectedDB db;
 	private DatabaseMetaData schema;
+	private Map cachedColumnTypes = new HashMap();
+	private Map cachedColumnNullability = new HashMap();
 	
 	public DatabaseSchemaInspector(ConnectedDB db) {
 		try {
@@ -87,6 +88,25 @@ public class DatabaseSchemaInspector {
 			rs.close();
 			this.cachedColumnTypes.put(column, new Integer(type));
 			return type;
+		} catch (SQLException ex) {
+			throw new D2RQException("Database exception", ex);
+		}
+	}
+	
+	public boolean isNullable(Attribute column) {
+		if (this.cachedColumnNullability.containsKey(column)) {
+			return ((Boolean) this.cachedColumnNullability.get(column)).booleanValue();
+		}
+		try {
+			ResultSet rs = this.schema.getColumns(null, column.schemaName(), 
+					column.tableName(), column.attributeName());
+			if (!rs.next()) {
+				throw new D2RQException("Column " + column + " not found in database");
+			}
+			boolean nullable = (rs.getInt("NULLABLE") == DatabaseMetaData.columnNullable);
+			rs.close();
+			this.cachedColumnNullability.put(column, new Boolean(nullable));
+			return nullable;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
 		}
