@@ -1,6 +1,7 @@
 package de.fuberlin.wiwiss.d2rs;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +11,8 @@ public class ResourceServlet extends HttpServlet {
 
 	public void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
-		String relativeResourceURI = request.getPathInfo().substring(1);
+		String relativeResourceURI = URLEncoder.encode(
+				request.getPathInfo().substring(1), "utf-8");
 		if (request.getQueryString() != null) {
 			relativeResourceURI = relativeResourceURI + "?" + request.getQueryString();
 		}
