@@ -1,8 +1,5 @@
 package de.fuberlin.wiwiss.d2rs;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 import com.hp.hpl.jena.query.describe.DescribeHandler;
 import com.hp.hpl.jena.query.engine1.ExecutionContext;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -12,7 +9,6 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
@@ -22,12 +18,9 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * TODO Is this thread-safe? ARQ uses just a single instance of this class.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindDescribeHandler.java,v 1.7 2006/11/04 23:30:15 cyganiak Exp $
+ * @version $Id: FindDescribeHandler.java,v 1.8 2007/02/06 15:04:22 cyganiak Exp $
  */
 public class FindDescribeHandler implements DescribeHandler {
-	private final static Property moreData = ResourceFactory.createProperty(
-			"http://richard.cyganiak.de/2006/link#moreData");
-	
 	private Model dataModel;
 	private Model resultModel;
 	
@@ -54,17 +47,6 @@ public class FindDescribeHandler implements DescribeHandler {
 		NodeIterator nit = description.listObjects();
 		while (nit.hasNext()) {
 			addSeeAlsoStatement(nit.nextNode(), seeAlsos, resource.getURI());
-		}
-		if (!description.isEmpty()) {
-			Collection classMapNames = D2RServer.instance().currentGraph().classMapNamesForResource(resource.asNode());
-			if (!classMapNames.isEmpty()) {
-				Resource r2 = seeAlsos.createResource(resource.getURI());
-				Iterator it = classMapNames.iterator();
-				while (it.hasNext()) {
-					String classMapName = (String) it.next();
-					r2.addProperty(moreData, seeAlsos.createResource(D2RServer.instance().baseURI() + "all/" + classMapName));
-				}
-			}
 		}
 		resultModel.add(description);
 		resultModel.add(seeAlsos);
