@@ -60,8 +60,10 @@
 #end
           </td>
           <td>
-#if ($property.value().isURI())
-            <a class="uri" href="$property.value().URI">$property.value().URI</a>
+#if ($property.valueQName())
+            <a class="uri" href="$property.value().URI">$property.valueQName()</a>
+#elseif ($property.value().isURI())
+            <small>&lt;</small><a class="uri" href="$property.value().URI">$property.value().URI</a><small>&gt;</small>
 #elseif ($property.value().isBlank())
             <span class="blank">_:$property.value().BlankNodeLabel</span>
 #elseif ($property.value().isLiteral())

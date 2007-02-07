@@ -131,6 +131,12 @@ public class PageServlet extends VelocityServlet {
 		public Node value() {
 			return this.value;
 		}
+		public String valueQName() {
+			if (!this.value.isURI()) {
+				return null;
+			}
+			return prefixes.qnameFor(this.value.getURI());
+		}
 		public String datatypeQName() {
 			String qname = prefixes.qnameFor(this.value.getLiteralDatatypeURI());
 			if (qname == null) {
