@@ -317,12 +317,13 @@ SPARQL.Query = function(service, priority) {
 				var content = null;
 
 				try {
-					if (!document.domain || (url.slice(7, document.domain.length + 7) != document.domain && netscape && netscape.security && netscape.security.PrivilegeManager)) {
+                    if (!document.domain || (url.slice(7, document.domain.length + 7) != document.domain && netscape && netscape.security && netscape.security.PrivilegeManager)) {
 						netscape.security.PrivilegeManager.enablePrivilege( "UniversalBrowserRead");
 						netscape.security.PrivilegeManager.enablePrivilege( "UniversalXPConnect"); 
 					}
 				} catch(e) {
 					alert("Cross-site requests prohibited. You will only be able to SPARQL the origin site: " + e);
+                    return;
 				}
 				
 				xhr.open(_method, url, true /* async */);
