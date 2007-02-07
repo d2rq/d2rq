@@ -59,7 +59,7 @@
 			<classpath refid="project.class.path"/>
 		</javac>
 	</target>
-
+<!--
 	<target name="init.tests">
 		<mkdir dir="${build.tests}"/>
 	</target>
@@ -86,7 +86,8 @@
 		</java>
 	</target>
 
-	<target name="jar" depends="compile,test">
+	<target name="jar" depends="compile,test">-->
+	<target name="jar" depends="compile">
 		<jar jarfile="${jar}" basedir="${build}"/>
 	</target>
 
