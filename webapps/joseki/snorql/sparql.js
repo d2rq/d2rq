@@ -317,7 +317,7 @@ SPARQL.Query = function(service, priority) {
 				var content = null;
 
 				try {
-					if (!document.domain || (url.slice(7, document.domain.length) != document.domain && netscape && netscape.security && netscape.security.PrivilegeManager)) {
+					if (!document.domain || (url.slice(7, document.domain.length + 7) != document.domain && netscape && netscape.security && netscape.security.PrivilegeManager)) {
 						netscape.security.PrivilegeManager.enablePrivilege( "UniversalBrowserRead");
 						netscape.security.PrivilegeManager.enablePrivilege( "UniversalXPConnect"); 
 					}
