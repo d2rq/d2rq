@@ -40,6 +40,11 @@
   </servlet>
   
   <servlet>
+    <servlet-name>D2R Resource RDF Description</servlet-name>
+    <servlet-class>de.fuberlin.wiwiss.d2rs.ResourceDescriptionServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
     <servlet-name>D2R ClassMap Directory Page</servlet-name>
     <servlet-class>de.fuberlin.wiwiss.d2rs.DirectoryServlet</servlet-class>
     <init-param>
@@ -85,6 +90,11 @@
     <url-pattern>/page/*</url-pattern>
   </servlet-mapping>
   
+  <servlet-mapping>
+    <servlet-name>D2R Resource RDF Description</servlet-name>
+    <url-pattern>/data/*</url-pattern>
+  </servlet-mapping>
+
   <servlet-mapping>
     <servlet-name>D2R ClassMap Directory Page</servlet-name>
     <url-pattern>/directory/*</url-pattern>

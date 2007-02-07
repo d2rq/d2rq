@@ -18,7 +18,8 @@ public class ContentNegotiator {
 	private final static Set rdfMIMETypes = new HashSet(
 			Arrays.asList(new String[]{
 					"application/rdf+xml",
-					"text/rdf"
+					"text/rdf",
+					"application/n3"
 			}));
 	private final static Set htmlMIMETypes = new HashSet(
 			Arrays.asList(new String[]{

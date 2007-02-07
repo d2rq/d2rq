@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.10 2006/10/27 15:56:59 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.11 2007/02/07 13:49:24 cyganiak Exp $
  */
 public class D2RServer {
 	private static D2RServer instance = null;
@@ -88,6 +88,14 @@ public class D2RServer {
 		} catch (UnsupportedEncodingException ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	public String dataURL(String relativeResourceURI) {
+		return this.baseURI() + "data/" + relativeResourceURI;
+	}
+	
+	public String pageURL(String relativeResourceURI) {
+		return this.baseURI() + "page/" + relativeResourceURI;
 	}
 	
 	public Model model() {

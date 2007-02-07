@@ -18,7 +18,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * TODO Is this thread-safe? ARQ uses just a single instance of this class.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindDescribeHandler.java,v 1.8 2007/02/06 15:04:22 cyganiak Exp $
+ * @version $Id: FindDescribeHandler.java,v 1.9 2007/02/07 13:49:24 cyganiak Exp $
  */
 public class FindDescribeHandler implements DescribeHandler {
 	private Model dataModel;
@@ -69,7 +69,7 @@ public class FindDescribeHandler implements DescribeHandler {
 			// Don't add seeAlso for the current resource pointing to its own description 
 			return;
 		}
-		if (resourceURI.startsWith(D2RServer.instance().resourceBaseURI())) {
+		if (resourceURI.startsWith(D2RServer.instance().baseURI())) {
 			// Don't add seeAlso for dereferenceable URIs
 			return;
 		}

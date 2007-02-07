@@ -51,7 +51,7 @@ public class PageServlet extends VelocityServlet {
 		setContentType(request, response);
 		context.put("uri", resourceURI);
 		context.put("home_link", D2RServer.instance().baseURI());
-		context.put("rdf_link", D2RServer.instance().graphURLDescribingResource(resourceURI));
+		context.put("rdf_link", D2RServer.instance().dataURL(relativeResourceURI));
 		context.put("label", resource.getProperty(RDFS.label));
 		context.put("properties", collectProperties(description, resource));
 		context.put("classmap_links", classmapLinks(resource));

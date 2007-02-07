@@ -8,9 +8,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.joseki.http.ModelResponse;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
@@ -20,7 +21,7 @@ public class ClassMapServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if (request.getPathInfo() == null) {
-			serveModel(classMapListModel(), response);
+			new ModelResponse(classMapListModel(), request, response).serve();
 			return;
 		}
 		String classMapName = request.getPathInfo().substring(1);
@@ -34,17 +35,7 @@ public class ClassMapServlet extends HttpServlet {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return;
 		}
-		serveModel(resourceList, response);
-	}
-
-	private void serveModel(Model m, HttpServletResponse response) throws ServletException, IOException {
-		response.addHeader("Content-Type", "application/rdf+xml; charset=utf-8");
-		response.addHeader("Cache-Control", "no-cache");
-		response.addHeader("Pragma", "no-cache");
-		RDFWriter w = m.getWriter("RDF/XML");
-		// Add this so IE6 will identify the contents as XML
-		w.setProperty("showXmlDeclaration", "true");
-		w.write(m, response.getOutputStream(), null);
+		new ModelResponse(resourceList, request, response).serve();
 	}
 
 	private GraphD2RQ graphD2RQ() {
