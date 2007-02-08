@@ -48,16 +48,11 @@ public class ResourceServlet extends HttpServlet {
 	}
 
 	private boolean clientPrefersHTML(HttpServletRequest request) {
-		System.out.println(request.getHeader("Accept"));
-		System.out.println(new AcceptList(request.getHeader("Accept")));
-
 		// This should use Joseki's HttpUtils.chooseContentType(...), but it
 		// is buggy, so we use our own implementation until Joseki is fixed.
 		// The Joseki version ignores ";q=x.x" values in the "Accept:" header.
 		AcceptItem bestFormat = chooseContentType(
 				request, supportedContentTypes, defaultContentType);
-
-		System.out.println(bestFormat.getAcceptType());
 
 		return contentTypeHTML.equals(bestFormat.getAcceptType())
 				|| contentTypeXHTML.equals(bestFormat.getAcceptType());
