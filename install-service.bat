@@ -4,7 +4,7 @@ REM !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 REM !!!!!!!!!! Set this to the root directory of your Java installation. !!!!!!!
 REM !!!!!!!!!! Typical value: C:\Program Files\Java\jdk_1.5.0_09         !!!!!!!
 REM !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-set JAVA_HOME=
+set JAVA_HOME_FOR_D2R=
 
 REM Check if at least serviceName and mappingFileName are present on the command line
 if "%1%2"=="" (
@@ -19,6 +19,9 @@ if NOT EXIST .\d2r-server.bat (
 )
 
 REM Make sure we have JAVA_HOME
+IF NOT "%JAVA_HOME_FOR_D2R%"=="" (
+  set JAVA_HOME=%JAVA_HOME_FOR_D2R%
+)
 if "%JAVA_HOME%"=="" (
   echo Could not determine the location of the Java installation.
   echo Please set the JAVA_HOME environment variable or edit install-service.bat
