@@ -21,11 +21,14 @@
       <strong><a href="$home_link">Home</a></strong>
 #if (!$classmap_links.isEmpty())
       | 
+#if ($truncated_results)
+      Example data:
+#end
 #foreach ($aClassMap in $classmap_links.keySet())
 #if ($aClassMap == $classmap)
       <strong>$aClassMap</strong>
 #else
-      <a href="$classmap_links.get($aClassMap)">$aClassMap</a>
+      <strong><a href="$classmap_links.get($aClassMap)">$aClassMap</a></strong>
 #end
 #end
 #end

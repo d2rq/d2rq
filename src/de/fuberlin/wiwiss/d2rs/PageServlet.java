@@ -49,6 +49,7 @@ public class PageServlet extends VelocityServlet {
 		response.addHeader("Cache-Control", "no-cache");
 		response.addHeader("Pragma", "no-cache");
 		setContentType(request, response);
+		context.put("truncated_results", new Boolean(D2RServer.instance().hasTruncatedResults()));
 		context.put("uri", resourceURI);
 		context.put("server_name", D2RServer.instance().serverName());
 		context.put("home_link", D2RServer.instance().baseURI());

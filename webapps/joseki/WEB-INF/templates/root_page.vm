@@ -22,8 +22,11 @@
       <strong>Home</strong>
 #if (!$classmap_links.isEmpty())
       | 
+#if ($truncated_results)
+      Example data:
+#end
 #foreach ($aClassMap in $classmap_links.keySet())
-      <a href="$classmap_links.get($aClassMap)">$aClassMap</a>
+      <strong><a href="$classmap_links.get($aClassMap)">$aClassMap</a></strong>
 #end
 #end
     </div>

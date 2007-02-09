@@ -30,6 +30,7 @@ public class RootServlet extends VelocityServlet {
 			String name = (String) it.next();
 			classMapLinks.put(name, D2RServer.instance().baseURI() + "directory/" + name);
 		}
+		context.put("truncated_results", new Boolean(D2RServer.instance().hasTruncatedResults()));
 		context.put("server_name", D2RServer.instance().serverName());
 		context.put("home_link", D2RServer.instance().baseURI());
 		context.put("rdf_link", D2RServer.instance().baseURI() + "all");

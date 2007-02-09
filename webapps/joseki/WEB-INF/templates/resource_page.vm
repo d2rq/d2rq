@@ -31,7 +31,14 @@
 #if (!$classmap_links.isEmpty())
       | 
 #foreach ($classmap in $classmap_links.keySet())
-      <strong><a href="$classmap_links.get($classmap)">All $classmap</a></strong>
+      <strong><a href="$classmap_links.get($classmap)">
+#if ($truncated_results)
+        Example
+#else
+        All
+#end
+        $classmap
+      </a></strong>
 #end
 #end
     </div>

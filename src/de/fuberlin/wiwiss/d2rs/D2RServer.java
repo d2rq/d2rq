@@ -18,16 +18,18 @@ import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.query.describe.DescribeHandlerRegistry;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.14 2007/02/09 15:20:10 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.15 2007/02/09 20:45:58 cyganiak Exp $
  */
 public class D2RServer {
 	private static D2RServer instance = null;
@@ -47,6 +49,7 @@ public class D2RServer {
 	private ConfigLoader config = null;
 	private int port = -1;
 	private String baseURI = null;
+	private boolean hasTruncatedResults;
 	private Model model = null;
 	private GraphD2RQ currentGraph = null;
 	private DataSource dataset;
@@ -80,7 +83,7 @@ public class D2RServer {
 		} else {
 			this.model = reloadModelD2RQ(this.config.getMappingURL());
 			this.prefixesModel = new NamespacePrefixModel();
-			this.prefixesModel.update(this.model);
+			this.prefixesModel.update(this.currentGraph.getPrefixMapping());
 		}
 	}
 
@@ -112,6 +115,10 @@ public class D2RServer {
 			return this.config.serverName();
 		}
 		return D2RServer.defaultServerName;
+	}
+	
+	public boolean hasTruncatedResults() {
+		return hasTruncatedResults;
 	}
 	
 	public String resourceBaseURI() {
@@ -160,14 +167,15 @@ public class D2RServer {
 		return this.dataset;
 	}
 	
-	public ModelD2RQ reloadModelD2RQ(String mappingFileURL) {
+	public Model reloadModelD2RQ(String mappingFileURL) {
 		Model mapModel = ModelFactory.createDefaultModel();
 		mapModel.read(mappingFileURL, resourceBaseURI(), "N3");
-		ModelD2RQ d2rqModel = new ModelD2RQ(mapModel, resourceBaseURI());
-		this.currentGraph = (GraphD2RQ) d2rqModel.getGraph();
+		this.hasTruncatedResults = mapModel.contains(null, D2RQ.resultSizeLimit, (RDFNode) null);
+		ModelD2RQ result = new ModelD2RQ(mapModel, resourceBaseURI());
+		this.currentGraph = (GraphD2RQ) result.getGraph();
 		this.currentGraph.connect();
 		this.currentGraph.initInventory(baseURI() + "all/");
-		return d2rqModel;
+		return result;
 	}
 	
 	private void initAutoReloading(String filename) {
