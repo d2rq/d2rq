@@ -7,6 +7,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rs.vocab.D2R;
 
@@ -17,6 +18,7 @@ public class ConfigLoader {
 	private Model model = null;
 	private int port = -1;
 	private String baseURI = null;
+	private String serverName = null;
 	
 	public ConfigLoader(String configURL) {
 		this.configURL = configURL;
@@ -52,6 +54,10 @@ public class ConfigLoader {
 						"Illegal integer value '" + value + "' for d2r:port");
 			}
 		}
+		s = server.getProperty(RDFS.label);
+		if (s != null) {
+			this.serverName = s.getString();
+		}
 	}
 	
 	public boolean isLocalMappingFile() {
@@ -81,6 +87,13 @@ public class ConfigLoader {
 			throw new IllegalStateException("Must load() first");
 		}
 		return this.baseURI;
+	}
+	
+	public String serverName() {
+		if (this.model == null) {
+			throw new IllegalStateException("Must load() first");
+		}
+		return this.serverName;
 	}
 	
 	private Resource findServerResource() {

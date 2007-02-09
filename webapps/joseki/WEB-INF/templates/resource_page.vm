@@ -4,9 +4,9 @@
   <head>
     <title>
 #if ($label)
-      $label.string | D2R Server
+      $label.string | $server_name
 #else
-      Description of $uri | D2R Server
+      Description of $uri | $server_name
 #end
     </title>
     <link rel="stylesheet" type="text/css" href="${home_link}snorql/style.css" />

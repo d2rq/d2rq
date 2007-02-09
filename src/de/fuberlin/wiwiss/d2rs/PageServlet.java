@@ -50,6 +50,7 @@ public class PageServlet extends VelocityServlet {
 		response.addHeader("Pragma", "no-cache");
 		setContentType(request, response);
 		context.put("uri", resourceURI);
+		context.put("server_name", D2RServer.instance().serverName());
 		context.put("home_link", D2RServer.instance().baseURI());
 		context.put("rdf_link", D2RServer.instance().dataURL(relativeResourceURI));
 		context.put("label", resource.getProperty(RDFS.label));

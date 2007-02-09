@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" class="browser">
   <head>
     <title>
-      All $classmap | D2R Server
+      All $classmap | $server_name
     </title>
     <link rel="stylesheet" type="text/css" href="${home_link}snorql/style.css" />
     <link rel="alternate" type="application/rdf+xml" href="$rdf_link" title="RDF" />
