@@ -1,0 +1,48 @@
+@prefix d2r:  <http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix dc:   <http://purl.org/dc/elements/1.1/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+
+<> a owl:Ontology;
+    rdfs:label "D2R Server configuration vocabulary"@en;
+    rdfs:comment "This vocabulary defines RDF terms used in configuration files for D2R Server, a software application that publishes relational databases on the Semantic Web."@en;
+    foaf:page <http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/>;
+    dc:creator <http://richard.cyganiak.de/foaf.rdf#cygri>;
+    owl:versionInfo "$Id: config.n3,v 1.1 2007/02/09 08:53:09 cyganiak Exp $";
+    .
+<http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/>
+    rdfs:label "D2R Server homepage and documentation"@en;
+    .
+d2r:Server a rdfs:Class;
+    rdfs:label "Server"@en;
+    rdfs:comment "A configuration for a D2R Server installation."@en;
+    rdfs:isDefinedBy <>;
+    .
+d2r:baseURI a rdf:Property;
+    rdfs:label "server base URI"@en;
+    rdfs:comment "Base URI for a D2R Server installation; the URI of the running server's start page."@en;
+    rdfs:domain d2r:Server;
+    rdfs:isDefinedBy <>;
+    .
+d2r:port a rdf:Property;
+    rdfs:label "server port"@en;
+    rdfs:comment "The TCP port on which a D2R Server installation listens."@en;
+    rdfs:domain d2r:Server;
+    rdfs:isDefinedBy <>;
+    .
+d2r:publishes a rdf:Property;
+    rdfs:label "publishes"@en;
+    rdfs:comment "The D2RQ-mapped database that is published by a D2R Server installation."@en;
+    rdfs:domain d2r:Server;
+    rdfs:range d2rq:Database;
+    rdfs:isDefinedBy <>;
+    .
+d2r:documentTemplate a rdf:Property;
+    rdfs:label "document template"@en;
+    rdfs:comment "A template resource whose properties will be attached to all RDF documents published by a D2R Server installation."@en;
+    rdfs:domain d2r:Server;
+    rdfs:isDefinedBy <>;
+    .

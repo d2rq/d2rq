@@ -16,6 +16,13 @@
 	<property name="zip" value="${distname}.zip"/>
 	<property name="tar" value="${distname}.tar.gz"/>
 	<property name="junit.jar" value="${lib}/junit.jar"/>
+
+	<property name="vocab.n3" value="${doc}/config.n3"/>
+	<property name="vocab.rdf" value="${doc}/config.rdf"/>
+	<property name="vocab.namespace" value="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#"/>
+	<property name="vocab.name" value="D2R"/>
+	<property name="vocab.package" value="${project.package}.vocab"/>
+	<property name="vocab.java" value="${src}/${project.path}/vocab/${vocab.name}.java"/>
 	
 	<path id="project.class.path">
 		<fileset dir="${lib}">
@@ -109,4 +116,32 @@
 	</target>
 
 	<target name="all" depends="zip,tar"/>
+
+	<target name="vocab.d2r.schemagen">
+		<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
+				failonerror="true">
+			<arg value="-i"/>
+			<arg value="file:${vocab.n3}"/>
+			<arg value="-o"/>
+			<arg value="${vocab.java}"/>
+			<arg value="-a"/>
+			<arg value="${vocab.namespace}"/>
+			<arg value="-n"/>
+			<arg value="${vocab.name}"/>
+			<arg value="--package"/>
+			<arg value="${vocab.package}"/>
+			<arg value="--rdfs"/>
+		</java>
+	</target>
+	
+	<target name="vocab.d2r.xml">
+		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
+				output="${vocab.rdf}" logError="yes" failonerror="true">
+			<arg value="${vocab.n3}"/>
+			<arg value="N3"/>
+			<arg value="RDF/XML-ABBREV"/>
+		</java>
+	</target>
+	
+	<target name="vocab.d2r" depends="vocab.d2r.xml,vocab.d2r.schemagen"/>
 </project>
