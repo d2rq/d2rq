@@ -4,6 +4,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -19,6 +20,7 @@ public class ConfigLoader {
 	private int port = -1;
 	private String baseURI = null;
 	private String serverName = null;
+	private Resource documentMetadata = null;
 	
 	public ConfigLoader(String configURL) {
 		this.configURL = configURL;
@@ -58,6 +60,10 @@ public class ConfigLoader {
 		if (s != null) {
 			this.serverName = s.getString();
 		}
+		s = server.getProperty(D2R.documentMetadata);
+		if (s != null) {
+			this.documentMetadata = s.getResource();
+		}
 	}
 	
 	public boolean isLocalMappingFile() {
@@ -94,6 +100,28 @@ public class ConfigLoader {
 			throw new IllegalStateException("Must load() first");
 		}
 		return this.serverName;
+	}
+	
+	public void addDocumentMetadata(Model document, Resource documentResource) {
+		if (this.documentMetadata == null) {
+			return;
+		}
+		if (this.model == null) {
+			throw new IllegalStateException("Must load() first");
+		}
+		StmtIterator it = this.documentMetadata.listProperties();
+		while (it.hasNext()) {
+			Statement stmt = it.nextStatement();
+			document.add(documentResource, stmt.getPredicate(), stmt.getObject());
+		}
+		it = this.model.listStatements(null, null, this.documentMetadata);
+		while (it.hasNext()) {
+			Statement stmt = it.nextStatement();
+			if (stmt.getPredicate().equals(D2R.documentMetadata)) {
+				continue;
+			}
+			document.add(stmt.getSubject(), stmt.getPredicate(), documentResource);
+		}
 	}
 	
 	private Resource findServerResource() {

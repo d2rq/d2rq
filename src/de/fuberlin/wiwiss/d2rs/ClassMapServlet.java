@@ -31,6 +31,7 @@ public class ClassMapServlet extends HttpServlet {
     	classMap.addProperty(RDFS.seeAlso, directory);
     	classMap.addProperty(RDFS.label, "List of all instances: " + classMapName);
     	directory.addProperty(RDFS.label, "D2R Server contents");
+		D2RServer.instance().addDocumentMetadata(resourceList, classMap);
 		if (resourceList == null) {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return;
@@ -53,6 +54,7 @@ public class ClassMapServlet extends HttpServlet {
 			list.addProperty(RDFS.seeAlso, instances);
 			instances.addProperty(RDFS.label, "List of all instances: " + classMapName);
 		}
+		D2RServer.instance().addDocumentMetadata(result, list);
 		return result;
 	}
 	

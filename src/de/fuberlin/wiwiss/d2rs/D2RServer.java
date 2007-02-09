@@ -18,6 +18,7 @@ import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.query.describe.DescribeHandlerRegistry;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
@@ -26,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.13 2007/02/09 11:33:04 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.14 2007/02/09 15:20:10 cyganiak Exp $
  */
 public class D2RServer {
 	private static D2RServer instance = null;
@@ -141,6 +142,10 @@ public class D2RServer {
 		return this.model;
 	}
 
+	public void addDocumentMetadata(Model document, Resource documentResource) {
+		this.config.addDocumentMetadata(document, documentResource);
+	}
+	
 	/**
 	 * @return The graph currently in use; will change to a new instance on auto-reload
 	 */

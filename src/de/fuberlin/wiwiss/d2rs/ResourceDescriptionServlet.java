@@ -42,6 +42,7 @@ public class ResourceDescriptionServlet extends HttpServlet {
 		if (label != null) {
 			document.addProperty(RDFS.label, "RDF Description of " + label);
 		}
+		D2RServer.instance().addDocumentMetadata(description, document);
 		new ModelResponse(description, request, response).serve();
 //		Resource resource = description.getResource(resourceURI);
 	}

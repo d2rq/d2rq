@@ -7,7 +7,7 @@
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:d2rq="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#">
   <owl:Ontology rdf:about="">
-    <owl:versionInfo>$Id: config.rdf,v 1.1 2007/02/09 08:53:09 cyganiak Exp $</owl:versionInfo>
+    <owl:versionInfo>$Id: config.rdf,v 1.2 2007/02/09 15:20:11 cyganiak Exp $</owl:versionInfo>
     <dc:creator rdf:resource="http://richard.cyganiak.de/foaf.rdf#cygri"/>
     <foaf:page>
       <rdf:Description rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/">
@@ -28,6 +28,12 @@
     <rdfs:comment xml:lang="en">Base URI for a D2R Server installation; the URI of the running server's start page.</rdfs:comment>
     <rdfs:label xml:lang="en">server base URI</rdfs:label>
   </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#documentMetadata">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">A template resource whose properties will be attached as metadata to all RDF documents published by a D2R Server installation.</rdfs:comment>
+    <rdfs:label xml:lang="en">document metadata</rdfs:label>
+  </rdf:Property>
   <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#port">
     <rdfs:isDefinedBy rdf:resource=""/>
     <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
@@ -40,11 +46,5 @@
     <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
     <rdfs:comment xml:lang="en">The D2RQ-mapped database that is published by a D2R Server installation.</rdfs:comment>
     <rdfs:label xml:lang="en">publishes</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#documentTemplate">
-    <rdfs:isDefinedBy rdf:resource=""/>
-    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
-    <rdfs:comment xml:lang="en">A template resource whose properties will be attached to all RDF documents published by a D2R Server installation.</rdfs:comment>
-    <rdfs:label xml:lang="en">document template</rdfs:label>
   </rdf:Property>
 </rdf:RDF>
