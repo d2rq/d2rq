@@ -10,7 +10,7 @@ import de.fuberlin.wiwiss.d2rs.D2RServer;
 /**
  * Command line launcher for D2R Server.
  * 
- * @version $Id: server.java,v 1.4 2006/10/27 12:48:40 cyganiak Exp $
+ * @version $Id: server.java,v 1.5 2007/02/09 11:22:53 cyganiak Exp $
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class server {
@@ -62,7 +62,7 @@ public class server {
 	
 	public static void setMappingFileURL(String mappingFileURL) {
 		try {
-			server.initFromMappingFile(mappingFileURL);
+			server.setConfigFile(mappingFileURL);
 		} catch (JenaException ex) {
 			Throwable t = ex;
 			if (ex.getCause() != null) {

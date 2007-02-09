@@ -26,13 +26,14 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.11 2007/02/07 13:49:24 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.12 2007/02/09 11:22:53 cyganiak Exp $
  */
 public class D2RServer {
 	private static D2RServer instance = null;
 	private static String SPARQLServiceName = "sparql";
 	private static String resourceServiceName = "resource";
 	private static String defaultBaseURI = "http://localhost";
+	private static int defaultPort = 2020;
 	
 	public static D2RServer instance() {
 		if (D2RServer.instance == null) {
@@ -40,8 +41,9 @@ public class D2RServer {
 		}
 		return D2RServer.instance;
 	}
-	
-	private int port = 2020;
+
+	private ConfigLoader config = null;
+	private int port = -1;
 	private String baseURI = null;
 	private Model model = null;
 	private GraphD2RQ currentGraph = null;
@@ -67,11 +69,40 @@ public class D2RServer {
 		this.baseURI = baseURI;
 	}
 	
-	public String baseURI() {
-		if (this.baseURI == null) {
-			return D2RServer.defaultBaseURI + ":" + this.port + "/";
+	public void setConfigFile(String configFileURL) {
+		log.info("using config file: " + configFileURL);
+		this.config = new ConfigLoader(configFileURL);
+		this.config.load();
+		if (this.config.isLocalMappingFile()) {
+			initAutoReloading(this.config.getLocalMappingFilename());
+		} else {
+			this.model = reloadModelD2RQ(this.config.getMappingURL());
+			this.prefixesModel = new NamespacePrefixModel();
+			this.prefixesModel.update(this.model);
 		}
-		return this.baseURI;
+	}
+
+	public String baseURI() {
+		if (this.baseURI != null) {
+			return this.baseURI;
+		}
+		if (this.config.baseURI() != null) {
+			return this.config.baseURI();
+		}
+		if (this.port() == 80) {
+			return D2RServer.defaultBaseURI + "/";
+		}
+		return D2RServer.defaultBaseURI + ":" + this.port() + "/";
+	}
+
+	public int port() {
+		if (this.port != -1) {
+			return this.port;
+		}
+		if (this.config.port() != -1) {
+			return this.config.port();
+		}
+		return D2RServer.defaultPort;
 	}
 	
 	public String resourceBaseURI() {
@@ -126,25 +157,6 @@ public class D2RServer {
 		return d2rqModel;
 	}
 	
-	public void initFromMappingFile(String mappingFileURL) {
-		log.info("using mapping file: " + mappingFileURL);
-		if (mappingFileURL.startsWith("file://")) {
-			initAutoReloading(mappingFileURL.substring(7));
-			return;
-		}
-		if (mappingFileURL.startsWith("file:")) {
-			initAutoReloading(mappingFileURL.substring(5));
-			return;
-		}
-		if (mappingFileURL.indexOf(":") == -1) {
-			initAutoReloading(mappingFileURL);
-			return;
-		}
-		this.model = reloadModelD2RQ(mappingFileURL);
-		this.prefixesModel = new NamespacePrefixModel();
-		this.prefixesModel.update(this.model);
-	}
-
 	private void initAutoReloading(String filename) {
 		this.reloader = new AutoReloader(new File(filename));
 		this.model = ModelFactory.createModelForGraph(this.reloader);
@@ -160,7 +172,7 @@ public class D2RServer {
 	
 	public void start() {
 		Registry.add(RDFServer.ServiceRegistryName, createJosekiServiceRegistry());
-		new RDFServer(null, this.port).start();
+		new RDFServer(null, port()).start();
 		log.info("[[[ Server started at " + baseURI() + " ]]]");
 	}
 	
