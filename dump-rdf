@@ -8,5 +8,4 @@ do
   if [ ! -e "$jar" ]; then continue; fi
   CP="$CP$SEP$jar"
 done
-LOGCONFIG=${LOGCONFIG:-file:$D2RQ_ROOT/etc/log4j.properties}
-exec java -cp "$CP" "-Dlog4j.configuration=${LOGCONFIG}" d2rq.dump_rdf "$@"
+exec java -cp "$CP" d2rq.dump_rdf "$@"
