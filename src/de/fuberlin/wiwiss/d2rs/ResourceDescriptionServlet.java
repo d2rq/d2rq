@@ -11,6 +11,7 @@ import org.joseki.http.ModelResponse;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rs.vocab.FOAF;
@@ -38,9 +39,9 @@ public class ResourceDescriptionServlet extends HttpServlet {
 		Resource resource = description.getResource(resourceURI);
 		Resource document = description.getResource(documentURL);
 		document.addProperty(FOAF.primaryTopic, resource);
-		String label = resource.getProperty(RDFS.label).getString();
+		Statement label = resource.getProperty(RDFS.label);
 		if (label != null) {
-			document.addProperty(RDFS.label, "RDF Description of " + label);
+			document.addProperty(RDFS.label, "RDF Description of " + label.getString());
 		}
 		D2RServer.instance().addDocumentMetadata(description, document);
 		new ModelResponse(description, request, response).serve();
