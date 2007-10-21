@@ -13,6 +13,7 @@ import org.apache.velocity.context.Context;
 import org.apache.velocity.servlet.VelocityServlet;
 
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDFS;
@@ -34,23 +35,20 @@ public class DirectoryServlet extends VelocityServlet {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return null;
 		}
-		Resource classMap = resourceList.getResource(
-				D2RServer.instance().baseURI() + "all/" + classMapName);
 		Map resources = new TreeMap();
-		Iterator it = classMap.listProperties(RDFS.seeAlso);
-		while (it.hasNext()) {
-			Statement stmt = (Statement) it.next();
-			if (!stmt.getObject().isURIResource()) {
+		ResIterator subjects = resourceList.listSubjects();
+		while (subjects.hasNext()) {
+			Resource resource = subjects.nextResource();
+			if (!resource.isURIResource()) {
 				continue;
 			}
-			Resource resource = (Resource) stmt.getObject().as(Resource.class);
 			String uri = resource.getURI();
 			Statement labelStmt = resource.getProperty(RDFS.label);
 			String label = (labelStmt == null) ? resource.getURI() : labelStmt.getString();
 			resources.put(uri, label);
 		}
 		Map classMapLinks = new TreeMap();
-		it = graphD2RQ().classMapNames().iterator();
+		Iterator it = graphD2RQ().classMapNames().iterator();
 		while (it.hasNext()) {
 			String name = (String) it.next();
 			classMapLinks.put(name, D2RServer.instance().baseURI() + "directory/" + name);
