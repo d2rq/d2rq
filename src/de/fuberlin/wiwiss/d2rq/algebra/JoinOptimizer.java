@@ -40,7 +40,7 @@ import java.util.Set;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.12 2006/11/02 21:15:43 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.13 2007/10/21 11:15:36 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -60,20 +60,16 @@ public class JoinOptimizer {
 		Iterator it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			if (!isRemovableJoinSide(join.table1(), join, allRequiredColumns)) {
+			if (isRemovableJoinSide(join.table1(), join, allRequiredColumns)) {
+				requiredJoins.remove(join);
+				replacedColumns.putAll(replacementColumns(join.attributes1(), join));
 				continue;
 			}
-			requiredJoins.remove(join);
-			replacedColumns.putAll(replacementColumns(join.attributes1(), join));
-		}
-		it = this.relation.baseRelation().joinConditions().iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
-			if (!isRemovableJoinSide(join.table2(), join, allRequiredColumns)) {
+			if (isRemovableJoinSide(join.table2(), join, allRequiredColumns)) {
+				requiredJoins.remove(join);
+				replacedColumns.putAll(replacementColumns(join.attributes2(), join));
 				continue;
 			}
-			requiredJoins.remove(join);
-			replacedColumns.putAll(replacementColumns(join.attributes2(), join));
 		}
 		if (replacedColumns.isEmpty()) {
 			return this.relation;
