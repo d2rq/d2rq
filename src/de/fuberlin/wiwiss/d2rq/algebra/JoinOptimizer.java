@@ -32,15 +32,29 @@ import java.util.Set;
  * TODO: <strong>Note:</strong> The third condition is currently not enforced.
  * This is not a problem in most situations, because d2rq:join is typically
  * used along an FK constraint. At this point in the code, we don't know the
- * direction of the FK though. The way 1:n and n:m joins are typically used,
- * condition 2 will exclude most cases where the FK is on <em>T2.c_n</em>.
- * However, it will not catch cases that result from a d2rq:join on a
- * d2rq:ClassMap along an 1:1 relation. This should be considered a bug.
+ * direction of the FK though. If the FK is on <em>T2.c_n</em>, then removing
+ * the join may result in incorrect results.
+ * 
+ * The way 1:n and n:m joins are typically used, condition 2 will exclude most
+ * cases where the FK is on <em>T2.c_n</em>.
+ * 
+ * Another heuristic catches many 1:1 cases: If a join looks removable, but
+ * switching the order of the two tables around also results in a removable
+ * join, then we don't remove it, because we have no indication in which
+ * direction the FK is pointing and might pick the wrong one, so the safe
+ * choice is not to optimize. 
+ *  
+ * However, there are still cases where a join will be incorrectly removed,
+ * e.g. a 1:1 join with a condition on a column not involved in the join.
+ * 
+ * This is a bug. The only way to be sure if a join can be removed is to check
+ * the database schema (or ask the user) if there is indeed a FK constraint on
+ * <em>T1.c_n</em>.
  * 
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.13 2007/10/21 11:15:36 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.14 2007/10/21 11:58:22 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -60,15 +74,19 @@ public class JoinOptimizer {
 		Iterator it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			if (isRemovableJoinSide(join.table1(), join, allRequiredColumns)) {
+			boolean isRemovable1 = isRemovableJoinSide(join.table1(), join, allRequiredColumns);
+			boolean isRemovable2 = isRemovableJoinSide(join.table2(), join, allRequiredColumns);
+
+			// Ugly heuristic
+			if (isRemovable1 && isRemovable2) continue;
+
+			if (isRemovable1) {
 				requiredJoins.remove(join);
 				replacedColumns.putAll(replacementColumns(join.attributes1(), join));
-				continue;
 			}
-			if (isRemovableJoinSide(join.table2(), join, allRequiredColumns)) {
+			if (isRemovable2) {
 				requiredJoins.remove(join);
 				replacedColumns.putAll(replacementColumns(join.attributes2(), join));
-				continue;
 			}
 		}
 		if (replacedColumns.isEmpty()) {
