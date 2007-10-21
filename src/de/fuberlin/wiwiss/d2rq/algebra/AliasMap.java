@@ -15,10 +15,14 @@ import java.util.Map.Entry;
  * kinds of objects, the inverse operation is available as well. 
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.6 2006/09/15 19:36:44 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.7 2007/10/21 19:42:48 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_SET);
+
+	public static AliasMap create1(RelationName original, RelationName alias) {
+		return new AliasMap(Collections.singletonList(new Alias(original, alias)));
+	}
 	
 	public static class Alias {
 		private RelationName original;

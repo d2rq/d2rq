@@ -25,6 +25,7 @@ import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
@@ -36,7 +37,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.17 2006/09/18 11:46:17 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.18 2007/10/21 19:42:49 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -269,13 +270,22 @@ public class MappingGenerator {
 		Attribute firstForeignColumn = ((Attribute[]) foreignKeys.get(0))[1];
 		Attribute secondLocalColumn = ((Attribute[]) foreignKeys.get(1))[0];
 		Attribute secondForeignColumn = ((Attribute[]) foreignKeys.get(1))[1];
-		this.out.println("# n:m table " + linkTableName);
+		boolean isSelfJoin = firstForeignColumn.relationName().equals(secondForeignColumn.relationName());
+		AliasMap alias = isSelfJoin
+				? createAliasMap(secondForeignColumn.relationName(), linkTableName)
+				: AliasMap.NO_ALIASES;
+		this.out.println("# n:m table " + linkTableName + (isSelfJoin ? " (self-join)" : ""));
 		this.out.println(propertyBridgeName(linkTableName.qualifiedName()) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(firstForeignColumn.relationName()) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(linkTableName) + ";");
 		this.out.println("\td2rq:refersToClassMap " + classMapName(secondForeignColumn.relationName()) + ";");
+		if (isSelfJoin) {
+			this.out.println("\td2rq:alias \"" + secondForeignColumn.relationName().qualifiedName() + 
+					" AS " + alias.applyTo(secondForeignColumn.relationName()).qualifiedName());
+		}
 		this.out.println("\td2rq:join \"" + firstForeignColumn.qualifiedName() + " = " + firstLocalColumn.qualifiedName() + "\";");
-		this.out.println("\td2rq:join \"" + secondLocalColumn.qualifiedName() + " = " + secondForeignColumn.qualifiedName() + "\";");
+		this.out.println("\td2rq:join \"" + secondLocalColumn.qualifiedName() + " = " + 
+				alias.applyTo(secondForeignColumn).qualifiedName() + "\";");
 		this.out.println("\t.");
 		createLinkProperty(linkTableName, firstForeignColumn.relationName(), secondForeignColumn.relationName());
 	}
@@ -423,5 +433,10 @@ public class MappingGenerator {
 			return uri;
 		}
 		return uri.substring(0, uri.length() - 1);
+	}
+	
+	private AliasMap createAliasMap(RelationName original, RelationName context) {
+		return AliasMap.create1(original, new RelationName(original.schemaName(), 
+				original.tableName() + "_" + context.tableName() + "__alias"));
 	}
 }
