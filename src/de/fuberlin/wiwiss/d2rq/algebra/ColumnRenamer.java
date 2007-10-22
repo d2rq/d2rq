@@ -1,22 +1,19 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
-import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * Something that can rename columns in various objects.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamer.java,v 1.3 2006/11/02 20:46:47 cyganiak Exp $
+ * @version $Id: ColumnRenamer.java,v 1.4 2007/10/22 10:21:16 cyganiak Exp $
  */
 public abstract class ColumnRenamer {
 	
@@ -28,10 +25,7 @@ public abstract class ColumnRenamer {
 		public Attribute applyTo(Attribute original) { return original; }
 		public Expression applyTo(Expression original) { return original; }
 		public Join applyTo(Join original) { return original; }
-		public List applyToColumnList(List columns) { return columns; }
-		public Set applyToColumnSet(Set columns) { return columns; }
 		public Set applyToJoinSet(Set joins) { return joins; }
-		public Map applyToMapKeys(Map mapWithColumnKeys) { return mapWithColumnKeys; }
 		public String toString() { return "ColumnRenamer.NULL"; }
 	};
 	
@@ -74,26 +68,6 @@ public abstract class ColumnRenamer {
 		return original.renameColumns(this);
 	}
 
-	public Set applyToColumnSet(Set columns) {
-		Set result = new HashSet();
-		Iterator it = columns.iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			result.add(applyTo(column));
-		}
-		return result;
-	}
-	
-	public List applyToColumnList(List columns) {
-		List result = new ArrayList(columns.size());
-		Iterator it = columns.iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			result.add(applyTo(column));
-		}
-		return result;
-	}
-	
 	public Set applyToJoinSet(Set joins) {
 		Set result = new HashSet();
 		Iterator it = joins.iterator();
@@ -103,19 +77,6 @@ public abstract class ColumnRenamer {
 		}
 		return result;
 	}
-
-	public ResultRow applyTo(final ResultRow row) {
-		return new ResultRow() {
-			public String get(Attribute column) {
-				return row.get(applyTo(column));
-			}
-			public String toString() {
-				return "[" + toString() + " <= " + row.toString() + "]";
-			}
-		};
-	}
-	
-	public abstract Map applyToMapKeys(Map mapWithColumnKeys);
 
 	public abstract AliasMap applyTo(AliasMap aliases);
 }

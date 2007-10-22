@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TripleRelation.java,v 1.1 2006/09/28 12:17:44 cyganiak Exp $
+ * @version $Id: TripleRelation.java,v 1.2 2007/10/22 10:21:16 cyganiak Exp $
  */
 public class TripleRelation implements RDFRelation {
 	private final static Set S_P_O = new HashSet(Arrays.asList(new String[] {"S", "P", "O"}));
@@ -154,6 +154,7 @@ public class TripleRelation implements RDFRelation {
 		if (this.baseRelation.joinConditions().isEmpty()) {
 			return this.subjectMaker.isUnique() || this.predicateMaker.isUnique() || this.objectMaker.isUnique();
 		}
+		// TODO Make smarter
 		return false;
 	}
 }

@@ -1,12 +1,8 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -15,7 +11,7 @@ import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.7 2006/11/02 20:46:46 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.8 2007/10/22 10:21:16 cyganiak Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static RelationName foo = new RelationName(null, "foo");
@@ -63,22 +59,6 @@ public class AliasMapTest extends TestCase {
 		assertEquals(baz_col1, this.fooAsBarMap.originalOf(baz_col1));
 		assertEquals(foo_col1, this.fooAsBarMap.originalOf(foo_col1));
 		assertEquals(foo_col1, this.fooAsBarMap.originalOf(bar_col1));
-	}
-	
-	public void testApplyToMapKeys() {
-		Map data = new HashMap();
-		data.put(foo_col1, "val1");
-		data.put(baz_col1, "val2");
-		Map expected = new HashMap();
-		expected.put(bar_col1, "val1");
-		expected.put(baz_col1, "val2");
-		assertEquals(expected, this.fooAsBarMap.applyToMapKeys(data));
-	}
-	
-	public void testApplyToColumnSet() {
-		Set data = new HashSet(Arrays.asList(new Attribute[]{foo_col1, baz_col1}));
-		Set expected = new HashSet(Arrays.asList(new Attribute[]{bar_col1, baz_col1}));
-		assertEquals(expected, this.fooAsBarMap.applyToColumnSet(data));
 	}
 	
 	public void testApplyToJoinSetDoesNotModifyUnaliasedJoin() {

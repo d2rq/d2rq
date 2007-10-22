@@ -7,15 +7,25 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
- * A map from table names to aliases. A table must have at most one alias. Can be applied
- * to various objects and will replace all mentions of a table with its alias. For some
- * kinds of objects, the inverse operation is available as well. 
+ * A map from table names to aliases. Can be applied to various objects and will 
+ * replace all mentions of a table with its alias. For some kinds of objects, 
+ * the inverse operation is available as well. 
  *
+ * TODO: There is an assumption that one original table has at most one alias.
+ * Otherwise, the applyTo() operations are indeterministic. This is troublesome.
+ * All uses of this class that need applyTo() should probably be redesigned
+ * to use something else than a "real" AliasMap.
+ *  
+ * TODO: AliasMap and ColumnRenamer are different concepts.
+ * An AliasMap is a bunch of "table AS alias" delcarations. A column renamer is
+ * something that can be applied to a column name to yield a new one. It should
+ * be possible to obtain a ColumnRenamer from a declared AliasMap, but they should
+ * be separate classes. AliasMap might also be better called Aliases or AliasSet.
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.7 2007/10/21 19:42:48 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.8 2007/10/22 10:21:16 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_SET);
@@ -131,22 +141,15 @@ public class AliasMap extends ColumnRenamer {
 		Collection newAliases = new ArrayList();
 		Iterator it = other.byAlias.values().iterator();
 		while (it.hasNext()) {
-			Alias otherAlias = (Alias) it.next();
-			newAliases.add(applyTo(otherAlias));
+			newAliases.add(applyTo((Alias) it.next()));
 		}
-		newAliases.addAll(this.byAlias.values());
-		return new AliasMap(newAliases);
-	}
-	
-	public Map applyToMapKeys(Map mapWithAttributeKeys) {
-		Map result = new HashMap();
-		Iterator it = mapWithAttributeKeys.entrySet().iterator();
+		it = this.byAlias.values().iterator();
 		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			Attribute column = (Attribute) entry.getKey();
-			result.put(applyTo(column), entry.getValue());
+			Alias alias = (Alias) it.next();
+			if (other.isAlias(alias.original())) continue;
+			newAliases.add(alias);
 		}
-		return result;
+		return new AliasMap(newAliases);
 	}
 	
 	public boolean equals(Object other) {

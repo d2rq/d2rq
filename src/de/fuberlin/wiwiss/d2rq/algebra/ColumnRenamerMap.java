@@ -2,11 +2,9 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 
 /**
@@ -14,7 +12,7 @@ import java.util.Map.Entry;
  * original and replacement columns.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerMap.java,v 1.1 2006/09/11 23:22:24 cyganiak Exp $
+ * @version $Id: ColumnRenamerMap.java,v 1.2 2007/10/22 10:21:16 cyganiak Exp $
  */
 public class ColumnRenamerMap extends ColumnRenamer {
 	private Map originalsToReplacements;
@@ -30,23 +28,6 @@ public class ColumnRenamerMap extends ColumnRenamer {
 		return original;
 	}
 
-	public Map applyToMapKeys(Map mapWithColumnKeys) {
-		Map result = new HashMap();
-		Iterator it = mapWithColumnKeys.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			Attribute originalColumn = (Attribute) entry.getKey();
-			Object originalValue = entry.getValue();
-			Attribute replacedColumn = applyTo(originalColumn);
-			if (result.containsKey(replacedColumn)
-					&& !originalValue.equals(result.get(replacedColumn))) {
-				return null;
-			}
-			result.put(applyTo(originalColumn), entry.getValue());
-		}
-		return result;
-	}
-	
 	public AliasMap applyTo(AliasMap aliases) {
 		return aliases;
 	}

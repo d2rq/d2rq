@@ -13,6 +13,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
@@ -32,7 +33,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.6 2006/10/23 15:39:14 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.7 2007/10/22 10:21:16 cyganiak Exp $
  */
 public abstract class ResourceMap extends MapObject {
 	protected static final Property valueProperty = 
@@ -166,14 +167,12 @@ public abstract class ResourceMap extends MapObject {
 		if (this.refersToClassMap == null) {
 			return buildNodeMaker(wrapValueSource(buildValueSourceBase()), !this.containsDuplicates);
 		}
-		return this.refersToClassMap.buildNodeMakerForReferringPropertyBridge(this, !this.containsDuplicates);
+		return this.refersToClassMap.buildAliasedNodeMaker(relationBuilder().aliases(), !this.containsDuplicates);
 	}
 
-	public NodeMaker buildNodeMakerForReferringPropertyBridge(ResourceMap other, boolean unique) {
-		ValueMaker values = other.wrapValueSource(
-				wrapValueSource(buildValueSourceBase())).replaceColumns(
-						other.relationBuilder().aliases());
-		return buildNodeMaker(values, unique); 
+	public NodeMaker buildAliasedNodeMaker(AliasMap aliases, boolean unique) {
+		ValueMaker values = wrapValueSource(buildValueSourceBase()).replaceColumns(aliases);
+		return buildNodeMaker(values, unique);
 	}
 	
 	private ValueMaker buildValueSourceBase() {

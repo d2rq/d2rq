@@ -84,6 +84,7 @@ public class PropertyBridge extends ResourceMap {
 						" links two d2rq:ClassMaps with different d2rq:dataStorages",
 						D2RQException.PROPERTYBRIDGE_CONFLICTING_DATABASES);
 			}
+			// TODO refersToClassMap cannot be combined w/ value constraints or translation tables
 		}
 		assertHasPrimarySpec(new Property[]{
 				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns,

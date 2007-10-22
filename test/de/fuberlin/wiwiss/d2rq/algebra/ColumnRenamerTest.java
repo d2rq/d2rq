@@ -1,22 +1,17 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
-import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
-import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerTest.java,v 1.5 2006/11/02 20:46:46 cyganiak Exp $
+ * @version $Id: ColumnRenamerTest.java,v 1.6 2007/10/22 10:21:16 cyganiak Exp $
  */
 public class ColumnRenamerTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "foo", "col1");
@@ -43,38 +38,6 @@ public class ColumnRenamerTest extends TestCase {
 		assertEquals(col2, this.col1ToCol2.applyTo(col2));
 	}
 	
-	public void testApplyToColumnSetReplacesMappedColumns() {
-		Set originals = new HashSet(Arrays.asList(new Attribute[]{col1, col2, col3}));
-		Set expected = new HashSet(Arrays.asList(new Attribute[]{col2, col3}));
-		assertEquals(expected, col1ToCol2.applyToColumnSet(originals));
-	}
-	
-	public void testApplyToMapKeysReplacesMappedKeys() {
-		Map original = new HashMap();
-		original.put(col1, "value1");
-		original.put(col3, "value3");
-		Map expected = new HashMap(); 
-		expected.put(col2, "value1");
-		expected.put(col3, "value3");
-		assertEquals(expected, this.col1ToCol2.applyToMapKeys(original));
-	}
-	
-	public void testApplyToMapKeysWithContradictionReturnsNull() {
-		Map original = new HashMap();
-		original.put(col1, "value1");
-		original.put(col2, "value2");
-		assertNull(this.col1ToCol2.applyToMapKeys(original));
-	}
-	
-	public void testApplyToMapKeysWithSameValueIsOK() {
-		Map original = new HashMap();
-		original.put(col1, "value1");
-		original.put(col2, "value1");
-		Map expected = new HashMap(); 
-		expected.put(col2, "value1");
-		assertEquals(expected, this.col1ToCol2.applyToMapKeys(original));
-	}
-	
 	public void testApplyToExpressionReplacesMappedColumns() {
 		Expression e = SQLExpression.create("foo.col1=foo.col3");
 		assertEquals(SQLExpression.create("foo.col2=foo.col3"), this.col1ToCol2.applyTo(e));
@@ -84,25 +47,6 @@ public class ColumnRenamerTest extends TestCase {
 		AliasMap aliases = new AliasMap(Collections.singleton(new Alias(
 				new RelationName(null, "foo"), new RelationName(null, "bar"))));
 		assertEquals(aliases, this.col1ToCol2.applyTo(aliases));
-	}
-	
-	public void testApplyToResultRowUnaffectedAttribute() {
-		ResultRow row = col1ToCol2.applyTo(new ResultRowMap(Collections.singletonMap(col3, "foo")));
-		assertEquals("foo", row.get(col3));
-		assertNull(row.get(col1));
-		assertNull(row.get(col2));
-	}
-	
-	public void testApplyToResultRowAffectedAttribute() {
-		ResultRow row = col1ToCol2.applyTo(new ResultRowMap(Collections.singletonMap(col2, "foo")));
-		assertEquals("foo", row.get(col1));
-		assertEquals("foo", row.get(col2));
-	}
-	
-	public void testApplyToResultRowReplacedAttribute() {
-		ResultRow row = col1ToCol2.applyTo(new ResultRowMap(Collections.singletonMap(col1, "foo")));
-		assertNull(row.get(col1));
-		assertNull(row.get(col2));
 	}
 	
 	public void testNullRenamerToStringEmpty() {
