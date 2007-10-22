@@ -30,8 +30,9 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
@@ -51,7 +52,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.41 2006/11/04 22:31:43 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.42 2007/10/22 10:18:54 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -206,19 +207,19 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			Iterator bridgeIt = this.mapping.classMap(classMapResource).compiledPropertyBridges().iterator();
 			while (bridgeIt.hasNext()) {
 				TripleRelation bridge = (TripleRelation) bridgeIt.next();
-				if (!bridge.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)).equals(Relation.EMPTY)) {
+				if (!bridge.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)).equals(RDFRelation.EMPTY)) {
 					inventoryBridges.add(bridge);
 				}
-				if (!bridge.selectTriple(new Triple(Node.ANY, RDFS.label.asNode(), Node.ANY)).equals(Relation.EMPTY)) {
+				if (!bridge.selectTriple(new Triple(Node.ANY, RDFS.label.asNode(), Node.ANY)).equals(RDFRelation.EMPTY)) {
 					inventoryBridges.add(bridge);
 				}
 			}
 			if (inventoryBridges.isEmpty() && !this.mapping.classMap(classMapResource).compiledPropertyBridges().isEmpty()) {
-				TripleRelation aBridge = (TripleRelation) this.mapping.classMap(classMapResource).compiledPropertyBridges().iterator().next();
+				Relation relation = (Relation) this.mapping.classMap(classMapResource).relation();
 				NodeMaker typeNodeMaker = new FixedNodeMaker(
 						RDF.type.asNode(), false);
 				NodeMaker resourceNodeMaker = new FixedNodeMaker(RDFS.Resource.asNode(), false);
-				inventoryBridges.add(new TripleRelation(aBridge.baseRelation(), 
+				inventoryBridges.add(new TripleRelation(relation, 
 						resourceMaker, typeNodeMaker, resourceNodeMaker));
 			}
 			this.classMapInventoryBridges.put(toClassMapName(classMap), inventoryBridges);
