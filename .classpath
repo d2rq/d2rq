@@ -3,28 +3,28 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/xml-apis.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/xercesImpl.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/wstx-asl-3.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/stax-api-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/log4j-1.2.12.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/junit.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/json.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/jenatest.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/jena.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/iri.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/icu4j_3_4.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/concurrent.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/commons-logging-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/arq-extra.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/arq.jar"/>
-	<classpathentry kind="lib" path="lib/arq-1.4/antlr-2.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/db-drivers/postgresql-8.2dev-503.jdbc3.jar"/>
-	<classpathentry kind="lib" path="lib/db-drivers/ojdbc14.jar"/>
-	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-3.1.12-bin.jar"/>
 	<classpathentry kind="lib" path="lib/sesame-1.2.4/sesame.jar"/>
 	<classpathentry kind="lib" path="lib/sesame-1.2.4/rio.jar"/>
 	<classpathentry kind="lib" path="lib/sesame-1.2.4/openrdf-util.jar"/>
 	<classpathentry kind="lib" path="lib/sesame-1.2.4/openrdf-model.jar"/>
+	<classpathentry kind="lib" path="lib/db-drivers/postgresql-8.2dev-503.jdbc3.jar"/>
+	<classpathentry kind="lib" path="lib/db-drivers/ojdbc14.jar"/>
+	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-3.1.12-bin.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/wstx-asl-3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/stax-api-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/lucene-core-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/log4j-1.2.12.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/junit.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/json.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/jena.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/iri.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/icu4j_3_4.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/concurrent.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/arq.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.4/antlr-2.7.5.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.1/jena-2.5.1-rdql.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

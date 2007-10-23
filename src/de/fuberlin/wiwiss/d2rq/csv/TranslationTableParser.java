@@ -15,7 +15,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.hp.hpl.jena.query.util.RelURI;
+import com.hp.hpl.jena.n3.IRIResolver;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
@@ -27,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
  * from the second.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTableParser.java,v 1.3 2006/09/18 08:54:59 cyganiak Exp $
+ * @version $Id: TranslationTableParser.java,v 1.4 2007/10/23 15:17:53 cyganiak Exp $
  */
 public class TranslationTableParser {
 	private Log log = LogFactory.getLog(TranslationTableParser.class);
@@ -41,7 +41,7 @@ public class TranslationTableParser {
 	
 	public TranslationTableParser(String url) {
 		try {
-			this.url = RelURI.resolve(url);;
+			this.url = new IRIResolver().resolve(url);;
 			this.reader = new BufferedReader(new FileReader(new File(new URI(this.url))));
 		} catch (FileNotFoundException fnfex) {
 			throw new D2RQException("File not found at URL: " + this.url);

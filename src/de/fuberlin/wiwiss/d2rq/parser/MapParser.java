@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.hp.hpl.jena.n3.IRIResolver;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.query.util.RelURI;
 import com.hp.hpl.jena.rdf.model.LiteralRequiredException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -32,7 +32,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.23 2006/11/01 15:26:58 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.24 2007/10/23 15:17:53 cyganiak Exp $
  */
 public class MapParser {
 
@@ -54,8 +54,9 @@ public class MapParser {
 		if (uri == null) {
 			return null;
 		}
-		return RelURI.resolve(uri);
+		return resolver.resolve(uri);
 	}
+	private final static IRIResolver resolver = new IRIResolver();
 
 	private OntModel model;
 	private String baseURI;
