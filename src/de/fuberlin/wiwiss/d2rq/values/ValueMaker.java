@@ -30,7 +30,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * of a set of RDF nodes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueMaker.java,v 1.5 2006/09/18 08:54:58 cyganiak Exp $
+ * @version $Id: ValueMaker.java,v 1.6 2007/10/23 14:30:33 cyganiak Exp $
  */
 public interface ValueMaker {
     
@@ -48,8 +48,11 @@ public interface ValueMaker {
 	 * to a single DB column would return a single-entry map with that
 	 * column as the key, and value as the value.
 	 * 
+	 * <p>The result is undefined if {@link #matches(String)} is false
+	 * for the same value.
+	 * 
 	 * @param value a non-<tt>null</tt> value
-	 * @return a map with {@link Attribute} keys, and string values.
+	 * @return a map with {@link Attribute} keys, and string values
 	 */
 	Map attributeConditions(String value);
 

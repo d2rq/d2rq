@@ -1,5 +1,8 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,16 +25,17 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.7 2006/10/23 15:39:14 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.8 2007/10/23 14:30:33 cyganiak Exp $
  */
 public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";
 	private final static java.util.regex.Pattern embeddedColumnRegex = 
-		java.util.regex.Pattern.compile("@@([^@]+)@@");
+		java.util.regex.Pattern.compile("@@([^@]+?)(?:\\|(urlencode|urlify))?@@");
 
 	private String pattern;
 	private String firstLiteralPart;
 	private List columns = new ArrayList(3);
+	private List columnFunctions = new ArrayList(3);
 	private List literalParts = new ArrayList(3);
 	private Set columnsAsSet;
 	private java.util.regex.Pattern regex;
@@ -73,7 +77,17 @@ public class Pattern implements ValueMaker {
 		if (value == null) {
 			return false;
 		}
-		return this.regex.matcher(value).matches();
+		Matcher match = this.regex.matcher(value);
+		if (!match.matches()) {
+			return false;
+		}
+		for (int i = 0; i < this.columns.size(); i++) {
+			ColumnFunction function = (ColumnFunction) this.columnFunctions.get(i);
+			if (function.decode(match.group(i + 1)) == null) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public Set projectionAttributes() {
@@ -97,7 +111,13 @@ public class Pattern implements ValueMaker {
 		}
 		Map result = new HashMap();
 		for (int i = 0; i < this.columns.size(); i++) {
-			result.put(this.columns.get(i), match.group(i + 1));
+			Attribute attribute = (Attribute) this.columns.get(i);
+			ColumnFunction function = (ColumnFunction) this.columnFunctions.get(i);
+			String attributeValue = function.decode(match.group(i + 1));
+			if (attributeValue == null) {
+				return Collections.EMPTY_MAP;
+			}
+			result.put(attribute, attributeValue);
 		}
 		return result;
 	}
@@ -112,11 +132,16 @@ public class Pattern implements ValueMaker {
 		StringBuffer result = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {
 			Attribute column = (Attribute) this.columns.get(index);
+			ColumnFunction function = (ColumnFunction) this.columnFunctions.get(index);
 			String value = row.get(column);
 			if (value == null) {
 				return null;
 			}
-			result.append(value);				
+			value = function.encode(value);
+			if (value == null) {
+				return null;
+			}
+			result.append(value);
 			result.append(this.literalParts.get(index));
 			index++;
 		}
@@ -149,8 +174,13 @@ public class Pattern implements ValueMaker {
 		StringBuffer newPattern = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {
 			Attribute column = (Attribute) this.columns.get(index);
+			ColumnFunction function = (ColumnFunction) this.columnFunctions.get(index); 
 			newPattern.append(DELIMITER);
 			newPattern.append(renames.applyTo(column).qualifiedName());
+			if (function.name() != null) {
+				newPattern.append("|");
+				newPattern.append(function.name());
+			}
 			newPattern.append(DELIMITER);
 			newPattern.append(this.literalParts.get(index));
 			index++;
@@ -166,6 +196,7 @@ public class Pattern implements ValueMaker {
 		String regexPattern = "\\Q" + this.firstLiteralPart + "\\E";
 		while (matched) {
 			this.columns.add(SQL.parseAttribute(match.group(1)));
+			this.columnFunctions.add(getColumnFunction(match.group(2)));
 			int nextLiteralStart = match.end();
 			matched = match.find();
 			int nextLiteralEnd = matched ? match.start() : this.pattern.length();
@@ -195,5 +226,81 @@ public class Pattern implements ValueMaker {
 	        	throw new UnsupportedOperationException();
 	        }
 	    };
+	}
+
+	private final static ColumnFunction IDENTITY = new IdentityFunction();
+	private final static ColumnFunction URLENCODE = new URLEncodeFunction();
+	private final static ColumnFunction URLIFY = new URLifyFunction();
+	
+	private ColumnFunction getColumnFunction(String functionName) {
+		if ("urlencode".equals(functionName)) {
+			return URLENCODE;
+		}
+		if ("urlify".equals(functionName)) {
+			return URLIFY;
+		}
+		if ("".equals(functionName) || functionName == null) {
+			return IDENTITY;
+		}
+		// Shouldn't happen
+		throw new D2RQException("Unrecognized column function '" + functionName + "'");
+	}
+	
+	private interface ColumnFunction {
+		String encode(String s);
+		String decode(String s);
+		String name();
+	}
+	
+	static class IdentityFunction implements ColumnFunction {
+		public String encode(String s) { return s; }
+		public String decode(String s) { return s; }
+		public String name() { return null; }
+	}
+	
+	static class URLEncodeFunction implements ColumnFunction {
+		public String encode(String s) {
+			try {
+				return URLEncoder.encode(s, "utf-8");
+			} catch (UnsupportedEncodingException ex) {
+				// Can't happen, UTF-8 is always supported
+				throw new RuntimeException(ex);
+			}
+		}
+		public String decode(String s) {
+			try {
+				return URLDecoder.decode(s, "utf-8");
+			} catch (UnsupportedEncodingException ex) {
+				// Can't happen, UTF-8 is always supported
+				throw new RuntimeException(ex);
+			} catch (IllegalArgumentException ex) {
+				// Broken encoding
+				return null;
+			}
+		}
+		public String name() { return "urlencode"; }
+	}
+	static class URLifyFunction implements ColumnFunction {
+		public String encode(String s) {
+			try {
+				return URLEncoder.encode(s, "utf-8")
+						.replaceAll("_", "%5F").replace('+', '_');
+			} catch (UnsupportedEncodingException ex) {
+				// Can't happen, UTF-8 is always supported
+				throw new RuntimeException(ex);
+			}
+		}
+		public String decode(String s) {
+			try {
+				return URLDecoder.decode(s.replace('_', '+'), "utf-8");
+			} catch (UnsupportedEncodingException ex) {
+				// Can't happen, UTF-8 is always supported
+				throw new RuntimeException(ex);
+			} catch (IllegalArgumentException ex) {
+				// Broken encoding
+				return null;
+			}
+		}
+		public String name() { return "urlify"; }
 	}
 }

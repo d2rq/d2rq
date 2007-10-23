@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -14,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.6 2006/10/23 15:39:14 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.7 2007/10/23 14:30:33 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "table", "col1");
@@ -314,6 +315,29 @@ public class PatternTest extends TestCase {
 	
 	public void testLiteralPatternRegexMatchesOnlyLiteralParts() {
 		assertTrue(new Pattern("aaa@@bbb.ccc@@aaa").literalPartsMatchRegex("a+"));
+	}
+
+	public void testPatternURLEncode() {
+		Pattern p = new Pattern("aaa@@table.col1|urlencode@@bbb");
+		assertPattern("aaax+ybbb", p.makeValue(row("x y")));
+		assertPatternValues(p, "aaax+ybbb", Collections.singletonMap("table.col1", "x y"));
+	}
+	
+	public void testPatternURLEncodeIllegal() {
+		Pattern p = new Pattern("@@table.col1|urlencode@@");
+		assertFalse(p.matches("%"));
+	}
+	
+	public void testPatternURLify() {
+		Pattern p = new Pattern("aaa@@table.col1|urlify@@bbb");
+		assertPattern("aaax_ybbb", p.makeValue(row("x y")));
+		assertPatternValues(p, "aaax_ybbb", Collections.singletonMap("table.col1", "x y"));
+	}
+	
+	public void testPatternURLifyEscapeUnderscore() {
+		Pattern p = new Pattern("aaa@@table.col1|urlify@@bbb");
+		assertPattern("aaax%5Fybbb", p.makeValue(row("x_y")));
+		assertPatternValues(p, "aaax%5Fybbb", Collections.singletonMap("table.col1", "x_y"));
 	}
 	
 	private void assertPattern(String expected, String pattern) {

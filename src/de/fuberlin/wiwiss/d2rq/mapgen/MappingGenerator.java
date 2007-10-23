@@ -36,7 +36,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.19 2007/10/22 10:21:16 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.20 2007/10/23 14:30:33 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -322,7 +322,11 @@ public class MappingGenerator {
 		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			result += "/@@" + column.qualifiedName() + "@@";
+			result += "/@@" + column.qualifiedName();
+			if (DatabaseSchemaInspector.isStringType(this.schema.columnType(column))) {
+				result += "|urlify";
+			}
+			result += "@@";
 		}
 		return result;
 	}
