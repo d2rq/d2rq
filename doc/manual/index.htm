@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <?xml version="1.0" encoding="utf-8"?><HTML lang=en xml:lang="en" 
-xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>D2RQ V0.5  -  User Manual</TITLE>
+xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>The D2RQ Plattform v0.5.1  -  User Manual</TITLE>
 <META http-equiv=Content-Type content="text/html; charset=utf-8">
 <STYLE type=text/css>
 
@@ -131,12 +131,12 @@ ul.toc li li { font-weight: normal; }
 </HEAD>
 <BODY>
 <DIV class=head> 
-  <h1 id=title>D2RQ V0.5 - Treating Non-RDF Relational Databases as Virtual RDF Graphs</h1>
+  <h1 id=title>The D2RQ Platform v0.5.1 - Treating Non-RDF Relational Databases as Virtual RDF Graphs</h1>
   <h2 id=doctype>User Manual and Language Specification</h2>
 <DL>
   <DT>This Version: 
     <DD><A 
-  href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20061030/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20061030/</A> 
+  href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20071025/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/20071025/</A> 
     <DT>Latest Version: 
     <DD><A 
   href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/">http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/</A>
@@ -162,17 +162,16 @@ ul.toc li li { font-weight: normal; }
 <P>As Semantic Web technologies are getting mature, there is a growing need for 
   RDF applications to access the content of huge, live, non-RDF, legacy databases 
   without having to replicate the whole database into RDF. This document describes 
-  D2RQ, a declarative mapping language and implementation for treating non-RDF
-  relational databases as virtual RDF graphs within the
-  <a href="http://jena.sourceforge.net/" target="_blank">Jena</a> and
+  the  D2RQ mapping language  for treating non-RDF
+  relational databases as virtual RDF graphs, and the D2RQ Platform that enables applications to access these graphs through the <a href="http://jena.sourceforge.net/" target="_blank">Jena</a> and
   <a href="http://www.openrdf.org/" target="_blank">Sesame</a>
-  Semantic Web development toolkits.</P>
+  APIs, as well as over the Web via the <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol</a> and as <a href="http://en.wikipedia.org/wiki/Linked_Data">Linked Data</a>.</P>
 
 <h2 id="toc">Table of Contents</h2>
 
 <ul class="toc">
   <li>1. <a href="#introduction">Introduction</a></li>
-  <li>2. <a href="#architecture">Architecture</a></li>
+  <li>2. <a href="#architecture">The D2RQ Platform</a></li>
   <li>3. <a href="#compatibility">Database Compatibility</a></li>
   <li>4. <a href="#commandline">The Command Line Tools</a>
     <ul>
@@ -211,41 +210,40 @@ ul.toc li li { font-weight: normal; }
 <hr />
 
 <h1><A id=introduction name=introduction>1. Introduction</A></h1>
-<P>This document describes D2RQ, a declarative mapping language for treating 
-  non-RDF, relational databases as virtual, read-only RDF graphs within the <a href="http://jena.sourceforge.net/" target="_blank">Jena</a> and <a href="http://www.openrdf.org/" target="_blank">Sesame</a> Semantic Web development toolkits. D2RQ offers a flexible access mechanism 
+<P>This document describes the D2RQ Platform for accessing 
+  non-RDF, relational databases as virtual, read-only RDF graphs.  D2RQ offers a variety of different RDF-based access mechanisms 
   to the content of huge, non-RDF databases without having to replicate the database 
   into RDF.</P>
 
 <p>Using D2RQ you can:</p>
 <ul>
-  <li>query a non-RDF database using <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> or find(spo),</li>
-  <li>access information in a non-RDF database using the <a href="http://jena.sourceforge.net/">Jena</a> Model API or the <a href="http://www.openrdf.org/">Sesame</a> API,</li>
-  <li>do RDFS and OWL inferencing over the content of a non-RDF database using Jena's inference engine.</li>
+  <li>query a non-RDF database using <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> or find(spo) queries,</li>
+  <li>access information in a non-RDF database using the <a href="http://jena.sourceforge.net/">Jena</a> API or the <a href="http://www.openrdf.org/">Sesame</a> API,</li>
+  <li>access the content of the database as <a href="http://en.wikipedia.org/wiki/Linked_Data">Linked Data</a> over the Web,</li>
+  <li>ask <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> queries over the <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol</a> against the database. </li>
 </ul>
 
-<p>D2RQ is implemented as a Jena graph, the basic information representation object 
-  within the Jena framework. A D2RQ graph wraps one or more local relational databases 
-  into a virtual, read-only RDF graph. It rewrites Jena API calls, find() and 
-  SPARQL queries to application-data-model specific SQL queries. The result sets 
-  of these SQL queries are transformed into RDF triples which are passed up to 
-  the higher layers of the Jena framework.</p>
-<p>The D2RQ Sesame interface wraps the D2RQ Jena graph implementation behind a Sesame
-  RDF source interface. It provides a read-only Sesame repository interface for querying  
-  and reasoning with RDF and RDF Schema.</p>
 <HR title="Separator for header">
-<h1><A id=architecture name=architecture>2. Architecture</A></h1>
-<p>D2RQ consists of:</p>
+<h1><a id="architecture" name="architecture">2. The D2RQ Platform</a></h1>
+<p>The D2RQ Platform consists of:</p>
 <ul>
   <li>the <strong>D2RQ Mapping Language</strong>, a declarative mapping language 
     for describing the relation between an ontology and an relational data model. 
   </li>
-  <li><strong>GraphD2RQ</strong>, a plug-in for the Jena Semantic Web toolkit, 
-    which uses the mappings to rewrite Jena API calls to SQL queries and passes 
-    query results as RDF triples up to the higher layers of the Jena framework or alternatively to the higher levels of the Sesame framework.</li>
+  <li>the <strong>D2RQ Engine</strong>, a plug-in for the Jena and Sesame Semantic Web toolkits, 
+    which uses the mappings to rewrite Jena and Sesame API calls to SQL queries against the database and passes 
+    query results  up to the higher layers of the frameworks.</li>
+  <li><strong>D2R Server</strong>, an HTTP server that can be used to provide a Linked Data view, a HTML view for debugging and a SPARQL Protocol endpoint over the database.</li>
 </ul>
-<p><img src="architecture.gif" width="450" height="207"></p>
 
-<p><strong>D2RQ Example</strong></p>
+<p>The figure below depicts the architecture of the D2RQ Platform: </p>
+<p><img src="architecture.png" alt="D2RQ Platform architecture diagram" /></p>
+<p>The <strong>D2RQ Engine</strong> is implemented as a Jena graph, the basic information representation object within the Jena framework. A D2RQ graph wraps a local relational databases into a virtual, read-only RDF graph. It rewrites Jena or Sesame API calls, find() and SPARQL queries to application-data-model specific SQL queries. The result sets of these SQL queries are transformed into RDF triples or SPARQL result sets that are passed up to the higher layers of the framework. The D2RQ Sesame interface wraps the D2RQ Jena graph implementation behind a Sesame RDF source interface. It provides a read-only Sesame repository interface for querying and reasoning with RDF and RDF Schema.</p>
+<p><strong>D2R Server</strong> is a tool for publishing relational databases on the Semantic Web. It enables RDF and HTML browsers to navigate the content of the database, 
+and allows applications to query the database using the SPARQL query language. D2R Server builds on the D2RQ Engine. For detailed information on how to set up D2R Server please refer to the 
+separate <a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/">D2R Server website</a>. </p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
 <p>We are using an example database which stores information about conferences, 
   papers, authors and topics throughout this manual. The database is mapped to the 
   International Semantic Web Community (ISWC) Ontology.</p>
@@ -266,7 +264,7 @@ ul.toc li li { font-weight: normal; }
 <hr />
 
 <h1 id="compatibility">3. Database Compatibility</h1>
-<p>D2RQ has been tested with these database engines:</p>
+<p>The D2RQ Plaffrom has been tested with these database engines:</p>
 
 <dl>
 <dt>Oracle</dt>
@@ -304,7 +302,7 @@ ul.toc li li { font-weight: normal; }
 
 <h1 id="commandline">4. The Command Line Tools</h1>
 
-<p>D2RQ is a library intended for use within applications, but it also comes with
+<p>The D2RQ Platform comes with
 two command line tools: a mapping generator that creates a default mapping file
 by analyzing the schema of an existing database, and a dump script that writes
 the complete contents of a database into a single RDF file. The scripts work
@@ -395,7 +393,7 @@ same as for the <a href="#generatemapping"><tt>generate-mapping</tt> script</a>.
 
 
 <h1 id="usingD2RQ">5. Using D2RQ within Jena</h1>
-<P>This section describes how D2RQ is used within the <a href="http://jena.sourceforge.net/">Jena 2 Semantic Web framework</a>. 
+<P>This section describes how the D2RQ Engine is used within the <a href="http://jena.sourceforge.net/">Jena 2 Semantic Web framework</a>. 
 </P>
 <P><strong>Download</strong></P>
 <P>D2RQ can be downloaded from <a href="http://sourceforge.net/projects/d2rq-map/" target="_blank">http://sourceforge.net/projects/d2rq-map/</a></P>
@@ -568,7 +566,7 @@ m.write(System.out);</pre>
 
 <HR>
 <h1 id="usingSesame">6. Using D2RQ within Sesame</h1>
-<P>This section describes how D2RQ is used within the Sesame 1.2 RDF API. 
+<P>This section describes how the D2RQ Engine is used within the Sesame 1.2 RDF API. 
 </P>
 <P><strong>Download</strong></P>
 <P>You have to download the following packages: </P>
@@ -638,8 +636,8 @@ try{
 <hr />
 
 <h1 id="specification">7. Language Specification</h1>
-<P>D2RQ is a declarative mapping language for describing the relation between 
-  relational database schemata and OWL/RDFS ontologies. A D2RQ map is an RDF document. 
+<P>The D2RQ mapping language is a declarative  language for describing the relation between 
+  a relational database schemata and <a href="http://www.w3.org/TR/rdf-schema/">RDFS vocabularies</a> or <a href="http://www.w3.org/TR/owl-features/">OWL</a> ontologies. A D2RQ map is an RDF document. 
 </P>
 <P>The language is formally defined by the <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1">D2RQ RDFS Schema</a>. 
   <br>
@@ -650,15 +648,14 @@ try{
   object to start with when writing a new D2RQ map is the ClassMap. A ClassMap 
   represents a class or a group of similar classes of the ontology. A ClassMap 
   specifies how instances of the class are identified. It has a set of PropertyBridges, 
-  which specify how the properties of an instance are created. D2RQ maps have 
-  the following general structure:</P>
-<P><img src="StructureGross.gif">&nbsp;</P>
-<P>The D2RQ map below relates the table conferences in a database to the class 
-  conference in an ontology. You can use it as a template for writing your own 
+  which specify how the properties of an instance are created. </P>
+<P>The figure below shows the structure of an example D2RQ map:</P>
+<p><img src="mapping.png" alt="Diagram: Structure of a typical D2RQ map" /></p>
+<P>The following example D2RQ map relates the table conferences in a database to the class 
+  conference in an ontology. You can use the map as a template for writing your own 
   maps.</P>
   <pre># D2RQ Namespace  
 @prefix d2rq:        &lt;http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#&gt; .
-
 # Namespace of the ontology
 @prefix : &lt;http://annotation.semanticweb.org/iswc/iswc.daml#&gt; .
 
@@ -696,7 +693,7 @@ map:location a d2rq:PropertyBridge;
     d2rq:datatype xsd:string;
     .</pre>
 
-<p>The D2RQ language constructs are described in detail below.</p>
+<p>The constructs of the D2RQ mapping language are described in detail below.</p>
 
 
 <h2><a name="database"></a>7.1 Database</h2>
@@ -1279,7 +1276,7 @@ map:ColorTable a d2rq:TranslationTable;
             d2rq:property :firstName;
             d2rq:column "Persons.FirstName";
             d2rq:belongsToClassMap map:PersonsClassMap;
-            d2rq:condition "Persons.FirstName <> ''".</pre>
+            d2rq:condition "Persons.FirstName &lt;&gt; ''".</pre>
 <br>
 <p><strong>Example: Relationship type codes</strong></p>
 <p>Imagine a table Rel_Paper_Topic that associates rows from a Papers table
@@ -1383,6 +1380,7 @@ is made by using an appropriate property on the bridge declaration:
 
 <h1 id="change_log">8. Change Log</h1>
 <ul>
+  <li>2007-10-25: Updated for D2RQ v0.5.1 and D2R Server v0.4. </li>
   <li>2006-10-26: Updated for D2RQ v0.5.</li>
   <li>2005-10-21: Updated for D2RQ v0.4.</li>
   <li>2005-04-29: Updated for D2RQ v0.3.</li>
@@ -1390,7 +1388,7 @@ is made by using an appropriate property on the bridge declaration:
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.26 2007/10/03 22:50:32 cyganiak Exp $</p>
+<p>$Id: index.htm,v 1.27 2007/10/23 13:50:22 cyganiak Exp $</p>
 
 </BODY>
 </HTML>
