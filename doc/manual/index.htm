@@ -719,6 +719,14 @@ map:location a d2rq:PropertyBridge;
     <td>A password if required by the database.</td>
   </tr>
   <tr> 
+    <td><strong>d2rq:resultSizeLimit </strong></td>
+    <td>An integer value that will be added as a LIMIT clause to all
+      generated SQL queries. This sets an upper bound for the number
+      of results returned from large databases. Note that this effectively
+      &#8220;cripples&#8221; the server and can cause unpredictable
+      results.</td>
+  </tr>
+  <tr> 
     <td><strong>d2rq:allowDistinct</strong></td>
     <td>Specifies the databases ability to handle DISTINCT correctly. 
     Value: "true" or "false". For example MSAccess cuts fields longer than 256 chars.</td>
@@ -773,14 +781,27 @@ that create the same URIs or blank node IDs.</P>
 <dl>
 <dt>URI patterns</dt>
 <dd><p>A URI pattern is instantiated by inserting values of
-  certain database columns into a pattern:</p>
+  certain database columns into a pattern. Examples:</p>
   <pre>http://example.org/persons/@@<em>Persons.ID</em>@@
 http://example.org/lineItems/item@@<em>Orders.orderID</em>@@-@@<em>LineItems.itemID</em>@@
 urn:isbn:@@<em>Books.isbn</em>@@
 mailto:@@<em>Persons.email</em>@@</pre>
   <p>The parts between <tt>@@</tt>'s mark database columns in
-  <tt>Table.Column</tt> notation. URI patterns are generated
+  <tt>Table.Column</tt> notation. URI patterns are used
   with the <tt>d2rq:uriPattern</tt> property.</p>
+  <p>Certain characters, like spaces or the hash sign, are not allowed
+    in URIs or have special meaning. Columns that contain such characters
+    need to be encoded before their values can be inserted into a URI
+    pattern:</p>
+  <ul>
+    <li>If a column is given as <tt>@@Table.Column|<strong>urlencode</strong>@@</tt>,
+      then <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/net/URLEncoder.html">URL encoding</a>
+      is applied before the string is inserted.</li>
+    <li>If a column is given as <tt>@@Table.Column|<strong>urlify</strong>@@</tt>,
+      then URL encoding is applied, with an additional rule that spaces are
+      converted to underscores (<tt>_</tt>). Some people find that this
+      produces friendlier URIs.</li>
+  </ul>
 </dd>
 
 <dt>Relative URI patterns</dt>
@@ -1355,7 +1376,7 @@ map:secondaryTopic a d2rq:PropertyBridge;
 of the D2RQ mapping language that have been replaced by better
 alternatives and should no longer be used.</p>
 
-<h3 id="datatype-object">5.9.1 <tt>d2rq:DatatypePropertyBridge</tt> and <tt>d2rq:ObjectPropertyBridge</tt></h3>
+<h3 id="datatype-object">7.9.1 <tt>d2rq:DatatypePropertyBridge</tt> and <tt>d2rq:ObjectPropertyBridge</tt></h3>
 
 <p>Older versions of the language used two different classes to
 distinguish between property bridges that produce literals, and
@@ -1380,7 +1401,7 @@ is made by using an appropriate property on the bridge declaration:
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.28 2007/10/23 13:51:43 cyganiak Exp $</p>
+<p>$Id: index.htm,v 1.29 2007/10/23 14:25:03 cyganiak Exp $</p>
 
 </BODY>
 </HTML>
