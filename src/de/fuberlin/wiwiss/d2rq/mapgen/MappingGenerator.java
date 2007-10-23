@@ -36,7 +36,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.20 2007/10/23 14:30:33 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.21 2007/10/23 15:07:22 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -377,7 +377,7 @@ public class MappingGenerator {
 		Resource r = classResource(tableName);
 		r.addProperty(RDF.type, RDFS.Class);
 		r.addProperty(RDF.type, OWL.Class);
-		r.addProperty(RDFS.label, tableName);
+		r.addProperty(RDFS.label, tableName.qualifiedName());
 		r.addProperty(RDFS.isDefinedBy, ontologyResource());
 	}
 
@@ -409,7 +409,7 @@ public class MappingGenerator {
 		Resource r = this.vocabModel.createResource(propertyURI);
 		r.addProperty(RDF.type, RDF.Property);
 		r.addProperty(RDF.type, OWL.ObjectProperty);
-		r.addProperty(RDFS.label, linkTableName);
+		r.addProperty(RDFS.label, linkTableName.qualifiedName());
 		r.addProperty(RDFS.domain, classResource(fromTable));
 		r.addProperty(RDFS.range, classResource(toTable));
 		r.addProperty(RDFS.isDefinedBy, ontologyResource());
