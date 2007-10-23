@@ -6,6 +6,6 @@
 
 :myModel
 	a d2rq:D2RQModel;
-	d2rq:mappingFile <file:doc/example/mapping-iswc.n3>;
+	d2rq:mappingFile <mapping-iswc.n3>;
 	d2rq:resourceBaseURI <http://localhost:2020/>;
 	.
