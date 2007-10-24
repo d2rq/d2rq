@@ -1,7 +1,5 @@
 package de.fuberlin.wiwiss.d2rs;
 
-import com.hp.hpl.jena.query.describe.DescribeHandler;
-import com.hp.hpl.jena.query.engine1.ExecutionContext;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
@@ -9,6 +7,8 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.sparql.core.describe.DescribeHandler;
+import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
@@ -18,7 +18,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * TODO Is this thread-safe? ARQ uses just a single instance of this class.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindDescribeHandler.java,v 1.9 2007/02/07 13:49:24 cyganiak Exp $
+ * @version $Id: FindDescribeHandler.java,v 1.10 2007/10/24 09:10:41 cyganiak Exp $
  */
 public class FindDescribeHandler implements DescribeHandler {
 	private Model dataModel;
@@ -28,7 +28,7 @@ public class FindDescribeHandler implements DescribeHandler {
 		this.dataModel = dataModel;
 	}
 	
-	public void start(Model accumulateResultModel, ExecutionContext qContext) {
+	public void start(Model accumulateResultModel, Context qContext) {
 		this.resultModel = accumulateResultModel;
 		this.resultModel.setNsPrefix("rdfs", RDFS.getURI());
 	}

@@ -26,8 +26,8 @@ public class ResourceServlet extends HttpServlet {
 //			Joseki.contentTypeXML,
 			Joseki.contentTypeRDFXML,
 			Joseki.contentTypeTurtle,
-			Joseki.contentTypeAppN3,
-			Joseki.contentTypeTextN3,
+			Joseki.contentTypeN3,
+			Joseki.contentTypeN3Alt,
 			Joseki.contentTypeNTriples
 	});
 

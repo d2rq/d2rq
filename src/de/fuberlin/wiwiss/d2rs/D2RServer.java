@@ -15,11 +15,13 @@ import org.joseki.processors.SPARQL;
 import com.hp.hpl.jena.query.DataSource;
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.query.DatasetFactory;
-import com.hp.hpl.jena.query.describe.DescribeHandlerRegistry;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.sparql.core.describe.DescribeHandler;
+import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerFactory;
+import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
@@ -29,7 +31,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.15 2007/02/09 20:45:58 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.16 2007/10/24 09:10:41 cyganiak Exp $
  */
 public class D2RServer {
 	private static D2RServer instance = null;
@@ -182,7 +184,7 @@ public class D2RServer {
 		this.reloader = new AutoReloader(new File(filename));
 		this.model = ModelFactory.createModelForGraph(this.reloader);
 		DescribeHandlerRegistry.get().clear();
-		DescribeHandlerRegistry.get().add(new FindDescribeHandler(this.model));
+		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory(this.model));
 		this.prefixesModel = new NamespacePrefixModel();		
 		this.reloader.setPrefixModel(this.prefixesModel);
 		this.dataset = DatasetFactory.create();
@@ -213,5 +215,15 @@ public class D2RServer {
 		log.info("verifying mapping file ...");
 		this.model.isEmpty();
 		log.info("--------------------");
+	}
+
+	private class FindDescribeHandlerFactory implements DescribeHandlerFactory {
+		private final Model dataModel;
+		FindDescribeHandlerFactory(Model dataModel) {
+			this.dataModel = dataModel;
+		}
+		public DescribeHandler create() {
+			return new FindDescribeHandler(dataModel);
+		}
 	}
 }
