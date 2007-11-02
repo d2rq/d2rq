@@ -30,31 +30,33 @@ public class ClassMapServlet extends HttpServlet {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return;
 		}
-    	Resource classMap = resourceList.getResource(D2RServer.instance().baseURI() + "all/" + classMapName);
-    	Resource directory = resourceList.createResource(D2RServer.instance().baseURI() + "all");
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
+    	Resource classMap = resourceList.getResource(server.baseURI() + "all/" + classMapName);
+    	Resource directory = resourceList.createResource(server.baseURI() + "all");
     	classMap.addProperty(RDFS.seeAlso, directory);
     	classMap.addProperty(RDFS.label, "List of all instances: " + classMapName);
     	directory.addProperty(RDFS.label, "D2R Server contents");
-		D2RServer.instance().addDocumentMetadata(resourceList, classMap);
+    	server.addDocumentMetadata(resourceList, classMap);
 		new ModelResponse(resourceList, request, response).serve();
 	}
 
 	private GraphD2RQ graphD2RQ() {
-		return (GraphD2RQ) D2RServer.instance().currentGraph();
+		return (GraphD2RQ) D2RServer.fromServletContext(getServletContext()).currentGraph();
 	}
 	
 	private Model classMapListModel() {
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		Model result = ModelFactory.createDefaultModel();
-		Resource list = result.createResource(D2RServer.instance().baseURI() + "all");
+		Resource list = result.createResource(server.baseURI() + "all");
 		list.addProperty(RDFS.label, "D2R Server contents");
 		Iterator it = graphD2RQ().classMapNames().iterator();
 		while (it.hasNext()) {
 			String classMapName = (String) it.next();
-			Resource instances = result.createResource(D2RServer.instance().baseURI() + "all/" + classMapName);
+			Resource instances = result.createResource(server.baseURI() + "all/" + classMapName);
 			list.addProperty(RDFS.seeAlso, instances);
 			instances.addProperty(RDFS.label, "List of all instances: " + classMapName);
 		}
-		D2RServer.instance().addDocumentMetadata(result, list);
+		server.addDocumentMetadata(result, list);
 		return result;
 	}
 	

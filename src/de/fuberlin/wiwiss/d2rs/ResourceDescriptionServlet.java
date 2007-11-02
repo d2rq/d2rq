@@ -19,16 +19,22 @@ import de.fuberlin.wiwiss.d2rs.vocab.FOAF;
 public class ResourceDescriptionServlet extends HttpServlet {
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String relativeResourceURI = request.getRequestURI().substring(request.getServletPath().length() + 1);
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
+		String relativeResourceURI = request.getRequestURI().substring(
+				request.getContextPath().length() + request.getServletPath().length());
+		// Some servlet containers keep the leading slash, some don't
+		if (!"".equals(relativeResourceURI) && "/".equals(relativeResourceURI.substring(0, 1))) {
+			relativeResourceURI = relativeResourceURI.substring(1);
+		}
 		if (request.getQueryString() != null) {
 			relativeResourceURI = relativeResourceURI + "?" + request.getQueryString();
 		}
-		String resourceURI = D2RServer.instance().resourceBaseURI() + relativeResourceURI;
-		String documentURL = D2RServer.instance().dataURL(relativeResourceURI);
+		String resourceURI = server.resourceBaseURI() + relativeResourceURI;
+		String documentURL = server.dataURL(relativeResourceURI);
 
 		Model description = QueryExecutionFactory.create(
 				"DESCRIBE <" + resourceURI + ">",
-				D2RServer.instance().dataset()).execDescribe();
+				server.dataset()).execDescribe();
 		if (description.size() == 0) {
 			response.sendError(404);
 		}
@@ -43,7 +49,7 @@ public class ResourceDescriptionServlet extends HttpServlet {
 		if (label != null) {
 			document.addProperty(RDFS.label, "RDF Description of " + label.getString());
 		}
-		D2RServer.instance().addDocumentMetadata(description, document);
+		server.addDocumentMetadata(description, document);
 		new ModelResponse(description, request, response).serve();
 //		Resource resource = description.getResource(resourceURI);
 	}

@@ -47,16 +47,17 @@ public class DirectoryServlet extends VelocityServlet {
 			String label = (labelStmt == null) ? resource.getURI() : labelStmt.getString();
 			resources.put(uri, label);
 		}
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		Map classMapLinks = new TreeMap();
 		Iterator it = graphD2RQ().classMapNames().iterator();
 		while (it.hasNext()) {
 			String name = (String) it.next();
-			classMapLinks.put(name, D2RServer.instance().baseURI() + "directory/" + name);
+			classMapLinks.put(name, server.baseURI() + "directory/" + name);
 		}
-		context.put("truncated_results", new Boolean(D2RServer.instance().hasTruncatedResults()));
-		context.put("server_name", D2RServer.instance().serverName());
-		context.put("home_link", D2RServer.instance().baseURI());
-		context.put("rdf_link", D2RServer.instance().baseURI() + "all/" + classMapName);
+		context.put("truncated_results", new Boolean(server.hasTruncatedResults()));
+		context.put("server_name", server.serverName());
+		context.put("home_link", server.baseURI());
+		context.put("rdf_link", server.baseURI() + "all/" + classMapName);
 		context.put("classmap", classMapName);
 		context.put("classmap_links", classMapLinks);
 		context.put("resources", resources);
@@ -72,7 +73,7 @@ public class DirectoryServlet extends VelocityServlet {
 	}
 
 	private GraphD2RQ graphD2RQ() {
-		return (GraphD2RQ) D2RServer.instance().currentGraph();
+		return (GraphD2RQ) D2RServer.fromServletContext(getServletContext()).currentGraph();
 	}
 
 	private static final long serialVersionUID = 8398973058486421941L;

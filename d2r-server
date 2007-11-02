@@ -14,4 +14,4 @@ do
   CP="$CP$SEP$jar"
 done
 LOGCONFIG=${LOGCONFIG:-file:$D2RQ_ROOT/etc/log4j.properties}
-exec java -cp "$CP" "-Dlog4j.configuration=${LOGCONFIG}" d2r.server "$@"
+exec java -cp "$CP" -Xmx256M "-Dlog4j.configuration=${LOGCONFIG}" d2r.server "$@"

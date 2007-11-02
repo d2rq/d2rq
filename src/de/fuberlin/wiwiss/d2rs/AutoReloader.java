@@ -22,6 +22,7 @@ public class AutoReloader extends GraphBase {
 	private static Log log = LogFactory.getLog(AutoReloader.class);
 	private static long CHECK_FREQUENCY_MS = 1000;
 	
+	private final D2RServer server;
 	private Graph base = null;
 	private PrefixMappingImpl prefixes = new PrefixMappingImpl();
 	private File mappingFile;
@@ -29,8 +30,9 @@ public class AutoReloader extends GraphBase {
 	private long previousCheck = Long.MIN_VALUE;
 	private NamespacePrefixModel prefixModel = null;
 	
-	public AutoReloader(File mappingFile) {
+	public AutoReloader(File mappingFile, D2RServer server) {
 		this.mappingFile = mappingFile;
+		this.server = server;
 	}
 	
 	public void setPrefixModel(NamespacePrefixModel m) {
@@ -80,7 +82,7 @@ public class AutoReloader extends GraphBase {
 			log.info("Reloading mapping file");
 		}
 		try {
-			Model model = D2RServer.instance().reloadModelD2RQ(this.mappingFile.toURL().toString());
+			Model model = server.reloadModelD2RQ(this.mappingFile.toURL().toString());
 			setNewBase(model.getGraph());
 			this.prefixModel.update(model);
 		} catch (MalformedURLException ex) {

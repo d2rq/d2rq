@@ -1,21 +1,31 @@
 package d2r;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.shared.JenaException;
 
-import de.fuberlin.wiwiss.d2rs.D2RServer;
+import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rs.JettyLauncher;
 
 /**
  * Command line launcher for D2R Server.
  * 
- * @version $Id: server.java,v 1.5 2007/02/09 11:22:53 cyganiak Exp $
+ * @version $Id: server.java,v 1.6 2007/11/02 14:46:24 cyganiak Exp $
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class server {
 	private final static String usage = "usage: d2r-server [-p port] [-b serverBaseURI] mappingFileName";
-	private static D2RServer server;
+	private static JettyLauncher server;
+	private final static Log log = LogFactory.getLog(server.class);
 	
 	public static void main(String[] args) {
 		CommandLine cmd = new CommandLine();
@@ -35,7 +45,7 @@ public class server {
 			System.err.println(usage);
 			System.exit(1);
 		}
-		server = D2RServer.instance();
+		server = new JettyLauncher();
 		if (cmd.contains(portArg)) {
 			setPort(Integer.parseInt(cmd.getArg(portArg).getValue()));
 		}
@@ -48,16 +58,16 @@ public class server {
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") != -1) {
 			mappingFileName = mappingFileName.replaceAll("\\\\", "/");
 		}
-		setMappingFileURL(mappingFileName);
+		setMappingFileURL(absolutize(mappingFileName));
 		startServer();
 	}
 	
 	public static void setPort(int port) {
-		server.setPort(port);
+		server.overridePort(port);
 	}
 
 	public static void setServerBaseURI(String baseURI) {
-		server.setBaseURI(baseURI);
+		server.overrideBaseURI(baseURI);
 	}
 	
 	public static void setMappingFileURL(String mappingFileURL) {
@@ -75,5 +85,19 @@ public class server {
 	
 	public static void startServer() {
 		server.start();
+		log.info("[[[ Server started at " + server.getHomeURI() + " ]]]");
+	}
+	
+	private static String absolutize(String relativeURI) {
+		try {
+			if (new URI(relativeURI).isAbsolute()) {
+				return relativeURI;
+			}
+			return new File(relativeURI).getAbsoluteFile().toURL().toExternalForm();
+		} catch (URISyntaxException ex) {
+			throw new D2RQException(ex);
+		} catch (MalformedURLException ex) {
+			throw new D2RQException(ex);
+		}
 	}
 }

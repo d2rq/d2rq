@@ -15,6 +15,7 @@
 	<property name="jar" value="${lib}/${distname}.jar"/>
 	<property name="zip" value="${distname}.zip"/>
 	<property name="tar" value="${distname}.tar.gz"/>
+    <property name="war" value="${name}.war" />
 	<property name="junit.jar" value="${lib}/junit.jar"/>
 
 	<property name="vocab.n3" value="${doc}/config.n3"/>
@@ -52,6 +53,7 @@
 	<target name="clean">
 		<delete dir="${build}" failonerror="false"/>
 		<delete dir="${build.tests}" failonerror="false"/>
+		<delete dir="${war}" failonerror="false"/>
 		<delete failonerror="false">
 			<fileset dir="." includes="${lib}/${name}-*.jar,${name}-*.zip,${name}-*.tar.gz"/>
 		</delete>
@@ -144,4 +146,24 @@
 	</target>
 	
 	<target name="vocab.d2r" depends="vocab.d2r.xml,vocab.d2r.schemagen"/>
+
+    <property name="war" value="{$war}"/>
+    <target name="war" depends="jar">
+        <war destfile="${war}" needxmlfile="false">
+            <fileset dir="webapp/">
+                <include name="snorql/**"/>
+            </fileset>
+            <lib dir="${lib}">
+                <exclude name="junit.jar"/>
+                <exclude name="servlet-api-2.5-6.1.1.jar"/>
+            </lib>
+            <lib file="${jar}"/>
+            <webinf dir="webapp/WEB-INF">
+                <include name="*"/>
+                <exclude name="templates"/>
+            </webinf>
+            <classes dir="etc"/>
+            <classes dir="webapp/WEB-INF/templates"/>
+        </war>
+    </target>
 </project>

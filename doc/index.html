@@ -96,7 +96,8 @@ pre { speak-punctuation: code; }
   <li><a href="#quickstart">Quick start</a></li>
   <li><a href="#customize">Customizing the database mapping</a> </li>
   <li><a href="#configuration">Server configuration</a></li>
-  <li><a href="#windows">Running as a service on Windows</a></li>
+  <li><a href="#windows">Running D2R Server as a service on Windows</a></li>
+  <li><a href="#container">Running D2R Server in an existing Servlet Container</a></li>
   <li><a href="#dumps">Creating RDF dumps</a></li>
   <li><a href="#mappingfiles">Pre-built mapping files</a></li>
   <li><a href="#support">Support and Feedback</a></li>
@@ -217,7 +218,7 @@ pre { speak-punctuation: code; }
 
 <p>Not that this effectively &#8220;cripples&#8221; the server and can cause somewhat unpredictable results. We still recommend it until we can offer a better solution.</p>
 
-<h2 id="windows">Running as a service on Windows</h2>
+<h2 id="windows">Running D2R Server as a service on Windows</h2>
 
 <p>To run D2R Server as a service on Windows, use the <tt>install-service</tt> script:</p>
 
@@ -226,6 +227,10 @@ pre { speak-punctuation: code; }
 <p>The service can be started from the Services panel in the management console. The service will log all output including startup errors to the files <tt>stdout.log</tt> and <tt>stderr.log</tt>.</p>
 
 <p>To uninstall the service, use <tt>uninstall-service</tt>. You have to uninstall and re-install the service when upgrading to a later version of D2R Server.</p>
+
+<h2 id="container">Running D2R Server in an existing Servlet Container</h2>
+
+<p>@@@</p>
 
 <h2 id="dumps">Creating RDF dumps</h2>
 
@@ -286,7 +291,7 @@ pre { speak-punctuation: code; }
 <div><a href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3"><img src="http://www.wiwiss.fu-berlin.de/suhl/_img/doap.png" align="absmiddle" /></a> (<a href="http://www4.wiwiss.fu-berlin.de/rdf_browser/?browse_uri=http%3A//www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3">View with Disco</a>)</div>
 
 <div id="footer">
-  <small>$Id: index.html,v 1.19 2007/02/13 18:24:41 cyganiak Exp $</small>
+  <small>$Id: index.html,v 1.20 2007/11/02 14:46:26 cyganiak Exp $</small>
 </div>
 </div>
 

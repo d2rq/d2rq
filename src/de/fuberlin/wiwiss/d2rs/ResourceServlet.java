@@ -33,16 +33,22 @@ public class ResourceServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
-		String relativeResourceURI = request.getRequestURI().substring(request.getServletPath().length() + 1);
+		String relativeResourceURI = request.getRequestURI().substring(
+				request.getContextPath().length() + request.getServletPath().length());
+		// Some servlet containers keep the leading slash, some don't
+		if (!"".equals(relativeResourceURI) && "/".equals(relativeResourceURI.substring(0, 1))) {
+			relativeResourceURI = relativeResourceURI.substring(1);
+		}
 		if (request.getQueryString() != null) {
 			relativeResourceURI = relativeResourceURI + "?" + request.getQueryString();
 		}
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		if (clientPrefersHTML(request)) {
 			response.addHeader("Location",
-					D2RServer.instance().pageURL(relativeResourceURI));
+					server.pageURL(relativeResourceURI));
 		} else {
 			response.addHeader("Location",
-					D2RServer.instance().dataURL(relativeResourceURI));
+					server.dataURL(relativeResourceURI));
 		}
 		response.setStatus(303);
 	}

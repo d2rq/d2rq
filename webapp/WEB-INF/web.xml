@@ -1,9 +1,19 @@
 <?xml version="1.0"?>
-<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN" "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/j2ee/dtds/web-app_2_3.dtd">
 <web-app>
 
   <display-name>D2R Server</display-name>
 
+  <!-- Configuration file for running the server in a servlet container.
+       Will be ignored if the server is started from the command line. -->
+  <context-param>
+    <param-name>configFile</param-name>
+    <param-value>config-example.n3</param-value>
+  </context-param>
+
+  <listener>
+    <listener-class>de.fuberlin.wiwiss.d2rs.WebappInitListener</listener-class>
+  </listener>
 
   <!-- SERVLETS -->
 
@@ -21,17 +31,18 @@
   </servlet>
 
   <servlet>
-    <servlet-name>D2R Resource Forwarder</servlet-name>
+    <servlet-name>ResourceServlet</servlet-name>
     <servlet-class>de.fuberlin.wiwiss.d2rs.ResourceServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
   </servlet>
   
   <servlet>
-    <servlet-name>D2R ClassMap Lister</servlet-name>
+    <servlet-name>ClassMapServlet</servlet-name>
     <servlet-class>de.fuberlin.wiwiss.d2rs.ClassMapServlet</servlet-class>
   </servlet>
   
   <servlet>
-    <servlet-name>D2R Resource Page</servlet-name>
+    <servlet-name>PageServlet</servlet-name>
     <servlet-class>de.fuberlin.wiwiss.d2rs.PageServlet</servlet-class>
     <init-param>
       <param-name>org.apache.velocity.properties</param-name>
@@ -40,12 +51,12 @@
   </servlet>
   
   <servlet>
-    <servlet-name>D2R Resource RDF Description</servlet-name>
+    <servlet-name>ResourceDescriptionServlet</servlet-name>
     <servlet-class>de.fuberlin.wiwiss.d2rs.ResourceDescriptionServlet</servlet-class>
   </servlet>
   
   <servlet>
-    <servlet-name>D2R ClassMap Directory Page</servlet-name>
+    <servlet-name>DirectoryServlet</servlet-name>
     <servlet-class>de.fuberlin.wiwiss.d2rs.DirectoryServlet</servlet-class>
     <init-param>
       <param-name>org.apache.velocity.properties</param-name>
@@ -54,7 +65,7 @@
   </servlet>
   
   <servlet>
-    <servlet-name>D2R Root Page</servlet-name>
+    <servlet-name>RootServlet</servlet-name>
     <servlet-class>de.fuberlin.wiwiss.d2rs.RootServlet</servlet-class>
     <init-param>
       <param-name>org.apache.velocity.properties</param-name>
@@ -63,7 +74,6 @@
   </servlet>
 
   <!-- MAPPINGS -->
-  <!-- Map URLs to SPARQL service processors -->
 
   <servlet-mapping>
     <servlet-name>SPARQL service processor</servlet-name>
@@ -71,85 +81,41 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>D2R Resource Forwarder</servlet-name>
+    <servlet-name>ResourceServlet</servlet-name>
     <url-pattern>/resource/*</url-pattern>
   </servlet-mapping>
   
   <servlet-mapping>
-    <servlet-name>D2R ClassMap Lister</servlet-name>
+    <servlet-name>ClassMapServlet</servlet-name>
     <url-pattern>/all/*</url-pattern>
   </servlet-mapping>
   
   <servlet-mapping>
-    <servlet-name>D2R ClassMap Lister</servlet-name>
+    <servlet-name>ClassMapServlet</servlet-name>
     <url-pattern>/all</url-pattern>
   </servlet-mapping>
   
   <servlet-mapping>
-    <servlet-name>D2R Resource Page</servlet-name>
+    <servlet-name>PageServlet</servlet-name>
     <url-pattern>/page/*</url-pattern>
   </servlet-mapping>
   
   <servlet-mapping>
-    <servlet-name>D2R Resource RDF Description</servlet-name>
+    <servlet-name>ResourceDescriptionServlet</servlet-name>
     <url-pattern>/data/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>D2R ClassMap Directory Page</servlet-name>
+    <servlet-name>DirectoryServlet</servlet-name>
     <url-pattern>/directory/*</url-pattern>
-  </servlet-mapping>
-  
-  <servlet-mapping>
-    <servlet-name>D2R Root Page</servlet-name>
-    <url-pattern>/</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>*.html</url-pattern>
+    <servlet-name>RootServlet</servlet-name>
+    <url-pattern>/index.html</url-pattern>
   </servlet-mapping>
-  
-  <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>*.css</url-pattern>
-  </servlet-mapping>
-  
-  <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>*.png</url-pattern>
-  </servlet-mapping>
-  
-  <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>*.js</url-pattern>
-  </servlet-mapping>
-  
-  <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>*.rdf</url-pattern>
-  </servlet-mapping>
-  
-  <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>/snorql/*</url-pattern>
-  </servlet-mapping>
-  
+
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>
-
-
-  <!-- SECURIY -->
-
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>Joseki</web-resource-name>
-      <url-pattern>/*</url-pattern>
-      <http-method>GET</http-method>
-      <http-method>POST</http-method>
-      <!-- <http-method>OPTIONS</http-method> -->
-    </web-resource-collection>
-  </security-constraint>
-
 </web-app>

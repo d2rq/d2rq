@@ -31,29 +31,35 @@ public class PageServlet extends VelocityServlet {
 	public Template handleRequest(HttpServletRequest request,
 			HttpServletResponse response,
 			Context context) throws IOException {
-		String relativeResourceURI = request.getRequestURI().substring(request.getServletPath().length() + 1);
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
+		String relativeResourceURI = request.getRequestURI().substring(
+				request.getContextPath().length() + request.getServletPath().length());
+		// Some servlet containers keep the leading slash, some don't
+		if (!"".equals(relativeResourceURI) && "/".equals(relativeResourceURI.substring(0, 1))) {
+			relativeResourceURI = relativeResourceURI.substring(1);
+		}
 		if (request.getQueryString() != null) {
 			relativeResourceURI = relativeResourceURI + "?" + request.getQueryString();
 		}
-		String resourceURI = D2RServer.instance().resourceBaseURI() + relativeResourceURI;
+		String resourceURI = server.resourceBaseURI() + relativeResourceURI;
 		Model description = QueryExecutionFactory.create(
 				"DESCRIBE <" + resourceURI + ">",
-				D2RServer.instance().dataset()).execDescribe();
+				server.dataset()).execDescribe();
 		if (description.size() == 0) {
 			response.sendError(404);
 			return null;
 		}
-		this.prefixes = D2RServer.instance().model();
+		this.prefixes = server.model();
 		Resource resource = description.getResource(resourceURI);
 		response.addHeader("Content-Type", "application/xhtml+xml; charset=utf-8");
 		response.addHeader("Cache-Control", "no-cache");
 		response.addHeader("Pragma", "no-cache");
 		setContentType(request, response);
-		context.put("truncated_results", new Boolean(D2RServer.instance().hasTruncatedResults()));
+		context.put("truncated_results", new Boolean(server.hasTruncatedResults()));
 		context.put("uri", resourceURI);
-		context.put("server_name", D2RServer.instance().serverName());
-		context.put("home_link", D2RServer.instance().baseURI());
-		context.put("rdf_link", D2RServer.instance().dataURL(relativeResourceURI));
+		context.put("server_name", server.serverName());
+		context.put("home_link", server.baseURI());
+		context.put("rdf_link", server.dataURL(relativeResourceURI));
 		context.put("label", resource.getProperty(RDFS.label));
 		context.put("properties", collectProperties(description, resource));
 		context.put("classmap_links", classmapLinks(resource));
@@ -79,11 +85,12 @@ public class PageServlet extends VelocityServlet {
 
 	private Map classmapLinks(Resource resource) {
 		Map result = new HashMap();
-		GraphD2RQ g = D2RServer.instance().currentGraph();
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
+		GraphD2RQ g = server.currentGraph();
 		Iterator it = g.classMapNamesForResource(resource.asNode()).iterator();
 		while (it.hasNext()) {
 			String name = (String) it.next();
-			result.put(name, D2RServer.instance().baseURI() + "directory/" + name);
+			result.put(name, server.baseURI() + "directory/" + name);
 		}
 		return result;
 	}
