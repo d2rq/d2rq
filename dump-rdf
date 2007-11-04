@@ -8,4 +8,4 @@ do
   if [ ! -e "$jar" ]; then continue; fi
   CP="$CP$SEP$jar"
 done
-exec java -cp "$CP" d2rq.dump_rdf "$@"
+exec java -cp "$CP" -Xmx256M d2rq.dump_rdf "$@"
