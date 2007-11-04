@@ -28,12 +28,13 @@ import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
+import de.fuberlin.wiwiss.d2rs.vocab.D2R;
 
 /**
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.17 2007/11/02 14:46:25 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.18 2007/11/04 00:41:14 cyganiak Exp $
  */
 public class D2RServer {
 	private final static String SPARQL_SERVICE_NAME = "sparql";
@@ -178,7 +179,6 @@ public class D2RServer {
 		this.model = ModelFactory.createModelForGraph(this.reloader);
 		DescribeHandlerRegistry.get().clear();
 		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory(this.model));
-		this.prefixesModel = new NamespacePrefixModel();		
 		this.reloader.setPrefixModel(this.prefixesModel);
 		this.dataset = DatasetFactory.create();
 		this.dataset.setDefaultModel(this.model);
@@ -190,11 +190,12 @@ public class D2RServer {
 		log.info("using config file: " + configFile);
 		this.config = new ConfigLoader(configFile);
 		this.config.load();
+		this.prefixesModel = new NamespacePrefixModel();
+		this.prefixesModel.ignoreNamespaceURI(D2R.NS);
 		if (this.config.isLocalMappingFile()) {
 			initAutoReloading(this.config.getLocalMappingFilename());
 		} else {
 			this.model = reloadModelD2RQ(this.config.getMappingURL());
-			this.prefixesModel = new NamespacePrefixModel();
 			this.prefixesModel.update(this.currentGraph.getPrefixMapping());
 		}
 		Registry.add(RDFServer.ServiceRegistryName, createJosekiServiceRegistry());
