@@ -12,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueDecorator.java,v 1.3 2006/09/16 14:19:20 cyganiak Exp $
+ * @version $Id: ValueDecorator.java,v 1.4 2007/11/04 18:15:14 cyganiak Exp $
  */
 public class ValueDecorator implements ValueMaker {
 	public static ValueConstraint maxLengthConstraint(final int maxLength) {
@@ -62,7 +62,8 @@ public class ValueDecorator implements ValueMaker {
 	}
 	
 	public Map attributeConditions(String value) {
-		return this.base.attributeConditions(this.translator.toDBValue(value));
+		String dbValue = this.translator.toDBValue(value);
+		return dbValue == null ? null : this.base.attributeConditions(dbValue);
 	}
 
 	public String makeValue(ResultRow row) {
@@ -81,7 +82,8 @@ public class ValueDecorator implements ValueMaker {
 				return false;
 			}
 		}
-		return this.base.matches(this.translator.toDBValue(value));
+		String dbValue = this.translator.toDBValue(value);
+		return dbValue != null && this.base.matches(dbValue);
 	}
 
 	public Set projectionAttributes() {

@@ -82,7 +82,7 @@ public class TypedNodeMaker implements NodeMaker {
 			return NodeMaker.EMPTY;
 		}
 		String value = this.nodeType.extractValue(node);
-		if (!this.valueMaker.matches(value)) {
+		if (value == null || !this.valueMaker.matches(value)) {
 			return NodeMaker.EMPTY;
 		}
 		List conditions = new ArrayList();
