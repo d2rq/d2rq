@@ -74,7 +74,7 @@ pre { speak-punctuation: code; }
 
 <div id="download">
   <h2><a href="http://sourceforge.net/project/showfiles.php?group_id=111002&amp;package_id=188901">Download D2R Server</a></h2>
-  <small>v0.3.2 (alpha), released 2007-02-13</small>
+  <small>v0.4 (alpha), released 2007-11-03</small>
 </div>
 <div id="demo">
   <h2><a href="http://www4.wiwiss.fu-berlin.de/is-group/">Live Demo</a></h2>
@@ -84,6 +84,7 @@ pre { speak-punctuation: code; }
 <h2 id="news">News</h2>
 
 <ul>
+  <li><strong>2007-11-03: Version 0.4 released.</strong> This version can be run as a J2EE web application inside existing servlet containers and fixes several bugs.</li>
   <li><strong>2007-02-13: Version 0.3.2 released,</strong> featuring more configurability, easy installation as a Windows service, and many small improvements and bugfixes.</li>
   <li><strong>2007-01-22: dbpedia.org uses D2R Server</strong> to <a href="http://dbpedia.org/main">publish structured data</a> extracted from Wikipedia.</li>
   <li><strong>2006-12-20: Gene Ontology servers:</strong> Chris Mungall (Berkeley Drosophila Genome Project) has set up D2R Servers for <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-GO">Gene Ontology annotations</a> and <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-InSitu">gene expression in fruitfly embryogenesis</a>.</li>
@@ -147,6 +148,9 @@ pre { speak-punctuation: code; }
   <li>a <strong>modern browser</strong> like Firefox, Opera or Safari
     for using D2R Server's AJAX SPARQL Explorer. Internet Explorer can
     only browse the HTML pages, but not use the SPARQL Explorer.</li>
+  <li>Optionally, a <strong>J2EE servlet container</strong> as a
+    deployment target. D2R Server can be run either as a stand-alone
+    web server or inside an existing servlet container.</li>
 </ul>
 
 <p>What to do:</p>
@@ -191,6 +195,13 @@ pre { speak-punctuation: code; }
   <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/">D2RQ Manual</a>.
   D2R Server will automatically detect changes to the mapping file and
   reload appropriately when you hit the browser's refresh button.</p>
+<p><strong>Note:</strong> The HTML and RDF browser interfaces only work
+  for URI patterns that are <em>relative</em> and <em>do not contain the
+  hash (#) character</em>. For example, a URI pattern such as
+  <tt>entries/@@mytable.id@@</tt> is browsable, but
+  <tt>http://example.com/entries#@@mytable.id@@</tt> is not. The mapping
+  generator only creates browsable patterns. Non-browsable patterns still
+  work in the SPARQL interface and in RDF dumps.</p>
 
 <h2 id="configuration">Server configuration</h2>
 
@@ -230,7 +241,25 @@ pre { speak-punctuation: code; }
 
 <h2 id="container">Running D2R Server in an existing Servlet Container</h2>
 
-<p>@@@</p>
+<p>By default, D2R Server is a stand-alone server application that includes
+  its own web server. But D2R Server can also be run as a J2EE web application
+  inside an existing servlet container, such as Tomcat:</p>
+
+<ol>
+  <li>Make sure that your mapping file includes a configuration block, as
+    described in the <a href="#configuration">server configuration section</a>.
+    Set the port number to that of the servlet container, and set the base
+    URI to something like <tt>http://<em>servername</em>/<em>webappname</em>/</tt>.</li>
+  <li>Change the <tt>configFile</tt> param in <tt>/webapp/WEB-INF/web.xml</tt>
+    to the name of your configuration file. For deployment, we reommend placing
+    the mapping file into the <tt>/webapp/WEB-INF/</tt> directory.</li>
+  <li>In D2R Server's main directory, Run <tt>ant war</tt>. This creates the
+    <tt>d2r-server.war</tt> file. You need Apache Ant for this step.</li>
+  <li>Optionally, if you want a different name for your web application,
+    rename the file to <tt><em>webappname</em>.war</tt></li>
+  <li>Deploy the war file into your servlet container, e.g. by copying it
+    into Tomcat's <tt>webapps</tt> directory.</li>
+</ol>
 
 <h2 id="dumps">Creating RDF dumps</h2>
 
@@ -291,7 +320,7 @@ pre { speak-punctuation: code; }
 <div><a href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3"><img src="http://www.wiwiss.fu-berlin.de/suhl/_img/doap.png" align="absmiddle" /></a> (<a href="http://www4.wiwiss.fu-berlin.de/rdf_browser/?browse_uri=http%3A//www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3">View with Disco</a>)</div>
 
 <div id="footer">
-  <small>$Id: index.html,v 1.20 2007/11/02 14:46:26 cyganiak Exp $</small>
+  <small>$Id: index.html,v 1.21 2007/11/04 00:41:37 cyganiak Exp $</small>
 </div>
 </div>
 

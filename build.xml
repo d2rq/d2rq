@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="D2RQ" default="all" basedir=".">
+<project name="D2R Server" default="all" basedir=".">
 
 	<property name="name" value="d2r-server"/>
-	<property name="version" value="0.3.2"/>
+	<property name="version" value="0.4"/>
 	<property name="project.package" value="de.fuberlin.wiwiss.d2rs"/>
 	<property name="project.path" value="de/fuberlin/wiwiss/d2rs"/>
 	<property name="src" value="src"/>
@@ -35,9 +35,6 @@
 
 	<patternset id="distfiles">
 		<include name="**/*"/>
-		<exclude name="${src}/**"/>
-		<exclude name="${src.tests}/**"/>
-		<exclude name="build.xml"/>
 		<exclude name="${build}/**"/>
 		<exclude name="${build.tests}/**"/>
 		<exclude name="build/**"/>
@@ -53,7 +50,7 @@
 	<target name="clean">
 		<delete dir="${build}" failonerror="false"/>
 		<delete dir="${build.tests}" failonerror="false"/>
-		<delete dir="${war}" failonerror="false"/>
+		<delete file="${war}" failonerror="false"/>
 		<delete failonerror="false">
 			<fileset dir="." includes="${lib}/${name}-*.jar,${name}-*.zip,${name}-*.tar.gz"/>
 		</delete>
@@ -147,23 +144,23 @@
 	
 	<target name="vocab.d2r" depends="vocab.d2r.xml,vocab.d2r.schemagen"/>
 
-    <property name="war" value="{$war}"/>
-    <target name="war" depends="jar">
-        <war destfile="${war}" needxmlfile="false">
-            <fileset dir="webapp/">
-                <include name="snorql/**"/>
-            </fileset>
-            <lib dir="${lib}">
-                <exclude name="junit.jar"/>
-                <exclude name="servlet-api-2.5-6.1.1.jar"/>
-            </lib>
-            <lib file="${jar}"/>
-            <webinf dir="webapp/WEB-INF">
-                <include name="*"/>
-                <exclude name="templates"/>
-            </webinf>
-            <classes dir="etc"/>
-            <classes dir="webapp/WEB-INF/templates"/>
-        </war>
-    </target>
+	<target name="war" depends="jar">
+		<war destfile="${war}" needxmlfile="false">
+			<fileset dir="webapp/">
+				<include name="**"/>
+				<exclude name="WEB-INF"/>
+			</fileset>
+			<lib dir="${lib}">
+				<exclude name="junit.jar"/>
+				<exclude name="servlet-api-2.5-6.1.1.jar"/>
+			</lib>
+			<lib file="${jar}"/>
+			<webinf dir="webapp/WEB-INF">
+				<include name="*"/>
+				<exclude name="templates"/>
+			</webinf>
+			<classes dir="etc"/>
+			<classes dir="webapp/WEB-INF/templates"/>
+		</war>
+	</target>
 </project>
