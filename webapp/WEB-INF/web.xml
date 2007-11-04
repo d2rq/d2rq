@@ -17,17 +17,10 @@
 
   <!-- SERVLETS -->
 
-  <!-- The Joseki SPARQL servlet -->
   <servlet>
+    <!-- The Joseki SPARQL servlet -->
     <servlet-name>SPARQL service processor</servlet-name>
     <servlet-class>org.joseki.http.Servlet</servlet-class>
-
-    <!-- Configuration file -->
-    <init-param>
-      <param-name>org.joseki.rdfserver.config</param-name>
-      <param-value>joseki-config.ttl</param-value>
-    </init-param>
-
   </servlet>
 
   <servlet>
