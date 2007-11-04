@@ -276,8 +276,8 @@ separate <a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/">D2R S
   <li>The automatic detection of column types does not work. Therefore, column types
     for <em>all</em> database columns must be provided in the mapping file
     by adding <tt>d2rq:textColumn</tt>,
-    <tt>d2rq:numericColumn</tt> or <tt>d2rq:dateColumn</tt> statements to the
-    <tt>d2rq:Database</tt>.</li>
+    <tt>d2rq:numericColumn</tt>, <tt>d2rq:dateColumn</tt> or
+    <tt>d2rq:timestampColumn</tt> statements to the <tt>d2rq:Database</tt>.</li>
   </ul>
   If possible, a dedicated JDBC driver for the database engine should be used
   instead of the ODBC-JDBC bridge to avoid these problems.
@@ -740,13 +740,15 @@ map:location a d2rq:PropertyBridge;
   <tr> 
     <td><strong>d2rq:textColumn</strong><br />
       <strong>d2rq:numericColumn</strong><br />
-      <strong>d2rq:dateColumn</strong>
+      <strong>d2rq:dateColumn</strong><br />
+      <strong>d2rq:timestampColumn</strong>
     </td>
     <td>These properties are used to declare the column type of database columns.
       Values are column names in <tt>Table_name.column_name</tt> notation.
       These properties do not need to be specified <em>unless</em>
       the engine is for some reason unable to determine the correct
-      column type by itself.
+      column type by itself. The <strong>d2rq:timestampColumn</strong>
+      is for column types that combine a date and a time.
     </td>
   </tr>
 </table>
@@ -1401,7 +1403,7 @@ is made by using an appropriate property on the bridge declaration:
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.30 2007/10/23 15:33:19 cyganiak Exp $</p>
+<p>$Id: index.htm,v 1.31 2007/11/04 16:56:15 cyganiak Exp $</p>
 
 </BODY>
 </HTML>

@@ -1,12 +1,16 @@
 package de.fuberlin.wiwiss.d2rq.nodes;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
@@ -23,10 +27,19 @@ public class TypedNodeMaker implements NodeMaker {
 	public final static NodeType URI = new URINodeType();
 	public final static NodeType BLANK = new BlankNodeType();
 	public final static NodeType PLAIN_LITERAL = new LiteralNodeType("", null);
+	public final static NodeType XSD_DATE = new DateLiteralNodeType();
+	public final static NodeType XSD_DATETIME = new DateTimeLiteralNodeType();
+	
 	public static NodeType languageLiteral(String language) {
 		return new LiteralNodeType(language, null);
 	}
 	public static NodeType typedLiteral(RDFDatatype datatype) {
+		if (datatype.equals(XSDDatatype.XSDdate)) {
+			return XSD_DATE;
+		}
+		if (datatype.equals(XSDDatatype.XSDdateTime)) {
+			return XSD_DATETIME;
+		}
 		return new LiteralNodeType("", datatype);
 	}
 	
@@ -147,6 +160,43 @@ public class TypedNodeMaker implements NodeMaker {
 				result.append(PrettyPrinter.toString(this.datatype));
 			}
 			return result.toString();
+		}
+	}
+	
+	private static class DateLiteralNodeType extends LiteralNodeType {
+		DateLiteralNodeType() {
+			super("", XSDDatatype.XSDdate);
+		}
+		public boolean matches(Node node) {
+			return super.matches(node) && XSDDatatype.XSDdate.isValid(node.getLiteralLexicalForm());
+		}
+		public String extractValue(Node node) {
+			XSDDateTime xsd = (XSDDateTime) node.getLiteralValue();
+			return new java.sql.Date(xsd.asCalendar().getTimeInMillis()).toString();
+		}
+		public Node makeNode(String value) {
+			// Couldn't figure out a safe way to convert java.sql.Date to an XSD date
+			if (!XSDDatatype.XSDdate.isValid(value)) return null;
+			return Node.createLiteral(value, null, XSDDatatype.XSDdate);
+		}
+	}
+	
+	private static class DateTimeLiteralNodeType extends LiteralNodeType {
+		DateTimeLiteralNodeType() {
+			super("", XSDDatatype.XSDdateTime);
+		}
+		public boolean matches(Node node) {
+			return super.matches(node) && XSDDatatype.XSDdateTime.isValid(node.getLiteralLexicalForm());
+		}
+		public String extractValue(Node node) {
+			XSDDateTime xsd = (XSDDateTime) node.getLiteralValue();
+			return new java.sql.Timestamp(xsd.asCalendar().getTimeInMillis()).toString();
+		}
+		public Node makeNode(String value) {
+			Timestamp t = Timestamp.valueOf(value);
+			Calendar c = Calendar.getInstance();
+			c.setTimeInMillis(t.getTime());
+			return Node.createLiteral(new XSDDateTime(c).toString(), null, XSDDatatype.XSDdateTime);
 		}
 	}
 }

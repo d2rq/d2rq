@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.8 2006/11/01 15:26:58 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.9 2007/11/04 16:56:15 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -29,6 +29,7 @@ public class ConnectedDB {
 	public static final int TEXT_COLUMN = 1;
 	public static final int NUMERIC_COLUMN = 2;
 	public static final int DATE_COLUMN = 3;
+	public static final int TIMESTAMP_COLUMN = 4;
 
 	private String jdbcURL;
 	private String username;
@@ -38,6 +39,7 @@ public class ConnectedDB {
 	private Set textColumns;
 	private Set numericColumns;
 	private Set dateColumns;
+	private Set timestampColumns;
 	private Connection connection = null;
 	private DatabaseSchemaInspector schemaInspector = null;
 	private String dbType = null;
@@ -45,12 +47,13 @@ public class ConnectedDB {
 	
 	public ConnectedDB(String jdbcURL, String username, String password) {
 		this(jdbcURL, username, password, null, true,
-				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET, Database.NO_LIMIT);
+				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET, 
+				Collections.EMPTY_SET, Database.NO_LIMIT);
 	}
 	
 	public ConnectedDB(String jdbcURL, String username, String password, String expressionTranslator,
 			boolean allowDistinct, Set textColumns, Set numericColumns, Set dateColumns,
-			int limit) {
+			Set timestampColumns, int limit) {
 		this.jdbcURL = jdbcURL;
 		this.expressionTranslator = expressionTranslator;
 		this.allowDistinct = allowDistinct;
@@ -59,6 +62,7 @@ public class ConnectedDB {
 		this.textColumns = textColumns;
 		this.numericColumns = numericColumns;
 		this.dateColumns = dateColumns;
+		this.timestampColumns = timestampColumns;
 		this.limit = limit;
 	}
 	
@@ -136,6 +140,9 @@ public class ConnectedDB {
     	if (this.dateColumns.contains(column.qualifiedName())) {
     		return DATE_COLUMN;
     	}
+    	if (this.timestampColumns.contains(column.qualifiedName())) {
+    		return TIMESTAMP_COLUMN;
+    	}
 		int type = schemaInspector().columnType(column);
 		switch (type) {
 			// TODO There are a bunch of others, see http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Types.html
@@ -160,7 +167,7 @@ public class ConnectedDB {
 	
 			case Types.DATE: return DATE_COLUMN;
 			case Types.TIME: return DATE_COLUMN;
-			case Types.TIMESTAMP: return DATE_COLUMN;
+			case Types.TIMESTAMP: return TIMESTAMP_COLUMN;
 			
 			default: throw new D2RQException("Unsupported database type code (" + type + ") for column "
 					+ column.qualifiedName());
@@ -216,12 +223,11 @@ public class ConnectedDB {
 				}
 			}
 		} else if (columnType == ConnectedDB.DATE_COLUMN) {
-			// TODO: This works in Access only! Should be:
-			// DATE '2006-09-15'
-			// TIMESTAMP '2006-09-15 12:34:56.7890'
-			// depending on type of column. This is SQL-92 and confirmed to 
-			// work in MySQL, PostgreSQL, Oracle.
-			return "#" + value + "#";
+			// TODO: Acces requires "#2006-09-15#"
+			return "DATE '" + value + "'";
+		} else if (columnType == ConnectedDB.TIMESTAMP_COLUMN) {
+			// TODO: Acces requires "#2006-09-15 23:59:00#" (?)
+			return "TIMESTAMP '" + value + "'";
 		}
 		return singleQuote(value);
 	}

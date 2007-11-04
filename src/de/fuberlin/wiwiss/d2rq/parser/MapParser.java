@@ -32,7 +32,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.24 2007/10/23 15:17:53 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.25 2007/11/04 16:56:16 cyganiak Exp $
  */
 public class MapParser {
 
@@ -179,6 +179,10 @@ public class MapParser {
 		while (stmts.hasNext()) {
 			database.addDateColumn(stmts.nextStatement().getString());
 		}
+		stmts = r.listProperties(D2RQ.timestampColumn);
+		while (stmts.hasNext()) {
+			database.addTimestampColumn(stmts.nextStatement().getString());
+		}
 	}
 
 	private void parseTranslationTables() {
@@ -314,7 +318,7 @@ public class MapParser {
 			classMap.setDatabase(this.mapping.database(
 					stmts.nextStatement().getResource()));
 		}
-		stmts = r.listProperties(D2RQ.class_);
+		stmts = r.listProperties(D2RQ.class__);
 		while (stmts.hasNext()) {
 			classMap.addClass(stmts.nextStatement().getResource());
 		}
