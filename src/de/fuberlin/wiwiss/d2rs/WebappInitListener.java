@@ -1,21 +1,14 @@
 package de.fuberlin.wiwiss.d2rs;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-
-import de.fuberlin.wiwiss.d2rq.D2RQException;
 
 /**
  * Initialize D2R server on startup of an appserver such as Tomcat. This listener should
  * be included in the web.xml. This is compatible with Servlet 2.3 spec compliant appservers.
  *
- * @version $Id: WebappInitListener.java,v 1.1 2007/11/02 14:46:25 cyganiak Exp $
+ * @version $Id: WebappInitListener.java,v 1.2 2007/11/04 17:31:04 cyganiak Exp $
  * @author Inigo Surguy
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
@@ -47,16 +40,9 @@ public class WebappInitListener implements ServletContextListener {
 	}
 	
 	private String absolutize(String fileName, ServletContext context) {
-		try {
-			URI uri = new URI(fileName);
-			if (uri.isAbsolute()) {
-				return fileName;
-			}
-			return new File(context.getRealPath("WEB-INF/" + fileName)).getAbsoluteFile().toURL().toExternalForm();
-		} catch (URISyntaxException ex) {
-			throw new D2RQException(ex);
-		} catch (MalformedURLException ex) {
-			throw new D2RQException(ex);
+		if (!fileName.matches("^[a-zA-Z0-9]+:")) {
+			fileName = context.getRealPath("WEB-INF/" + fileName);
 		}
+		return ConfigLoader.toAbsoluteURI(fileName);
 	}
 }

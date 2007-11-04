@@ -1,10 +1,5 @@
 package d2r;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
 
@@ -13,13 +8,13 @@ import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.shared.JenaException;
 
-import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rs.ConfigLoader;
 import de.fuberlin.wiwiss.d2rs.JettyLauncher;
 
 /**
  * Command line launcher for D2R Server.
  * 
- * @version $Id: server.java,v 1.6 2007/11/02 14:46:24 cyganiak Exp $
+ * @version $Id: server.java,v 1.7 2007/11/04 17:31:04 cyganiak Exp $
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class server {
@@ -53,12 +48,7 @@ public class server {
 			setServerBaseURI(cmd.getArg(baseURIArg).getValue());
 		}
 		String mappingFileName = cmd.getItem(0);
-		// Windows? Convert \ to / in mapping file name
-		// because we treat it as a URL, not a file name
-		if (System.getProperty("os.name").toLowerCase().indexOf("win") != -1) {
-			mappingFileName = mappingFileName.replaceAll("\\\\", "/");
-		}
-		setMappingFileURL(absolutize(mappingFileName));
+		setMappingFileName(mappingFileName);
 		startServer();
 	}
 	
@@ -70,15 +60,15 @@ public class server {
 		server.overrideBaseURI(baseURI);
 	}
 	
-	public static void setMappingFileURL(String mappingFileURL) {
+	public static void setMappingFileName(String mappingFileName) {
 		try {
-			server.setConfigFile(mappingFileURL);
+			server.setConfigFile(ConfigLoader.toAbsoluteURI(mappingFileName));
 		} catch (JenaException ex) {
 			Throwable t = ex;
 			if (ex.getCause() != null) {
 				t = ex.getCause();
 			}
-			System.err.println(mappingFileURL + ": " + t.getMessage());
+			System.err.println(mappingFileName + ": " + t.getMessage());
 			System.exit(1);
 		}
 	}
@@ -86,18 +76,5 @@ public class server {
 	public static void startServer() {
 		server.start();
 		log.info("[[[ Server started at " + server.getHomeURI() + " ]]]");
-	}
-	
-	private static String absolutize(String relativeURI) {
-		try {
-			if (new URI(relativeURI).isAbsolute()) {
-				return relativeURI;
-			}
-			return new File(relativeURI).getAbsoluteFile().toURL().toExternalForm();
-		} catch (URISyntaxException ex) {
-			throw new D2RQException(ex);
-		} catch (MalformedURLException ex) {
-			throw new D2RQException(ex);
-		}
 	}
 }

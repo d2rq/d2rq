@@ -1,5 +1,10 @@
 package de.fuberlin.wiwiss.d2rs;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -10,9 +15,34 @@ import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rs.vocab.D2R;
 
 public class ConfigLoader {
+
+	/**
+	 * Accepts an absolute URI, relative file: URI, or plain
+	 * file name (including names with spaces, Windows backslashes
+	 * etc) and returns an equivalent full absolute URI.
+	 */
+	public static String toAbsoluteURI(String fileName) {
+		// Windows? Convert \ to / in mapping file name
+		// because we treat it as a URL, not a file name
+		if (System.getProperty("os.name").toLowerCase().indexOf("win") != -1) {
+			fileName = fileName.replaceAll("\\\\", "/");
+		}
+		try {
+			if (fileName.matches("^[a-zA-Z0-9]+:") && new URI(fileName).isAbsolute()) {
+				return fileName;
+			}
+			return new File(fileName).getAbsoluteFile().toURL().toExternalForm();
+		} catch (URISyntaxException ex) {
+			throw new D2RQException(ex);
+		} catch (MalformedURLException ex) {
+			throw new D2RQException(ex);
+		}
+	}
+
 	private boolean isLocalMappingFile;
 	private String configURL;
 	private String mappingFilename = null;
