@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * TODO: Shouldn't call to SQL so much
  *  
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLExpression.java,v 1.1 2006/11/02 20:46:46 cyganiak Exp $
+ * @version $Id: SQLExpression.java,v 1.2 2007/11/05 23:00:49 cyganiak Exp $
  */
 public class SQLExpression extends Expression {
 	
@@ -27,7 +27,12 @@ public class SQLExpression extends Expression {
 		if ("0".equals(sql)) {
 			return Expression.FALSE;
 		}
-		return new SQLExpression(sql);
+		if (sql.startsWith("(") && sql.endsWith(")")) {
+			return new SQLExpression(sql);
+		}
+		// Put it in brackets, otherwise we get into precedence trouble
+		// e.g. with an expression "foo OR bar"
+		return new SQLExpression("(" + sql + ")");
 	}
 	
 	private String expression;
@@ -59,7 +64,7 @@ public class SQLExpression extends Expression {
 	}
 	
 	public String toString() {
-		return "SQL(" + this.expression + ")";
+		return "SQL" + this.expression;
 	}
 	
 	public boolean equals(Object other) {
