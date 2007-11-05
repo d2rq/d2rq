@@ -8,7 +8,7 @@ import javax.servlet.ServletContextListener;
  * Initialize D2R server on startup of an appserver such as Tomcat. This listener should
  * be included in the web.xml. This is compatible with Servlet 2.3 spec compliant appservers.
  *
- * @version $Id: WebappInitListener.java,v 1.2 2007/11/04 17:31:04 cyganiak Exp $
+ * @version $Id: WebappInitListener.java,v 1.3 2007/11/05 21:35:11 cyganiak Exp $
  * @author Inigo Surguy
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
@@ -40,7 +40,7 @@ public class WebappInitListener implements ServletContextListener {
 	}
 	
 	private String absolutize(String fileName, ServletContext context) {
-		if (!fileName.matches("^[a-zA-Z0-9]+:")) {
+		if (!fileName.matches("[a-zA-Z0-9]+:.*")) {
 			fileName = context.getRealPath("WEB-INF/" + fileName);
 		}
 		return ConfigLoader.toAbsoluteURI(fileName);

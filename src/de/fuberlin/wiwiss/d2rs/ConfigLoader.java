@@ -32,7 +32,7 @@ public class ConfigLoader {
 			fileName = fileName.replaceAll("\\\\", "/");
 		}
 		try {
-			if (fileName.matches("^[a-zA-Z0-9]+:") && new URI(fileName).isAbsolute()) {
+			if (fileName.matches("[a-zA-Z0-9]+:.*") && new URI(fileName).isAbsolute()) {
 				return fileName;
 			}
 			return new File(fileName).getAbsoluteFile().toURL().toExternalForm();
