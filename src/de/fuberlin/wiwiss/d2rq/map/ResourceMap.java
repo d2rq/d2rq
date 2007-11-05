@@ -33,16 +33,15 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.7 2007/10/22 10:21:16 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.8 2007/11/05 01:02:37 cyganiak Exp $
  */
 public abstract class ResourceMap extends MapObject {
-	protected static final Property valueProperty = 
-		D2RQ.ClassMap.getModel().createProperty(D2RQ.NS + "x-value");
 
 	// These can be set on PropertyBridges and ClassMaps
 	protected String bNodeIdColumns = null;	// comma-separated list
 	protected String uriColumn = null;
 	protected String uriPattern = null;
+	protected RDFNode constantValue = null;
 	protected Collection valueRegexes = new ArrayList();
 	protected Collection valueContainses = new ArrayList();
 	protected int valueMaxLength = Integer.MAX_VALUE;
@@ -57,7 +56,6 @@ public abstract class ResourceMap extends MapObject {
 	protected String pattern = null;
 	protected String datatype = null;
 	protected String lang = null;
-	protected RDFNode value = null;
 	protected ClassMap refersToClassMap = null;
 
 	private NodeMaker cachedNodeMaker;
@@ -81,6 +79,11 @@ public abstract class ResourceMap extends MapObject {
 	public void setURIPattern(String pattern) {
 		assertNotYetDefined(this.uriColumn, D2RQ.uriPattern, D2RQException.RESOURCEMAP_DUPLICATE_URIPATTERN);
 		this.uriPattern = pattern;
+	}
+	
+	public void setConstantValue(RDFNode constantValue) {
+		assertNotYetDefined(this.constantValue, D2RQ.constantValue, D2RQException.RESOURCEMAP_DUPLICATE_CONSTANTVALUE);
+		this.constantValue = constantValue;
 	}
 	
 	public void addValueRegex(String regex) {
@@ -160,8 +163,8 @@ public abstract class ResourceMap extends MapObject {
 	}
 	
 	private NodeMaker buildNodeMaker() {
-		if (this.value != null) {
-			return new FixedNodeMaker(this.value.asNode(), 
+		if (this.constantValue != null) {
+			return new FixedNodeMaker(this.constantValue.asNode(), 
 					!this.containsDuplicates);
 		}
 		if (this.refersToClassMap == null) {
@@ -299,7 +302,7 @@ public abstract class ResourceMap extends MapObject {
 		if (property.equals(D2RQ.column)) return this.column != null;
 		if (property.equals(D2RQ.pattern)) return this.pattern != null;
 		if (property.equals(D2RQ.refersToClassMap)) return this.refersToClassMap != null;
-		if (property.equals(valueProperty)) return this.value != null;
+		if (property.equals(D2RQ.constantValue)) return this.constantValue != null;
 		throw new D2RQException("No primary spec: " + property);
 	}
 }

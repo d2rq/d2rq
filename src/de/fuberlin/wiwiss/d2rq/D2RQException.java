@@ -6,7 +6,7 @@ import com.hp.hpl.jena.shared.JenaException;
  * Exception used to signal most D2RQ errors.
  *
  * @author Chris Bizer chris@bizer.de
- * @version $Id: D2RQException.java,v 1.12 2006/11/01 15:26:57 cyganiak Exp $
+ * @version $Id: D2RQException.java,v 1.13 2007/11/05 01:02:39 cyganiak Exp $
  */
 
 public class D2RQException extends JenaException {
@@ -33,7 +33,7 @@ public class D2RQException extends JenaException {
 	public static final int PROPERTYBRIDGE_DUPLICATE_REFERSTOCLASSMAP = 20;
 	public static final int PROPERTYBRIDGE_INVALID_REFERSTOCLASSMAP = 21;
 	public static final int PROPERTYBRIDGE_DUPLICATE_VALUEMAXLENGTH = 22;
-	public static final int PROPERTYBRIDGE_DUPLICATE_VALUE = 23;
+//	public static final int PROPERTYBRIDGE_DUPLICATE_VALUE = 23;
 	public static final int PROPERTYBRIDGE_CONFLICTING_DATABASES = 24;
 	public static final int PROPERTYBRIDGE_LANG_AND_DATATYPE = 25;
 	public static final int PROPERTYBRIDGE_NONLITERAL_WITH_DATATYPE = 26;
@@ -64,6 +64,8 @@ public class D2RQException extends JenaException {
 	public static final int RESOURCEMAP_ILLEGAL_URIPATTERN = 50;
 	public static final int DATABASE_MISSING_DSN = 51;
 	public static final int MUST_BE_NUMERIC = 52;
+	public static final int RESOURCEMAP_DUPLICATE_CONSTANTVALUE = 53;
+	public static final int CLASSMAP_INVALID_CONSTANTVALUE = 53;
 	
 	private int code;
 	

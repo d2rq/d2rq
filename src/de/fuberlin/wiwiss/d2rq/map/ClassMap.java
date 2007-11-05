@@ -49,7 +49,7 @@ public class ClassMap extends ResourceMap {
 		PropertyBridge bridge = new PropertyBridge(this.resource);
 		bridge.setBelongsToClassMap(this);
 		bridge.addProperty(property);
-		bridge.setValue(value);
+		bridge.setConstantValue(value);
 		addPropertyBridge(bridge);
 	}
 	
@@ -64,12 +64,17 @@ public class ClassMap extends ResourceMap {
 	public void validate() throws D2RQException {
 		assertHasBeenDefined(this.database, D2RQ.dataStorage, D2RQException.CLASSMAP_NO_DATABASE);
 		assertHasPrimarySpec(new Property[]{
-				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns
+				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns, D2RQ.constantValue
 		});
 		if (this.classes.isEmpty() && this.propertyBridges.isEmpty()) {
 			throw new D2RQException(toString() + 
 					" has no d2rq:PropertyBridges and no d2rq:class",
 					D2RQException.CLASSMAP_NO_PROPERTYBRIDGES);
+		}
+		if (this.constantValue != null && !this.constantValue.isLiteral()) {
+			throw new D2RQException(
+					"d2rq:constantValue for class map " + toString() + " must be a URI or blank node", 
+					D2RQException.CLASSMAP_INVALID_CONSTANTVALUE);
 		}
 		Iterator it = this.propertyBridges.iterator();
 		while (it.hasNext()) {
@@ -99,7 +104,7 @@ public class ClassMap extends ResourceMap {
 			PropertyBridge bridge = new PropertyBridge(this.resource);
 			bridge.setBelongsToClassMap(this);
 			bridge.addProperty(RDF.type);
-			bridge.setValue(class_);
+			bridge.setConstantValue(class_);
 			this.compiledPropertyBridges.addAll(bridge.toRDFRelations());
 		}
 	}

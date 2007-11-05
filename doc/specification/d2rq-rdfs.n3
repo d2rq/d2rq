@@ -22,7 +22,7 @@
    				dc:creator       "Richard Cyganiak" ;
    				dc:date          "2006-08-12" ;
    				dc:format        "RDF";
-   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.15 2007/11/04 16:56:15 cyganiak Exp $";
+   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.16 2007/11/05 01:02:40 cyganiak Exp $";
    				.
 
 
@@ -113,6 +113,12 @@ d2rq:bNodeIdColumns
 				a rdf:Property;
 				rdfs:label "bNode ID columns";
 				rdfs:comment "Comma-separated list of database columns used for construction of blank nodes.";
+				rdfs:domain d2rq:ResourceMap;
+				.
+d2rq:constantValue
+				a rdf:Property;
+				rdfs:label "constant value";
+				rdfs:comment "A constant RDF node to be used as the value of this property bridge, or as the resource of a singleton ClassMap.";
 				rdfs:domain d2rq:ResourceMap;
 				.
 d2rq:condition	a rdf:Property;

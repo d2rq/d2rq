@@ -7,12 +7,11 @@ import java.util.Iterator;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
@@ -61,11 +60,6 @@ public class PropertyBridge extends ResourceMap {
 		this.lang = lang;
 	}
 	
-	public void setValue(RDFNode value) {
-		assertNotYetDefined(this.value, valueProperty, D2RQException.PROPERTYBRIDGE_DUPLICATE_VALUE);
-		this.value = value;
-	}
-	
 	public void setRefersToClassMap(ClassMap classMap) {
 		assertNotYetDefined(this.refersToClassMap, D2RQ.refersToClassMap, 
 				D2RQException.PROPERTYBRIDGE_DUPLICATE_REFERSTOCLASSMAP);
@@ -88,7 +82,7 @@ public class PropertyBridge extends ResourceMap {
 		}
 		assertHasPrimarySpec(new Property[]{
 				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns,
-				D2RQ.column, D2RQ.pattern, valueProperty,
+				D2RQ.column, D2RQ.pattern, D2RQ.constantValue,
 				D2RQ.refersToClassMap
 		});
 		if (this.datatype != null && this.lang != null) {

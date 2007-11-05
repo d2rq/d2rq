@@ -61,6 +61,11 @@
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
     <rdfs:label>date column</rdfs:label>
   </rdf:Property>
+  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#constantValue">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ResourceMap"/>
+    <rdfs:comment>A constant RDF node to be used as the value of this property bridge, or as the resource of a singleton ClassMap.</rdfs:comment>
+    <rdfs:label>constant value</rdfs:label>
+  </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#javaClass">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ClassMap"/>
     <rdfs:comment>Qualified name of a Java class that implements de.fuberlin.wiwiss.d2rq.Translator and translates between database and RDF.</rdfs:comment>
@@ -277,7 +282,7 @@
     <rdfs:label>href</rdfs:label>
   </rdf:Property>
   <rdf:Description rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1">
-    <owl:versionInfo>$Id: d2rq-rdfs.rdf,v 1.6 2007/11/04 16:56:15 cyganiak Exp $</owl:versionInfo>
+    <owl:versionInfo>$Id: d2rq-rdfs.rdf,v 1.7 2007/11/05 01:02:40 cyganiak Exp $</owl:versionInfo>
     <dc:format>RDF</dc:format>
     <dc:date>2006-08-12</dc:date>
     <dc:creator>Richard Cyganiak</dc:creator>
