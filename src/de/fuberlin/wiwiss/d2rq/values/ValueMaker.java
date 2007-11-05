@@ -30,13 +30,13 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * of a set of RDF nodes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueMaker.java,v 1.6 2007/10/23 14:30:33 cyganiak Exp $
+ * @version $Id: ValueMaker.java,v 1.7 2007/11/05 22:59:38 cyganiak Exp $
  */
 public interface ValueMaker {
     
 	/**
 	 * Checks if a given value fits this source without querying the
-	 * database.
+	 * database. A value maker should never match <tt>null</tt>.
 	 */
 	boolean matches(String value);
 
