@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.7 2006/09/18 19:06:54 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.8 2007/11/06 13:56:22 cyganiak Exp $
  */
 public class Mapping {
 	private Model model = ModelFactory.createDefaultModel();
@@ -125,7 +125,7 @@ public class Mapping {
 	 * @return A collection of {@link RDFRelation}s corresponding to each
 	 * 		of the property bridges
 	 */
-	public Collection compiledPropertyBridges() {
+	public synchronized Collection compiledPropertyBridges() {
 		if (this.compiledPropertyBridges == null) {
 			compilePropertyBridges();
 		}
