@@ -36,6 +36,10 @@ public class PrettyPrinterTest extends TestCase {
 				PrettyPrinter.toString(RDF.type.asNode(), new PrefixMappingImpl()));
 		assertEquals("rdf:type", 
 				PrettyPrinter.toString(RDF.type.asNode(), PrefixMapping.Standard));
+		assertEquals("?x", 
+				PrettyPrinter.toString(Node.createVariable("x")));
+		assertEquals("?ANY",
+				PrettyPrinter.toString(Node.ANY));
 	}
 	
 	public void testTriplePrettyPrinting() {
@@ -44,6 +48,10 @@ public class PrettyPrinterTest extends TestCase {
 						Node.createURI("http://example.org/a"),
 						RDFS.label.asNode(),
 						Node.createLiteral("Example", null, null))));
+	}
+
+	public void testTriplePrettyPrintingWithNodeANY() {
+		assertEquals("?ANY ?ANY ?ANY .", PrettyPrinter.toString(Triple.ANY));
 	}
 	
 	public void testTriplePrettyPrintingWithPrefixMapping() {

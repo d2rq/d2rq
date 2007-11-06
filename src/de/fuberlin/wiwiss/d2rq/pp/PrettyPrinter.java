@@ -13,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Pretty printer for various kinds of objects.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PrettyPrinter.java,v 1.4 2006/09/11 22:29:21 cyganiak Exp $
+ * @version $Id: PrettyPrinter.java,v 1.5 2007/11/06 10:06:18 cyganiak Exp $
  */
 public class PrettyPrinter {
 
@@ -44,6 +44,12 @@ public class PrettyPrinter {
 		}
 		if (n.isBlank()) {
 			return "_:" + n.getBlankNodeLabel();
+		}
+		if (n.isVariable()) {
+			return "?" + n.getName();
+		}
+		if (Node.ANY.equals(n)) {
+			return "?ANY";
 		}
 		// Literal
 		String s = "\"" + n.getLiteralLexicalForm() + "\"";
