@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" class="browser">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <title>
       All $classmap | $server_name
@@ -8,7 +8,7 @@
     <link rel="stylesheet" type="text/css" href="${home_link}snorql/style.css" />
     <link rel="alternate" type="application/rdf+xml" href="$rdf_link" title="RDF" />
   </head>
-  <body>
+  <body class="browser">
     <div id="rdficon"><a href="$rdf_link" title="RDF data"><img src="${home_link}snorql/rdf_flyer.24.gif" alt="[RDF data]" /></a></div>
     <div id="header">
       <h1 id="title">
