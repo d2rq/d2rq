@@ -7,10 +7,6 @@
     <script src="sparql.js"></script>
     <script>
 
-function betterUnescape(s) {
-    return unescape(s.replace(/\+/g, ' '));
-}
-
 function start() {
     setEndpointURL(document.location.href.match(/^([^?]*)snorql\//)[1] + 'sparql');
     outputChanged('browse');
@@ -27,7 +23,7 @@ function start() {
     }
     var match = queryString.match(/prefixes=([^&]*)/);
     if (match) {
-        prefixes = betterUnescape(match[1]);
+        prefixes = decodeURIComponent(match[1]);
     }
     var querytext = null;
     if (queryString == 'classes') {
@@ -44,32 +40,32 @@ function start() {
     }
     var match = queryString.match(/property=([^&]*)/);
     if (match) {
-        var resultTitle = 'All uses of property ' + betterUnescape(match[1]) + ':';
+        var resultTitle = 'All uses of property ' + decodeURIComponent(match[1]) + ':';
         var query = 'SELECT ?resource ?value\n' +
-                'WHERE { ?resource <' + betterUnescape(match[1]) + '> ?value }\n' +
+                'WHERE { ?resource <' + decodeURIComponent(match[1]) + '> ?value }\n' +
                 'ORDER BY ?resource ?value';
     }
     var match = queryString.match(/class=([^&]*)/);
     if (match) {
-        var resultTitle = 'All instances of class ' + betterUnescape(match[1]) + ':';
+        var resultTitle = 'All instances of class ' + decodeURIComponent(match[1]) + ':';
         var query = 'SELECT ?instance\n' +
-                'WHERE { ?instance a <' + betterUnescape(match[1]) + '> }\n' +
+                'WHERE { ?instance a <' + decodeURIComponent(match[1]) + '> }\n' +
                 'ORDER BY ?instance';
     }
     var match = queryString.match(/describe=([^&]*)/);
     if (match) {
-        var resultTitle = 'Description of ' + betterUnescape(match[1]) + ':';
+        var resultTitle = 'Description of ' + decodeURIComponent(match[1]) + ':';
         var query = 'SELECT ?property ?hasValue ?isValueOf\n' +
                 'WHERE {\n' +
-                '  { <' + betterUnescape(match[1]) + '> ?property ?hasValue }\n' +
+                '  { <' + decodeURIComponent(match[1]) + '> ?property ?hasValue }\n' +
                 '  UNION\n' +
-                '  { ?isValueOf ?property <' + betterUnescape(match[1]) + '> }\n' +
+                '  { ?isValueOf ?property <' + decodeURIComponent(match[1]) + '> }\n' +
                 '}\n' +
                 'ORDER BY (!BOUND(?hasValue)) ?property ?hasValue ?isValueOf';
     }
     if (queryString.match(/query=/)) {
         var resultTitle = 'SPARQL results:';
-        querytext = betterUnescape(queryString.match(/query=([^&]*)/)[1]);
+        querytext = decodeURIComponent(queryString.match(/query=([^&]*)/)[1]);
         var query = prefixes + querytext;
     }
     if (!querytext) {
@@ -244,11 +240,11 @@ function jsonToHTML(json) {
             var varName = json.head.vars[v];
             var node = binding[varName];
             if (varName == 'property') {
-                td.appendChild(nodeToHTML(node, function(uri) { return '?property=' + escape(uri); }));
+                td.appendChild(nodeToHTML(node, function(uri) { return '?property=' + encodeURIComponent(uri); }));
             } else if (varName == 'class') {
-                td.appendChild(nodeToHTML(node, function(uri) { return '?class=' + escape(uri); }));
+                td.appendChild(nodeToHTML(node, function(uri) { return '?class=' + encodeURIComponent(uri); }));
             } else {
-                td.appendChild(nodeToHTML(node, function(uri) { return '?describe=' + escape(uri); }));
+                td.appendChild(nodeToHTML(node, function(uri) { return '?describe=' + encodeURIComponent(uri); }));
             }
             tr.appendChild(td);
         }

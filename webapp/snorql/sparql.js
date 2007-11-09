@@ -2,6 +2,7 @@
   Copyright (c) 2006, 2007
     Lee Feigenbaum ( lee AT thefigtrees DOT net )
 	Elias Torres   ( elias AT torrez DOT us )
+    Wing Yung      ( wingerz AT gmail DOT com )
   All rights reserved.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -112,7 +113,17 @@ SPARQL._query_transformations = {
 			for (var v in o.results.bindings[i])
 				if (ret[v] instanceof Array) ret[v].push(o.results.bindings[i][v].value);
 		return ret;
-	}
+	},
+    selectValueHashes: function(o) {
+        var hashes = [];
+        for (var i = 0; i < o.results.bindings.length; i++) {
+            var hash = {};
+            for (var v in o.results.bindings[i])
+                hash[v] = o.results.bindings[i][v].value;
+            hashes.push(hash);
+        }
+        return hashes;
+    }
 };
 
 SPARQL.statistics = {
@@ -240,7 +251,7 @@ SPARQL.Query = function(service, priority) {
     var _method = service.method();
 	var _output = service.output();
 	var _priority = priority || 0;
-	var _request_headers = service.requestHeaders();
+	var _request_headers = clone_obj(service.requestHeaders());
 
 	//------------------
 	// private functions
@@ -280,7 +291,7 @@ SPARQL.Query = function(service, priority) {
 		var user_data = "argument" in cb ? cb.argument : null;
 		if (which in cb) {
 			if (cb.scope) {
-				cb[which].apply(scope, [arg, user_data]);
+                cb[which].apply(cb.scope, [arg, user_data]);
 			} else { 
 				cb[which](arg, user_data); 
 			}
@@ -293,6 +304,7 @@ SPARQL.Query = function(service, priority) {
 		this._doCallback(arg.callback, 'failure', xhr /* just pass through the connection response object */);
 	};
 	this._querySuccess = function(xhr, arg) {
+        //alert(xhr.responseText);
 		SPARQL.statistics.successes++;
 		_service._markDone(this);
 		this._doCallback(arg.callback, 'success', arg.transformer(
@@ -317,7 +329,7 @@ SPARQL.Query = function(service, priority) {
 				var content = null;
 
 				try {
-                    if (!document.domain || (url.slice(7, document.domain.length + 7) != document.domain && netscape && netscape.security && netscape.security.PrivilegeManager)) {
+                    if (!document.domain || (url.match(/^https?:\/\//) && url.slice(7, document.domain.length + 7) != document.domain && window.netscape && netscape.security && netscape.security.PrivilegeManager)) {
 						netscape.security.PrivilegeManager.enablePrivilege( "UniversalBrowserRead");
 						netscape.security.PrivilegeManager.enablePrivilege( "UniversalXPConnect"); 
 					}
@@ -330,7 +342,8 @@ SPARQL.Query = function(service, priority) {
 				
 				// set the headers, including the content-type for POSTed queries
 				for (var header in this.requestHeaders())
-					xhr.setRequestHeader(header, this.requestHeaders()[header]);
+                    if (typeof(this.requestHeaders()[header]) != "function")
+	    				xhr.setRequestHeader(header, this.requestHeaders()[header]);
 				if (_method == 'POST') {
 					xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 					content = this.queryParameters();
@@ -416,12 +429,12 @@ SPARQL.Query = function(service, priority) {
 		var i;
 		
 		// add default and named graphs to the protocol invocation
-		for (i = 0; i < this.defaultGraphs().length; i++) urlQueryString += 'default-graph-uri=' + escape(this.defaultGraphs()[i]) + '&';
-		for (i = 0; i < this.namedGraphs().length; i++) urlQueryString += 'named-graph-uri=' + escape(this.namedGraphs()[i]) + '&';
+		for (i = 0; i < this.defaultGraphs().length; i++) urlQueryString += 'default-graph-uri=' + encodeURIComponent(this.defaultGraphs()[i]) + '&';
+		for (i = 0; i < this.namedGraphs().length; i++) urlQueryString += 'named-graph-uri=' + encodeURIComponent(this.namedGraphs()[i]) + '&';
 		
 		// specify JSON output (currently output= supported by latest Joseki) (or other output)
 		urlQueryString += 'output=' + _output + '&';
-		return urlQueryString + 'query=' + escape(this.queryString());
+		return urlQueryString + 'query=' + encodeURIComponent(this.queryString());
 	}
 	
     /**
