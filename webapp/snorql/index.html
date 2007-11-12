@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" class="snorql">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <title>SPARQL Explorer</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
-    <script src="sparql.js"></script>
-    <script>
+    <script type="text/javascript" src="sparql.js"></script>
+    <script type="text/javascript">
+//<![CDATA[
+
+function betterUnescape(s) {
+    return unescape(s.replace(/\+/g, ' '));
+}
 
 function start() {
     setEndpointURL(document.location.href.match(/^([^?]*)snorql\//)[1] + 'sparql');
@@ -23,7 +28,7 @@ function start() {
     }
     var match = queryString.match(/prefixes=([^&]*)/);
     if (match) {
-        prefixes = decodeURIComponent(match[1]);
+        prefixes = betterUnescape(match[1]);
     }
     var querytext = null;
     if (queryString == 'classes') {
@@ -65,7 +70,7 @@ function start() {
     }
     if (queryString.match(/query=/)) {
         var resultTitle = 'SPARQL results:';
-        querytext = decodeURIComponent(queryString.match(/query=([^&]*)/)[1]);
+        querytext = betterUnescape(queryString.match(/query=([^&]*)/)[1]);
         var query = prefixes + querytext;
     }
     if (!querytext) {
@@ -355,10 +360,11 @@ function addEvent(obj, evType, fn){
         alert("Handler could not be attached");
     }
 }
+//]]>
     </script>
   </head>
 
-  <body onLoad="start()">
+  <body class="snorql" onload="start()">
     <div id="header">
       <h1 id="title">SPARQL Explorer</h1>
     </div>
@@ -374,16 +380,16 @@ function addEvent(obj, evType, fn){
     <div class="section" style="margin-right: 10em">
       <h2>SPARQL:</h2>
       <pre id="prefixestext"></pre>
-      <form id="queryform" action="#" method="get">
+      <form id="queryform" action="#" method="get"><div>
         <input type="hidden" name="query" value="" id="query" />
         <input type="hidden" name="prefixes" value="" id="prefixes" disabled="disabled" />
         <input type="hidden" name="output" value="json" id="jsonoutput" disabled="disabled" />
         <input type="hidden" name="stylesheet" value="" id="stylesheet" disabled="disabled" />
-      </form>
+      </div></form>
       <div>
-        <textarea name="query" rows="9" id="querytext"></textarea>
+        <textarea name="query" rows="9" cols="80" id="querytext"></textarea>
         Results:
-        <select id="selectoutput" onChange="outputChanged(this.value)">
+        <select id="selectoutput" onchange="outputChanged(this.value)">
           <option selected="selected" value="browse">Browse</option>
           <option value="json">as JSON</option>
           <option value="xml">as XML</option>
@@ -393,8 +399,8 @@ function addEvent(obj, evType, fn){
           XSLT stylesheet URL:
           <input id="xsltstylesheet" type="text" value="xml-to-html.xsl" size="20" />
         </span></span>
-        <input type="button" value="Go!" onClick="submitQuery()" />
-        <input type="button" value="Reset" onClick="resetQuery()" />
+        <input type="button" value="Go!" onclick="submitQuery()" />
+        <input type="button" value="Reset" onclick="resetQuery()" />
       </div>
     </div>
 
