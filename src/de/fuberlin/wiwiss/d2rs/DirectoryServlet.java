@@ -5,12 +5,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
-import org.apache.velocity.servlet.VelocityServlet;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ResIterator;
@@ -20,20 +20,20 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
-public class DirectoryServlet extends VelocityServlet {
+public class DirectoryServlet extends HttpServlet {
+
 	
-	public Template handleRequest(HttpServletRequest request,
-			HttpServletResponse response,
-			Context context) throws IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+			throws ServletException, IOException {
 		if (request.getPathInfo() == null) {
 			response.sendError(404);
-			return null;
+			return;
 		}
 		String classMapName = request.getPathInfo().substring(1);
 		Model resourceList = graphD2RQ().classMapInventory(classMapName);
 		if (resourceList == null) {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
-			return null;
+			return;
 		}
 		Map resources = new TreeMap();
 		ResIterator subjects = resourceList.listSubjects();
@@ -54,6 +54,8 @@ public class DirectoryServlet extends VelocityServlet {
 			String name = (String) it.next();
 			classMapLinks.put(name, server.baseURI() + "directory/" + name);
 		}
+		VelocityWrapper velocity = new VelocityWrapper(this, response);
+		Context context = velocity.getContext();
 		context.put("truncated_results", new Boolean(server.hasTruncatedResults()));
 		context.put("server_name", server.serverName());
 		context.put("home_link", server.baseURI());
@@ -61,15 +63,7 @@ public class DirectoryServlet extends VelocityServlet {
 		context.put("classmap", classMapName);
 		context.put("classmap_links", classMapLinks);
 		context.put("resources", resources);
-		response.addHeader("Content-Type", "application/xhtml+xml; charset=utf-8");
-		response.addHeader("Cache-Control", "no-cache");
-		response.addHeader("Pragma", "no-cache");
-		setContentType(request, response);
-		try {
-			return getTemplate("directory_page.vm");
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
+		velocity.mergeTemplateXHTML("directory_page.vm");
 	}
 
 	private GraphD2RQ graphD2RQ() {

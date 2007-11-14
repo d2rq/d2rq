@@ -7,12 +7,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
-import org.apache.velocity.servlet.VelocityServlet;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -25,12 +24,11 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
-public class PageServlet extends VelocityServlet {
+public class PageServlet extends HttpServlet {
 	private PrefixMapping prefixes;
 	
-	public Template handleRequest(HttpServletRequest request,
-			HttpServletResponse response,
-			Context context) throws IOException {
+	public void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		String relativeResourceURI = request.getRequestURI().substring(
 				request.getContextPath().length() + request.getServletPath().length());
@@ -47,14 +45,12 @@ public class PageServlet extends VelocityServlet {
 				server.dataset()).execDescribe();
 		if (description.size() == 0) {
 			response.sendError(404);
-			return null;
+			return;
 		}
 		this.prefixes = server.model();
 		Resource resource = description.getResource(resourceURI);
-		response.addHeader("Content-Type", "application/xhtml+xml; charset=utf-8");
-		response.addHeader("Cache-Control", "no-cache");
-		response.addHeader("Pragma", "no-cache");
-		setContentType(request, response);
+		VelocityWrapper velocity = new VelocityWrapper(this, response);
+		Context context = velocity.getContext();
 		context.put("truncated_results", new Boolean(server.hasTruncatedResults()));
 		context.put("uri", resourceURI);
 		context.put("server_name", server.serverName());
@@ -63,11 +59,7 @@ public class PageServlet extends VelocityServlet {
 		context.put("label", resource.getProperty(RDFS.label));
 		context.put("properties", collectProperties(description, resource));
 		context.put("classmap_links", classmapLinks(resource));
-		try {
-			return getTemplate("resource_page.vm");
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
+		velocity.mergeTemplateXHTML("resource_page.vm");
 	}
 
 	private Collection collectProperties(Model m, Resource r) {

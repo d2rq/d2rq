@@ -6,20 +6,18 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
-import org.apache.velocity.servlet.VelocityServlet;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
-public class RootServlet extends VelocityServlet {
+public class RootServlet extends HttpServlet {
 	
-	public Template handleRequest(HttpServletRequest request,
-			HttpServletResponse response,
-			Context context) throws IOException, ServletException {
+	public void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		Map classMapLinks = new TreeMap();
 		Iterator it = graphD2RQ().classMapNames().iterator();
@@ -27,20 +25,14 @@ public class RootServlet extends VelocityServlet {
 			String name = (String) it.next();
 			classMapLinks.put(name, server.baseURI() + "directory/" + name);
 		}
+		VelocityWrapper velocity = new VelocityWrapper(this, response);
+		Context context = velocity.getContext();
 		context.put("truncated_results", new Boolean(server.hasTruncatedResults()));
 		context.put("server_name", server.serverName());
 		context.put("home_link", server.baseURI());
 		context.put("rdf_link", server.baseURI() + "all");
 		context.put("classmap_links", classMapLinks);
-		response.addHeader("Content-Type", "application/xhtml+xml; charset=utf-8");
-		response.addHeader("Cache-Control", "no-cache");
-		response.addHeader("Pragma", "no-cache");
-		setContentType(request, response);
-		try {
-			return getTemplate("root_page.vm");
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
+		velocity.mergeTemplateXHTML("root_page.vm");
 	}
 
 	private GraphD2RQ graphD2RQ() {
