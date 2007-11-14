@@ -56,9 +56,6 @@ public class DirectoryServlet extends HttpServlet {
 		}
 		VelocityWrapper velocity = new VelocityWrapper(this, response);
 		Context context = velocity.getContext();
-		context.put("truncated_results", new Boolean(server.hasTruncatedResults()));
-		context.put("server_name", server.serverName());
-		context.put("home_link", server.baseURI());
 		context.put("rdf_link", server.baseURI() + "all/" + classMapName);
 		context.put("classmap", classMapName);
 		context.put("classmap_links", classMapLinks);

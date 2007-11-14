@@ -8,7 +8,7 @@ import javax.servlet.ServletContextListener;
  * Initialize D2R server on startup of an appserver such as Tomcat. This listener should
  * be included in the web.xml. This is compatible with Servlet 2.3 spec compliant appservers.
  *
- * @version $Id: WebappInitListener.java,v 1.4 2007/11/14 16:58:30 cyganiak Exp $
+ * @version $Id: WebappInitListener.java,v 1.5 2007/11/14 17:05:52 cyganiak Exp $
  * @author Inigo Surguy
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
@@ -16,7 +16,6 @@ public class WebappInitListener implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent event) {
 		ServletContext context = event.getServletContext();
-		VelocityWrapper.initEngine(context);
 		D2RServer server = new D2RServer();
 		String configFile = context.getInitParameter("overrideConfigFile");
 		if (configFile == null) {
@@ -34,6 +33,7 @@ public class WebappInitListener implements ServletContextListener {
 		server.setConfigFile(configFile);
 		server.start();
 		server.putIntoServletContext(context);
+		VelocityWrapper.initEngine(server, context);
 	}
 
 	public void contextDestroyed(ServletContextEvent event) {

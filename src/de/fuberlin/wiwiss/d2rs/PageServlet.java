@@ -51,10 +51,7 @@ public class PageServlet extends HttpServlet {
 		Resource resource = description.getResource(resourceURI);
 		VelocityWrapper velocity = new VelocityWrapper(this, response);
 		Context context = velocity.getContext();
-		context.put("truncated_results", new Boolean(server.hasTruncatedResults()));
 		context.put("uri", resourceURI);
-		context.put("server_name", server.serverName());
-		context.put("home_link", server.baseURI());
 		context.put("rdf_link", server.dataURL(relativeResourceURI));
 		context.put("label", resource.getProperty(RDFS.label));
 		context.put("properties", collectProperties(description, resource));
