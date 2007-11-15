@@ -54,7 +54,7 @@ import java.util.Set;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.14 2007/10/21 11:58:22 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.15 2007/11/15 15:29:32 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -74,6 +74,8 @@ public class JoinOptimizer {
 		Iterator it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
+			if (!isRemovableJoin(join)) continue;
+			
 			boolean isRemovable1 = isRemovableJoinSide(join.table1(), join, allRequiredColumns);
 			boolean isRemovable2 = isRemovableJoinSide(join.table2(), join, allRequiredColumns);
 
@@ -116,6 +118,20 @@ public class JoinOptimizer {
 		return results;
 	}
 
+	private boolean isRemovableJoin(Join join) {
+		Iterator it = join.attributes1().iterator();
+		while (it.hasNext()) {
+			Attribute side1 = (Attribute) it.next();
+			Attribute side2 = join.equalAttribute(side1);
+			if (!relation.baseRelation().database().areCompatibleFormats(
+					relation.baseRelation().aliases().originalOf(side1), 
+					relation.baseRelation().aliases().originalOf(side2))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * Checks if the table on one side of a join is irrelevant to the result.
 	 * @param tableName A table that is on one side of the join

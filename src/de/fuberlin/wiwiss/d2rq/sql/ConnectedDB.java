@@ -6,6 +6,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -19,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.9 2007/11/04 16:56:15 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.10 2007/11/15 15:29:32 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -44,6 +46,7 @@ public class ConnectedDB {
 	private DatabaseSchemaInspector schemaInspector = null;
 	private String dbType = null;
 	private int limit;
+	private Map zerofillCache = new HashMap(); // Attribute => Boolean
 	
 	public ConnectedDB(String jdbcURL, String username, String password) {
 		this(jdbcURL, username, password, null, true,
@@ -97,8 +100,10 @@ public class ConnectedDB {
      * Will currently report one of these constants:
      * 
      * <ul>
-     * <li><tt>DBConnection.MySQL</tt></li>
-     * <li><tt>DBConnection.Other</tt></li>
+     * <li><tt>ConnectedDB.MySQL</tt></li>
+     * <li><tt>ConnectedDB.PostgreSQL</tt></li>
+     * <li><tt>ConnectedDB.Oracle</tt></li>
+     * <li><tt>ConnectedDB.Other</tt></li>
      * </ul>
      * @return The brand of RDBMS
      */
@@ -122,6 +127,11 @@ public class ConnectedDB {
 		return this.dbType;
 	}
 	
+	/**
+	 * Reports the brand of RDBMS.
+	 * @return <tt>true</tt> if this database is of the given brand
+	 * @see #dbType()
+	 */
 	public boolean dbTypeIs(String candidateType) {
 		return candidateType.equals(dbType());
 	}
@@ -174,6 +184,43 @@ public class ConnectedDB {
 		}
 	}
 
+	/**
+	 * <p>Checks if two columns are formatted by the database in a compatible
+	 * fashion.</p>
+	 * 
+	 * <p>Assuming <tt>v1</tt> is a value from column1, and <tt>v2</tt> a value
+	 * from column2, and <tt>v1 = v2</tt> evaluates to <tt>true</tt> within the
+	 * database, then we call the values have <em>compatible formatting</em> if
+	 * <tt>SELECT</tt>ing them results in character-for-character identical
+	 * strings. As an example, a <tt>TINYINT</tt> and a <tt>BIGINT</tt> are
+	 * compatible because equal values will be formatted in the same way
+	 * when <tt>SELECT</tt>ed, e.g. <tt>1 = 1</tt>. But if one of them is
+	 * <tt>ZEROFILL</tt>, then <tt>SELECT</tt>ing will result in a different
+	 * character string, e.g. <tt>1 = 0000000001</tt>. The two columns wouldn't
+	 * be compatible.</p>
+	 * 
+	 * <p>This is used by the engine when removing unnecessary joins. If
+	 * two columns have compatible formatting, then we can sometimes use
+	 * one in place of the other when they are known to have equal values.
+	 * But not if they are incompatible, because e.g. <tt>http://example.org/id/1</tt>
+	 * is different from <tt>http://example.org/id/0000000001</tt>.</p>
+	 * 
+	 * @return <tt>true</tt> if both arguments have compatible formatting
+	 */
+	public boolean areCompatibleFormats(Attribute column1, Attribute column2) {
+		// TODO Right now we only catch the ZEROFILL case. There are many more!
+		return !isZerofillColumn(column1) && !isZerofillColumn(column2);
+	}
+	
+	private boolean isZerofillColumn(Attribute column) {
+		if (!dbTypeIs(MySQL)) return false;
+		if (!zerofillCache.containsKey(column)) {
+			zerofillCache.put(column, 
+					new Boolean(schemaInspector().isZerofillColumn(column)));
+		}
+		return ((Boolean) zerofillCache.get(column)).booleanValue();
+	}
+    
 	private final static Pattern singleQuoteEscapePattern = Pattern.compile("([\\\\'])");
 	private final static Pattern singleQuoteEscapePatternOracle = Pattern.compile("(')");
 	private final static Pattern doubleQuoteEscapePattern = Pattern.compile("(\")");

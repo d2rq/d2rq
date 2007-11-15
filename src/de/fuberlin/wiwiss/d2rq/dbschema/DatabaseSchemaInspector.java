@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rq.dbschema;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.8 2007/01/02 10:48:59 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.9 2007/11/15 15:29:32 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -112,6 +113,21 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
+	public boolean isZerofillColumn(Attribute column) {
+		try {
+			if (!db.dbTypeIs(ConnectedDB.MySQL)) return false;
+			Statement stmt = db.connection().createStatement();
+			ResultSet rs = stmt.executeQuery("DESCRIBE " + db.quoteRelationName(column.relationName()));
+			while (rs.next()) {
+				if (!column.attributeName().equals(rs.getString("Field"))) continue;
+				return rs.getString("Type").toLowerCase().indexOf("zerofill") != -1;
+			}
+		} catch (SQLException ex) {
+			throw new D2RQException("Database exception", ex);
+		}
+		throw new D2RQException("Column not found in DESCRIBE result: " + column);
+	}
+
 	public List listTableNames() {
 		List result = new ArrayList();
 		try {
