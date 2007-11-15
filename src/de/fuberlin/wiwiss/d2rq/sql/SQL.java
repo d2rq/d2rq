@@ -21,14 +21,14 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
  * Parses different types of SQL fragments from Strings, and turns them
  * back into Strings. All methods are static.
  * 
- * TODO: find/rename/quoteColumnsInExpression will fail e.g. for coumn names
+ * TODO: find/rename/quoteColumnsInExpression will fail e.g. for column names
  *       occuring inside string literals
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL.java,v 1.2 2006/09/15 19:36:44 cyganiak Exp $
+ * @version $Id: SQL.java,v 1.3 2007/11/15 16:44:17 cyganiak Exp $
  */
 public class SQL {
-	private static final java.util.regex.Pattern attributeRegex = 
+	private static final java.util.regex.Pattern attributeRegexConservative = 
 		java.util.regex.Pattern.compile(
 				// Optional schema name and dot, group 1 is schema name
 				"(?:([a-zA-Z_]\\w*)\\.)?" +
@@ -36,6 +36,14 @@ public class SQL {
 				"([a-zA-Z_]\\w*)\\." +
 				// Required column name, is group 3
 				"([a-zA-Z_]\\w*)");
+	private static final java.util.regex.Pattern attributeRegexLax = 
+		java.util.regex.Pattern.compile(
+				// Optional schema name and dot, group 1 is schema name
+				"(?:([^.]+)\\.)?" +
+				// Required table name and dot, group 2 is table name
+				"([^.]+)\\." +
+				// Required column name, is group 3
+				"([^.]+)");
 
 	/**
 	 * Constructs an attribute from a fully qualified column name in <tt>[schema.]table.column</tt>
@@ -44,7 +52,7 @@ public class SQL {
 	 * @param qualifiedName The attribute's name
 	 */
 	public static Attribute parseAttribute(String qualifiedName) {
-		Matcher match = attributeRegex.matcher(qualifiedName);
+		Matcher match = attributeRegexLax.matcher(qualifiedName);
 		if (!match.matches()) {
 			throw new D2RQException("Attribute \"" + qualifiedName + 
 					"\" is not in \"[schema.]table.column\" notation",
@@ -55,7 +63,7 @@ public class SQL {
 
 	public static Set findColumnsInExpression(String expression) {
 		Set results = new HashSet();
-		Matcher match = attributeRegex.matcher(expression);
+		Matcher match = attributeRegexConservative.matcher(expression);
 		while (match.find()) {
 			results.add(new Attribute(match.group(1), match.group(2), match.group(3)));
 		}
@@ -64,7 +72,7 @@ public class SQL {
 	
 	public static String replaceColumnsInExpression(String expression, ColumnRenamer columnRenamer) {
 		StringBuffer result = new StringBuffer();
-		Matcher match = attributeRegex.matcher(expression);
+		Matcher match = attributeRegexConservative.matcher(expression);
 		boolean matched = match.find();
 		int firstPartEnd = matched ? match.start() : expression.length();
 		result.append(expression.substring(0, firstPartEnd));
@@ -82,7 +90,7 @@ public class SQL {
 	// TODO: This really should happen in Expression and without string munging
 	public static String quoteColumnsInExpression(String expression, ConnectedDB database) {
 		StringBuffer result = new StringBuffer();
-		Matcher match = attributeRegex.matcher(expression);
+		Matcher match = attributeRegexConservative.matcher(expression);
 		boolean matched = match.find();
 		int firstPartEnd = matched ? match.start() : expression.length();
 		result.append(expression.substring(0, firstPartEnd));

@@ -6,12 +6,15 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
@@ -36,7 +39,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.21 2007/10/23 15:07:22 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.22 2007/11/15 16:44:17 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -292,25 +295,35 @@ public class MappingGenerator {
 		return "map:database";
 	}
 	
+	// A very conservative pattern for the local part of a QName.
+	// If a URI doesn't match, better don't QName it.
+	private final static Pattern simpleXMLName = 
+			Pattern.compile("[a-zA-Z_][a-zA-Z0-9_-]*");
+	private String toPrefixedURI(String namespaceURI, String prefix, String s) {
+		if (simpleXMLName.matcher(s).matches()) {
+			return prefix + ":" + s;
+		}
+		try {
+			return "<" + namespaceURI + URLEncoder.encode(s, "utf-8") + ">";
+		} catch (UnsupportedEncodingException ex) {
+			throw new RuntimeException("Can't happen");
+		}
+	}
+
 	private String classMapName(RelationName tableName) {
-		return "map:" + qNameEscape(tableName.qualifiedName());
+		return toPrefixedURI(mapNamespaceURI, "map", tableName.qualifiedName());
 	}
 	
 	private String propertyBridgeName(String relationName) {
-		return "map:" + qNameEscape(relationName);
+		return toPrefixedURI(mapNamespaceURI, "map", relationName);
 	}
 	
-	private String qNameEscape(String s) {
-		// The Jena N3 parser can't deal with dots in QNames
-		return s.replace('.', '_');
-	}
-
 	private String vocabularyTermQName(RelationName table) {
-		return "vocab:" + qNameEscape(table.qualifiedName());
+		return toPrefixedURI(vocabNamespaceURI, "vocab", table.qualifiedName());
 	}
 
 	private String vocabularyTermQName(Attribute attribute) {
-		return "vocab:" + qNameEscape(toRelationName(attribute));
+		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attribute));
 	}
 
 	private boolean hasPrimaryKey(RelationName tableName) {
