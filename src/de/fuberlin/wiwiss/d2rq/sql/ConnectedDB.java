@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.11 2007/11/15 15:54:50 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.12 2007/11/15 16:43:16 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -79,7 +79,10 @@ public class ConnectedDB {
 		try {
 			return DriverManager.getConnection(this.jdbcURL, this.username, this.password);
 		} catch (SQLException ex) {
-			throw new D2RQException(ex, D2RQException.D2RQ_SQLEXCEPTION);
+			throw new D2RQException(
+					"Database connection to " + jdbcURL + " failed " +
+					"(user: " + username + "): " + ex.getMessage(), 
+					D2RQException.D2RQ_DB_CONNECTION_FAILED);
 		}
 	}
 	
