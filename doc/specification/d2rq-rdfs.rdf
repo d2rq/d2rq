@@ -126,11 +126,6 @@
     <rdfs:comment>URL of a D2RQ mapping file.</rdfs:comment>
     <rdfs:label>mapping file</rdfs:label>
   </rdf:Property>
-  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#expressionTranslator">
-    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
-    <rdfs:comment>A Java class or string null (for no expression translation).</rdfs:comment>
-    <rdfs:label>expression translator</rdfs:label>
-  </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#class">
     <owl:inverseOf>
       <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#classMap"/>
@@ -282,7 +277,7 @@
     <rdfs:label>href</rdfs:label>
   </rdf:Property>
   <rdf:Description rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1">
-    <owl:versionInfo>$Id: d2rq-rdfs.rdf,v 1.7 2007/11/05 01:02:40 cyganiak Exp $</owl:versionInfo>
+    <owl:versionInfo>$Id: d2rq-rdfs.rdf,v 1.8 2007/11/15 15:54:50 cyganiak Exp $</owl:versionInfo>
     <dc:format>RDF</dc:format>
     <dc:date>2006-08-12</dc:date>
     <dc:creator>Richard Cyganiak</dc:creator>

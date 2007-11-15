@@ -7,12 +7,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.query.Expression;
 
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
-import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
@@ -21,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.2 2006/11/02 20:46:45 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.3 2007/11/15 15:54:51 cyganiak Exp $
  */
 public class ConstraintHandler {
     public boolean possible=true;
@@ -30,7 +27,6 @@ public class ConstraintHandler {
     /** Mapping between a variable (Node) and its NodeConstraints. */
     public Map variableToConstraint=new HashMap(); 
     Collection rdqlConstraints;
-    ExpressionTranslator rdqlTranslator;
     
     public void setVariableBindings(VariableBindings bindings) {
         this.bindings=bindings;
@@ -78,32 +74,6 @@ public class ConstraintHandler {
         while (it.hasNext()) {
             NodeConstraintImpl c=(NodeConstraintImpl)it.next();
             c.addConstraintsToSQL(sql);
-        }
-        addRDQLConstraints(sql);
-    }
-    
-    /**
-     * Adds constraints that come from the RDQL expression.
-     * The RDQL query not just contains triple but also conditions
-     * about nodes, such as  ! (?a = "v").
-     * Note that the SQL term given to the database becomes stronger,
-     * so that less entries are returned.
-     * The class of the rdqlTranslator is settable in the mapping file.
-     * Note that its constructor must have exactly the same signature as
-     * ExpressionTranslator. This is likely to change in the future.
-     * @param sql contains information about the SQL dialect of the database and aliases.
-     */
-	void addRDQLConstraints(SelectStatementBuilder sql) {
-		if (this.rdqlTranslator == null) {
-			this.rdqlTranslator = sql.getDatabase().expressionTranslator(this);
-		}
-        Iterator it=rdqlConstraints.iterator();
-        while (possible && it.hasNext()) {
-            Expression e=(Expression)it.next();
-            String str=rdqlTranslator.translateToString(e);
-            if (str != null) {
-            	sql.addCondition(SQLExpression.create(str));
-            }
         }
     }
        

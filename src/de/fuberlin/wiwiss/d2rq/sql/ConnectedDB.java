@@ -1,6 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
-import java.lang.reflect.Constructor;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -15,13 +14,11 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
-import de.fuberlin.wiwiss.d2rq.fastpath.ConstraintHandler;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.rdql.ExpressionTranslator;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.10 2007/11/15 15:29:32 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.11 2007/11/15 15:54:50 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -36,7 +33,6 @@ public class ConnectedDB {
 	private String jdbcURL;
 	private String username;
 	private String password;
-	private String expressionTranslator;
 	private boolean allowDistinct;
 	private Set textColumns;
 	private Set numericColumns;
@@ -49,16 +45,15 @@ public class ConnectedDB {
 	private Map zerofillCache = new HashMap(); // Attribute => Boolean
 	
 	public ConnectedDB(String jdbcURL, String username, String password) {
-		this(jdbcURL, username, password, null, true,
+		this(jdbcURL, username, password, true,
 				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET, 
 				Collections.EMPTY_SET, Database.NO_LIMIT);
 	}
 	
-	public ConnectedDB(String jdbcURL, String username, String password, String expressionTranslator,
+	public ConnectedDB(String jdbcURL, String username, String password,
 			boolean allowDistinct, Set textColumns, Set numericColumns, Set dateColumns,
 			Set timestampColumns, int limit) {
 		this.jdbcURL = jdbcURL;
-		this.expressionTranslator = expressionTranslator;
 		this.allowDistinct = allowDistinct;
 		this.username = username;
 		this.password = password;
@@ -298,25 +293,6 @@ public class ConnectedDB {
 		}
 		// PostgreSQL and Oracle (and SQL-92) use double quotes
 		return doubleQuote(identifier);
-	}
-
-	// TODO Better if we didn't have to pass the parameters in, and use a non-arg constructor
-	// Maybe return an ExpressionTranslatorFactory?
-	public ExpressionTranslator expressionTranslator(ConstraintHandler handler) {
-		if (this.expressionTranslator == null) {
-			return new ExpressionTranslator(handler, this);
-		} else {
-			try {
-				Class c = Class.forName(this.expressionTranslator);
-				Constructor constructor = c.getConstructor(
-						new Class[]{ConstraintHandler.class});
-				return (ExpressionTranslator) constructor.newInstance(new Object[]{handler, this});
-		    } catch (ClassNotFoundException ex) {
-		    	throw new D2RQException("Couldn't find d2rq:expressionTranslator class " + this.expressionTranslator);
-		    } catch (Exception ex) {
-		    	throw new D2RQException("Couldn't instantiate " + this.expressionTranslator, ex);
-		    }
-		}
 	}
 	
 	/** 

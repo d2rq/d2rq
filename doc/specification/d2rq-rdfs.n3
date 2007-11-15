@@ -22,7 +22,7 @@
    				dc:creator       "Richard Cyganiak" ;
    				dc:date          "2006-08-12" ;
    				dc:format        "RDF";
-   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.16 2007/11/05 01:02:40 cyganiak Exp $";
+   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.17 2007/11/15 15:54:50 cyganiak Exp $";
    				.
 
 
@@ -74,11 +74,6 @@ d2rq:timestampColumn rdf:type rdf:Property ;
 d2rq:allowDistinct  rdf:type rdf:Property ;
 		    	rdfs:label "allow distinct" ;
 				rdfs:comment "Value: true/false that describe the databases ability to handle DISTINCT correctly. (e.g. MSAccess cuts fields longer than 256 chars)";
-                rdfs:domain d2rq:Database
-                .
-d2rq:expressionTranslator rdf:type rdf:Property ;
-		    	rdfs:label "expression translator" ;
-				rdfs:comment "A Java class or string null (for no expression translation).";
                 rdfs:domain d2rq:Database
                 .
 d2rq:resultSizeLimit a rdf:Property;

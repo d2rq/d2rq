@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.17 2007/11/04 16:56:15 cyganiak Exp $
+ * @version $Id: Database.java,v 1.18 2007/11/15 15:54:50 cyganiak Exp $
  */
 public class Database extends MapObject {
 	public static final int NO_LIMIT = -1;
@@ -73,7 +73,6 @@ public class Database extends MapObject {
 	private Set numericColumns = new HashSet();
 	private Set dateColumns = new HashSet();
 	private Set timestampColumns = new HashSet();
-    private String expressionTranslator = null;		// class name
     private int limit = NO_LIMIT;
 	private boolean allowDistinct = true;
 	private ConnectedDB connection = null;
@@ -128,10 +127,6 @@ public class Database extends MapObject {
 		this.timestampColumns.add(column);
 	}
 	
-	public void setExpressionTranslator(String expressionTranslator) {
-		this.expressionTranslator = expressionTranslator;
-	}
-	
 	public void setAllowDistinct(boolean b) {
 		this.allowDistinct = b;
 	}
@@ -156,8 +151,7 @@ public class Database extends MapObject {
 		if (driver != null) {
 			registerJDBCDriver(driver);
 		}
-		this.connection = new ConnectedDB(url, this.username, this.password,
-				this.expressionTranslator, this.allowDistinct,
+		this.connection = new ConnectedDB(url, this.username, this.password, this.allowDistinct,
 				this.textColumns, this.numericColumns, this.dateColumns, this.timestampColumns,
 				this.limit);
 		return this.connection;
