@@ -9,7 +9,6 @@
 	<classpathentry kind="lib" path="lib/sesame-1.2.4/openrdf-model.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/postgresql-8.2dev-503.jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/ojdbc14.jar"/>
-	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-3.1.12-bin.jar"/>
 	<classpathentry kind="lib" path="lib/jena-2.5.4/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/jena-2.5.4/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/jena-2.5.4/wstx-asl-3.0.0.jar"/>
@@ -26,5 +25,6 @@
 	<classpathentry kind="lib" path="lib/jena-2.5.4/arq.jar"/>
 	<classpathentry kind="lib" path="lib/jena-2.5.4/antlr-2.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/jena-2.5.1/jena-2.5.1-rdql.jar"/>
+	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.5-bin.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
