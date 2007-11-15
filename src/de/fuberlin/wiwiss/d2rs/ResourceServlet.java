@@ -51,6 +51,7 @@ public class ResourceServlet extends HttpServlet {
 					server.dataURL(relativeResourceURI));
 		}
 		response.setStatus(303);
+		response.addHeader("Vary", "Accept");
 	}
 
 	private boolean clientPrefersHTML(HttpServletRequest request) {
