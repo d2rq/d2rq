@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rq.map;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -17,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.18 2007/11/15 15:54:50 cyganiak Exp $
+ * @version $Id: Database.java,v 1.19 2007/11/16 09:29:16 cyganiak Exp $
  */
 public class Database extends MapObject {
 	public static final int NO_LIMIT = -1;
@@ -76,6 +77,7 @@ public class Database extends MapObject {
     private int limit = NO_LIMIT;
 	private boolean allowDistinct = true;
 	private ConnectedDB connection = null;
+	private Properties connectionProperties = new Properties();
 	
 	public Database(Resource resource) {
 		super(resource);
@@ -135,6 +137,10 @@ public class Database extends MapObject {
 		this.limit = limit;
 	}
 	
+	public void setConnectionProperty(String key, String value) {
+		this.connectionProperties.setProperty(key, value);
+	}
+	
 	public ConnectedDB connectedDB() {
 		if (this.connection != null) {
 			return this.connection;
@@ -153,7 +159,7 @@ public class Database extends MapObject {
 		}
 		this.connection = new ConnectedDB(url, this.username, this.password, this.allowDistinct,
 				this.textColumns, this.numericColumns, this.dateColumns, this.timestampColumns,
-				this.limit);
+				this.limit, this.connectionProperties);
 		return this.connection;
 	}
 

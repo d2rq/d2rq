@@ -39,7 +39,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.22 2007/11/15 16:44:17 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.23 2007/11/16 09:29:16 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -146,6 +146,7 @@ public class MappingGenerator {
 		this.out.println("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .");
 		this.out.println("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .");
 		this.out.println("@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .");
+		this.out.println("@prefix jdbc: <http://d2rq.org/terms/jdbc/> .");
 		this.out.println();
 		writeDatabase();
 		initVocabularyModel();
@@ -168,6 +169,10 @@ public class MappingGenerator {
 		}
 		if (this.databasePassword != null) {
 			this.out.println("\td2rq:password \"" + this.databasePassword + "\";");
+		}
+		if ("MySQL".equals(this.databaseType)) {
+			this.out.println("\tjdbc:autoReconnect \"true\";");
+			this.out.println("\tjdbc:zeroDateTimeBehavior \"convertToNull\";");
 		}
 		this.out.println("\t.");
 		this.out.println();
@@ -259,11 +264,6 @@ public class MappingGenerator {
 //			// Suppress empty strings ('')
 //			out.println("\td2rq:condition \"" + column.getQualifiedName() + " != ''\";");			
 //		}
-		if (this.databaseType == "MySQL" && DatabaseSchemaInspector.isDateType(colType)) {
-			// Work around an issue with the MySQL driver where SELECTing a date/time
-			// column containing '0000-00-00 ...' causes an SQLException
-			this.out.println("\td2rq:condition \"" + column.qualifiedName() + " != '0000'\";");
-		}
 	}
 	
 	private void writeLink(RelationName linkTableName) {

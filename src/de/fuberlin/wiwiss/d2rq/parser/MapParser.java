@@ -26,13 +26,14 @@ import de.fuberlin.wiwiss.d2rq.map.ResourceMap;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
+import de.fuberlin.wiwiss.d2rq.vocab.JDBC;
 
 /**
  * Creates a {@link Mapping} from a Jena model representation
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.28 2007/11/15 15:54:51 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.29 2007/11/16 09:29:16 cyganiak Exp $
  */
 public class MapParser {
 
@@ -178,6 +179,14 @@ public class MapParser {
 		stmts = r.listProperties(D2RQ.timestampColumn);
 		while (stmts.hasNext()) {
 			database.addTimestampColumn(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties();
+		while (stmts.hasNext()) {
+			Statement stmt = stmts.nextStatement();
+			String prop = stmt.getPredicate().getURI();
+			if (!prop.startsWith(JDBC.NS)) continue;
+			database.setConnectionProperty(
+					prop.substring(JDBC.NS.length()), stmt.getString());
 		}
 	}
 

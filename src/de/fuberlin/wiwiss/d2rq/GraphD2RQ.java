@@ -42,6 +42,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
+import de.fuberlin.wiwiss.d2rq.vocab.JDBC;
 
 /**
  * A D2RQ virtual read-only graph backed by a non-RDF database.
@@ -52,7 +53,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.42 2007/10/22 10:18:54 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.43 2007/11/16 09:34:13 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -112,7 +113,10 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
 			String namespace = (String) entry.getValue();
-			if (D2RQ.NS.equals(namespace)) {
+			if (D2RQ.NS.equals(namespace) && "d2rq".equals(entry.getKey())) {
+				getPrefixMapping().removeNsPrefix((String) entry.getKey());
+			}
+			if (JDBC.NS.equals(namespace) && "jdbc".equals(entry.getKey())) {
 				getPrefixMapping().removeNsPrefix((String) entry.getKey());
 			}
 		}

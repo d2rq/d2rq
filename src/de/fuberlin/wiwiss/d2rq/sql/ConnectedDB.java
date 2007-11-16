@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.13 2007/11/16 09:29:15 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.14 2007/11/16 09:34:13 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -93,14 +93,12 @@ public class ConnectedDB {
 		Properties result = (connectionProperties == null) 
 				? new Properties() 
 				: new Properties(connectionProperties);
-		System.out.println(result);
 		if (username != null) {
 			result.setProperty("user", username);
 		}
 		if (password != null) {
 			result.setProperty("password", password);
 		}
-		System.out.println(result);
 		return result;
 	}
 	

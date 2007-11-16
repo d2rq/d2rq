@@ -758,10 +758,29 @@ map:location a d2rq:PropertyBridge;
               d2rq:textColumn &quot;Conferences.Name&quot;;
               d2rq:textColumn &quot;Conferences.Location&quot;;
               d2rq:dateColumn &quot;Conferences.Date&quot;.</pre>
-<P>A note on using multiple databases within a single D2RQ map: You cannot link from
-one database by having a property bridge with d2rq:belongsToClassMap in one database
-and d2rq:refersToClassMap in the other. Instead, define class maps in both databases
-that create the same URIs or blank node IDs.</P>
+
+
+<p><strong>Specifying JDBC connection properties</strong></p>
+
+<p>Most JDBC drivers offer a range of <em>JDBC connection properties</em>,
+  which specify advanced configuration options for the JDBC database connection.
+  A D2RQ mapping file can be made to use arbitrary connection properties when
+  setting up the JDBC connection. This is done through the <tt>jdbc:</tt> namespace
+  (namespace URI: <tt>http://d2rq.org/terms/jdbc/</tt>). RDF properties in that
+  namespace will be passed as connection properties.
+  Consult your JDBC driver's documentation for a list of available properties.</p>
+
+<pre>@prefix jdbc: &lt;http://d2rq.org/terms/jdbc/&gt; .
+
+map:database a d2rq:Database;
+    # ... other database configuration ...
+    jdbc:autoReconnect "true";
+    jdbc:zeroDateTimeBehavior "convertToNull";
+    .</pre>
+
+<p>The example uses two connection properties which are understood by the MySQL
+JDBC driver: <tt>autoReconnect=true</tt> and 
+<tt>zeroDateTimeBehavior=convertToNull</tt>.</p>
 
 <h2><a name="classmap"></a>7.2 ClassMap</h2>
 <p>A <strong>d2rq:ClassMap</strong> represents a class or a group of similar classes 
@@ -1419,7 +1438,7 @@ map:SeeAlsoStatement a d2rq:AdditionalProperty;
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.33 2007/11/15 15:54:50 cyganiak Exp $</p>
+<p>$Id: index.htm,v 1.34 2007/11/16 09:29:16 cyganiak Exp $</p>
 
 </BODY>
 </HTML>
