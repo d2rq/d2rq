@@ -7,6 +7,7 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.12 2007/11/15 16:43:16 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.13 2007/11/16 09:29:15 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -43,16 +44,17 @@ public class ConnectedDB {
 	private String dbType = null;
 	private int limit;
 	private Map zerofillCache = new HashMap(); // Attribute => Boolean
+	private final Properties connectionProperties;
 	
 	public ConnectedDB(String jdbcURL, String username, String password) {
 		this(jdbcURL, username, password, true,
 				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET, 
-				Collections.EMPTY_SET, Database.NO_LIMIT);
+				Collections.EMPTY_SET, Database.NO_LIMIT, null);
 	}
 	
 	public ConnectedDB(String jdbcURL, String username, String password,
 			boolean allowDistinct, Set textColumns, Set numericColumns, Set dateColumns,
-			Set timestampColumns, int limit) {
+			Set timestampColumns, int limit, Properties connectionProperties) {
 		this.jdbcURL = jdbcURL;
 		this.allowDistinct = allowDistinct;
 		this.username = username;
@@ -62,6 +64,7 @@ public class ConnectedDB {
 		this.dateColumns = dateColumns;
 		this.timestampColumns = timestampColumns;
 		this.limit = limit;
+		this.connectionProperties = connectionProperties;
 	}
 	
 	public Connection connection() {
@@ -77,13 +80,28 @@ public class ConnectedDB {
 	
 	private Connection connect() {
 		try {
-			return DriverManager.getConnection(this.jdbcURL, this.username, this.password);
+			return DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
 		} catch (SQLException ex) {
 			throw new D2RQException(
 					"Database connection to " + jdbcURL + " failed " +
 					"(user: " + username + "): " + ex.getMessage(), 
 					D2RQException.D2RQ_DB_CONNECTION_FAILED);
 		}
+	}
+	
+	private Properties getConnectionProperties() {
+		Properties result = (connectionProperties == null) 
+				? new Properties() 
+				: new Properties(connectionProperties);
+		System.out.println(result);
+		if (username != null) {
+			result.setProperty("user", username);
+		}
+		if (password != null) {
+			result.setProperty("password", password);
+		}
+		System.out.println(result);
+		return result;
 	}
 	
 	public DatabaseSchemaInspector schemaInspector() {
