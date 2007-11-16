@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.9 2007/11/15 15:29:32 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.10 2007/11/16 15:25:54 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -35,8 +35,11 @@ public class DatabaseSchemaInspector {
 		switch (columnType) {
 		case Types.BIGINT:        return "xsd:long";
 //		case Types.BINARY:        return "xsd:hexBinary";
-//		case Types.BIT:           return "xsd:boolean";
+		// TODO: BIT is a bit string, not a single boolean
+		// But the MySQL JDBC driver reports TINYINT(1) as BIT 
+		case Types.BIT:           return "xsd:boolean";
 //		case Types.BLOB:          return "xsd:hexBinary";
+		case Types.BOOLEAN:       return "xsd:boolean";
 		case Types.CHAR:          return "xsd:string";
 //		case Types.CLOB:          return "xsd:string";
 		case Types.DATE:          return "xsd:date";

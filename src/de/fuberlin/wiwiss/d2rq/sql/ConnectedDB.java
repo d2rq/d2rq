@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.14 2007/11/16 09:34:13 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.15 2007/11/16 15:25:55 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -183,7 +183,8 @@ public class ConnectedDB {
 			case Types.REAL: return NUMERIC_COLUMN;
 			case Types.FLOAT: return NUMERIC_COLUMN;
 			case Types.DOUBLE: return NUMERIC_COLUMN;
-	
+			case Types.BOOLEAN: return NUMERIC_COLUMN;
+			
 			// TODO: What to do with binary columns?
 			case Types.BINARY: return TEXT_COLUMN;
 			case Types.VARBINARY: return TEXT_COLUMN;

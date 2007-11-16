@@ -29,6 +29,7 @@ public class TypedNodeMaker implements NodeMaker {
 	public final static NodeType PLAIN_LITERAL = new LiteralNodeType("", null);
 	public final static NodeType XSD_DATE = new DateLiteralNodeType();
 	public final static NodeType XSD_DATETIME = new DateTimeLiteralNodeType();
+	public final static NodeType XSD_BOOLEAN = new BooleanLiteralNodeType();
 	
 	public static NodeType languageLiteral(String language) {
 		return new LiteralNodeType(language, null);
@@ -39,6 +40,9 @@ public class TypedNodeMaker implements NodeMaker {
 		}
 		if (datatype.equals(XSDDatatype.XSDdateTime)) {
 			return XSD_DATETIME;
+		}
+		if (datatype.equals(XSDDatatype.XSDboolean)) {
+			return XSD_BOOLEAN;
 		}
 		return new LiteralNodeType("", datatype);
 	}
@@ -197,6 +201,33 @@ public class TypedNodeMaker implements NodeMaker {
 			Calendar c = Calendar.getInstance();
 			c.setTimeInMillis(t.getTime());
 			return Node.createLiteral(new XSDDateTime(c).toString(), null, XSDDatatype.XSDdateTime);
+		}
+	}
+	
+	private static class BooleanLiteralNodeType extends LiteralNodeType {
+		BooleanLiteralNodeType() {
+			super("", XSDDatatype.XSDboolean);
+		}
+		public boolean matches(Node node) {
+			return super.matches(node) && XSDDatatype.XSDboolean.isValid(node.getLiteralLexicalForm());
+		}
+		public String extractValue(Node node) {
+			if ("0".equals(node.getLiteralLexicalForm()) || "false".equals(node.getLiteralLexicalForm())) {
+				return "0";
+			}
+			return "1";
+		}
+		public Node makeNode(String value) {
+			boolean b = false;
+			try {
+				int intValue = Integer.parseInt(value);
+				b = intValue != 0;
+			} catch (NumberFormatException ex) {
+				if ("true".equals(value.toLowerCase())) {
+					b = true;
+				}
+			}
+			return Node.createLiteral(b ? "true" : "false", null, XSDDatatype.XSDboolean);
 		}
 	}
 }
