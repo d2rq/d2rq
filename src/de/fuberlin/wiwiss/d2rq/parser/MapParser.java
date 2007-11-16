@@ -27,13 +27,14 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 import de.fuberlin.wiwiss.d2rq.vocab.JDBC;
+import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
 
 /**
  * Creates a {@link Mapping} from a Jena model representation
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.29 2007/11/16 09:29:16 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.30 2007/11/16 12:10:15 cyganiak Exp $
  */
 public class MapParser {
 
@@ -81,6 +82,7 @@ public class MapParser {
 		if (this.mapping != null) {
 			return this.mapping;
 		}
+		findUnknownD2RQTerms();
 		this.mapping = new Mapping();
 		try {
 		    parseProcessingInstructions();
@@ -98,6 +100,28 @@ public class MapParser {
 		return this.mapping;
 	}
 
+	private void findUnknownD2RQTerms() {
+		VocabularySummarizer d2rqTerms = new VocabularySummarizer(D2RQ.class);
+		StmtIterator it = this.model.listStatements();
+		while (it.hasNext()) {
+			Statement stmt = it.nextStatement();
+			if (stmt.getPredicate().getURI().startsWith(D2RQ.NS) 
+					&& !d2rqTerms.getAllProperties().contains(stmt.getPredicate())) {
+				throw new D2RQException(
+						"Unknown property " + PrettyPrinter.toString(stmt.getPredicate()) + ", maybe a typo?",
+						D2RQException.MAPPING_UNKNOWN_D2RQ_PROPERTY);
+			}
+			if (stmt.getPredicate().equals(RDF.type)
+					&& stmt.getObject().isURIResource()
+					&& stmt.getResource().getURI().startsWith(D2RQ.NS)
+					&& !d2rqTerms.getAllClasses().contains(stmt.getObject())) {
+				throw new D2RQException(
+						"Unknown class d2rq:" + PrettyPrinter.toString(stmt.getObject()) + ", maybe a typo?",
+						D2RQException.MAPPING_UNKNOWN_D2RQ_CLASS);
+			}
+		}
+	}
+	
 	private void parseProcessingInstructions() {
 		Iterator it = this.model.listIndividuals(D2RQ.ProcessingInstructions);
 		while (it.hasNext()) {
