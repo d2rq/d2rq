@@ -10,7 +10,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class MappingTest extends TestCase {
 	private final static Resource database1 = ResourceFactory.createResource("http://test/db");
@@ -25,13 +24,6 @@ public class MappingTest extends TestCase {
 	public void testNewMappingWithoutResource() {
 		Mapping m = new Mapping();
 		assertTrue(m.resource().isAnon());
-	}
-	
-	public void testProcessingInstructions() {
-		Mapping m = new Mapping();
-		assertNull(m.processingInstruction(D2RQ.queryHandler));
-		m.setProcessingInstruction(D2RQ.queryHandler, "foo");
-		assertEquals("foo", m.processingInstruction(D2RQ.queryHandler));
 	}
 	
 	public void testNoDatabasesInitially() {

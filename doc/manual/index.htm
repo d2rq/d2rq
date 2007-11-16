@@ -201,8 +201,7 @@ ul.toc li li { font-weight: normal; }
       <li>7.5. <a href="#translationtable">d2rq:TranslationTable</a></li>
       <li>7.6. <a href="#conditional">Conditional Mappings</a></li>
       <li>7.7. <a href="#hint">Performance Optimization using Hint Properties</a></li>
-      <li>7.8. <a href="#processing">d2rq:ProcessingInstructions</a></li>
-      <li>7.9. <a href="#deprecated">Deprecated Language Constructs</a></li>
+      <li>7.8. <a href="#deprecated">Deprecated Language Constructs</a></li>
     </ul>
   </li>
   <li>8. <a href="#change_log">Change Log</a></li>
@@ -1384,19 +1383,13 @@ map:secondaryTopic a d2rq:PropertyBridge;
   or a <a href="#translationtable">translation table</a> with a custom Java class 
   that returns <tt>null</tt> for unwanted database values.</p>
 
-<h2><a name="processing" id="processing"></a>7.8 Processing Instructions</h2>
-<p>You can configure  D2RQ by providing d2rq:ProcessingInstructions. Up till now D2RQ V0.4 only supports the queryHandler processing instruction. The d2rq:queryHandler processing instruction can be used to specify a query handler that is different from the default query handler which is D2RQQueryHandler. </p>
-<p><strong>Example: Switch back to Jena's standard query handler </strong></p>
-<pre>:ProcessingInstructions1 a d2rq:ProcessingInstructions;
-            d2rq:queryHandler "com.hp.hpl.jena.graph.query.SimpleQueryHandler".</pre>
-
-<h2 id="deprecated">7.9 Deprecated Language Constructs</h2>
+<h2 id="deprecated">7.8 Deprecated Language Constructs</h2>
 
 <p>This section lists several language constructs from older versions
 of the D2RQ mapping language that have been replaced by better
 alternatives and should no longer be used.</p>
 
-<h3 id="datatype-object">7.9.1 <tt>d2rq:DatatypePropertyBridge</tt> and <tt>d2rq:ObjectPropertyBridge</tt></h3>
+<h3 id="datatype-object">7.8.1 <tt>d2rq:DatatypePropertyBridge</tt> and <tt>d2rq:ObjectPropertyBridge</tt></h3>
 
 <p>Older versions of the language used two different classes to
 distinguish between property bridges that produce literals, and
@@ -1409,7 +1402,7 @@ is made by using an appropriate property on the bridge declaration:
 <tt>d2rq:uriColumn</tt>, <tt>d2rq:uriPattern</tt> and
 <tt>d2rq:bNodeIdColumns</tt> for resources.</dd></p>
 
-<h3 id="additionalproperty"><a name="additionalproperty"></a>7.9.2 AdditionalProperty</h3>
+<h3 id="additionalproperty"><a name="additionalproperty"></a>7.8.2 AdditionalProperty</h3>
 <p>Up until D2RQ 0.5.1, the <tt>d2rq:AdditionalProperty</tt> construct could be used
   to add a constant property-value pairs to all instances of a class map. An example
   is shown below:</p>
@@ -1438,7 +1431,7 @@ map:SeeAlsoStatement a d2rq:AdditionalProperty;
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.34 2007/11/16 09:29:16 cyganiak Exp $</p>
+<p>$Id: index.htm,v 1.35 2007/11/16 15:32:15 cyganiak Exp $</p>
 
 </BODY>
 </HTML>

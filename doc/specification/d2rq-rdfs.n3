@@ -22,7 +22,7 @@
    				dc:creator       "Richard Cyganiak" ;
    				dc:date          "2006-08-12" ;
    				dc:format        "RDF";
-   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.17 2007/11/15 15:54:50 cyganiak Exp $";
+   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.18 2007/11/16 15:32:14 cyganiak Exp $";
    				.
 
 
@@ -334,21 +334,6 @@ d2rq:rdfValue	rdf:type rdf:Property ;
 		        rdfs:label "RDF value" ;
              	rdfs:domain d2rq:Translation
              	.
-
-# -----------------------------------------------
-# Processing Instructions
-# -----------------------------------------------
-
-d2rq:ProcessingInstructions rdf:type rdfs:Class ;
-        		rdfs:label "Processing Instructions" ; 
-    			rdfs:comment "Attach processing instructions to nodes of this type." 
-    			.
-
-d2rq:queryHandler	rdf:type rdf:Property ;
-				rdfs:label "query handler" ; 
-				rdfs:comment "a Java class name that specifies the graphs QueryHandler.";
-	   			rdfs:domain d2rq:ProcessingInstructions
-        		.
 
 # -----------------------------------------------
 # Jena Assembler

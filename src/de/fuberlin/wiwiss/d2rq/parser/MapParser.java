@@ -34,7 +34,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.30 2007/11/16 12:10:15 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.31 2007/11/16 15:32:15 cyganiak Exp $
  */
 public class MapParser {
 
@@ -85,7 +85,6 @@ public class MapParser {
 		findUnknownD2RQTerms();
 		this.mapping = new Mapping();
 		try {
-		    parseProcessingInstructions();
 			parseDatabases();
 			parseTranslationTables();
 			parseClassMaps();
@@ -118,20 +117,6 @@ public class MapParser {
 				throw new D2RQException(
 						"Unknown class d2rq:" + PrettyPrinter.toString(stmt.getObject()) + ", maybe a typo?",
 						D2RQException.MAPPING_UNKNOWN_D2RQ_CLASS);
-			}
-		}
-	}
-	
-	private void parseProcessingInstructions() {
-		Iterator it = this.model.listIndividuals(D2RQ.ProcessingInstructions);
-		while (it.hasNext()) {
-			Resource instructions = (Resource) it.next();
-			StmtIterator it2 = instructions.listProperties();
-			while (it2.hasNext()) {
-				Statement stmt = (Statement) it2.next();
-				if (stmt.getObject().isLiteral()) {
-					this.mapping.setProcessingInstruction(stmt.getPredicate(), stmt.getString());
-				}
 			}
 		}
 	}

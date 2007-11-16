@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
@@ -22,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.8 2007/11/06 13:56:22 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.9 2007/11/16 15:32:14 cyganiak Exp $
  */
 public class Mapping {
 	private Model model = ModelFactory.createDefaultModel();
@@ -31,7 +30,6 @@ public class Mapping {
 	private Map databases = new HashMap();
 	private Map classMaps = new HashMap();
 	private Map translationTables = new HashMap();
-	private Map processingInstructions = new HashMap();
 	private Collection compiledPropertyBridges;
 	
 	public Mapping() {
@@ -111,14 +109,6 @@ public class Mapping {
 	
 	public TranslationTable translationTable(Resource name) {
 		return (TranslationTable) this.translationTables.get(name);
-	}
-	
-	public void setProcessingInstruction(Property key, String value) {
-		this.processingInstructions.put(key, value);
-	}
-	
-	public String processingInstruction(Property property) {
-		return (String) this.processingInstructions.get(property);
 	}
 	
 	/**

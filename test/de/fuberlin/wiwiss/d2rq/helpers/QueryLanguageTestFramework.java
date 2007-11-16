@@ -21,7 +21,6 @@ import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.vocabulary.DC;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.sql.BeanCounter;
 import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
@@ -31,7 +30,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: QueryLanguageTestFramework.java,v 1.3 2006/09/11 23:22:26 cyganiak Exp $
+ * @version $Id: QueryLanguageTestFramework.java,v 1.4 2007/11/16 15:34:43 cyganiak Exp $
  */
 public abstract class QueryLanguageTestFramework extends TestCase {
 	protected ModelD2RQ model;
@@ -74,7 +73,6 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	protected Logger sqlResultSetLogger=new Logger();
 	protected Logger oldSQLResultSetLogger;
 	protected Logger oldSQLResultSetSeparatorLogger;
-	protected boolean oldIsUsingD2RQQueryHandler;
 	
 	public QueryLanguageTestFramework() {
 		super();
@@ -117,8 +115,6 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	
 	protected void setUp() throws Exception {
 		this.model = new ModelD2RQ(mapURL(), "N3", "http://test/");
-		oldIsUsingD2RQQueryHandler=GraphD2RQ.isUsingD2RQQueryHandler();
-		GraphD2RQ.setUsingD2RQQueryHandler(true);
 //		this.model.enableDebug();
 	    setUpShowErrors(); // should be activated all the time
 //	    setUpShowPerformance(); // activate (only) to test performance (only)
@@ -128,7 +124,6 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	}
 	
 	protected void tearDown() throws Exception {
-	    GraphD2RQ.setUsingD2RQQueryHandler(oldIsUsingD2RQQueryHandler);
 		this.model.close();
 		this.results = null;
 		super.tearDown();
@@ -140,12 +135,10 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 			super.runTest();
 			return;
 		}		
-		boolean oldState=GraphD2RQ.isUsingD2RQQueryHandler();
 		boolean oldRDQLLoggerState=rdqlLogger.debugEnabled();
 		boolean oldSqlResultSetLoggerState=sqlResultSetLogger.debugEnabled();
 		try {
 			for (int i=0; i<configs; i++) {
-			    GraphD2RQ.setUsingD2RQQueryHandler(usingD2RQ[i]);
 			    rdqlLogger.setDebug(verbatim[i] && oldRDQLLoggerState);
 			    sqlResultSetLogger.setDebug(verbatim[i] && oldSqlResultSetLoggerState);
 			    usingLogger.debug("using " + handlerDescription[i] + " ...");
@@ -185,7 +178,6 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 		} catch (Exception e) {
 			throw e; 
 		} finally {
-			GraphD2RQ.setUsingD2RQQueryHandler(oldState);
 			rdqlLogger.setDebug(oldRDQLLoggerState);
 			sqlResultSetLogger.setDebug(oldSqlResultSetLoggerState);
 		}

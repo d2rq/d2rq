@@ -1,6 +1,5 @@
 package de.fuberlin.wiwiss.d2rq;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +19,6 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.TripleMatch;
 import com.hp.hpl.jena.graph.impl.GraphBase;
 import com.hp.hpl.jena.graph.query.QueryHandler;
-import com.hp.hpl.jena.graph.query.SimpleQueryHandler;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -53,12 +51,10 @@ import de.fuberlin.wiwiss.d2rq.vocab.JDBC;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.43 2007/11/16 09:34:13 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.44 2007/11/16 15:32:15 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
-	
-	static private boolean usingD2RQQueryHandler = true;
 	
 //	private final ReificationStyle style;
 //	private boolean closed = false;
@@ -66,13 +62,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 
 	private Mapping mapping;
 
-	public static boolean isUsingD2RQQueryHandler() {
-		return usingD2RQQueryHandler;
-	}
-	public static void setUsingD2RQQueryHandler(boolean usingD2RQQueryHandler) {
-		GraphD2RQ.usingD2RQQueryHandler = usingD2RQQueryHandler;
-	}
-	
 	/**
 	 * Creates a new D2RQ graph from a Jena model containing a D2RQ
 	 * mapping.
@@ -135,21 +124,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		// on the other hand: new instance guaranties that all information with handler
 		// is up to date.
 		checkOpen();
-		String queryHandler = this.mapping.processingInstruction(D2RQ.queryHandler);
-		if (queryHandler!=null) {
-		    try {
-		        Class c=Class.forName(queryHandler);
-		        Constructor con=c.getConstructor(new Class[]{Graph.class}); 
-		        QueryHandler qh=(QueryHandler)con.newInstance(new Object[]{this});
-		        return qh;
-		    } catch (Exception e) {
-		        throw new RuntimeException(e);
-		    }
-		} else if (usingD2RQQueryHandler) {
-			return new D2RQQueryHandler(this, this.mapping.compiledPropertyBridges());
-		} else {
-		    return new SimpleQueryHandler(this);
-		}
+		return new D2RQQueryHandler(this, this.mapping.compiledPropertyBridges());
 	}
 
 	/**
