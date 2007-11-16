@@ -3,7 +3,9 @@ package d2rq;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
@@ -24,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
  * {@link MappingGenerator} or a mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: dump_rdf.java,v 1.5 2006/10/26 13:50:42 cyganiak Exp $
+ * @version $Id: dump_rdf.java,v 1.6 2007/11/16 12:27:54 cyganiak Exp $
  */
 public class dump_rdf {
 	private final static String[] includedDrivers = {
@@ -166,13 +168,22 @@ public class dump_rdf {
 		void doDump() throws DumpParameterException {
 			Model mapModel = makeMapModel();
 			Model d2rqModel = new ModelD2RQ(mapModel, baseURI());
+			String absoluteBaseURI = MapParser.absolutizeURI(baseURI());
 			PrintStream out = makeDestinationStream();
 			RDFWriter writer = d2rqModel.getWriter(this.format);
-			if (this.baseURI != null && 
-					(this.format.equals("RDF/XML") || this.format.equals("RDF/XML-ABBREV"))) {
-				writer.setProperty("xmlbase", this.baseURI);
+			if (this.format.equals("RDF/XML") || this.format.equals("RDF/XML-ABBREV")) {
+				writer.setProperty("showXmlDeclaration", "true");
+				if (this.baseURI != null) {
+					writer.setProperty("xmlbase", this.baseURI);
+				}
+				try {
+					writer.write(d2rqModel, new OutputStreamWriter(out, "utf-8"), absoluteBaseURI);
+				} catch (UnsupportedEncodingException ex) {
+					throw new RuntimeException("Can't happen -- utf-8 is always supported");
+				}
+			} else {
+				writer.write(d2rqModel, out, absoluteBaseURI);
 			}
-			writer.write(d2rqModel, out, MapParser.absolutizeURI(baseURI()));
 		}
 		private Model makeMapModel() throws DumpParameterException {
 			if (hasMappingFile()) {
