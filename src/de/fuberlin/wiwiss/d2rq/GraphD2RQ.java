@@ -22,7 +22,6 @@ import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
@@ -39,8 +38,6 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
-import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
-import de.fuberlin.wiwiss.d2rq.vocab.JDBC;
 
 /**
  * A D2RQ virtual read-only graph backed by a non-RDF database.
@@ -51,16 +48,12 @@ import de.fuberlin.wiwiss.d2rq.vocab.JDBC;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.44 2007/11/16 15:32:15 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.45 2007/11/16 20:04:48 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
-	
-//	private final ReificationStyle style;
-//	private boolean closed = false;
-	private Capabilities capabilities = null;
-
-	private Mapping mapping;
+	private final Capabilities capabilities = new D2RQCapabilities();
+	private final Mapping mapping;
 
 	/**
 	 * Creates a new D2RQ graph from a Jena model containing a D2RQ
@@ -71,13 +64,8 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * @throws D2RQException on error in the mapping model
 	 */
 	public GraphD2RQ(Model mapModel, String baseURIForData) throws D2RQException {
-		copyPrefixes(mapModel);
-		if (baseURIForData == null) {
-			baseURIForData = "http://localhost/resource/";
-		}
-		MapParser parser = new MapParser(mapModel, baseURIForData);
-		this.mapping = parser.parse();
-		this.mapping.validate();
+		this(new MapParser(mapModel, 
+				(baseURIForData == null) ? "http://localhost/resource/" : baseURIForData).parse());
 	}
 
 	/**
@@ -88,27 +76,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	public GraphD2RQ(Mapping mapping) throws D2RQException {
 		this.mapping = mapping;
 		this.mapping.validate();
-	}
-	
-	/**
-	 * Copies all prefixes from the mapping file to the D2RQ model.
-	 * This makes the output of Model.write(...) nicer. The D2RQ
-	 * prefix is dropped on the assumption that it is not wanted
-	 * in the actual data.
-	 */ 
-	private void copyPrefixes(PrefixMapping prefixes) {
-		getPrefixMapping().setNsPrefixes(prefixes);
-		Iterator it = getPrefixMapping().getNsPrefixMap().entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			String namespace = (String) entry.getValue();
-			if (D2RQ.NS.equals(namespace) && "d2rq".equals(entry.getKey())) {
-				getPrefixMapping().removeNsPrefix((String) entry.getKey());
-			}
-			if (JDBC.NS.equals(namespace) && "jdbc".equals(entry.getKey())) {
-				getPrefixMapping().removeNsPrefix((String) entry.getKey());
-			}
-		}
+		getPrefixMapping().setNsPrefixes(mapping.getPrefixMapping());
 	}
 
 	/**
@@ -140,7 +108,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	}
 
 	public Capabilities getCapabilities() { 
-		if (this.capabilities == null) this.capabilities = new D2RQCapabilities();
 		return this.capabilities;
 	}
 

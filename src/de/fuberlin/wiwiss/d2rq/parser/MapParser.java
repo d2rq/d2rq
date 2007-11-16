@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rq.parser;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import com.hp.hpl.jena.n3.IRIResolver;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -34,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.31 2007/11/16 15:32:15 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.32 2007/11/16 20:04:48 cyganiak Exp $
  */
 public class MapParser {
 
@@ -84,6 +85,7 @@ public class MapParser {
 		}
 		findUnknownD2RQTerms();
 		this.mapping = new Mapping();
+		copyPrefixes();
 		try {
 			parseDatabases();
 			parseTranslationTables();
@@ -97,6 +99,26 @@ public class MapParser {
 					D2RQException.MAPPING_LITERAL_INSTEADOF_RESOURCE);
 		}
 		return this.mapping;
+	}
+	
+	/**
+	 * Copies all prefixes from the mapping file Model to the D2RQ mapping.
+	 * Administrative D2RQ prefixes are dropped on the assumption that they
+	 * are not wanted in the actual data.
+	 */ 
+	private void copyPrefixes() {
+		mapping.getPrefixMapping().setNsPrefixes(model);
+		Iterator it = mapping.getPrefixMapping().getNsPrefixMap().entrySet().iterator();
+		while (it.hasNext()) {
+			Entry entry = (Entry) it.next();
+			String namespace = (String) entry.getValue();
+			if (D2RQ.NS.equals(namespace) && "d2rq".equals(entry.getKey())) {
+				mapping.getPrefixMapping().removeNsPrefix((String) entry.getKey());
+			}
+			if (JDBC.NS.equals(namespace) && "jdbc".equals(entry.getKey())) {
+				mapping.getPrefixMapping().removeNsPrefix((String) entry.getKey());
+			}
+		}
 	}
 
 	private void findUnknownD2RQTerms() {

@@ -5,6 +5,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.impl.ModelCom;
 import com.hp.hpl.jena.util.FileManager;
 
+import de.fuberlin.wiwiss.d2rq.map.Mapping;
+
 /**
  * <p>A D2RQ read-only Jena model backed by a D2RQ-mapped non-RDF database.</p>
  *
@@ -16,7 +18,7 @@ import com.hp.hpl.jena.util.FileManager;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.11 2006/09/07 13:38:25 cyganiak Exp $
+ * @version $Id: ModelD2RQ.java,v 1.12 2007/11/16 20:04:48 cyganiak Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */
@@ -57,5 +59,13 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 */
 	public ModelD2RQ(Model mapModel, String baseURIForData) {
 		super(new GraphD2RQ(mapModel, baseURIForData), BuiltinPersonalities.model);
+	}
+	
+	/**
+	 * Create a non-RDF database-based model. The model is created
+	 * from the given D2RQ map.
+	 */
+	public ModelD2RQ(Mapping mapping) {
+		super(new GraphD2RQ(mapping), BuiltinPersonalities.model);
 	}
 }

@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
@@ -18,6 +19,7 @@ import com.hp.hpl.jena.util.FileManager;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
@@ -26,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
  * {@link MappingGenerator} or a mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: dump_rdf.java,v 1.7 2007/11/16 19:38:16 cyganiak Exp $
+ * @version $Id: dump_rdf.java,v 1.8 2007/11/16 20:04:48 cyganiak Exp $
  */
 public class dump_rdf {
 	private final static String[] includedDrivers = {
@@ -167,7 +169,16 @@ public class dump_rdf {
 		}
 		void doDump() throws DumpParameterException {
 			Model mapModel = makeMapModel();
-			Model d2rqModel = new ModelD2RQ(mapModel, baseURI());
+			
+			// Override the d2rq:resultSizeLimit given in the mapping
+			Mapping mapping = new MapParser(mapModel, baseURI()).parse();
+			Iterator it = mapping.databases().iterator();
+			while (it.hasNext()) {
+				Database db = (Database) it.next();
+				db.setResultSizeLimit(Database.NO_LIMIT);
+			}
+			
+			Model d2rqModel = new ModelD2RQ(mapping);
 			String absoluteBaseURI = MapParser.absolutizeURI(baseURI());
 			PrintStream out = makeDestinationStream();
 			RDFWriter writer = d2rqModel.getWriter(this.format);

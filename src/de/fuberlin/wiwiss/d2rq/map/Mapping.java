@@ -9,6 +9,8 @@ import java.util.Map;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.shared.PrefixMapping;
+import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -21,15 +23,16 @@ import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.9 2007/11/16 15:32:14 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.10 2007/11/16 20:04:48 cyganiak Exp $
  */
 public class Mapping {
-	private Model model = ModelFactory.createDefaultModel();
+	private final Model model = ModelFactory.createDefaultModel();
 	private Resource mappingResource;
 
-	private Map databases = new HashMap();
-	private Map classMaps = new HashMap();
-	private Map translationTables = new HashMap();
+	private final Map databases = new HashMap();
+	private final Map classMaps = new HashMap();
+	private final Map translationTables = new HashMap();
+	private final PrefixMapping prefixes = new PrefixMappingImpl();
 	private Collection compiledPropertyBridges;
 	
 	public Mapping() {
@@ -134,5 +137,9 @@ public class Mapping {
 			RDFRelation bridge = (RDFRelation) it.next();
 			assertHasColumnTypes(bridge);
 		}
+	}
+	
+	public PrefixMapping getPrefixMapping() {
+		return prefixes;
 	}
 }
