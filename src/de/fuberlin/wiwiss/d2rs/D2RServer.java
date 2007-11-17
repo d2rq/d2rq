@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rs;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Iterator;
 
 import javax.servlet.ServletContext;
 
@@ -21,6 +22,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.shared.PrefixMapping;
+import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandler;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerFactory;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
@@ -34,7 +37,7 @@ import de.fuberlin.wiwiss.d2rs.vocab.D2R;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.18 2007/11/04 00:41:14 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.19 2007/11/17 22:27:37 cyganiak Exp $
  */
 public class D2RServer {
 	private final static String SPARQL_SERVICE_NAME = "sparql";
@@ -55,7 +58,7 @@ public class D2RServer {
 	private Model model = null;
 	private GraphD2RQ currentGraph = null;
 	private DataSource dataset;
-	private NamespacePrefixModel prefixesModel;
+	private PrefixMapping prefixes;
 	private AutoReloader reloader = null;
 	private Log log = LogFactory.getLog(D2RServer.class);
 	
@@ -166,6 +169,7 @@ public class D2RServer {
 	public Model reloadModelD2RQ(String mappingFileURL) {
 		Model mapModel = ModelFactory.createDefaultModel();
 		mapModel.read(mappingFileURL, resourceBaseURI(), "N3");
+		updatePrefixes(mapModel);
 		this.hasTruncatedResults = mapModel.contains(null, D2RQ.resultSizeLimit, (RDFNode) null);
 		ModelD2RQ result = new ModelD2RQ(mapModel, resourceBaseURI());
 		this.currentGraph = (GraphD2RQ) result.getGraph();
@@ -173,30 +177,45 @@ public class D2RServer {
 		this.currentGraph.initInventory(baseURI() + "all/");
 		return result;
 	}
+
+	private void updatePrefixes(PrefixMapping newPrefixes) {
+		prefixes = new PrefixMappingImpl();
+		Iterator it = newPrefixes.getNsPrefixMap().keySet().iterator();
+		while (it.hasNext()) {
+			String prefix = (String) it.next();
+			String uri = newPrefixes.getNsPrefixURI(prefix);
+			if (D2R.NS.equals(uri)) continue;
+			prefixes.setNsPrefix(prefix, uri);
+		}
+	}
 	
 	private void initAutoReloading(String filename) {
 		this.reloader = new AutoReloader(new File(filename), this);
 		this.model = ModelFactory.createModelForGraph(this.reloader);
 		DescribeHandlerRegistry.get().clear();
 		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory(this.model));
-		this.reloader.setPrefixModel(this.prefixesModel);
 		this.dataset = DatasetFactory.create();
 		this.dataset.setDefaultModel(this.model);
-		this.dataset.addNamedModel(NamespacePrefixModel.namespaceModelURI, this.prefixesModel);
 		this.reloader.forceReload();
+	}
+
+	public void checkMappingFileChanged() {
+		if (reloader == null) return;
+		reloader.checkMappingFileChanged();
+	}
+	
+	public PrefixMapping getPrefixes() {
+		return prefixes;
 	}
 	
 	public void start() {
 		log.info("using config file: " + configFile);
 		this.config = new ConfigLoader(configFile);
 		this.config.load();
-		this.prefixesModel = new NamespacePrefixModel();
-		this.prefixesModel.ignoreNamespaceURI(D2R.NS);
 		if (this.config.isLocalMappingFile()) {
 			initAutoReloading(this.config.getLocalMappingFilename());
 		} else {
 			this.model = reloadModelD2RQ(this.config.getMappingURL());
-			this.prefixesModel.update(this.currentGraph.getPrefixMapping());
 		}
 		Registry.add(RDFServer.ServiceRegistryName, createJosekiServiceRegistry());
 	}

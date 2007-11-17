@@ -28,15 +28,10 @@ public class AutoReloader extends GraphBase {
 	private File mappingFile;
 	private long lastModified = Long.MAX_VALUE;
 	private long previousCheck = Long.MIN_VALUE;
-	private NamespacePrefixModel prefixModel = null;
 	
 	public AutoReloader(File mappingFile, D2RServer server) {
 		this.mappingFile = mappingFile;
 		this.server = server;
-	}
-	
-	public void setPrefixModel(NamespacePrefixModel m) {
-		this.prefixModel = m;
 	}
 	
 	public void forceReload() {
@@ -83,14 +78,13 @@ public class AutoReloader extends GraphBase {
 		}
 		try {
 			Model model = server.reloadModelD2RQ(this.mappingFile.toURL().toString());
-			setNewBase(model.getGraph());
-			this.prefixModel.update(model);
+			setNewBaseGraph(model.getGraph());
 		} catch (MalformedURLException ex) {
-			throw new D2RQException("No URL: " + this.mappingFile, ex);
+			throw new D2RQException("Not a URL: " + this.mappingFile, ex);
 		}
 	}
 	
-	private void setNewBase(Graph newBase) {
+	private void setNewBaseGraph(Graph newBase) {
 		this.base = newBase;
 		this.prefixes.setNsPrefixes(newBase.getPrefixMapping());
 	}

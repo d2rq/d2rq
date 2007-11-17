@@ -66,6 +66,11 @@
     </init-param>
   </servlet>
 
+  <servlet>
+    <servlet-name>NamespaceServlet</servlet-name>
+    <servlet-class>de.fuberlin.wiwiss.d2rs.NamespaceServlet</servlet-class>
+  </servlet>
+  
   <!-- MAPPINGS -->
 
   <servlet-mapping>
@@ -106,6 +111,11 @@
   <servlet-mapping>
     <servlet-name>RootServlet</servlet-name>
     <url-pattern>/index.html</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>NamespaceServlet</servlet-name>
+    <url-pattern>/snorql/namespaces.js</url-pattern>
   </servlet-mapping>
 
   <welcome-file-list>

@@ -5,6 +5,7 @@
     <title>SPARQL Explorer</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script type="text/javascript" src="sparql.js"></script>
+    <script type="text/javascript" src="namespaces.js"></script>
     <script type="text/javascript">
 //<![CDATA[
 
@@ -21,14 +22,10 @@ function start() {
     } else {
         var queryString = '';
     }
-    retrieveNamespaces();
+    loadNamespaces();
     if (!queryString) {
         document.getElementById('querytext').value = 'SELECT * WHERE {\n...\n}';
         return;
-    }
-    var match = queryString.match(/prefixes=([^&]*)/);
-    if (match) {
-        prefixes = betterUnescape(match[1]);
     }
     var querytext = null;
     if (queryString == 'classes') {
@@ -77,8 +74,7 @@ function start() {
         querytext = query;
     }
     document.getElementById('querytext').value = querytext;
-    syncArgResultTitle = resultTitle;
-    doQuery(query, function(json) { syncArgJSON = json; waitForOther(); });
+    doQuery(query, function(json) { displayResult(json, resultTitle); });
 }
 
 var service;
@@ -91,28 +87,16 @@ function setEndpointURL(url) {
 
 var namespaces = {};
 var prefixes = '';
-function retrieveNamespaces() {
-    var query = 'SELECT ?uri ?prefix WHERE {\n' +
-            '    GRAPH <http://www.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/vocab#ns_model> { ?uri <http://www.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/vocab#prefix> ?prefix }\n' +
-            '}';
-    service.query(query, {
-            success: function(json) { acceptNamespaces(json); waitForOther(); },
-            failure: onFailure
-    });
-}
-
-function acceptNamespaces(json) {
-    var queryPart = '';
-    for (i in json.results.bindings) {
-        var prefix = json.results.bindings[i].prefix.value;
-        var uri = json.results.bindings[i].uri.value;
-        namespaces[uri] = prefix;
-        queryPart = queryPart + 'PREFIX ' + prefix + ': <' + uri + '>\n';
+function loadNamespaces() {
+    prefixes = '';
+    for (prefix in D2R_namespacePrefixes) {
+        var uri = D2R_namespacePrefixes[prefix];
+        namespaces[prefix] = uri;
+        prefixes = prefixes + 'PREFIX ' + prefix + ': <' + uri + '>\n';
     }
-    prefixes = queryPart;
-    document.getElementById('prefixestext').appendChild(document.createTextNode(queryPart));
+    document.getElementById('prefixestext').appendChild(document.createTextNode(prefixes));
 }
-
+    
 function doQuery(sparql, callback) {
     busy = document.createElement('p');
     busy.className = 'busy';
@@ -122,17 +106,6 @@ function doQuery(sparql, callback) {
             success: callback,
             failure: onFailure
     });
-}
-
-var syncCalls = 0;
-var syncArgResultTitle = null; 
-var syncArgJSON = null; 
-function waitForOther() {
-    syncCalls = syncCalls + 1;
-    if (syncCalls < 2) {
-        return;
-    }
-    displayResult(syncArgJSON, syncArgResultTitle);
 }
 
 function displayResult(json, resultTitle) {
@@ -174,11 +147,8 @@ function submitQuery() {
     if (output == 'browse') {
         document.getElementById('queryform').action = browserBaseURL();
         document.getElementById('query').value = document.getElementById('querytext').value;
-        document.getElementById('prefixes').value = prefixes;
-        document.getElementById('prefixes').disabled = false;
     } else {
         document.getElementById('query').value = prefixes + document.getElementById('querytext').value;
-        document.getElementById('prefixes').disabled = true;
     }
     document.getElementById('jsonoutput').disabled = (output != 'json');
     document.getElementById('stylesheet').disabled = (output != 'xslt' || !document.getElementById('xsltstylesheet').value);
@@ -382,7 +352,6 @@ function addEvent(obj, evType, fn){
       <pre id="prefixestext"></pre>
       <form id="queryform" action="#" method="get"><div>
         <input type="hidden" name="query" value="" id="query" />
-        <input type="hidden" name="prefixes" value="" id="prefixes" disabled="disabled" />
         <input type="hidden" name="output" value="json" id="jsonoutput" disabled="disabled" />
         <input type="hidden" name="stylesheet" value="" id="stylesheet" disabled="disabled" />
       </div></form>
