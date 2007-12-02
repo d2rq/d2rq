@@ -1,35 +1,16 @@
 package de.fuberlin.wiwiss.d2rs;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.joseki.Joseki;
-import org.joseki.http.AcceptItem;
-import org.joseki.http.AcceptList;
+import de.fuberlin.wiwiss.pubby.negotiation.ContentTypeNegotiator;
+import de.fuberlin.wiwiss.pubby.negotiation.MediaRangeSpec;
+import de.fuberlin.wiwiss.pubby.negotiation.PubbyNegotiator;
 
 public class ResourceServlet extends HttpServlet {
-	private static String contentTypeHTML = "text/html";
-	private static String contentTypeXHTML = "application/xhtml+xml";
-
-	private static AcceptItem defaultContentType = new AcceptItem(contentTypeHTML);
-    
-	private static AcceptList supportedContentTypes = new AcceptList(new String[]{
-			// HTML types
-			contentTypeHTML,
-			contentTypeXHTML,
-
-			// RDF types should mirror Joseki's accepted formats from ResponseHttp.java
-//			Joseki.contentTypeXML,
-			Joseki.contentTypeRDFXML,
-			Joseki.contentTypeTurtle,
-			Joseki.contentTypeN3,
-			Joseki.contentTypeN3Alt,
-			Joseki.contentTypeNTriples
-	});
 
     public void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
@@ -42,52 +23,32 @@ public class ResourceServlet extends HttpServlet {
 		if (request.getQueryString() != null) {
 			relativeResourceURI = relativeResourceURI + "?" + request.getQueryString();
 		}
-		D2RServer server = D2RServer.fromServletContext(getServletContext());
-		if (clientPrefersHTML(request)) {
-			response.addHeader("Location",
-					server.pageURL(relativeResourceURI));
-		} else {
-			response.addHeader("Location",
-					server.dataURL(relativeResourceURI));
-		}
-		response.setStatus(303);
-		response.addHeader("Vary", "Accept");
-	}
 
-	private boolean clientPrefersHTML(HttpServletRequest request) {
-		// This should use Joseki's HttpUtils.chooseContentType(...), but it
-		// is buggy, so we use our own implementation until Joseki is fixed.
-		// The Joseki version ignores ";q=x.x" values in the "Accept:" header.
-		AcceptItem bestFormat = chooseContentType(
-				request, supportedContentTypes, defaultContentType);
-
-		return contentTypeHTML.equals(bestFormat.getAcceptType())
-				|| contentTypeXHTML.equals(bestFormat.getAcceptType());
-	}
-
-	private AcceptItem chooseContentType(HttpServletRequest request, 
-			AcceptList offeredContentTypes, AcceptItem defaultContentType) {
-		String acceptHeader = request.getHeader("Accept");
-		if (acceptHeader == null) {
-			return defaultContentType;
-		}
-		AcceptList acceptedContentTypes = new AcceptList(acceptHeader);
-		AcceptItem bestMatch = match(acceptedContentTypes, offeredContentTypes) ;
+		response.addHeader("Vary", "Accept, User-Agent");
+		ContentTypeNegotiator negotiator = PubbyNegotiator.getPubbyNegotiator();
+		MediaRangeSpec bestMatch = negotiator.getBestMatch(
+				request.getHeader("Accept"), request.getHeader("User-Agent"));
 		if (bestMatch == null) {
-			return defaultContentType;
+			response.setStatus(406);
+			response.setContentType("text/plain");
+			response.getOutputStream().println(
+					"406 Not Acceptable: The requested data format is not supported. " +
+					"Only HTML and RDF are available.");
+			return;
 		}
-		return bestMatch;
-	}
-	
-	private AcceptItem match(AcceptList accepted, AcceptList offered) {
-        for ( Iterator iter = accepted.iterator() ; iter.hasNext() ; )
-        {
-            AcceptItem i2 = (AcceptItem)iter.next() ;
-            AcceptItem m = offered.match(i2) ;
-            if ( m != null )
-                return m ;
-        }
-        return null ;
+		
+		response.setStatus(303);
+		response.setContentType("text/plain");
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
+		String location;
+		if ("text/html".equals(bestMatch.getMediaType())) {
+			location = server.pageURL(relativeResourceURI);
+		} else {
+			location = server.dataURL(relativeResourceURI);
+		}
+		response.addHeader("Location", location);
+		response.getOutputStream().println(
+				"303 See Other: For a description of this item, see " + location);
 	}
 	
 	private static final long serialVersionUID = 2752377911405801794L;
