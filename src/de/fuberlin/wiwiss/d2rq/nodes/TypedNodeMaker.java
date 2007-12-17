@@ -197,10 +197,19 @@ public class TypedNodeMaker implements NodeMaker {
 			return new java.sql.Timestamp(xsd.asCalendar().getTimeInMillis()).toString();
 		}
 		public Node makeNode(String value) {
-			Timestamp t = Timestamp.valueOf(value);
-			Calendar c = Calendar.getInstance();
-			c.setTimeInMillis(t.getTime());
-			return Node.createLiteral(new XSDDateTime(c).toString(), null, XSDDatatype.XSDdateTime);
+			try {
+				Calendar c = Calendar.getInstance();
+				Timestamp t = Timestamp.valueOf(value);
+				c.setTimeInMillis(t.getTime());
+				return Node.createLiteral(
+						new XSDDateTime(c).toString(), null, XSDDatatype.XSDdateTime);
+			} catch (RuntimeException ex) {
+				// TODO: This is hackish ... Support for PostgreSQL TIMESTAMP WITH TIME ZONE type
+				// PostgreSQL answers a TIMESTAMP with an added [+-]HH(:MM)?,
+				// and the Timestamp class won't parse that
+				value = value.replace(' ', 'T').replaceAll("\\.\\d+", "").replaceAll("[+-]\\d\\d$", "$0:00");
+				return Node.createLiteral(value, null, XSDDatatype.XSDdateTime);
+			}
 		}
 	}
 	
