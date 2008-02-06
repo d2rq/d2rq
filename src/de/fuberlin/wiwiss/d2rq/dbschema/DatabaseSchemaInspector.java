@@ -7,11 +7,14 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
@@ -19,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.10 2007/11/16 15:25:54 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.11 2008/02/06 17:26:14 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -194,9 +197,14 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public List foreignKeyColumns(RelationName tableName) {
+	/**
+	 * Returns the foreign keys defined for a table.
+	 * @param tableName The table whose foreign keys we want
+	 * @return A list of {@link Join}s; the local columns are in attributes1() 
+	 */
+	public List foreignKeys(RelationName tableName) {
 		try {
-			List result = new ArrayList();
+			Map fks = new HashMap();
 			ResultSet rs = this.schema.getImportedKeys(
 					null, schemaName(tableName), tableName(tableName));
 			while (rs.next()) {
@@ -206,20 +214,45 @@ public class DatabaseSchemaInspector {
 				RelationName fkTable = toRelationName(
 						rs.getString("FKTABLE_SCHEM"), rs.getString("FKTABLE_NAME"));
 				Attribute foreignColumn = new Attribute(fkTable, rs.getString("FKCOLUMN_NAME"));
-				result.add(new Attribute[]{foreignColumn, primaryColumn});
+				String fkName = rs.getString("FK_NAME");
+				if (!fks.containsKey(fkName)) {
+					fks.put(fkName, new ForeignKey());
+				}
+				int keySeq = rs.getInt("KEY_SEQ") - 1;
+				((ForeignKey) fks.get(fkName)).addColumns(
+						keySeq, foreignColumn, primaryColumn);
 			}
 			rs.close();
-			return result;
+			List results = new ArrayList();
+			Iterator it = fks.values().iterator();
+			while (it.hasNext()) {
+				ForeignKey fk = (ForeignKey) it.next();
+				results.add(fk.toJoin());
+			}
+			return results;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
 		}
 	}
 
+	/**
+	 * A table T is considered to be a link table if it has exactly two
+	 * foreign key constraints, and the constraints reference other
+	 * tables (not T), and the constraints cover all columns of T.
+	 * 
+	 * TODO: Should check that the table is not referenced by foreign keys from other tables
+	 */
 	public boolean isLinkTable(RelationName tableName) {
-		if (listColumns(tableName).size() != 2) {
-			return false;
+		List foreignKeys = foreignKeys(tableName);
+		if (foreignKeys.size() != 2) return false;
+		List columns = listColumns(tableName);
+		Iterator it = foreignKeys.iterator();
+		while (it.hasNext()) {
+			Join fk = (Join) it.next();
+			if (fk.isSameTable()) return false;
+			columns.removeAll(fk.attributes1());
 		}
-		return foreignKeyColumns(tableName).size() == 2;
+		return columns.isEmpty();
 	}
 	
 	private String schemaName(RelationName tableName) {
@@ -243,5 +276,24 @@ public class DatabaseSchemaInspector {
 			return new RelationName(null, table);
 		}
 		return new RelationName(schema, table);
+	}
+
+	/**
+	 * A foreign key. Supports adding (local column, other column) pairs. The pairs
+	 * can be added out of order and will be re-ordered internally. When all
+	 * columns are added, a {@link Join} object can be created.
+	 */
+	private class ForeignKey {
+		private TreeMap primaryColumns = new TreeMap();
+		private TreeMap foreignColumns = new TreeMap();
+		private void addColumns(int keySequence, Attribute foreign, Attribute primary) {
+			primaryColumns.put(new Integer(keySequence), primary);
+			foreignColumns.put(new Integer(keySequence), foreign);
+		}
+		private Join toJoin() {
+			return new Join(
+					new ArrayList(foreignColumns.values()),
+					new ArrayList(primaryColumns.values()));
+		}
 	}
 }

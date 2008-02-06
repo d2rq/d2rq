@@ -28,7 +28,9 @@ import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -39,7 +41,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.23 2007/11/16 09:29:16 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.24 2008/02/06 17:26:14 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -190,17 +192,24 @@ public class MappingGenerator {
 		this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
 		this.out.println("\t.");
 		writeLabelBridge(tableName);
-		List foreignKeys = this.schema.foreignKeyColumns(tableName);
+		List foreignKeys = this.schema.foreignKeys(tableName);
 		Iterator it = this.schema.listColumns(tableName).iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			writeColumn(column, foreignKeys);
+			if (!isInForeignKey(column, foreignKeys)) {
+				writeColumn(column);
+			}
+		}
+		it = foreignKeys.iterator();
+		while (it.hasNext()) {
+			Join fk = (Join) it.next();
+			writeForeignKey(fk);
 		}
 		it = this.linkTables.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
 			if (entry.getValue().equals(tableName)) {
-				writeLink((RelationName) entry.getKey());
+				writeLinkTable((RelationName) entry.getKey());
 			}
 		}
 		this.out.println();
@@ -215,46 +224,50 @@ public class MappingGenerator {
 		this.out.println("\t.");
 	}
 	
-	public void writeColumn(Attribute column, List foreignKeys) {
+	public void writeColumn(Attribute column) {
 		this.out.println(propertyBridgeName(toRelationName(column)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(column.relationName()) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(column) + ";");
-		Attribute foreignKeyColumn = null;
-		Iterator it = foreignKeys.iterator();
-		while (it.hasNext()) {
-			Attribute[] linkedColumns = (Attribute[]) it.next();
-			if (linkedColumns[0].equals(column)) {
-				foreignKeyColumn = linkedColumns[1];
-			}
+		this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
+		int colType = this.schema.columnType(column);
+		String xsd = DatabaseSchemaInspector.xsdTypeFor(colType);
+		if (xsd != null && !"xsd:string".equals(xsd)) {
+			// We use plain literals instead of xsd:strings, so skip
+			// this if it's an xsd:string
+			this.out.println("\td2rq:datatype " + xsd + ";");
 		}
-		if (foreignKeyColumn == null) {
-			this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
-			int colType = this.schema.columnType(column);
-			String xsd = DatabaseSchemaInspector.xsdTypeFor(colType);
-			if (xsd != null && !"xsd:string".equals(xsd)) {
-				// We use plain literals instead of xsd:strings, so skip
-				// this if it's an xsd:string
-				this.out.println("\td2rq:datatype " + xsd + ";");
-			}
-			writeColumnHacks(column, colType);
-			if (xsd == null) {
-				createDatatypeProperty(column, null);
-			} else {
-				String datatypeURI = xsd.replaceAll("xsd:", XSDDatatype.XSD + "#");
-				createDatatypeProperty(column, TypeMapper.getInstance().getSafeTypeByName(datatypeURI));
-			}
+		writeColumnHacks(column, colType);
+		if (xsd == null) {
+			createDatatypeProperty(column, null);
 		} else {
-			this.out.println("\td2rq:refersToClassMap " + classMapName(foreignKeyColumn.relationName()) + ";");
-			Attribute joinColumn = foreignKeyColumn;
-			// Same-table join? Then we need to set up an alias for the table and join to that
-			if (column.relationName().equals(foreignKeyColumn.relationName())) {
-				String aliasName = foreignKeyColumn.relationName().qualifiedName().replace('.', '_') + "__alias";
-				this.out.println("\td2rq:alias \"" + column.relationName().qualifiedName() + " AS " + aliasName + "\";");
-				joinColumn = new Attribute(null, aliasName, foreignKeyColumn.attributeName());
-			}
-			this.out.println("\td2rq:join \"" + column.qualifiedName() + " = " + joinColumn.qualifiedName() + "\";");
-			createObjectProperty(column, foreignKeyColumn);
+			String datatypeURI = xsd.replaceAll("xsd:", XSDDatatype.XSD + "#");
+			createDatatypeProperty(column, TypeMapper.getInstance().getSafeTypeByName(datatypeURI));
 		}
+		this.out.println("\t.");
+	}
+
+	public void writeForeignKey(Join foreignKey) {
+		RelationName primaryTable = foreignKey.table1();
+		List primaryColumns = foreignKey.attributes1();
+		RelationName foreignTable = foreignKey.table2();
+		this.out.println(propertyBridgeName(toRelationName(primaryColumns)) + " a d2rq:PropertyBridge;");
+		this.out.println("\td2rq:belongsToClassMap " + classMapName(primaryTable) + ";");
+		this.out.println("\td2rq:property " + vocabularyTermQName(primaryColumns) + ";");
+		this.out.println("\td2rq:refersToClassMap " + classMapName(foreignKey.table2()) + ";");
+		AliasMap alias = AliasMap.NO_ALIASES;
+		// Same-table join? Then we need to set up an alias for the table and join to that
+		if (foreignKey.isSameTable()) {
+			String aliasName = foreignTable.qualifiedName().replace('.', '_') + "__alias";
+			this.out.println("\td2rq:alias \"" + foreignTable.qualifiedName() + " AS " + aliasName + "\";");
+			alias = AliasMap.create1(foreignTable, new RelationName(null, aliasName));
+		}
+		Iterator it = primaryColumns.iterator();
+		while (it.hasNext()) {
+			Attribute column = (Attribute) it.next();
+			this.out.println("\td2rq:join \"" + column.qualifiedName() + " = " +
+					alias.applyTo(foreignKey.equalAttribute(column)).qualifiedName() + "\";");
+		}
+		createObjectProperty(foreignKey);
 		this.out.println("\t.");
 	}
 
@@ -266,29 +279,40 @@ public class MappingGenerator {
 //		}
 	}
 	
-	private void writeLink(RelationName linkTableName) {
-		List foreignKeys = this.schema.foreignKeyColumns(linkTableName);
-		Attribute firstLocalColumn = ((Attribute[]) foreignKeys.get(0))[0];
-		Attribute firstForeignColumn = ((Attribute[]) foreignKeys.get(0))[1];
-		Attribute secondLocalColumn = ((Attribute[]) foreignKeys.get(1))[0];
-		Attribute secondForeignColumn = ((Attribute[]) foreignKeys.get(1))[1];
-		boolean isSelfJoin = firstForeignColumn.relationName().equals(secondForeignColumn.relationName());
-		Attribute aliasColumn = isSelfJoin
-				? createAliasColumn(secondForeignColumn, linkTableName)
-				: secondForeignColumn;
+	private void writeLinkTable(RelationName linkTableName) {
+		List foreignKeys = this.schema.foreignKeys(linkTableName);
+		Join join1 = (Join) foreignKeys.get(0);
+		Join join2 = (Join) foreignKeys.get(1);
+		RelationName table1 = join1.table2();
+		RelationName table2 = join2.table2();
+		boolean isSelfJoin = table1.equals(table2);
 		this.out.println("# n:m table " + linkTableName + (isSelfJoin ? " (self-join)" : ""));
 		this.out.println(propertyBridgeName(linkTableName.qualifiedName()) + " a d2rq:PropertyBridge;");
-		this.out.println("\td2rq:belongsToClassMap " + classMapName(firstForeignColumn.relationName()) + ";");
+		this.out.println("\td2rq:belongsToClassMap " + classMapName(table1) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(linkTableName) + ";");
-		this.out.println("\td2rq:refersToClassMap " + classMapName(secondForeignColumn.relationName()) + ";");
-		if (isSelfJoin) {
-			this.out.println("\td2rq:alias \"" + secondForeignColumn.relationName().qualifiedName() + 
-					" AS " + aliasColumn.relationName().qualifiedName());
+		this.out.println("\td2rq:refersToClassMap " + classMapName(table2) + ";");
+		Iterator it = join1.attributes1().iterator();
+		while (it.hasNext()) {
+			Attribute column = (Attribute) it.next();
+			Attribute otherColumn = join1.equalAttribute(column);
+			this.out.println("\td2rq:join \"" + column.qualifiedName() + " = " + otherColumn.qualifiedName() + "\";");
 		}
-		this.out.println("\td2rq:join \"" + firstForeignColumn.qualifiedName() + " = " + firstLocalColumn.qualifiedName() + "\";");
-		this.out.println("\td2rq:join \"" + secondLocalColumn.qualifiedName() + " = " + aliasColumn.qualifiedName() + "\";");
+		AliasMap alias = AliasMap.NO_ALIASES;
+		if (isSelfJoin) {
+			RelationName aliasName = new RelationName(
+					null, table2.tableName() + "_" + linkTableName.tableName() + "__alias");
+			alias = AliasMap.create1(table2, aliasName);
+			this.out.println("\td2rq:alias \"" + table2.qualifiedName() + 
+					" AS " + aliasName.qualifiedName());
+		}
+		it = join2.attributes1().iterator();
+		while (it.hasNext()) {
+			Attribute column = (Attribute) it.next();
+			Attribute otherColumn = join2.equalAttribute(column);
+			this.out.println("\td2rq:join \"" + column.qualifiedName() + " = " + alias.applyTo(otherColumn).qualifiedName() + "\";");
+		}
 		this.out.println("\t.");
-		createLinkProperty(linkTableName, firstForeignColumn.relationName(), secondForeignColumn.relationName());
+		createLinkProperty(linkTableName, table1, table2);
 	}
 
 	private String databaseName() {
@@ -326,6 +350,10 @@ public class MappingGenerator {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attribute));
 	}
 
+	private String vocabularyTermQName(List attributes) {
+		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attributes));
+	}
+
 	private boolean hasPrimaryKey(RelationName tableName) {
 		return !this.schema.primaryKeyColumns(tableName).isEmpty();
 	}
@@ -361,6 +389,17 @@ public class MappingGenerator {
 		return column.tableName() + "_" + column.attributeName();
 	}
 
+	private String toRelationName(List columns) {
+		StringBuffer result = new StringBuffer();
+		result.append(((Attribute) columns.get(0)).tableName());
+		Iterator it = columns.iterator();
+		while (it.hasNext()) {
+			Attribute column = (Attribute) it.next();
+			result.append("_" + column.attributeName());
+		}
+		return result.toString();
+	}
+
 	private void identifyLinkTables() {
 		Iterator it = this.schema.listTableNames().iterator();
 		while (it.hasNext()) {
@@ -368,11 +407,20 @@ public class MappingGenerator {
 			if (!this.schema.isLinkTable(tableName)) {
 				continue;
 			}
-			Attribute[] firstForeignKey = (Attribute[]) this.schema.foreignKeyColumns(tableName).get(0);
-			this.linkTables.put(tableName, firstForeignKey[1].relationName());
+			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName).get(0);
+			this.linkTables.put(tableName, firstForeignKey.table2());
 		}
 	}
-	
+
+	private boolean isInForeignKey(Attribute column, List foreignKeys) {
+		Iterator it = foreignKeys.iterator();
+		while (it.hasNext()) {
+			Join fk = (Join) it.next();
+			if (fk.containsColumn(column)) return true;
+		}
+		return false;
+	}
+
 	private void initVocabularyModel() {
 		this.vocabModel.setNsPrefix("rdf", RDF.getURI());
 		this.vocabModel.setNsPrefix("rdfs", RDFS.getURI());
@@ -394,29 +442,28 @@ public class MappingGenerator {
 		r.addProperty(RDFS.isDefinedBy, ontologyResource());
 	}
 
-	private void initProperty(Resource r, Attribute column) {
+	private void createDatatypeProperty(Attribute column, RDFDatatype datatype) {
+		Resource r = propertyResource(column);
 		r.addProperty(RDF.type, RDF.Property);
 		r.addProperty(RDFS.label, toRelationName(column));
 		r.addProperty(RDFS.domain, classResource(column.relationName()));
 		r.addProperty(RDFS.isDefinedBy, ontologyResource());		
-	}
-	
-	private void createDatatypeProperty(Attribute column, RDFDatatype datatype) {
-		Resource r = propertyResource(column);
-		initProperty(r, column);
 		r.addProperty(RDF.type, OWL.DatatypeProperty);
 		if (datatype != null) {
 			r.addProperty(RDFS.range, this.vocabModel.getResource(datatype.getURI()));
 		}
 	}
 
-	private void createObjectProperty(Attribute subjectColumn, Attribute objectColumn) {
-		Resource r = propertyResource(subjectColumn);
-		initProperty(r, subjectColumn);
+	private void createObjectProperty(Join join) {
+		Resource r = propertyResource(join.attributes1());
+		r.addProperty(RDF.type, RDF.Property);
 		r.addProperty(RDF.type, OWL.ObjectProperty);
-		r.addProperty(RDFS.range, classResource(objectColumn.relationName()));
+		r.addProperty(RDFS.label, toRelationName(join.attributes1()));
+		r.addProperty(RDFS.domain, classResource(join.table1()));
+		r.addProperty(RDFS.range, classResource(join.table2()));
+		r.addProperty(RDFS.isDefinedBy, ontologyResource());		
 	}
-
+	
 	private void createLinkProperty(RelationName linkTableName, RelationName fromTable, RelationName toTable) {
 		String propertyURI = this.vocabNamespaceURI + linkTableName;
 		Resource r = this.vocabModel.createResource(propertyURI);
@@ -443,17 +490,15 @@ public class MappingGenerator {
 		return this.vocabModel.createResource(propertyURI);
 	}
 	
+	private Resource propertyResource(List columns) {
+		String propertyURI = this.vocabNamespaceURI + toRelationName(columns);
+		return this.vocabModel.createResource(propertyURI);
+	}
+	
 	private String dropTrailingHash(String uri) {
 		if (!uri.endsWith("#")) {
 			return uri;
 		}
 		return uri.substring(0, uri.length() - 1);
-	}
-	
-	private Attribute createAliasColumn(Attribute original, RelationName context) {
-		return new Attribute(
-				original.schemaName(), 
-				original.tableName() + "_" + context.tableName() + "__alias",
-				original.attributeName());
 	}
 }

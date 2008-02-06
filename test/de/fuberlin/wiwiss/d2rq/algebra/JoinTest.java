@@ -11,15 +11,16 @@ public class JoinTest extends TestCase {
 	private final static Attribute table2foo = new Attribute(null, "table2", "foo");
 	private final static Attribute table2bar = new Attribute(null, "table2", "bar");
 	private final static RelationName table1 = new RelationName(null, "table1");
+	private final static RelationName table2 = new RelationName(null, "table2");
 	
 	public void testToString() {
 		Join join = new Join(table1foo, table2foo);
 		assertEquals("Join(table1.foo <=> table2.foo)", join.toString());
 	}
 	
-	public void testToStringSmallerTableFirst() {
+	public void testToStringRetainsTableOrder() {
 		Join join = new Join(table2foo, table1foo);
-		assertEquals("Join(table1.foo <=> table2.foo)", join.toString());
+		assertEquals("Join(table2.foo <=> table1.foo)", join.toString());
 	}
 	
 	public void testToStringRetainsAttributeOrder() {
@@ -35,9 +36,9 @@ public class JoinTest extends TestCase {
 		assertEquals("Join(table1.bar <=> table2.foo)", join.renameColumns(renamer).toString());
 	}
 	
-	public void testFirstTableFirst() {
+	public void testTableOrderIsRetained() {
 		assertEquals(table1, new Join(table1foo, table2foo).table1());
-		assertEquals(table1, new Join(table2foo, table1foo).table1());
+		assertEquals(table2, new Join(table2foo, table1foo).table1());
 	}
 	
 	public void testJoinOverSameAttributesIsEqual() {

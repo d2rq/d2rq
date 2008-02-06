@@ -58,7 +58,7 @@ public class CompileTest extends TestCase {
 		}
 		assertEquals(new HashSet(Arrays.asList(new String[]{
 				"Join(e.manager <=> m.ID)", 
-				"Join(foo.bar <=> m.ID)",
+				"Join(m.ID <=> foo.bar)",
 				"Join(e.ID <=> foo.bar)"})),
 				joinsToString);
 	}

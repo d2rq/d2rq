@@ -10,8 +10,11 @@ import java.util.Map;
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
  *
+ * TODO: Remodel as a foreign key constraint? Values of side1 must be in side2?
+ *       At the moment, A=B is considered .equals(B=A) 
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.7 2006/09/15 19:36:45 cyganiak Exp $
+ * @version $Id: Join.java,v 1.8 2008/02/06 17:26:13 cyganiak Exp $
  */
 public class Join {
 	private List attributes1 = new ArrayList();
@@ -27,23 +30,20 @@ public class Join {
 	public Join(List oneSideAttributes, List otherSideAttributes) {
 		RelationName oneRelation = ((Attribute) oneSideAttributes.get(0)).relationName();
 		RelationName otherRelation = ((Attribute) otherSideAttributes.get(0)).relationName();
-		if (oneRelation.compareTo(otherRelation) < 0) {
-			this.attributes1 = oneSideAttributes;
-			this.attributes2 = otherSideAttributes;
-			this.table1 = oneRelation;
-			this.table2 = otherRelation;
-		} else {
-			this.attributes1 = otherSideAttributes;
-			this.attributes2 = oneSideAttributes;
-			this.table1 = otherRelation;
-			this.table2 = oneRelation;
-		}
+		this.attributes1 = oneSideAttributes;
+		this.attributes2 = otherSideAttributes;
+		this.table1 = oneRelation;
+		this.table2 = otherRelation;
 		for (int i = 0; i < this.attributes1.size(); i++) {
 			Attribute a1 = (Attribute) this.attributes1.get(i);
 			Attribute a2 = (Attribute) this.attributes2.get(i);
 			this.otherSide.put(a1, a2);
 			this.otherSide.put(a2, a1);
 		}
+	}
+	
+	public boolean isSameTable() {
+		return this.table1.equals(this.table2);
 	}
 	
 	public boolean containsColumn(Attribute column) {
@@ -103,8 +103,12 @@ public class Join {
 			return false;
 		}
 		Join otherJoin = (Join) otherObject;
-		return this.attributes1.equals(otherJoin.attributes1)
-				&& this.attributes2.equals(otherJoin.attributes2);
+		return 
+				(this.attributes1.equals(otherJoin.attributes1) 
+						&& this.attributes2.equals(otherJoin.attributes2))
+				||
+				(this.attributes1.equals(otherJoin.attributes2) 
+						&& this.attributes2.equals(otherJoin.attributes1));
 	}
 	
 	public Join renameColumns(ColumnRenamer columnRenamer) {
