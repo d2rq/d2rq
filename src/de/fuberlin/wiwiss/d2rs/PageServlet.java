@@ -155,15 +155,21 @@ public class PageServlet extends HttpServlet {
 			if (this.isInverse != other.isInverse) {
 				return (this.isInverse) ? -1 : 1;
 			}
-			if (this.value.isURI()) {
+			if (this.value.isURI() || other.value.isURI()) {
 				if (!other.value.isURI()) {
 					return 1;
 				}
+				if (!this.value.isURI()) {
+					return -1;
+				}
 				return this.value.getURI().compareTo(other.value.getURI());
 			}
-			if (this.value.isBlank()) {
+			if (this.value.isBlank() || other.value.isBlank()) {
 				if (!other.value.isBlank()) {
 					return -1;
+				}
+				if (!this.value.isBlank()) {
+					return 1;
 				}
 				return this.value.getBlankNodeLabel().compareTo(other.value.getBlankNodeLabel());
 			}
