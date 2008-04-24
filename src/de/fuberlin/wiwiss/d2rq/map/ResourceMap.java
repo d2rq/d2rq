@@ -16,6 +16,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
@@ -27,13 +28,14 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Column;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.SQLExpressionValueMaker;
 import de.fuberlin.wiwiss.d2rq.values.ValueDecorator;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.8 2007/11/05 01:02:37 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.9 2008/04/24 17:48:52 cyganiak Exp $
  */
 public abstract class ResourceMap extends MapObject {
 
@@ -54,6 +56,7 @@ public abstract class ResourceMap extends MapObject {
 	// These can be set only on a PropertyBridge
 	protected String column = null;
 	protected String pattern = null;
+	protected String sqlExpression = null;
 	protected String datatype = null;
 	protected String lang = null;
 	protected ClassMap refersToClassMap = null;
@@ -201,6 +204,9 @@ public abstract class ResourceMap extends MapObject {
 		if (this.pattern != null) {
 			return new Pattern(this.pattern);
 		}
+		if (this.sqlExpression != null) {
+			return new SQLExpressionValueMaker(SQLExpression.create(sqlExpression));
+		}
 		throw new D2RQException(this + " needs a column/pattern/bNodeID specification");
 	}
 
@@ -239,7 +245,7 @@ public abstract class ResourceMap extends MapObject {
 		if (this.uriColumn != null || this.uriPattern != null) {
 			return TypedNodeMaker.URI;
 		}
-		if (this.column == null && this.pattern == null) {
+		if (this.column == null && this.pattern == null && this.sqlExpression == null) {
 			throw new D2RQException(this + " needs a column/pattern/bNodeID specification");
 		}
 		if (this.datatype != null && this.lang != null) {
@@ -301,6 +307,7 @@ public abstract class ResourceMap extends MapObject {
 		if (property.equals(D2RQ.uriPattern)) return this.uriPattern != null;
 		if (property.equals(D2RQ.column)) return this.column != null;
 		if (property.equals(D2RQ.pattern)) return this.pattern != null;
+		if (property.equals(D2RQ.sqlExpression)) return this.sqlExpression != null;
 		if (property.equals(D2RQ.refersToClassMap)) return this.refersToClassMap != null;
 		if (property.equals(D2RQ.constantValue)) return this.constantValue != null;
 		throw new D2RQException("No primary spec: " + property);

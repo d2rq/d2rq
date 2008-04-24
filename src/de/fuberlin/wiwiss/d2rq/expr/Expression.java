@@ -11,10 +11,10 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 
 /**
- * An SQL expression.
- *  
+ * A SQL expression.
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Expression.java,v 1.1 2006/11/02 20:46:46 cyganiak Exp $
+ * @version $Id: Expression.java,v 1.2 2008/04/24 17:48:53 cyganiak Exp $
  */
 public abstract class Expression {
 	public static final Expression TRUE = new Expression() {

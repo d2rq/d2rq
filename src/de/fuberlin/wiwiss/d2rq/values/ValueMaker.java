@@ -1,10 +1,11 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
-import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -30,38 +31,18 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * of a set of RDF nodes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueMaker.java,v 1.7 2007/11/05 22:59:38 cyganiak Exp $
+ * @version $Id: ValueMaker.java,v 1.8 2008/04/24 17:48:53 cyganiak Exp $
  */
 public interface ValueMaker {
     
-	/**
-	 * Checks if a given value fits this source without querying the
-	 * database. A value maker should never match <tt>null</tt>.
-	 */
-	boolean matches(String value);
+	void selectValue(String value, MutableRelation baseRelation);
 
 	/**
-	 * Returns a map of database fields and values corresponding
-	 * to the argument.
-	 * 
-	 * <p>For example, a ValueSource that corresponds directly
-	 * to a single DB column would return a single-entry map with that
-	 * column as the key, and value as the value.
-	 * 
-	 * <p>The result is undefined if {@link #matches(String)} is false
-	 * for the same value.
-	 * 
-	 * @param value a non-<tt>null</tt> value
-	 * @return a map with {@link Attribute} keys, and string values
-	 */
-	Map attributeConditions(String value);
-
-	/**
-	 * Returns a set of all columns containing data necessary
+	 * Returns a set of all {@link ProjectionSpec}s containing data necessary
 	 * for this ValueSource.
-	 * @return a set of {Column}s
+	 * @return a set of {@link ProjectionSpec}s
 	 */
-	Set projectionAttributes();
+	Set projectionSpecs();
 
 	/**
 	 * Retrieves a value from a database row according to some rule or pattern.

@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.10 2006/09/17 00:36:27 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.11 2008/04/24 17:48:54 cyganiak Exp $
  */
 public class FindQuery {
 	private Collection compatibleRelations = new ArrayList();
@@ -69,7 +69,7 @@ public class FindQuery {
 			RDFRelation union = new UnionOverSameBase(relations);
 			SelectStatementBuilder sql = new SelectStatementBuilder(union.baseRelation().database());
 			sql.setEliminateDuplicates(!union.isUnique());
-			sql.addSelectColumns(union.projectionColumns());
+			sql.addSelectSpecs(union.projectionSpecs());
 			sql.addRelation(union.baseRelation());
 			result = result.andThen(new ApplyTripleMakerIterator(sql.execute(), union));
 		}

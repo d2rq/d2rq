@@ -2,17 +2,17 @@ package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueDecorator.java,v 1.4 2007/11/04 18:15:14 cyganiak Exp $
+ * @version $Id: ValueDecorator.java,v 1.5 2008/04/24 17:48:53 cyganiak Exp $
  */
 public class ValueDecorator implements ValueMaker {
 	public static ValueConstraint maxLengthConstraint(final int maxLength) {
@@ -61,11 +61,6 @@ public class ValueDecorator implements ValueMaker {
 		this.translator = translator;
 	}
 	
-	public Map attributeConditions(String value) {
-		String dbValue = this.translator.toDBValue(value);
-		return dbValue == null ? null : this.base.attributeConditions(dbValue);
-	}
-
 	public String makeValue(ResultRow row) {
 		return this.translator.toRDFValue(this.base.makeValue(row));
 	}
@@ -74,20 +69,25 @@ public class ValueDecorator implements ValueMaker {
 		this.base.describeSelf(c);
 	}
 
-	public boolean matches(String value) {
+	public void selectValue(String value, MutableRelation relation) {
 		Iterator it = this.constraints.iterator();
 		while (it.hasNext()) {
 			ValueConstraint constraint = (ValueConstraint) it.next();
 			if (!constraint.matches(value)) {
-				return false;
+				relation.empty();
+				return;
 			}
 		}
 		String dbValue = this.translator.toDBValue(value);
-		return dbValue != null && this.base.matches(dbValue);
+		if (dbValue == null) {
+			relation.empty();
+			return;
+		}
+		this.base.selectValue(dbValue, relation);
 	}
 
-	public Set projectionAttributes() {
-		return this.base.projectionAttributes();
+	public Set projectionSpecs() {
+		return this.base.projectionSpecs();
 	}
 	
 	public ValueMaker replaceColumns(ColumnRenamer renamer) {

@@ -9,18 +9,28 @@ import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
+/**
+ * A specification for creating RDF nodes out of a database relation.
+ * 
+ * TODO This probably shouldn't have projectionSpecs(), and probably also not
+ * 		isUnique() and renameColumns(), all of which should be handled by the
+ * 		underlying Relation
+ * 
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ * @version $Id: NodeMaker.java,v 1.4 2008/04/24 17:48:53 cyganiak Exp $
+ */
 public interface NodeMaker {
 
 	static NodeMaker EMPTY = new NodeMaker() {
 		public boolean isUnique() { return true; }
 		public Node makeNode(ResultRow tuple) { return null; }
 		public void describeSelf(NodeSetFilter c) { c.limitToEmptySet(); }
-		public Set projectionColumns() { return Collections.EMPTY_SET; }
+		public Set projectionSpecs() { return Collections.EMPTY_SET; }
 		public NodeMaker selectNode(Node node, MutableRelation relation) { return this; }
 		public NodeMaker renameColumns(ColumnRenamer renamer, MutableRelation relation) { return this; }
 	};
 	
-	Set projectionColumns();
+	Set projectionSpecs();
 
 	boolean isUnique();
 

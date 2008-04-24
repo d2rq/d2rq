@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
@@ -44,15 +43,6 @@ public class ClassMap extends ResourceMap {
 		this.classes.add(class_);
 	}
 
-	// TODO: Introduce an AdditionalProperty class, or delete and make d2rq:value work
-	public void addAdditionalProperty(Resource property, RDFNode value) {
-		PropertyBridge bridge = new PropertyBridge(this.resource);
-		bridge.setBelongsToClassMap(this);
-		bridge.addProperty(property);
-		bridge.setConstantValue(value);
-		addPropertyBridge(bridge);
-	}
-	
 	public void addPropertyBridge(PropertyBridge bridge) {
 		this.propertyBridges.add(bridge);
 	}

@@ -54,7 +54,7 @@ import java.util.Set;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.15 2007/11/15 15:29:32 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.16 2008/04/24 17:48:52 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private RDFRelation relation;
@@ -69,7 +69,7 @@ public class JoinOptimizer {
 	
 	public RDFRelation optimize() {
 		Map replacedColumns = new HashMap();
-		Set allRequiredColumns = allRequiredColumns();
+		Set allRequiredColumns = relation.allKnownAttributes();
 		Set requiredJoins = new HashSet(this.relation.baseRelation().joinConditions());
 		Iterator it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
@@ -103,19 +103,6 @@ public class JoinOptimizer {
 				this.relation.nodeMaker(0).renameColumns(renamer, MutableRelation.DUMMY),
 				this.relation.nodeMaker(1).renameColumns(renamer, MutableRelation.DUMMY),
 				this.relation.nodeMaker(2).renameColumns(renamer, MutableRelation.DUMMY));
-	}
-
-	private Set allRequiredColumns() {
-		Set results = new HashSet();
-		results.addAll(this.relation.projectionColumns());
-		results.addAll(this.relation.baseRelation().condition().columns());
-		Iterator it = this.relation.baseRelation().joinConditions().iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
-			results.addAll(join.attributes1());
-			results.addAll(join.attributes2());
-		}
-		return results;
 	}
 
 	private boolean isRemovableJoin(Join join) {

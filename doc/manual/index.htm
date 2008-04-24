@@ -915,7 +915,7 @@ mailto:@@<em>Persons.email</em>@@</pre>
     <td valign="top">Specifies an SQL WHERE condition. An instance of this class 
       will only be generated for database rows that satisfy the condition. Conditions 
       can be used to hide parts of the database from D2RQ, e.g. deny access to 
-      data which is older or newer than a certain date. See section <a href="#condtional">Conditional 
+      data which is older or newer than a certain date. See section <a href="#conditional">Conditional 
       Mappings</a> for details.</td>
   </tr>
 </table>
@@ -1011,6 +1011,13 @@ map:PersonsType a d2rq:PropertyBridge ;
       a pattern contains more than one column, then a separating string, which 
       cannot occur in the column values, has to be used between the column names, 
       in order to allow D2RQ reversing given literals into column values.</td>
+  </tr>
+  <tr>
+    <td valign="top"><strong>d2rq:sqlExpression</strong></td>
+    <td valign="top">For properties with literal values. Generates
+      literal values by evaluating a SQL expression. Note that querying
+      for such a computed value might put a heavy load on the database.
+      See <a href="#ex-sqlexpression">example</a> below.</td>
   </tr>
   <tr>
     <td valign="top"><strong>d2rq:datatype</strong></td>
@@ -1154,6 +1161,26 @@ map:PersonsType a d2rq:PropertyBridge ;
   &quot;Persons.Email&quot; column. The example uses
   <tt>d2rq:uriPattern</tt> instead of <tt>d2rq:pattern</tt>
   because the bridge should produce URIs, not literals.</p>
+
+<p id="ex-sqlexpression"><strong>Example: A property bridge that computes mailbox hashes</strong></p>
+<p>The popular <a href="http://xmlns.com/foaf/0.1/">FOAF vocabulary</a> has a
+  property <tt>foaf:mbox_sha1sum</tt> for publishing email addresses in an
+  encoded form. This prevents spammers from harvesting the address, while still
+  letting us recognize if the same email address is used in two different
+  places.</p>
+<pre>map:UserEmailSHA1 a d2rq:PropertyBridge;
+    d2rq:belongsToClassMap map:User;
+    d2rq:property foaf:mbox_sha1sum;
+    d2rq:sqlExpression "SHA1(CONCAT('mailto:', user.email))";
+    .</pre>
+<p>The values of the <tt>foaf:mbox_sha1sum</tt> are computed by evaluating
+  the <tt>d2rq:sqlExpression</tt>. We first create a <tt>mailto:</tt> URI
+  from the email address, as required by FOAF. Then we apply the SHA1
+  hash function, again as required by FOAF. The result will be a literal value.</p>
+<p>Note that querying for a specific <tt>foaf:mbox_sha1sum</tt> value will
+  put a heavy load on the database because the hash has to be computed for every
+  user in the database. For a large database, it would be better to store the
+  encoded values in a column in the database.</p>
 
 <p><strong><a name="exjoin2"></a>Example: Linking instances
   from two database tables</strong></p>
@@ -1431,7 +1458,7 @@ map:SeeAlsoStatement a d2rq:AdditionalProperty;
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.35 2007/11/16 15:32:15 cyganiak Exp $</p>
+<p>$Id: index.htm,v 1.36 2008/04/24 17:47:31 cyganiak Exp $</p>
 
 </BODY>
 </HTML>

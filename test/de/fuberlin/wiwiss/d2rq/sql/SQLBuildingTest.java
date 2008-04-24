@@ -8,12 +8,12 @@ import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLBuildingTest.java,v 1.3 2006/11/02 20:46:46 cyganiak Exp $
+ * @version $Id: SQLBuildingTest.java,v 1.4 2008/04/24 17:47:52 cyganiak Exp $
  */
 public class SQLBuildingTest extends TestCase {
 
 	public void testSingleQuoteEscape() {
-		ConnectedDB db = createFakeDatabase(ConnectedDB.Other);
+		ConnectedDB db = new DummyDB();
 		assertEquals("'a'", db.singleQuote("a"));
 		assertEquals("''''", db.singleQuote("'"));
 		assertEquals("'\\\\'", db.singleQuote("\\"));
@@ -24,7 +24,7 @@ public class SQLBuildingTest extends TestCase {
 	}
 
 	public void testSingleQuoteEscapeOracle() {
-		ConnectedDB db = createFakeDatabase(ConnectedDB.Oracle);
+		ConnectedDB db = new DummyDB(ConnectedDB.Oracle);
 		assertEquals("'a'", db.singleQuote("a"));
 		assertEquals("''''", db.singleQuote("'"));
 		assertEquals("'\\'", db.singleQuote("\\"));
@@ -35,7 +35,7 @@ public class SQLBuildingTest extends TestCase {
 	}
 
 	public void testDoubleQuoteEscape() {
-		ConnectedDB db = createFakeDatabase(ConnectedDB.Other);
+		ConnectedDB db = new DummyDB();
 		assertEquals("\"a\"", db.doubleQuote("a"));
 		assertEquals("\"'\"", db.doubleQuote("'"));
 		assertEquals("\"\"\"\"", db.doubleQuote("\""));
@@ -45,7 +45,7 @@ public class SQLBuildingTest extends TestCase {
 	}
 
 	public void testBacktickQuoteEscape() {
-		ConnectedDB db = createFakeDatabase(ConnectedDB.MySQL);
+		ConnectedDB db = new DummyDB(ConnectedDB.MySQL);
 		assertEquals("`a`", db.backtickQuote("a"));
 		assertEquals("````", db.backtickQuote("`"));
 		assertEquals("`\\\\`", db.backtickQuote("\\"));
@@ -55,7 +55,7 @@ public class SQLBuildingTest extends TestCase {
 	}
 
 	public void testAttributeQuoting() {
-		ConnectedDB db = createFakeDatabase(ConnectedDB.Other);
+		ConnectedDB db = new DummyDB();
 		assertEquals("\"schema\".\"table\".\"column\"",
 				db.quoteAttribute(new Attribute("schema", "table", "column")));
 		assertEquals("\"table\".\"column\"",
@@ -63,19 +63,19 @@ public class SQLBuildingTest extends TestCase {
 	}
 	
 	public void testDoubleQuotesInAttributesAreEscaped() {
-		ConnectedDB db = createFakeDatabase(ConnectedDB.Other);
+		ConnectedDB db = new DummyDB();
 		assertEquals("\"sch\"\"ema\".\"ta\"\"ble\".\"col\"\"umn\"",
 				db.quoteAttribute(new Attribute("sch\"ema", "ta\"ble", "col\"umn")));
 	}
 	
 	public void testAttributeQuotingMySQL() {
-		ConnectedDB db = createFakeDatabase(ConnectedDB.MySQL);
+		ConnectedDB db = new DummyDB(ConnectedDB.MySQL);
 		assertEquals("`table`.`column`",
 				db.quoteAttribute(new Attribute(null, "table", "column")));
 	}
 
 	public void testRelationNameQuoting() {
-		ConnectedDB db = createFakeDatabase(ConnectedDB.Other);
+		ConnectedDB db = new DummyDB();
 		assertEquals("\"schema\".\"table\"",
 				db.quoteRelationName(new RelationName("schema", "table")));
 		assertEquals("\"table\"",
@@ -83,52 +83,40 @@ public class SQLBuildingTest extends TestCase {
 	}
 	
 	public void testBackticksInRelationsAreEscapedMySQL() {
-		ConnectedDB db = createFakeDatabase(ConnectedDB.MySQL);
+		ConnectedDB db = new DummyDB(ConnectedDB.MySQL);
 		assertEquals("`ta``ble`",
 				db.quoteRelationName(new RelationName(null, "ta`ble")));
 	}
 	
 	public void testRelationNameQuotingMySQL() {
-		ConnectedDB db = createFakeDatabase(ConnectedDB.MySQL);
+		ConnectedDB db = new DummyDB(ConnectedDB.MySQL);
 		assertEquals("`table`",
 				db.quoteRelationName(new RelationName(null, "table")));
 	}
 
 	public void testEmptyBuilder() {
-		SelectStatementBuilder builder = new SelectStatementBuilder(createFakeDatabase());
+		SelectStatementBuilder builder = new SelectStatementBuilder(new DummyDB());
 		assertNull(builder.getSQLStatement());
 		assertTrue(builder.isTrivial());
 	}
 	
 	public void testConditionWithNoSelectColumnsIsNotTrivial() {
-		SelectStatementBuilder builder = new SelectStatementBuilder(createFakeDatabase());
+		SelectStatementBuilder builder = new SelectStatementBuilder(new DummyDB());
 		builder.addCondition(SQLExpression.create("foo.bar = 1"));
 		assertFalse(builder.isTrivial());
 	}
 
 	public void testQueryWithSelectColumnsIsNotTrivial() {
-		SelectStatementBuilder builder = new SelectStatementBuilder(createFakeDatabase());
-		builder.addSelectColumn(new Attribute(null, "foo", "bar"));
+		SelectStatementBuilder builder = new SelectStatementBuilder(new DummyDB());
+		builder.addSelectSpec(new Attribute(null, "foo", "bar"));
 		assertFalse(builder.isTrivial());
 	}
 	
 	public void testQueryWithFalseConditionIsEmpty() {
-		SelectStatementBuilder builder = new SelectStatementBuilder(createFakeDatabase());
-		builder.addSelectColumn(new Attribute(null, "foo", "bar"));
+		SelectStatementBuilder builder = new SelectStatementBuilder(new DummyDB());
+		builder.addSelectSpec(new Attribute(null, "foo", "bar"));
 		builder.addCondition(Expression.FALSE);
 		assertNull(builder.getSQLStatement());
 		assertTrue(builder.isEmpty());
-	}
-	
-	private ConnectedDB createFakeDatabase() {
-		return createFakeDatabase(ConnectedDB.Other);
-	}
-	
-	private ConnectedDB createFakeDatabase(final String type) {
-		return new ConnectedDB(null, null, null) {
-			public String dbType() {
-				return type;
-			}
-		};
 	}
 }

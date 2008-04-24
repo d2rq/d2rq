@@ -23,16 +23,16 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TripleRelation.java,v 1.2 2007/10/22 10:21:16 cyganiak Exp $
+ * @version $Id: TripleRelation.java,v 1.3 2008/04/24 17:48:52 cyganiak Exp $
  */
-public class TripleRelation implements RDFRelation {
+public class TripleRelation extends RDFRelation {
 	private final static Set S_P_O = new HashSet(Arrays.asList(new String[] {"S", "P", "O"}));
 	
 	private NodeMaker subjectMaker;
 	private NodeMaker predicateMaker;
 	private NodeMaker objectMaker; 
 	private Relation baseRelation;
-	private Set projectionColumns = new HashSet();
+	private Set projectionSpecs = new HashSet();
 	private boolean isUnique;
 	
 	public TripleRelation(Relation baseRelation, NodeMaker subjectMaker, NodeMaker predicateMaker, NodeMaker objectMaker) {
@@ -40,9 +40,9 @@ public class TripleRelation implements RDFRelation {
 		this.predicateMaker = predicateMaker;
 		this.objectMaker = objectMaker;
 		this.baseRelation = baseRelation;
-		this.projectionColumns.addAll(this.subjectMaker.projectionColumns());
-		this.projectionColumns.addAll(this.predicateMaker.projectionColumns());
-		this.projectionColumns.addAll(this.objectMaker.projectionColumns());
+		this.projectionSpecs.addAll(this.subjectMaker.projectionSpecs());
+		this.projectionSpecs.addAll(this.predicateMaker.projectionSpecs());
+		this.projectionSpecs.addAll(this.objectMaker.projectionSpecs());
 		this.isUnique = determineIsUnique();
 	}
 	
@@ -54,8 +54,8 @@ public class TripleRelation implements RDFRelation {
 		return this.isUnique;
 	}
 	
-	public Set projectionColumns() {
-		return this.projectionColumns;
+	public Set projectionSpecs() {
+		return this.projectionSpecs;
 	}
 
 	public NodeMaker nodeMaker(int index) {
@@ -75,27 +75,9 @@ public class TripleRelation implements RDFRelation {
 				")";
 	}
 	
-	// TODO: Some duplication with UnionOverSameBase.tables()
 	public RDFRelation withPrefix(int index) {
-		Set tables = new HashSet();
-		Iterator it = this.projectionColumns.iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			tables.add(column.relationName());
-		}
-		it = this.baseRelation.joinConditions().iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
-			tables.add(join.table1());
-			tables.add(join.table2());
-		}
-		it = this.baseRelation.condition().columns().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			tables.add(column.relationName());
-		}
 		Collection newAliases = new ArrayList();
-		it = tables.iterator();
+		Iterator it = tables().iterator();
 		// TODO Move code to RelationName.withPrefix
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();

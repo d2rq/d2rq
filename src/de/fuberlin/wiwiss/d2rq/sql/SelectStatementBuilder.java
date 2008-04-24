@@ -14,10 +14,11 @@ import com.hp.hpl.jena.util.iterator.SingletonIterator;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
-import de.fuberlin.wiwiss.d2rq.expr.AttributeEquality;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
+import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
@@ -27,11 +28,11 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.22 2006/11/02 21:15:44 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.23 2008/04/24 17:48:53 cyganiak Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
-	private List selectColumns = new ArrayList(10);
+	private List selectSpecs = new ArrayList(10);
 	private List conditions = new ArrayList();		// Expressions
 	private Expression cachedCondition = null;
 	private boolean eliminateDuplicates = false;
@@ -39,7 +40,7 @@ public class SelectStatementBuilder {
 	private Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
 
 	/**
-	 * TODO: Try if we can change parameters to (Relation, projectionColumns) and make immutable
+	 * TODO: Try if we can change parameters to (Relation, projectionSpecs) and make immutable
 	 */
 	public SelectStatementBuilder(ConnectedDB database) {
 		this.database = database;
@@ -60,7 +61,7 @@ public class SelectStatementBuilder {
 	}
 
 	public boolean isTrivial() {
-		return this.selectColumns.isEmpty() && condition().isTrue();
+		return this.selectSpecs.isEmpty() && condition().isTrue();
 	}
 
 	public boolean isEmpty() {
@@ -88,16 +89,19 @@ public class SelectStatementBuilder {
 		}
 		addMentionedTablesFromConditions();
 		StringBuffer result = new StringBuffer("SELECT ");
+		if (this.database.limit() != Database.NO_LIMIT) {
+			result.append("TOP " + this.database.limit() + " ");
+		}
 		if (this.eliminateDuplicates) {
 			result.append("DISTINCT ");
 		}
-		Iterator it = this.selectColumns.iterator();
+		Iterator it = this.selectSpecs.iterator();
 		if (!it.hasNext()) {
 			result.append("1");
 		}
 		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			result.append(this.database.quoteAttribute(column));
+			ProjectionSpec projection = (ProjectionSpec) it.next();
+			result.append(projection.toSQL(database, aliases));
 			if (it.hasNext()) {
 				result.append(", ");
 			}
@@ -123,9 +127,9 @@ public class SelectStatementBuilder {
 			result.append(" WHERE ");
 			result.append(condition().toSQL(this.database, this.aliases));
 		}
-		if (this.database.limit() != Database.NO_LIMIT) {
-			result.append(" LIMIT " + this.database.limit());
-		}
+//		if (this.database.limit() != Database.NO_LIMIT) {
+//			result.append(" LIMIT " + this.database.limit());
+//		}
 		return result.toString();
 	}
 	
@@ -134,25 +138,29 @@ public class SelectStatementBuilder {
 	}
 	
 	/**
-	 * Adds a column to the SELECT part of the query.
-	 * @param column the column
+	 * Adds a {@link ProjectionSpec} to the SELECT part of the query.
+	 * @param projection
 	 */
-	public void addSelectColumn(Attribute column) {
-		if (this.selectColumns.contains(column)) {
+	public void addSelectSpec(ProjectionSpec projection) {
+		if (this.selectSpecs.contains(projection)) {
 			return;
 		}
-		this.mentionedTables.add(column.relationName());
-		this.selectColumns.add(column);
+		Iterator it = projection.requiredAttributes().iterator();
+		while (it.hasNext()) {
+			Attribute attribute = (Attribute) it.next();
+			this.mentionedTables.add(attribute.relationName());
+		}
+		this.selectSpecs.add(projection);
 	}
 
     /**
-     * Adds a list of {@link Attribute}s to the SELECT part of the query
-     * @param columns
+     * Adds a list of {@link ProjectionSpecs}s to the SELECT part of the query
+     * @param projections
      */
-	public void addSelectColumns(Set columns) {
-		Iterator it = columns.iterator();
+	public void addSelectSpecs(Set projections) {
+		Iterator it = projections.iterator();
 		while (it.hasNext()) {
-			addSelectColumn((Attribute) it.next());
+			addSelectSpec((ProjectionSpec) it.next());
 		}
 	}
 
@@ -170,7 +178,7 @@ public class SelectStatementBuilder {
 		while (it.hasNext()) {
 			Attribute attribute1 = (Attribute) it.next();
 			Attribute attribute2 = join.equalAttribute(attribute1);
-			addCondition(AttributeEquality.create(attribute1, attribute2));
+			addCondition(Equality.createAttributeEquality(attribute1, attribute2));
 		}
     }
 
@@ -193,6 +201,6 @@ public class SelectStatementBuilder {
 		if (isEmpty()) {
 			return NullIterator.instance;
 		}
-		return new QueryExecutionIterator(getSQLStatement(), this.selectColumns, this.database);		
+		return new QueryExecutionIterator(getSQLStatement(), this.selectSpecs, this.database);		
 	}
 }

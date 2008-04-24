@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.15 2007/11/16 15:25:55 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.16 2008/04/24 17:48:53 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -269,8 +269,7 @@ public class ConnectedDB {
 				replaceAll("$1$1") + "`";
 	}
 
-	public String quoteValue(String value, Attribute column) {
-	    int columnType = columnType(column);
+	public String quoteValue(String value, int columnType) {
 		if (columnType == ConnectedDB.NUMERIC_COLUMN) {
 			// Check if it actually is a number to avoid SQL injection
 			try {
@@ -292,6 +291,10 @@ public class ConnectedDB {
 			return "TIMESTAMP '" + value + "'";
 		}
 		return singleQuote(value);
+	}
+	
+	public String quoteValue(String value, Attribute column) {
+	    return quoteValue(value, columnType(column));
 	}
 	
 	public String quoteAttribute(Attribute attribute) {

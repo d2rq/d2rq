@@ -9,45 +9,45 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 
 /**
  * A result row returned by a database query, presented as a
- * map from columns to string values.
+ * map from SELECT clause entries to string values.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResultRowMap.java,v 1.2 2006/09/11 23:02:50 cyganiak Exp $
+ * @version $Id: ResultRowMap.java,v 1.3 2008/04/24 17:48:53 cyganiak Exp $
  */
 public class ResultRowMap implements ResultRow {
 	
-	public static ResultRowMap fromResultSet(ResultSet resultSet, List columns) throws SQLException {
+	public static ResultRowMap fromResultSet(ResultSet resultSet, List projectionSpecs) throws SQLException {
 		Map result = new HashMap();
-		for (int i = 0; i < columns.size(); i++) {
-			result.put(columns.get(i), resultSet.getString(i + 1));
+		for (int i = 0; i < projectionSpecs.size(); i++) {
+			result.put(projectionSpecs.get(i), resultSet.getString(i + 1));
 		}
 		return new ResultRowMap(result);
 	}
 	
-	private Map columnsToValues;
+	private Map projectionsToValues;
 	
-	public ResultRowMap(Map columnsToValues) {
-		this.columnsToValues = columnsToValues;
+	public ResultRowMap(Map projectionsToValues) {
+		this.projectionsToValues = projectionsToValues;
 	}
 	
-	public String get(Attribute column) {
-		return (String) this.columnsToValues.get(column);
+	public String get(ProjectionSpec projection) {
+		return (String) this.projectionsToValues.get(projection);
 	}
 
 	public String toString() {
-		List columns = new ArrayList(this.columnsToValues.keySet());
+		List columns = new ArrayList(this.projectionsToValues.keySet());
 		Collections.sort(columns);
 		StringBuffer result = new StringBuffer("{");
 		Iterator it = columns.iterator();
 		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			result.append(column.qualifiedName());
+			ProjectionSpec projection = (ProjectionSpec) it.next();
+			result.append(projection.toString());
 			result.append(" => '");
-			result.append(this.columnsToValues.get(column));
+			result.append(this.projectionsToValues.get(projection));
 			result.append("'");
 			if (it.hasNext()) {
 				result.append(", ");

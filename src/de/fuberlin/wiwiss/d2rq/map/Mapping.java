@@ -14,6 +14,7 @@ import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 
 /**
@@ -23,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.10 2007/11/16 20:04:48 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.11 2008/04/24 17:48:52 cyganiak Exp $
  */
 public class Mapping {
 	private final Model model = ModelFactory.createDefaultModel();
@@ -74,11 +75,15 @@ public class Mapping {
 	}
 
 	private void assertHasColumnTypes(RDFRelation relation) {
-		Iterator it = relation.projectionColumns().iterator();
+		Iterator it = relation.projectionSpecs().iterator();
 		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			relation.baseRelation().database().columnType(
-					relation.baseRelation().aliases().originalOf(column));			
+			ProjectionSpec projection = (ProjectionSpec) it.next();
+			Iterator it2 = projection.requiredAttributes().iterator();
+			while (it2.hasNext()) {
+				Attribute attribute = (Attribute) it2.next();
+				relation.baseRelation().database().columnType(
+						relation.baseRelation().aliases().originalOf(attribute));
+			}
 		}
 	}
 	

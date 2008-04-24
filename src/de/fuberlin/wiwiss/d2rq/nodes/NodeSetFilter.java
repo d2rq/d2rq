@@ -10,8 +10,10 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
 /**
  * Defines constraints to a set of RDF {@link Node}s.
  * 
+ * TODO: Should there be limitValuesToExpression(Expression)?
+ * 
  * @author Richard Cyganiak
- * @version $Id: NodeSetFilter.java,v 1.1 2006/09/16 14:19:20 cyganiak Exp $
+ * @version $Id: NodeSetFilter.java,v 1.2 2008/04/24 17:48:53 cyganiak Exp $
  */
 public interface NodeSetFilter {
 

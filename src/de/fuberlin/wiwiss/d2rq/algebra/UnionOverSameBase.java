@@ -16,9 +16,9 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UnionOverSameBase.java,v 1.11 2006/11/02 21:15:43 cyganiak Exp $
+ * @version $Id: UnionOverSameBase.java,v 1.12 2008/04/24 17:48:52 cyganiak Exp $
  */
-public class UnionOverSameBase implements RDFRelation {
+public class UnionOverSameBase extends RDFRelation {
 
 	/**
 	 * Checks if two {@link RDFRelation}s can be combined into
@@ -44,8 +44,8 @@ public class UnionOverSameBase implements RDFRelation {
 		if (!first.baseRelation().condition().equals(second.baseRelation().condition())) {
 			return false;
 		}
-		Set firstTables = tables(first);
-		Set secondTables = tables(second);
+		Set firstTables = first.tables();
+		Set secondTables = second.tables();
 		if (!firstTables.equals(secondTables)) {
 			return false;
 		}
@@ -60,35 +60,9 @@ public class UnionOverSameBase implements RDFRelation {
 		return true;
 	}
 
-	/**
-	 * Collects all table names used in the argument.
-	 * TODO: Should be a method on Relation?
-	 * @return A Set of {@link RelationName}s
-	 */
-	private static Set tables(RDFRelation query) {
-		Set results = new HashSet();
-		Iterator it = query.projectionColumns().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			results.add(column.relationName());
-		}
-		it = query.baseRelation().condition().columns().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			results.add(column.relationName());
-		}
-		it = query.baseRelation().joinConditions().iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
-			results.add(join.table1());
-			results.add(join.table2());
-		}
-		return results;
-	}
-
 	private Relation baseRelation;
 	private List tripleMakers;
-	private Set projectionColumns = new HashSet();
+	private Set projectionSpecs = new HashSet();
 	
 	public UnionOverSameBase(List baseRelations) {
 		this.baseRelation = ((RDFRelation) baseRelations.get(0)).baseRelation();
@@ -96,7 +70,7 @@ public class UnionOverSameBase implements RDFRelation {
 		Iterator it = baseRelations.iterator();
 		while (it.hasNext()) {
 			RDFRelation relation = (RDFRelation) it.next();
-			this.projectionColumns.addAll(relation.projectionColumns());
+			this.projectionSpecs.addAll(relation.projectionSpecs());
 		}
 	}
 
@@ -104,8 +78,8 @@ public class UnionOverSameBase implements RDFRelation {
 		return this.baseRelation;
 	}
 	
-	public Set projectionColumns() {
-		return this.projectionColumns;
+	public Set projectionSpecs() {
+		return this.projectionSpecs;
 	}
 	
 	public boolean isUnique() {

@@ -9,7 +9,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResultRowTest.java,v 1.3 2006/09/15 15:31:21 cyganiak Exp $
+ * @version $Id: ResultRowTest.java,v 1.4 2008/04/24 17:47:52 cyganiak Exp $
  */
 public class ResultRowTest extends TestCase {
 	private static final Attribute col1 = new Attribute(null, "foo", "col1");
@@ -38,6 +38,6 @@ public class ResultRowTest extends TestCase {
 		m.put(col1, "value1");
 		m.put(col2, "value2");
 		// columns sorted alphabetically
-		assertEquals("{foo.col1 => 'value1', foo.col2 => 'value2'}", new ResultRowMap(m).toString());
+		assertEquals("{@@foo.col1@@ => 'value1', @@foo.col2@@ => 'value2'}", new ResultRowMap(m).toString());
 	}
 }

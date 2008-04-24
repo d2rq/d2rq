@@ -1,15 +1,15 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeID.java,v 1.6 2006/11/02 13:01:16 cyganiak Exp $
+ * @version $Id: BlankNodeID.java,v 1.7 2008/04/24 17:48:53 cyganiak Exp $
  */
 public class BlankNodeID implements ValueMaker {
 	private final static String DELIMITER = "@@";
@@ -50,44 +50,29 @@ public class BlankNodeID implements ValueMaker {
 		c.limitValuesToBlankNodeID(this);
 	}
 
-	public boolean matches(String anonID) {
-		if (anonID == null) {
-			return false;
+	public void selectValue(String value, MutableRelation relation) {
+		if (value == null) {
+			relation.empty();
+			return;
 		}
-		int index = anonID.indexOf(DELIMITER);
-		// Check if given bNode was created by D2RQ
-		if (index == -1) {
-			return false;
-		}
+		String[] parts = value.split(DELIMITER);
 		// Check if given bNode was created by this class map
-		return this.classMapID.equals(anonID.substring(0, index));		
-	}
-
-	/* (non-Javadoc)
-	 * @see de.fuberlin.wiwiss.d2rq.ValueSource#getColumns()
-	 */
-	public Set projectionAttributes() {
-		return new HashSet(this.attributes);
-	}
-
-	/**
-	 * Extracts column values from a blank node ID string. The
-	 * keys are {@link Attribute}s, the values are strings.
-	 * @param anonID value to be checked.
-	 * @return a map with <tt>Column</tt> keys and string values
-	 * @see de.fuberlin.wiwiss.d2rq.values.ValueMaker#attributeConditions(java.lang.String)
-	 */
-	public Map attributeConditions(String anonID) {
-		String[] parts = anonID.split(DELIMITER);
-		Map result = new HashMap(3);
+		if (parts.length != this.attributes.size() + 1 
+				|| !this.classMapID.equals(parts[0])) {
+			relation.empty();
+			return;		
+		}
 		Iterator it = this.attributes.iterator();
 		int i = 1;	// parts[0] is classMap identifier
 		while (it.hasNext()) {
 			Attribute attribute = (Attribute) it.next();
-			result.put(attribute, parts[i]);
+			relation.select(Equality.createAttributeValue(attribute, parts[i]));
 			i++;
 		}
-		return result;
+	}
+
+	public Set projectionSpecs() {
+		return new HashSet(this.attributes);
 	}
 
 	/**

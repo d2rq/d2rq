@@ -1,12 +1,20 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
+import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
+import de.fuberlin.wiwiss.d2rq.expr.Equality;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
@@ -15,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.7 2007/10/23 14:30:33 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.8 2008/04/24 17:47:52 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "table", "col1");
@@ -69,17 +77,17 @@ public class PatternTest extends TestCase {
 
 	public void testMatches() {
 		Pattern p = new Pattern("http://www.example.org/dbserver01/db01#Paper@@Papers.PaperID@@-@@Persons.PersonID@@-@@Conferences.ConfID@@.rdf");
-		assertTrue(p.matches("http://www.example.org/dbserver01/db01#Paper1111-2222222-333.rdf"));
+		assertTrue(matches(p, "http://www.example.org/dbserver01/db01#Paper1111-2222222-333.rdf"));
 	}
 
 	public void testMatchesTrivialPattern() {
 		Pattern p = new Pattern("foobar");
 		assertPatternValues(p, "foobar", new HashMap());
-		assertNoMatch(p, "fooba");
-		assertNoMatch(p, "foobarb");
-		assertNoMatch(p, "oobar");
-		assertNoMatch(p, "ffoobar");
-		assertNoMatch(p, null);
+		assertFalse(matches(p, "fooba"));
+		assertFalse(matches(p, "foobarb"));
+		assertFalse(matches(p, "oobar"));
+		assertFalse(matches(p, "ffoobar"));
+		assertFalse(matches(p, null));
 	}
 
 	public void testMatchesMiniPattern() {
@@ -91,7 +99,7 @@ public class PatternTest extends TestCase {
 		assertPatternValues(p, "a", map);
 		map.put("table.col1", "xyz");
 		assertPatternValues(p, "xyz", map);
-		assertNoMatch(p, null);
+		assertFalse(matches(p, null));
 	}
 
 	/**
@@ -114,7 +122,7 @@ public class PatternTest extends TestCase {
 		Map map = new HashMap();
 		map.put("table.col1", "1");
 		assertPatternValues(p, "(foo|bar)1", map);
-		assertNoMatch(p, "foo1");
+		assertFalse(matches(p, "foo1"));
 	}
 
 	public void testMatchesOneColumnPattern() {
@@ -126,9 +134,9 @@ public class PatternTest extends TestCase {
 		assertPatternValues(p, "foobar", map);
 		map.put("table.col1", "foofoobarbar");
 		assertPatternValues(p, "foofoofoobarbarbar", map);
-		assertNoMatch(p, "fooba");
-		assertNoMatch(p, "barfoo");
-		assertNoMatch(p, "fobar");
+		assertFalse(matches(p, "fooba"));
+		assertFalse(matches(p, "barfoo"));
+		assertFalse(matches(p, "fobar"));
 	}
 
 	public void testMatchesTwoColumnPattern() {
@@ -146,9 +154,9 @@ public class PatternTest extends TestCase {
 		map.put("table.col1", "XYZ");
 		map.put("table.col2", "XYZ-2");
 		assertPatternValues(p, "fooXYZ-XYZ-2baz", map);
-		assertNoMatch(p, "foo1-");
-		assertNoMatch(p, "foobaz-");
-		assertNoMatch(p, "foo1-2baz3");
+		assertFalse(matches(p, "foo1-"));
+		assertFalse(matches(p, "foobaz-"));
+		assertFalse(matches(p, "foo1-2baz3"));
 	}
 
 	public void testMatchesPatternStartingWithColumn() {
@@ -163,9 +171,9 @@ public class PatternTest extends TestCase {
 		map.put("table.col1", "baz");
 		map.put("table.col2", "foo");
 		assertPatternValues(p, "bazbarfoobaz", map);
-		assertNoMatch(p, "1bar");
-		assertNoMatch(p, "bazbar");
-		assertNoMatch(p, "1bar2baz3");
+		assertFalse(matches(p, "1bar"));
+		assertFalse(matches(p, "bazbar"));
+		assertFalse(matches(p, "1bar2baz3"));
 	}
 
 	public void testMatchesPatternEndingWithColumn() {
@@ -325,7 +333,7 @@ public class PatternTest extends TestCase {
 	
 	public void testPatternURLEncodeIllegal() {
 		Pattern p = new Pattern("@@table.col1|urlencode@@");
-		assertFalse(p.matches("%"));
+		assertFalse(matches(p, "%"));
 	}
 	
 	public void testPatternURLify() {
@@ -346,28 +354,30 @@ public class PatternTest extends TestCase {
 	}
 	
 	private void assertPatternValues(Pattern pattern, String value, Map expectedValues) {
-		assertTrue(pattern.matches(value));
-		Map actualValues = pattern.attributeConditions(value);
+		assertTrue(matches(pattern, value));
+		Collection expressions = new HashSet();
 		Iterator it = expectedValues.keySet().iterator();
 		while (it.hasNext()) {
-			String name = (String) it.next();
-			Attribute column = SQL.parseAttribute(name);
-			assertTrue("missing column " + column, actualValues.containsKey(column));
-			assertEquals(expectedValues.get(name), actualValues.get(column));
+			String attribute = (String) it.next();
+			Equality.createExpressionValue(new AttributeExpr(
+					SQL.parseAttribute(attribute)), value);
 		}
-		it = actualValues.keySet().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			assertTrue("unexpected column " + column, expectedValues.containsKey(column.qualifiedName()));
-			assertEquals(expectedValues.get(column.qualifiedName()), actualValues.get(column));
-		}
+		Expression expr = Conjunction.create(expressions);
+		assertEquals(expr, getSelectCondition(pattern, value));
+	}
+
+	private Expression getSelectCondition(ValueMaker valueMaker, String value) {
+		MutableRelation checker = new MutableRelation(Relation.TRUE);
+		valueMaker.selectValue(value, checker);
+		return checker.immutableSnapshot().condition();
 	}
 	
-	private void assertNoMatch(Pattern pattern, String value) {
-		assertFalse(pattern.matches(value));
-		assertTrue(pattern.attributeConditions(value).isEmpty());
+	private boolean matches(ValueMaker valueMaker, String value) {
+		MutableRelation checker = new MutableRelation(Relation.TRUE);
+		valueMaker.selectValue(value, checker);
+		return !checker.immutableSnapshot().equals(Relation.EMPTY);
 	}
-	
+
 	private ResultRow row(String spec) {
 		String[] parts = spec.split("\\|", -1);
 		Attribute[] columns = {col1, col2, col3, col4, col5};

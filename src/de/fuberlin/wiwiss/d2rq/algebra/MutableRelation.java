@@ -10,7 +10,7 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  * The MutableRelation solves this problem.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MutableRelation.java,v 1.3 2006/11/02 21:15:43 cyganiak Exp $
+ * @version $Id: MutableRelation.java,v 1.4 2008/04/24 17:48:52 cyganiak Exp $
  */
 public class MutableRelation implements RelationalOperators {
 
@@ -33,7 +33,14 @@ public class MutableRelation implements RelationalOperators {
 		return this.relation = this.relation.renameColumns(renamer);
 	}
 
+	public Relation empty() {
+		return this.relation = Relation.EMPTY;
+	}
+	
 	public Relation select(Expression condition) {
+		if (condition.isFalse()) {
+			return empty();
+		}
 		return this.relation = this.relation.select(condition);
 	}
 }

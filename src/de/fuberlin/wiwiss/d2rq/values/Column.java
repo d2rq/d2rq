@@ -1,11 +1,12 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -14,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * column.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.5 2006/11/02 13:01:16 cyganiak Exp $
+ * @version $Id: Column.java,v 1.6 2008/04/24 17:48:53 cyganiak Exp $
  */
 public class Column implements ValueMaker {
 	private Attribute attribute;
@@ -25,10 +26,6 @@ public class Column implements ValueMaker {
 		this.attributeAsSet = Collections.singleton(this.attribute);
 	}
 	
-	public Map attributeConditions(String value) {
-		return Collections.singletonMap(this.attribute, value);
-	}
-
 	public String makeValue(ResultRow row) {
 		return row.get(this.attribute);
 	}
@@ -37,11 +34,15 @@ public class Column implements ValueMaker {
 		c.limitValuesToAttribute(this.attribute);
 	}
 
-	public boolean matches(String value) {
-		return value != null;
+	public void selectValue(String value, MutableRelation relation) {
+		if (value == null) {
+			relation.empty();
+			return;
+		}
+		relation.select(Equality.createAttributeValue(attribute, value));
 	}
 
-	public Set projectionAttributes() {
+	public Set projectionSpecs() {
 		return this.attributeAsSet;
 	}
 

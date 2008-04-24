@@ -9,9 +9,9 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 /**
  * TODO Describe this type
  * TODO Add uniqueConstraints()
- * TODO Explicitly list tables
+ * TODO Explicitly list tables!!!
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Relation.java,v 1.7 2006/11/02 21:15:43 cyganiak Exp $
+ * @version $Id: Relation.java,v 1.8 2008/04/24 17:48:52 cyganiak Exp $
  */
 public interface Relation extends RelationalOperators {
 
@@ -29,8 +29,8 @@ public interface Relation extends RelationalOperators {
 		public AliasMap aliases() { return AliasMap.NO_ALIASES; }
 		public Set joinConditions() { return Collections.EMPTY_SET; }
 		public Expression condition() { return Expression.TRUE; }
-		// TODO This smells like a bug; TRUE can remain TRUE or become EMPTY upon select()
-		public Relation select(Expression condition) { return Relation.EMPTY; }
+		// TODO This is dangerous; TRUE can remain TRUE or become EMPTY upon select()
+		public Relation select(Expression condition) { return Relation.TRUE; }
 		public Relation renameColumns(ColumnRenamer renamer) { return this; }
 		public String toString() { return "Relation.TRUE"; }
 	};

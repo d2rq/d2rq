@@ -4,18 +4,17 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
@@ -25,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.8 2007/10/23 14:30:33 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.9 2008/04/24 17:48:53 cyganiak Exp $
  */
 public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";
@@ -73,53 +72,30 @@ public class Pattern implements ValueMaker {
 		c.limitValuesToPattern(this);
 	}
 
-	public boolean matches(String value) {
+	public void selectValue(String value, MutableRelation relation) {
 		if (value == null) {
-			return false;
+			relation.empty();
+			return;
 		}
 		Matcher match = this.regex.matcher(value);
 		if (!match.matches()) {
-			return false;
+			relation.empty();
+			return;
 		}
-		for (int i = 0; i < this.columns.size(); i++) {
-			ColumnFunction function = (ColumnFunction) this.columnFunctions.get(i);
-			if (function.decode(match.group(i + 1)) == null) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public Set projectionAttributes() {
-		return this.columnsAsSet;
-	}
-
-	/**
-	 * Extracts column values according to the pattern from a value string. The
-	 * keys are {@link Attribute}s, the values are strings.
-	 * @param value value to be checked.
-	 * @return a map with <tt>Column</tt> keys and string values
-	 * @see de.fuberlin.wiwiss.d2rq.values.ValueMaker#attributeConditions(java.lang.String)
-	 */
-	public Map attributeConditions(String value) {
-		if (value == null) {
-			return Collections.EMPTY_MAP;
-		}
-		Matcher match = this.regex.matcher(value);
-		if (!match.matches()) {
-			return Collections.EMPTY_MAP;
-		}
-		Map result = new HashMap();
 		for (int i = 0; i < this.columns.size(); i++) {
 			Attribute attribute = (Attribute) this.columns.get(i);
 			ColumnFunction function = (ColumnFunction) this.columnFunctions.get(i);
 			String attributeValue = function.decode(match.group(i + 1));
 			if (attributeValue == null) {
-				return Collections.EMPTY_MAP;
+				relation.empty();
+				return;
 			}
-			result.put(attribute, attributeValue);
+			relation.select(Equality.createAttributeValue(attribute, attributeValue));
 		}
-		return result;
+	}
+
+	public Set projectionSpecs() {
+		return this.columnsAsSet;
 	}
 
 	/**

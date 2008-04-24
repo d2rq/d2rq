@@ -22,7 +22,7 @@
    				dc:creator       "Richard Cyganiak" ;
    				dc:date          "2006-08-12" ;
    				dc:format        "RDF";
-   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.18 2007/11/16 15:32:14 cyganiak Exp $";
+   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.19 2008/04/24 17:47:30 cyganiak Exp $";
    				.
 
 
@@ -188,6 +188,12 @@ d2rq:column     rdf:type rdf:Property ;
 		      	rdfs:label "column" ; 
              	rdfs:domain d2rq:PropertyBridge
              	.
+d2rq:sqlExpression
+				a rdf:Property;
+				rdfs:label "SQL expression";
+				rdfs:comment "A SQL expression whose result will be the value of this property bridge.";
+				rdfs:domain d2rq:PropertyBridge;
+				.
 d2rq:join       rdf:type rdf:Property ;
 		      	rdfs:label "join" ; 
                 rdfs:comment "SQL join condition over tables in the database.";

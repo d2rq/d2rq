@@ -1,12 +1,22 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.Collections;
+import java.util.Set;
+
+import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
+import de.fuberlin.wiwiss.d2rq.expr.Equality;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+
 /**
  * A database column.
- *
+ * 
+ * TODO: Should track its SQL datatype code
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Attribute.java,v 1.6 2006/09/15 17:53:37 cyganiak Exp $
+ * @version $Id: Attribute.java,v 1.7 2008/04/24 17:48:52 cyganiak Exp $
  */
-public class Attribute implements Comparable {
+public class Attribute implements Comparable, ProjectionSpec {
 	private String attributeName;
 	private RelationName relationName;
 	private String qualifiedName;
@@ -34,6 +44,10 @@ public class Attribute implements Comparable {
 	 */
 	public String qualifiedName() {
 		return this.qualifiedName;
+	}
+	
+	public String toSQL(ConnectedDB database, AliasMap aliases) {
+		return database.quoteAttribute(this);
 	}
 	
 	/**
@@ -70,6 +84,18 @@ public class Attribute implements Comparable {
 		return this.relationName.schemaName();
 	}
 
+	public Set requiredAttributes() {
+		return Collections.singleton(this);
+	}
+	
+	public Expression selectValue(String value) {
+		return Equality.createAttributeValue(this, value);
+	}
+	
+	public Expression toExpression() {
+		return new AttributeExpr(this);
+	}
+	
 	public String toString() {
 		return "@@" + this.qualifiedName + "@@";
 	}

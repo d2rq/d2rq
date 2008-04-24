@@ -31,7 +31,7 @@ public class FixedNodeMaker implements NodeMaker {
 		c.limitTo(this.node);
 	}
 
-	public Set projectionColumns() {
+	public Set projectionSpecs() {
 		return Collections.EMPTY_SET;
 	}
 

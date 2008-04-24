@@ -1,12 +1,8 @@
 package de.fuberlin.wiwiss.d2rq.nodes;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -14,11 +10,9 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
-import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
-import de.fuberlin.wiwiss.d2rq.expr.AttributeValue;
-import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
@@ -57,8 +51,8 @@ public class TypedNodeMaker implements NodeMaker {
 		this.isUnique = isUnique;
 	}
 	
-	public Set projectionColumns() {
-		return this.valueMaker.projectionAttributes();
+	public Set projectionSpecs() {
+		return this.valueMaker.projectionSpecs();
 	}
 	
 	public boolean isUnique() {
@@ -86,16 +80,13 @@ public class TypedNodeMaker implements NodeMaker {
 			return NodeMaker.EMPTY;
 		}
 		String value = this.nodeType.extractValue(node);
-		if (value == null || !this.valueMaker.matches(value)) {
+		if (value == null) {
 			return NodeMaker.EMPTY;
 		}
-		List conditions = new ArrayList();
-		Iterator it = this.valueMaker.attributeConditions(value).entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			conditions.add(AttributeValue.create((Attribute) entry.getKey(), (String) entry.getValue()));
+		valueMaker.selectValue(value, relation);
+		if (Relation.EMPTY.equals(relation.immutableSnapshot())) {
+			return NodeMaker.EMPTY;
 		}
-		relation.select(Conjunction.create(conditions));
 		return new FixedNodeMaker(node, isUnique());
 	}
 	

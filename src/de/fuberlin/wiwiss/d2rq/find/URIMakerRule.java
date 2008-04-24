@@ -14,6 +14,7 @@ import com.hp.hpl.jena.graph.Node;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
@@ -42,7 +43,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * RDFRelations in an order that puts URI patterns first.</p>
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRule.java,v 1.1 2006/09/17 00:36:27 cyganiak Exp $
+ * @version $Id: URIMakerRule.java,v 1.2 2008/04/24 17:48:54 cyganiak Exp $
  */
 public class URIMakerRule implements Comparator {
 	private Map identifierCache = new HashMap();
@@ -123,7 +124,9 @@ public class URIMakerRule implements Comparator {
 		public void addPotentialMatch(NodeMaker nodeMaker) {
 			if (node.isURI() 
 					&& uriMakerIdentifier(nodeMaker).isURIPattern() 
-					&& !nodeMaker.selectNode(node, MutableRelation.DUMMY).equals(NodeMaker.EMPTY)) {
+					&& !nodeMaker.selectNode(
+							node, new MutableRelation(Relation.TRUE)).equals(
+									NodeMaker.EMPTY)) {
 				this.canMatchURIColumn = false;
 			}
 		}

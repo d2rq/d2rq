@@ -2,6 +2,8 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Triple;
@@ -15,14 +17,17 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  * attached to the relation, plus a set of TripleMakers attached to the
  * NodeMakers. Very much work in progress.
  * 
+ * TODO Probably shouldn't have projectionSpecs(), renameColumns() and
+ * 		isUnique(), all of which sound like properties of the baseRelation()
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RDFRelation.java,v 1.7 2006/09/28 12:17:44 cyganiak Exp $
+ * @version $Id: RDFRelation.java,v 1.8 2008/04/24 17:48:52 cyganiak Exp $
  */
-public interface RDFRelation extends TripleMaker {
+public abstract class RDFRelation implements TripleMaker {
 	
-	static final RDFRelation EMPTY = new RDFRelation() {
+	public static final RDFRelation EMPTY = new RDFRelation() {
 		public Relation baseRelation() { return Relation.EMPTY; }
-		public Set projectionColumns() { return Collections.EMPTY_SET; }
+		public Set projectionSpecs() { return Collections.EMPTY_SET; }
 		public boolean isUnique() { return true; }
 		public Collection makeTriples(ResultRow row) { return Collections.EMPTY_LIST; }
 		public NodeMaker nodeMaker(int index) { return NodeMaker.EMPTY; }
@@ -33,24 +38,51 @@ public interface RDFRelation extends TripleMaker {
 		public String toString() { return "RDFRelation.EMPTY"; }
 	};
 
-	Relation baseRelation();
+	public abstract Relation baseRelation();
 	
-	Set projectionColumns();
+	public abstract Set projectionSpecs();
 	
-	boolean isUnique();
+	public abstract boolean isUnique();
 
 	/**
 	 * TODO Get rid of RDFRelation.nodeMaker(index)
 	 * @param index 0, 1 or 2 
 	 * @return The subject, predicate or object NodeMaker
 	 */
-	NodeMaker nodeMaker(int index);
+	public abstract NodeMaker nodeMaker(int index);
 	
-	RDFRelation selectTriple(Triple triplePattern);
+	public abstract RDFRelation selectTriple(Triple triplePattern);
 	
-	RDFRelation renameColumns(ColumnRenamer renamer);
+	public abstract RDFRelation renameColumns(ColumnRenamer renamer);
 	
-	Collection names();
+	public abstract Collection names();
 	
-	NodeMaker namedNodeMaker(String name);
+	public abstract NodeMaker namedNodeMaker(String name);
+	
+	public Set allKnownAttributes() {
+		Set results = new HashSet();
+		Iterator it = projectionSpecs().iterator();
+		while (it.hasNext()) {
+			ProjectionSpec spec = (ProjectionSpec) it.next();
+			results.addAll(spec.requiredAttributes());
+		}
+		results.addAll(baseRelation().condition().columns());
+		it = baseRelation().joinConditions().iterator();
+		while (it.hasNext()) {
+			Join join = (Join) it.next();
+			results.addAll(join.attributes1());
+			results.addAll(join.attributes2());
+		}
+		return results;
+	}
+	
+	public Set tables() {
+		Set results = new HashSet();
+		Iterator it = allKnownAttributes().iterator();
+		while (it.hasNext()) {
+			Attribute attribute = (Attribute) it.next();
+			results.add(attribute.relationName());
+		}
+		return results;
+	}
 }

@@ -35,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.32 2007/11/16 20:04:48 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.33 2008/04/24 17:48:54 cyganiak Exp $
  */
 public class MapParser {
 
@@ -369,9 +369,11 @@ public class MapParser {
 		stmts = r.listProperties(D2RQ.additionalProperty);
 		while (stmts.hasNext()) {
 			Resource additionalProperty = stmts.nextStatement().getResource();
-			classMap.addAdditionalProperty(
-					additionalProperty.getProperty(D2RQ.propertyName).getResource(),
-					additionalProperty.getProperty(D2RQ.propertyValue).getObject());
+			PropertyBridge bridge = new PropertyBridge(r);
+			bridge.setBelongsToClassMap(classMap);
+			bridge.addProperty(additionalProperty.getProperty(D2RQ.propertyName).getResource());
+			bridge.setConstantValue(additionalProperty.getProperty(D2RQ.propertyValue).getObject());
+			classMap.addPropertyBridge(bridge);
 		}
 	}
 	
@@ -408,6 +410,10 @@ public class MapParser {
 			} else {
 				bridge.setPattern(stmts.nextStatement().getString());
 			}
+		}
+		stmts = r.listProperties(D2RQ.sqlExpression);
+		while (stmts.hasNext()) {
+			bridge.setSQLExpression(stmts.nextStatement().getString());
 		}
 		stmts = r.listProperties(D2RQ.lang);
 		while (stmts.hasNext()) {

@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 
@@ -13,11 +12,8 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
-import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class PropertyBridge extends ResourceMap {
@@ -50,6 +46,11 @@ public class PropertyBridge extends ResourceMap {
 		this.pattern = pattern;
 	}
 
+	public void setSQLExpression(String sqlExpression) {
+		assertNotYetDefined(this.column, D2RQ.sqlExpression, D2RQException.PROPERTYBRIDGE_DUPLICATE_SQL_EXPRESSION);
+		this.sqlExpression = sqlExpression;
+	}
+	
 	public void setDatatype(String datatype) {
 		assertNotYetDefined(this.datatype, D2RQ.datatype, D2RQException.PROPERTYBRIDGE_DUPLICATE_DATATYPE);
 		this.datatype = datatype;
@@ -82,19 +83,22 @@ public class PropertyBridge extends ResourceMap {
 		}
 		assertHasPrimarySpec(new Property[]{
 				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns,
-				D2RQ.column, D2RQ.pattern, D2RQ.constantValue,
+				D2RQ.column, D2RQ.pattern, D2RQ.sqlExpression, D2RQ.constantValue,
 				D2RQ.refersToClassMap
 		});
 		if (this.datatype != null && this.lang != null) {
 			throw new D2RQException(toString() + " has both d2rq:datatype and d2rq:lang",
 					D2RQException.PROPERTYBRIDGE_LANG_AND_DATATYPE);
 		}
-		if (this.datatype != null && this.column == null && this.pattern == null) {
-			throw new D2RQException("d2rq:datatype can only be used with d2rq:column and d2rq:pattern at " + this,
+		if (this.datatype != null && this.column == null && this.pattern == null
+				&& this.sqlExpression == null) {
+			throw new D2RQException("d2rq:datatype can only be used with d2rq:column, d2rq:pattern " +
+					"or d2rq:sqlExpression at " + this,
 					D2RQException.PROPERTYBRIDGE_NONLITERAL_WITH_DATATYPE);
 		}
 		if (this.lang != null && this.column == null && this.pattern == null) {
-			throw new D2RQException("d2rq:lang can only be used with d2rq:column and d2rq:pattern at " + this,
+			throw new D2RQException("d2rq:lang can only be used with d2rq:column, d2rq:pattern " +
+					"or d2rq:sqlExpression at " + this,
 					D2RQException.PROPERTYBRIDGE_NONLITERAL_WITH_LANG);
 		}
 	}
@@ -108,21 +112,6 @@ public class PropertyBridge extends ResourceMap {
 		return builder.buildRelation(this.belongsToClassMap.database().connectedDB()); 
 	}
 
-	public NodeMaker nodeMaker() {
-		// TODO: MySQL DateTime hack -- how to do this properly?
-		if (this.belongsToClassMap.database() != null
-				&& this.translateWith == null
-				&& this.datatype != null
-				&& this.datatype.equals(XSDDatatype.XSDdateTime.getURI())
-				&& this.column != null
-				&& this.belongsToClassMap.database().connectedDB().columnType(
-						SQL.parseAttribute(this.column)) == ConnectedDB.DATE_COLUMN) {
-//			this.translateWith = new TranslationTable();
-//			this.translateWith.setTranslator(new DateTimeTranslator());
-		}
-		return super.nodeMaker();
-	}
-	
 	public Collection toRDFRelations() {
 		this.validate();
 		Collection results = new ArrayList();

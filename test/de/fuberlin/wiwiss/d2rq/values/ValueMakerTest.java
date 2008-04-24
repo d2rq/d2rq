@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
 import junit.framework.TestCase;
 
@@ -32,55 +35,61 @@ public class ValueMakerTest extends TestCase {
 	}
 	
 	public void testMaxLengthConstraint() {
-		DummyValueSource source = new DummyValueSource("foo", true);
+		DummyValueSource source = new DummyValueSource("foo");
 		ValueDecorator values = new ValueDecorator(source, Collections.singletonList(ValueDecorator.maxLengthConstraint(5)));
-		assertFalse(values.matches(null));
-		assertTrue(values.matches(""));
-		assertTrue(values.matches("foo"));
-		assertTrue(values.matches("fooba"));
-		assertFalse(values.matches("foobar"));
-		source.setCouldFit(false);
-		assertFalse(values.matches("foo"));
+		assertFalse(matches(values, null));
+		assertTrue(matches(values, ""));
+		assertTrue(matches(values, "foo"));
+		assertTrue(matches(values, "fooba"));
+		assertFalse(matches(values, "foobar"));
+		source.setSelectCondition(Expression.FALSE);
+		assertFalse(matches(values, "foo"));
 	}
 	
 	public void testContainsConstraint() {
-		DummyValueSource source = new DummyValueSource("foo", true);
+		DummyValueSource source = new DummyValueSource("foo");
 		ValueDecorator values = new ValueDecorator(source, Collections.singletonList(ValueDecorator.containsConstraint("foo")));
-		assertFalse(values.matches(null));
-		assertTrue(values.matches("foo"));
-		assertTrue(values.matches("barfoobaz"));
-		assertFalse(values.matches(""));
-		assertFalse(values.matches("bar"));
+		assertFalse(matches(values, null));
+		assertTrue(matches(values, "foo"));
+		assertTrue(matches(values, "barfoobaz"));
+		assertFalse(matches(values, ""));
+		assertFalse(matches(values, "bar"));
 		values = new ValueDecorator(source, Collections.singletonList(ValueDecorator.containsConstraint("")));
-		assertFalse(values.matches(null));
-		assertTrue(values.matches(""));
-		assertTrue(values.matches("a"));
-		source.setCouldFit(false);
-		assertFalse(values.matches("a"));
+		assertFalse(matches(values, null));
+		assertTrue(matches(values, ""));
+		assertTrue(matches(values, "a"));
+		source.setSelectCondition(Expression.FALSE);
+		assertFalse(matches(values, "a"));
 	}
 	
 	public void testRegexConstraint() {
-		DummyValueSource source = new DummyValueSource("foo", true);
+		DummyValueSource source = new DummyValueSource("foo");
 		ValueDecorator values = new ValueDecorator(source, Collections.singletonList(ValueDecorator.regexConstraint("^[0-9]{5}$")));
-		assertFalse(values.matches(null));
-		assertTrue(values.matches("12345"));
-		assertFalse(values.matches("abc"));
-		source.setCouldFit(false);
-		assertFalse(values.matches("12345"));
+		assertFalse(matches(values, null));
+		assertTrue(matches(values, "12345"));
+		assertFalse(matches(values, "abc"));
+		source.setSelectCondition(Expression.FALSE);
+		assertFalse(matches(values, "12345"));
 	}
 	
 	public void testColumnDoesNotMatchNull() {
 		Column column = new Column(foo_col1);
-		assertFalse(column.matches(null));
+		assertFalse(matches(column, null));
 	}
 	
 	public void testPatternDoesNotMatchNull() {
 		Pattern pattern = new Pattern("foo/@@foo.bar@@");
-		assertFalse(pattern.matches(null));
+		assertFalse(matches(pattern, null));
 	}
 	
 	public void testBlankNodeIDDoesNotMatchNull() {
 		BlankNodeID bNodeID = new BlankNodeID("classmap", Collections.singletonList(foo_col1));
-		assertFalse(bNodeID.matches(null));
+		assertFalse(matches(bNodeID, null));
+	}
+	
+	private boolean matches(ValueMaker valueMaker, String value) {
+		MutableRelation checker = new MutableRelation(Relation.TRUE);
+		valueMaker.selectValue(value, checker);
+		return !checker.immutableSnapshot().equals(Relation.EMPTY);
 	}
 }
