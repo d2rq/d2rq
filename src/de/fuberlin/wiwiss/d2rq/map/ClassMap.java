@@ -86,7 +86,7 @@ public class ClassMap extends ResourceMap {
 		Iterator it = this.propertyBridges.iterator();
 		while (it.hasNext()) {
 			PropertyBridge bridge = (PropertyBridge) it.next();
-			this.compiledPropertyBridges.addAll(bridge.toRDFRelations());
+			this.compiledPropertyBridges.addAll(bridge.toTripleRelations());
 		}
 		it = this.classes.iterator();
 		while (it.hasNext()) {
@@ -95,7 +95,7 @@ public class ClassMap extends ResourceMap {
 			bridge.setBelongsToClassMap(this);
 			bridge.addProperty(RDF.type);
 			bridge.setConstantValue(class_);
-			this.compiledPropertyBridges.addAll(bridge.toRDFRelations());
+			this.compiledPropertyBridges.addAll(bridge.toTripleRelations());
 		}
 	}
 	

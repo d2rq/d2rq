@@ -24,12 +24,18 @@ public class TripleRelationTest extends TestCase {
 				new TypedNodeMaker(TypedNodeMaker.URI, new Pattern("http://example.org/original/@@original.id@@"), true),
 				new FixedNodeMaker(Node.createURI("http://example.org/property"), false),
 				new TypedNodeMaker(TypedNodeMaker.PLAIN_LITERAL, new Column(new Attribute(alias, "value")), false));
-		assertEquals("URI(Pattern(http://example.org/original/@@original.id@@))", t.nodeMaker(0).toString());
-		assertEquals("Literal(Column(alias.value))", t.nodeMaker(2).toString());
-		assertEquals("AliasMap(original AS alias)", t.baseRelation().aliases().toString());
-		RDFRelation t4 = t.withPrefix(4);
-		assertEquals("URI(Pattern(http://example.org/original/@@T4_original.id@@))", t4.nodeMaker(0).toString());
-		assertEquals("Literal(Column(T4_alias.value))", t4.nodeMaker(2).toString());
-		assertEquals("AliasMap(original AS T4_alias, original AS T4_original)", t4.baseRelation().aliases().toString());
+		assertEquals("URI(Pattern(http://example.org/original/@@original.id@@))", 
+				t.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER).toString());
+		assertEquals("Literal(Column(alias.value))", 
+				t.nodeMaker(TripleRelation.OBJECT_NODE_MAKER).toString());
+		assertEquals("AliasMap(original AS alias)", 
+				t.baseRelation().aliases().toString());
+		TripleRelation t4 = t.withPrefix(4);
+		assertEquals("URI(Pattern(http://example.org/original/@@T4_original.id@@))", 
+				t4.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER).toString());
+		assertEquals("Literal(Column(T4_alias.value))", 
+				t4.nodeMaker(TripleRelation.OBJECT_NODE_MAKER).toString());
+		assertEquals("AliasMap(original AS T4_alias, original AS T4_original)", 
+				t4.baseRelation().aliases().toString());
 	}
 }

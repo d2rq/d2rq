@@ -112,7 +112,7 @@ public class PropertyBridge extends ResourceMap {
 		return builder.buildRelation(this.belongsToClassMap.database().connectedDB()); 
 	}
 
-	public Collection toRDFRelations() {
+	public Collection toTripleRelations() {
 		this.validate();
 		Collection results = new ArrayList();
 		Iterator it = this.properties.iterator();

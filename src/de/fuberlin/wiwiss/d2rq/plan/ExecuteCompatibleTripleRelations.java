@@ -1,27 +1,26 @@
-package de.fuberlin.wiwiss.d2rq.algebra;
+package de.fuberlin.wiwiss.d2rq.plan;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.hp.hpl.jena.graph.Triple;
-
-import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: UnionOverSameBase.java,v 1.12 2008/04/24 17:48:52 cyganiak Exp $
+ * @version $Id: ExecuteCompatibleTripleRelations.java,v 1.1 2008/04/25 11:25:05 cyganiak Exp $
  */
-public class UnionOverSameBase extends RDFRelation {
+public class ExecuteCompatibleTripleRelations implements ExecutionPlanElement, TripleMaker {
 
 	/**
-	 * Checks if two {@link RDFRelation}s can be combined into
+	 * Checks if two {@link TripleRelation}s can be combined into
 	 * a single SQL statement. Relations can be combined iff
 	 * they access the same database and they contain exactly the same
 	 * joins and WHERE clauses. If they both contain no joins, they
@@ -31,7 +30,7 @@ public class UnionOverSameBase extends RDFRelation {
 	 * 
 	 * @return <tt>true</tt> if both arguments are combinable
 	 */
-	public static boolean isSameBase(RDFRelation first, RDFRelation second) {
+	public static boolean areCompatible(TripleRelation first, TripleRelation second) {
 		if (!first.baseRelation().database().equals(second.baseRelation().database())) {
 			return false;
 		}
@@ -64,12 +63,12 @@ public class UnionOverSameBase extends RDFRelation {
 	private List tripleMakers;
 	private Set projectionSpecs = new HashSet();
 	
-	public UnionOverSameBase(List baseRelations) {
-		this.baseRelation = ((RDFRelation) baseRelations.get(0)).baseRelation();
+	public ExecuteCompatibleTripleRelations(List baseRelations) {
+		this.baseRelation = ((TripleRelation) baseRelations.get(0)).baseRelation();
 		this.tripleMakers = baseRelations;
 		Iterator it = baseRelations.iterator();
 		while (it.hasNext()) {
-			RDFRelation relation = (RDFRelation) it.next();
+			TripleRelation relation = (TripleRelation) it.next();
 			this.projectionSpecs.addAll(relation.projectionSpecs());
 		}
 	}
@@ -82,10 +81,6 @@ public class UnionOverSameBase extends RDFRelation {
 		return this.projectionSpecs;
 	}
 	
-	public boolean isUnique() {
-		return true;
-	}
-	
 	public Collection makeTriples(ResultRow row) {
 		List result = new ArrayList();
 		Iterator it = this.tripleMakers.iterator();
@@ -96,23 +91,7 @@ public class UnionOverSameBase extends RDFRelation {
 		return result;
 	}
 	
-	public NodeMaker nodeMaker(int index) {
-		throw new UnsupportedOperationException();
-	}
-
-	public RDFRelation selectTriple(Triple triplePattern) {
-		throw new UnsupportedOperationException();
-	}
-	
-	public RDFRelation renameColumns(ColumnRenamer renamer) {
-		throw new UnsupportedOperationException();
-	}
-
-	public Collection names() {
-		return Collections.EMPTY_LIST;
-	}
-	
-	public NodeMaker namedNodeMaker(String name) {
-		return null;
+	public void visit(ExecutionPlanVisitor visitor) {
+		visitor.visit(this);
 	}
 }

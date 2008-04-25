@@ -27,7 +27,6 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
@@ -48,7 +47,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.45 2007/11/16 20:04:48 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.46 2008/04/25 11:25:06 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -153,10 +152,10 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			Iterator bridgeIt = this.mapping.classMap(classMapResource).compiledPropertyBridges().iterator();
 			while (bridgeIt.hasNext()) {
 				TripleRelation bridge = (TripleRelation) bridgeIt.next();
-				if (!bridge.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)).equals(RDFRelation.EMPTY)) {
+				if (bridge.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)) != null) {
 					inventoryBridges.add(bridge);
 				}
-				if (!bridge.selectTriple(new Triple(Node.ANY, RDFS.label.asNode(), Node.ANY)).equals(RDFRelation.EMPTY)) {
+				if (bridge.selectTriple(new Triple(Node.ANY, RDFS.label.asNode(), Node.ANY)) != null) {
 					inventoryBridges.add(bridge);
 				}
 			}

@@ -9,7 +9,7 @@ import java.util.Set;
 
 
 /**
- * <p>Removes unnecessary joins from an {@link RDFRelation} in cases
+ * <p>Removes unnecessary joins from a {@link TripleRelation} in cases
  * where this is possible without affecting the result. This is an
  * optimization.</p>
  * 
@@ -54,20 +54,20 @@ import java.util.Set;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.16 2008/04/24 17:48:52 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.17 2008/04/25 11:25:05 cyganiak Exp $
  */
 public class JoinOptimizer {
-	private RDFRelation relation;
+	private TripleRelation relation;
 	
 	/**
 	 * Constructs a new JoinOptimizer.
-	 * @param base The RDFRelation to be optimized
+	 * @param base The TripleRelation to be optimized
 	 */
-	public JoinOptimizer(RDFRelation base) {
-		this.relation = base;
+	public JoinOptimizer(TripleRelation relation) {
+		this.relation = relation;
 	}
 	
-	public RDFRelation optimize() {
+	public TripleRelation optimize() {
 		Map replacedColumns = new HashMap();
 		Set allRequiredColumns = relation.allKnownAttributes();
 		Set requiredJoins = new HashSet(this.relation.baseRelation().joinConditions());
@@ -100,9 +100,9 @@ public class JoinOptimizer {
 					this.relation.baseRelation().aliases(),
 					this.relation.baseRelation().condition(),
 					requiredJoins).renameColumns(renamer),
-				this.relation.nodeMaker(0).renameColumns(renamer, MutableRelation.DUMMY),
-				this.relation.nodeMaker(1).renameColumns(renamer, MutableRelation.DUMMY),
-				this.relation.nodeMaker(2).renameColumns(renamer, MutableRelation.DUMMY));
+				this.relation.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER).renameColumns(renamer, MutableRelation.DUMMY),
+				this.relation.nodeMaker(TripleRelation.PREDICATE_NODE_MAKER).renameColumns(renamer, MutableRelation.DUMMY),
+				this.relation.nodeMaker(TripleRelation.OBJECT_NODE_MAKER).renameColumns(renamer, MutableRelation.DUMMY));
 	}
 
 	private boolean isRemovableJoin(Join join) {

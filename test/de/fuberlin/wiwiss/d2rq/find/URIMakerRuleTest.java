@@ -5,15 +5,16 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import junit.framework.TestCase;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.find.URIMakerRule.URIMakerRuleChecker;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
@@ -21,7 +22,6 @@ import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.values.Column;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
-import junit.framework.TestCase;
 
 /**
  * :cm1 a d2rq:ClassMap;
@@ -41,13 +41,13 @@ import junit.framework.TestCase;
  *     d2rq:class foaf:Document;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRuleTest.java,v 1.4 2006/11/02 21:15:44 cyganiak Exp $
+ * @version $Id: URIMakerRuleTest.java,v 1.5 2008/04/25 11:25:05 cyganiak Exp $
  */
 public class URIMakerRuleTest extends TestCase {
-	private RDFRelation withURIPatternSubject;
-	private RDFRelation withURIPatternSubjectAndObject;
-	private RDFRelation withURIColumnSubject;
-	private RDFRelation withURIPatternSubjectAndURIColumnObject;
+	private TripleRelation withURIPatternSubject;
+	private TripleRelation withURIPatternSubjectAndObject;
+	private TripleRelation withURIColumnSubject;
+	private TripleRelation withURIPatternSubjectAndURIColumnObject;
 	private URIMakerRuleChecker employeeChecker;
 	private URIMakerRuleChecker foobarChecker;
 
@@ -106,13 +106,13 @@ public class URIMakerRuleTest extends TestCase {
 	}
 	
 	public void testSort() {
-		Collection unsorted = new ArrayList(Arrays.asList(new RDFRelation[]{
+		Collection unsorted = new ArrayList(Arrays.asList(new TripleRelation[]{
 				this.withURIColumnSubject,
 				this.withURIPatternSubject, 
 				this.withURIPatternSubjectAndObject,
 				this.withURIPatternSubjectAndURIColumnObject
 		}));
-		Collection sorted = new ArrayList(Arrays.asList(new RDFRelation[]{
+		Collection sorted = new ArrayList(Arrays.asList(new TripleRelation[]{
 				this.withURIPatternSubjectAndObject,
 				this.withURIPatternSubject, 
 				this.withURIPatternSubjectAndURIColumnObject,
@@ -122,25 +122,36 @@ public class URIMakerRuleTest extends TestCase {
 	}
 	
 	public void testRuleCheckerStartsAccepting() {
-		assertTrue(this.employeeChecker.canMatch(this.withURIColumnSubject.nodeMaker(0)));
-		assertTrue(this.employeeChecker.canMatch(this.withURIPatternSubject.nodeMaker(0)));
+		assertTrue(this.employeeChecker.canMatch(
+				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+		assertTrue(this.employeeChecker.canMatch(
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
 	}
 	
 	public void testRuleCheckerUnaffectedByNonURIPattern() {
-		this.employeeChecker.addPotentialMatch(this.withURIColumnSubject.nodeMaker(0));
-		assertTrue(this.employeeChecker.canMatch(this.withURIColumnSubject.nodeMaker(0)));
-		assertTrue(this.employeeChecker.canMatch(this.withURIPatternSubject.nodeMaker(0)));
+		this.employeeChecker.addPotentialMatch(
+				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER));
+		assertTrue(this.employeeChecker.canMatch(
+				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+		assertTrue(this.employeeChecker.canMatch(
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
 	}
 	
 	public void testRuleCheckerRejectsAfterMatch() {
-		this.employeeChecker.addPotentialMatch(this.withURIPatternSubject.nodeMaker(0));
-		assertFalse(this.employeeChecker.canMatch(this.withURIColumnSubject.nodeMaker(0)));
-		assertTrue(this.employeeChecker.canMatch(this.withURIPatternSubject.nodeMaker(0)));
+		this.employeeChecker.addPotentialMatch(
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER));
+		assertFalse(this.employeeChecker.canMatch(
+				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+		assertTrue(this.employeeChecker.canMatch(
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
 	}
 	
 	public void testRuleCheckerDoesNotRejectAfterNonMatch() {
-		this.foobarChecker.addPotentialMatch(this.withURIPatternSubject.nodeMaker(0));
-		assertTrue(this.foobarChecker.canMatch(this.withURIColumnSubject.nodeMaker(0)));
-		assertTrue(this.foobarChecker.canMatch(this.withURIPatternSubject.nodeMaker(0)));
+		this.foobarChecker.addPotentialMatch(
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER));
+		assertTrue(this.foobarChecker.canMatch(
+				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+		assertTrue(this.foobarChecker.canMatch(
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
 	}
 }

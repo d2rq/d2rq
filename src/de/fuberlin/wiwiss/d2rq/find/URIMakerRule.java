@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +14,8 @@ import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
@@ -43,13 +44,13 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * RDFRelations in an order that puts URI patterns first.</p>
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRule.java,v 1.2 2008/04/24 17:48:54 cyganiak Exp $
+ * @version $Id: URIMakerRule.java,v 1.3 2008/04/25 11:25:06 cyganiak Exp $
  */
 public class URIMakerRule implements Comparator {
 	private Map identifierCache = new HashMap();
 
-	public List sortRDFRelations(Collection rdfRelations) {
-		ArrayList results = new ArrayList(rdfRelations);
+	public List sortRDFRelations(Collection tripleRelations) {
+		ArrayList results = new ArrayList(tripleRelations);
 		Collections.sort(results, this);
 		return results;
 	}
@@ -59,11 +60,11 @@ public class URIMakerRule implements Comparator {
 	}
 	
 	public int compare(Object o1, Object o2) {
-		if (!(o1 instanceof RDFRelation) || !(o2 instanceof RDFRelation)) {
+		if (!(o1 instanceof TripleRelation) || !(o2 instanceof TripleRelation)) {
 			return 0;
 		}
-		int priority1 = priority((RDFRelation) o1);
-		int priority2 = priority((RDFRelation) o2);
+		int priority1 = priority((TripleRelation) o1);
+		int priority2 = priority((TripleRelation) o2);
 		if (priority1 > priority2) {
 			return -1;
 		}
@@ -73,10 +74,12 @@ public class URIMakerRule implements Comparator {
 		return 0;
 	}
 	
-	private int priority(RDFRelation relation) {
+	private int priority(TripleRelation relation) {
 		int result = 0;
-		for (int i = 0; i < 3; i++) {
-			URIMakerIdentifier id = uriMakerIdentifier(relation.nodeMaker(i));
+		Iterator it = TripleRelation.S_P_O_NODE_MAKERS.iterator();
+		while (it.hasNext()) {
+			String name = (String) it.next();
+			URIMakerIdentifier id = uriMakerIdentifier(relation.nodeMaker(name));
 			if (id.isURIPattern()) {
 				result += 3;
 			}

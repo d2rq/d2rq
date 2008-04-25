@@ -8,7 +8,7 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
@@ -16,21 +16,21 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * Iterator for PatternQueryCombiner results.
  * 
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.4 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.5 2008/04/25 11:25:05 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
 	private final VariableBindings variableBindings;
 	private final Collection constraints;
-	private final RDFRelation[] conjunction;
+	private final TripleRelation[] conjunction;
 	private final Iterator conjunctionsIterator;
 	private ApplyTripleMakerRowIterator resultSet; 
 	private Triple[] nextRow = null;
 	
-	public PQCResultIterator(RDFRelation[][] tripleQueries, VariableBindings variableBindings, Collection constraints) {
+	public PQCResultIterator(TripleRelation[][] tripleQueries, VariableBindings variableBindings, Collection constraints) {
 		this.variableBindings=variableBindings;
 		this.constraints=constraints;
-		this.conjunction = new RDFRelation[tripleQueries.length];
-		this.conjunctionsIterator= new CombinationIterator(tripleQueries);
+		this.conjunction = new TripleRelation[tripleQueries.length];
+		this.conjunctionsIterator = new CombinationIterator(tripleQueries);
 	}
 	
 	public boolean hasNext() {
@@ -67,7 +67,7 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 			}
 			Object[] combination = (Object[]) this.conjunctionsIterator.next();
 			for (int i = 0; i < combination.length; i++) {
-				this.conjunction[i] = (RDFRelation) combination[i];
+				this.conjunction[i] = (TripleRelation) combination[i];
 			}
 			ConstraintHandler ch = new ConstraintHandler();
 			ch.setVariableBindings(this.variableBindings);
@@ -79,15 +79,15 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 			}
 			this.resultSet = new ApplyTripleMakerRowIterator(
 					getSQL(ch).execute(), this.conjunction);
-		} // enless while loop
+		} // endless while loop
 	}
 
 	private SelectStatementBuilder getSQL(ConstraintHandler ch) {
-		ConnectedDB db = this.conjunction[0].baseRelation().database();
+		ConnectedDB db = conjunction[0].baseRelation().database();
 		SelectStatementBuilder sql = new SelectStatementBuilder(db);
 		sql.setEliminateDuplicates(db.allowDistinct());	
-		for (int i=0; i < this.conjunction.length; i++) {
-			RDFRelation t = this.conjunction[i];
+		for (int i = 0; i < this.conjunction.length; i++) {
+			TripleRelation t = this.conjunction[i];
 			sql.addSelectSpecs(t.projectionSpecs());
 			sql.addRelation(t.baseRelation());
 		}

@@ -11,7 +11,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
@@ -44,13 +44,15 @@ public class CompileTest extends TestCase {
 	}
 	
 	public void testAttributesInRefersToClassMapAreRenamed() {
-		RDFRelation relation = (RDFRelation) this.managerBridge.toRDFRelations().iterator().next();
-		assertEquals("URI(Pattern(http://test/employee@@e.ID@@))", relation.nodeMaker(0).toString());
-		assertEquals("URI(Pattern(http://test/employee@@m.ID@@))", relation.nodeMaker(2).toString());
+		TripleRelation relation = (TripleRelation) this.managerBridge.toTripleRelations().iterator().next();
+		assertEquals("URI(Pattern(http://test/employee@@e.ID@@))", 
+				relation.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER).toString());
+		assertEquals("URI(Pattern(http://test/employee@@m.ID@@))", 
+				relation.nodeMaker(TripleRelation.OBJECT_NODE_MAKER).toString());
 	}
 	
 	public void testJoinConditionsInRefersToClassMapAreRenamed() {
-		RDFRelation relation = (RDFRelation) this.managerBridge.toRDFRelations().iterator().next();
+		TripleRelation relation = (TripleRelation) this.managerBridge.toTripleRelations().iterator().next();
 		Set joinsToString = new HashSet();
 		Iterator it = relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
@@ -64,13 +66,13 @@ public class CompileTest extends TestCase {
 	}
 	
 	public void testConditionInRefersToClassMapIsRenamed() {
-		RDFRelation relation = (RDFRelation) this.managerBridge.toRDFRelations().iterator().next();
+		TripleRelation relation = (TripleRelation) this.managerBridge.toTripleRelations().iterator().next();
 		assertEquals("Conjunction(SQL(e.status = 'active'), SQL(m.status = 'active'))",
 				relation.baseRelation().condition().toString());
 	}
 
 	public void testAliasesInRefersToClassMapAreRenamed() {
-		RDFRelation relation = (RDFRelation) this.managerBridge.toRDFRelations().iterator().next();
+		TripleRelation relation = (TripleRelation) this.managerBridge.toTripleRelations().iterator().next();
 		assertEquals(
 				new AliasMap(Arrays.asList(new Alias[]{
 						SQL.parseAlias("employees AS e"), 

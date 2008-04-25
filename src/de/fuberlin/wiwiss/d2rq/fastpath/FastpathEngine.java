@@ -12,8 +12,6 @@ import com.hp.hpl.jena.graph.query.Mapping;
 import com.hp.hpl.jena.graph.query.Pipe;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
-import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 
 /**
@@ -25,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
  *
  * @author jg
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FastpathEngine.java,v 1.4 2006/10/16 12:46:00 cyganiak Exp $
+ * @version $Id: FastpathEngine.java,v 1.5 2008/04/25 11:25:05 cyganiak Exp $
  */
 public class FastpathEngine {
 	private final Pipe input;
@@ -67,7 +65,7 @@ public class FastpathEngine {
 		for (int i = 0; i < triples.length; i++) {
 			triples[i] = this.stageInfo.compiled(i).asTripleMatch(domain).asTriple();
 		}
-		RDFRelation[][] tripleQueries = candidateRelationsForEachTriple(triples); 
+		TripleRelation[][] tripleQueries = candidateRelationsForEachTriple(triples); 
 		if (tripleQueries == null) {
 			return;
 		}
@@ -85,33 +83,24 @@ public class FastpathEngine {
 		it.close();
 	}
 
-	public RDFRelation[][] candidateRelationsForEachTriple(Triple[] triples) {
-		List[] bridges = makePrefixedPropertyBridges(triples);
-		if (bridges == null) return null;
-		RDFRelation[][] results = new RDFRelation[triples.length][];
+	public TripleRelation[][] candidateRelationsForEachTriple(Triple[] triples) {
+		TripleRelation[][] results = new TripleRelation[triples.length][];
 		for (int i = 0; i < triples.length; i++) {
-			Triple t = triples[i];
-			results[i] = new RDFRelation[bridges[i].size()];
-			for (int j = 0; j < results[i].length; j++) {
-				results[i][j] = new JoinOptimizer(
-						((RDFRelation)bridges[i].get(j)).selectTriple(t)).optimize();
-			}
+			List candidates = findAndPrefixCandidates(triples[i], i);
+			results[i] = (TripleRelation[]) candidates.toArray(
+					new TripleRelation[candidates.size()]);
 		}
 		return results;
 	}
 
-	public List[] makePrefixedPropertyBridges(Triple[] triples) {
-		List[] results = new List[triples.length];
-		for (int i = 0; i < triples.length; i++) {
-			List relationsForTriple = new ArrayList();
-			Iterator it = this.rdfRelations.iterator();
-			while (it.hasNext()) {
-				TripleRelation bridge = (TripleRelation) it.next();
-				if (!bridge.selectTriple(triples[i]).equals(RDFRelation.EMPTY)) {
-					relationsForTriple.add(bridge.withPrefix(i));
-				}
-			}
-			results[i] = relationsForTriple;
+	private List findAndPrefixCandidates(Triple triple, int prefix) {
+		List results = new ArrayList();
+		Iterator it = this.rdfRelations.iterator();
+		while (it.hasNext()) {
+			TripleRelation bridge = (TripleRelation) it.next();
+			TripleRelation candidate = bridge.selectTriple(triple);
+			if (candidate == null) continue;
+			results.add(candidate.withPrefix(prefix));
 		}
 		return results;
 	}

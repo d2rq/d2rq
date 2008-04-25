@@ -15,7 +15,8 @@ import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * A D2RQ mapping. Consists of {@link ClassMap}s,
@@ -24,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.11 2008/04/24 17:48:52 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.12 2008/04/25 11:25:05 cyganiak Exp $
  */
 public class Mapping {
 	private final Model model = ModelFactory.createDefaultModel();
@@ -72,21 +73,13 @@ public class Mapping {
 			ClassMap classMap = (ClassMap) it.next();
 			classMap.validate();	// Also validates attached bridges
 		}
-	}
-
-	private void assertHasColumnTypes(RDFRelation relation) {
-		Iterator it = relation.projectionSpecs().iterator();
+		it = compiledPropertyBridges().iterator();
 		while (it.hasNext()) {
-			ProjectionSpec projection = (ProjectionSpec) it.next();
-			Iterator it2 = projection.requiredAttributes().iterator();
-			while (it2.hasNext()) {
-				Attribute attribute = (Attribute) it2.next();
-				relation.baseRelation().database().columnType(
-						relation.baseRelation().aliases().originalOf(attribute));
-			}
+			TripleRelation bridge = (TripleRelation) it.next();
+			new AttributeTypeValidator(bridge).validate();
 		}
 	}
-	
+
 	public void addDatabase(Database database) {
 		this.databases.put(database.resource(), database);
 	}
@@ -120,7 +113,7 @@ public class Mapping {
 	}
 	
 	/**
-	 * @return A collection of {@link RDFRelation}s corresponding to each
+	 * @return A collection of {@link TripleRelation}s corresponding to each
 	 * 		of the property bridges
 	 */
 	public synchronized Collection compiledPropertyBridges() {
@@ -137,14 +130,31 @@ public class Mapping {
 			ClassMap classMap = (ClassMap) it.next();
 			this.compiledPropertyBridges.addAll(classMap.compiledPropertyBridges());
 		}
-		it = this.compiledPropertyBridges.iterator();
-		while (it.hasNext()) {
-			RDFRelation bridge = (RDFRelation) it.next();
-			assertHasColumnTypes(bridge);
-		}
 	}
 	
 	public PrefixMapping getPrefixMapping() {
 		return prefixes;
+	}
+
+	private class AttributeTypeValidator {
+		private final TripleRelation relation;
+		AttributeTypeValidator(TripleRelation relation) {
+			this.relation = relation;
+		}
+		void validate() {
+			ConnectedDB db = relation.baseRelation().database();
+			Iterator it = relation.projectionSpecs().iterator();
+			while (it.hasNext()) {
+				validateAttributes(((ProjectionSpec) it.next()).requiredAttributes(), db);
+			}
+			validateAttributes(relation.baseRelation().allKnownAttributes(), db);
+		}
+		private void validateAttributes(Collection attributes, ConnectedDB db) {
+			Iterator it = attributes.iterator();
+			while (it.hasNext()) {
+				Attribute attribute = (Attribute) it.next();
+				db.columnType(relation.baseRelation().aliases().originalOf(attribute));
+			}
+		}
 	}
 }

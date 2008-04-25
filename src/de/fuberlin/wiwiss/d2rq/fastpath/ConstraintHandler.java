@@ -8,7 +8,7 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
@@ -18,12 +18,12 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.3 2007/11/15 15:54:51 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.4 2008/04/25 11:25:05 cyganiak Exp $
  */
 public class ConstraintHandler {
     public boolean possible=true;
     public VariableBindings bindings;
-    RDFRelation[] conjunction;
+    TripleRelation[] conjunction;
     /** Mapping between a variable (Node) and its NodeConstraints. */
     public Map variableToConstraint=new HashMap(); 
     Collection rdqlConstraints;
@@ -32,7 +32,7 @@ public class ConstraintHandler {
         this.bindings=bindings;
     }
     
-    public void setTripleQueryConjunction(RDFRelation[] conjunction) {
+    public void setTripleQueryConjunction(TripleRelation[] conjunction) {
         this.conjunction=conjunction;
     }
     
@@ -87,9 +87,9 @@ public class ConstraintHandler {
      *
      */
 	public class NodeMakerIterator implements Iterator {
-	    RDFRelation[] conjunction;
+	    TripleRelation[] conjunction;
 	    Iterator indexSetIterator;
-		public NodeMakerIterator(RDFRelation[] conjunction, Set indexSet) {
+		public NodeMakerIterator(TripleRelation[] conjunction, Set indexSet) {
 		    this.conjunction=conjunction;
 		    this.indexSetIterator=indexSet.iterator();
 		}
@@ -100,7 +100,8 @@ public class ConstraintHandler {
         }
         public NodeMaker nextNodeMaker() {
             VariableIndex i = (VariableIndex) indexSetIterator.next();
-	        return conjunction[i.tripleNr].nodeMaker(i.nodeNr);
+	        return conjunction[i.tripleNr].nodeMaker(
+	        		(String) TripleRelation.S_P_O_NODE_MAKERS.get(i.nodeNr));
         }
         public Object next() {
             return nextNodeMaker();

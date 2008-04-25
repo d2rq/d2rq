@@ -12,7 +12,7 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
-import de.fuberlin.wiwiss.d2rq.algebra.RDFRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.16 2006/11/01 13:17:50 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.17 2008/04/25 11:25:06 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -64,7 +64,7 @@ public class ParserTest extends TestCase {
 	public void testParseAlias() {
 		Mapping mapping = parse("parser/alias.n3").parse();
 		assertEquals(1, mapping.compiledPropertyBridges().size());
-		RDFRelation bridge = (RDFRelation) mapping.compiledPropertyBridges().iterator().next();
+		TripleRelation bridge = (TripleRelation) mapping.compiledPropertyBridges().iterator().next();
 		assertTrue(bridge.baseRelation().condition().isTrue());
 		AliasMap aliases = bridge.baseRelation().aliases();
 		AliasMap expected = new AliasMap(Collections.singleton(SQL.parseAlias("People AS Bosses")));

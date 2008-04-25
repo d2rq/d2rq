@@ -5,7 +5,7 @@ import java.util.Set;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
-public class RelationImpl implements Relation {
+public class RelationImpl extends Relation {
 	private ConnectedDB database;
 	private AliasMap aliases;
 	private Expression condition;
