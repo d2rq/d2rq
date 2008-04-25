@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
+
 
 /**
  * <p>Removes unnecessary joins from a {@link TripleRelation} in cases
@@ -54,7 +56,7 @@ import java.util.Set;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.17 2008/04/25 11:25:05 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.18 2008/04/25 15:25:13 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private TripleRelation relation;
@@ -69,7 +71,7 @@ public class JoinOptimizer {
 	
 	public TripleRelation optimize() {
 		Map replacedColumns = new HashMap();
-		Set allRequiredColumns = relation.allKnownAttributes();
+		Set allRequiredColumns = relation.baseRelation().allKnownAttributes();
 		Set requiredJoins = new HashSet(this.relation.baseRelation().joinConditions());
 		Iterator it = this.relation.baseRelation().joinConditions().iterator();
 		while (it.hasNext()) {
@@ -95,14 +97,22 @@ public class JoinOptimizer {
 			return this.relation;
 		}
 		ColumnRenamer renamer = new ColumnRenamerMap(replacedColumns);
+		NodeMaker s = this.relation.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER);
+		NodeMaker p = this.relation.nodeMaker(TripleRelation.PREDICATE_NODE_MAKER);
+		NodeMaker o = this.relation.nodeMaker(TripleRelation.OBJECT_NODE_MAKER);
+		Set projections = new HashSet();
+		projections.addAll(s.projectionSpecs());
+		projections.addAll(p.projectionSpecs());
+		projections.addAll(o.projectionSpecs());
 		return new TripleRelation(
 				new RelationImpl(this.relation.baseRelation().database(),
 					this.relation.baseRelation().aliases(),
 					this.relation.baseRelation().condition(),
-					requiredJoins).renameColumns(renamer),
-				this.relation.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER).renameColumns(renamer, MutableRelation.DUMMY),
-				this.relation.nodeMaker(TripleRelation.PREDICATE_NODE_MAKER).renameColumns(renamer, MutableRelation.DUMMY),
-				this.relation.nodeMaker(TripleRelation.OBJECT_NODE_MAKER).renameColumns(renamer, MutableRelation.DUMMY));
+					requiredJoins, projections,
+					this.relation.baseRelation().isUnique()).renameColumns(renamer),
+				s.renameAttributes(renamer, MutableRelation.DUMMY),
+				p.renameAttributes(renamer, MutableRelation.DUMMY),
+				o.renameAttributes(renamer, MutableRelation.DUMMY));
 	}
 
 	private boolean isRemovableJoin(Join join) {

@@ -3,8 +3,10 @@ package de.fuberlin.wiwiss.d2rq.map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
@@ -15,6 +17,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
@@ -35,7 +38,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.9 2008/04/24 17:48:52 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.10 2008/04/25 15:26:20 cyganiak Exp $
  */
 public abstract class ResourceMap extends MapObject {
 
@@ -128,6 +131,16 @@ public abstract class ResourceMap extends MapObject {
 	public void setContainsDuplicates(boolean b) {
 		this.containsDuplicates = b;
 	}
+
+	private Collection aliases() {
+		Set parsedAliases = new HashSet();
+		Iterator it = aliases.iterator();
+		while (it.hasNext()) {
+			String alias = (String) it.next();
+			parsedAliases.add(SQL.parseAlias(alias));
+		}
+		return parsedAliases;
+	}
 	
 	public RelationBuilder relationBuilder() {
 		RelationBuilder result = new RelationBuilder();
@@ -141,10 +154,11 @@ public abstract class ResourceMap extends MapObject {
 			String condition = (String) it.next();
 			result.addCondition(condition);
 		}
-		it = this.aliases.iterator();
+		result.addAliases(aliases());
+		it = nodeMaker().projectionSpecs().iterator();
 		while (it.hasNext()) {
-			String alias = (String) it.next();
-			result.addAlias(SQL.parseAlias(alias));
+			ProjectionSpec projection = (ProjectionSpec) it.next();
+			result.addProjection(projection);
 		}
 		return result;
 	}
@@ -173,11 +187,11 @@ public abstract class ResourceMap extends MapObject {
 		if (this.refersToClassMap == null) {
 			return buildNodeMaker(wrapValueSource(buildValueSourceBase()), !this.containsDuplicates);
 		}
-		return this.refersToClassMap.buildAliasedNodeMaker(relationBuilder().aliases(), !this.containsDuplicates);
+		return this.refersToClassMap.buildAliasedNodeMaker(new AliasMap(aliases()), !this.containsDuplicates);
 	}
 
 	public NodeMaker buildAliasedNodeMaker(AliasMap aliases, boolean unique) {
-		ValueMaker values = wrapValueSource(buildValueSourceBase()).replaceColumns(aliases);
+		ValueMaker values = wrapValueSource(buildValueSourceBase()).renameAttributes(aliases);
 		return buildNodeMaker(values, unique);
 	}
 	

@@ -1,6 +1,9 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -18,8 +21,12 @@ public class TripleRelationTest extends TestCase {
 		RelationName original = new RelationName(null, "original");
 		RelationName alias = new RelationName(null, "alias");
 		AliasMap aliases = AliasMap.create1(original, alias);
+		Set projections = new HashSet(Arrays.asList(new Attribute[]{
+				new Attribute(original, "id"), 
+				new Attribute(alias, "value")}));
 		Relation rel = new RelationImpl(
-				null, aliases, Expression.TRUE, Collections.EMPTY_SET);
+				null, aliases, Expression.TRUE, 
+				Collections.EMPTY_SET, projections, false);
 		TripleRelation t = new TripleRelation(rel, 
 				new TypedNodeMaker(TypedNodeMaker.URI, new Pattern("http://example.org/original/@@original.id@@"), true),
 				new FixedNodeMaker(Node.createURI("http://example.org/property"), false),

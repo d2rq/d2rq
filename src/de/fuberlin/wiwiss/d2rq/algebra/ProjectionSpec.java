@@ -10,11 +10,13 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * a column name or an expression.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ProjectionSpec.java,v 1.1 2008/04/24 17:48:52 cyganiak Exp $
+ * @version $Id: ProjectionSpec.java,v 1.2 2008/04/25 15:25:13 cyganiak Exp $
  */
 public interface ProjectionSpec {
 
 	public Set requiredAttributes();
+	
+	public ProjectionSpec renameAttributes(ColumnRenamer renamer);
 	
 	public Expression toExpression();
 	

@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * column.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.6 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: Column.java,v 1.7 2008/04/25 15:26:58 cyganiak Exp $
  */
 public class Column implements ValueMaker {
 	private Attribute attribute;
@@ -46,7 +46,7 @@ public class Column implements ValueMaker {
 		return this.attributeAsSet;
 	}
 
-	public ValueMaker replaceColumns(ColumnRenamer renamer) {
+	public ValueMaker renameAttributes(ColumnRenamer renamer) {
 		return new Column(renamer.applyTo(this.attribute));
 	}
 	

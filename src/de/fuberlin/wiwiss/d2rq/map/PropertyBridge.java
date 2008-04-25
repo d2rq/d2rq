@@ -12,6 +12,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
@@ -118,11 +119,10 @@ public class PropertyBridge extends ResourceMap {
 		Iterator it = this.properties.iterator();
 		while (it.hasNext()) {
 			Property property = (Property) it.next();
-			results.add(new TripleRelation(
-					buildRelation(),
-					this.belongsToClassMap.nodeMaker(),
-					new FixedNodeMaker(property.asNode(), false),
-					nodeMaker()));
+			NodeMaker s = this.belongsToClassMap.nodeMaker();
+			NodeMaker p = new FixedNodeMaker(property.asNode(), false);
+			NodeMaker o = nodeMaker();
+			results.add(new TripleRelation(buildRelation(), s, p, o));
 		}
 		return results;
 	}

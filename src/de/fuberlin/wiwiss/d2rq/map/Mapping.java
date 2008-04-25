@@ -14,9 +14,8 @@ import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * A D2RQ mapping. Consists of {@link ClassMap}s,
@@ -25,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.12 2008/04/25 11:25:05 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.13 2008/04/25 15:26:20 cyganiak Exp $
  */
 public class Mapping {
 	private final Model model = ModelFactory.createDefaultModel();
@@ -137,23 +136,15 @@ public class Mapping {
 	}
 
 	private class AttributeTypeValidator {
-		private final TripleRelation relation;
+		private final Relation relation;
 		AttributeTypeValidator(TripleRelation relation) {
-			this.relation = relation;
+			this.relation = relation.baseRelation();
 		}
 		void validate() {
-			ConnectedDB db = relation.baseRelation().database();
-			Iterator it = relation.projectionSpecs().iterator();
-			while (it.hasNext()) {
-				validateAttributes(((ProjectionSpec) it.next()).requiredAttributes(), db);
-			}
-			validateAttributes(relation.baseRelation().allKnownAttributes(), db);
-		}
-		private void validateAttributes(Collection attributes, ConnectedDB db) {
-			Iterator it = attributes.iterator();
+			Iterator it = relation.allKnownAttributes().iterator();
 			while (it.hasNext()) {
 				Attribute attribute = (Attribute) it.next();
-				db.columnType(relation.baseRelation().aliases().originalOf(attribute));
+				relation.database().columnType(relation.aliases().originalOf(attribute));
 			}
 		}
 	}

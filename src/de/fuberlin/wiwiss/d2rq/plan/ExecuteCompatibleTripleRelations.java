@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -15,32 +16,30 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExecuteCompatibleTripleRelations.java,v 1.1 2008/04/25 11:25:05 cyganiak Exp $
+ * @version $Id: ExecuteCompatibleTripleRelations.java,v 1.2 2008/04/25 15:26:58 cyganiak Exp $
  */
 public class ExecuteCompatibleTripleRelations implements ExecutionPlanElement, TripleMaker {
 
 	/**
-	 * Checks if two {@link TripleRelation}s can be combined into
+	 * Checks if two {@link Relation}s can be combined into
 	 * a single SQL statement. Relations can be combined iff
 	 * they access the same database and they contain exactly the same
 	 * joins and WHERE clauses. If they both contain no joins, they
 	 * must contain only columns from the same table.
 	 * 
-	 * TODO This should be done via Relation.equals?
-	 * 
 	 * @return <tt>true</tt> if both arguments are combinable
 	 */
-	public static boolean areCompatible(TripleRelation first, TripleRelation second) {
-		if (!first.baseRelation().database().equals(second.baseRelation().database())) {
+	public static boolean areCompatible(Relation first, Relation second) {
+		if (!first.database().equals(second.database())) {
 			return false;
 		}
 		if (!first.isUnique() || !second.isUnique()) {
 			return false;
 		}
-		if (!first.baseRelation().joinConditions().equals(second.baseRelation().joinConditions())) {
+		if (!first.joinConditions().equals(second.joinConditions())) {
 			return false;
 		}
-		if (!first.baseRelation().condition().equals(second.baseRelation().condition())) {
+		if (!first.condition().equals(second.condition())) {
 			return false;
 		}
 		Set firstTables = first.tables();
@@ -51,8 +50,8 @@ public class ExecuteCompatibleTripleRelations implements ExecutionPlanElement, T
 		Iterator it = firstTables.iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
-			if (!first.baseRelation().aliases().originalOf(tableName).equals(
-					second.baseRelation().aliases().originalOf(tableName))) {
+			if (!first.aliases().originalOf(tableName).equals(
+					second.aliases().originalOf(tableName))) {
 				return false;
 			}
 		}
@@ -61,24 +60,22 @@ public class ExecuteCompatibleTripleRelations implements ExecutionPlanElement, T
 
 	private Relation baseRelation;
 	private List tripleMakers;
-	private Set projectionSpecs = new HashSet();
 	
 	public ExecuteCompatibleTripleRelations(List baseRelations) {
-		this.baseRelation = ((TripleRelation) baseRelations.get(0)).baseRelation();
 		this.tripleMakers = baseRelations;
+		Relation base = ((TripleRelation) baseRelations.get(0)).baseRelation();
+		Set projections = new HashSet();
 		Iterator it = baseRelations.iterator();
 		while (it.hasNext()) {
-			TripleRelation relation = (TripleRelation) it.next();
-			this.projectionSpecs.addAll(relation.projectionSpecs());
+			TripleRelation bridge = (TripleRelation) it.next();
+			projections.addAll(bridge.baseRelation().projections());
 		}
+		this.baseRelation = new RelationImpl(base.database(), base.aliases(),
+				base.condition(), base.joinConditions(), projections, base.isUnique());
 	}
 
-	public Relation baseRelation() {
+	public Relation relation() {
 		return this.baseRelation;
-	}
-	
-	public Set projectionSpecs() {
-		return this.projectionSpecs;
 	}
 	
 	public Collection makeTriples(ResultRow row) {

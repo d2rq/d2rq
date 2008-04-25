@@ -12,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * Dummy implementation of {@link ValueMaker}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DummyValueSource.java,v 1.3 2008/04/24 17:47:52 cyganiak Exp $
+ * @version $Id: DummyValueSource.java,v 1.4 2008/04/25 15:21:28 cyganiak Exp $
  */
 public class DummyValueSource implements ValueMaker {
 	private String returnValue = null;
@@ -50,7 +50,7 @@ public class DummyValueSource implements ValueMaker {
 		return this.returnValue;
 	}
 	
-	public ValueMaker replaceColumns(ColumnRenamer renamer) {
+	public ValueMaker renameAttributes(ColumnRenamer renamer) {
 		return this;
 	}
 }

@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.9 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.10 2008/04/25 15:26:58 cyganiak Exp $
  */
 public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";
@@ -145,7 +145,7 @@ public class Pattern implements ValueMaker {
 				&& this.literalParts.equals(p.literalParts);
 	}
 	
-	public ValueMaker replaceColumns(ColumnRenamer renames) {
+	public ValueMaker renameAttributes(ColumnRenamer renames) {
 		int index = 0;
 		StringBuffer newPattern = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {

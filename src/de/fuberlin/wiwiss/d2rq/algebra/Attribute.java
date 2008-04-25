@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO: Should track its SQL datatype code
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Attribute.java,v 1.7 2008/04/24 17:48:52 cyganiak Exp $
+ * @version $Id: Attribute.java,v 1.8 2008/04/25 15:25:13 cyganiak Exp $
  */
 public class Attribute implements Comparable, ProjectionSpec {
 	private String attributeName;
@@ -90,6 +90,10 @@ public class Attribute implements Comparable, ProjectionSpec {
 	
 	public Expression selectValue(String value) {
 		return Equality.createAttributeValue(this, value);
+	}
+	
+	public ProjectionSpec renameAttributes(ColumnRenamer renamer) {
+		return renamer.applyTo(this);
 	}
 	
 	public Expression toExpression() {

@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeID.java,v 1.7 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: BlankNodeID.java,v 1.8 2008/04/25 15:26:58 cyganiak Exp $
  */
 public class BlankNodeID implements ValueMaker {
 	private final static String DELIMITER = "@@";
@@ -95,7 +95,7 @@ public class BlankNodeID implements ValueMaker {
         return result.toString();
 	}
 	
-	public ValueMaker replaceColumns(ColumnRenamer renamer) {
+	public ValueMaker renameAttributes(ColumnRenamer renamer) {
 		List replacedAttributes = new ArrayList();
 		Iterator it = this.attributes.iterator();
 		while (it.hasNext()) {

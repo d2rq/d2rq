@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * 		underlying Relation
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeMaker.java,v 1.4 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: NodeMaker.java,v 1.5 2008/04/25 15:26:20 cyganiak Exp $
  */
 public interface NodeMaker {
 
@@ -27,7 +27,7 @@ public interface NodeMaker {
 		public void describeSelf(NodeSetFilter c) { c.limitToEmptySet(); }
 		public Set projectionSpecs() { return Collections.EMPTY_SET; }
 		public NodeMaker selectNode(Node node, MutableRelation relation) { return this; }
-		public NodeMaker renameColumns(ColumnRenamer renamer, MutableRelation relation) { return this; }
+		public NodeMaker renameAttributes(ColumnRenamer renamer, MutableRelation relation) { return this; }
 	};
 	
 	Set projectionSpecs();
@@ -40,5 +40,5 @@ public interface NodeMaker {
 
 	NodeMaker selectNode(Node node, MutableRelation relation);
 
-	NodeMaker renameColumns(ColumnRenamer renamer, MutableRelation relation);
+	NodeMaker renameAttributes(ColumnRenamer renamer, MutableRelation relation);
 }

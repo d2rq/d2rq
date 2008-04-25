@@ -42,7 +42,7 @@ public class FixedNodeMaker implements NodeMaker {
 		return NodeMaker.EMPTY;
 	}
 	
-	public NodeMaker renameColumns(ColumnRenamer renamer, MutableRelation relation) {
+	public NodeMaker renameAttributes(ColumnRenamer renamer, MutableRelation relation) {
 		relation.renameColumns(renamer);
 		return new FixedNodeMaker(node, this.isUnique);
 	}

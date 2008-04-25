@@ -90,10 +90,10 @@ public class TypedNodeMaker implements NodeMaker {
 		return new FixedNodeMaker(node, isUnique());
 	}
 	
-	public NodeMaker renameColumns(ColumnRenamer renamer, MutableRelation relation) {
+	public NodeMaker renameAttributes(ColumnRenamer renamer, MutableRelation relation) {
 		relation.renameColumns(renamer);
 		return new TypedNodeMaker(this.nodeType, 
-				this.valueMaker.replaceColumns(renamer), this.isUnique);
+				this.valueMaker.renameAttributes(renamer), this.isUnique);
 	}
 
 	public String toString() {

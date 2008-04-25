@@ -12,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueDecorator.java,v 1.5 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: ValueDecorator.java,v 1.6 2008/04/25 15:26:58 cyganiak Exp $
  */
 public class ValueDecorator implements ValueMaker {
 	public static ValueConstraint maxLengthConstraint(final int maxLength) {
@@ -90,8 +90,8 @@ public class ValueDecorator implements ValueMaker {
 		return this.base.projectionSpecs();
 	}
 	
-	public ValueMaker replaceColumns(ColumnRenamer renamer) {
-		return new ValueDecorator(this.base.replaceColumns(renamer), this.constraints, this.translator);
+	public ValueMaker renameAttributes(ColumnRenamer renamer) {
+		return new ValueDecorator(this.base.renameAttributes(renamer), this.constraints, this.translator);
 	}
 	
 	public interface ValueConstraint {

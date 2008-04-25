@@ -23,12 +23,12 @@ import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
  *
  * @author jg
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FastpathEngine.java,v 1.5 2008/04/25 11:25:05 cyganiak Exp $
+ * @version $Id: FastpathEngine.java,v 1.6 2008/04/25 15:25:26 cyganiak Exp $
  */
 public class FastpathEngine {
 	private final Pipe input;
 	private final Pipe output;
-	private final Collection rdfRelations;
+	private final Collection tripleRelations;
 	private final int tripleCount;
 	private final StageInfo stageInfo;
 	private boolean cancel = false;
@@ -38,7 +38,7 @@ public class FastpathEngine {
 			ExpressionSet constraints, Triple[] triples) {
 		this.input = input;
 		this.output = output;
-		this.rdfRelations = rdfRelations;
+		this.tripleRelations = rdfRelations;
 		this.stageInfo = new StageInfo(map, constraints, triples);
 		this.tripleCount = triples.length;
 	}
@@ -95,7 +95,7 @@ public class FastpathEngine {
 
 	private List findAndPrefixCandidates(Triple triple, int prefix) {
 		List results = new ArrayList();
-		Iterator it = this.rdfRelations.iterator();
+		Iterator it = this.tripleRelations.iterator();
 		while (it.hasNext()) {
 			TripleRelation bridge = (TripleRelation) it.next();
 			TripleRelation candidate = bridge.selectTriple(triple);

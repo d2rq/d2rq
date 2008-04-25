@@ -6,17 +6,22 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 public class RelationImpl extends Relation {
-	private ConnectedDB database;
-	private AliasMap aliases;
-	private Expression condition;
-	private Set joinConditions;
+	private final ConnectedDB database;
+	private final AliasMap aliases;
+	private final Expression condition;
+	private final Set joinConditions;
+	private final Set projections;
+	private final boolean isUnique;
 	
 	public RelationImpl(ConnectedDB database, AliasMap aliases,
-			Expression condition, Set joinConditions) {
+			Expression condition, Set joinConditions, Set projections,
+			boolean isUnique) {
 		this.database = database;
 		this.aliases = aliases;
 		this.condition = condition;
 		this.joinConditions = joinConditions;
+		this.projections = projections;
+		this.isUnique = isUnique;
 	}
 
 	public ConnectedDB database() {
@@ -35,6 +40,14 @@ public class RelationImpl extends Relation {
 		return this.joinConditions;
 	}
 
+	public Set projections() {
+		return projections;
+	}
+
+	public boolean isUnique() {
+		return isUnique;
+	}
+	
 	public Relation select(Expression selectCondition) {
 		if (selectCondition.isTrue()) {
 			return this;
@@ -42,12 +55,13 @@ public class RelationImpl extends Relation {
 		if (selectCondition.isFalse()) {
 			return Relation.EMPTY;
 		}
-		return new RelationImpl(this.database, this.aliases, this.condition.and(selectCondition),
-				this.joinConditions);
+		return new RelationImpl(database, aliases, condition.and(selectCondition),
+				joinConditions, projections, isUnique);
 	}
 	
 	public Relation renameColumns(ColumnRenamer renames) {
-		return new RelationImpl(this.database, renames.applyTo(this.aliases),
-				renames.applyTo(this.condition), renames.applyToJoinSet(this.joinConditions));
+		return new RelationImpl(database, renames.applyTo(aliases),
+				renames.applyTo(condition), renames.applyToJoinSet(joinConditions),
+				renames.applyToProjectionSet(projections), isUnique);
 	}
 }

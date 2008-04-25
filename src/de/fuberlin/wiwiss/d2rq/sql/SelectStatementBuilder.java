@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NullIterator;
@@ -28,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.23 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.24 2008/04/25 15:26:58 cyganiak Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -54,6 +53,10 @@ public class SelectStatementBuilder {
 			addJoin(join);
 		}
 		addCondition(relation.condition());
+		it = relation.projections().iterator();
+		while (it.hasNext()) {
+			addSelectSpec((ProjectionSpec) it.next());
+		}
 	}
 	
 	public ConnectedDB getDatabase() {
@@ -141,7 +144,7 @@ public class SelectStatementBuilder {
 	 * Adds a {@link ProjectionSpec} to the SELECT part of the query.
 	 * @param projection
 	 */
-	public void addSelectSpec(ProjectionSpec projection) {
+	private void addSelectSpec(ProjectionSpec projection) {
 		if (this.selectSpecs.contains(projection)) {
 			return;
 		}
@@ -151,17 +154,6 @@ public class SelectStatementBuilder {
 			this.mentionedTables.add(attribute.relationName());
 		}
 		this.selectSpecs.add(projection);
-	}
-
-    /**
-     * Adds a list of {@link ProjectionSpecs}s to the SELECT part of the query
-     * @param projections
-     */
-	public void addSelectSpecs(Set projections) {
-		Iterator it = projections.iterator();
-		while (it.hasNext()) {
-			addSelectSpec((ProjectionSpec) it.next());
-		}
 	}
 
 	/**

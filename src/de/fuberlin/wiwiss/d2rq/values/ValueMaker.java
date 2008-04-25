@@ -31,7 +31,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * of a set of RDF nodes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueMaker.java,v 1.8 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: ValueMaker.java,v 1.9 2008/04/25 15:26:58 cyganiak Exp $
  */
 public interface ValueMaker {
     
@@ -53,5 +53,5 @@ public interface ValueMaker {
 	
 	void describeSelf(NodeSetFilter c);
 
-	ValueMaker replaceColumns(ColumnRenamer renamer);
+	ValueMaker renameAttributes(ColumnRenamer renamer);
 }

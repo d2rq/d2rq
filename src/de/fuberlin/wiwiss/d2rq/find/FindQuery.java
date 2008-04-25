@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
@@ -14,11 +13,11 @@ import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.find.URIMakerRule.URIMakerRuleChecker;
+import de.fuberlin.wiwiss.d2rq.plan.ExecuteCompatibleTripleRelations;
 import de.fuberlin.wiwiss.d2rq.plan.ExecuteSequence;
 import de.fuberlin.wiwiss.d2rq.plan.ExecuteTripleRelation;
 import de.fuberlin.wiwiss.d2rq.plan.ExecutionPlanElement;
 import de.fuberlin.wiwiss.d2rq.plan.ExecutionPlanVisitor;
-import de.fuberlin.wiwiss.d2rq.plan.ExecuteCompatibleTripleRelations;
 import de.fuberlin.wiwiss.d2rq.sql.ApplyTripleMakerIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
@@ -30,7 +29,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  * SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.12 2008/04/25 11:25:06 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.13 2008/04/25 15:26:21 cyganiak Exp $
  */
 public class FindQuery {
 	private List compatibleRelations = new ArrayList();
@@ -58,7 +57,9 @@ public class FindQuery {
 		Iterator it = this.compatibleRelations.iterator();
 		while (it.hasNext()) {
 			List queries = (List) it.next();
-			if (ExecuteCompatibleTripleRelations.areCompatible((TripleRelation) queries.get(0), relation)) {
+			if (ExecuteCompatibleTripleRelations.areCompatible(
+					((TripleRelation) queries.get(0)).baseRelation(), 
+					relation.baseRelation())) {
 				queries.add(relation);
 				return;
 			}
@@ -98,11 +99,10 @@ public class FindQuery {
 		}
 		public void visit(ExecuteTripleRelation planElement) {
 			TripleRelation relation = planElement.getTripleRelation();
-			chain(relation.baseRelation(), relation.projectionSpecs(),
-					relation.isUnique(), relation);
+			chain(relation.baseRelation(), relation);
 		}
 		public void visit(ExecuteCompatibleTripleRelations union) {
-			chain(union.baseRelation(), union.projectionSpecs(), true, union);
+			chain(union.relation(), union);
 		}
 		public void visit(ExecuteSequence sequence) {
 			Iterator it = sequence.elements().iterator();
@@ -114,11 +114,9 @@ public class FindQuery {
 		public void visitEmptyPlanElement() {
 			// Do nothing
 		}
-		private void chain(Relation relation, Set projections, boolean isUnique, 
-				TripleMaker tripleMaker) {
+		private void chain(Relation relation, TripleMaker tripleMaker) {
 			SelectStatementBuilder sql = new SelectStatementBuilder(relation.database());
-			sql.setEliminateDuplicates(!isUnique);
-			sql.addSelectSpecs(projections);
+			sql.setEliminateDuplicates(!relation.isUnique());
 			sql.addRelation(relation);
 			iterator = iterator.andThen(
 					new ApplyTripleMakerIterator(sql.execute(), tripleMaker));

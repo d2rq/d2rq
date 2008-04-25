@@ -13,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  * Something that can rename columns in various objects.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamer.java,v 1.4 2007/10/22 10:21:16 cyganiak Exp $
+ * @version $Id: ColumnRenamer.java,v 1.5 2008/04/25 15:25:13 cyganiak Exp $
  */
 public abstract class ColumnRenamer {
 	
@@ -78,5 +78,19 @@ public abstract class ColumnRenamer {
 		return result;
 	}
 
+	public ProjectionSpec applyTo(ProjectionSpec original) {
+		return original.renameAttributes(this);
+	}
+	
+	public Set applyToProjectionSet(Set projections) {
+		Set result = new HashSet();
+		Iterator it = projections.iterator();
+		while (it.hasNext()) {
+			ProjectionSpec projection = (ProjectionSpec) it.next();
+			result.add(applyTo(projection));
+		}
+		return result;
+	}
+	
 	public abstract AliasMap applyTo(AliasMap aliases);
 }

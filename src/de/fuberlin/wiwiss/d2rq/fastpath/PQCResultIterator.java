@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * Iterator for PatternQueryCombiner results.
  * 
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.5 2008/04/25 11:25:05 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.6 2008/04/25 15:25:26 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
 	private final VariableBindings variableBindings;
@@ -88,7 +88,6 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 		sql.setEliminateDuplicates(db.allowDistinct());	
 		for (int i = 0; i < this.conjunction.length; i++) {
 			TripleRelation t = this.conjunction[i];
-			sql.addSelectSpecs(t.projectionSpecs());
 			sql.addRelation(t.baseRelation());
 		}
 		ch.addConstraintsToSQL(sql);
