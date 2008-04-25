@@ -1,6 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -8,8 +9,9 @@ import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -22,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeID.java,v 1.8 2008/04/25 15:26:58 cyganiak Exp $
+ * @version $Id: BlankNodeID.java,v 1.9 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class BlankNodeID implements ValueMaker {
 	private final static String DELIMITER = "@@";
@@ -50,25 +52,25 @@ public class BlankNodeID implements ValueMaker {
 		c.limitValuesToBlankNodeID(this);
 	}
 
-	public void selectValue(String value, MutableRelation relation) {
+	public Expression valueExpression(String value) {
 		if (value == null) {
-			relation.empty();
-			return;
+			return Expression.FALSE;
 		}
 		String[] parts = value.split(DELIMITER);
 		// Check if given bNode was created by this class map
 		if (parts.length != this.attributes.size() + 1 
 				|| !this.classMapID.equals(parts[0])) {
-			relation.empty();
-			return;		
+			return Expression.FALSE;		
 		}
 		Iterator it = this.attributes.iterator();
 		int i = 1;	// parts[0] is classMap identifier
+		Collection expressions = new ArrayList(attributes.size());
 		while (it.hasNext()) {
 			Attribute attribute = (Attribute) it.next();
-			relation.select(Equality.createAttributeValue(attribute, parts[i]));
+			expressions.add(Equality.createAttributeValue(attribute, parts[i]));
 			i++;
 		}
+		return Conjunction.create(expressions);
 	}
 
 	public Set projectionSpecs() {

@@ -11,8 +11,8 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
@@ -72,7 +72,7 @@ public class TypedNodeMaker implements NodeMaker {
 		return this.nodeType.makeNode(value);
 	}
 	
-	public NodeMaker selectNode(Node node, MutableRelation relation) {
+	public NodeMaker selectNode(Node node, RelationalOperators sideEffects) {
 		if (node.equals(Node.ANY) || node.isVariable()) {
 			return this;
 		}
@@ -83,15 +83,16 @@ public class TypedNodeMaker implements NodeMaker {
 		if (value == null) {
 			return NodeMaker.EMPTY;
 		}
-		valueMaker.selectValue(value, relation);
-		if (Relation.EMPTY.equals(relation.immutableSnapshot())) {
+		Expression expr = valueMaker.valueExpression(value);
+		if (expr.isFalse()) {
+			sideEffects.select(Expression.FALSE);
 			return NodeMaker.EMPTY;
 		}
+		sideEffects.select(expr);
 		return new FixedNodeMaker(node, isUnique());
 	}
 	
-	public NodeMaker renameAttributes(ColumnRenamer renamer, MutableRelation relation) {
-		relation.renameColumns(renamer);
+	public NodeMaker renameAttributes(ColumnRenamer renamer) {
 		return new TypedNodeMaker(this.nodeType, 
 				this.valueMaker.renameAttributes(renamer), this.isUnique);
 	}

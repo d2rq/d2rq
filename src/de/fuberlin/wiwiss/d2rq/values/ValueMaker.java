@@ -4,8 +4,8 @@ import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -31,11 +31,11 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * of a set of RDF nodes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueMaker.java,v 1.9 2008/04/25 15:26:58 cyganiak Exp $
+ * @version $Id: ValueMaker.java,v 1.10 2008/04/25 16:27:41 cyganiak Exp $
  */
 public interface ValueMaker {
     
-	void selectValue(String value, MutableRelation baseRelation);
+	Expression valueExpression(String value);
 
 	/**
 	 * Returns a set of all {@link ProjectionSpec}s containing data necessary

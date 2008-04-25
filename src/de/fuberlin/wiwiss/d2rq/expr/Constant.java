@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO Should have a SQL type code instead of the stupid column reference
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Constant.java,v 1.1 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: Constant.java,v 1.2 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class Constant extends Expression {
 	private final String value;
@@ -72,9 +72,11 @@ public class Constant extends Expression {
 	public boolean equals(Object other) {
 		if (!(other instanceof Constant)) return false;
 		Constant otherConstant = (Constant) other;
-		return value.equals(otherConstant.value) && 
-				((attributeForTrackingType == null && otherConstant.attributeForTrackingType == null)
-				|| attributeForTrackingType.equals(otherConstant.attributeForTrackingType));
+		if (!value.equals(otherConstant.value)) return false;
+		if (attributeForTrackingType == null) {
+			return otherConstant.attributeForTrackingType == null;
+		}
+		return attributeForTrackingType.equals(otherConstant.attributeForTrackingType);
 	}
 	
 	public int hashCode() {

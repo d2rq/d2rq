@@ -9,10 +9,9 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
+import de.fuberlin.wiwiss.d2rq.expr.Constant;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -23,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.8 2008/04/24 17:47:52 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.9 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "table", "col1");
@@ -358,24 +357,19 @@ public class PatternTest extends TestCase {
 		Collection expressions = new HashSet();
 		Iterator it = expectedValues.keySet().iterator();
 		while (it.hasNext()) {
-			String attribute = (String) it.next();
-			Equality.createExpressionValue(new AttributeExpr(
-					SQL.parseAttribute(attribute)), value);
+			String attributeName = (String) it.next();
+			String attributeValue = (String) expectedValues.get(attributeName);
+			Attribute attribute = SQL.parseAttribute(attributeName);
+			expressions.add(Equality.create(
+					new AttributeExpr(attribute), 
+					new Constant(attributeValue, attribute)));
 		}
 		Expression expr = Conjunction.create(expressions);
-		assertEquals(expr, getSelectCondition(pattern, value));
+		assertEquals(expr, pattern.valueExpression(value));
 	}
 
-	private Expression getSelectCondition(ValueMaker valueMaker, String value) {
-		MutableRelation checker = new MutableRelation(Relation.TRUE);
-		valueMaker.selectValue(value, checker);
-		return checker.immutableSnapshot().condition();
-	}
-	
 	private boolean matches(ValueMaker valueMaker, String value) {
-		MutableRelation checker = new MutableRelation(Relation.TRUE);
-		valueMaker.selectValue(value, checker);
-		return !checker.immutableSnapshot().equals(Relation.EMPTY);
+		return !valueMaker.valueExpression(value).isFalse();
 	}
 
 	private ResultRow row(String spec) {

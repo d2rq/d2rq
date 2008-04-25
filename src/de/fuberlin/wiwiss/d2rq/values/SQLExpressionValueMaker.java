@@ -5,7 +5,6 @@ import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.algebra.ExpressionProjectionSpec;
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
@@ -18,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * TODO Write unit tests
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLExpressionValueMaker.java,v 1.2 2008/04/25 15:26:58 cyganiak Exp $
+ * @version $Id: SQLExpressionValueMaker.java,v 1.3 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class SQLExpressionValueMaker implements ValueMaker {
 	private final Expression expression;
@@ -42,8 +41,8 @@ public class SQLExpressionValueMaker implements ValueMaker {
 		return row.get(projection);
 	}
 
-	public void selectValue(String value, MutableRelation relation) {
-		relation.select(Equality.createExpressionValue(expression, value));
+	public Expression valueExpression(String value) {
+		return Equality.createExpressionValue(expression, value);
 	}
 	
 	public ValueMaker renameAttributes(ColumnRenamer renamer) {

@@ -26,8 +26,8 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -47,7 +47,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.46 2008/04/25 11:25:06 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.47 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -201,7 +201,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			Entry entry = (Entry) it.next();
 			String classMapName = (String) entry.getKey();
 			NodeMaker nodeMaker = (NodeMaker) entry.getValue();
-			if (!nodeMaker.selectNode(resource, MutableRelation.DUMMY).equals(NodeMaker.EMPTY)) {
+			if (!nodeMaker.selectNode(resource, RelationalOperators.DUMMY).equals(NodeMaker.EMPTY)) {
 				results.add(classMapName);
 			}
 		}

@@ -3,12 +3,9 @@ package de.fuberlin.wiwiss.d2rq.values;
 import java.util.Arrays;
 import java.util.Collections;
 
-import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
-import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.expr.Expression;
-
 import junit.framework.TestCase;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
 public class ValueMakerTest extends TestCase {
 	private final static Attribute foo_col1 = new Attribute(null, "foo", "col1");
@@ -88,8 +85,6 @@ public class ValueMakerTest extends TestCase {
 	}
 	
 	private boolean matches(ValueMaker valueMaker, String value) {
-		MutableRelation checker = new MutableRelation(Relation.TRUE);
-		valueMaker.selectValue(value, checker);
-		return !checker.immutableSnapshot().equals(Relation.EMPTY);
+		return !valueMaker.valueExpression(value).isFalse();
 	}
 }

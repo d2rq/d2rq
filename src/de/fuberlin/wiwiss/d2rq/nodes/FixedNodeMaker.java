@@ -6,7 +6,8 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -35,15 +36,15 @@ public class FixedNodeMaker implements NodeMaker {
 		return Collections.EMPTY_SET;
 	}
 
-	public NodeMaker selectNode(Node n, MutableRelation relation) {
+	public NodeMaker selectNode(Node n, RelationalOperators sideEffects) {
 		if (n.equals(this.node) || n.equals(Node.ANY) || n.isVariable()) {
 			return this;
 		}
+		sideEffects.select(Expression.FALSE);
 		return NodeMaker.EMPTY;
 	}
 	
-	public NodeMaker renameAttributes(ColumnRenamer renamer, MutableRelation relation) {
-		relation.renameColumns(renamer);
+	public NodeMaker renameAttributes(ColumnRenamer renamer) {
 		return new FixedNodeMaker(node, this.isUnique);
 	}
 	

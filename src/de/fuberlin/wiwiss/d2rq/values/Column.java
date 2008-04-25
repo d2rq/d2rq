@@ -5,8 +5,8 @@ import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * column.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.7 2008/04/25 15:26:58 cyganiak Exp $
+ * @version $Id: Column.java,v 1.8 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class Column implements ValueMaker {
 	private Attribute attribute;
@@ -34,12 +34,11 @@ public class Column implements ValueMaker {
 		c.limitValuesToAttribute(this.attribute);
 	}
 
-	public void selectValue(String value, MutableRelation relation) {
+	public Expression valueExpression(String value) {
 		if (value == null) {
-			relation.empty();
-			return;
+			return Expression.FALSE;
 		}
-		relation.select(Equality.createAttributeValue(attribute, value));
+		return Equality.createAttributeValue(attribute, value);
 	}
 
 	public Set projectionSpecs() {

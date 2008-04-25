@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -13,8 +14,9 @@ import java.util.regex.Matcher;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
@@ -24,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.10 2008/04/25 15:26:58 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.11 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";
@@ -72,26 +74,25 @@ public class Pattern implements ValueMaker {
 		c.limitValuesToPattern(this);
 	}
 
-	public void selectValue(String value, MutableRelation relation) {
+	public Expression valueExpression(String value) {
 		if (value == null) {
-			relation.empty();
-			return;
+			return Expression.FALSE;
 		}
 		Matcher match = this.regex.matcher(value);
 		if (!match.matches()) {
-			relation.empty();
-			return;
+			return Expression.FALSE;
 		}
+		Collection expressions = new ArrayList(columns.size());
 		for (int i = 0; i < this.columns.size(); i++) {
 			Attribute attribute = (Attribute) this.columns.get(i);
 			ColumnFunction function = (ColumnFunction) this.columnFunctions.get(i);
 			String attributeValue = function.decode(match.group(i + 1));
 			if (attributeValue == null) {
-				relation.empty();
-				return;
+				return Expression.FALSE;
 			}
-			relation.select(Equality.createAttributeValue(attribute, attributeValue));
+			expressions.add(Equality.createAttributeValue(attribute, attributeValue));
 		}
+		return Conjunction.create(expressions);
 	}
 
 	public Set projectionSpecs() {

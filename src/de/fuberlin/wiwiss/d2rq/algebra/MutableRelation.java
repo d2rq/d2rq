@@ -10,15 +10,9 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  * The MutableRelation solves this problem.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MutableRelation.java,v 1.4 2008/04/24 17:48:52 cyganiak Exp $
+ * @version $Id: MutableRelation.java,v 1.5 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class MutableRelation implements RelationalOperators {
-
-	public final static MutableRelation DUMMY = new MutableRelation(null) {
-		public Relation renameColumns(ColumnRenamer renamer) { return null; }
-		public Relation select(Expression condition) { return null; }
-	};
-	
 	private Relation relation;
 	
 	public MutableRelation(Relation initialState) {

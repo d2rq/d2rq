@@ -6,13 +6,13 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
-import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueDecorator.java,v 1.6 2008/04/25 15:26:58 cyganiak Exp $
+ * @version $Id: ValueDecorator.java,v 1.7 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class ValueDecorator implements ValueMaker {
 	public static ValueConstraint maxLengthConstraint(final int maxLength) {
@@ -69,21 +69,19 @@ public class ValueDecorator implements ValueMaker {
 		this.base.describeSelf(c);
 	}
 
-	public void selectValue(String value, MutableRelation relation) {
+	public Expression valueExpression(String value) {
 		Iterator it = this.constraints.iterator();
 		while (it.hasNext()) {
 			ValueConstraint constraint = (ValueConstraint) it.next();
 			if (!constraint.matches(value)) {
-				relation.empty();
-				return;
+				return Expression.FALSE;
 			}
 		}
 		String dbValue = this.translator.toDBValue(value);
 		if (dbValue == null) {
-			relation.empty();
-			return;
+			return Expression.FALSE;
 		}
-		this.base.selectValue(dbValue, relation);
+		return base.valueExpression(dbValue);
 	}
 
 	public Set projectionSpecs() {

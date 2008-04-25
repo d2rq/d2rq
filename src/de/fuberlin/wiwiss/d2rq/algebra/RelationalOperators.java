@@ -5,6 +5,11 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
 public interface RelationalOperators {
 
+	public final static RelationalOperators DUMMY = new RelationalOperators() {
+		public Relation renameColumns(ColumnRenamer renamer) { return null; }
+		public Relation select(Expression condition) { return null; }
+	};
+
 	/**
 	 * <p>Applies the selection operator to this relation.
 	 * The new relation will contain only the tuples for which
