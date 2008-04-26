@@ -9,21 +9,21 @@
 	<classpathentry kind="lib" path="lib/sesame-1.2.4/openrdf-model.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/postgresql-8.2dev-503.jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/ojdbc14.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/xml-apis.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/xercesImpl.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/wstx-asl-3.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/stax-api-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/lucene-core-2.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/log4j-1.2.12.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/junit.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/json.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/jena.jar" sourcepath="/Jena-2.5.4/src"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/iri.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/icu4j_3_4.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/concurrent.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/commons-logging-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/arq.jar"/>
-	<classpathentry kind="lib" path="lib/jena-2.5.4/antlr-2.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.5-bin.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/wstx-asl-3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/stax-api-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/lucene-core-2.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/log4j-1.2.12.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/junit.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/json.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/jena.jar" sourcepath="/Jena-2.5.5/src"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/iri.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/icu4j_3_4.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/concurrent.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/arq.jar" sourcepath="/ARQ-2.2/src"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/antlr-2.7.5.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
