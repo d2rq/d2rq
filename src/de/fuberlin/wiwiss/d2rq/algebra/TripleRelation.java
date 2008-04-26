@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TripleRelation.java,v 1.6 2008/04/25 16:27:41 cyganiak Exp $
+ * @version $Id: TripleRelation.java,v 1.7 2008/04/26 22:16:07 cyganiak Exp $
  */
 public class TripleRelation implements TripleMaker {
 	public static final String SUBJECT_NODE_MAKER = "subject";
@@ -60,11 +60,9 @@ public class TripleRelation implements TripleMaker {
 	public TripleRelation withPrefix(int index) {
 		Collection newAliases = new ArrayList();
 		Iterator it = baseRelation().tables().iterator();
-		// TODO Move code to RelationName.withPrefix
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
-			newAliases.add(new Alias(tableName, new RelationName(null,
-							"T" + index + "_" + tableName.qualifiedName().replace('.', '_'))));
+			newAliases.add(new Alias(tableName, tableName.withPrefix(index)));
 		}
 		AliasMap renamer = new AliasMap(newAliases);
 		NodeMaker s = subjectMaker.renameAttributes(renamer);

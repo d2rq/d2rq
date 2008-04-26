@@ -9,7 +9,7 @@ import junit.framework.TestCase;
  * Unit test cases for {@link Attribute}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AttributeTest.java,v 1.5 2006/09/15 15:31:22 cyganiak Exp $
+ * @version $Id: AttributeTest.java,v 1.6 2008/04/26 22:16:08 cyganiak Exp $
  */
 public class AttributeTest extends TestCase {
 	private final static RelationName table1 = new RelationName(null, "table1");
@@ -191,5 +191,13 @@ public class AttributeTest extends TestCase {
 	public void testCompareSameRelationName() {
 		assertEquals(0, table1.compareTo(table1));
 		assertEquals(0, xTable1.compareTo(xTable1));
+	}
+	
+	public void testRelationNameWithPrefixNoSchema() {
+		assertEquals("T42_table1", table1.withPrefix(42).qualifiedName());
+	}
+	
+	public void testRelationNameWithPrefixWithSchema() {
+		assertEquals("T42_x_table1", xTable1.withPrefix(42).qualifiedName());
 	}
 }
