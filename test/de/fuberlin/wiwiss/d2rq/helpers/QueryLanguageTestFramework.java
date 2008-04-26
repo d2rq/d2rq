@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import junit.framework.TestCase;
 
 import com.hp.hpl.jena.query.Query;
@@ -30,7 +33,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: QueryLanguageTestFramework.java,v 1.4 2007/11/16 15:34:43 cyganiak Exp $
+ * @version $Id: QueryLanguageTestFramework.java,v 1.5 2008/04/26 21:27:09 cyganiak Exp $
  */
 public abstract class QueryLanguageTestFramework extends TestCase {
 	protected ModelD2RQ model;
@@ -61,16 +64,17 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	    verbatim = new boolean[] {false,true};
 	}
 	
-	protected static Logger bigStringInResultLogger=new Logger();
+	private final static String pckg = "de.fuberlin.wiwiss.d2rq.testing.";
+	protected static Logger bigStringInResultLogger = Logger.getLogger(pckg + "BigStringInResult");
 	// Loggers used for switching on/off output
-	protected Logger dumpLogger=new Logger();
-	protected Logger usingLogger=new Logger();
-	protected Logger testCaseSeparatorLogger=new Logger();
-	protected Logger performanceLogger=new Logger();
-	protected Logger rdqlLogger=new Logger();
-	protected Logger differentLogger=new Logger();
-	protected Logger differenceLogger=new Logger();
-	protected Logger sqlResultSetLogger=new Logger();
+	protected Logger dumpLogger = Logger.getLogger(pckg + "Dump");
+	protected Logger usingLogger = Logger.getLogger(pckg + "Using");
+	protected Logger testCaseSeparatorLogger = Logger.getLogger(pckg + "TestCaseSeparator");
+	protected Logger performanceLogger = Logger.getLogger(pckg + "Performance");
+	protected Logger rdqlLogger = Logger.getLogger(pckg + "RDQL");
+	protected Logger differentLogger = Logger.getLogger(pckg + "Different");
+	protected Logger differenceLogger = Logger.getLogger(pckg + "Difference");
+	protected Logger sqlResultSetLogger = Logger.getLogger(pckg + "SQLResultSet");
 	protected Logger oldSQLResultSetLogger;
 	protected Logger oldSQLResultSetSeparatorLogger;
 	
@@ -82,25 +86,25 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	protected void setUpShowPerformance() {
 	    nTimes=10;
 	    compareQueryHandlers=true;
-	    rdqlLogger.setDebug(true);
-		rdqlLogger.setDebug(true);
-		performanceLogger.setDebug(true);
+	    rdqlLogger.setLevel(Level.DEBUG);
+		rdqlLogger.setLevel(Level.DEBUG);
+		performanceLogger.setLevel(Level.DEBUG);
 	}
 	protected void setUpMixOutputs(boolean v) {
 	    compareQueryHandlers=v;
-	    usingLogger.setDebug(v);	    
-		testCaseSeparatorLogger.setDebug(v);
+	    usingLogger.setLevel(v ? Level.DEBUG : Level.INFO);	    
+		testCaseSeparatorLogger.setLevel(v ? Level.DEBUG : Level.INFO);
 	}
 	protected void setUpShowStatements() {
-	    rdqlLogger.setDebug(true);
-		sqlResultSetLogger.setDebug(true);	    
+	    rdqlLogger.setLevel(Level.DEBUG);
+		sqlResultSetLogger.setLevel(Level.DEBUG);	    
 	}
 	protected void setUpShowErrors() {
-		differentLogger.setDebug(true);
-		differenceLogger.setDebug(true);	    
+		differentLogger.setLevel(Level.DEBUG);
+		differenceLogger.setLevel(Level.DEBUG);	    
 	}
 	protected void setUpShowWarnings() {
-		bigStringInResultLogger.setDebug(true);	    
+		bigStringInResultLogger.setLevel(Level.DEBUG);	    
 	}
 	protected void setUpShowAll() {
 	    setUpMixOutputs(true);
@@ -135,18 +139,18 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 			super.runTest();
 			return;
 		}		
-		boolean oldRDQLLoggerState=rdqlLogger.debugEnabled();
-		boolean oldSqlResultSetLoggerState=sqlResultSetLogger.debugEnabled();
+		Level oldRDQLLoggerState=rdqlLogger.getLevel();
+		Level oldSqlResultSetLoggerState=sqlResultSetLogger.getLevel();
 		try {
 			for (int i=0; i<configs; i++) {
-			    rdqlLogger.setDebug(verbatim[i] && oldRDQLLoggerState);
-			    sqlResultSetLogger.setDebug(verbatim[i] && oldSqlResultSetLoggerState);
+			    rdqlLogger.setLevel(verbatim[i] ? oldRDQLLoggerState : Level.INFO);
+			    sqlResultSetLogger.setLevel(verbatim[i] ? oldSqlResultSetLoggerState: Level.INFO);
 			    usingLogger.debug("using " + handlerDescription[i] + " ...");
 			    startInst=BeanCounter.instance();
 			    for (int j=0; j< nTimes; j++) {
 			        if (j>0) {
-					    rdqlLogger.setDebug(false);
-					    sqlResultSetLogger.setDebug(false);
+					    rdqlLogger.setLevel(Level.INFO);
+					    sqlResultSetLogger.setLevel(Level.INFO);
 			        }
 			        super.runTest();
 			    }
@@ -178,8 +182,8 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 		} catch (Exception e) {
 			throw e; 
 		} finally {
-			rdqlLogger.setDebug(oldRDQLLoggerState);
-			sqlResultSetLogger.setDebug(oldSqlResultSetLoggerState);
+			rdqlLogger.setLevel(oldRDQLLoggerState);
+			sqlResultSetLogger.setLevel(oldSqlResultSetLoggerState);
 		}
 	}
 	
@@ -327,4 +331,4 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 			count++;
 		}
 	}
- }
+}
