@@ -185,6 +185,7 @@ ul.toc li li { font-weight: normal; }
       <li>5.2. <a href="#usingfind">Using Jena's Graph API</a></li>
       <li>5.3. <a href="#sparql">Using SPARQL</a></li>
       <li>5.4. <a href="#jena-assembler">The D2RQ Assembler</a></li>
+      <li>5.5. <a href="#unit-tests">Running the D2RQ unit tests</a></li>
     </ul>
   </li>
   <li>6. <a href="#usingSesame">Using D2RQ within Sesame</a>
@@ -554,6 +555,19 @@ Model m = Assembler.general.openModel(modelSpec);
 
 // Write it to System.out
 m.write(System.out);</pre>
+
+
+<h2 id="unit-tests">5.5. Running the D2RQ unit tests</h2>
+
+<p>Some of the D2RQ unit tests are using the ISWC example database from the <tt>/doc/example</tt> directory of the D2RQ distribution. To run the tests:</p>
+
+<ol>
+  <li>Set up a MySQL database and import the database dump from <tt>/doc/example/iswc-mysql.sql</tt>.</li>
+  <li>Change the JDBC database connection string, username and password in <tt>/doc/example/mapping-iswc.n3</tt>
+    to match your configuration.</li>
+  <li>Run the <tt>D2RQTestSuite</tt> class as a JUnit test.</li>
+</ol>
+
 
 <HR>
 <h1 id="usingSesame">6. Using D2RQ within Sesame</h1>
@@ -1458,7 +1472,7 @@ map:SeeAlsoStatement a d2rq:AdditionalProperty;
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.37 2008/04/26 21:54:10 cyganiak Exp $</p>
+<p>$Id: index.htm,v 1.38 2008/04/26 22:06:16 cyganiak Exp $</p>
 
 </BODY>
 </HTML>
