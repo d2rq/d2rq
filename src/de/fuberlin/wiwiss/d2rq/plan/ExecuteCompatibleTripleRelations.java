@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExecuteCompatibleTripleRelations.java,v 1.2 2008/04/25 15:26:58 cyganiak Exp $
+ * @version $Id: ExecuteCompatibleTripleRelations.java,v 1.3 2008/04/26 21:43:18 cyganiak Exp $
  */
 public class ExecuteCompatibleTripleRelations implements ExecutionPlanElement, TripleMaker {
 
@@ -31,9 +31,6 @@ public class ExecuteCompatibleTripleRelations implements ExecutionPlanElement, T
 	 */
 	public static boolean areCompatible(Relation first, Relation second) {
 		if (!first.database().equals(second.database())) {
-			return false;
-		}
-		if (!first.isUnique() || !second.isUnique()) {
 			return false;
 		}
 		if (!first.joinConditions().equals(second.joinConditions())) {
@@ -65,13 +62,15 @@ public class ExecuteCompatibleTripleRelations implements ExecutionPlanElement, T
 		this.tripleMakers = baseRelations;
 		Relation base = ((TripleRelation) baseRelations.get(0)).baseRelation();
 		Set projections = new HashSet();
+		boolean allUnique = true;
 		Iterator it = baseRelations.iterator();
 		while (it.hasNext()) {
 			TripleRelation bridge = (TripleRelation) it.next();
 			projections.addAll(bridge.baseRelation().projections());
+			allUnique = allUnique && bridge.baseRelation().isUnique();
 		}
 		this.baseRelation = new RelationImpl(base.database(), base.aliases(),
-				base.condition(), base.joinConditions(), projections, base.isUnique());
+				base.condition(), base.joinConditions(), projections, allUnique);
 	}
 
 	public Relation relation() {
