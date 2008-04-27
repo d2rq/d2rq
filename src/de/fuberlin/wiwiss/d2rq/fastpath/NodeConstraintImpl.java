@@ -26,8 +26,10 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * all constraining information that we know about the different node positions
  * from the {@link TripleRelation}s.
  * 
+ * TODO: Delete and replace with NodeSetFilterImpl
+ * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.7 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.8 2008/04/27 22:42:37 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeSetFilter {
     public static final int NotFixedNodeType = 0;
@@ -53,7 +55,8 @@ public class NodeConstraintImpl implements NodeSetFilter {
     /** set of columns that are equal with this node */
     private Set columns=new HashSet(); 
     /** all patterns to be matched against */
-    private List patternConstraints = new ArrayList(); 
+    private List patterns = new ArrayList();
+    
     // protected Map columnToEqualColumns=new HashMap(); // column -> set of equal columns (may be inferred by patterns)
     // protected Map columnToDataType=new HashMap(); // column -> Database.ColumnType (Integer)
     // protected Map patternToEqualPatterns=new HashMap(); // pattern 
@@ -74,24 +77,6 @@ public class NodeConstraintImpl implements NodeSetFilter {
     
     public boolean infoAdded() {
     	return this.infoAdded;
-    }
-    
-    public Node fixedNode() {
-    	return this.fixedNode;
-    }
-    
-    public Set patterns() {
-    	Set result = new HashSet();
-    	Iterator it = this.patternConstraints.iterator();
-    	while (it.hasNext()) {
-			PatternConstraint constraint = (PatternConstraint) it.next();
-			result.add(constraint.pattern());
-		}
-    	return result;
-    }
-    
-    public Set columns() {
-    	return this.columns;
     }
     
 	public void limitToLiterals(String language, RDFDatatype datatype) {
@@ -152,6 +137,12 @@ public class NodeConstraintImpl implements NodeSetFilter {
         possible = (nodeType == t);
     }
     
+    public void limitValues(String constant) {
+    	if (!possible)
+    		return;
+    	// TODO Handle limitValues(constant)
+    }
+    
     /** 
      * Constraints given on Nodes that are equal to Columns
      * can be directly translated to Column constraints.
@@ -161,7 +152,7 @@ public class NodeConstraintImpl implements NodeSetFilter {
     public void limitValuesToAttribute(Attribute c) {
         if (!possible)
             return;
-    	if (!this.patternConstraints.isEmpty()) {
+    	if (!this.patterns.isEmpty()) {
     		limitToEmptySet();
     	}
         columns.add(c);
@@ -179,41 +170,34 @@ public class NodeConstraintImpl implements NodeSetFilter {
     	if (!this.columns.isEmpty()) {
     		limitToEmptySet();
     	}
-        Iterator it = this.patternConstraints.iterator();
+        Iterator it = this.patterns.iterator();
         while (it.hasNext()) {
-            PatternConstraint constraint = (PatternConstraint) it.next();
-            constraint.match(p, p.attributes());
+            Pattern existingPattern = (Pattern) it.next();
+            matchPatterns(p, existingPattern);
         }
-        this.patternConstraints.add(new PatternConstraint(p, p.attributes()));
+        this.patterns.add(p);
     }
 
-    private class PatternConstraint {
-    	private Pattern pattern;
-    	private List columns;
-    	PatternConstraint(Pattern pattern, List columns) {
-    		this.pattern = pattern;
-    		this.columns = columns;
-    	}
-    	Pattern pattern() {
-    		return this.pattern;
-    	}
-    	void match(Pattern p, List otherColumns) {
-    		if (!this.pattern.isCompatibleWith(p)) {
-    			limitToEmptySet();
-    			return;
-    		}
-    		for (int i = 0; i < this.columns.size(); i++) {
-    			Attribute col1 = (Attribute) this.columns.get(i);
-    			Attribute col2 = (Attribute) otherColumns.get(i);
-    			conditions.add(Equality.createAttributeEquality(col1, col2));
-    		}
-    	}
+	void matchPatterns(Pattern p1, Pattern p2) {
+		if (!p1.isEquivalentTo(p2)) {
+			limitToEmptySet();
+			return;
+		}
+		for (int i = 0; i < p1.attributes().size(); i++) {
+			Attribute col1 = (Attribute) p1.attributes().get(i);
+			Attribute col2 = (Attribute) p2.attributes().get(i);
+			conditions.add(Equality.createAttributeEquality(col1, col2));
+		}
     }
 
     public void limitValuesToBlankNodeID(BlankNodeID id) {
     	// TODO Handle blank node IDs
     }
 
+    public void limitValuesToExpression(Expression expression) {
+    	// TODO Handle expressions
+    }
+    
     /** 
      * The collected constraints are created as SQL constraints.
      * @param sql the statment maker that gets the constraints. 

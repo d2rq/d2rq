@@ -20,7 +20,7 @@ public class AttributeNotNull extends Expression {
 		this.attribute = attribute;
 	}
 	
-	public Set columns() {
+	public Set attributes() {
 		return Collections.singleton(this.attribute);
 	}
 
@@ -32,7 +32,7 @@ public class AttributeNotNull extends Expression {
 		return false;
 	}
 
-	public Expression renameColumns(ColumnRenamer columnRenamer) {
+	public Expression renameAttributes(ColumnRenamer columnRenamer) {
 		return AttributeNotNull.create(columnRenamer.applyTo(this.attribute));
 	}
 

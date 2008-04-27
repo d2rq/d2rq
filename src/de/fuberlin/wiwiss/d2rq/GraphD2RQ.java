@@ -47,7 +47,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.47 2008/04/25 16:27:41 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.48 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
@@ -206,5 +206,9 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			}
 		}
     	return results;
+    }
+    
+    public Collection tripleRelations() {
+    	return mapping.compiledPropertyBridges();
     }
 }

@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.Set;
+
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
 
@@ -10,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  * The MutableRelation solves this problem.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MutableRelation.java,v 1.5 2008/04/25 16:27:41 cyganiak Exp $
+ * @version $Id: MutableRelation.java,v 1.6 2008/04/27 22:42:36 cyganiak Exp $
  */
 public class MutableRelation implements RelationalOperators {
 	private Relation relation;
@@ -36,5 +38,9 @@ public class MutableRelation implements RelationalOperators {
 			return empty();
 		}
 		return this.relation = this.relation.select(condition);
+	}
+	
+	public Relation project(Set projectionSpecs) {
+		return relation = relation.project(projectionSpecs);
 	}
 }

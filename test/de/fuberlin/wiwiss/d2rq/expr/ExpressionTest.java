@@ -10,7 +10,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExpressionTest.java,v 1.2 2008/04/24 17:47:52 cyganiak Exp $
+ * @version $Id: ExpressionTest.java,v 1.3 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class ExpressionTest extends TestCase {
 	private AliasMap aliases;
@@ -40,10 +40,10 @@ public class ExpressionTest extends TestCase {
 	
 	public void testConstant() {
 		Expression expr = new Constant("foo");
-		assertTrue(expr.columns().isEmpty());
+		assertTrue(expr.attributes().isEmpty());
 		assertFalse(expr.isFalse());
 		assertFalse(expr.isTrue());
-		assertEquals(expr, expr.renameColumns(aliases));
+		assertEquals(expr, expr.renameAttributes(aliases));
 	}
 	
 	public void testConstantEquals() {
@@ -83,6 +83,6 @@ public class ExpressionTest extends TestCase {
 	public void testConstantTypeAttributeIsRenamed() {
 		Attribute attribute = SQL.parseAttribute("table.col1");
 		assertEquals("Constant(42@alias.col1)", 
-				new Constant("42", attribute).renameColumns(aliases).toString());
+				new Constant("42", attribute).renameAttributes(aliases).toString());
 	}
 }

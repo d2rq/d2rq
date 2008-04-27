@@ -1,0 +1,15 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix ex: <http://example.org/> .
+@prefix map: <#> .
+@prefix test: <http://d2rq.org/terms/test#> .
+
+map:Table1 a d2rq:ClassMap;
+	d2rq:uriPattern "http://example.org/res@@table1.id@@";
+	d2rq:dataStorage test:DummyDatabase;
+	.
+map:TypeBridge a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:Table1;
+	d2rq:property rdf:type;
+	d2rq:uriColumn "table1.uri";
+	.

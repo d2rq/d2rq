@@ -1,0 +1,10 @@
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix ex: <http://example.org/> .
+@prefix map: <#> .
+@prefix test: <http://d2rq.org/terms/test#> .
+
+map:Table1 a d2rq:ClassMap;
+	d2rq:uriPattern "http://example.org/res@@table1.id@@";
+	d2rq:class ex:Class1;
+	d2rq:dataStorage test:DummyDatabase;
+	.

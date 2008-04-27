@@ -4,16 +4,17 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 
 /**
  * Defines constraints to a set of RDF {@link Node}s.
  * 
- * TODO: Should there be limitValuesToExpression(Expression)?
+ * TODO: NodeSetFilter doesn't handle ColumnFunctions or TranslationTables yet
  * 
  * @author Richard Cyganiak
- * @version $Id: NodeSetFilter.java,v 1.2 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: NodeSetFilter.java,v 1.3 2008/04/27 22:42:38 cyganiak Exp $
  */
 public interface NodeSetFilter {
 
@@ -49,6 +50,13 @@ public interface NodeSetFilter {
 	public void limitToLiterals(String language, RDFDatatype datatype);
 
 	/**
+	 * Limits this node set to the node that has a particular
+	 * constant value.
+	 * @param constant The value of the node in this set
+	 */
+	public void limitValues(String constant);
+	
+	/**
 	 * Limits this node set to those whose value matches a value in a 
 	 * particular database table column.
 	 * @param attribute The attribute containing possible values
@@ -68,4 +76,11 @@ public interface NodeSetFilter {
 	 * @param id The blank node ID producing possible values
 	 */
 	public void limitValuesToBlankNodeID(BlankNodeID id);
+
+	/**
+	 * Limits this node set to nodes whose value matches the given
+	 * SQL expression.
+	 * @param expression The SQL expression that generates possible values 
+	 */
+	public void limitValuesToExpression(Expression expression);
 }

@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -23,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TripleRelation.java,v 1.7 2008/04/26 22:16:07 cyganiak Exp $
+ * @version $Id: TripleRelation.java,v 1.8 2008/04/27 22:42:36 cyganiak Exp $
  */
 public class TripleRelation implements TripleMaker {
 	public static final String SUBJECT_NODE_MAKER = "subject";
@@ -89,6 +91,11 @@ public class TripleRelation implements TripleMaker {
 		if (p.equals(NodeMaker.EMPTY)) return null;
 		NodeMaker o = this.objectMaker.selectNode(t.getObject(), newBase);
 		if (o.equals(NodeMaker.EMPTY)) return null;
+		Set projections = new HashSet();
+		projections.addAll(s.projectionSpecs());
+		projections.addAll(p.projectionSpecs());
+		projections.addAll(o.projectionSpecs());
+		newBase.project(projections);
 		return new TripleRelation(newBase.immutableSnapshot(), s, p, o);
 	}
 	

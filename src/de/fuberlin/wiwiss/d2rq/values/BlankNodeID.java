@@ -9,7 +9,10 @@ import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
+import de.fuberlin.wiwiss.d2rq.expr.Concatenation;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
+import de.fuberlin.wiwiss.d2rq.expr.Constant;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
@@ -24,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeID.java,v 1.9 2008/04/25 16:27:41 cyganiak Exp $
+ * @version $Id: BlankNodeID.java,v 1.10 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class BlankNodeID implements ValueMaker {
 	private final static String DELIMITER = "@@";
@@ -46,6 +49,10 @@ public class BlankNodeID implements ValueMaker {
 
 	public List attributes() {
 		return this.attributes;
+	}
+	
+	public String classMapID() {
+		return this.classMapID;
 	}
 	
 	public void describeSelf(NodeSetFilter c) {
@@ -119,5 +126,17 @@ public class BlankNodeID implements ValueMaker {
 		}
 		result.append(")");
 		return result.toString();
+	}
+	
+	public Expression toExpression() {
+		List parts = new ArrayList();
+		parts.add(new Constant(classMapID));
+		Iterator it = attributes.iterator();
+		while (it.hasNext()) {
+			Attribute attribute = (Attribute) it.next();
+			parts.add(new Constant(DELIMITER));
+			parts.add(new AttributeExpr(attribute));
+		}
+		return Concatenation.create(parts);
 	}
 }

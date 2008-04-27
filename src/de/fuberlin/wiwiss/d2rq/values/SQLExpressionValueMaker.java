@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * TODO Write unit tests
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLExpressionValueMaker.java,v 1.3 2008/04/25 16:27:41 cyganiak Exp $
+ * @version $Id: SQLExpressionValueMaker.java,v 1.4 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class SQLExpressionValueMaker implements ValueMaker {
 	private final Expression expression;
@@ -29,8 +29,7 @@ public class SQLExpressionValueMaker implements ValueMaker {
 	}
 	
 	public void describeSelf(NodeSetFilter c) {
-		// Do nothing, the value of a SQL expression could be anything
-		// TODO: Should there be c.limitToExpression(...)?
+		c.limitValuesToExpression(expression);
 	}
 	
 	public Set projectionSpecs() {

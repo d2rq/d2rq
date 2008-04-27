@@ -12,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * An expression that is TRUE iff its two constituent expressions are true.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Equality.java,v 1.1 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: Equality.java,v 1.2 2008/04/27 22:42:37 cyganiak Exp $
  */
 public class Equality extends Expression {
 
@@ -45,11 +45,11 @@ public class Equality extends Expression {
 	private Equality(Expression expr1, Expression expr2) {
 		this.expr1 = expr1;
 		this.expr2 = expr2;
-		columns.addAll(expr1.columns());
-		columns.addAll(expr2.columns());
+		columns.addAll(expr1.attributes());
+		columns.addAll(expr2.attributes());
 	}
 	
-	public Set columns() {
+	public Set attributes() {
 		return columns;
 	}
 
@@ -62,10 +62,10 @@ public class Equality extends Expression {
 		return expr1.equals(expr2);
 	}
 
-	public Expression renameColumns(ColumnRenamer columnRenamer) {
+	public Expression renameAttributes(ColumnRenamer columnRenamer) {
 		return new Equality(
-				expr1.renameColumns(columnRenamer), 
-				expr2.renameColumns(columnRenamer));
+				expr1.renameAttributes(columnRenamer), 
+				expr2.renameAttributes(columnRenamer));
 	}
 
 	public String toSQL(ConnectedDB database, AliasMap aliases) {

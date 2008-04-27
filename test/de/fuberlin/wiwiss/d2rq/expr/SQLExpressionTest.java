@@ -28,7 +28,7 @@ public class SQLExpressionTest extends TestCase {
 		Set expectedColumns = new HashSet(Arrays.asList(
 				new Attribute[]{new Attribute(null, "papers", "publish"), 
 						new Attribute(null, "papers", "rating")}));
-		assertEquals(expectedColumns, e.columns());
+		assertEquals(expectedColumns, e.attributes());
 	}
 	
 	public void testToString() {
@@ -49,7 +49,7 @@ public class SQLExpressionTest extends TestCase {
 	public void testRenameColumnsWithAliasMap() {
 		Alias a = new Alias(new RelationName(null, "foo"), new RelationName(null, "bar"));
 		assertEquals(SQLExpression.create("bar.col1 = baz.col1"),
-				SQLExpression.create("foo.col1 = baz.col1").renameColumns(
+				SQLExpression.create("foo.col1 = baz.col1").renameAttributes(
 						new AliasMap(Collections.singleton(a))));
 	}
 	
@@ -57,6 +57,6 @@ public class SQLExpressionTest extends TestCase {
 		Map map = new HashMap();
 		map.put(new Attribute(null, "foo", "col1"), new Attribute(null, "foo", "col2"));
 		assertEquals(SQLExpression.create("foo.col2=foo.col3"), 
-				SQLExpression.create("foo.col1=foo.col3").renameColumns(new ColumnRenamerMap(map)));
+				SQLExpression.create("foo.col1=foo.col3").renameAttributes(new ColumnRenamerMap(map)));
 	}
 }

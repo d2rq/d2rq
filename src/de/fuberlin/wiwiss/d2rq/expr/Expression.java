@@ -14,22 +14,22 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * A SQL expression.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Expression.java,v 1.2 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: Expression.java,v 1.3 2008/04/27 22:42:37 cyganiak Exp $
  */
 public abstract class Expression {
 	public static final Expression TRUE = new Expression() {
-		public Set columns() { return Collections.EMPTY_SET; }
+		public Set attributes() { return Collections.EMPTY_SET; }
 		public boolean isFalse() { return false; }
 		public boolean isTrue() { return true; }
-		public Expression renameColumns(ColumnRenamer columnRenamer) { return this; }
+		public Expression renameAttributes(ColumnRenamer columnRenamer) { return this; }
 		public String toSQL(ConnectedDB database, AliasMap aliases) { return "1"; }
 		public String toString() { return "TRUE"; }
 	};
 	public static final Expression FALSE = new Expression() {
-		public Set columns() { return Collections.EMPTY_SET; }
+		public Set attributes() { return Collections.EMPTY_SET; }
 		public boolean isFalse() { return true; }
 		public boolean isTrue() { return false; }
-		public Expression renameColumns(ColumnRenamer columnRenamer) { return this; }
+		public Expression renameAttributes(ColumnRenamer columnRenamer) { return this; }
 		public String toSQL(ConnectedDB database, AliasMap aliases) { return "0"; }
 		public String toString() { return "FALSE"; }
 	};
@@ -38,9 +38,9 @@ public abstract class Expression {
 	
 	public abstract boolean isFalse();
 	
-	public abstract Set columns();
+	public abstract Set attributes();
 	
-	public abstract Expression renameColumns(ColumnRenamer columnRenamer);
+	public abstract Expression renameAttributes(ColumnRenamer columnRenamer);
 	
 	public abstract String toSQL(ConnectedDB database, AliasMap aliases);
 

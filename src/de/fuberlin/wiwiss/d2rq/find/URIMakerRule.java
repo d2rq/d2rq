@@ -15,6 +15,7 @@ import com.hp.hpl.jena.graph.Node;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
@@ -43,7 +44,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * RDFRelations in an order that puts URI patterns first.</p>
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRule.java,v 1.4 2008/04/25 16:27:42 cyganiak Exp $
+ * @version $Id: URIMakerRule.java,v 1.5 2008/04/27 22:42:39 cyganiak Exp $
  */
 public class URIMakerRule implements Comparator {
 	private Map identifierCache = new HashMap();
@@ -112,9 +113,11 @@ public class URIMakerRule implements Comparator {
 		public void limitToEmptySet() { }
 		public void limitToLiterals(String language, RDFDatatype datatype) { }
 		public void limitToURIs() { this.isURIMaker = true; }
+		public void limitValues(String constant) { }
 		public void limitValuesToAttribute(Attribute attribute) { this.isColumn = true; }
 		public void limitValuesToBlankNodeID(BlankNodeID id) { }
 		public void limitValuesToPattern(Pattern pattern) { this.isPattern = true; }
+		public void limitValuesToExpression(Expression expression) { }
 	}
 	
 	public class URIMakerRuleChecker {

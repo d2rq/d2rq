@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
@@ -63,5 +64,12 @@ public class RelationImpl extends Relation {
 		return new RelationImpl(database, renames.applyTo(aliases),
 				renames.applyTo(condition), renames.applyToJoinSet(joinConditions),
 				renames.applyToProjectionSet(projections), isUnique);
+	}
+
+	public Relation project(Set projectionSpecs) {
+		Set newProjections = new HashSet(projectionSpecs);
+		newProjections.retainAll(projections);
+		return new RelationImpl(database, aliases, condition, joinConditions, 
+				newProjections, isUnique);
 	}
 }

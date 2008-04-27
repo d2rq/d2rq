@@ -27,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.24 2008/04/25 15:26:58 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.25 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -79,7 +79,7 @@ public class SelectStatementBuilder {
 	}
 	
 	private void addMentionedTablesFromConditions() {
-		Iterator it = condition().columns().iterator();
+		Iterator it = condition().attributes().iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
 			this.mentionedTables.add(column.relationName());

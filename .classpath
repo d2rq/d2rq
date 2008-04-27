@@ -25,5 +25,6 @@
 	<classpathentry kind="lib" path="lib/jena-2.5.5/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jena-2.5.5/arq.jar" sourcepath="/ARQ-2.2/src"/>
 	<classpathentry kind="lib" path="lib/jena-2.5.5/antlr-2.7.5.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.5.5/jenatest.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

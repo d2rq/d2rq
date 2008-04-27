@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO Should have a SQL type code instead of the stupid column reference
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Constant.java,v 1.2 2008/04/25 16:27:41 cyganiak Exp $
+ * @version $Id: Constant.java,v 1.3 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class Constant extends Expression {
 	private final String value;
@@ -35,7 +35,11 @@ public class Constant extends Expression {
 		this.attributeForTrackingType = attributeForTrackingType;
 	}
 	
-	public Set columns() {
+	public String value() {
+		return value;
+	}
+	
+	public Set attributes() {
 		return Collections.EMPTY_SET;
 	}
 
@@ -47,7 +51,7 @@ public class Constant extends Expression {
 		return false;
 	}
 
-	public Expression renameColumns(ColumnRenamer columnRenamer) {
+	public Expression renameAttributes(ColumnRenamer columnRenamer) {
 		if (attributeForTrackingType == null) {
 			return this;
 		}

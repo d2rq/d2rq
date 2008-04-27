@@ -14,7 +14,10 @@ import java.util.regex.Matcher;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
+import de.fuberlin.wiwiss.d2rq.expr.Concatenation;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
+import de.fuberlin.wiwiss.d2rq.expr.Constant;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
@@ -26,7 +29,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * used as an UriPattern for generating URIs from a column's primary key.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Pattern.java,v 1.11 2008/04/25 16:27:41 cyganiak Exp $
+ * @version $Id: Pattern.java,v 1.12 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";
@@ -52,6 +55,17 @@ public class Pattern implements ValueMaker {
 		this.columnsAsSet = new HashSet(this.columns);
 	}
 
+	public String firstLiteralPart() {
+		return firstLiteralPart;
+	}
+	
+	public String lastLiteralPart() {
+		if (literalParts.isEmpty()) {
+			return firstLiteralPart;
+		}
+		return (String) literalParts.get(literalParts.size() - 1);
+	}
+	
 	public boolean literalPartsMatchRegex(String regex) {
 		if (!this.firstLiteralPart.matches(regex)) {
 			return false;
@@ -141,7 +155,7 @@ public class Pattern implements ValueMaker {
 		return this.pattern.hashCode();
 	}
 	
-	public boolean isCompatibleWith(Pattern p) {
+	public boolean isEquivalentTo(Pattern p) {
 		return this.firstLiteralPart.equals(p.firstLiteralPart)
 				&& this.literalParts.equals(p.literalParts);
 	}
@@ -205,6 +219,16 @@ public class Pattern implements ValueMaker {
 	    };
 	}
 
+	public Expression toExpression() {
+		List parts = new ArrayList(literalParts.size() * 2 + 1);
+		parts.add(new Constant(firstLiteralPart));
+		for (int i = 0; i < columns.size(); i++) {
+			parts.add(new AttributeExpr((Attribute) columns.get(i)));
+			parts.add(new Constant((String) literalParts.get(i)));
+		}
+		return Concatenation.create(parts);
+	}
+	
 	private final static ColumnFunction IDENTITY = new IdentityFunction();
 	private final static ColumnFunction URLENCODE = new URLEncodeFunction();
 	private final static ColumnFunction URLIFY = new URLifyFunction();

@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.Set;
+
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
 
@@ -8,6 +10,7 @@ public interface RelationalOperators {
 	public final static RelationalOperators DUMMY = new RelationalOperators() {
 		public Relation renameColumns(ColumnRenamer renamer) { return null; }
 		public Relation select(Expression condition) { return null; }
+		public Relation project(Set projectionSpecs) { return null; }
 	};
 
 	/**
@@ -35,4 +38,15 @@ public interface RelationalOperators {
 	 * 		names have been replaced with the new ones
 	 */
 	Relation renameColumns(ColumnRenamer renamer);
+	
+	/**
+	 * <p>Applies the projection operator to this relation.</p>
+	 * 
+	 * <p>The new relation will contain only the attributes given
+	 * as the argument.</p>
+	 * 
+	 * @param projectionSpecs A set of {@link ProjectionSpec} instances
+	 * @return A relation having the specified attributes
+	 */
+	Relation project(Set projectionSpecs);
 }

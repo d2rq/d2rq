@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * TODO: Shouldn't call to SQL so much
  *  
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLExpression.java,v 1.2 2007/11/05 23:00:49 cyganiak Exp $
+ * @version $Id: SQLExpression.java,v 1.3 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class SQLExpression extends Expression {
 	
@@ -51,11 +51,11 @@ public class SQLExpression extends Expression {
 		return false;
 	}
 	
-	public Set columns() {
+	public Set attributes() {
 		return this.columns;
 	}
 	
-	public Expression renameColumns(ColumnRenamer columnRenamer) {
+	public Expression renameAttributes(ColumnRenamer columnRenamer) {
 		return new SQLExpression(SQL.replaceColumnsInExpression(this.expression, columnRenamer));
 	}
 	

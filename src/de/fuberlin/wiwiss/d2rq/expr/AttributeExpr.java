@@ -15,7 +15,7 @@ public class AttributeExpr extends Expression {
 		this.attribute = attribute;
 	}
 	
-	public Set columns() {
+	public Set attributes() {
 		return Collections.singleton(attribute);
 	}
 
@@ -27,7 +27,7 @@ public class AttributeExpr extends Expression {
 		return false;
 	}
 
-	public Expression renameColumns(ColumnRenamer columnRenamer) {
+	public Expression renameAttributes(ColumnRenamer columnRenamer) {
 		return new AttributeExpr(columnRenamer.applyTo(attribute));
 	}
 

@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.9 2008/04/25 16:27:41 cyganiak Exp $
+ * @version $Id: PatternTest.java,v 1.10 2008/04/27 22:42:37 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "table", "col1");
@@ -279,29 +279,29 @@ public class PatternTest extends TestCase {
 	public void testIdenticalPatternsAreCompatible() {
 		Pattern p1 = new Pattern("foo@@table.col1@@");
 		Pattern p2 = new Pattern("foo@@table.col1@@");
-		assertTrue(p1.isCompatibleWith(p2));
-		assertTrue(p2.isCompatibleWith(p1));
+		assertTrue(p1.isEquivalentTo(p2));
+		assertTrue(p2.isEquivalentTo(p1));
 	}
 	
 	public void testPatternsWithDifferentColumnNamesAreCompatible() {
 		Pattern p1 = new Pattern("foo@@table.col1@@");
 		Pattern p2 = new Pattern("foo@@table.col2@@");
-		assertTrue(p1.isCompatibleWith(p2));
-		assertTrue(p2.isCompatibleWith(p1));
+		assertTrue(p1.isEquivalentTo(p2));
+		assertTrue(p2.isEquivalentTo(p1));
 	}
 	
 	public void testPatternsWithDifferentLiteralPartsAreNotCompatible() {
 		Pattern p1 = new Pattern("foo@@table.col1@@");
 		Pattern p2 = new Pattern("bar@@table.col1@@");
-		assertFalse(p1.isCompatibleWith(p2));
-		assertFalse(p2.isCompatibleWith(p1));
+		assertFalse(p1.isEquivalentTo(p2));
+		assertFalse(p2.isEquivalentTo(p1));
 	}
 	
 	public void testMultiColumnPatternsWithDifferentLiteralPartsAreNotCompatible() {
 		Pattern p1 = new Pattern("foo@@table.col1@@bar@@table.col2@@abc");
 		Pattern p2 = new Pattern("foo@@table.col1@@bar@@table.col2@@xyz");
-		assertFalse(p1.isCompatibleWith(p2));
-		assertFalse(p2.isCompatibleWith(p1));
+		assertFalse(p1.isEquivalentTo(p2));
+		assertFalse(p2.isEquivalentTo(p1));
 	}
 	
 	public void testLiteralPatternsMatchTrivialRegex() {
@@ -345,6 +345,27 @@ public class PatternTest extends TestCase {
 		Pattern p = new Pattern("aaa@@table.col1|urlify@@bbb");
 		assertPattern("aaax%5Fybbb", p.makeValue(row("x_y")));
 		assertPatternValues(p, "aaax%5Fybbb", Collections.singletonMap("table.col1", "x_y"));
+	}
+	
+	public void testTrivialPatternFirstPart() {
+		assertEquals("aaa", new Pattern("aaa").firstLiteralPart());
+	}
+	
+	public void testTrivialPatternLastPart() {
+		assertEquals("aaa", new Pattern("aaa").lastLiteralPart());
+	}
+
+	public void testEmptyFirstPart() {
+		assertEquals("", new Pattern("@@table.col1@@aaa").firstLiteralPart());
+	}
+	
+	public void testEmptyLastPart() {
+		assertEquals("", new Pattern("aaa@@table.col1@@").lastLiteralPart());
+	}
+
+	public void testFirstAndLastPart() {
+		assertEquals("aaa", new Pattern("aaa@@table.col1@@bbb").firstLiteralPart());
+		assertEquals("bbb", new Pattern("aaa@@table.col1@@bbb").lastLiteralPart());
 	}
 	
 	private void assertPattern(String expected, String pattern) {

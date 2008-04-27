@@ -19,7 +19,7 @@ public class ExpressionProjectionSpec implements ProjectionSpec {
 	}
 
 	public Set requiredAttributes() {
-		return expression.columns();
+		return expression.attributes();
 	}
 
 	public Expression toExpression() {

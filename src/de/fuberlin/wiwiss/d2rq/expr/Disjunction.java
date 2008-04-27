@@ -48,7 +48,7 @@ public class Disjunction extends Expression {
 		Iterator it = this.expressions.iterator();
 		while (it.hasNext()) {
 			Expression expression = (Expression) it.next();
-			this.attributes.addAll(expression.columns());
+			this.attributes.addAll(expression.attributes());
 		}
 	}
 
@@ -60,16 +60,16 @@ public class Disjunction extends Expression {
 		return false;
 	}
 	
-	public Set columns() {
+	public Set attributes() {
 		return this.attributes;
 	}
 
-	public Expression renameColumns(ColumnRenamer columnRenamer) {
+	public Expression renameAttributes(ColumnRenamer columnRenamer) {
 		Set renamedExpressions = new HashSet();
 		Iterator it = this.expressions.iterator();
 		while (it.hasNext()) {
 			Expression expression = (Expression) it.next();
-			renamedExpressions.add(expression.renameColumns(columnRenamer));
+			renamedExpressions.add(expression.renameAttributes(columnRenamer));
 		}
 		return Disjunction.create(renamedExpressions);
 	}
