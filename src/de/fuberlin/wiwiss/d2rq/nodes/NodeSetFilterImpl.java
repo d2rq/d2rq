@@ -78,6 +78,9 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 	}
 	
 	public void limitTo(Node node) {
+		if (Node.ANY.equals(node) || node.isVariable()) {
+			return;
+		}
 		if (fixedNode == null) {
 			fixedNode = node;
 		} else if (!fixedNode.equals(node)) {

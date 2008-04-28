@@ -11,10 +11,11 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 /**
  * A database column.
  * 
- * TODO: Should track its SQL datatype code
+ * TODO: Attribute should track its SQL datatype code
+ * TODO: Attribute should track wether it is nullable
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Attribute.java,v 1.8 2008/04/25 15:25:13 cyganiak Exp $
+ * @version $Id: Attribute.java,v 1.9 2008/04/28 14:33:21 cyganiak Exp $
  */
 public class Attribute implements Comparable, ProjectionSpec {
 	private String attributeName;

@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.engine;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,9 +11,13 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * TODO Merge with TripleRelation
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeRelation.java,v 1.1 2008/04/27 22:42:37 cyganiak Exp $
+ * @version $Id: NodeRelation.java,v 1.2 2008/04/28 14:33:21 cyganiak Exp $
  */
 public class NodeRelation {
+	
+	public static final NodeRelation TRUE = 
+		new NodeRelation(Relation.TRUE, Collections.EMPTY_MAP);
+	
 	private Relation base;
 	private Map variablesToNodeMakers;
 	

@@ -27,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * - Attributes with obviously incompatible types should not match
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeSetTest.java,v 1.1 2008/04/27 22:42:37 cyganiak Exp $
+ * @version $Id: NodeSetTest.java,v 1.2 2008/04/28 14:33:21 cyganiak Exp $
  */
 public class NodeSetTest extends TestCase {
 	private final static Attribute table1foo = SQL.parseAttribute("table1.foo");
@@ -395,5 +395,17 @@ public class NodeSetTest extends TestCase {
 						"Constant(http://example.org/res), " +
 						"AttributeExpr(@@table1.foo@@)))",
 				nodes.translatedExpression().toString());
+	}
+	
+	public void testANYNodeDoesNotLimit() {
+		nodes.limitTo(Node.ANY);
+		nodes.limitTo(RDF.Nodes.type);
+		assertFalse(nodes.isEmpty());
+	}
+	
+	public void testVariableNodeDoesNotLimit() {
+		nodes.limitTo(Node.createVariable("foo"));
+		nodes.limitTo(RDF.Nodes.type);
+		assertFalse(nodes.isEmpty());
 	}
 }

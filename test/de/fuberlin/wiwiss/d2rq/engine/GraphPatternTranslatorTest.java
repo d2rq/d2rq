@@ -20,6 +20,8 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
 public class GraphPatternTranslatorTest extends TestCase {
 	private final static RelationName table1 = SQL.parseRelationName("table1");
 	private final static Attribute table1id = SQL.parseAttribute("table1.id");
+	private final static Attribute t1table1id = SQL.parseAttribute("T1_table1.id");
+	private final static Attribute t2table1id = SQL.parseAttribute("T2_table1.id");
 	
 	public void testEmptyGraphAndBGP() {
 		NodeRelation nodeRel = translate1(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
@@ -99,7 +101,53 @@ public class GraphPatternTranslatorTest extends TestCase {
 		NodeRelation[] rels = translate("?s ?p ?o", "engine/simple.n3");
 		assertEquals(2, rels.length);
 	}
+
+	public void testMatchOneOfTwoPropertyBridges() {
+		NodeRelation nodeRel = translate1(
+				"ex:res1 rdf:type ex:Class1",
+				"engine/simple.n3");
+		Relation r = nodeRel.baseRelation();
+		assertEquals(Collections.EMPTY_SET, r.projections());
+		assertEquals(Equality.createAttributeValue(table1id, "1"), r.condition());
+	}
 	
+	public void testAskTwoTriplePatternsNoMatch() {
+		assertNull(translate1(
+				"ex:res1 rdf:type ex:Class1 . ex:res1 rdf:type ex:Class2",
+				"engine/simple.n3"));
+	}
+	
+	public void testAskTwoTriplePatternsMatch() {
+		NodeRelation nodeRel = translate1(
+				"ex:res1 rdf:type ex:Class1 . ex:res1 ex:foo ?foo",
+				"engine/simple.n3");
+		assertEquals(Collections.singleton("foo"), nodeRel.variableNames());
+		assertEquals("Literal(Column(T2_table1.foo))", nodeRel.nodeMaker("foo").toString());
+		Relation r = nodeRel.baseRelation();
+		assertEquals("Conjunction(" +
+				"Equality(" +
+						"AttributeExpr(@@T1_table1.id@@), " +
+						"Constant(1@T1_table1.id)), " +
+				"Equality(" +
+						"AttributeExpr(@@T2_table1.id@@), " +
+						"Constant(1@T2_table1.id)))", 
+				r.condition().toString());
+	}
+	
+	public void testTwoTriplePatternsWithJoinMatch() {
+		NodeRelation nodeRel = translate1(
+				"?x rdf:type ex:Class1 . ?x ex:foo ?foo",
+				"engine/simple.n3");
+		assertEquals(2, nodeRel.variableNames().size());
+		assertEquals("Literal(Column(T2_table1.foo))", 
+				nodeRel.nodeMaker("foo").toString());
+		assertEquals("URI(Pattern(http://example.org/res@@T1_table1.id@@))", 
+				nodeRel.nodeMaker("x").toString());
+		Relation r = nodeRel.baseRelation();
+		assertEquals(Equality.createAttributeEquality(t1table1id, t2table1id),
+				r.condition());
+	}
+
 	private NodeRelation translate1(String pattern, String mappingFile) {
 		return translate1(triplesToList(pattern), mappingFile);
 	}
