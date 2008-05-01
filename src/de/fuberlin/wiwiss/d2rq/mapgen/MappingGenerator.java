@@ -41,7 +41,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.24 2008/02/06 17:26:14 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.25 2008/05/01 10:42:22 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -303,7 +303,7 @@ public class MappingGenerator {
 					null, table2.tableName() + "_" + linkTableName.tableName() + "__alias");
 			alias = AliasMap.create1(table2, aliasName);
 			this.out.println("\td2rq:alias \"" + table2.qualifiedName() + 
-					" AS " + aliasName.qualifiedName());
+					" AS " + aliasName.qualifiedName() + "\";");
 		}
 		it = join2.attributes1().iterator();
 		while (it.hasNext()) {
