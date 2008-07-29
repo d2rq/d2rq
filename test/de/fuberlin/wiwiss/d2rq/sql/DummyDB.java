@@ -32,4 +32,8 @@ public class DummyDB extends ConnectedDB {
 		}
 		return super.columnType(attribute);
 	}
+	
+	public boolean equals(Object other) {
+		return other instanceof DummyDB;
+	}
 }

@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExecuteCompatibleTripleRelations.java,v 1.3 2008/04/26 21:43:18 cyganiak Exp $
+ * @version $Id: ExecuteCompatibleTripleRelations.java,v 1.4 2008/07/29 18:45:32 cyganiak Exp $
  */
 public class ExecuteCompatibleTripleRelations implements ExecutionPlanElement, TripleMaker {
 
@@ -51,6 +51,9 @@ public class ExecuteCompatibleTripleRelations implements ExecutionPlanElement, T
 					second.aliases().originalOf(tableName))) {
 				return false;
 			}
+		}
+		if (!first.isUnique() || !second.isUnique()) {
+			return false;
 		}
 		return true;
 	}

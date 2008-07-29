@@ -9,6 +9,7 @@ import junit.framework.TestCase;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
@@ -21,26 +22,52 @@ public class CompileTest extends TestCase {
 	private Database database;
 	private ClassMap employees;
 	private PropertyBridge managerBridge;
+	private ClassMap cities;
+	private PropertyBridge citiesTypeBridge;
+	private PropertyBridge citiesNameBridge;
+	private ClassMap countries;
+	private PropertyBridge countriesTypeBridge;
 	
 	public void setUp() {
 		this.model = ModelFactory.createDefaultModel();
 		this.mapping = new Mapping();
 		this.database = new Database(this.model.createResource());
 		this.mapping.addDatabase(this.database);
-		this.employees = new ClassMap(this.model.createResource());
-		this.employees.setDatabase(this.database);
-		this.employees.setURIPattern("http://test/employee@@e.ID@@");
-		this.employees.addAlias("employees AS e");
-		this.employees.addJoin("e.ID = foo.bar");
-		this.employees.addCondition("e.status = 'active'");
-		this.mapping.addClassMap(this.employees);
-		this.managerBridge = new PropertyBridge(this.model.createResource());
-		this.managerBridge.setBelongsToClassMap(this.employees);
-		this.managerBridge.addProperty(this.model.createProperty("http://terms.example.org/manager"));
-		this.managerBridge.addAlias("e AS m");
-		this.managerBridge.setRefersToClassMap(this.employees);
-		this.managerBridge.addJoin("e.manager = m.ID");
-		this.employees.addPropertyBridge(this.managerBridge);
+
+		employees = createClassMap("http://test/employee@@e.ID@@");
+		employees.addAlias("employees AS e");
+		employees.addJoin("e.ID = foo.bar");
+		employees.addCondition("e.status = 'active'");
+		managerBridge = createPropertyBridge(employees, "http://terms.example.org/manager");
+		managerBridge.addAlias("e AS m");
+		managerBridge.setRefersToClassMap(this.employees);
+		managerBridge.addJoin("e.manager = m.ID");
+		
+		cities = createClassMap("http://test/city@@c.ID@@");
+		citiesTypeBridge = createPropertyBridge(cities, RDF.type.getURI());
+		citiesTypeBridge.setConstantValue(model.createResource("http://terms.example.org/City"));
+		citiesNameBridge = createPropertyBridge(cities, "http://terms.example.org/name");
+		citiesNameBridge.setColumn("c.name");
+		countries = createClassMap("http://test/countries/@@c.country@@");
+		countries.setContainsDuplicates(true);
+		countriesTypeBridge = createPropertyBridge(countries, RDF.type.getURI());
+		countriesTypeBridge.setConstantValue(model.createResource("http://terms.example.org/Country"));
+	}
+
+	private ClassMap createClassMap(String uriPattern) {
+		ClassMap result = new ClassMap(this.model.createResource());
+		result.setDatabase(this.database);
+		result.setURIPattern(uriPattern);
+		this.mapping.addClassMap(result);
+		return result;
+	}
+
+	private PropertyBridge createPropertyBridge(ClassMap classMap, String propertyURI) {
+		PropertyBridge result = new PropertyBridge(this.model.createResource());
+		result.setBelongsToClassMap(classMap);
+		result.addProperty(this.model.createProperty(propertyURI));
+		classMap.addPropertyBridge(result);
+		return result;
 	}
 	
 	public void testAttributesInRefersToClassMapAreRenamed() {
@@ -78,5 +105,17 @@ public class CompileTest extends TestCase {
 						SQL.parseAlias("employees AS e"), 
 						SQL.parseAlias("employees AS m")})),
 				relation.baseRelation().aliases());
+	}
+	
+	public void testSimpleTypeBridgeContainsNoDuplicates() {
+		assertTrue(this.citiesTypeBridge.buildRelation().isUnique());
+	}
+	
+	public void testSimpleColumnBridgeContainsNoDuplicates() {
+		assertTrue(this.citiesNameBridge.buildRelation().isUnique());
+	}
+	
+	public void testBridgeWithDuplicateClassMapContainsDuplicates() {
+		assertFalse(this.countriesTypeBridge.buildRelation().isUnique());
 	}
 }

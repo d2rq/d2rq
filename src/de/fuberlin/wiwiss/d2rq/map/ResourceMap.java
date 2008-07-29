@@ -38,7 +38,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.10 2008/04/25 15:26:20 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.11 2008/07/29 18:45:32 cyganiak Exp $
  */
 public abstract class ResourceMap extends MapObject {
 
@@ -159,6 +159,9 @@ public abstract class ResourceMap extends MapObject {
 		while (it.hasNext()) {
 			ProjectionSpec projection = (ProjectionSpec) it.next();
 			result.addProjection(projection);
+		}
+		if (!containsDuplicates) {
+			result.setIsUnique(true);
 		}
 		return result;
 	}

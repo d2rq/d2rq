@@ -21,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO isUnique is not properly handled yet
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RelationBuilder.java,v 1.9 2008/04/25 15:26:58 cyganiak Exp $
+ * @version $Id: RelationBuilder.java,v 1.10 2008/07/29 18:45:32 cyganiak Exp $
  */
 public class RelationBuilder {
 	private Expression condition = Expression.TRUE;
@@ -41,6 +41,7 @@ public class RelationBuilder {
 		this.joinConditions.addAll(other.joinConditions);
 		this.aliases.addAll(other.aliases);
 		this.projections.addAll(other.projections);
+		this.isUnique = this.isUnique || other.isUnique;
 	}
 	
 	public void addAliased(RelationBuilder other) {
