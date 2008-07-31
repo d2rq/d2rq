@@ -37,7 +37,7 @@ import de.fuberlin.wiwiss.d2rs.vocab.D2R;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.20 2008/07/31 11:21:33 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.21 2008/07/31 11:35:20 cyganiak Exp $
  */
 public class D2RServer {
 	private final static String SPARQL_SERVICE_NAME = "sparql";
@@ -72,13 +72,17 @@ public class D2RServer {
 	}
 
 	public void overrideBaseURI(String baseURI) {
+
+		// This is a hack to allow hash URIs to be used at least in the
+		// SPARQL endpoint. It will not work in the Web interface.
 		if (!baseURI.endsWith("/") && !baseURI.endsWith("#")) {
 			baseURI += "/";
 		}
-		log.info("using custom base URI: " + baseURI);
 		if (baseURI.contains("#")) {
 			log.warn("Base URIs containing '#' may not work correctly!");
 		}
+
+		log.info("using custom base URI: " + baseURI);
 		this.overrideBaseURI = baseURI;
 	}
 	
@@ -121,6 +125,11 @@ public class D2RServer {
 	}
 	
 	public String resourceBaseURI() {
+		// This is a hack to allow hash URIs to be used at least in the
+		// SPARQL endpoint. It will not work in the Web interface.
+		if (this.baseURI().endsWith("#")) {
+			return this.baseURI();
+		}
 		return this.baseURI() + D2RServer.RESOURCE_SERVICE_NAME + "/";
 	}
 	
