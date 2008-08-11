@@ -15,7 +15,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingRoot;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIterSingleton;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIteratorCheck;
-import com.hp.hpl.jena.sparql.engine.main.OpCompiler;
+import com.hp.hpl.jena.sparql.engine.main.QC;
 import com.hp.hpl.jena.sparql.util.Context;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * TODO: @@@ QueryEngineD2RQ and the whole package is work in progress
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryEngineD2RQ.java,v 1.1 2008/04/27 22:42:37 cyganiak Exp $
+ * @version $Id: QueryEngineD2RQ.java,v 1.2 2008/08/11 08:29:05 cyganiak Exp $
  */
 public class QueryEngineD2RQ extends QueryEngineBase {
 	private GraphD2RQ graph;
@@ -50,7 +50,7 @@ public class QueryEngineD2RQ extends QueryEngineBase {
 	public QueryIterator eval(Op op, DatasetGraph dataset, Binding binding, Context context) {
 		ExecutionContext execCxt = new ExecutionContext(context, dataset.getDefaultGraph(), dataset) ;
 		QueryIterator input = new QueryIterSingleton(binding, execCxt);
-		QueryIterator qIter = OpCompiler.compile(op, input, execCxt);
+		QueryIterator qIter = QC.compile(op, input, execCxt);
 		return QueryIteratorCheck.check(qIter, execCxt);
 	}
 

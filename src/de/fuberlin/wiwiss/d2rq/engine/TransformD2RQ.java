@@ -29,7 +29,7 @@ public class TransformD2RQ extends TransformCopy {
 				opBGP.getPattern().getList(),
 				graph.tripleRelations()).translate();
 		if (nodeRelations.isEmpty()) {
-			return new OpNull();
+			return OpNull.create();
 		}
 		if (nodeRelations.size() == 1) {
 			return new OpD2RQ(opBGP, (NodeRelation) nodeRelations.iterator().next());
