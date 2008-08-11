@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.parser;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -12,6 +14,7 @@ import com.hp.hpl.jena.rdf.model.LiteralRequiredException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceRequiredException;
 import com.hp.hpl.jena.rdf.model.Statement;
@@ -35,7 +38,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.33 2008/04/24 17:48:54 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.34 2008/08/11 08:28:24 cyganiak Exp $
  */
 public class MapParser {
 
@@ -84,6 +87,8 @@ public class MapParser {
 			return this.mapping;
 		}
 		findUnknownD2RQTerms();
+		ensureAllDistinct(new Resource[]{D2RQ.Database, D2RQ.ClassMap, D2RQ.PropertyBridge, 
+				D2RQ.TranslationTable, D2RQ.Translation}, D2RQException.MAPPING_TYPECONFLICT);
 		this.mapping = new Mapping();
 		copyPrefixes();
 		try {
@@ -99,6 +104,27 @@ public class MapParser {
 					D2RQException.MAPPING_LITERAL_INSTEADOF_RESOURCE);
 		}
 		return this.mapping;
+	}
+	
+	private void ensureAllDistinct(Resource[] distinctClasses, int errorCode) {
+		Collection classes = Arrays.asList(distinctClasses);
+		ResIterator it = this.model.listSubjects();
+		while (it.hasNext()) {
+			Resource resource = it.nextResource();
+			Resource matchingType = null;
+			StmtIterator typeIt = resource.listProperties(RDF.type);
+			while (typeIt.hasNext()) {
+				Resource type = typeIt.nextStatement().getResource();
+				if (!classes.contains(type)) continue;
+				if (matchingType == null) {
+					matchingType = type;
+				} else {
+					throw new D2RQException("Name " + PrettyPrinter.toString(resource) + " cannot be both a "
+							+ PrettyPrinter.toString(matchingType) + " and a " + PrettyPrinter.toString(type),
+							errorCode);
+				}
+			}
+		}
 	}
 	
 	/**

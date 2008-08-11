@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.17 2008/04/25 11:25:06 cyganiak Exp $
+ * @version $Id: ParserTest.java,v 1.18 2008/08/11 08:28:24 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";
@@ -97,6 +97,14 @@ public class ParserTest extends TestCase {
 		Mapping m = parse("parser/translation-table.n3").parse();
 		TranslationTable tt = m.translationTable(ResourceFactory.createResource("http://example.org/tt"));
 		assertEquals("http://example.org/foo", tt.translator().toRDFValue("uri"));
+	}
+	
+	public void testTypeConflictClassMapAndBridgeIsDetected() {
+		try {
+			parse("parser/type-classmap-and-propertybridge.n3").parse();
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.MAPPING_TYPECONFLICT, ex.errorCode());
+		}
 	}
 	
 	private MapParser parse(String testFileName) {

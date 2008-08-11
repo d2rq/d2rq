@@ -1,0 +1,20 @@
+@prefix : <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix ex: <http://example.org/> .
+@prefix map: <#> .
+
+map:database a :Database;
+  :jdbcDriver "com.mysql.jdbc.Driver";
+  :jdbcDSN "jdbc:mysql:///db";
+  :numericColumn "People.ID";
+  :textColumn "People.name";
+  :textColumn "People.email";
+  :textColumn "People.www";
+  .
+map:classmap1 a :ClassMap;
+  :dataStorage map:database;
+  :uriPattern "http://example.org/p@@People.ID@@";
+  :class ex:Person
+  :properties [ :property ex:name; :column "People.name"; ];
+  :properties [ :property ex:mbox; :uriPattern "mailto:@@People.email@@"; ];
+  :properties [ :property ex:homepage; :uriColumn "People.www"; ];
+  .
