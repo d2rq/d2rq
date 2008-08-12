@@ -143,14 +143,13 @@ public class TripleRelationJoiner {
 			nodeMaker.describeSelf(nodeSet);
 		}
 		boolean areAllSatisfiable() {
-			boolean hasEmptySet = false;
 			Iterator it = nodeSets.keySet().iterator();
 			while (it.hasNext()) {
 				String name = (String) it.next();
 				NodeSetFilterImpl nodeSet = (NodeSetFilterImpl) nodeSets.get(name);
-				hasEmptySet = hasEmptySet || nodeSet.isEmpty();
+				if (nodeSet.isEmpty()) return false;
 			}
-			return !hasEmptySet;
+			return true;
 		}
 		Expression variableConstraints() {
 			Collection expressions = new ArrayList();

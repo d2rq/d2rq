@@ -10,11 +10,11 @@ import com.hp.hpl.jena.sparql.util.NodeIsomorphismMap;
 
 public class OpD2RQ extends OpExtMain {
 	private final OpBGP original;
-	private final NodeRelation replacement;
+	private final NodeRelation nodeRelation;
 	
-	public OpD2RQ(OpBGP original, NodeRelation replacement) {
+	public OpD2RQ(OpBGP original, NodeRelation nodeRelation) {
 		this.original = original;
-		this.replacement = replacement;
+		this.nodeRelation = nodeRelation;
 	}
 	
 	public QueryIterator eval(QueryIterator input, ExecutionContext execCxt) {
@@ -22,7 +22,7 @@ public class OpD2RQ extends OpExtMain {
 		// and ignore it
 		input.close();
 		
-		return NodeRelationQueryIterator.createQueryIterator(replacement, execCxt);
+		return NodeRelationQueryIterator.createQueryIterator(nodeRelation, execCxt);
 	}
 
 	public boolean equalTo(Op other, NodeIsomorphismMap labelMap) {
@@ -32,7 +32,7 @@ public class OpD2RQ extends OpExtMain {
 	}
 
 	public int hashCode() {
-		return original.hashCode() ^ replacement.hashCode();
+		return original.hashCode() ^ nodeRelation.hashCode();
 	}
 
 	public OpExt copy() {

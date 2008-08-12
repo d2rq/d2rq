@@ -48,11 +48,11 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.49 2008/08/12 06:47:37 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.50 2008/08/12 12:07:35 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	
-	{
+	static {
 		QueryEngineD2RQ.register();
 	}
 	
