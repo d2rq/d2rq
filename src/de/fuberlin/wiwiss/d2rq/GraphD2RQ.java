@@ -29,6 +29,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.engine.D2RQDatasetGraph;
 import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -37,7 +38,6 @@ import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
-import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
 
 /**
  * A D2RQ virtual read-only graph backed by a non-RDF database.
@@ -48,7 +48,7 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.50 2008/08/12 12:07:35 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.51 2008/08/12 13:40:19 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	
@@ -59,6 +59,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
 	private final Capabilities capabilities = new D2RQCapabilities();
 	private final Mapping mapping;
+	private final D2RQDatasetGraph dataset = new D2RQDatasetGraph(this);
 
 	/**
 	 * Creates a new D2RQ graph from a Jena model containing a D2RQ
@@ -97,7 +98,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		// on the other hand: new instance guaranties that all information with handler
 		// is up to date.
 		checkOpen();
-		return new D2RQQueryHandler(this, this.mapping.compiledPropertyBridges());
+		return new D2RQQueryHandler(this, dataset);
 	}
 
 	/**
