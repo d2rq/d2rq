@@ -82,17 +82,16 @@
 			</classpath>
 		</javac>
 	</target>
-<!--			
+
 	<target name="copyfiles.tests" depends="init">
 		<copy todir="${build.tests}/">
 			<fileset dir="${src.tests}/">
-				<include name="${project.path}/trix/tests/*"/>
-				<include name="${project.path}/trig/tests/*"/>
+				<include name="${project.path}/**/*.n3"/>
 			</fileset>
 		</copy>
 	</target>
--->
-	<target name="test" depends="compile.tests">
+
+	<target name="test" depends="compile.tests,copyfiles.tests">
 		<java classname="junit.textui.TestRunner" fork="yes" failonerror="true">
 			<arg value="${project.package}.D2RQTestSuite"/>
 			<classpath>
