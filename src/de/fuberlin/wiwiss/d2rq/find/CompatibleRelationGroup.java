@@ -10,8 +10,6 @@ import java.util.Set;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
-import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
-import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 /**
  * A group of {@link Relation}s that can be combined into a single
@@ -23,9 +21,9 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  * table.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: CompatibleRelationGroup.java,v 1.1 2008/08/12 13:07:53 cyganiak Exp $
+ * @version $Id: CompatibleRelationGroup.java,v 1.2 2008/08/12 17:26:22 cyganiak Exp $
  */
-public class CompatibleRelationGroup implements TripleMaker {
+public class CompatibleRelationGroup {
 
 	private final List tripleMakers = new ArrayList();
 	private final Relation firstBaseRelation;
@@ -81,16 +79,7 @@ public class CompatibleRelationGroup implements TripleMaker {
 				projections, allUnique);
 	}
 	
-	public Collection makeTriples(ResultRow row) {
-		if (tripleMakers.size() == 1) {
-			return ((TripleMaker) tripleMakers.get(0)).makeTriples(row);
-		}
-		List result = new ArrayList();
-		Iterator it = this.tripleMakers.iterator();
-		while (it.hasNext()) {
-			TripleMaker relation = (TripleMaker) it.next();
-			result.addAll(relation.makeTriples(row));
-		}
-		return result;
+	public Collection tripleMakers() {
+		return tripleMakers;
 	}
 }

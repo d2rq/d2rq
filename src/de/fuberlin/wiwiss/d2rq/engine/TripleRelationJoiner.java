@@ -96,11 +96,11 @@ public class TripleRelationJoiner {
 			Triple t = (Triple) newPatterns.get(i);
 			TripleRelation r = (TripleRelation) newRelations.get(i);
 			nodeSets.registerIfVariable(t.getSubject(), 
-					r.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER));
+					r.nodeMaker(TripleRelation.SUBJECT));
 			nodeSets.registerIfVariable(t.getPredicate(), 
-					r.nodeMaker(TripleRelation.PREDICATE_NODE_MAKER));
+					r.nodeMaker(TripleRelation.PREDICATE));
 			nodeSets.registerIfVariable(t.getObject(), 
-					r.nodeMaker(TripleRelation.OBJECT_NODE_MAKER));
+					r.nodeMaker(TripleRelation.OBJECT));
 		}
 		if (!nodeSets.areAllSatisfiable()) {
 			return null;

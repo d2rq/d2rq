@@ -41,7 +41,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
  *     d2rq:class foaf:Document;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRuleTest.java,v 1.6 2008/04/25 15:21:27 cyganiak Exp $
+ * @version $Id: URIMakerRuleTest.java,v 1.7 2008/08/12 17:26:22 cyganiak Exp $
  */
 public class URIMakerRuleTest extends TestCase {
 	private TripleRelation withURIPatternSubject;
@@ -123,35 +123,35 @@ public class URIMakerRuleTest extends TestCase {
 	
 	public void testRuleCheckerStartsAccepting() {
 		assertTrue(this.employeeChecker.canMatch(
-				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT)));
 		assertTrue(this.employeeChecker.canMatch(
-				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT)));
 	}
 	
 	public void testRuleCheckerUnaffectedByNonURIPattern() {
 		this.employeeChecker.addPotentialMatch(
-				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER));
+				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT));
 		assertTrue(this.employeeChecker.canMatch(
-				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT)));
 		assertTrue(this.employeeChecker.canMatch(
-				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT)));
 	}
 	
 	public void testRuleCheckerRejectsAfterMatch() {
 		this.employeeChecker.addPotentialMatch(
-				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER));
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT));
 		assertFalse(this.employeeChecker.canMatch(
-				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT)));
 		assertTrue(this.employeeChecker.canMatch(
-				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT)));
 	}
 	
 	public void testRuleCheckerDoesNotRejectAfterNonMatch() {
 		this.foobarChecker.addPotentialMatch(
-				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER));
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT));
 		assertTrue(this.foobarChecker.canMatch(
-				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+				this.withURIColumnSubject.nodeMaker(TripleRelation.SUBJECT)));
 		assertTrue(this.foobarChecker.canMatch(
-				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER)));
+				this.withURIPatternSubject.nodeMaker(TripleRelation.SUBJECT)));
 	}
 }

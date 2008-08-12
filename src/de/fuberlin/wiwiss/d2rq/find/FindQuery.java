@@ -13,7 +13,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.find.URIMakerRule.URIMakerRuleChecker;
-import de.fuberlin.wiwiss.d2rq.sql.RelationToTriplesIterator;
 
 
 /**
@@ -22,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.sql.RelationToTriplesIterator;
  * SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.15 2008/08/12 13:07:53 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.16 2008/08/12 17:26:22 cyganiak Exp $
  */
 public class FindQuery {
 	private List compatibleRelations = new ArrayList();
@@ -37,10 +36,10 @@ public class FindQuery {
 			TripleRelation tripleRelation = (TripleRelation) it.next();
 			TripleRelation selectedTripleRelation = tripleRelation.selectTriple(triplePattern);
 			if (selectedTripleRelation != null
-					&& subjectChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER))
-					&& objectChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT_NODE_MAKER))) {
-				subjectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER));
-				objectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT_NODE_MAKER));
+					&& subjectChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.SUBJECT))
+					&& objectChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT))) {
+				subjectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.SUBJECT));
+				objectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT));
 				addRelation(new JoinOptimizer(selectedTripleRelation).optimize());
 			}
 		}
@@ -51,11 +50,11 @@ public class FindQuery {
 		while (it.hasNext()) {
 			CompatibleRelationGroup group = (CompatibleRelationGroup) it.next();
 			if (group.isCompatible(tripleRelation.baseRelation())) {
-				group.add(tripleRelation.baseRelation(), tripleRelation);
+				group.add(tripleRelation.baseRelation(), new TripleMaker(tripleRelation));
 				return;
 			}
 		}
-		this.compatibleRelations.add(new CompatibleRelationGroup(tripleRelation.baseRelation(), tripleRelation));
+		this.compatibleRelations.add(new CompatibleRelationGroup(tripleRelation.baseRelation(), new TripleMaker(tripleRelation)));
 	}
 
 	public ExtendedIterator iterator() {
@@ -65,7 +64,7 @@ public class FindQuery {
 			CompatibleRelationGroup group = (CompatibleRelationGroup) it.next();
 			if (!group.baseRelation().equals(Relation.EMPTY)) {
 				result = result.andThen(
-						RelationToTriplesIterator.createTripleIterator(group.baseRelation(), group));
+						RelationToTriplesIterator.createTripleIterator(group.baseRelation(), group.tripleMakers()));
 			}
 		}
 		return result;

@@ -56,7 +56,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.19 2008/04/25 16:27:41 cyganiak Exp $
+ * @version $Id: JoinOptimizer.java,v 1.20 2008/08/12 17:26:22 cyganiak Exp $
  */
 public class JoinOptimizer {
 	private TripleRelation relation;
@@ -97,9 +97,9 @@ public class JoinOptimizer {
 			return this.relation;
 		}
 		ColumnRenamer renamer = new ColumnRenamerMap(replacedColumns);
-		NodeMaker s = this.relation.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER);
-		NodeMaker p = this.relation.nodeMaker(TripleRelation.PREDICATE_NODE_MAKER);
-		NodeMaker o = this.relation.nodeMaker(TripleRelation.OBJECT_NODE_MAKER);
+		NodeMaker s = this.relation.nodeMaker(TripleRelation.SUBJECT);
+		NodeMaker p = this.relation.nodeMaker(TripleRelation.PREDICATE);
+		NodeMaker o = this.relation.nodeMaker(TripleRelation.OBJECT);
 		Set projections = new HashSet();
 		projections.addAll(s.projectionSpecs());
 		projections.addAll(p.projectionSpecs());

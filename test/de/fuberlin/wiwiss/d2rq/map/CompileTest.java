@@ -73,9 +73,9 @@ public class CompileTest extends TestCase {
 	public void testAttributesInRefersToClassMapAreRenamed() {
 		TripleRelation relation = (TripleRelation) this.managerBridge.toTripleRelations().iterator().next();
 		assertEquals("URI(Pattern(http://test/employee@@e.ID@@))", 
-				relation.nodeMaker(TripleRelation.SUBJECT_NODE_MAKER).toString());
+				relation.nodeMaker(TripleRelation.SUBJECT).toString());
 		assertEquals("URI(Pattern(http://test/employee@@m.ID@@))", 
-				relation.nodeMaker(TripleRelation.OBJECT_NODE_MAKER).toString());
+				relation.nodeMaker(TripleRelation.OBJECT).toString());
 	}
 	
 	public void testJoinConditionsInRefersToClassMapAreRenamed() {

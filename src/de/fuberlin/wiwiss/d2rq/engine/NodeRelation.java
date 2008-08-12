@@ -1,17 +1,22 @@
 package de.fuberlin.wiwiss.d2rq.engine;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 
 /**
- * TODO Merge with TripleRelation
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeRelation.java,v 1.3 2008/08/12 06:47:35 cyganiak Exp $
+ * @version $Id: NodeRelation.java,v 1.4 2008/08/12 17:26:22 cyganiak Exp $
  */
 public class NodeRelation {
 	
@@ -36,5 +41,22 @@ public class NodeRelation {
 	
 	public NodeMaker nodeMaker(String variableName) {
 		return (NodeMaker) variablesToNodeMakers.get(variableName);
+	}
+
+	public NodeRelation withPrefix(int index) {
+		Collection newAliases = new ArrayList();
+		Iterator it = baseRelation().tables().iterator();
+		while (it.hasNext()) {
+			RelationName tableName = (RelationName) it.next();
+			newAliases.add(new Alias(tableName, tableName.withPrefix(index)));
+		}
+		AliasMap renamer = new AliasMap(newAliases);
+		Map renamedNodeMakers = new HashMap();
+		it = variableNames().iterator();
+		while (it.hasNext()) {
+			String variableName = (String) it.next();
+			renamedNodeMakers.put(variableName, nodeMaker(variableName).renameAttributes(renamer));
+		}
+		return new NodeRelation(baseRelation().renameColumns(renamer), renamedNodeMakers);
 	}
 }

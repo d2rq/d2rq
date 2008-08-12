@@ -44,7 +44,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * RDFRelations in an order that puts URI patterns first.</p>
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRule.java,v 1.5 2008/04/27 22:42:39 cyganiak Exp $
+ * @version $Id: URIMakerRule.java,v 1.6 2008/08/12 17:26:22 cyganiak Exp $
  */
 public class URIMakerRule implements Comparator {
 	private Map identifierCache = new HashMap();
@@ -76,7 +76,7 @@ public class URIMakerRule implements Comparator {
 	
 	private int priority(TripleRelation relation) {
 		int result = 0;
-		Iterator it = TripleRelation.S_P_O_NODE_MAKERS.iterator();
+		Iterator it = TripleRelation.SUBJ_PRED_OBJ.iterator();
 		while (it.hasNext()) {
 			String name = (String) it.next();
 			URIMakerIdentifier id = uriMakerIdentifier(relation.nodeMaker(name));
