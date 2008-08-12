@@ -1,22 +1,26 @@
 package de.fuberlin.wiwiss.d2rq.fastpath;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NiceIterator;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.engine.TripleRelationJoiner;
+import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
  * Iterator for PatternQueryCombiner results.
  * 
  * @author jgarbers
- * @version $Id: PQCResultIterator.java,v 1.6 2008/04/25 15:25:26 cyganiak Exp $
+ * @version $Id: PQCResultIterator.java,v 1.7 2008/08/12 06:47:36 cyganiak Exp $
  */
 public class PQCResultIterator extends NiceIterator implements ClosableIterator {
 	private final VariableBindings variableBindings;
@@ -77,21 +81,21 @@ public class PQCResultIterator extends NiceIterator implements ClosableIterator 
 			if (!ch.possible) {
 				continue;
 			}
-			this.resultSet = new ApplyTripleMakerRowIterator(
-					getSQL(ch).execute(), this.conjunction);
+			List relations = new ArrayList();
+			for (int i = 0; i < this.conjunction.length; i++) {
+				TripleRelation t = this.conjunction[i];
+				relations.add(t.baseRelation());
+			}
+			Relation joined = TripleRelationJoiner.joinRelations(relations, ch.getConstraints());
+			if (joined.equals(Relation.EMPTY)) {
+				this.resultSet = null;
+				continue;
+			}
+			SelectStatementBuilder sql = new SelectStatementBuilder(joined);
+			QueryExecutionIterator qex = new QueryExecutionIterator(
+					sql.getSQLStatement(), sql.getColumnSpecs(), joined.database());
+			this.resultSet = new ApplyTripleMakerRowIterator(qex, this.conjunction);
 		} // endless while loop
-	}
-
-	private SelectStatementBuilder getSQL(ConstraintHandler ch) {
-		ConnectedDB db = conjunction[0].baseRelation().database();
-		SelectStatementBuilder sql = new SelectStatementBuilder(db);
-		sql.setEliminateDuplicates(db.allowDistinct());	
-		for (int i = 0; i < this.conjunction.length; i++) {
-			TripleRelation t = this.conjunction[i];
-			sql.addRelation(t.baseRelation());
-		}
-		ch.addConstraintsToSQL(sql);
-		return sql;
 	}
 
 	public void close() {

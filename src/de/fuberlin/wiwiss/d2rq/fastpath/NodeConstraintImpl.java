@@ -11,10 +11,10 @@ import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
-import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
@@ -29,7 +29,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * TODO: Delete and replace with NodeSetFilterImpl
  * 
  * @author jg
- * @version $Id: NodeConstraintImpl.java,v 1.8 2008/04/27 22:42:37 cyganiak Exp $
+ * @version $Id: NodeConstraintImpl.java,v 1.9 2008/08/12 06:47:36 cyganiak Exp $
  */
 public class NodeConstraintImpl implements NodeSetFilter {
     public static final int NotFixedNodeType = 0;
@@ -204,7 +204,8 @@ public class NodeConstraintImpl implements NodeSetFilter {
      * It knows about Alias and correct quoting of values for integer/string
      * database columns.
      */
-    public void addConstraintsToSQL(SelectStatementBuilder sql) {
+    public Expression getExpression() {
+    	List expressions = new ArrayList(conditions);
         String value = null;
         if (fixedNode != null)
             value = fixedNode.toString(); // TODO what is a clean way to extract uri or literal value?
@@ -213,17 +214,14 @@ public class NodeConstraintImpl implements NodeSetFilter {
         while (it.hasNext()) {
             Attribute col = (Attribute) it.next();
             if (value != null && firstCol == null) {
-            	sql.addCondition(Equality.createAttributeValue(col,value));
+            	expressions.add(Equality.createAttributeValue(col,value));
             }
             if (firstCol == null) {
             	firstCol = col;
             	continue;
             }
-            sql.addCondition(Equality.createAttributeEquality(firstCol, col));
+            expressions.add(Equality.createAttributeEquality(firstCol, col));
         }
-        it = this.conditions.iterator();
-        while (it.hasNext()) {
-			sql.addCondition((Expression) it.next());
-		}
+    	return Conjunction.create(expressions);
     }
 }

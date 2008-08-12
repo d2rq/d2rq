@@ -3,30 +3,46 @@ package de.fuberlin.wiwiss.d2rq.sql;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
+import com.hp.hpl.jena.util.iterator.NullIterator;
+import com.hp.hpl.jena.util.iterator.SingletonIterator;
+
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 
 
 /**
- * Iterates over the triple stream created by applying several triple makers
- * to each row of an SQL {@link QueryExecutionIterator}. Skips <tt>null</tt>
- * triples produced by the triple makers.
+ * Takes a {@link Relation}, runs the corresponding SELECT query, and applies
+ * a {@link TripleMaker} to each SQL result row. Iterates over each of the 
+ * generated triples. Skips <tt>null</tt> triples produced by the triple makers.
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ApplyTripleMakerIterator.java,v 1.1 2006/09/11 23:22:25 cyganiak Exp $
+ * @version $Id: RelationToTriplesIterator.java,v 1.1 2008/08/12 06:47:36 cyganiak Exp $
  */
-public class ApplyTripleMakerIterator implements ClosableIterator {
+public class RelationToTriplesIterator implements ClosableIterator {
+	
+	public static ClosableIterator createTripleIterator(Relation relation, TripleMaker tripleMaker) {
+		if (relation.equals(Relation.EMPTY)) {
+			return NullIterator.instance;
+		}
+		if (relation.isTrivial()) {
+			return new SingletonIterator(ResultRow.NO_ATTRIBUTES);
+		}
+		return new RelationToTriplesIterator(relation, tripleMaker);
+	}
+	
 	private TripleMaker tripleMaker;
 	private ClosableIterator sqlIterator;
     private LinkedList tripleQueue = new LinkedList();
     private boolean explicitlyClosed = false;
 
-	public ApplyTripleMakerIterator(ClosableIterator sqlIterator, TripleMaker tripleMaker) {
-		this.sqlIterator = sqlIterator;
+    private RelationToTriplesIterator(Relation relation, TripleMaker tripleMaker) {
+    	SelectStatementBuilder select = new SelectStatementBuilder(relation);
+    	this.sqlIterator = new QueryExecutionIterator(
+    			select.getSQLStatement(), select.getColumnSpecs(), relation.database());
 		this.tripleMaker = tripleMaker;
-	}
-
+    }
+    
 	public boolean hasNext() {
 		if (this.explicitlyClosed) {
 			return false;
@@ -44,10 +60,6 @@ public class ApplyTripleMakerIterator implements ClosableIterator {
 		return this.tripleQueue.removeFirst();
 	}
 	
-	public Triple nextTriple() {
-		return (Triple) next();
-	}
-
 	public void close() {
 		this.explicitlyClosed = true;
 		this.sqlIterator.close();

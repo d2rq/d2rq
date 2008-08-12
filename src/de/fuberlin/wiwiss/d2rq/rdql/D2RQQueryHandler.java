@@ -11,12 +11,15 @@ import com.hp.hpl.jena.graph.query.SimpleQueryHandler;
 import com.hp.hpl.jena.graph.query.Stage;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
 
 /**
  * A D2RQQueryHandler handles queries on behalf of a {@link GraphD2RQ}.
  * 
+ * TODO: Use {@link QueryEngineD2RQ} instead of {@link FastPathEngine} 
+ * 
  * @author jgarbers
- * @version $Id: D2RQQueryHandler.java,v 1.10 2006/10/16 12:46:01 cyganiak Exp $
+ * @version $Id: D2RQQueryHandler.java,v 1.11 2008/08/12 06:47:37 cyganiak Exp $
  */
 public class D2RQQueryHandler extends SimpleQueryHandler implements QueryHandler {
 	private Collection rdfRelations;

@@ -29,6 +29,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
@@ -47,9 +48,14 @@ import de.fuberlin.wiwiss.d2rq.rdql.D2RQQueryHandler;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.48 2008/04/27 22:42:38 cyganiak Exp $
+ * @version $Id: GraphD2RQ.java,v 1.49 2008/08/12 06:47:37 cyganiak Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
+	
+	{
+		QueryEngineD2RQ.register();
+	}
+	
 	private Log log = LogFactory.getLog(GraphD2RQ.class);
 	private final Capabilities capabilities = new D2RQCapabilities();
 	private final Mapping mapping;

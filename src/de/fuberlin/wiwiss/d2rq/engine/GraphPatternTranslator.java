@@ -19,6 +19,9 @@ public class GraphPatternTranslator {
 		this.tripleRelations = tripleRelations;
 	}
 
+	/**
+	 * @return A list of {@link NodeRelation}s
+	 */
 	public List translate() {
 		if (triplePatterns.isEmpty()) {
 			return Collections.singletonList(NodeRelation.TRUE);

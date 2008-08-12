@@ -14,12 +14,12 @@ import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 
 /**
- * Executes an SQL query and delivers result rows as an iterator over arrays
- * of Strings. The query is executed lazily. This class logs all executed SQL queries.
+ * Executes an SQL query and delivers result rows as an iterator over {@link ResultRow}s.
+ * The query is executed lazily. This class logs all executed SQL queries.
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryExecutionIterator.java,v 1.5 2006/09/13 14:06:23 cyganiak Exp $
+ * @version $Id: QueryExecutionIterator.java,v 1.6 2008/08/12 06:47:36 cyganiak Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
 	public static Collection protocol=null;

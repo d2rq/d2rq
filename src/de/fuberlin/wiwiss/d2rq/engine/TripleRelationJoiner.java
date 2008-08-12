@@ -21,12 +21,45 @@ import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilterImpl;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 public class TripleRelationJoiner {
 	
 	public static TripleRelationJoiner create() {
 		return new TripleRelationJoiner(new VariableNameToNodeSetMap(), 
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * Static convenience function that joins several {@link Relation}s into one. Exposed here
+	 * because it can be used in the old FastPath engine.
+	 * 
+	 * TODO: Make private and non-static if no longer needed by old FastPath engine
+	 * 
+	 * @param relations A set of {@link Relation}s
+	 * @param additionalCondition An additional expression, e.g. join condition
+	 * @return A relation that is the join of the inputs
+	 */
+	public static Relation joinRelations(Collection relations, Expression additionalCondition) {
+		if (relations.isEmpty()) {
+			return Relation.TRUE;
+		}
+		ConnectedDB connectedDB = ((Relation) relations.iterator().next()).database();
+		Iterator it = relations.iterator();
+		AliasMap joinedAliases = AliasMap.NO_ALIASES;
+		Collection expressions = new HashSet();
+		expressions.add(additionalCondition);
+		Set joins = new HashSet();
+		Set projections = new HashSet();
+		while (it.hasNext()) {
+			Relation relation = (Relation) it.next();
+			joinedAliases = joinedAliases.applyTo(relation.aliases());
+			expressions.add(relation.condition());
+			joins.addAll(relation.joinConditions());
+			projections.addAll(relation.projections());
+		}
+		return new RelationImpl(connectedDB, joinedAliases, Conjunction.create(expressions), 
+				joins, projections, false);
 	}
 	
 	private final VariableNameToNodeSetMap nodeSets;
@@ -83,24 +116,13 @@ public class TripleRelationJoiner {
 	}
 	
 	private Relation joinedBaseRelation() {
-		if (joinedTriplePatterns.isEmpty()) {
-			return Relation.TRUE;
-		}
-		Relation first = ((TripleRelation) joinedTripleRelations.get(0)).baseRelation();
+		List relations = new ArrayList();
 		Iterator it = joinedTripleRelations.iterator();
-		AliasMap joinedAliases = AliasMap.NO_ALIASES;
-		Collection expressions = new HashSet();
-		Set joins = new HashSet();
-		Set projections = new HashSet();
 		while (it.hasNext()) {
 			TripleRelation tripleRelation = (TripleRelation) it.next();
-			joinedAliases = joinedAliases.applyTo(tripleRelation.baseRelation().aliases());
-			expressions.add(tripleRelation.baseRelation().condition());
-			joins.addAll(tripleRelation.baseRelation().joinConditions());
-			projections.addAll(tripleRelation.baseRelation().projections());
+			relations.add(tripleRelation.baseRelation());
 		}
-		return new RelationImpl(first.database(), joinedAliases, Conjunction.create(expressions), 
-				joins, projections, false);
+		return joinRelations(relations, Expression.TRUE);
 	}
 	
 	private static class VariableNameToNodeSetMap {

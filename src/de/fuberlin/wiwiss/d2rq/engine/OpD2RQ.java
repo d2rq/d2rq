@@ -18,8 +18,11 @@ public class OpD2RQ extends OpExtMain {
 	}
 	
 	public QueryIterator eval(QueryIterator input, ExecutionContext execCxt) {
-		// TODO @@@ Auto-generated method stub
-		return null;
+		// I'm not sure what the semantics of input is; so I just close
+		// and ignore it
+		input.close();
+		
+		return NodeRelationQueryIterator.createQueryIterator(replacement, execCxt);
 	}
 
 	public boolean equalTo(Op other, NodeIsomorphismMap labelMap) {

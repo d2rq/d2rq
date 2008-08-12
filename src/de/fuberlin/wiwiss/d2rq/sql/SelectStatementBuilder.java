@@ -6,10 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import com.hp.hpl.jena.util.iterator.ClosableIterator;
-import com.hp.hpl.jena.util.iterator.NullIterator;
-import com.hp.hpl.jena.util.iterator.SingletonIterator;
-
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
@@ -27,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.25 2008/04/27 22:42:38 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.26 2008/08/12 06:47:36 cyganiak Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -38,39 +34,33 @@ public class SelectStatementBuilder {
 	private AliasMap aliases = AliasMap.NO_ALIASES;
 	private Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
 
-	/**
-	 * TODO: Try if we can change parameters to (Relation, projectionSpecs) and make immutable
-	 */
-	public SelectStatementBuilder(ConnectedDB database) {
-		this.database = database;
-	}
-	
-	public void addRelation(Relation relation) {
-		addAliasMap(relation.aliases());
+	public SelectStatementBuilder(Relation relation) {
+		if (relation.isTrivial()) {
+			throw new IllegalArgumentException("Cannot create SQL for trivial relation");
+		}
+		if (relation.equals(Relation.EMPTY)) {
+			throw new IllegalArgumentException("Cannot create SQL for empty relation");
+		}
+		database = relation.database();
+		this.aliases = this.aliases.applyTo(relation.aliases());
 		Iterator it = relation.joinConditions().iterator();
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
-			addJoin(join);
+			Iterator it2 = join.attributes1().iterator();
+			while (it2.hasNext()) {
+				Attribute attribute1 = (Attribute) it2.next();
+				Attribute attribute2 = join.equalAttribute(attribute1);
+				addCondition(Equality.createAttributeEquality(attribute1, attribute2));
+			}
 		}
 		addCondition(relation.condition());
 		it = relation.projections().iterator();
 		while (it.hasNext()) {
 			addSelectSpec((ProjectionSpec) it.next());
 		}
+		eliminateDuplicates = !relation.isUnique();
 	}
 	
-	public ConnectedDB getDatabase() {
-	    return this.database;
-	}
-
-	public boolean isTrivial() {
-		return this.selectSpecs.isEmpty() && condition().isTrue();
-	}
-
-	public boolean isEmpty() {
-		return condition().isFalse();
-	}
-
 	private Expression condition() {
 		if (this.cachedCondition == null) {
 			this.cachedCondition = Conjunction.create(this.conditions);
@@ -87,15 +77,12 @@ public class SelectStatementBuilder {
 	}
 	
 	public String getSQLStatement() {
-		if (isTrivial() || isEmpty()) {
-			return null;
-		}
 		addMentionedTablesFromConditions();
 		StringBuffer result = new StringBuffer("SELECT ");
 		if (this.database.limit() != Database.NO_LIMIT) {
 			result.append("TOP " + this.database.limit() + " ");
 		}
-		if (this.eliminateDuplicates) {
+		if (this.eliminateDuplicates && database.allowDistinct()) {
 			result.append("DISTINCT ");
 		}
 		Iterator it = this.selectSpecs.iterator();
@@ -136,8 +123,14 @@ public class SelectStatementBuilder {
 		return result.toString();
 	}
 	
-	public void addAliasMap(AliasMap newAliases) {
-		this.aliases = this.aliases.applyTo(newAliases);
+	/**
+	 * Returns the projection specs used in this query, in order of appearance 
+	 * in the "SELECT x, y, z" part of the query.
+	 * 
+	 * @return A list of {@link ProjectionSpec}s
+	 */
+	public List getColumnSpecs() {
+		return this.selectSpecs;
 	}
 	
 	/**
@@ -156,43 +149,8 @@ public class SelectStatementBuilder {
 		this.selectSpecs.add(projection);
 	}
 
-	/**
-	 * Adds a WHERE clause to the query.
-	 * @param condition An SQL expression
-	 */
-	public void addCondition(Expression condition) {
+	private void addCondition(Expression condition) {
 		this.conditions.add(condition);
 		this.cachedCondition = null;
-	}
-
-	private void addJoin(Join join) {
-		Iterator it = join.attributes1().iterator();
-		while (it.hasNext()) {
-			Attribute attribute1 = (Attribute) it.next();
-			Attribute attribute2 = join.equalAttribute(attribute1);
-			addCondition(Equality.createAttributeEquality(attribute1, attribute2));
-		}
-    }
-
-	/**
-	 * Sets if the SQL statement should eliminate duplicate rows
-	 * ("SELECT DISTINCT").
-	 * @param eliminateDuplicates enable DISTINCT?
-	 */
-	public void setEliminateDuplicates(boolean eliminateDuplicates) {
-		this.eliminateDuplicates = eliminateDuplicates;
-	}
-	
-	/**
-	 * @return An iterator over {@link ResultRow}s
-	 */
-	public ClosableIterator execute() {
-		if (isTrivial()) {
-			return new SingletonIterator(ResultRow.NO_ATTRIBUTES);
-		}
-		if (isEmpty()) {
-			return NullIterator.instance;
-		}
-		return new QueryExecutionIterator(getSQLStatement(), this.selectSpecs, this.database);		
 	}
 }

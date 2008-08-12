@@ -9,8 +9,8 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
-import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /** 
  * Handles variable node constraints for a TripleQuery conjunction.
@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * (This code could as well be kept in PatternQueryCombiner.)
  * 
  * @author jgarbers
- * @version $Id: ConstraintHandler.java,v 1.4 2008/04/25 11:25:05 cyganiak Exp $
+ * @version $Id: ConstraintHandler.java,v 1.5 2008/08/12 06:47:36 cyganiak Exp $
  */
 public class ConstraintHandler {
     public boolean possible=true;
@@ -69,12 +69,14 @@ public class ConstraintHandler {
      * @param sql contains both the places where to store expressions 
      * and the methods, how to format them.
      */
-    public void addConstraintsToSQL(SelectStatementBuilder sql) {
+    public Expression getConstraints() {
+    	Expression result = Expression.TRUE;
         Iterator it=variableToConstraint.values().iterator();
         while (it.hasNext()) {
             NodeConstraintImpl c=(NodeConstraintImpl)it.next();
-            c.addConstraintsToSQL(sql);
+            result = result.and(c.getExpression());
         }
+        return result;
     }
        
     public NodeMakerIterator makeNodeMakerIterator(Set indexSet)  {

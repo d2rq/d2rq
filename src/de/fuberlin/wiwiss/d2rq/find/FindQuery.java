@@ -18,8 +18,7 @@ import de.fuberlin.wiwiss.d2rq.plan.ExecuteSequence;
 import de.fuberlin.wiwiss.d2rq.plan.ExecuteTripleRelation;
 import de.fuberlin.wiwiss.d2rq.plan.ExecutionPlanElement;
 import de.fuberlin.wiwiss.d2rq.plan.ExecutionPlanVisitor;
-import de.fuberlin.wiwiss.d2rq.sql.ApplyTripleMakerIterator;
-import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
+import de.fuberlin.wiwiss.d2rq.sql.RelationToTriplesIterator;
 import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
 
 
@@ -29,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.sql.TripleMaker;
  * SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.13 2008/04/25 15:26:21 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.14 2008/08/12 06:47:37 cyganiak Exp $
  */
 public class FindQuery {
 	private List compatibleRelations = new ArrayList();
@@ -115,11 +114,10 @@ public class FindQuery {
 			// Do nothing
 		}
 		private void chain(Relation relation, TripleMaker tripleMaker) {
-			SelectStatementBuilder sql = new SelectStatementBuilder(relation.database());
-			sql.setEliminateDuplicates(!relation.isUnique());
-			sql.addRelation(relation);
-			iterator = iterator.andThen(
-					new ApplyTripleMakerIterator(sql.execute(), tripleMaker));
+			if (relation.equals(Relation.EMPTY)) {
+				return;
+			}
+			iterator = iterator.andThen(RelationToTriplesIterator.createTripleIterator(relation, tripleMaker));
 		}
 	}
 }

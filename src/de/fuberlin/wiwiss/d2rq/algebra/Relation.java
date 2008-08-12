@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO Add uniqueConstraints()
  * TODO Explicitly list tables!!!
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Relation.java,v 1.11 2008/04/27 22:42:36 cyganiak Exp $
+ * @version $Id: Relation.java,v 1.12 2008/08/12 06:47:37 cyganiak Exp $
  */
 public abstract class Relation implements RelationalOperators {
 
@@ -42,14 +42,20 @@ public abstract class Relation implements RelationalOperators {
 		public Set joinConditions() { return Collections.EMPTY_SET; }
 		public Expression condition() { return Expression.TRUE; }
 		public Set projections() { return Collections.EMPTY_SET; }
-		// TODO This is dangerous; TRUE can remain TRUE or become EMPTY upon select()
-		public Relation select(Expression condition) { return Relation.TRUE; }
+		public Relation select(Expression condition) {
+			if (condition.isFalse()) return Relation.EMPTY;
+			if (condition.isTrue()) return Relation.TRUE;
+			// TODO This is broken; we need to evaluate the expression, but we don't
+			// have a ConnectedDB available here so we can't really do it
+			return Relation.TRUE;
+		}
 		public Relation renameColumns(ColumnRenamer renamer) { return this; }
 		public Relation project(Set projectionSpecs) { return this; }
 		public boolean isUnique() { return true; }
 		public String toString() { return "Relation.TRUE"; }
 	};
 	
+	// TODO Can we remove this, and maybe pass the database around in an ARQ Context object?
 	public abstract ConnectedDB database();
 	
 	/**
@@ -106,5 +112,9 @@ public abstract class Relation implements RelationalOperators {
 			results.add(attribute.relationName());
 		}
 		return results;
+	}
+	
+	public boolean isTrivial() {
+		return projections().isEmpty() && condition().isTrue() && joinConditions().isEmpty();
 	}
 }

@@ -15,6 +15,8 @@ import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 
 /**
+ * TODO The entire package is obsolete now thanks to {@link QueryEngineD2RQ} and should be removed.
+ * 
  * TODO instanciate just one PatternQueryCombiner? it could do some caching
  * 		or leave the caching for graph? e.g. triple -> list of bridges
  * 
@@ -23,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
  *
  * @author jg
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FastpathEngine.java,v 1.6 2008/04/25 15:25:26 cyganiak Exp $
+ * @version $Id: FastpathEngine.java,v 1.7 2008/08/12 06:47:36 cyganiak Exp $
  */
 public class FastpathEngine {
 	private final Pipe input;
