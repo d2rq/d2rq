@@ -16,13 +16,23 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeRelation.java,v 1.5 2008/08/13 06:34:59 cyganiak Exp $
+ * @version $Id: NodeRelation.java,v 1.6 2008/08/13 11:27:35 cyganiak Exp $
  */
 public class NodeRelation {
 	
 	public static final NodeRelation TRUE = 
 		new NodeRelation(Relation.TRUE, Collections.EMPTY_MAP);
 
+	public static NodeRelation empty(Set variables) {
+		Map map = new HashMap();
+		Iterator it = variables.iterator();
+		while (it.hasNext()) {
+			String variableName = (String) it.next();
+			map.put(variableName, NodeMaker.EMPTY);
+		}
+		return new NodeRelation(Relation.EMPTY, map);
+	}
+	
 	private Relation base;
 	private Map variablesToNodeMakers;
 	

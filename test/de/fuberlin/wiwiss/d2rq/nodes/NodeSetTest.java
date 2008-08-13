@@ -27,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * - Attributes with obviously incompatible types should not match
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeSetTest.java,v 1.2 2008/04/28 14:33:21 cyganiak Exp $
+ * @version $Id: NodeSetTest.java,v 1.3 2008/08/13 11:27:38 cyganiak Exp $
  */
 public class NodeSetTest extends TestCase {
 	private final static Attribute table1foo = SQL.parseAttribute("table1.foo");
@@ -276,67 +276,67 @@ public class NodeSetTest extends TestCase {
 	public void testSameAttributeTwiceExpressionIsTrue() {
 		nodes.limitValuesToAttribute(table1foo);
 		nodes.limitValuesToAttribute(table1foo);
-		assertEquals(Expression.TRUE, nodes.translatedExpression());
+		assertEquals(Expression.TRUE, nodes.constraint());
 	}
 	
 	public void testAttributeAndConstantExpressionIsEquality() {
 		nodes.limitValues("foo");
 		nodes.limitValuesToAttribute(table1foo);
 		assertEquals(Equality.createAttributeValue(table1foo, "foo"), 
-				nodes.translatedExpression());
+				nodes.constraint());
 	}
 	
 	public void testSameBlankNodeIDTwiceExpressionIsTrue() {
 		nodes.limitValuesToBlankNodeID(fooBlankNodeID);
 		nodes.limitValuesToBlankNodeID(fooBlankNodeID);
-		assertEquals(Expression.TRUE, nodes.translatedExpression());
+		assertEquals(Expression.TRUE, nodes.constraint());
 	}
 	
 	public void testSamePatternTwiceExpressionIsTrue() {
 		nodes.limitValuesToPattern(pattern1);
 		nodes.limitValuesToPattern(pattern1);
-		assertEquals(Expression.TRUE, nodes.translatedExpression());
+		assertEquals(Expression.TRUE, nodes.constraint());
 	}
 	
 	public void testSameExpressionTwiceExpressionIsTrue() {
 		nodes.limitValuesToExpression(expression1);
 		nodes.limitValuesToExpression(expression1);
-		assertEquals(Expression.TRUE, nodes.translatedExpression());
+		assertEquals(Expression.TRUE, nodes.constraint());
 	}
 	
 	public void testBlankNodeAndConstantMatchExpressionIsEquality() {
 		nodes.limitValuesToBlankNodeID(fooBlankNodeID);
 		nodes.limitTo(Node.createAnon(new AnonId("Foo@@42")));
 		assertEquals(Equality.createAttributeValue(table1foo, "42"), 
-				nodes.translatedExpression());
+				nodes.constraint());
 	}
 	
 	public void testPatternAndConstantMatchExpressionIsEquality() {
 		nodes.limitValuesToPattern(pattern1);
 		nodes.limitValues("http://example.org/res42");
 		assertEquals(Equality.createAttributeValue(table1foo, "42"), 
-				nodes.translatedExpression());
+				nodes.constraint());
 	}
 	
 	public void testExpressionAndConstantExpressionIsEquality() {
 		nodes.limitValues("foo");
 		nodes.limitValuesToExpression(expression1);
 		assertEquals(Equality.createExpressionValue(expression1, "foo"),
-				nodes.translatedExpression());
+				nodes.constraint());
 	}
 	
 	public void testTwoAttributesExpressionIsEquality() {
 		nodes.limitValuesToAttribute(table1foo);
 		nodes.limitValuesToAttribute(table1bar);
 		assertEquals(Equality.createAttributeEquality(table1foo, table1bar),
-				nodes.translatedExpression());
+				nodes.constraint());
 	}
 	
 	public void testEquivalentPatternsExpressionIsEquality() {
 		nodes.limitValuesToPattern(pattern1);
 		nodes.limitValuesToPattern(pattern1aliased);
 		assertEquals(Equality.createAttributeEquality(table1foo, alias1foo), 
-				nodes.translatedExpression());
+				nodes.constraint());
 	}
 	
 	public void testTwoPatternsExpressionIsConcatEquality() {
@@ -351,21 +351,21 @@ public class NodeSetTest extends TestCase {
 						"AttributeExpr(@@table1.foo@@), " +
 						"Constant(/), " +
 						"AttributeExpr(@@table1.bar@@)))",
-				nodes.translatedExpression().toString());
+				nodes.constraint().toString());
 	}
 	
 	public void testTwoExpressionsTranslatesToEquality() {
 		nodes.limitValuesToExpression(expression1);
 		nodes.limitValuesToExpression(expression2);
 		assertEquals(Equality.create(expression1, expression2), 
-				nodes.translatedExpression());
+				nodes.constraint());
 	}
 	
 	public void testEquivalentBlankNodeIDsExpressionIsEquality() {
 		nodes.limitValuesToBlankNodeID(fooBlankNodeID);
 		nodes.limitValuesToBlankNodeID(fooBlankNodeID2);
 		assertEquals(Equality.createAttributeEquality(table1foo, alias1foo),
-				nodes.translatedExpression());
+				nodes.constraint());
 	}
 	
 	public void testPatternEqualsAttribute() {
@@ -376,14 +376,14 @@ public class NodeSetTest extends TestCase {
 				"Concatenation(" +
 						"Constant(http://example.org/res), " +
 						"AttributeExpr(@@table1.foo@@)))",
-				nodes.translatedExpression().toString());
+				nodes.constraint().toString());
 	}
 	
 	public void testExpressionEqualsAttribute() {
 		nodes.limitValuesToExpression(expression1);
 		nodes.limitValuesToAttribute(table1bar);
 		assertEquals(Equality.create(expression1, new AttributeExpr(table1bar)),
-				nodes.translatedExpression());
+				nodes.constraint());
 	}
 	
 	public void testExpressionEqualsPattern() {
@@ -394,7 +394,7 @@ public class NodeSetTest extends TestCase {
 				"Concatenation(" +
 						"Constant(http://example.org/res), " +
 						"AttributeExpr(@@table1.foo@@)))",
-				nodes.translatedExpression().toString());
+				nodes.constraint().toString());
 	}
 	
 	public void testANYNodeDoesNotLimit() {

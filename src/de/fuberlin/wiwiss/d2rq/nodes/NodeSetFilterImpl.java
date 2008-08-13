@@ -190,7 +190,7 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 		return results;
 	}
 	
-	public Expression translatedExpression() {
+	public Expression constraint() {
 		if (isEmpty()) {
 			return Expression.FALSE;
 		}

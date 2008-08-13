@@ -113,5 +113,8 @@ public class GraphPatternTranslator {
 			}
 			return results;
 		}
+		public String toString() {
+			return "CandidateList(" + triplePattern + ")[" + candidates + "]";
+		}
 	}
 }

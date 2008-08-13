@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryExecutionIterator.java,v 1.7 2008/08/13 06:35:24 cyganiak Exp $
+ * @version $Id: QueryExecutionIterator.java,v 1.8 2008/08/13 11:27:39 cyganiak Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
 	public static Collection protocol=null;
@@ -114,7 +114,6 @@ public class QueryExecutionIterator implements ClosableIterator {
 	    }
     	this.queryExecuted = true;
     	LogFactory.getLog(QueryExecutionIterator.class).debug(this.sql);
-    	System.out.println(sql);
     	BeanCounter.totalNumberOfExecutedSQLQueries++;
     	if (protocol!=null)
     	    protocol.add(this.sql);

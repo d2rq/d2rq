@@ -19,13 +19,13 @@ import java.util.Map;
  * to use something else than a "real" AliasMap.
  *  
  * TODO: AliasMap and ColumnRenamer are different concepts.
- * An AliasMap is a bunch of "table AS alias" delcarations. A column renamer is
+ * An AliasMap is a bunch of "table AS alias" declarations. A column renamer is
  * something that can be applied to a column name to yield a new one. It should
  * be possible to obtain a ColumnRenamer from a declared AliasMap, but they should
  * be separate classes. AliasMap might also be better called Aliases or AliasSet.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.8 2007/10/22 10:21:16 cyganiak Exp $
+ * @version $Id: AliasMap.java,v 1.9 2008/08/13 11:27:38 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_SET);
