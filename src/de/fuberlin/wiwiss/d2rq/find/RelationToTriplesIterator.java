@@ -23,11 +23,11 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RelationToTriplesIterator.java,v 1.1 2008/08/12 17:26:22 cyganiak Exp $
+ * @version $Id: RelationToTriplesIterator.java,v 1.2 2008/08/13 06:35:00 cyganiak Exp $
  */
 public class RelationToTriplesIterator implements ClosableIterator {
 	
-	public static ClosableIterator createTripleIterator(Relation relation, Collection tripleMakers) {
+	public static ClosableIterator create(Relation relation, Collection tripleMakers) {
 		if (relation.equals(Relation.EMPTY)) {
 			return NullIterator.instance;
 		}

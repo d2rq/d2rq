@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.find;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.Collections;
 import java.util.Set;
@@ -8,7 +8,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
-import de.fuberlin.wiwiss.d2rq.find.CompatibleRelationGroup;
 import de.fuberlin.wiwiss.d2rq.sql.DummyDB;
 
 public class CompatibleRelationGroupTest extends TestCase {
@@ -22,8 +21,8 @@ public class CompatibleRelationGroupTest extends TestCase {
 		RelationImpl notUnique = new RelationImpl(
 				new DummyDB(), AliasMap.NO_ALIASES, Expression.TRUE, Collections.EMPTY_SET, 
 				projections2, false);
-		assertTrue(new CompatibleRelationGroup(unique, null).isCompatible(unique));
-		assertFalse(new CompatibleRelationGroup(unique, null).isCompatible(notUnique));
-		assertFalse(new CompatibleRelationGroup(notUnique, null).isCompatible(unique));
+		assertTrue(new CompatibleRelationGroup(unique).isCompatible(unique));
+		assertFalse(new CompatibleRelationGroup(unique).isCompatible(notUnique));
+		assertFalse(new CompatibleRelationGroup(notUnique).isCompatible(unique));
 	}
 }

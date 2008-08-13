@@ -9,6 +9,7 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.NullIterator;
 
+import de.fuberlin.wiwiss.d2rq.algebra.CompatibleRelationGroup;
 import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
@@ -16,22 +17,29 @@ import de.fuberlin.wiwiss.d2rq.find.URIMakerRule.URIMakerRuleChecker;
 
 
 /**
- * A find query on a list of property bridges. Results are delivered
- * as an iterator. Will combine queries on multiple bridges into one
- * SQL statement where possible.
+ * A find query on a collection of {@link TripleRelation}s. Results are 
+ * delivered as an iterator of triples. Will combine queries on multiple
+ * relations into one SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.16 2008/08/12 17:26:22 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.17 2008/08/13 06:35:00 cyganiak Exp $
  */
 public class FindQuery {
-	private List compatibleRelations = new ArrayList();
+	private final Triple triplePattern;
+	private final Collection tripleRelations;
 	
-	public FindQuery(Triple triplePattern, Collection propertyBridges) {
+	public FindQuery(Triple triplePattern, Collection tripleRelations) {
+		this.triplePattern = triplePattern;
+		this.tripleRelations = tripleRelations;
+	}
+
+	private List selectedTripleRelations() {
 		URIMakerRule rule = new URIMakerRule();
-		propertyBridges = rule.sortRDFRelations(propertyBridges);
+		List sortedTripleRelations = rule.sortRDFRelations(tripleRelations);
 		URIMakerRuleChecker subjectChecker = rule.createRuleChecker(triplePattern.getSubject());
 		URIMakerRuleChecker objectChecker = rule.createRuleChecker(triplePattern.getObject());
-		Iterator it = propertyBridges.iterator();
+		List result = new ArrayList();
+		Iterator it = sortedTripleRelations.iterator();
 		while (it.hasNext()) {
 			TripleRelation tripleRelation = (TripleRelation) it.next();
 			TripleRelation selectedTripleRelation = tripleRelation.selectTriple(triplePattern);
@@ -40,31 +48,22 @@ public class FindQuery {
 					&& objectChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT))) {
 				subjectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.SUBJECT));
 				objectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT));
-				addRelation(new JoinOptimizer(selectedTripleRelation).optimize());
+				result.add(new JoinOptimizer(selectedTripleRelation).optimize());
 			}
 		}
+		return result;
 	}
 	
-	private void addRelation(TripleRelation tripleRelation) {
-		Iterator it = this.compatibleRelations.iterator();
-		while (it.hasNext()) {
-			CompatibleRelationGroup group = (CompatibleRelationGroup) it.next();
-			if (group.isCompatible(tripleRelation.baseRelation())) {
-				group.add(tripleRelation.baseRelation(), new TripleMaker(tripleRelation));
-				return;
-			}
-		}
-		this.compatibleRelations.add(new CompatibleRelationGroup(tripleRelation.baseRelation(), new TripleMaker(tripleRelation)));
-	}
-
 	public ExtendedIterator iterator() {
 		ExtendedIterator result = NullIterator.emptyIterator();
-		Iterator it = compatibleRelations.iterator();
+		Iterator it = CompatibleRelationGroup.groupTripleRelations(
+				selectedTripleRelations()).iterator();
 		while (it.hasNext()) {
 			CompatibleRelationGroup group = (CompatibleRelationGroup) it.next();
 			if (!group.baseRelation().equals(Relation.EMPTY)) {
 				result = result.andThen(
-						RelationToTriplesIterator.createTripleIterator(group.baseRelation(), group.tripleMakers()));
+						RelationToTriplesIterator.create(
+								group.baseRelation(), group.tripleMakers()));
 			}
 		}
 		return result;

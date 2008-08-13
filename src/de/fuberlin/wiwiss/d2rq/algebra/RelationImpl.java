@@ -72,4 +72,32 @@ public class RelationImpl extends Relation {
 		return new RelationImpl(database, aliases, condition, joinConditions, 
 				newProjections, isUnique);
 	}
+	
+	public String toString() {
+		StringBuffer result = new StringBuffer("RelationImpl(");
+		if (isUnique) {
+			result.append("[unique]");
+		}
+		result.append("\n");
+		result.append("    project: ");
+		result.append(projections);
+		result.append("\n");
+		if (!joinConditions.isEmpty()) {
+			result.append("    joins: ");
+			result.append(joinConditions);
+			result.append("\n");
+		}
+		if (!condition.isTrue()) {
+			result.append("    condition: ");
+			result.append(condition);
+			result.append("\n");
+		}
+		if (!aliases.equals(AliasMap.NO_ALIASES)) {
+			result.append("    aliases: ");
+			result.append(aliases);
+			result.append("\n");
+		}
+		result.append(")");
+		return result.toString();
+	}
 }

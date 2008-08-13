@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.engine;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,6 +15,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpNull;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.algebra.CompatibleRelationGroup;
 
 public class TransformD2RQ extends TransformCopy {
 	private final Log log = LogFactory.getLog(TransformD2RQ.class);
@@ -32,13 +35,17 @@ public class TransformD2RQ extends TransformCopy {
 			return OpNull.create();
 		}
 		if (nodeRelations.size() == 1) {
-			return new OpD2RQ(opBGP, (NodeRelation) nodeRelations.iterator().next());
+			NodeRelation nodeRelation = (NodeRelation) nodeRelations.iterator().next();
+			return new OpD2RQ(opBGP, 
+					nodeRelation.baseRelation(),
+					Collections.singleton(new BindingMaker(nodeRelation)));
 		}
-		Iterator it = nodeRelations.iterator();
+		Collection compatibleGroups = CompatibleRelationGroup.groupNodeRelations(nodeRelations);
+		Iterator it = compatibleGroups.iterator();
 		Op tree = null;
 		while (it.hasNext()) {
-			NodeRelation nodeRelation = (NodeRelation) it.next();
-			Op op = new OpD2RQ(null, nodeRelation);
+			CompatibleRelationGroup group = (CompatibleRelationGroup) it.next();
+			Op op = new OpD2RQ(null, group.baseRelation(), group.bindingMakers());
 			if (tree == null) {
 				tree = op;
 			} else {

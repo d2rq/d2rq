@@ -14,6 +14,7 @@ public class AllTests {
 		suite.addTestSuite(TripleRelationTest.class);
 		suite.addTestSuite(AttributeTest.class);
 		suite.addTestSuite(ColumnRenamerTest.class);
+		suite.addTestSuite(CompatibleRelationGroupTest.class);
 		suite.addTestSuite(JoinTest.class);
 		//$JUnit-END$
 		return suite;

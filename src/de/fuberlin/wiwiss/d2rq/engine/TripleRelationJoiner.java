@@ -58,6 +58,9 @@ public class TripleRelationJoiner {
 			joins.addAll(relation.joinConditions());
 			projections.addAll(relation.projections());
 		}
+		// TODO: @@@ Figure out uniqueness instead of just false
+		// I think the new relation is unique if it is joined only on unique node sets.
+		// A node set is unique if it is constrained by only unique node makers.
 		return new RelationImpl(connectedDB, joinedAliases, Conjunction.create(expressions), 
 				joins, projections, false);
 	}

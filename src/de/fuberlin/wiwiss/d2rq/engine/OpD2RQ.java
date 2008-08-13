@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.engine;
 
+import java.util.Collection;
+
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpExt;
@@ -8,13 +10,17 @@ import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.engine.main.OpExtMain;
 import com.hp.hpl.jena.sparql.util.NodeIsomorphismMap;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+
 public class OpD2RQ extends OpExtMain {
 	private final OpBGP original;
-	private final NodeRelation nodeRelation;
+	private final Relation relation;
+	private final Collection bindingMakers;
 	
-	public OpD2RQ(OpBGP original, NodeRelation nodeRelation) {
+	public OpD2RQ(OpBGP original, Relation relation, Collection bindingMakers) {
 		this.original = original;
-		this.nodeRelation = nodeRelation;
+		this.relation = relation;
+		this.bindingMakers = bindingMakers;
 	}
 	
 	public QueryIterator eval(QueryIterator input, ExecutionContext execCxt) {
@@ -22,7 +28,7 @@ public class OpD2RQ extends OpExtMain {
 		// and ignore it
 		input.close();
 		
-		return NodeRelationQueryIterator.createQueryIterator(nodeRelation, execCxt);
+		return RelationToBindingsIterator.create(relation, bindingMakers, execCxt);
 	}
 
 	public boolean equalTo(Op other, NodeIsomorphismMap labelMap) {
@@ -32,7 +38,7 @@ public class OpD2RQ extends OpExtMain {
 	}
 
 	public int hashCode() {
-		return original.hashCode() ^ nodeRelation.hashCode();
+		return original.hashCode() ^ relation.hashCode() ^ bindingMakers.hashCode();
 	}
 
 	public OpExt copy() {
@@ -44,6 +50,6 @@ public class OpD2RQ extends OpExtMain {
 	}
 
 	public String getName() {
-		return "D2RQ";
+		return "d2rq";
 	}
 }

@@ -33,7 +33,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: QueryLanguageTestFramework.java,v 1.5 2008/04/26 21:27:09 cyganiak Exp $
+ * @version $Id: QueryLanguageTestFramework.java,v 1.6 2008/08/13 06:35:23 cyganiak Exp $
  */
 public abstract class QueryLanguageTestFramework extends TestCase {
 	protected ModelD2RQ model;
@@ -254,6 +254,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 
 	protected void sparql(String sparql) {
 //	    rdqlLogger.debug("RDQL-Query: " + rdql);
+		System.out.println(sparql);
 		queryString=sparql;
 		sparql = 
 				"PREFIX dc: <" + DC.NS + ">\n" +
