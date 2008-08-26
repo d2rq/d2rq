@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -19,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.16 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.17 2008/08/26 12:12:07 cyganiak Exp $
  */
 public class ConnectedDB {
 	public static final String MySQL = "MySQL";
@@ -90,9 +91,18 @@ public class ConnectedDB {
 	}
 	
 	private Properties getConnectionProperties() {
-		Properties result = (connectionProperties == null) 
-				? new Properties() 
-				: new Properties(connectionProperties);
+		// We could use the Properties(defaults) constructor, but some faulty
+		// JDBC drivers seem to bypass the defaults, maybe by using get()
+		// instead of getProperty(). This was observed with some version of
+		// the MySQL driver. So we clone a new Properties object.
+		Properties result = new Properties();
+		if (connectionProperties != null) {
+			Iterator it = connectionProperties.keySet().iterator();
+			while (it.hasNext()) {
+				String property = (String) it.next();
+				result.setProperty(property, connectionProperties.getProperty(property));
+			}
+		}
 		if (username != null) {
 			result.setProperty("user", username);
 		}
