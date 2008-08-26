@@ -41,7 +41,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.25 2008/05/01 10:42:22 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.26 2008/08/26 22:09:33 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -217,7 +217,7 @@ public class MappingGenerator {
 	}
 
 	public void writeLabelBridge(RelationName tableName) {
-		this.out.println(propertyBridgeName(tableName.qualifiedName()) + "__label a d2rq:PropertyBridge;");
+		this.out.println(propertyBridgeName(tableName.qualifiedName(), "__label") + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(tableName) + ";");
 		this.out.println("\td2rq:property rdfs:label;");
 		this.out.println("\td2rq:pattern \"" + labelPattern(tableName) + "\";");
@@ -339,7 +339,11 @@ public class MappingGenerator {
 	}
 	
 	private String propertyBridgeName(String relationName) {
-		return toPrefixedURI(mapNamespaceURI, "map", relationName);
+		return propertyBridgeName(relationName, "");
+	}
+	
+	private String propertyBridgeName(String relationName, String suffix) {
+		return toPrefixedURI(mapNamespaceURI, "map", relationName + suffix);
 	}
 	
 	private String vocabularyTermQName(RelationName table) {
