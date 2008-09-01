@@ -27,7 +27,8 @@ public class ResourceDescriptionServlet extends HttpServlet {
 		if (request.getQueryString() != null) {
 			relativeResourceURI = relativeResourceURI + "?" + request.getQueryString();
 		}
-		String resourceURI = server.resourceBaseURI() + relativeResourceURI;
+		String resourceURI = RequestParamHandler.removeOutputRequestParam(
+				server.resourceBaseURI() + relativeResourceURI);
 		String documentURL = server.dataURL(relativeResourceURI);
 
 		Model description = QueryExecutionFactory.create(

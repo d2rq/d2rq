@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * negotiation based tooling.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RequestParamHandler.java,v 1.1 2008/09/01 11:35:08 cyganiak Exp $
+ * @version $Id: RequestParamHandler.java,v 1.2 2008/09/01 23:56:31 cyganiak Exp $
  */
 public class RequestParamHandler {
 	private static final String ATTRIBUTE_NAME_IS_HANDLED =
@@ -30,6 +30,18 @@ public class RequestParamHandler {
 		mimeTypes.put("n3", "text/rdf+n3;charset=utf-8");
 		mimeTypes.put("nt", "text/plain");
 		mimeTypes.put("text", "text/plain");
+	}
+	
+	/**
+	 * Removes the "output=foobar" part of a URI if present.
+	 */
+	public static String removeOutputRequestParam(String uri) {
+		// Remove the param: output=[a-z0-9]*
+		// There are two cases. The param can occur at the end of the URI,
+		// this is matched by the first part: [?&]param$
+		// Or it can occur elsewhere, then it's matched by param& with a
+		// lookbehind that requires [?&] to occur before the pattern.
+		return uri.replaceFirst("([?&]output=[a-z0-9]*$)|((?<=[?&])output=[a-z0-9]*&)", "");
 	}
 	
 	private final HttpServletRequest request;
