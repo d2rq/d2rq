@@ -4,6 +4,8 @@
   <head>
     <title>Snorql: A SPARQL Explorer</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type="text/javascript" src="prototype.js"></script>
+    <script type="text/javascript" src="scriptaculous/scriptaculous.js"></script>
     <script type="text/javascript" src="sparql.js"></script>
     <script type="text/javascript" src="namespaces.js"></script>
     <script type="text/javascript" src="snorql.js"></script>
@@ -14,21 +16,39 @@
       <h1 id="title">Snorql: A SPARQL Explorer</h1>
     </div>
 
-    <div class="section" style="float: right; width: 6em">
+    <div class="section" style="float: right; width: 8em">
       <h2>Browse:</h2>
       <ul>
-        <li><a href="?classes">Classes</a></li>
-        <li><a href="?properties">Properties</a></li>
+        <li><a class="graph-link" href="?browse=classes">Classes</a></li>
+        <li><a class="graph-link" href="?browse=properties">Properties</a></li>
+        <li id="browse-named-graphs-link"><a href="?browse=graphs">Named Graphs</a></li>
       </ul>
     </div>
 
-    <div class="section" style="margin-right: 10em">
+    <div id="default-graph-section" class="section" style="margin-right: 12em">
+      <h2 style="display: inline">GRAPH:</h2>
+      <p style="display: inline">
+        Default graph.
+        <a href="?browse=graphs">List named graphs</a>
+      </p>
+    </div>
+
+    <div id="named-graph-section" class="section" style="margin-right: 12em">
+      <h2 style="display: inline">GRAPH:</h2>
+      <p style="display: inline">
+        <span id="selected-named-graph">Named graph goes here</span>.
+        <a href="javascript:snorql.switchToDefaultGraph()">Switch back to default graph</a>
+      </p>
+    </div>
+
+    <div class="section" style="margin-right: 12em">
       <h2>SPARQL:</h2>
       <pre id="prefixestext"></pre>
       <form id="queryform" action="#" method="get"><div>
         <input type="hidden" name="query" value="" id="query" />
         <input type="hidden" name="output" value="json" id="jsonoutput" disabled="disabled" />
         <input type="hidden" name="stylesheet" value="" id="stylesheet" disabled="disabled" />
+        <input type="hidden" name="graph" value="" id="graph-uri" disabled="disabled" />
       </div></form>
       <div>
         <textarea name="query" rows="9" cols="80" id="querytext"></textarea>
@@ -52,6 +72,6 @@
       <div id="result"><span></span></div>
     </div>
 
-    <div id="footer">Powered by <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/">D2R Server</a></div>
+    <div id="footer">Powered by <a id="poweredby" href="#">Snorql</a></div>
   </body>
 </html>

@@ -1,55 +1,75 @@
 var snorql = new Snorql();
 
 function Snorql() {
+    this._endpoint = document.location.href.match(/^([^?]*)snorql\//)[1] + 'sparql';
+    this._poweredByLink = 'http://www.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/';
+    this._poweredByLabel = 'D2R Server';
+    this._enableNamedGraphs = false;
+
     this._browserBase = null;
-    this._endpoint = null;
     this._namespaces = {};
+    this._graph = null;
     this._xsltDOM = null;
 
     this.start = function() {
         // TODO: Extract a QueryType class
         this.setBrowserBase(document.location.href.replace(/\?.*/, ''));
-        var endpoint = document.location.href.match(/^([^?]*)snorql\//)[1] + 'sparql';
-        this.setEndpointURL(endpoint);
+        this._displayEndpointURL();
+        this._displayPoweredBy();
         this.setNamespaces(D2R_namespacePrefixes);
         this.updateOutputMode();
         var match = document.location.href.match(/\?(.*)/);
         var queryString = match ? match[1] : '';
         if (!queryString) {
-            document.getElementById('querytext').value = 'SELECT * WHERE {\n...\n}';
+            document.getElementById('querytext').value = 'SELECT DISTINCT * WHERE {\n  ?s ?p ?o\n}\nLIMIT 10';
+            this._updateGraph(null, false);
             return;
         }
+        var graph = queryString.match(/graph=([^&]*)/);
+        graph = graph ? decodeURIComponent(graph[1]) : null;
+        this._updateGraph(graph, false);
+        var browse = queryString.match(/browse=([^&]*)/);
         var querytext = null;
-        if (queryString == 'classes') {
+        if (browse && browse[1] == 'classes') {
             var resultTitle = 'List of all classes:';
             var query = 'SELECT DISTINCT ?class\n' +
                     'WHERE { [] a ?class }\n' +
                     'ORDER BY ?class';
         }
-        if (queryString == 'properties') {
+        if (browse && browse[1] == 'properties') {
             var resultTitle = 'List of all properties:';
             var query = 'SELECT DISTINCT ?property\n' +
                     'WHERE { [] ?property [] }\n' +
                     'ORDER BY ?property';
         }
+        if (browse && browse[1] == 'graphs') {
+            var resultTitle = 'List of all named graphs:';
+            var querytext = 'SELECT DISTINCT ?namedgraph ?label\n' +
+                    'WHERE {\n' +
+                    '  GRAPH ?namedgraph { ?s ?p ?o }\n' +
+                    '  OPTIONAL { ?namedgraph rdfs:label ?label }\n' +
+                    '}\n' +
+                    'ORDER BY ?namedgraph';
+            var query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n' + querytext;
+        }
         var match = queryString.match(/property=([^&]*)/);
         if (match) {
             var resultTitle = 'All uses of property ' + decodeURIComponent(match[1]) + ':';
-            var query = 'SELECT ?resource ?value\n' +
+            var query = 'SELECT DISTINCT ?resource ?value\n' +
                     'WHERE { ?resource <' + decodeURIComponent(match[1]) + '> ?value }\n' +
                     'ORDER BY ?resource ?value';
         }
         var match = queryString.match(/class=([^&]*)/);
         if (match) {
             var resultTitle = 'All instances of class ' + decodeURIComponent(match[1]) + ':';
-            var query = 'SELECT ?instance\n' +
+            var query = 'SELECT DISTINCT ?instance\n' +
                     'WHERE { ?instance a <' + decodeURIComponent(match[1]) + '> }\n' +
                     'ORDER BY ?instance';
         }
         var match = queryString.match(/describe=([^&]*)/);
         if (match) {
             var resultTitle = 'Description of ' + decodeURIComponent(match[1]) + ':';
-            var query = 'SELECT ?property ?hasValue ?isValueOf\n' +
+            var query = 'SELECT DISTINCT ?property ?hasValue ?isValueOf\n' +
                     'WHERE {\n' +
                     '  { <' + decodeURIComponent(match[1]) + '> ?property ?hasValue }\n' +
                     '  UNION\n' +
@@ -68,6 +88,10 @@ function Snorql() {
         document.getElementById('querytext').value = querytext;
         this.displayBusyMessage();
         var service = new SPARQL.Service(this._endpoint);
+        if (this._graph) {
+            service.addDefaultGraph(this._graph);
+        }
+        service.setRequestHeader('Accept', 'application/sparql-results+json,*/*');
         var dummy = this;
         service.query(query, {
             success: function(json) {
@@ -88,16 +112,67 @@ function Snorql() {
         this._browserBase = url;
     }
 
-    this.setEndpointURL = function(url) {
-        this._endpoint = url;
-        var newTitle = 'Snorql: Exploring ' + url;
+    this._displayEndpointURL = function() {
+        var newTitle = 'Snorql: Exploring ' + this._endpoint;
         this._display(document.createTextNode(newTitle), 'title');
         document.title = newTitle;
+    }
+
+    this._displayPoweredBy = function() {
+        $('poweredby').href = this._poweredByLink;
+        $('poweredby').update(this._poweredByLabel);
     }
 
     this.setNamespaces = function(namespaces) {
         this._namespaces = namespaces;
         this._display(document.createTextNode(this._getPrefixes()), 'prefixestext');
+    }
+
+    this.switchToGraph = function(uri) {
+        this._updateGraph(uri, true);
+    }
+
+    this.switchToDefaultGraph = function() {
+        this._updateGraph(null, true);
+    }
+
+    this._updateGraph = function(uri, effect) {
+        if (!this._enableNamedGraphs) {
+            $('default-graph-section').hide();
+            $('named-graph-section').hide();
+            $('browse-named-graphs-link').hide();
+            return;
+        }
+        var changed = (uri != this._graph);
+        this._graph = uri;
+        var el = document.getElementById('graph-uri');
+        el.disabled = (this._graph == null);
+        el.value = this._graph;
+        if (this._graph == null) {
+            var show = 'default-graph-section';
+            var hide = 'named-graph-section';
+            $$('a.graph-link').each(function(link) {
+                match = link.href.match(/^(.*)[&?]graph=/);
+                if (match) link.href = match[1];
+            });
+        } else {
+            var show = 'named-graph-section';
+            var hide = 'default-graph-section';
+            $('selected-named-graph').update(this._graph);
+            var uri = this._graph;
+            $$('a.graph-link').each(function(link) {
+                match = link.href.match(/^(.*)[&?]graph=/);
+                if (!match) link.href = link.href + '&graph=' + uri;
+            });
+        }
+        $(hide).hide();
+        $(show).show();
+        if (effect && changed) {
+            new Effect.Highlight(show,
+                {startcolor: '#ffff00', endcolor: '#ccccff', resotrecolor: '#ccccff'});
+        }
+        $('graph-uri').disabled = (this._graph == null);
+        $('graph-uri').value = this._graph;
     }
 
     this.updateOutputMode = function() {
@@ -161,6 +236,7 @@ function Snorql() {
             div.appendChild(new SPARQLResultFormatter(json, this._namespaces).toDOM());
         }
         this._display(div, 'result');
+        this._updateGraph(this._graph); // refresh links in new result
     }
 
     this._display = function(node, whereID) {
@@ -212,7 +288,7 @@ function SPARQLResultFormatter(json, namespaces) {
         var table = document.createElement('table');
         table.className = 'queryresults';
         table.appendChild(this._createTableHeader());
-        for (var i in this._results) {
+        for (var i = 0; i < this._results.length; i++) {
             table.appendChild(this._createTableRow(this._results[i], i));
         }
         return table;
@@ -231,10 +307,19 @@ function SPARQLResultFormatter(json, namespaces) {
 
     this._createTableHeader = function() {
         var tr = document.createElement('tr');
-        for (var i in this._variables) {
+        var hasNamedGraph = false;
+        for (var i = 0; i < this._variables.length; i++) {
             var th = document.createElement('th');
             th.appendChild(document.createTextNode(this._variables[i]));
             tr.appendChild(th);
+            if (this._variables[i] == 'namedgraph') {
+                hasNamedGraph = true;
+            }
+        }
+        if (hasNamedGraph) {
+            var th = document.createElement('th');
+            th.appendChild(document.createTextNode(' '));
+            tr.insertBefore(th, tr.firstChild);
         }
         return tr;
     }
@@ -246,11 +331,23 @@ function SPARQLResultFormatter(json, namespaces) {
         } else {
             tr.className = 'even';
         }
-        for (var v in this._variables) {
-            var varName = this._variables[v];
+        var namedGraph = null;
+        for (var i = 0; i < this._variables.length; i++) {
+            var varName = this._variables[i];
             td = document.createElement('td');
             td.appendChild(this._formatNode(binding[varName], varName));
             tr.appendChild(td);
+            if (this._variables[i] == 'namedgraph') {
+                namedGraph = binding[varName];
+            }
+        }
+        if (namedGraph) {
+            var link = document.createElement('a');
+            link.href = 'javascript:snorql.switchToGraph(\'' + namedGraph.value + '\')';
+            link.appendChild(document.createTextNode('Switch'));
+            var td = document.createElement('td');
+            td.appendChild(link);
+            tr.insertBefore(td, tr.firstChild);
         }
         return tr;
     }
@@ -280,6 +377,7 @@ function SPARQLResultFormatter(json, namespaces) {
         var a = document.createElement('a');
         a.href = this._getLinkMaker(varName)(node.value);
         a.title = '<' + node.value + '>';
+        a.className = 'graph-link';
         var qname = this._toQName(node.value);
         if (qname) {
             a.appendChild(document.createTextNode(qname));
@@ -355,7 +453,7 @@ function SPARQLResultFormatter(json, namespaces) {
     }
 
     this._isNumericXSDType = function(datatypeURI) {
-        for (i in this._numericXSDTypes) {
+        for (i = 0; i < this._numericXSDTypes.length; i++) {
             if (datatypeURI == this._xsdNamespace + this._numericXSDTypes[i]) {
                 return true;
             }
