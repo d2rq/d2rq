@@ -2,8 +2,6 @@ package de.fuberlin.wiwiss.pubby.negotiation;
 
 import java.util.regex.Pattern;
 
-
-
 public class PubbyNegotiator {
 	private final static ContentTypeNegotiator pubbyNegotiator;
 	private final static ContentTypeNegotiator dataNegotiator;
@@ -25,7 +23,7 @@ public class PubbyNegotiator {
 		pubbyNegotiator.addVariant("text/html;q=0.81")
 				.addAliasMediaType("application/xhtml+xml;q=0.81");
 		pubbyNegotiator.addVariant("application/rdf+xml")
-				.addAliasMediaType("application/xml;q=0.5")
+				.addAliasMediaType("application/xml;q=0.45")
 				.addAliasMediaType("text/xml;q=0.4");
 		pubbyNegotiator.addVariant("text/rdf+n3;charset=utf-8;q=0.95")
 				.addAliasMediaType("text/n3;q=0.5")
@@ -37,7 +35,7 @@ public class PubbyNegotiator {
 
 		dataNegotiator = new ContentTypeNegotiator();
 		dataNegotiator.addVariant("application/rdf+xml;q=0.99")
-				.addAliasMediaType("application/xml;q=0.5")
+				.addAliasMediaType("application/xml;q=0.45")
 				.addAliasMediaType("text/xml;q=0.4");
 		dataNegotiator.addVariant("text/rdf+n3;charset=utf-8")
 				.addAliasMediaType("text/n3;q=0.5")

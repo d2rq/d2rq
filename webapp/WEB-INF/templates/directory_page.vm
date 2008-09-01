@@ -6,7 +6,8 @@
       All $classmap | $server_name
     </title>
     <link rel="stylesheet" type="text/css" href="${home_link}snorql/style.css" />
-    <link rel="alternate" type="application/rdf+xml" href="$rdf_link" title="RDF" />
+    <link rel="alternate" type="application/rdf+xml" href="$rdf_link?output=rdfxml" title="This page in RDF (XML)" />
+    <link rel="alternate" type="text/rdf+n3" href="$rdf_link?output=n3" title="This page in RDF (N3)" />
   </head>
   <body class="browser">
     <div id="rdficon"><a href="$rdf_link" title="RDF data"><img src="${home_link}snorql/rdf_flyer.24.gif" alt="[RDF data]" /></a></div>
