@@ -14,9 +14,16 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * that has the appropriate MIME type in the Accept: header.
  * This request can then be fed into the rest of our content
  * negotiation based tooling.
+ *
+ * TODO: The list of shortname=>mimetype mappings should live
+ * in ContentTypeNegotiator, which should have new methods
+ * getMatchWithOverride() and getOverrideName(), and this
+ * class here should just have static methods getParamFromURI,
+ * removeParamFromURI, addParamToURI. The whole WrappedRequest
+ * thing is smelly. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RequestParamHandler.java,v 1.2 2008/09/01 23:56:31 cyganiak Exp $
+ * @version $Id: RequestParamHandler.java,v 1.3 2008/09/02 00:20:11 cyganiak Exp $
  */
 public class RequestParamHandler {
 	private static final String ATTRIBUTE_NAME_IS_HANDLED =

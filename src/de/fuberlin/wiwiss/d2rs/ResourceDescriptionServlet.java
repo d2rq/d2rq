@@ -49,6 +49,7 @@ public class ResourceDescriptionServlet extends HttpServlet {
 			document.addProperty(RDFS.label, "RDF Description of " + label.getString());
 		}
 		server.addDocumentMetadata(description, document);
+// TODO: Add a Content-Location header
 		new ModelResponse(description, request, response).serve();
 //		Resource resource = description.getResource(resourceURI);
 	}
