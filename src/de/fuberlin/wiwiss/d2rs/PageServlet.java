@@ -47,7 +47,7 @@ public class PageServlet extends HttpServlet {
 			response.sendError(404);
 			return;
 		}
-		this.prefixes = server.model();
+		this.prefixes = server.getPrefixes(); // model();
 		Resource resource = description.getResource(resourceURI);
 		VelocityWrapper velocity = new VelocityWrapper(this, response);
 		Context context = velocity.getContext();

@@ -1,9 +1,7 @@
 package de.fuberlin.wiwiss.d2rs;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Iterator;
 
 import javax.servlet.ServletContext;
 
@@ -15,29 +13,20 @@ import org.joseki.Service;
 import org.joseki.ServiceRegistry;
 import org.joseki.processors.SPARQL;
 
-import com.hp.hpl.jena.query.DataSource;
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.DatasetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
-import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandler;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerFactory;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
-import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
-import de.fuberlin.wiwiss.d2rs.vocab.D2R;
 
 /**
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.21 2008/07/31 11:35:20 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.22 2008/09/02 11:30:05 cyganiak Exp $
  */
 public class D2RServer {
 	private final static String SPARQL_SERVICE_NAME = "sparql";
@@ -45,25 +34,30 @@ public class D2RServer {
 	private final static String DEFAULT_BASE_URI = "http://localhost";
 	private final static String DEFAULT_SERVER_NAME = "D2R Server";
 	private final static String SERVER_INSTANCE = "D2RServer.SERVER_INSTANCE";
+	private static final Log log = LogFactory.getLog(D2RServer.class);
 	
-	public static D2RServer fromServletContext(ServletContext context) {
-		return (D2RServer) context.getAttribute(SERVER_INSTANCE);
-	}
-	
-	private ConfigLoader config = null;
-	private int overridePort = -1;
-	private String overrideBaseURI = null;
+	/** d2rq mapping file */
 	private String configFile;
-	private boolean hasTruncatedResults;
-	private Model model = null;
-	private GraphD2RQ currentGraph = null;
-	private DataSource dataset;
-	private PrefixMapping prefixes;
-	private AutoReloader reloader = null;
-	private Log log = LogFactory.getLog(D2RServer.class);
+	
+	/** config file parser and Java representation */
+	private ConfigLoader config = null;
+	
+	/** server port from command line, overrides port in config file */
+	private int overridePort = -1;
+	
+	/** base URI from command line */
+	private String overrideBaseURI = null;
+	
+	/** the dataset, auto-reloadable in case of local mapping files */
+	private AutoReloadableDataset dataset;
+
 	
 	public void putIntoServletContext(ServletContext context) {
 		context.setAttribute(SERVER_INSTANCE, this);
+	}
+	
+	public static D2RServer fromServletContext(ServletContext context) {
+		return (D2RServer) context.getAttribute(SERVER_INSTANCE);
 	}
 	
 	public void overridePort(int port) {
@@ -121,7 +115,7 @@ public class D2RServer {
 	}
 	
 	public boolean hasTruncatedResults() {
-		return hasTruncatedResults;
+		return dataset.hasTruncatedResults();
 	}
 	
 	public String resourceBaseURI() {
@@ -152,109 +146,74 @@ public class D2RServer {
 	public String pageURL(String relativeResourceURI) {
 		return this.baseURI() + "page/" + relativeResourceURI;
 	}
-	
-	public Model model() {
-		return this.model;
-	}
 
 	public void addDocumentMetadata(Model document, Resource documentResource) {
 		this.config.addDocumentMetadata(document, documentResource);
 	}
-	
+
+	/**
+	 * @return the auto-reloadable dataset which contains a GraphD2RQ as its default graph, no named graphs
+	 */
+	public AutoReloadableDataset dataset() {
+		return this.dataset;
+	}
+
 	/**
 	 * @return The graph currently in use; will change to a new instance on auto-reload
 	 */
 	public GraphD2RQ currentGraph() {
-		if (this.reloader != null) {
-			this.reloader.checkMappingFileChanged();
-		}
-		if (this.currentGraph == null) {
-			throw new RuntimeException("No config-file configured in web.xml");
-		}
-		return this.currentGraph;
+		return (GraphD2RQ) this.dataset.asDatasetGraph().getDefaultGraph();
 	}
 	
-	public Dataset dataset() {
-		return this.dataset;
-	}
-	
-	public Model reloadModelD2RQ(String mappingFileURL) {
-		Model mapModel = ModelFactory.createDefaultModel();
-		mapModel.read(mappingFileURL, resourceBaseURI(), "N3");
-		updatePrefixes(mapModel);
-		this.hasTruncatedResults = mapModel.contains(null, D2RQ.resultSizeLimit, (RDFNode) null);
-		ModelD2RQ result = new ModelD2RQ(mapModel, resourceBaseURI());
-		this.currentGraph = (GraphD2RQ) result.getGraph();
-		this.currentGraph.connect();
-		this.currentGraph.initInventory(baseURI() + "all/");
-		return result;
-	}
-
-	private void updatePrefixes(PrefixMapping newPrefixes) {
-		prefixes = new PrefixMappingImpl();
-		Iterator it = newPrefixes.getNsPrefixMap().keySet().iterator();
-		while (it.hasNext()) {
-			String prefix = (String) it.next();
-			String uri = newPrefixes.getNsPrefixURI(prefix);
-			if (D2R.NS.equals(uri)) continue;
-			prefixes.setNsPrefix(prefix, uri);
-		}
-	}
-	
-	private void initAutoReloading(String filename) {
-		this.reloader = new AutoReloader(new File(filename), this);
-		this.model = ModelFactory.createModelForGraph(this.reloader);
-		DescribeHandlerRegistry.get().clear();
-		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory(this.model));
-		this.dataset = DatasetFactory.create();
-		this.dataset.setDefaultModel(this.model);
-		this.reloader.forceReload();
-	}
-
+	/**
+	 * delegate to auto-reloadable dataset, will reload if necessary
+	 */
 	public void checkMappingFileChanged() {
-		if (reloader == null) return;
-		reloader.checkMappingFileChanged();
+		dataset.checkMappingFileChanged();
 	}
 	
+	/** 
+	 * delegate to auto-reloadable dataset	 * 
+	 * @return prefix mappings for the d2rq base graph
+	 */
 	public PrefixMapping getPrefixes() {
-		return prefixes;
+		return dataset.getPrefixMapping();
 	}
 	
 	public void start() {
 		log.info("using config file: " + configFile);
 		this.config = new ConfigLoader(configFile);
 		this.config.load();
-		if (this.config.isLocalMappingFile()) {
-			initAutoReloading(this.config.getLocalMappingFilename());
-		} else {
-			this.model = reloadModelD2RQ(this.config.getMappingURL());
-		}
-		Registry.add(RDFServer.ServiceRegistryName, createJosekiServiceRegistry());
+		
+		if (config.isLocalMappingFile())
+			this.dataset = new AutoReloadableDataset(config.getLocalMappingFilename(), true, this);
+		else
+			this.dataset = new AutoReloadableDataset(config.getMappingURL(), false, this);
+		this.dataset.forceReload();
+		
+		DescribeHandlerRegistry.get().clear();
+		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory(this.dataset.getDefaultModel()));
+
+		Registry.add(RDFServer.ServiceRegistryName,
+				createJosekiServiceRegistry());
 	}
 	
 	protected ServiceRegistry createJosekiServiceRegistry() {
 		ServiceRegistry services = new ServiceRegistry();
-		Service service = createJosekiService();
+		Service service = new Service(new SPARQL(),
+				D2RServer.SPARQL_SERVICE_NAME,
+				new D2RQDatasetDesc(this.dataset));
 		services.add(D2RServer.SPARQL_SERVICE_NAME, service);
 		return services;
 	}
 	
-	protected Service createJosekiService() {
-		return new Service(new SPARQL(), D2RServer.SPARQL_SERVICE_NAME,
-				new D2RQDatasetDesc(this.dataset));
-	}
-	
-	protected void checkIfModelWorks() {
-		log.info("verifying mapping file ...");
-		this.model.isEmpty();
-		log.info("--------------------");
-	}
-
 	private class FindDescribeHandlerFactory implements DescribeHandlerFactory {
 		private final Model dataModel;
+		
 		FindDescribeHandlerFactory(Model dataModel) {
 			this.dataModel = dataModel;
 		}
+		
 		public DescribeHandler create() {
 			return new FindDescribeHandler(dataModel, D2RServer.this);
 		}

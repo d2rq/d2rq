@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.joseki.DatasetDesc;
 
-import com.hp.hpl.jena.query.DataSource;
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.rdf.model.Resource;
 
@@ -16,12 +15,12 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * to initialize programmatically.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQDatasetDesc.java,v 1.4 2006/09/02 11:44:45 cyganiak Exp $
+ * @version $Id: D2RQDatasetDesc.java,v 1.5 2008/09/02 11:30:05 cyganiak Exp $
  */
 public class D2RQDatasetDesc extends DatasetDesc {
-	private DataSource dataset;
+	private AutoReloadableDataset dataset;
 	
-	public D2RQDatasetDesc(DataSource dataset) {
+	public D2RQDatasetDesc(AutoReloadableDataset dataset) {
 		super(null);
 		this.dataset = dataset;
 	}
