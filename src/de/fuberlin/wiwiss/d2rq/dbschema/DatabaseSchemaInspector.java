@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.11 2008/02/06 17:26:14 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.12 2009/02/06 12:31:44 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -120,14 +120,27 @@ public class DatabaseSchemaInspector {
 	}
 	
 	public boolean isZerofillColumn(Attribute column) {
+		boolean isZerofill = false;
+		boolean foundColumn = false;
+		
 		try {
 			if (!db.dbTypeIs(ConnectedDB.MySQL)) return false;
 			Statement stmt = db.connection().createStatement();
-			ResultSet rs = stmt.executeQuery("DESCRIBE " + db.quoteRelationName(column.relationName()));
+			ResultSet rs = stmt.executeQuery("DESCRIBE " + db.quoteRelationName(column.relationName()));		
+
 			while (rs.next()) {
-				if (!column.attributeName().equals(rs.getString("Field"))) continue;
-				return rs.getString("Type").toLowerCase().indexOf("zerofill") != -1;
+				if (column.attributeName().equals(rs.getString("Field"))) {
+					isZerofill = (rs.getString("Type").toLowerCase().indexOf("zerofill") != -1);
+					foundColumn = true;
+					break;
+				}
 			}
+			
+			rs.close();
+			stmt.close();			
+
+			if (foundColumn)
+				return isZerofill;	
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
 		}

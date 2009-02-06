@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rq.sql;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -19,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryExecutionIterator.java,v 1.8 2008/08/13 11:27:39 cyganiak Exp $
+ * @version $Id: QueryExecutionIterator.java,v 1.9 2009/02/06 12:31:44 fatorange Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
 	public static Collection protocol=null;
@@ -27,6 +28,7 @@ public class QueryExecutionIterator implements ClosableIterator {
 	private String sql;
 	private List columns;
 	private ConnectedDB database;
+	private Statement statement = null;
 	private ResultSet resultSet = null;
 	private ResultRow prefetchedRow = null;
 	private int numCols = 0;
@@ -94,6 +96,8 @@ public class QueryExecutionIterator implements ClosableIterator {
 	 */
 	public void close() {
 	    this.explicitlyClosed = true;
+	    
+	    /* JDBC 4+ requires manual closing of result sets and statements */
 	    if (this.resultSet != null) {
 			try {
 				this.resultSet.close();
@@ -102,6 +106,18 @@ public class QueryExecutionIterator implements ClosableIterator {
 				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
 			}
 	    }
+	    
+	    if (this.statement != null) {
+			try {
+				this.statement.close();
+				this.statement = null;
+			} catch (SQLException ex) {
+				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
+			}
+	    }
+
+	    this.prefetchedRow = null;
+
 	}
 
 	public void remove() {
@@ -119,8 +135,8 @@ public class QueryExecutionIterator implements ClosableIterator {
     	    protocol.add(this.sql);
         try {
 			Connection con = this.database.connection();
-			java.sql.Statement stmt = con.createStatement();
-			this.resultSet = stmt.executeQuery(this.sql);
+			this.statement = con.createStatement();
+			this.resultSet = this.statement.executeQuery(this.sql);
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {
         	throw new D2RQException(ex.getMessage() + ": " + this.sql);

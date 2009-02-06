@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RelationToTriplesIterator.java,v 1.2 2008/08/13 06:35:00 cyganiak Exp $
+ * @version $Id: RelationToTriplesIterator.java,v 1.3 2009/02/06 12:31:44 fatorange Exp $
  */
 public class RelationToTriplesIterator implements ClosableIterator {
 	
@@ -56,7 +56,16 @@ public class RelationToTriplesIterator implements ClosableIterator {
 		if (this.tripleQueue.isEmpty()) {
 			tryFillTripleQueue();
 		}
-		return !this.tripleQueue.isEmpty();
+		/*
+		 * Jena's NiceIterator.andThen() assumes exhausted iterators to auto-close,
+		 * see Jena Bug 2565071
+		 */ 
+		if (this.tripleQueue.isEmpty()) {
+			close();
+			return false;
+		}
+		else
+			return true;
 	}
 
 	public Object next() {
