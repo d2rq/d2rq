@@ -25,29 +25,20 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
  *       occuring inside string literals
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL.java,v 1.4 2009/02/06 13:59:02 fatorange Exp $
+ * @version $Id: SQL.java,v 1.5 2009/02/06 20:33:06 fatorange Exp $
  */
 public class SQL {
 	private static final java.util.regex.Pattern attributeRegexConservative = 
 		java.util.regex.Pattern.compile(
+				// Ignore quoted text since the last match or the beginning of the string
+				// This is required to distinguish host names (e.g. in URLs) from column names
+				"\\G.*?(?:(?<!\\\\)'.*?(?<!\\\\)'.*?)*?" +
 				// Optional schema name and dot, group 1 is schema name
 				"(?:([a-zA-Z_]\\w*)\\.)?" +
 				// Required table name and dot, group 2 is table name
 				"([a-zA-Z_]\\w*)\\." +
-				// Required column name, is group 3
+				// Required column name, is group 3.
 				"([a-zA-Z_]\\w*)");
-	private static final java.util.regex.Pattern columnInExpressionRegex = 
-		java.util.regex.Pattern.compile(
-				// Optional schema name and dot, group 1 is schema name
-				"(?:([a-zA-Z_]\\w*)\\.)?" +
-				// Required table name and dot, group 2 is table name
-				"([a-zA-Z_]\\w*)\\." +
-				// Required column name, is group 3
-				"([a-zA-Z_]\\w*)" +
-				// only the left-side of the expression is relevant
-				// the other 2 patterns do not work when value of attribute
-				// is an URL
-				"\\w*=");
 	private static final java.util.regex.Pattern attributeRegexLax = 
 		java.util.regex.Pattern.compile(
 				// Optional schema name and dot, group 1 is schema name
@@ -75,7 +66,7 @@ public class SQL {
 
 	public static Set findColumnsInExpression(String expression) {
 		Set results = new HashSet();
-		Matcher match = columnInExpressionRegex.matcher(expression);
+		Matcher match = attributeRegexConservative.matcher(expression);
 		while (match.find()) {
 			results.add(new Attribute(match.group(1), match.group(2), match.group(3)));
 		}
@@ -86,14 +77,18 @@ public class SQL {
 		StringBuffer result = new StringBuffer();
 		Matcher match = attributeRegexConservative.matcher(expression);
 		boolean matched = match.find();
-		int firstPartEnd = matched ? match.start() : expression.length();
+		int firstPartEnd = matched ? (match.start(1) != -1 ? match.start(1)
+														   : match.start(2))
+								   : expression.length();
 		result.append(expression.substring(0, firstPartEnd));
 		while (matched) {
 			Attribute column = new Attribute(match.group(1), match.group(2), match.group(3));
 			result.append(columnRenamer.applyTo(column).qualifiedName());
 			int nextPartStart = match.end();
 			matched = match.find();
-			int nextPartEnd = matched ? match.start() : expression.length();
+			int nextPartEnd = matched ? (match.start(1) != -1 ? match.start(1)
+															  : match.start(2))
+									  : expression.length();
 			result.append(expression.substring(nextPartStart, nextPartEnd));
 		}
 		return result.toString();
@@ -104,14 +99,18 @@ public class SQL {
 		StringBuffer result = new StringBuffer();
 		Matcher match = attributeRegexConservative.matcher(expression);
 		boolean matched = match.find();
-		int firstPartEnd = matched ? match.start() : expression.length();
+		int firstPartEnd = matched ? (match.start(1) != -1 ? match.start(1)
+				   				    					   : match.start(2))
+				   				   : expression.length();
 		result.append(expression.substring(0, firstPartEnd));
 		while (matched) {
 			result.append(database.quoteAttribute(
 					new Attribute(match.group(1), match.group(2), match.group(3))));
 			int nextPartStart = match.end();
 			matched = match.find();
-			int nextPartEnd = matched ? match.start() : expression.length();
+			int nextPartEnd = matched ? (match.start(1) != -1 ? match.start(1)
+					  										  : match.start(2))
+					  				  : expression.length();
 			result.append(expression.substring(nextPartStart, nextPartEnd));
 		}
 		return result.toString();
