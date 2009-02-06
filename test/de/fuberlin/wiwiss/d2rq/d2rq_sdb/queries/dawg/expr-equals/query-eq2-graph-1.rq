@@ -1,0 +1,9 @@
+PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX  : <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT  ?x1 ?x2 ?v
+WHERE
+{ 
+	?x1 :rating1 ?v .
+    ?x2 :rating1 ?v . 
+}

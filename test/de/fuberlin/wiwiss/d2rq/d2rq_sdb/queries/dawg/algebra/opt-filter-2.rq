@@ -1,0 +1,13 @@
+PREFIX foaf:<http://xmlns.com/foaf/0.1/>
+PREFIX bsbm:<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT *
+{ 
+  ?review bsbm:rating1 ?rating1 .
+  OPTIONAL
+  { 
+    ?reviewer foaf:name ?reviewerName .
+    FILTER(?rating1 = 5)
+    FILTER(?w="Ruggiero-Delane")
+  }
+}

@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rq.engine;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Var;
@@ -16,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * Produces {@link Binding}s from {@link ResultRow}s.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BindingMaker.java,v 1.1 2008/08/13 06:34:59 cyganiak Exp $
+ * @version $Id: BindingMaker.java,v 1.2 2009/02/06 13:59:02 fatorange Exp $
  */
 public class BindingMaker {
 	private final Map variableNamesToNodeMakers;
@@ -50,6 +51,17 @@ public class BindingMaker {
 		return result;
 	}
 
+	public Set variableNames()
+	{
+		return variableNamesToNodeMakers.keySet();
+	}
+	
+	
+	public NodeMaker nodeMaker(Var var)
+	{
+		return (NodeMaker) variableNamesToNodeMakers.get(var.getName());
+	}
+	
 	public String toString() {
 		StringBuffer result = new StringBuffer("BindingMaker(\n");
 		Iterator it = variableNamesToNodeMakers.keySet().iterator();

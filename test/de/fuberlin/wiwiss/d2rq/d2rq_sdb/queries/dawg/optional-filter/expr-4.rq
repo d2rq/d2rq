@@ -1,0 +1,15 @@
+PREFIX  rev: <http://purl.org/stuff/rev#> 
+PREFIX  bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> 
+PREFIX  foaf:   <http://xmlns.com/foaf/0.1/>
+
+SELECT  ?revName ?rating2
+WHERE
+{ 
+	?review rev:reviewer ?reviewer . 
+    ?reviewer foaf:name ?revName .
+    OPTIONAL
+    { 
+    	?review bsbm:rating2 ?rating2 .
+      	FILTER (?rating2 < 3 && ?revName = "Ruggiero-Delane") .
+    } .
+}

@@ -1,0 +1,7 @@
+PREFIX :<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> 
+
+SELECT ?value 
+{ 
+    ?product :productPropertyNumeric1 ?value . 
+    FILTER (?value = 483)
+}

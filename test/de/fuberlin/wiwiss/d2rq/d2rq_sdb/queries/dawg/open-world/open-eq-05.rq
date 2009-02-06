@@ -1,0 +1,7 @@
+PREFIX  :       <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> 
+
+SELECT *
+{ 
+	?x :price ?v 
+  	FILTER ( ?v = "7855.1"^^:USD )
+}

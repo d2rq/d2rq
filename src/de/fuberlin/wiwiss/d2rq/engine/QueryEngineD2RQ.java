@@ -3,7 +3,6 @@ package de.fuberlin.wiwiss.d2rq.engine;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.sparql.algebra.AlgebraGenerator;
 import com.hp.hpl.jena.sparql.algebra.Op;
-import com.hp.hpl.jena.sparql.algebra.Transformer;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.engine.ExecutionContext;
 import com.hp.hpl.jena.sparql.engine.Plan;
@@ -19,12 +18,13 @@ import com.hp.hpl.jena.sparql.engine.main.QC;
 import com.hp.hpl.jena.sparql.util.Context;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.optimizer.D2RQTreeOptimizer;
 
 /**
  * TODO: @@@ QueryEngineD2RQ and the whole package is work in progress
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryEngineD2RQ.java,v 1.3 2008/08/12 06:47:35 cyganiak Exp $
+ * @version $Id: QueryEngineD2RQ.java,v 1.4 2009/02/06 13:59:02 fatorange Exp $
  */
 public class QueryEngineD2RQ extends QueryEngineBase {
 	private GraphD2RQ graph;
@@ -44,7 +44,10 @@ public class QueryEngineD2RQ extends QueryEngineBase {
 	}
 
 	protected Op modifyOp(Op op) {
-		return Transformer.transform(new TransformD2RQ(graph), op);
+	    Op optimizedOp;
+	     
+	    optimizedOp = D2RQTreeOptimizer.optimize(op, graph);
+		return optimizedOp;
 	}
 	
 	public QueryIterator eval(Op op, DatasetGraph dataset, Binding input, Context context) {

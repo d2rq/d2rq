@@ -64,6 +64,11 @@ public class TypedNodeMaker implements NodeMaker {
 		this.valueMaker.describeSelf(c);
 	}
 
+	public ValueMaker valueMaker()
+	{
+		return this.valueMaker;
+	}
+	
 	public Node makeNode(ResultRow tuple) {
 		String value = this.valueMaker.makeValue(tuple);
 		if (value == null) {

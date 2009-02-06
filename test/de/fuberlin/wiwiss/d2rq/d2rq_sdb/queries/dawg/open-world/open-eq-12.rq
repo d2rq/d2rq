@@ -1,0 +1,10 @@
+PREFIX  :       <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX  xsd:    <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?x ?v1 ?y ?v2
+{
+    ?x :rating1 ?v1 .
+    ?y :rating1 ?v2 .
+    OPTIONAL { ?y :rating1 ?v3 . FILTER( ?v1 != ?v3 || ?v1 = ?v3 )}
+    FILTER (!bound(?v3))
+}

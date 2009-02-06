@@ -1,0 +1,5 @@
+SELECT ?property ?hasValue ?isValueOf 
+WHERE 
+{
+	<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/Offer25> ?property ?hasValue 
+} 

@@ -1,0 +1,14 @@
+PREFIX bsbm:<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT *
+{ 
+  ?product1 rdfs:label "manner gatemen" .
+  {
+  	?product2 rdfs:label "coterie ahchoo" .
+  	OPTIONAL 
+  	{ 
+  		?product1 bsbm:productPropertyTextual5 ?propertyTextual5
+  	} 
+  }
+}

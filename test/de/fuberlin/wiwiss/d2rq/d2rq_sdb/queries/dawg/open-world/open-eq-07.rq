@@ -1,0 +1,8 @@
+PREFIX  :       <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT *
+{
+    ?x1 :rating1 ?v1 .
+    ?x2 :rating1 ?v2 .
+    FILTER ( ?v1 = ?v2 )
+}

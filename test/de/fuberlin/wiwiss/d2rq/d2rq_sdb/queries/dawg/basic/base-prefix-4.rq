@@ -1,0 +1,8 @@
+BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/> 
+PREFIX bsbm:<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT * 
+WHERE 
+{ 
+	<Product2> bsbm:productPropertyNumeric1 ?value 	
+} 

@@ -1,0 +1,8 @@
+
+
+
+SELECT DISTINCT ?class 
+WHERE 
+{ 
+	[] a ?class 
+}

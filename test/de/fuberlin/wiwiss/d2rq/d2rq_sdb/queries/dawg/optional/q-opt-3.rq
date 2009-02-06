@@ -1,0 +1,13 @@
+PREFIX  foaf:   <http://xmlns.com/foaf/0.1/>
+
+SELECT ?mbox ?name
+{
+	{ 
+		?x foaf:mbox_sha1sum ?mbox 
+    }
+	UNION 
+  	{ 
+  		?x foaf:mbox_sha1sum ?mbox . 
+  		?x foaf:name  ?name 
+  	}
+}

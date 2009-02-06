@@ -1,0 +1,7 @@
+PREFIX  : <http://purl.org/stuff/rev#>
+
+SELECT *
+{ 
+	:text ?p ?v . 
+	FILTER langMatches(lang(?v), "*") . 
+}

@@ -1,0 +1,15 @@
+PREFIX    :<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX xsd:<http://www.w3.org/2001/XMLSchema#> 
+
+SELECT DISTINCT * 
+WHERE 
+{ 
+  { 
+  	?s :rating2 ?o 
+  } 
+  UNION 
+  { 
+  	?s :rating1 ?o 
+  }
+}
+

@@ -1,0 +1,10 @@
+PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX  : <http://downlode.org/rdf/iso-3166/countries#>
+
+SELECT  ?x
+WHERE
+{ 
+	?x bsbm:country ?v . 
+    FILTER ( ?v = :US  ) .
+}

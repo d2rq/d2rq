@@ -1,0 +1,15 @@
+PREFIX bsbm:<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX rev:<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/>
+
+SELECT *
+{ 
+    rev:Review11 bsbm:rating1 ?value1 .
+    OPTIONAL
+    {
+      rev:Review6 bsbm:rating3 ?value2 .
+      OPTIONAL 
+      { 
+      	rev:Review4 bsbm:rating1 ?value3 . 
+      }
+    }
+}

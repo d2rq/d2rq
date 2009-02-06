@@ -1,0 +1,9 @@
+PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX  : <http://purl.org/stuff/rev#>
+
+SELECT  ?x ?v
+WHERE
+{ 
+	?x :reviewer ?v . 
+    FILTER isIRI(?v) .
+}

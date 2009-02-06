@@ -1,0 +1,16 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+
+SELECT DISTINCT ?product ?productLabel
+WHERE 
+{ 
+	{
+		?product rdfs:label ?productLabel .
+	}
+	{
+		<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/Product2> bsbm:productFeature ?prodFeature .
+		?product bsbm:productFeature ?prodFeature .
+	}
+}

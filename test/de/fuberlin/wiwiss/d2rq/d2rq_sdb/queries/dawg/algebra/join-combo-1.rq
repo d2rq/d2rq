@@ -1,0 +1,18 @@
+PREFIX :<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT ?product1 ?productType ?productPropertyTextual5 ?property
+{ 
+    ?product1 :productFeature ?productFeature . 
+    OPTIONAL 
+    { 
+    	?product1 :productPropertyTextual5 ?productPropertyTextual5 
+    }. 
+    ?product1 :productPropertyNumeric1 483 
+    { 
+    	?product2 a ?productType 
+    } 
+    UNION 
+    { 
+    	?product1 ?property ?value 
+    } 
+}

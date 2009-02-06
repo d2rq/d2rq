@@ -1,0 +1,8 @@
+PREFIX     :    <http://purl.org/dc/elements/1.1/>
+PREFIX  xsd:    <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?x ?date
+{
+    ?x :date ?date .
+    FILTER ( datatype(?date) = xsd:date )
+}

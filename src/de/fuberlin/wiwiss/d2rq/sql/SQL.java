@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
  *       occuring inside string literals
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL.java,v 1.3 2007/11/15 16:44:17 cyganiak Exp $
+ * @version $Id: SQL.java,v 1.4 2009/02/06 13:59:02 fatorange Exp $
  */
 public class SQL {
 	private static final java.util.regex.Pattern attributeRegexConservative = 
@@ -36,6 +36,18 @@ public class SQL {
 				"([a-zA-Z_]\\w*)\\." +
 				// Required column name, is group 3
 				"([a-zA-Z_]\\w*)");
+	private static final java.util.regex.Pattern columnInExpressionRegex = 
+		java.util.regex.Pattern.compile(
+				// Optional schema name and dot, group 1 is schema name
+				"(?:([a-zA-Z_]\\w*)\\.)?" +
+				// Required table name and dot, group 2 is table name
+				"([a-zA-Z_]\\w*)\\." +
+				// Required column name, is group 3
+				"([a-zA-Z_]\\w*)" +
+				// only the left-side of the expression is relevant
+				// the other 2 patterns do not work when value of attribute
+				// is an URL
+				"\\w*=");
 	private static final java.util.regex.Pattern attributeRegexLax = 
 		java.util.regex.Pattern.compile(
 				// Optional schema name and dot, group 1 is schema name
@@ -63,7 +75,7 @@ public class SQL {
 
 	public static Set findColumnsInExpression(String expression) {
 		Set results = new HashSet();
-		Matcher match = attributeRegexConservative.matcher(expression);
+		Matcher match = columnInExpressionRegex.matcher(expression);
 		while (match.find()) {
 			results.add(new Attribute(match.group(1), match.group(2), match.group(3)));
 		}

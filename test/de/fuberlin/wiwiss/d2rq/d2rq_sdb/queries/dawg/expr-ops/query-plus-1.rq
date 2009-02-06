@@ -1,0 +1,9 @@
+PREFIX : <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT ?s 
+WHERE 
+{
+    ?s :rating1 ?o .
+    ?s2 :rating1 ?o2 .
+    FILTER(?o + ?o2 = 5) .
+}

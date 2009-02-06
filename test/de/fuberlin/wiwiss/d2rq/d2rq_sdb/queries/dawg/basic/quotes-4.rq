@@ -1,0 +1,10 @@
+# This query uses UNIX line end conventions.
+# It is in CVS in binary.
+PREFIX :<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/>
+PREFIX  xsd:    <http://www.w3.org/2001/XMLSchema#> 
+
+SELECT ?x
+{ 
+	?x ?p """manner
+	gatemen"""^^:someType
+}

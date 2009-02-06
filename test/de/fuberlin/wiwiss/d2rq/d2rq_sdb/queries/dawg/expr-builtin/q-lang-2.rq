@@ -1,0 +1,8 @@
+PREFIX : <http://purl.org/stuff/rev#>
+PREFIX  xsd:    <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?x
+{ 
+	?x :reviewer ?v . 
+  	FILTER ( lang(?v) = '' )
+}

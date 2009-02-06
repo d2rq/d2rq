@@ -1,0 +1,9 @@
+PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX  : <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT  ?x ?v
+WHERE
+{ 
+	?x :rating1 ?v . 
+    FILTER isBlank(?v) .
+}

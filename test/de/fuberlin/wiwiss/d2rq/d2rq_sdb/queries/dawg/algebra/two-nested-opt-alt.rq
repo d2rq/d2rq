@@ -1,0 +1,18 @@
+PREFIX bsbm:<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+PREFIX rev:<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/>
+
+## The nested optional example, rewritten to a form that is the same
+## for the SPARQL algebra and the declarative semantics.
+SELECT *
+{ 
+    rev:Review6 bsbm:rating1 ?rating1 .
+    OPTIONAL 
+    { 
+    	rev:Review4 bsbm:rating4 ?rating4 . 
+    }
+    OPTIONAL 
+    { 
+    	rev:Review4 bsbm:rating4 ?rating4 . 
+    	rev:Review2 bsbm:rating1 ?value 
+    }
+}

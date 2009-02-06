@@ -1,0 +1,7 @@
+PREFIX 	   :<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/>
+
+SELECT ?p ?v
+{ 
+	:Product1 ?p (?v) . 
+}
+

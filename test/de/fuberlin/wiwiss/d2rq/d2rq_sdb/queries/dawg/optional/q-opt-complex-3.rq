@@ -1,0 +1,24 @@
+PREFIX  foaf:   <http://xmlns.com/foaf/0.1/>
+PREFIX  dc:     <http://purl.org/dc/elements/1.1/>
+PREFIX  bsbm:   <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT ?name ?country ?publisher ?date
+WHERE 
+{ 
+    ?person 
+        a foaf:Person;
+        foaf:name ?name . 
+    GRAPH ?x 
+    { 
+        [] foaf:name ?name;
+           bsbm:country ?country
+    } 
+    OPTIONAL 
+    { 
+        ?person dc:publisher ?publisher 
+        OPTIONAL 
+        { 
+        	?person dc:date ?date 
+        } 
+    } 
+}

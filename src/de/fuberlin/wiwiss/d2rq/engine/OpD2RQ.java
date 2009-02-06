@@ -23,12 +23,14 @@ public class OpD2RQ extends OpExtMain {
 		this.bindingMakers = bindingMakers;
 	}
 	
-	public QueryIterator eval(QueryIterator input, ExecutionContext execCxt) {
+	public QueryIterator eval(QueryIterator input, ExecutionContext execCxt) 
+	{
 		// I'm not sure what the semantics of input is; so I just close
 		// and ignore it
-		input.close();
+//		input.close();
 		
-		return RelationToBindingsIterator.create(relation, bindingMakers, execCxt);
+//		return RelationToBindingsIterator.create(relation, bindingMakers, execCxt);
+		return RelationToBindingsIterator2.create(relation, bindingMakers, input, execCxt);
 	}
 
 	public boolean equalTo(Op other, NodeIsomorphismMap labelMap) {
@@ -52,4 +54,5 @@ public class OpD2RQ extends OpExtMain {
 	public String getName() {
 		return "d2rq";
 	}
+	
 }

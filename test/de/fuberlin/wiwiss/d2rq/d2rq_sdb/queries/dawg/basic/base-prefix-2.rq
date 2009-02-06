@@ -1,0 +1,7 @@
+BASE <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/> 
+PREFIX : <#>
+
+SELECT * WHERE 
+{ 
+	:Product2 ?p ?v 
+} 

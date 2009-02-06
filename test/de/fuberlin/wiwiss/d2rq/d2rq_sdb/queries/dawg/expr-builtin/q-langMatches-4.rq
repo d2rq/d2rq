@@ -1,0 +1,7 @@
+PREFIX : <http://example.org/rev#>
+
+SELECT *
+{ 
+	:text ?p ?v . 
+	FILTER (! langMatches(lang(?v), "*")) . 
+}

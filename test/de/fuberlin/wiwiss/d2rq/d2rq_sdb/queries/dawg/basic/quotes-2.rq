@@ -1,0 +1,8 @@
+PREFIX :<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer1/>
+
+SELECT ?x
+{ 
+	?x ?p """coterie ahchoo""" 
+}
+
+

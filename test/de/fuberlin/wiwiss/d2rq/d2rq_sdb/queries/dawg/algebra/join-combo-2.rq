@@ -1,0 +1,16 @@
+PREFIX :<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT ?review ?value ?type
+{ 
+    GRAPH ?g 
+    { 
+    	?review ?predicate 10 
+    } 
+    { 
+    	?review :rating1 ?value 
+    } 
+    UNION 
+    { 
+    	?product a ?type 
+    }
+}

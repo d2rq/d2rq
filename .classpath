@@ -27,5 +27,7 @@
 	<classpathentry kind="lib" path="lib/arq-2.4/wstx-asl-3.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/arq-2.4/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/arq-2.4/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/sdb-1.1/sdb.jar"/>
+	<classpathentry kind="lib" path="lib/hsqldb-1.8/hsqldb.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -1,0 +1,8 @@
+PREFIX :<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor1/>
+PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
+
+SELECT * 
+{ 
+	:Offer3 ?p $v . 
+	:Offer3 ?p ?v 
+}
