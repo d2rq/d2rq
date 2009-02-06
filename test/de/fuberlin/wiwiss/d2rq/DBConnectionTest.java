@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
 /**
  * @author jgarbers
- * @version $Id: DBConnectionTest.java,v 1.23 2006/09/13 14:06:24 cyganiak Exp $
+ * @version $Id: DBConnectionTest.java,v 1.24 2009/02/06 13:52:30 fatorange Exp $
  */
 public class DBConnectionTest extends TestCase {
 
@@ -72,6 +72,9 @@ public class DBConnectionTest extends TestCase {
 					query_results += rs.getString(pos);
 				}
 			} // end while
+		
+		rs.close();
+		s.close();
 		return query_results;
 	}
 
