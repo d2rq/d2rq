@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
 /**
  * @author jgarbers
- * @version $Id: DBConnectionTest.java,v 1.24 2009/02/06 13:52:30 fatorange Exp $
+ * @version $Id: DBConnectionTest.java,v 1.25 2009/02/07 14:51:32 fatorange Exp $
  */
 public class DBConnectionTest extends TestCase {
 
@@ -38,9 +38,9 @@ public class DBConnectionTest extends TestCase {
 		databases = parser.parse().databases();
 		firstDatabase = (Database)databases.iterator().next();
 		simplestQuery = "SELECT 1;";
-		// mediumQuery = "SELECT PaperID from PAPERS";
-		mediumQuery = "SELECT DISTINCT Papers.PaperID FROM Rel_Paper_Topic , Papers , Topics WHERE Papers.PaperID=Rel_Paper_Topic.PaperID AND Rel_Paper_Topic.TopicID=Topics.TopicID AND Topics.TopicID=3 AND Rel_Paper_Topic.RelationType = 1 AND Papers.Publish = 1;";
-		complexQuery = "SELECT T0_Papers.PaperID, T0_Persons.URI, T1_Persons.Email, T1_Persons.URI FROM Persons AS T1_Persons , Papers AS T0_Papers , Rel_Person_Paper AS T0_Rel_Person_Paper , Persons AS T0_Persons WHERE T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Papers.Publish = 1 AND T0_Persons.URI=T1_Persons.URI AND (NOT (CONCAT('http://www.conference.org/conf02004/paper#Paper' , CAST(T0_Papers.PaperID AS char) , '') = T0_Persons.URI));";
+		// mediumQuery = "SELECT PaperID from papers";
+		mediumQuery = "SELECT DISTINCT papers.PaperID FROM rel_paper_topic, papers, topics WHERE papers.PaperID=rel_paper_topic.PaperID AND rel_paper_topic.TopicID=topics.TopicID AND topics.TopicID=3 AND rel_paper_topic.RelationType = 1 AND papers.Publish = 1;";
+		complexQuery = "SELECT T0_Papers.PaperID, T0_Persons.URI, T1_Persons.Email, T1_Persons.URI FROM persons AS T1_Persons, papers AS T0_Papers, rel_person_paper AS T0_Rel_Person_Paper, persons AS T0_Persons WHERE T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Papers.Publish = 1 AND T0_Persons.URI=T1_Persons.URI AND (NOT (CONCAT('http://www.conference.org/conf02004/paper#Paper' , CAST(T0_Papers.PaperID AS char) , '') = T0_Persons.URI));";
 
 	}
 
@@ -79,7 +79,7 @@ public class DBConnectionTest extends TestCase {
 	}
 
 	public Connection manuallyConfiguredConnection() {
-		final int configure = 3; // TODO change this to your local DB configuration
+		final int configure = 1; // TODO change this to your local DB configuration
 		String driverClass;
 		String url;
 		String name;
@@ -120,8 +120,8 @@ public class DBConnectionTest extends TestCase {
 	public void xtestManuallyConfiguredConnection() throws SQLException {
 	    Connection c=manuallyConfiguredConnection();
 		// String query = simplestQuery;
-		// String query = "select PaperID from Papers";
-		String query = "SELECT Papers.PaperID, Papers.Year FROM Papers WHERE Papers.Year=2002 AND Papers.PaperID = 2 AND Papers.Publish = 1;";
+		// String query = "select PaperID from papers";
+		String query = "SELECT papers.PaperID, papers.Year FROM papers WHERE papers.Year=2002 AND papers.PaperID = 2 AND papers.Publish = 1;";
     
 		String query_results = performQuery(c, query);
 		c.close();
@@ -133,8 +133,8 @@ public class DBConnectionTest extends TestCase {
 	    // when using the DISTINCT keyword, Strings are truncated to 256 chars
 	    Connection c = firstDatabase.connectedDB().connection(); 
 	    //Connection c=manuallyConfiguredConnection();
-		String nonDistinct = "SELECT T0_Papers.Abstract FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
-		String distinct = "SELECT DISTINCT T0_Papers.Abstract FROM Papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
+		String nonDistinct = "SELECT T0_Papers.Abstract FROM papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
+		String distinct = "SELECT DISTINCT T0_Papers.Abstract FROM papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
 		String distinctResult = performQuery(c, distinct);
 		String nonDistinctResult = performQuery(c, nonDistinct);
 		c.close();
