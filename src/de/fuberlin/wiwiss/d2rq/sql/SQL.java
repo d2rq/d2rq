@@ -25,14 +25,15 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
  *       occuring inside string literals
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL.java,v 1.5 2009/02/06 20:33:06 fatorange Exp $
+ * @version $Id: SQL.java,v 1.6 2009/02/07 15:17:58 fatorange Exp $
  */
 public class SQL {
 	private static final java.util.regex.Pattern attributeRegexConservative = 
 		java.util.regex.Pattern.compile(
-				// Ignore quoted text since the last match or the beginning of the string
+				// Ignore quoted text since the last match or the beginning of the string;
+				// taking inner string escaping into consideration
 				// This is required to distinguish host names (e.g. in URLs) from column names
-				"\\G.*?(?:(?<!\\\\)'.*?(?<!\\\\)'.*?)*?" +
+				"\\G.*?(?:'[^'\\\\]*?(?:\\\\.[^'\\\\]*?)*?'.*?)*?" +
 				// Optional schema name and dot, group 1 is schema name
 				"(?:([a-zA-Z_]\\w*)\\.)?" +
 				// Required table name and dot, group 2 is table name
