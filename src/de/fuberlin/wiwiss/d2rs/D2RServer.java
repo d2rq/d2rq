@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.22 2008/09/02 11:30:05 cyganiak Exp $
+ * @version $Id: D2RServer.java,v 1.23 2009/02/07 18:22:39 fatorange Exp $
  */
 public class D2RServer {
 	private final static String SPARQL_SERVICE_NAME = "sparql";
@@ -72,7 +72,7 @@ public class D2RServer {
 		if (!baseURI.endsWith("/") && !baseURI.endsWith("#")) {
 			baseURI += "/";
 		}
-		if (baseURI.contains("#")) {
+		if (baseURI.indexOf('#') != -1) {
 			log.warn("Base URIs containing '#' may not work correctly!");
 		}
 
