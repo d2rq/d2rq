@@ -209,8 +209,9 @@ public class TypedNodeMaker implements NodeMaker {
 				c.setTime(t);
 				
 				TimeZone.setDefault(oldDefault);
+				/* Strip timezone indicator as our input was not timezoned either (at least if it was parsed by the Timestamp class, see below) */
 				return Node.createLiteral(
-						new XSDDateTime(c).toString(), null, XSDDatatype.XSDdateTime);
+						new XSDDateTime(c).toString().replaceAll("Z$", ""), null, XSDDatatype.XSDdateTime);
 			} catch (RuntimeException ex) {
 				// TODO: This is hackish ... Support for PostgreSQL TIMESTAMP WITH TIME ZONE type
 				// PostgreSQL answers a TIMESTAMP with an added [+-]HH(:MM)?,
