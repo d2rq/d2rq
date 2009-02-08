@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rq.nodes;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Set;
+import java.util.TimeZone;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -193,11 +194,21 @@ public class TypedNodeMaker implements NodeMaker {
 			XSDDateTime xsd = (XSDDateTime) node.getLiteralValue();
 			return new java.sql.Timestamp(xsd.asCalendar().getTimeInMillis()).toString();
 		}
+
 		public Node makeNode(String value) {
 			try {
+				/* 
+				 * Although timestamps are UTC by definition, Timestamp.valueOf() will use the system's default timezone.
+				 * In order to force UTC, we need to temporarily change the system default
+				 */
+				TimeZone oldDefault = TimeZone.getDefault();
+				TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+				
 				Calendar c = Calendar.getInstance();
 				Timestamp t = Timestamp.valueOf(value);
-				c.setTimeInMillis(t.getTime());
+				c.setTime(t);
+				
+				TimeZone.setDefault(oldDefault);
 				return Node.createLiteral(
 						new XSDDateTime(c).toString(), null, XSDDatatype.XSDdateTime);
 			} catch (RuntimeException ex) {
