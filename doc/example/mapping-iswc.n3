@@ -11,11 +11,14 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix iswc: <http://annotation.semanticweb.org/iswc/iswc.daml#> .
 @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+@prefix jdbc: <http://d2rq.org/terms/jdbc/> .
 
 map:database a d2rq:Database;
 	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-	d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/iswc";
+	d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/iswc?autoReconnect=true";
 	d2rq:username "root";
+	jdbc:keepAlive "3600";				# sends noop-query every 3600 seconds
+#	jdbc:keepAliveQuery "SELECT 1";		# optional custom noop-query
 	.
 
 # Table conferences
