@@ -239,8 +239,12 @@ map:rel_person_organization a d2rq:PropertyBridge;
 map:Topics a d2rq:ClassMap;
 	d2rq:dataStorage map:database;
 	d2rq:uriPattern "topics/@@topics.TopicID@@";
-	d2rq:class skos:Concept;
 	.
+map:topics_Type a d2rq:PropertyBridge;
+    d2rq:belongsToClassMap map:Topics;
+    d2rq:property rdf:type;
+    d2rq:constantValue skos:Concept;
+    .
 map:topics_TopicName a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Topics;
 	d2rq:property skos:prefLabel;
