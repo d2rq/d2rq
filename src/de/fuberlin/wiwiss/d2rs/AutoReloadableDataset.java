@@ -132,7 +132,11 @@ public class AutoReloadableDataset implements Dataset {
 	}
 
 	public Iterator listNames() {
-		return NullIterator.instance;
+		return NullIterator.instance();
+	}
+
+	public void close() {
+		datasetGraph.close();
 	}
 	
 }
