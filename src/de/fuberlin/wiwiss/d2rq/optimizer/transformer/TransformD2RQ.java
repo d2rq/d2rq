@@ -23,6 +23,8 @@ import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.expr.ExprNode;
+
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -586,22 +588,16 @@ public class TransformD2RQ extends TransformCopy
      */
     private Expression convertFilterExprToSQLExpression(Expr expr, NodeRelation nodeRelation)
     {
-        Expression sqlExpression;
-        String sqlString;
-        
-        sqlExpression = null;
-        
-        // convert to a sql-string
-        sqlString = ExprUtility.convertExprToSQL(expr, nodeRelation);
-        
-        // converting sucessfully ?
-        if (sqlString != null)
-        {
-            // create SQLExpression
-            sqlExpression = SQLExpression.create(sqlString);
-        }
-        
-        return sqlExpression;
+    	if (expr instanceof ExprNode) { // only handle SPARQL, no RDQL
+	        // convert to a sql-string
+	        String sqlString = ExprUtility.convertExprToSQL(expr, nodeRelation);
+	        
+	        // converting sucessfully ?
+	        if (sqlString != null)
+	            return SQLExpression.create(sqlString);
+    	}
+    	
+    	return null;
     }
         
 }

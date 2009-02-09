@@ -5,6 +5,7 @@ import java.util.Iterator;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprList;
+import com.hp.hpl.jena.sparql.expr.ExprNode;
 
 
 /**
@@ -39,10 +40,12 @@ public class OpFilterUtility
 		// for every expression of the filter, apply first DeMorgan-law and then Distributive-law
 		for (Iterator iterator = exprList.iterator(); iterator.hasNext();)
         {
-            expr = (Expr) iterator.next();
-            expr = applyDeMorganLaw(expr); 			// !(a || b) will become !a && !b
-            expr = applyDistributivLaw(expr);		// a || (b && c) will become (a || b) && (a || c)
-            newExprList.add(expr);            
+			expr = (Expr) iterator.next();
+			if (expr instanceof ExprNode) { // only SPARQL expressions are handled (e.g. no RDQL SimpleNode)
+	            expr = applyDeMorganLaw(expr); 			// !(a || b) will become !a && !b
+	            expr = applyDistributivLaw(expr);		// a || (b && c) will become (a || b) && (a || c)
+			}
+	        newExprList.add(expr);
         }
 		
 		// split ever expression that contains conjunctions
