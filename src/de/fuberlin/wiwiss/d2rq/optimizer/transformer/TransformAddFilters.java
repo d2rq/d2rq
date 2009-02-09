@@ -30,6 +30,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.algebra.op.OpTable;
 import com.hp.hpl.jena.sparql.algebra.op.OpTriple;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
+import com.hp.hpl.jena.sparql.core.VarExprList;
 
 /**
  * Adds needed filters.
@@ -167,9 +168,9 @@ public class TransformAddFilters extends TransformCopy
 
     public Op transform(OpAssign opAssign, Op subOp)
     {
-    	OpAssign newOpAssign;
+    	Op newOpAssign;
     	
-    	newOpAssign = new OpAssign(subOp);
+    	newOpAssign = OpAssign.assign(subOp, opAssign.getVarExprList());
         return OpFilter.filter(newOpAssign);
     }
 

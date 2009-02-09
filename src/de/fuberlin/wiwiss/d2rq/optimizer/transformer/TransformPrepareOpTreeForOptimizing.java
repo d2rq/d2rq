@@ -8,12 +8,14 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.algebra.Op;
+import com.hp.hpl.jena.sparql.algebra.OpExtRegistry;
 import com.hp.hpl.jena.sparql.algebra.Transform;
 import com.hp.hpl.jena.sparql.algebra.op.Op0;
 import com.hp.hpl.jena.sparql.algebra.op.Op1;
 import com.hp.hpl.jena.sparql.algebra.op.Op2;
 import com.hp.hpl.jena.sparql.algebra.op.OpAssign;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
+import com.hp.hpl.jena.sparql.algebra.op.OpConditional;
 import com.hp.hpl.jena.sparql.algebra.op.OpDatasetNames;
 import com.hp.hpl.jena.sparql.algebra.op.OpDiff;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
@@ -311,13 +313,8 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 
 	public Op transform(OpExt opExt) 
 	{
-		Op newOpExt;
-		
-		// copy opext
-		newOpExt = opExt.copy();
-		
-		// add label
-		return addLabelToOpExt((OpExt)newOpExt);
+		// copy of OpExt currently not possible
+		throw new RuntimeException("Processing OpExt not implemented.");
 	}
 
 	public Op transform(OpGraph opGraph, Op subOp) 
@@ -474,6 +471,17 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		return addLabelToOp2((Op2)newOpDiff);
 	}
 	
+	public Op transform(OpConditional opCondition, Op left, Op right) {
+		Op newOpCond;
+		
+		// copy opcond
+		newOpCond = opCondition.copy(left, right);
+
+		// add label
+		return addLabelToOp2((Op2)newOpCond);
+	}
+	
+
 	/**
 	 * Method for adding an oplabel to an op0. The oplabel
 	 * contains the threated object-vars of the op0. Only if the 
@@ -599,5 +607,5 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		// add the label
 		return OpLabel.create(threatedVars, opExt);
 	}
-	
+
 }

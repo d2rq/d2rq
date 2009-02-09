@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -16,6 +17,7 @@ import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.optimizer.LeftJoin;
 
 /**
  * Collects parts of a SELECT query and delivers a corresponding SQL statement.
@@ -23,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.26 2008/08/12 06:47:36 cyganiak Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.27 2009/02/09 12:21:31 fatorange Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -33,7 +35,8 @@ public class SelectStatementBuilder {
 	private boolean eliminateDuplicates = false;
 	private AliasMap aliases = AliasMap.NO_ALIASES;
 	private Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
-
+	private StringBuffer leftJoinExpression = new StringBuffer();
+	
 	public SelectStatementBuilder(Relation relation) {
 		if (relation.isTrivial()) {
 			throw new IllegalArgumentException("Cannot create SQL for trivial relation");
@@ -59,6 +62,9 @@ public class SelectStatementBuilder {
 			addSelectSpec((ProjectionSpec) it.next());
 		}
 		eliminateDuplicates = !relation.isUnique();
+	
+		addMentionedTablesFromConditions();
+		createLeftJoinExpression(relation.leftJoinConditions());
 	}
 	
 	private Expression condition() {
@@ -76,8 +82,75 @@ public class SelectStatementBuilder {
 		}
 	}
 	
+	/**
+	 * Creates a sql-leftJoin-Expression if there is one
+	 * @param leftJoinConditions
+	 */
+	private void createLeftJoinExpression(Set leftJoinConditions)
+	{
+		
+		RelationName relationName1, relationName2;
+		LeftJoin leftJoin;
+		Set leftJoinTableNames = new HashSet();
+		int tableNr = 1;
+		
+		// create the left-join tables (table1 left join table2, ...)
+		for (Iterator iterator = leftJoinConditions.iterator(); iterator.hasNext(); )
+		{
+			
+			leftJoin = (LeftJoin) iterator.next();
+			relationName1 = leftJoin.getRelation1(); 
+			relationName2 = leftJoin.getRelation2();
+			
+			this.mentionedTables.remove(relationName1);
+			this.mentionedTables.remove(relationName2);
+		
+			// swap if necessary
+			if (!leftJoinTableNames.contains(relationName1) && leftJoinTableNames.contains(relationName2))
+			{
+				relationName2 = relationName1;
+			}
+			
+			leftJoinTableNames.add(relationName1);
+			leftJoinTableNames.add(relationName2);
+			
+			// left-join syntax: table1 left join table2 on (...) left join table3 on (...)
+			if (tableNr == 1)
+			{
+				leftJoinExpression.append(this.database.quoteRelationName(this.aliases.originalOf(relationName1)));
+				
+				if (this.database.dbTypeIs(ConnectedDB.Oracle)) 
+				{
+					leftJoinExpression.append(" ");
+				} else {
+					leftJoinExpression.append(" AS ");
+				}
+				leftJoinExpression.append(this.database.quoteRelationName(relationName1));
+				
+				
+			}
+			tableNr++;
+
+			leftJoinExpression.append(" LEFT JOIN ");
+			leftJoinExpression.append(this.database.quoteRelationName(this.aliases.originalOf(relationName2)));
+			
+			if (this.database.dbTypeIs(ConnectedDB.Oracle)) 
+			{
+				leftJoinExpression.append(" ");
+			} else {
+				leftJoinExpression.append(" AS ");
+			}
+			leftJoinExpression.append(this.database.quoteRelationName(relationName2));
+			
+			leftJoinExpression.append(" ON ");
+			// join-conditions
+			leftJoinExpression.append(leftJoin.getJoinConditions().toSQL(this.database, this.aliases));
+		}
+	}
+	
+	
 	public String getSQLStatement() {
-		addMentionedTablesFromConditions();
+		
 		StringBuffer result = new StringBuffer("SELECT ");
 		if (this.database.limit() != Database.NO_LIMIT) {
 			result.append("TOP " + this.database.limit() + " ");
@@ -96,6 +169,8 @@ public class SelectStatementBuilder {
 				result.append(", ");
 			}
 		}
+		
+		
 		result.append(" FROM ");
 		it = mentionedTables.iterator();
 		while (it.hasNext()) {			
@@ -112,7 +187,20 @@ public class SelectStatementBuilder {
 			if (it.hasNext()) {
 				result.append(", ");
 			}
+		
 		}
+		
+		// are some left joins
+		if (leftJoinExpression.length() > 0)
+		{
+			
+			if (!this.mentionedTables.isEmpty())
+			{
+				result.append(", ");
+			}
+			result.append(leftJoinExpression);
+		}
+		
 		if (!condition().isTrue()) {
 			result.append(" WHERE ");
 			result.append(condition().toSQL(this.database, this.aliases));
@@ -120,6 +208,9 @@ public class SelectStatementBuilder {
 //		if (this.database.limit() != Database.NO_LIMIT) {
 //			result.append(" LIMIT " + this.database.limit());
 //		}
+		
+//		System.out.println("SQL-Statement: " + result);
+		
 		return result.toString();
 	}
 	

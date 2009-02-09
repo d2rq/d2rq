@@ -15,6 +15,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.optimizer.utility.MutableIndex;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 public class GraphPatternTranslatorTest extends TestCase {
@@ -162,7 +163,7 @@ public class GraphPatternTranslatorTest extends TestCase {
 	}
 	
 	private NodeRelation translate1(List triplePatterns, Collection tripleRelations) {
-		Collection rels = new GraphPatternTranslator(triplePatterns, tripleRelations).translate();
+		Collection rels = new GraphPatternTranslator(triplePatterns, tripleRelations, new MutableIndex(triplePatterns.size()>1)).translate();
 		if (rels.isEmpty()) return null;
 		assertEquals(1, rels.size());
 		return (NodeRelation) rels.iterator().next();
@@ -170,7 +171,7 @@ public class GraphPatternTranslatorTest extends TestCase {
 
 	private NodeRelation[] translate(String pattern, String mappingFile) {
 		Collection rels = new GraphPatternTranslator(triplesToList(pattern),
-				MapFixture.loadPropertyBridges(mappingFile)).translate();
+				MapFixture.loadPropertyBridges(mappingFile), new MutableIndex(false)).translate();
 		return (NodeRelation[]) rels.toArray(new NodeRelation[rels.size()]);
 	}
 	

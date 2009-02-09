@@ -1,0 +1,9 @@
+PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+
+SELECT * 
+WHERE 
+{
+	?x bsbm:productPropertyNumeric2 ?propertyNumeric2 .
+ 	OPTIONAL { ?x bsbm:productPropertyTextual4 ?propertyTextual4 }
+ 	OPTIONAL { ?x bsbm:productPropertyTextual5 ?propertyTextual5 }
+}	

@@ -795,6 +795,24 @@ map:database a d2rq:Database;
 JDBC driver: <tt>autoReconnect=true</tt> and 
 <tt>zeroDateTimeBehavior=convertToNull</tt>.</p>
 
+<p><strong>Keep-alive long-term connections</strong></p>
+
+<p>Some database servers like MySQL may terminate open client connections after some
+interval (MySQL default is 12 hours). To keep alive long-term connections, D2R can be
+configured to periodically run "noop" queries. This feature can be enabled with the
+special property <tt>jdbc:keepAlive</tt>. An example is given below:</p>
+
+<pre>@prefix jdbc: &lt;http://d2rq.org/terms/jdbc/&gt; .
+
+map:database a d2rq:Database;
+    # ... other database configuration ...
+    jdbc:keepAlive "3600"; # value in seconds
+    jdbc:keepAliveQuery "SELECT 1"; # (optionally to override default noop query)
+    .</pre>
+
+<p>By default the noop query is "SELECT 1", which may not work with some DBMS.
+For this purpose, the default query may be overridden with a custom noop query.</p>
+
 <h2><a name="classmap"></a>7.2 ClassMap</h2>
 <p>A <strong>d2rq:ClassMap</strong> represents a class or a group of similar classes 
   of an OWL ontology or RDFS schema. A class map defines how instances of the 
@@ -1092,7 +1110,7 @@ map:PersonsType a d2rq:PropertyBridge ;
     <td valign="top">Specifies an SQL WHERE condition. The bridge will only generate 
       a statement if the condition holds. A common usage is to suppress triples 
       with empty literal values: <tt>d2rq:condition &quot;Table.Column <> ''&quot;</tt>. 
-      See section <a href="#condtional">Conditional Mappings</a> for details. 
+      See section <a href="#conditional">Conditional Mappings</a> for details. 
     </td>
   </tr>
   <tr> 
@@ -1472,7 +1490,7 @@ map:SeeAlsoStatement a d2rq:AdditionalProperty;
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.38 2008/04/26 22:06:16 cyganiak Exp $</p>
+<p>$Id: index.htm,v 1.39 2009/02/09 12:21:31 fatorange Exp $</p>
 
 </BODY>
 </HTML>

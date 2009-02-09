@@ -7,17 +7,22 @@ import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpExt;
 import com.hp.hpl.jena.sparql.engine.ExecutionContext;
 import com.hp.hpl.jena.sparql.engine.QueryIterator;
-import com.hp.hpl.jena.sparql.engine.main.OpExtMain;
+import com.hp.hpl.jena.sparql.serializer.SerializationContext;
+import com.hp.hpl.jena.sparql.sse.writers.WriterOp;
+import com.hp.hpl.jena.sparql.util.IndentedWriter;
 import com.hp.hpl.jena.sparql.util.NodeIsomorphismMap;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.optimizer.iterators.RelationToBindingsD2RQIterator;
 
-public class OpD2RQ extends OpExtMain {
-	private final OpBGP original;
-	private final Relation relation;
-	private final Collection bindingMakers;
+public class OpD2RQ extends OpExt
+{
+	protected final OpBGP original;
+	protected final Relation relation;
+	protected final Collection bindingMakers;
 	
-	public OpD2RQ(OpBGP original, Relation relation, Collection bindingMakers) {
+	public OpD2RQ(OpBGP original, Relation relation, Collection bindingMakers) 
+	{
 		this.original = original;
 		this.relation = relation;
 		this.bindingMakers = bindingMakers;
@@ -25,12 +30,7 @@ public class OpD2RQ extends OpExtMain {
 	
 	public QueryIterator eval(QueryIterator input, ExecutionContext execCxt) 
 	{
-		// I'm not sure what the semantics of input is; so I just close
-		// and ignore it
-//		input.close();
-		
-//		return RelationToBindingsIterator.create(relation, bindingMakers, execCxt);
-		return RelationToBindingsIterator2.create(relation, bindingMakers, input, execCxt);
+		return RelationToBindingsD2RQIterator.create(relation, bindingMakers, input, execCxt);
 	}
 
 	public boolean equalTo(Op other, NodeIsomorphismMap labelMap) {
@@ -51,8 +51,32 @@ public class OpD2RQ extends OpExtMain {
 		return original;
 	}
 
-	public String getName() {
+	/**
+	 * used for linking 2 OpD2RQs with an left-join
+	 * @return
+	 */
+	public Relation getRelation() {
+		return relation;
+	}
+
+	/**
+	 * used for linking 2 OpD2RQs with an left-join
+	 * @return
+	 */
+	public Collection getBindingMakers() 
+	{
+		return bindingMakers;
+	}
+
+	public String getSubTag() {
 		return "d2rq";
+	}
+
+	public void outputArgs(IndentedWriter out, SerializationContext sCxt) {
+		int line = out.getRow() ;
+		WriterOp.output(out, this, sCxt) ;
+		if ( line != out.getRow() )
+			out.ensureStartOfLine() ;
 	}
 	
 }

@@ -44,10 +44,10 @@ public final class DistributiveLawApplyer implements ExprVisitor
 		
 		if (curExpr instanceof ExprFunction1)
 		{
-			subExpr = ((ExprFunction1)curExpr).getArg();
+			subExpr = curExpr;
 			// step down
 			this.resultExpr = curExpr;
-			subExpr.visit(this);
+			((ExprFunction1) subExpr).getArg().visit(this);
 			
 		}else if (curExpr instanceof ExprFunction2)
 		{
@@ -120,10 +120,12 @@ public final class DistributiveLawApplyer implements ExprVisitor
 
 	public void visit(NodeValue nv) 
 	{
+		this.resultExpr = nv;
 	}
 
 	public void visit(ExprVar nv) 
 	{
+		this.resultExpr = nv;
 	}
 
 	

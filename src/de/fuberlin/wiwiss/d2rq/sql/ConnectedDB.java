@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
+import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,17 +12,22 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-
+ 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.18 2008/08/26 12:20:30 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.19 2009/02/09 12:21:31 fatorange Exp $
  */
 public class ConnectedDB {
+	private static final Log log = LogFactory.getLog(ConnectedDB.class);
+	
 	public static final String MySQL = "MySQL";
 	public static final String PostgreSQL = "PostgreSQL";
 	public static final String Oracle = "Oracle";
@@ -30,6 +36,11 @@ public class ConnectedDB {
 	public static final int NUMERIC_COLUMN = 2;
 	public static final int DATE_COLUMN = 3;
 	public static final int TIMESTAMP_COLUMN = 4;
+
+	public static final String KEEP_ALIVE_PROPERTY = "keepAlive"; // interval property, value in seconds
+	public static final int DEFAULT_KEEP_ALIVE_INTERVAL = 60*60; // hourly
+	public static final String KEEP_ALIVE_QUERY_PROPERTY = "keepAliveQuery"; // override default keep alive query
+	public static final String DEFAULT_KEEP_ALIVE_QUERY = "SELECT 1"; // may not work for some DBMS
 
 	private String jdbcURL;
 	private String username;
@@ -45,6 +56,56 @@ public class ConnectedDB {
 	private int limit;
 	private Map zerofillCache = new HashMap(); // Attribute => Boolean
 	private final Properties connectionProperties;
+
+	private class KeepAliveAgent extends Thread {
+		private boolean shutdown = false;
+		private final int interval;
+		private final String query;
+		
+		/**
+		 * @param interval in seconds
+		 */
+		public KeepAliveAgent(int interval, String query) {
+			this.interval = interval;
+			this.query = query;
+		}
+		
+		public void run() {
+			Connection c;
+			Statement s = null;
+			while (!shutdown) {
+				try { Thread.sleep(interval*1000); }
+				catch (InterruptedException e) { if (shutdown) break; }
+				
+				try {
+					if (log.isDebugEnabled())
+						log.debug("Keep alive agent is executing noop query '" + query + "'...");
+					c = connection();
+					s = c.createStatement();
+					s.execute(query);
+					s.close();
+				} catch (Throwable e) { // may throw D2RQException at runtime
+					log.error("Keep alive connection test failed: " + e.getMessage());
+				} finally {
+					if (s != null) try { s.close(); } catch (Exception ignore) {}
+				}
+			}
+			
+			log.info("Keep alive agent terminated.");
+		}
+		
+		public void shutdown() {
+			this.shutdown = true;
+		}
+	};
+	
+	private final Thread shutdownHook = new Thread() {
+		public void run() {
+			keepAliveAgent.shutdown();
+		}
+	};
+	
+	private final KeepAliveAgent keepAliveAgent;
 	
 	public ConnectedDB(String jdbcURL, String username, String password) {
 		this(jdbcURL, username, password, true,
@@ -65,6 +126,24 @@ public class ConnectedDB {
 		this.timestampColumns = timestampColumns;
 		this.limit = limit;
 		this.connectionProperties = connectionProperties;
+		
+		// create keep alive agent if enabled
+		if (connectionProperties != null && connectionProperties.containsKey(KEEP_ALIVE_PROPERTY)) {
+			int interval = DEFAULT_KEEP_ALIVE_INTERVAL;
+			String query = DEFAULT_KEEP_ALIVE_QUERY;
+			try {
+				interval = new Integer((String) connectionProperties.get(KEEP_ALIVE_PROPERTY)).intValue();
+				if (interval <= 0) interval = DEFAULT_KEEP_ALIVE_INTERVAL;
+			} catch (NumberFormatException ignore) {	} // use default
+			if (connectionProperties.containsKey(KEEP_ALIVE_QUERY_PROPERTY))
+				query = connectionProperties.getProperty(KEEP_ALIVE_QUERY_PROPERTY);
+			
+			this.keepAliveAgent = new KeepAliveAgent(interval, query);
+			this.keepAliveAgent.start();
+			Runtime.getRuntime().addShutdownHook(shutdownHook);
+			log.info("Keep alive agent is enabled (interval: " + interval + " seconds, noop query: '" + query + "').");
+		} else
+			this.keepAliveAgent = null;
 	}
 	
 	public Connection connection() {

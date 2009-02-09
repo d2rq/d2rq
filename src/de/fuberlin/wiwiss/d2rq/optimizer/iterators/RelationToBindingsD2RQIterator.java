@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.engine;
+package de.fuberlin.wiwiss.d2rq.optimizer.iterators;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,6 +19,7 @@ import com.hp.hpl.jena.sparql.util.IndentedWriter;
 import com.hp.hpl.jena.sparql.util.Utils;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.engine.BindingMaker;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
@@ -26,12 +27,26 @@ import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
-
-public class RelationToBindingsIterator2 extends QueryIterRepeatApply
+ 
+/**
+ * Iterator that calcualtes the result-bindings of an OpD2RQ.
+ *
+ * @author Herwig Leimer
+ *
+ */
+public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
 {
-	private final Collection bindingMakers;
-	private Relation relation;
+	protected final Collection bindingMakers;
+	protected final Relation relation;
 	
+	/**
+	 * Creates a new RelationToBindingsD2RQIterator
+	 * @param relation - contains information for getting the data used for the bindings from the database
+	 * @param bindingMakers - contains information for creating the bindings from the the databasedata
+	 * @param input - Input-Iterator
+	 * @param context - execution-context
+	 * @return QueryIterator - a QueryIterator
+	 */
 	public static QueryIterator create(Relation relation, Collection bindingMakers, QueryIterator input, ExecutionContext context) 
 	{
 		if (relation.condition().isFalse() || relation.isTrivial()) 
@@ -39,28 +54,44 @@ public class RelationToBindingsIterator2 extends QueryIterRepeatApply
 			input.close();
 			return new QueryIterNullIterator(context);
 		}
-		return new RelationToBindingsIterator2(relation, bindingMakers, input, context);
+		return new RelationToBindingsD2RQIterator(relation, bindingMakers, input, context);
 	}
 	
-	protected RelationToBindingsIterator2(Relation relation, Collection bindingMakers, QueryIterator input, ExecutionContext context)
+	/**
+	 * Constructor
+	 * @param relation - contains information for getting the data used for the bindings from the database
+	 * @param bindingMakers - contains information for creating the bindings from the the databasedata
+	 * @param input - Input-Iterator
+	 * @param context - execution-context
+	 */
+	protected RelationToBindingsD2RQIterator(Relation relation, Collection bindingMakers, QueryIterator input, ExecutionContext context)
     {
 		super(input, context) ;
     	this.bindingMakers = bindingMakers;
     	this.relation = relation;
 	}
 	
-	
+	/**
+	 * Method for printing
+	 */
 	public void output(IndentedWriter out, SerializationContext cxt) 
 	{
 		out.print(Utils.className(this));
 	}
 
+	
 	protected QueryIterator nextStage(Binding binding) 
 	{	
 		return new StagePattern(binding, relation, bindingMakers, getExecContext()) ;
 	}
 	
-	
+	/**
+	 * Class that fetches additional values for every parent-binding.
+	 * Especially necessary for Joins and LeftJoins.
+	 * 
+	 * @author Herwig Leimer
+	 *
+	 */
 	static class StagePattern extends QueryIter
     {
         Binding parentBinding ;
@@ -70,7 +101,14 @@ public class RelationToBindingsIterator2 extends QueryIterRepeatApply
         NodeMaker nodeMaker;
         ValueMaker valueMaker;
         Set vars = new HashSet();
-                
+              
+        /**
+         * Construtor
+         * @param parentBinding - Parentbinding - for example join/leftjoin - the parentbinding will be a resultbinding from the left-OpD2RQ
+         * @param relation - relation for getting the needed data from the database
+         * @param bindingMakers - bindingMakers for creating the bindings
+         * @param qCxt - execution-context
+         */
         public StagePattern(Binding parentBinding, Relation relation,	Collection bindingMakers, ExecutionContext qCxt)
         {
             super(qCxt) ;
@@ -138,6 +176,9 @@ public class RelationToBindingsIterator2 extends QueryIterRepeatApply
             }
         }
 
+        /**
+         * Check for next-binding
+         */
     	public boolean hasNextBinding() 
     	{
     		
@@ -149,14 +190,18 @@ public class RelationToBindingsIterator2 extends QueryIterRepeatApply
     		return !queue.isEmpty();
     	}
 
-        
-        //@Override
+    	/**
+    	 * Closes the iterator
+    	 */
         protected void closeIterator()
         {
         	if (wrapped != null)
         		wrapped.close();
         }
 
+        /**
+         * Go to the next binding
+         */
     	public Binding moveToNextBinding() 
     	{
     		Binding b =  (Binding) queue.removeFirst();
@@ -181,14 +226,17 @@ public class RelationToBindingsIterator2 extends QueryIterRepeatApply
     		
     	}
     
-    	private void enqueueBindings(ResultRow row) 
+    	/**
+    	 * Makes the binding from a result-row of the database
+    	 * and puts it into a queue
+    	 * @param row
+    	 */
+    	protected void enqueueBindings(ResultRow row) 
     	{
     		Iterator it = bindingMakers.iterator();
     		while (it.hasNext()) 
     		{
     			BindingMaker bindingMaker = (BindingMaker) it.next();
-//    			System.out.println("Row: " + row);
-//    			System.out.println("BindingMaker: " + bindingMaker);
     			Binding binding = bindingMaker.makeBinding(row);
     			if (binding != null) 
     			{

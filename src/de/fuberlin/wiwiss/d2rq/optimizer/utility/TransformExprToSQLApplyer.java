@@ -13,6 +13,8 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
+import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
 /**
  * Transforms an expr to a sql-string
@@ -164,7 +166,6 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
         if (!sqlOperator.equals(""))
         {
             sqlExpression.append("(");
-            // TODO: check for sql-operator
             sqlExpression.append(sqlOperator);
             sqlExpression.append(" ");
             expr.getArg().visit(this);
@@ -184,13 +185,46 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
     private void convertFunctionExpr2(ExprFunction2 expr)
     {
         String sparqlOperator, sqlOperator;
+        boolean compatible = true;
+        NodeMaker nodeMakerVar1, nodeMakerVar2;
+        ValueMaker valueMakerVar1, valueMakerVar2;
+        Pattern varPattern1, varPattern2;
         
         // name of the sparql-operator
         sparqlOperator = expr.getOpName();
         // get the equivalent sql-operator
         sqlOperator = SPARQLToSQLOperatorsTable.getSQLKeyword(sparqlOperator);
 
-        if (!sqlOperator.equals(""))
+        // when arg1 & arg2 are an URL, check for compatiblity of their patterns
+        if (expr.getArg1().isVariable() && expr.getArg2().isVariable())
+        {
+        	nodeMakerVar1 = this.nodeRelation.nodeMaker(expr.getArg1().getVarName());
+        	nodeMakerVar2 = this.nodeRelation.nodeMaker(expr.getArg2().getVarName());
+        	
+        	// i don't know if this is really necessary
+        	if (!(nodeMakerVar1 instanceof TypedNodeMaker) || !(nodeMakerVar2 instanceof TypedNodeMaker))
+        	{
+        		compatible = false;
+        	}
+        	
+        	valueMakerVar1 = ((TypedNodeMaker)nodeMakerVar1).valueMaker();
+        	valueMakerVar2 = ((TypedNodeMaker)nodeMakerVar2).valueMaker();
+        
+        	if (valueMakerVar1 instanceof Pattern && valueMakerVar2 instanceof Pattern)
+        	{
+        		varPattern1 = (Pattern)valueMakerVar1;
+        		varPattern2 = (Pattern)valueMakerVar2;
+        		
+        		// check if pattern are compatible
+        		if (!varPattern1.firstLiteralPart().equals(varPattern2.firstLiteralPart()))
+        		{
+        			compatible = false;
+        		}
+        	}
+        	
+        }
+        	
+        if (!sqlOperator.equals("") && compatible)
         {
             sqlExpression.append("(") ;
             expr.getArg1().visit(this) ;

@@ -1,12 +1,11 @@
 package de.fuberlin.wiwiss.d2rq.optimizer.utility;
 
 import com.hp.hpl.jena.sparql.expr.Expr;
-
 import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
 
 /**
  * Utility-class for expr. 
- * Can convert expr to someone else. 
+ * Can convert expr to someone else - current to sql-string. 
  * 
  * @author Herwig Leimer
  *

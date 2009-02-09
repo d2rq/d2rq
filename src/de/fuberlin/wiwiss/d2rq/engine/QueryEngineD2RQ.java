@@ -15,6 +15,7 @@ import com.hp.hpl.jena.sparql.engine.binding.BindingRoot;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIterRoot;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIteratorCheck;
 import com.hp.hpl.jena.sparql.engine.main.QC;
+import com.hp.hpl.jena.sparql.engine.main.QueryEngineMain;
 import com.hp.hpl.jena.sparql.util.Context;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
@@ -24,9 +25,9 @@ import de.fuberlin.wiwiss.d2rq.optimizer.D2RQTreeOptimizer;
  * TODO: @@@ QueryEngineD2RQ and the whole package is work in progress
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryEngineD2RQ.java,v 1.4 2009/02/06 13:59:02 fatorange Exp $
+ * @version $Id: QueryEngineD2RQ.java,v 1.5 2009/02/09 12:21:30 fatorange Exp $
  */
-public class QueryEngineD2RQ extends QueryEngineBase {
+public class QueryEngineD2RQ extends QueryEngineMain {
 	private GraphD2RQ graph;
 	
 	public QueryEngineD2RQ(GraphD2RQ graph, Query query) {
@@ -34,7 +35,7 @@ public class QueryEngineD2RQ extends QueryEngineBase {
 	}
 
 	public QueryEngineD2RQ(GraphD2RQ graph, Query query, Context context) {
-		super(query, new D2RQDatasetGraph(graph), new AlgebraGenerator(context), BindingRoot.create(), context);
+		super(query, new D2RQDatasetGraph(graph), BindingRoot.create(), context);
 		this.graph = graph;
 	}
 
@@ -51,10 +52,11 @@ public class QueryEngineD2RQ extends QueryEngineBase {
 	}
 	
 	public QueryIterator eval(Op op, DatasetGraph dataset, Binding input, Context context) {
-		ExecutionContext execCxt = new ExecutionContext(context, dataset.getDefaultGraph(), dataset) ;
-        QueryIterator qIter1 = QueryIterRoot.create(input, execCxt) ;
-		QueryIterator qIter = QC.compile(op, qIter1, execCxt);
-		return QueryIteratorCheck.check(qIter, execCxt);
+//		ExecutionContext execCxt = new ExecutionContext(context, dataset.getDefaultGraph(), dataset, getFactory()) ;
+//        QueryIterator qIter1 = QueryIterRoot.create(input, execCxt) ;
+//		QueryIterator qIter = QC.compile(op, qIter1, execCxt);
+//		return QueryIteratorCheck.check(qIter, execCxt);
+		return super.eval(op, dataset, input, context);
 	}
 
 	// Factory stuff

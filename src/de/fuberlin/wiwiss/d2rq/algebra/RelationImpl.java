@@ -11,6 +11,7 @@ public class RelationImpl extends Relation {
 	private final AliasMap aliases;
 	private final Expression condition;
 	private final Set joinConditions;
+	private final Set leftJoinConditions;
 	private final Set projections;
 	private final boolean isUnique;
 	
@@ -23,6 +24,23 @@ public class RelationImpl extends Relation {
 		this.joinConditions = joinConditions;
 		this.projections = projections;
 		this.isUnique = isUnique;
+		this.leftJoinConditions = new HashSet();
+	}
+
+	public RelationImpl(ConnectedDB database, AliasMap aliases,
+			Expression condition, Set joinConditions, Set projections, Set leftJoinConditions,
+			boolean isUnique) {
+		this.database = database;
+		this.aliases = aliases;
+		this.condition = condition;
+		this.joinConditions = joinConditions;
+		this.projections = projections;
+		this.isUnique = isUnique;
+		this.leftJoinConditions = leftJoinConditions;
+	}
+	
+	public Set leftJoinConditions() {
+		return leftJoinConditions;
 	}
 
 	public ConnectedDB database() {

@@ -1,9 +1,3 @@
-/*
- * (c) Copyright 2006, 2007, 2008 Hewlett-Packard Development Company, LP
- * All rights reserved.
- * [See end of file]
- */
-
 package de.fuberlin.wiwiss.d2rq.optimizer;
 
 import java.util.ArrayList;
@@ -20,6 +14,7 @@ import com.hp.hpl.jena.sparql.algebra.op.Op1;
 import com.hp.hpl.jena.sparql.algebra.op.Op2;
 import com.hp.hpl.jena.sparql.algebra.op.OpAssign;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
+import com.hp.hpl.jena.sparql.algebra.op.OpConditional;
 import com.hp.hpl.jena.sparql.algebra.op.OpDatasetNames;
 import com.hp.hpl.jena.sparql.algebra.op.OpDiff;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
@@ -54,6 +49,7 @@ import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformAddFilters;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformPrepareOpTreeForOptimizing;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformApplyD2RQOpimizingRules;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformD2RQ;
+import de.fuberlin.wiwiss.d2rq.optimizer.utility.MutableIndex;
 
 /**
  * Class for optimizing an op-tree especially for D2RQ. 
@@ -110,8 +106,12 @@ public class D2RQTreeOptimizer
             return op ;
         }
         
+        // calculate all optional vars and fixed vars
+        // this information is used in the relationstobindingsleftjoiniterator
+        VarFinder varFinder = new VarFinder(op);
+        
         // visitor that applies the rules for moving down the filterconditions
-        D2RQOpTreeVisitor d2RQOpTreeVisitor = new D2RQOpTreeVisitor(graph) ;
+        D2RQOpTreeVisitor d2RQOpTreeVisitor = new D2RQOpTreeVisitor(graph, varFinder) ;
         // start visiting
         op.visit(d2RQOpTreeVisitor) ;
         Op r = d2RQOpTreeVisitor.result() ;
@@ -137,13 +137,13 @@ public class D2RQTreeOptimizer
          * Constructor
          * @param transform - Transformer to be applied on the operator-tree
          */
-        public D2RQOpTreeVisitor(GraphD2RQ graph)
+        public D2RQOpTreeVisitor(GraphD2RQ graph, VarFinder varFinder)
         { 
         	this.filterExpr = new ArrayList();
         	this.optimizingTransform = new TransformApplyD2RQOpimizingRules();
-            this.d2rqTransform = new TransformD2RQ(graph);
+            this.d2rqTransform = new TransformD2RQ(graph, new MutableIndex(), varFinder);
             this.addFilterTransform = new TransformAddFilters();
-            this.stack = new Stack();            
+            this.stack = new Stack();
         }
         
         /**
@@ -228,6 +228,7 @@ public class D2RQTreeOptimizer
             checkMoveDownFilterExprAndVisitOpJoin(opJoin);
         }
                 
+
         /**
          * When there are some filterexpressions which belong to an OpBGP, the OpBGP will be converted
          * to an OpFilteredBGP. A OpFilteredBGP is nearly the same like an OpBGP but it has
@@ -240,6 +241,7 @@ public class D2RQTreeOptimizer
         	Op newOp;
             
         	newOp = op;
+        	
         	
         	// are there some filterexpression which belong to this BGP ? 
             if (!this.filterExpr.isEmpty())
@@ -283,6 +285,10 @@ public class D2RQTreeOptimizer
             // TODO: Regel nochmal ueberdenken !!!
         	checkMoveDownFilterExprAndVisitOpDiff(opDiff);
         }
+        
+        public void visit(OpConditional opCondition) {
+			notMoveDownFilterExprAndVisitOp2(opCondition); //TODO moving down / improvements possible!! Check this
+		}
         
         public void visit(OpProcedure opProc)
         { 
@@ -339,7 +345,6 @@ public class D2RQTreeOptimizer
          */
         public void visit(OpLeftJoin opLeftJoin)
         { 
-        	// TODO: Regel nochmal ueberdenken !!!
         	checkMoveDownFilterExprAndVisitOpLeftJoin(opLeftJoin); 
         }
 
@@ -654,6 +659,7 @@ public class D2RQTreeOptimizer
             // above this op2
             filterExprAfterOpLeftJoin = new ArrayList();
             
+            	
             // check left subtree
             if ((left = opLeftJoin.getLeft()) != null )
             {
@@ -678,6 +684,7 @@ public class D2RQTreeOptimizer
                 if (right instanceof OpLabel)
                 {
                     opRightLabel = (OpLabel)right;
+                    
                     filterExprRightSide = calcValidFilterExpr(filterExprBeforeOpLeftJoin, opRightLabel);
                     validFilterExprRightSide = new ArrayList();
                     
@@ -702,24 +709,28 @@ public class D2RQTreeOptimizer
                 right = (Op)this.stack.pop();
             }
             
+            
+            
             // note: filterExprAfterOpUnion contains now all filterexpressions which could
             // be moved down
             // now calculate all filterexpressions which were not moveable
             notMoveableFilterExpr = new ArrayList(filterExprBeforeOpLeftJoin);
             notMoveableFilterExpr.removeAll(filterExprAfterOpLeftJoin);
 
+            
+            
             // if there are some filterexpressions which could not be moved down,
             // an opFilter must be inserted that contains this filterexpressions
             if (!notMoveableFilterExpr.isEmpty())
-            {
+            {        	
+            	
                 // create the filter
                 newOp = opLeftJoin.apply(addFilterTransform, left, right); 
                 // add the conditions
                 ((OpFilter)newOp).getExprs().getList().addAll(notMoveableFilterExpr);
             }else
             {
-                // nothing must be done
-            	newOp = opLeftJoin.apply(d2rqTransform, left, right);
+            	newOp = opLeftJoin.apply(d2rqTransform, left, right);	
             }
             
             // restore filterexpressions

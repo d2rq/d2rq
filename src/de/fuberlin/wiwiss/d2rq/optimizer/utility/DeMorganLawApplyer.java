@@ -145,10 +145,12 @@ public final class DeMorganLawApplyer implements ExprVisitor
 
 	public void visit(NodeValue nv) 
 	{
+		this.resultExpr = nv;
 	}
 
 	public void visit(ExprVar nv) 
 	{
+		this.resultExpr = nv;
 	}
 
 	

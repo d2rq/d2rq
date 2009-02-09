@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.map.Mapping;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.12 2007/11/16 20:04:48 cyganiak Exp $
+ * @version $Id: ModelD2RQ.java,v 1.13 2009/02/09 12:21:31 fatorange Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */
@@ -58,7 +58,7 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 * 		absolute URIs; if <tt>null</tt>, then D2RQ will pick a base URI
 	 */
 	public ModelD2RQ(Model mapModel, String baseURIForData) {
-		super(new GraphD2RQ(mapModel, baseURIForData), BuiltinPersonalities.model);
+		super(new GraphD2RQ(mapModel, baseURIForData), BuiltinPersonalities.model); // BuiltinPersonalities.model really required?
 	}
 	
 	/**

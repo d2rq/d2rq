@@ -5,6 +5,7 @@ import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.Transform;
 import com.hp.hpl.jena.sparql.algebra.op.OpAssign;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
+import com.hp.hpl.jena.sparql.algebra.op.OpConditional;
 import com.hp.hpl.jena.sparql.algebra.op.OpDatasetNames;
 import com.hp.hpl.jena.sparql.algebra.op.OpDiff;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
@@ -195,6 +196,11 @@ public class TransformApplyD2RQOpimizingRules implements Transform
 	public Op transform(OpDiff opDiff, Op left, Op right) 
 	{
 		return opDiff;
+	}
+
+	public Op transform(OpConditional opCondition, Op left, Op right)
+	{
+		return opCondition;
 	}
 	
 }

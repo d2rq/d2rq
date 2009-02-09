@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * graph and no named graphs.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQDatasetGraph.java,v 1.1 2008/04/27 22:42:37 cyganiak Exp $
+ * @version $Id: D2RQDatasetGraph.java,v 1.2 2009/02/09 12:21:30 fatorange Exp $
  */
 public class D2RQDatasetGraph implements DatasetGraph {
 	private final static Lock LOCK_INSTANCE = new LockNone();
@@ -44,10 +44,14 @@ public class D2RQDatasetGraph implements DatasetGraph {
 	}
 
 	public Iterator listGraphNodes() {
-		return NullIterator.instance;
+		return NullIterator.instance();
 	}
 
 	public int size() {
 		return 0;	// Just default graph
+	}
+
+	public void close() {
+		graph.close();
 	}
 }

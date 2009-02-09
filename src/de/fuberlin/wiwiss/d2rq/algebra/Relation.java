@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO Add uniqueConstraints()
  * TODO Explicitly list tables!!!
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Relation.java,v 1.12 2008/08/12 06:47:37 cyganiak Exp $
+ * @version $Id: Relation.java,v 1.13 2009/02/09 12:21:31 fatorange Exp $
  */
 public abstract class Relation implements RelationalOperators {
 
@@ -28,6 +28,7 @@ public abstract class Relation implements RelationalOperators {
 		public ConnectedDB database() { return null; }
 		public AliasMap aliases() { return AliasMap.NO_ALIASES; }
 		public Set joinConditions() { return Collections.EMPTY_SET; }
+		public Set leftJoinConditions() { return Collections.EMPTY_SET; }
 		public Expression condition() { return Expression.FALSE; }
 		public Set projections() { return Collections.EMPTY_SET; }
 		public Relation select(Expression condition) { return this; }
@@ -40,6 +41,7 @@ public abstract class Relation implements RelationalOperators {
 		public ConnectedDB database() { return null; }
 		public AliasMap aliases() { return AliasMap.NO_ALIASES; }
 		public Set joinConditions() { return Collections.EMPTY_SET; }
+		public Set leftJoinConditions() { return Collections.EMPTY_SET; }
 		public Expression condition() { return Expression.TRUE; }
 		public Set projections() { return Collections.EMPTY_SET; }
 		public Relation select(Expression condition) {
@@ -72,6 +74,13 @@ public abstract class Relation implements RelationalOperators {
 	 */
 	public abstract Set joinConditions();
 
+	/**
+	 * Returns the leftjoin conditions that must hold between the tables
+	 * in the relation.
+	 * @return A set of {@link Join}s 
+	 */
+	public abstract Set leftJoinConditions();
+	
 	/**
 	 * An expression that must be satisfied for all tuples in the
 	 * relation.

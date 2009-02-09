@@ -26,13 +26,29 @@ public class OpFilteredBGP extends OpBGP
 		super(basicPattern);
 	}
 	
+	/**
+	 * Parent-Op
+	 * @return Op - Parent-Op
+	 */
 	public Op getParent() 
 	{
 		return parent;
 	}
 
+	/**
+	 * Links to a parent-op
+	 * @param parent - parent-op
+	 */
 	public void setParent(Op parent) 
 	{
 		this.parent = parent;
+	}
+	
+	/**
+	 * Name
+	 */
+	public String getName() 
+	{
+		return "filteredBGP";
 	}
 }
