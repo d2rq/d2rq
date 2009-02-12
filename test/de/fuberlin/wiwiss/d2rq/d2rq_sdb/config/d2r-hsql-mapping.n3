@@ -352,7 +352,7 @@ map:review_reviewDate a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:review;
 	d2rq:property bsbm:reviewDate;
 	d2rq:column "review.reviewDate";
-	d2rq:datatype xsd:date;
+	d2rq:datatype xsd:dateTime;
 	.
 map:review_title a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:review;

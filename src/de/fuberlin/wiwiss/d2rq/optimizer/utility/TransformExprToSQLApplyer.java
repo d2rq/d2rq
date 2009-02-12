@@ -84,7 +84,19 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
     		if (nv.isDecimal() || nv.isDouble() || nv.isFloat() || nv.isInteger() || nv.isNumber())
     		{
     			sqlExpression.append(nv.asString());
-    		}else
+    		}
+    		else if (nv.isDateTime())
+    		{
+    			/*
+    			 * Convert xsd:dateTime: CCYY-MM-DDThh:mm:ss
+    			 * to SQL-92 TIMESTAMP: CCYY-MM-DD hh:mm:ss[.fraction]
+    			 * TODO support time zones (WITH TIME ZONE columns)
+    			 */
+    			sqlExpression.append("'");
+    			sqlExpression.append(nv.asString().replace("T", " "));
+    			sqlExpression.append("'");
+    		}
+    		else
     		{
     			sqlExpression.append("'");
     			sqlExpression.append(nv.asString()) ;

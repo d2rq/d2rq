@@ -45,24 +45,24 @@ map:offer_validFrom a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:offer;
 	d2rq:property bsbm:validFrom;
 	d2rq:column "offer.validFrom";
-	d2rq:datatype xsd:date;
+	d2rq:datatype xsd:dateTime;
 	.
 map:offer_validTo a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:offer;
 	d2rq:property bsbm:validTo;
 	d2rq:column "offer.validTo";
-	d2rq:datatype xsd:date;
+	d2rq:datatype xsd:dateTime;
 	.
 map:offer_deliveryDays a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:offer;
 	d2rq:property bsbm:deliveryDays;
 	d2rq:column "offer.deliveryDays";
-	d2rq:datatype xsd:int;
+	d2rq:datatype xsd:integer;
 	.
 map:offer_offerWebpage a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:offer;
 	d2rq:property bsbm:offerWebpage;
-	d2rq:column "offer.offerWebpage";
+	d2rq:uriColumn "offer.offerWebpage";
 	.
 map:offer_publisher a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:offer;
@@ -129,7 +129,7 @@ map:producer_comment a d2rq:PropertyBridge;
 map:producer_homepage a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:producer;
 	d2rq:property foaf:homepage;
-	d2rq:column "producer.homepage";
+	d2rq:uriColumn "producer.homepage";
 	.
 map:producer_country a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:producer;
@@ -157,13 +157,13 @@ map:product a d2rq:ClassMap;
 map:product_feature a d2rq:PropertyBridge;
   d2rq:belongsToClassMap map:product;
   d2rq:property bsbm:productFeature;
-  d2rq:uriPattern "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature@@productfeatureproduct.productfeature@@";
+  d2rq:uriPattern "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature@@productfeatureproduct.productFeature@@";
   d2rq:join "product.nr = productfeatureproduct.product";
   .
 map:product_type a d2rq:PropertyBridge;
   d2rq:belongsToClassMap map:product;
   d2rq:property rdf:type;
-  d2rq:uriPattern "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType@@producttypeproduct.producttype@@";
+  d2rq:uriPattern "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType@@producttypeproduct.productType@@";
   d2rq:join "product.nr = producttypeproduct.product";
   .
 map:product_label a d2rq:PropertyBridge;
@@ -352,7 +352,7 @@ map:review_reviewDate a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:review;
 	d2rq:property bsbm:reviewDate;
 	d2rq:column "review.reviewDate";
-	d2rq:datatype xsd:date;
+	d2rq:datatype xsd:dateTime;
 	.
 map:review_title a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:review;
@@ -419,25 +419,25 @@ map:review_rating1 a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:review;
 	d2rq:property bsbm:rating1;
 	d2rq:column "review.rating1";
-	d2rq:datatype xsd:int;
+	d2rq:datatype xsd:integer;
 	.
 map:review_rating2 a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:review;
 	d2rq:property bsbm:rating2;
 	d2rq:column "review.rating2";
-	d2rq:datatype xsd:int;
+	d2rq:datatype xsd:integer;
 	.
 map:review_rating3 a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:review;
 	d2rq:property bsbm:rating3;
 	d2rq:column "review.rating3";
-	d2rq:datatype xsd:int;
+	d2rq:datatype xsd:integer;
 	.
 map:review_rating4 a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:review;
 	d2rq:property bsbm:rating4;
 	d2rq:column "review.rating4";
-	d2rq:datatype xsd:int;
+	d2rq:datatype xsd:integer;
 	.
 map:review_publisher a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:review;
@@ -470,7 +470,7 @@ map:vendor_comment a d2rq:PropertyBridge;
 map:vendor_homepage a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:vendor;
 	d2rq:property foaf:homepage;
-	d2rq:column "vendor.homepage";
+	d2rq:uriColumn "vendor.homepage";
 	.
 map:vendor_country a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:vendor;

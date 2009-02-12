@@ -33,13 +33,9 @@ public class SdbSqlEqualityTest extends LoadDataTest
 	private String[] excludedQueriesFileNames = {  
             // fehlgeschlagene Tests
 							"query9.rq",		// bsbm - D2RQException: Wrong data type: For input string: "er1":
-							"query11.rq",		// bsbm - Datumsproblem: "2008-05-08:00" statt "2008-05-08T00:00:00"
-							"query12.rq",		// bsbm - Datumsproblem: "2008-07-17:00" statt "2008-07-17T00:00:00" 
 							"var-1.rq", 		// basic - Exception: Wrong data type: For input string: "Site1":
-							"var-2.rq",			// basic - Datumsproblem: "2008-03-26:00" statt "2008-03-26T00:00:00"
 							"term-8.rq",		// basic - Unterschiedl. Anzahl von Erebnissen
 							"distinct-1.rq",	// distinct - Unterschiedl. Anzahl von Erebnissen + Datatype format exception: "2008-08-30:00"^^xsd:dateTime
-							"distinct-2.rq",	// distinct - DatatypeFormatException: Lexical form '2008-03-24:00' is not a legal instance of Datatype[http://www.w3.org/2001/XMLSchema#dateTime
 							"no-distinct-1.rq", // distinct - Unterschiedl. Erebnisse
 							"no-distinct-2.rq", // distinct - DatatypeFormatException: Lexical form '2008-03-24:00' is not a legal instance of Datatype[http://www.w3.org/2001/XMLSchema#dateTime
 							"query-eq-3.rq",	// expr-equals - Unterschiedl. Anzahl von Erebnissen + Datatype format exception: "2008-08-30:00"^^xsd:dateTime
