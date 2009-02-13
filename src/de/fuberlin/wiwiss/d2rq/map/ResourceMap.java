@@ -38,7 +38,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.11 2008/07/29 18:45:32 cyganiak Exp $
+ * @version $Id: ResourceMap.java,v 1.12 2009/02/13 14:31:53 dorgon Exp $
  */
 public abstract class ResourceMap extends MapObject {
 
@@ -60,6 +60,7 @@ public abstract class ResourceMap extends MapObject {
 	protected String column = null;
 	protected String pattern = null;
 	protected String sqlExpression = null;
+	protected String uriSqlExpression = null;
 	protected String datatype = null;
 	protected String lang = null;
 	protected ClassMap refersToClassMap = null;
@@ -224,6 +225,9 @@ public abstract class ResourceMap extends MapObject {
 		if (this.sqlExpression != null) {
 			return new SQLExpressionValueMaker(SQLExpression.create(sqlExpression));
 		}
+		if (this.uriSqlExpression != null) {
+			return new SQLExpressionValueMaker(SQLExpression.create(uriSqlExpression));
+		}
 		throw new D2RQException(this + " needs a column/pattern/bNodeID specification");
 	}
 
@@ -262,8 +266,13 @@ public abstract class ResourceMap extends MapObject {
 		if (this.uriColumn != null || this.uriPattern != null) {
 			return TypedNodeMaker.URI;
 		}
+		if (this.uriSqlExpression != null) {
+			return TypedNodeMaker.URI;
+		}
+		
+		// literals
 		if (this.column == null && this.pattern == null && this.sqlExpression == null) {
-			throw new D2RQException(this + " needs a column/pattern/bNodeID specification");
+			throw new D2RQException(this + " needs a column/pattern/bNodeID/sqlExpression/uriSqlExpression specification");
 		}
 		if (this.datatype != null && this.lang != null) {
 			throw new D2RQException(this + " has both d2rq:lang and d2rq:datatype");
@@ -325,6 +334,7 @@ public abstract class ResourceMap extends MapObject {
 		if (property.equals(D2RQ.column)) return this.column != null;
 		if (property.equals(D2RQ.pattern)) return this.pattern != null;
 		if (property.equals(D2RQ.sqlExpression)) return this.sqlExpression != null;
+		if (property.equals(D2RQ.uriSqlExpression)) return this.uriSqlExpression != null;
 		if (property.equals(D2RQ.refersToClassMap)) return this.refersToClassMap != null;
 		if (property.equals(D2RQ.constantValue)) return this.constantValue != null;
 		throw new D2RQException("No primary spec: " + property);

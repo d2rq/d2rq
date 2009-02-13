@@ -52,6 +52,11 @@ public class PropertyBridge extends ResourceMap {
 		this.sqlExpression = sqlExpression;
 	}
 	
+	public void setUriSQLExpression(String uriSqlExpression) {
+		assertNotYetDefined(this.column, D2RQ.uriSqlExpression, D2RQException.PROPERTYBRIDGE_DUPLICATE_URI_SQL_EXPRESSION);
+		this.uriSqlExpression = uriSqlExpression;
+	}
+	
 	public void setDatatype(String datatype) {
 		assertNotYetDefined(this.datatype, D2RQ.datatype, D2RQException.PROPERTYBRIDGE_DUPLICATE_DATATYPE);
 		this.datatype = datatype;
@@ -84,7 +89,7 @@ public class PropertyBridge extends ResourceMap {
 		}
 		assertHasPrimarySpec(new Property[]{
 				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns,
-				D2RQ.column, D2RQ.pattern, D2RQ.sqlExpression, D2RQ.constantValue,
+				D2RQ.column, D2RQ.pattern, D2RQ.sqlExpression, D2RQ.uriSqlExpression, D2RQ.constantValue,
 				D2RQ.refersToClassMap
 		});
 		if (this.datatype != null && this.lang != null) {

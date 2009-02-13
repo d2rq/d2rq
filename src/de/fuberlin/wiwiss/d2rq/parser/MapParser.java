@@ -38,7 +38,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.34 2008/08/11 08:28:24 cyganiak Exp $
+ * @version $Id: MapParser.java,v 1.35 2009/02/13 14:31:56 dorgon Exp $
  */
 public class MapParser {
 
@@ -440,6 +440,10 @@ public class MapParser {
 		stmts = r.listProperties(D2RQ.sqlExpression);
 		while (stmts.hasNext()) {
 			bridge.setSQLExpression(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.uriSqlExpression);
+		while (stmts.hasNext()) {
+			bridge.setUriSQLExpression(stmts.nextStatement().getString());
 		}
 		stmts = r.listProperties(D2RQ.lang);
 		while (stmts.hasNext()) {
