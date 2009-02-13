@@ -80,6 +80,11 @@ public class SQLSyntaxTest extends TestCase {
 				new Attribute("s2", "t2", "c2")})),
 				SQL.findColumnsInExpression("s1.t1.c1 + s2.t2.c2 = 135"));
 	}
+	
+	public void testFindColumnsInExpressionWithStrings() {
+		assertEquals(new HashSet(Arrays.asList(new Attribute[]{foo_col1, foo_col2, bar_col1})),
+				SQL.findColumnsInExpression("FUNC(\"foo.other\", foo.col1, 'foo.bar.other') = foo.col2 && FUNC(F2(), bar.col1)"));
+	}
 
 	public void testReplaceColumnsInExpressionWithAliasMap() {
 		Alias alias = new Alias(new RelationName(null, "foo"), new RelationName(null, "bar"));
