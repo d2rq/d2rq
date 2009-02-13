@@ -88,9 +88,14 @@ public class SQLSyntaxTest extends TestCase {
 	
 	public void testFindColumnsInExpressionWithStrings() {
 		assertEquals(new HashSet(Arrays.asList(new Attribute[]{foo_col1, foo_col2, bar_col1})),
-				SQL.findColumnsInExpression("FUNC('foo.other', foo.col1, 'foo.bar.other') = foo.col2 && FUNC(F2(), bar.col1)"));
+				SQL.findColumnsInExpression("FUNC('mustnot.match', foo.col1, 'must.not.match') = foo.col2 && FUNC(F2(), bar.col1)"));
 	}
 
+	public void testFindColumnsInExpressionWithStrings2() { // may occur with d2rq:sqlExpression
+		assertEquals(new HashSet(Arrays.asList(new Attribute[]{foo_col1})),
+				SQL.findColumnsInExpression("FUNC('mustnot.match', foo.col1, 'must.not.match')"));
+	}
+	
 	public void testReplaceColumnsInExpressionWithAliasMap() {
 		Alias alias = new Alias(new RelationName(null, "foo"), new RelationName(null, "bar"));
 		AliasMap fooAsBar = new AliasMap(Collections.singleton(alias));
