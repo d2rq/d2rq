@@ -76,7 +76,7 @@ public class SQLSyntaxTest extends TestCase {
 	
 	public void testFindColumnsInExpression2() {
 		assertEquals(new HashSet(Arrays.asList(new Attribute[]{foo_col1, foo_col2})),
-				SQL.findColumnsInExpression("'must.not.match' = t1.c1 && t1.c2 = 'must.not' && t1.c2 != \"must.not\""));
+				SQL.findColumnsInExpression("'must.not.match' = foo.col1 && foo.col2 = 'must.not' && foo.col2 != \"must.noteither\""));
 	}
 
 	public void testFindColumnsInExpressionWithSchema() {
