@@ -1,4 +1,4 @@
-/* CVS $Id: D2R.java,v 1.2 2007/02/09 15:20:11 cyganiak Exp $ */
+/* CVS $Id: D2R.java,v 1.3 2009/02/14 22:40:14 fatorange Exp $ */
 package de.fuberlin.wiwiss.d2rs.vocab; 
 import com.hp.hpl.jena.rdf.model.*;
  
@@ -35,6 +35,8 @@ public class D2R {
      *  page.</p>
      */
     public static final Property baseURI = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#baseURI" );
+    
+    public static final Property vocabularyIncludeInstances = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#vocabularyIncludeInstances" );    
     
     /** <p>A configuration for a D2R Server installation.</p> */
     public static final Resource Server = m_model.createResource( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server" );

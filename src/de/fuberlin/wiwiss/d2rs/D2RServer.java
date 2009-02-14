@@ -26,11 +26,17 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.23 2009/02/07 18:22:39 fatorange Exp $
+ * @version $Id: D2RServer.java,v 1.24 2009/02/14 22:40:14 fatorange Exp $
  */
 public class D2RServer {
 	private final static String SPARQL_SERVICE_NAME = "sparql";
+	
+	/* These service names should match the mappings in web.xml */
 	private final static String RESOURCE_SERVICE_NAME = "resource";
+	private final static String DATA_SERVICE_NAME = "data";
+	private final static String PAGE_SERVICE_NAME = "page";
+	private final static String VOCABULARY_STEM = "vocab/";
+	
 	private final static String DEFAULT_BASE_URI = "http://localhost";
 	private final static String DEFAULT_SERVER_NAME = "D2R Server";
 	private final static String SERVER_INSTANCE = "D2RServer.SERVER_INSTANCE";
@@ -118,13 +124,17 @@ public class D2RServer {
 		return dataset.hasTruncatedResults();
 	}
 	
-	public String resourceBaseURI() {
+	public String resourceBaseURI(String serviceStem) {
 		// This is a hack to allow hash URIs to be used at least in the
 		// SPARQL endpoint. It will not work in the Web interface.
 		if (this.baseURI().endsWith("#")) {
 			return this.baseURI();
 		}
-		return this.baseURI() + D2RServer.RESOURCE_SERVICE_NAME + "/";
+		return this.baseURI() + serviceStem + D2RServer.RESOURCE_SERVICE_NAME + "/";
+	}
+	
+	public String resourceBaseURI() {
+		return resourceBaseURI("");
 	}
 	
 	public String graphURLDescribingResource(String resourceURI) {
@@ -139,12 +149,28 @@ public class D2RServer {
 		}
 	}
 	
-	public String dataURL(String relativeResourceURI) {
-		return this.baseURI() + "data/" + relativeResourceURI;
+	public static String getResourceServiceName() {
+		return RESOURCE_SERVICE_NAME;
+	}
+
+	public static String getDataServiceName() {
+		return DATA_SERVICE_NAME;
 	}
 	
-	public String pageURL(String relativeResourceURI) {
-		return this.baseURI() + "page/" + relativeResourceURI;
+	public static String getPageServiceName() {
+		return PAGE_SERVICE_NAME;
+	}
+	
+	public String dataURL(String serviceStem, String relativeResourceURI) {
+		return this.baseURI() + serviceStem + DATA_SERVICE_NAME + "/" + relativeResourceURI;
+	}
+	
+	public String pageURL(String serviceStem, String relativeResourceURI) {
+		return this.baseURI() + serviceStem + PAGE_SERVICE_NAME + "/" + relativeResourceURI;
+	}
+	
+	public boolean isVocabularyResource(Resource r) {
+		return r.getURI().startsWith(resourceBaseURI(VOCABULARY_STEM));
 	}
 
 	public void addDocumentMetadata(Model document, Resource documentResource) {
@@ -217,5 +243,9 @@ public class D2RServer {
 		public DescribeHandler create() {
 			return new FindDescribeHandler(dataModel, D2RServer.this);
 		}
+	}
+	
+	public ConfigLoader getConfig() {
+		return config;
 	}
 }

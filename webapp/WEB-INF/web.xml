@@ -84,6 +84,11 @@
   </servlet-mapping>
   
   <servlet-mapping>
+    <servlet-name>ResourceServlet</servlet-name>
+    <url-pattern>/vocab/resource/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
     <servlet-name>ClassMapServlet</servlet-name>
     <url-pattern>/all/*</url-pattern>
   </servlet-mapping>
@@ -99,8 +104,18 @@
   </servlet-mapping>
   
   <servlet-mapping>
+    <servlet-name>PageServlet</servlet-name>
+    <url-pattern>/vocab/page/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
     <servlet-name>ResourceDescriptionServlet</servlet-name>
     <url-pattern>/data/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ResourceDescriptionServlet</servlet-name>
+    <url-pattern>/vocab/data/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

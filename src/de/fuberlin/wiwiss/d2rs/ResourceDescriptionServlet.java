@@ -2,6 +2,7 @@ package de.fuberlin.wiwiss.d2rs;
 
 import java.io.IOException;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +17,7 @@ import de.fuberlin.wiwiss.d2rs.vocab.FOAF;
 
 public class ResourceDescriptionServlet extends HttpServlet {
 	
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		String relativeResourceURI = request.getRequestURI().substring(
 				request.getContextPath().length() + request.getServletPath().length());
@@ -27,13 +28,21 @@ public class ResourceDescriptionServlet extends HttpServlet {
 		if (request.getQueryString() != null) {
 			relativeResourceURI = relativeResourceURI + "?" + request.getQueryString();
 		}
+		
+		/* Determine service stem, i.e. vocab/ in /[vocab/]data */
+		int servicePos;
+		if (-1 == (servicePos = request.getServletPath().indexOf("/" + D2RServer.getDataServiceName())))
+				throw new ServletException("Expected to find service path /" + D2RServer.getDataServiceName());
+		String serviceStem = request.getServletPath().substring(1, servicePos + 1);		
+				
 		String resourceURI = RequestParamHandler.removeOutputRequestParam(
-				server.resourceBaseURI() + relativeResourceURI);
-		String documentURL = server.dataURL(relativeResourceURI);
+				server.resourceBaseURI(serviceStem) + relativeResourceURI);
+		String documentURL = server.dataURL(serviceStem, relativeResourceURI);
 
 		Model description = QueryExecutionFactory.create(
 				"DESCRIBE <" + resourceURI + ">",
 				server.dataset()).execDescribe();
+			
 		if (description.size() == 0) {
 			response.sendError(404);
 		}

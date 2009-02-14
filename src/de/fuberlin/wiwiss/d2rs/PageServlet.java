@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +29,7 @@ public class PageServlet extends HttpServlet {
 	private PrefixMapping prefixes;
 	
 	public void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+			HttpServletResponse response) throws IOException, ServletException {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		String relativeResourceURI = request.getRequestURI().substring(
 				request.getContextPath().length() + request.getServletPath().length());
@@ -39,10 +40,18 @@ public class PageServlet extends HttpServlet {
 		if (request.getQueryString() != null) {
 			relativeResourceURI = relativeResourceURI + "?" + request.getQueryString();
 		}
-		String resourceURI = server.resourceBaseURI() + relativeResourceURI;
+
+		/* Determine service stem, i.e. vocab/ in /[vocab/]page */
+		int servicePos;
+		if (-1 == (servicePos = request.getServletPath().indexOf("/" + D2RServer.getPageServiceName())))
+				throw new ServletException("Expected to find service path /" + D2RServer.getPageServiceName());
+		String serviceStem = request.getServletPath().substring(1, servicePos + 1);		
+		
+		String resourceURI = server.resourceBaseURI(serviceStem) + relativeResourceURI;
+		
 		Model description = QueryExecutionFactory.create(
 				"DESCRIBE <" + resourceURI + ">",
-				server.dataset()).execDescribe();
+				server.dataset()).execDescribe();			
 		if (description.size() == 0) {
 			response.sendError(404);
 			return;
@@ -52,7 +61,7 @@ public class PageServlet extends HttpServlet {
 		VelocityWrapper velocity = new VelocityWrapper(this, response);
 		Context context = velocity.getContext();
 		context.put("uri", resourceURI);
-		context.put("rdf_link", server.dataURL(relativeResourceURI));
+		context.put("rdf_link", server.dataURL(serviceStem, relativeResourceURI));
 		context.put("label", resource.getProperty(RDFS.label));
 		context.put("properties", collectProperties(description, resource));
 		context.put("classmap_links", classmapLinks(resource));

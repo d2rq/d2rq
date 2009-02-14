@@ -51,6 +51,7 @@ public class ConfigLoader {
 	private String baseURI = null;
 	private String serverName = null;
 	private Resource documentMetadata = null;
+	private boolean vocabularyIncludeInstances = true;
 	
 	public ConfigLoader(String configURL) {
 		this.configURL = configURL;
@@ -94,6 +95,10 @@ public class ConfigLoader {
 		if (s != null) {
 			this.documentMetadata = s.getResource();
 		}
+		s = server.getProperty(D2R.vocabularyIncludeInstances);
+		if (s != null) {
+			this.vocabularyIncludeInstances = s.getBoolean();
+		}		
 	}
 	
 	public boolean isLocalMappingFile() {
@@ -130,6 +135,10 @@ public class ConfigLoader {
 			throw new IllegalStateException("Must load() first");
 		}
 		return this.serverName;
+	}
+	
+	public boolean getVocabularyIncludeInstances() {
+		return this.vocabularyIncludeInstances;
 	}
 	
 	public void addDocumentMetadata(Model document, Resource documentResource) {
