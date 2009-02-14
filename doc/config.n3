@@ -11,7 +11,7 @@
     rdfs:comment "This vocabulary defines RDF terms used in configuration files for D2R Server, a software application that publishes relational databases on the Semantic Web."@en;
     foaf:page <http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/>;
     dc:creator <http://richard.cyganiak.de/foaf.rdf#cygri>;
-    owl:versionInfo "$Id: config.n3,v 1.2 2007/02/09 15:20:11 cyganiak Exp $";
+    owl:versionInfo "$Id: config.n3,v 1.3 2009/02/14 22:43:42 fatorange Exp $";
     .
 <http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/>
     rdfs:label "D2R Server homepage and documentation"@en;
@@ -43,6 +43,13 @@ d2r:publishes a rdf:Property;
 d2r:documentMetadata a rdf:Property;
     rdfs:label "document metadata"@en;
     rdfs:comment "A template resource whose properties will be attached as metadata to all RDF documents published by a D2R Server installation."@en;
+    rdfs:domain d2r:Server;
+    rdfs:isDefinedBy <>;
+    .
+
+d2r:vocabularyIncludeInstances a rdf:Property;
+    rdfs:label "serve instance data for vocabulary resources"@en;
+    rdfs:comment "Whether views of vocabulary resources should include instance data."@en;
     rdfs:domain d2r:Server;
     rdfs:isDefinedBy <>;
     .
