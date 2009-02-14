@@ -16,13 +16,13 @@
 # http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/
 
 <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1>
-   				rdfs:label       "D2RQ - Language Specification V0.4" ;
+   				rdfs:label       "D2RQ - Language Specification V0.5" ;
    				rdfs:comment     "This document specifies the D2RQ mapping language. D2RQ is a declarative language to describe mappings between relational database schemata and OWL/RDFS ontologies.  See D2RQ Users Manual for detailed explanations and examples (http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/)." ;
    				dc:creator       "Chris Bizer" ;
    				dc:creator       "Richard Cyganiak" ;
    				dc:date          "2006-08-12" ;
    				dc:format        "RDF";
-   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.20 2009/02/13 14:31:56 dorgon Exp $";
+   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.21 2009/02/14 22:37:15 fatorange Exp $";
    				.
 
 
@@ -82,6 +82,19 @@ d2rq:resultSizeLimit a rdf:Property;
 				rdfs:domain d2rq:Database;
 				.
 
+# -----------------------------------------------
+# Configuration
+# -----------------------------------------------
+
+d2rq:Configuration			rdf:type rdfs:Class ;
+        				rdfs:label "Configuration" ; 
+    					rdfs:comment "Represents general settings." ;
+    					.
+d2rq:serveVocabulary			rdf:type rdf:Property ;
+					rdfs:label "serve vocabulary" ;
+					rdfs:comment "Whether to serve inferred and user-supplied vocabulary data" ; 
+	   				rdfs:domain d2rq:Configuration ;
+       	     				.
 
 # -----------------------------------------------
 # Resource Map
@@ -154,6 +167,26 @@ d2rq:containsDuplicates rdf:type rdf:Property ;
 				rdfs:label "contains duplicates" ; 
              	rdfs:domain d2rq:ClassMap
              	.
+
+d2rq:classDefinitionLabel	rdf:type rdf:Property ;
+				rdfs:label "class label" ; 
+		            	rdfs:comment "A label to be served as rdfs:label for all associated class definitions" ;
+		             	rdfs:domain d2rq:ClassMap ;
+	        	     	.
+
+d2rq:classDefinitionComment	rdf:type rdf:Property ;
+				rdfs:label "class comment" ; 
+		            	rdfs:comment "A comment to be served as rdfs:comment for all associated class definitions" ;
+	             		rdfs:domain d2rq:ClassMap ;
+	             		.
+	
+d2rq:additionalClassDefinitionProperty	rdf:type rdf:Property ;
+					rdfs:label "additional class definition property" ; 
+			            	rdfs:comment "An additional property to be served for all associated class definitions" ;
+	             			rdfs:domain d2rq:ClassMap ;
+					rdfs:range  d2rq:AdditionalProperty ;
+		             		.
+
 
 # -----------------------------------------------
 # Class Map Property
@@ -255,6 +288,24 @@ d2rq:valueMaxLength rdf:type rdf:Property ;
               	rdfs:comment "Optimizing hint: the maximum length of values of this PropertyBridge."
               	.
 
+d2rq:propertyDefinitionLabel	rdf:type rdf:Property ;
+				rdfs:label "property label" ; 
+		            	rdfs:comment "A label to be served as rdfs:label for all associated properties" ;
+		             	rdfs:domain d2rq:PropertyBridge ;
+	        	     	.
+
+d2rq:propertyDefinitionComment	rdf:type rdf:Property ;
+				rdfs:label "property comment" ; 
+		            	rdfs:comment "A comment to be served as rdfs:comment for all associated properties" ;
+	             		rdfs:domain d2rq:PropertyBridge ;
+        	     		.
+
+d2rq:additionalPropertyDefinitionProperty	rdf:type rdf:Property ;
+						rdfs:label "additional property definition property" ; 
+			           	 	rdfs:comment "An additional property to be served for all associated property definitions" ;
+	             				rdfs:domain d2rq:PropertyBridge ;
+						rdfs:range  d2rq:AdditionalProperty ;
+		             			.
 
 # -----------------------------------------------
 # Datatype and Object Property Bridge
@@ -296,20 +347,20 @@ d2rq:propertyBridge  rdf:type rdf:Property ;
 # Additional Property Definition
 # -----------------------------------------------
 
-d2rq:AdditionalProperty rdf:type rdfs:Class ;
-				rdfs:label "Additional Property" ;
-    			rdfs:comment "Adds an additonal property to a class if D2R Map is used for DB exports, not DB queries." 
+d2rq:AdditionalProperty	rdf:type rdfs:Class ;
+			rdfs:label "Additional Property" ;
+    			rdfs:comment "Represents an additional property that may be added to instances as well as class and property definitions." ;
     			.
 
-d2rq:propertyName rdf:type rdf:Property ;
-		        rdfs:label "property name" ;
-            	rdfs:domain d2rq:AdditionalProperty
-            	.
-d2rq:propertyValue rdf:type rdf:Property ;
-		      	rdfs:label "property value" ;
-            	rdfs:domain d2rq:AdditionalProperty
-            	.            
-                       
+d2rq:propertyName	rdf:type rdf:Property ;
+			rdfs:label "property name" ;
+            		rdfs:domain d2rq:AdditionalProperty ;
+	            	.
+
+d2rq:propertyValue	rdf:type rdf:Property ;
+			rdfs:label "property value" ;
+            		rdfs:domain d2rq:AdditionalProperty ;
+			.
 
 # -----------------------------------------------
 # Translation Table

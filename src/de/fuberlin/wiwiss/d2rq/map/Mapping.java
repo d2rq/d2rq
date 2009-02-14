@@ -6,16 +6,22 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
+import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * A D2RQ mapping. Consists of {@link ClassMap}s,
@@ -24,13 +30,20 @@ import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.13 2008/04/25 15:26:20 cyganiak Exp $
+ * @version $Id: Mapping.java,v 1.14 2009/02/14 22:37:14 fatorange Exp $
  */
 public class Mapping {
 	private final Model model = ModelFactory.createDefaultModel();
+	
+	/**
+	 * Holds descriptions of the used classes and properties
+	 */
+	private final Model vocabularyModel = ModelFactory.createDefaultModel();
+
 	private Resource mappingResource;
 
 	private final Map databases = new HashMap();
+	private Configuration configuration = new Configuration();
 	private final Map classMaps = new HashMap();
 	private final Map translationTables = new HashMap();
 	private final PrefixMapping prefixes = new PrefixMappingImpl();
@@ -52,6 +65,10 @@ public class Mapping {
 		return this.mappingResource;
 	}
 
+	public Model getVocabularyModel() {
+		return vocabularyModel;
+	}
+	
 	public void validate() throws D2RQException {
 		if (this.databases.isEmpty()) {
 			throw new D2RQException("No d2rq:Database defined in the mapping", 
@@ -91,6 +108,14 @@ public class Mapping {
 		return (Database) this.databases.get(name);
 	}
 	
+	public Configuration configuration() {
+		return this.configuration;
+	}
+
+	public void setConfiguration(Configuration configuration) {
+		this.configuration = configuration;
+	}
+
 	public void addClassMap(ClassMap classMap) {
 		this.classMaps.put(classMap.resource(), classMap);
 	}
@@ -145,6 +170,78 @@ public class Mapping {
 			while (it.hasNext()) {
 				Attribute attribute = (Attribute) it.next();
 				relation.database().columnType(relation.aliases().originalOf(attribute));
+			}
+		}
+	}
+	
+	/**
+	 * Helper method to add definitions from a ResourceMap to its underlying resource
+	 * @param map
+	 * @param targetResource
+	 */
+	private void addDefinitions(ResourceMap map, Resource targetResource) {
+		/* Infer rdfs:Class or rdf:Property type */
+		Statement s = vocabularyModel.createStatement(targetResource, RDF.type, map instanceof ClassMap ? RDFS.Class : RDF.Property);
+		if (!this.vocabularyModel.contains(s))
+			this.vocabularyModel.add(s);
+		
+		/* Apply labels */
+		Iterator it = map.getDefinitionLabels().iterator();
+		while (it.hasNext()) {
+			Literal propertyLabel = (Literal) it.next();
+			s = vocabularyModel.createStatement(targetResource, RDFS.label, propertyLabel);
+			if (!this.vocabularyModel.contains(s))
+				this.vocabularyModel.add(s);
+		}
+
+		/* Apply comments */
+		it = map.getDefinitionComments().iterator();
+		while (it.hasNext()) {
+			Literal propertyComment = (Literal) it.next();
+			s = vocabularyModel.createStatement(targetResource, RDFS.comment, propertyComment);
+			if (!this.vocabularyModel.contains(s))
+				this.vocabularyModel.add(s);
+		}
+		
+		/* Apply additional properties */
+		it = map.getAdditionalDefinitionProperties().iterator();
+		while (it.hasNext()) {
+			Resource additionalProperty = (Resource) it.next();
+			s = vocabularyModel.createStatement(targetResource, 
+						additionalProperty.getProperty(D2RQ.propertyName).getResource().as(Property.class),
+						additionalProperty.getProperty(D2RQ.propertyValue).getObject());
+			if (!this.vocabularyModel.contains(s))
+				this.vocabularyModel.add(s);				
+		}	}
+	
+	/**
+	 * Loads labels, comments and additional properties for referenced
+	 * classes and properties and infers types
+	 * Must be called after all classes and property bridges are loaded
+	 */
+	public void buildVocabularyModel() {
+		Iterator itClassMaps = this.classMaps.values().iterator();
+		while (itClassMaps.hasNext()) {
+			ClassMap classMap = (ClassMap) itClassMaps.next();
+			
+			/* Loop through referenced classes */
+			Iterator itClasses = classMap.getClasses().iterator();
+			while (itClasses.hasNext()) {
+				Resource class_ = (Resource) itClasses.next();
+				addDefinitions(classMap, class_);
+			}
+
+			/* Loop through property bridges */
+			Iterator itPropertyBridges = classMap.propertyBridges().iterator();
+			while (itPropertyBridges.hasNext()) {
+				PropertyBridge bridge = (PropertyBridge) itPropertyBridges.next();
+				
+				/* Loop through referenced properties */				
+				Iterator itProperties = bridge.properties().iterator();
+				while (itProperties.hasNext()) {
+					Resource property = (Resource) itProperties.next();
+					addDefinitions(bridge, property);
+				}
 			}
 		}
 	}

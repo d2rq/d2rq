@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -38,7 +39,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.12 2009/02/13 14:31:53 dorgon Exp $
+ * @version $Id: ResourceMap.java,v 1.13 2009/02/14 22:37:14 fatorange Exp $
  */
 public abstract class ResourceMap extends MapObject {
 
@@ -68,6 +69,14 @@ public abstract class ResourceMap extends MapObject {
 	private NodeMaker cachedNodeMaker;
 	private Relation cachedRelation;
 	
+	Collection definitionLabels = new ArrayList();
+	Collection definitionComments = new ArrayList();
+
+	/**
+	 * List of D2RQ.AdditionalProperty
+	 */
+	Collection additionalDefinitionProperties = new ArrayList();	
+
 	public ResourceMap(Resource resource, boolean defaultContainsDuplicate) {
 		super(resource);
 		this.containsDuplicates = defaultContainsDuplicate;
@@ -339,4 +348,28 @@ public abstract class ResourceMap extends MapObject {
 		if (property.equals(D2RQ.constantValue)) return this.constantValue != null;
 		throw new D2RQException("No primary spec: " + property);
 	}
+	
+	public Collection getDefinitionLabels() {
+		return definitionLabels;
+	}
+	
+	public Collection getDefinitionComments() {
+		return definitionComments;
+	}
+
+	public Collection getAdditionalDefinitionProperties() {
+		return additionalDefinitionProperties;
+	}
+
+	public void addDefinitionLabel(Literal definitionLabel) {
+		definitionLabels.add(definitionLabel);
+	}
+
+	public void addDefinitionComment(Literal definitionComment) {
+		definitionComments.add(definitionComment);
+	}
+
+	public void addDefinitionProperty(Resource additionalProperty) {
+		additionalDefinitionProperties.add(additionalProperty);
+	}		
 }

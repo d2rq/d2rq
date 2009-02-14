@@ -5,7 +5,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Node_ANY;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.NullIterator;
 
@@ -14,6 +20,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.JoinOptimizer;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.find.URIMakerRule.URIMakerRuleChecker;
+import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 
 /**
@@ -22,16 +29,24 @@ import de.fuberlin.wiwiss.d2rq.find.URIMakerRule.URIMakerRuleChecker;
  * relations into one SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.17 2008/08/13 06:35:00 cyganiak Exp $
+ * @version $Id: FindQuery.java,v 1.18 2009/02/14 22:37:15 fatorange Exp $
  */
 public class FindQuery {
 	private final Triple triplePattern;
 	private final Collection tripleRelations;
+	private final boolean serveVocabulary;
+	private final Model vocabularyModel;
 	
-	public FindQuery(Triple triplePattern, Collection tripleRelations) {
+	public FindQuery(Triple triplePattern, Collection tripleRelations, boolean serveVocabulary, Model vocabularyModel) {
 		this.triplePattern = triplePattern;
 		this.tripleRelations = tripleRelations;
+		this.serveVocabulary = serveVocabulary;
+		this.vocabularyModel = vocabularyModel;
 	}
+	
+	public FindQuery(Triple triplePattern, Collection tripleRelations) {
+		this(triplePattern, tripleRelations, false, null);
+	}	
 
 	private List selectedTripleRelations() {
 		URIMakerRule rule = new URIMakerRule();
@@ -56,6 +71,13 @@ public class FindQuery {
 	
 	public ExtendedIterator iterator() {
 		ExtendedIterator result = NullIterator.emptyIterator();
+		
+		/* Answer from vocabulary model */
+		if (serveVocabulary && vocabularyModel != null) {
+			result = result.andThen(vocabularyModel.getGraph().find(triplePattern));
+		}
+
+		/* Answer from database */
 		Iterator it = CompatibleRelationGroup.groupTripleRelations(
 				selectedTripleRelations()).iterator();
 		while (it.hasNext()) {

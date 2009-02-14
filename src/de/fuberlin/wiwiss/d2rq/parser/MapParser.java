@@ -23,6 +23,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.map.ClassMap;
+import de.fuberlin.wiwiss.d2rq.map.Configuration;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
@@ -38,7 +39,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.35 2009/02/13 14:31:56 dorgon Exp $
+ * @version $Id: MapParser.java,v 1.36 2009/02/14 22:37:15 fatorange Exp $
  */
 public class MapParser {
 
@@ -93,9 +94,11 @@ public class MapParser {
 		copyPrefixes();
 		try {
 			parseDatabases();
+			parseConfiguration();
 			parseTranslationTables();
 			parseClassMaps();
 			parsePropertyBridges();
+			this.mapping.buildVocabularyModel();
 		} catch (LiteralRequiredException ex) {
 			throw new D2RQException("Expected URI resource, found literal instead: " + ex.getMessage(),
 					D2RQException.MAPPING_RESOURCE_INSTEADOF_LITERAL);
@@ -179,6 +182,22 @@ public class MapParser {
 		}
 	}
 	
+	private void parseConfiguration() {
+		Iterator it = this.model.listIndividuals(D2RQ.Configuration);
+		if (it.hasNext()) {
+			Resource configResource = (Resource) it.next();
+			Configuration configuration = new Configuration(configResource);
+			StmtIterator stmts = configResource.listProperties(D2RQ.serveVocabulary);
+			while (stmts.hasNext()) {
+				configuration.setServeVocabulary(stmts.nextStatement().getBoolean());
+			}			
+			this.mapping.setConfiguration(configuration);
+
+			if (it.hasNext())
+				throw new D2RQException("Only one configuration block is allowed");
+		}
+	}
+
 	private void parseDatabase(Database database, Resource r) {
 		StmtIterator stmts;
 		stmts = r.listProperties(D2RQ.odbcDSN);
@@ -401,6 +420,19 @@ public class MapParser {
 			bridge.setConstantValue(additionalProperty.getProperty(D2RQ.propertyValue).getObject());
 			classMap.addPropertyBridge(bridge);
 		}
+		stmts = r.listProperties(D2RQ.classDefinitionLabel);
+		while (stmts.hasNext()) {
+			classMap.addDefinitionLabel(stmts.nextStatement().getLiteral());
+		}
+		stmts = r.listProperties(D2RQ.classDefinitionComment);
+		while (stmts.hasNext()) {
+			classMap.addDefinitionComment(stmts.nextStatement().getLiteral());
+		}
+		stmts = r.listProperties(D2RQ.additionalClassDefinitionProperty);
+		while (stmts.hasNext()) {
+			Resource additionalProperty = stmts.nextStatement().getResource();
+			classMap.addDefinitionProperty(additionalProperty);
+		}
 	}
 	
 	private void parsePropertyBridges() {
@@ -465,6 +497,19 @@ public class MapParser {
 		stmts = this.model.listStatements(null, D2RQ.propertyBridge, r);
 		while (stmts.hasNext()) {
 			bridge.addProperty(stmts.nextStatement().getSubject());
+		}
+		stmts = r.listProperties(D2RQ.propertyDefinitionLabel);
+		while (stmts.hasNext()) {
+			bridge.addDefinitionLabel(stmts.nextStatement().getLiteral());
+		}
+		stmts = r.listProperties(D2RQ.propertyDefinitionComment);
+		while (stmts.hasNext()) {
+			bridge.addDefinitionComment(stmts.nextStatement().getLiteral());
+		}
+		stmts = r.listProperties(D2RQ.additionalPropertyDefinitionProperty);
+		while (stmts.hasNext()) {
+			Resource additionalProperty = stmts.nextStatement().getResource();
+			bridge.addDefinitionProperty(additionalProperty);
 		}
 	}
 

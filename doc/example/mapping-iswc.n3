@@ -26,11 +26,22 @@ map:Conferences a d2rq:ClassMap;
 	d2rq:dataStorage map:database;
 	d2rq:uriPattern "conferences/@@conferences.ConfID@@";
 	d2rq:class iswc:Conference;
+	
+	# Some unrelated properties to test class definitions
+	d2rq:classDefinitionLabel "conference";
+	d2rq:classDefinitionComment "A conference";
+	d2rq:additionalClassDefinitionProperty map:conferenceSubClassOf;
 	.
+	
 map:conferences_Name a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Conferences;
 	d2rq:property rdfs:label;
 	d2rq:column "conferences.Name";
+
+	# Some properties to test property definitions
+	d2rq:propertyDefinitionLabel "label";
+	d2rq:propertyDefinitionComment "A human-readable name for the subject.";
+	d2rq:additionalPropertyDefinitionProperty map:labelDomain;
 	.
 map:conferences_Date a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Conferences;
@@ -265,3 +276,13 @@ map:topics_ParentID a d2rq:PropertyBridge;
     d2rq:alias "topics AS parentTopics";
     .
 
+# Unrelated property definitions for testing
+map:conferenceSubClassOf a d2rq:AdditionalProperty;
+	d2rq:propertyName rdfs:subClassOf;
+	d2rq:propertyValue iswc:Event;
+	.
+
+map:labelDomain a d2rq:AdditionalProperty;
+	d2rq:propertyName rdfs:domain;
+	d2rq:propertyValue rdfs:Resource;
+	.	

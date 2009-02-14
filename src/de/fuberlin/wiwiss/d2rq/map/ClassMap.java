@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
@@ -27,6 +29,10 @@ public class ClassMap extends ResourceMap {
 	
 	public Resource resource() {
 		return this.resource;
+	}
+	
+	public Collection getClasses() {
+		return classes;
 	}
 	
 	public void setDatabase(Database database) {

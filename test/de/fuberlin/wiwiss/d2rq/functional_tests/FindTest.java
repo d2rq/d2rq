@@ -4,6 +4,7 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.VCARD;
 
 import de.fuberlin.wiwiss.d2rq.helpers.FindTestFramework;
@@ -25,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTest.java,v 1.14 2006/09/28 14:00:22 cyganiak Exp $
+ * @version $Id: FindTest.java,v 1.15 2009/02/14 22:37:15 fatorange Exp $
  */
 public class FindTest extends FindTestFramework {
     
@@ -37,7 +38,7 @@ public class FindTest extends FindTestFramework {
 		assertNoStatement(resource("papers/6"), RDF.type, ISWC.InProceedings);
 		assertStatement(resource("conferences/23541"), RDF.type, ISWC.Conference);
 		assertStatement(resource("topics/15"), RDF.type, SKOS.Concept);
-		assertStatementCount(62);
+		assertStatementCount(94);
 	}
 
 	public void testListTopicInstances() {
@@ -163,7 +164,7 @@ public class FindTest extends FindTestFramework {
 	public void testDump() {
 		find(null, null, null);
 //		dump();
-		assertStatementCount(296);
+		assertStatementCount(334);
 	}
 
 	public void testFindPredicate() {
@@ -191,4 +192,17 @@ public class FindTest extends FindTestFramework {
 		assertStatement(resource("topics/1"), SKOS.broader, resource("topics/3"));
 		assertStatementCount(10);
 	}
+	
+	public void testDefinitions() {
+		find(ISWC.Conference, null, null);
+		assertStatement(ISWC.Conference, RDF.type, RDFS.Class);
+		assertStatement(ISWC.Conference, RDFS.label, m.createLiteral("conference"));
+		assertStatement(ISWC.Conference, RDFS.comment, m.createLiteral("A conference"));
+		assertStatement(ISWC.Conference, RDFS.subClassOf, ISWC.Event);
+		find(RDFS.label, null, null);
+		assertStatement(RDFS.label, RDF.type, RDF.Property);
+		assertStatement(RDFS.label, RDFS.label, m.createLiteral("label"));
+		assertStatement(RDFS.label, RDFS.comment, m.createLiteral("A human-readable name for the subject."));
+		assertStatement(RDFS.label, RDFS.domain, RDFS.Resource);
+	}	
 }
