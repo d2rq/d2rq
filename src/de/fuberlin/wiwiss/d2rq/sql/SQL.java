@@ -21,19 +21,17 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
  * Parses different types of SQL fragments from Strings, and turns them
  * back into Strings. All methods are static.
  * 
- * TODO: find/rename/quoteColumnsInExpression will fail e.g. for column names
- *       occuring inside string literals
- *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL.java,v 1.6 2009/02/07 15:17:58 fatorange Exp $
+ * @version $Id: SQL.java,v 1.7 2009/02/15 01:13:35 fatorange Exp $
  */
 public class SQL {
 	private static final java.util.regex.Pattern attributeRegexConservative = 
 		java.util.regex.Pattern.compile(
 				// Ignore quoted text since the last match or the beginning of the string;
 				// taking inner string escaping into consideration
-				// This is required to distinguish host names (e.g. in URLs) from column names
-				"\\G.*?(?:'[^'\\\\]*?(?:\\\\.[^'\\\\]*?)*?'.*?)*?" +
+				// This is required to distinguish similar strings
+				// like file and host names (e.g. in URLs) from column names
+				"\\G[^']*?(?:'[^'\\\\]*?(?:\\\\.[^'\\\\]*?)*?'[^']*?)*?" +
 				// Optional schema name and dot, group 1 is schema name
 				"(?:([a-zA-Z_]\\w*)\\.)?" +
 				// Required table name and dot, group 2 is table name
