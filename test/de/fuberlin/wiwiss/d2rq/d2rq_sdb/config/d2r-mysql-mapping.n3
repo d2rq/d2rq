@@ -80,7 +80,7 @@ map:offer_publishDate a d2rq:PropertyBridge;
 # Table person #########################################################################
 map:person a d2rq:ClassMap;
 	d2rq:dataStorage map:database;
-	d2rq:uriPattern "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite@@person.publisher@@/Reviewer@@person.nr@@";
+	d2rq:uriPattern "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite@@person.publisher@@/Person@@person.nr@@";
 	d2rq:class foaf:Person;
 	.
 map:person_name a d2rq:PropertyBridge;
