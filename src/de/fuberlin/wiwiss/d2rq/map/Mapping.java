@@ -30,7 +30,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.14 2009/02/14 22:37:14 fatorange Exp $
+ * @version $Id: Mapping.java,v 1.15 2009/02/18 15:52:22 fatorange Exp $
  */
 public class Mapping {
 	private final Model model = ModelFactory.createDefaultModel();
@@ -208,7 +208,7 @@ public class Mapping {
 		while (it.hasNext()) {
 			Resource additionalProperty = (Resource) it.next();
 			s = vocabularyModel.createStatement(targetResource, 
-						additionalProperty.getProperty(D2RQ.propertyName).getResource().as(Property.class),
+						(Property)(additionalProperty.getProperty(D2RQ.propertyName).getResource().as(Property.class)),
 						additionalProperty.getProperty(D2RQ.propertyValue).getObject());
 			if (!this.vocabularyModel.contains(s))
 				this.vocabularyModel.add(s);				
