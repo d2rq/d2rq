@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.19 2009/02/09 12:21:31 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.20 2009/02/19 00:54:17 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -41,6 +41,9 @@ public class ConnectedDB {
 	public static final int DEFAULT_KEEP_ALIVE_INTERVAL = 60*60; // hourly
 	public static final String KEEP_ALIVE_QUERY_PROPERTY = "keepAliveQuery"; // override default keep alive query
 	public static final String DEFAULT_KEEP_ALIVE_QUERY = "SELECT 1"; // may not work for some DBMS
+	
+	private static final String ORACLE_SET_DATE_FORMAT = "ALTER SESSION SET NLS_DATE_FORMAT = 'SYYYY-MM-DD'";
+	private static final String ORACLE_SET_TIMESTAMP_FORMAT = "ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'SYYYY-MM-DD HH24:MI:SS'";
 
 	private String jdbcURL;
 	private String username;
@@ -159,7 +162,26 @@ public class ConnectedDB {
 	
 	private Connection connect() {
 		try {
-			return DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
+			if (this.jdbcURL.contains(":oracle:")) {
+				/* The pre-JSE 6 Oracle driver requires explicit registering */
+				DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
+				Connection connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
+				Statement stmt = connection.createStatement();
+				try
+				{
+					stmt.execute(ORACLE_SET_DATE_FORMAT);
+					stmt.execute(ORACLE_SET_TIMESTAMP_FORMAT);
+				}
+				catch (SQLException ex) {
+					throw new D2RQException("Unable to set date format: " + ex.getMessage(), D2RQException.D2RQ_SQLEXCEPTION);					
+				}
+				finally {
+					stmt.close();
+				}
+				return connection;
+			}
+			else 
+				return DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
 		} catch (SQLException ex) {
 			throw new D2RQException(
 					"Database connection to " + jdbcURL + " failed " +
@@ -268,6 +290,7 @@ public class ConnectedDB {
 			case Types.BINARY: return TEXT_COLUMN;
 			case Types.VARBINARY: return TEXT_COLUMN;
 			case Types.LONGVARBINARY: return TEXT_COLUMN;
+			case Types.CLOB: return TEXT_COLUMN;
 	
 			case Types.DATE: return DATE_COLUMN;
 			case Types.TIME: return DATE_COLUMN;

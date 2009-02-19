@@ -16,14 +16,25 @@ import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
  * map from SELECT clause entries to string values.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResultRowMap.java,v 1.3 2008/04/24 17:48:53 cyganiak Exp $
+ * @version $Id: ResultRowMap.java,v 1.4 2009/02/19 00:54:17 fatorange Exp $
  */
 public class ResultRowMap implements ResultRow {
 	
 	public static ResultRowMap fromResultSet(ResultSet resultSet, List projectionSpecs) throws SQLException {
 		Map result = new HashMap();
 		for (int i = 0; i < projectionSpecs.size(); i++) {
-			result.put(projectionSpecs.get(i), resultSet.getString(i + 1));
+			/*
+			 * Specifically handle Oracle DATEs and TIMESTAMPs because the regular getString()
+			 * returns them in non-standard fashion, e.g. "2008-3-22.0.0. 0. 0".
+			 * This occurs independently of the NLS_DATE_FORMAT / NLS_TIMESTAMP_FORMAT in use.
+			 */
+			Object resultObj = resultSet.getObject(i + 1);
+			if (resultObj instanceof oracle.sql.DATE)
+				result.put(projectionSpecs.get(i), resultSet.getDate(i + 1).toString());
+			else if (resultObj instanceof oracle.sql.TIMESTAMP)
+				result.put(projectionSpecs.get(i), resultSet.getTimestamp(i + 1).toString());
+			else
+				result.put(projectionSpecs.get(i), resultSet.getString(i + 1));
 		}
 		return new ResultRowMap(result);
 	}
