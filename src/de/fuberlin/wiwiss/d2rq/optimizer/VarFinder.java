@@ -76,7 +76,7 @@ public class VarFinder
             filterMentions = _filterMentions ;
         }
         
-        @Override
+        //@Override
         public void visit(OpQuadPattern quadPattern)
         {
             slot(quadPattern.getGraphNode()) ;
@@ -91,7 +91,7 @@ public class VarFinder
             }
         }
 
-        @Override
+        //@Override
         public void visit(OpBGP opBGP)
         {
             BasicPattern triples = opBGP.getPattern() ;
@@ -110,19 +110,19 @@ public class VarFinder
                 defines.add(Var.alloc(node)) ;
         }
         
-        @Override
+        //@Override
         public void visit(OpExt opExt)
         {
             opExt.effectiveOp().visit(this) ;
         }
         
-      	@Override
+      	//@Override
         public void visit(OpLabel opLabel)
         {
         	opLabel.getSubOp().visit(this);
         }
         
-        @Override
+        //@Override
         public void visit(OpJoin opJoin)
         {
             VarUsageVisitor leftUsage = VarUsageVisitor.apply(opJoin.getLeft()) ;
@@ -137,7 +137,7 @@ public class VarFinder
             filterMentions.addAll(rightUsage.filterMentions) ;
         }
 
-        @Override
+        //@Override
         public void visit(OpLeftJoin opLeftJoin)
         {
             VarUsageVisitor leftUsage = VarUsageVisitor.apply(opLeftJoin.getLeft()) ;
@@ -161,7 +161,7 @@ public class VarFinder
                 opLeftJoin.getExprs().varsMentioned(filterMentions);
         }
 
-        @Override
+        //@Override
         public void visit(OpUnion opUnion)
         {
             VarUsageVisitor leftUsage = VarUsageVisitor.apply(opUnion.getLeft()) ;
@@ -176,20 +176,20 @@ public class VarFinder
             filterMentions.addAll(rightUsage.filterMentions) ;
         }
 
-        @Override
+        //@Override
         public void visit(OpGraph opGraph)
         {
             slot(opGraph.getNode()) ;
         }
         
-        @Override
+        //@Override
         public void visit(OpFilter opFilter)
         {
             opFilter.getExprs().varsMentioned(filterMentions);
             opFilter.getSubOp().visit(this) ;
         }
         
-        @Override
+        //@Override
         public void visit(OpAssign opAssign)
         {
             opAssign.getSubOp().visit(this) ;
@@ -197,7 +197,7 @@ public class VarFinder
             defines.addAll(vars) ;
         }
         
-        @Override
+        //@Override
         public void visit(OpProject opProject)
         {
             List vars = opProject.getVars() ;
@@ -211,27 +211,30 @@ public class VarFinder
             filterMentions.addAll(subUsage.filterMentions) ;
         }
        
-        @Override
+        //@Override
         protected void visit0(Op0 op) {}
         
-        @Override
+        //@Override
         protected void visit1(Op1 op1) {
         	op1.getSubOp().visit(this); // descend
         }
         
-        @Override
+        //@Override
         protected void visit2(Op2 op2) {
         	op2.getLeft().visit(this);
         	op2.getRight().visit(this);
         }
         
-        @Override
+        //@Override
         protected void visitN(OpN opN) {
-        	for (Op op : opN.getElements())
-        		op.visit(this);
+        	List elements = opN.getElements();
+        	for ( Iterator iter = elements.iterator() ; iter.hasNext(); ) {
+        		Op op = (Op)iter.next();
+        		op.visit(this);        		
+        	}
         }
         
-        @Override
+        //@Override
         protected void visitExt(OpExt op) {}
         
     }
