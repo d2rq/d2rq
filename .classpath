@@ -3,10 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
-	<classpathentry kind="lib" path="lib/joseki.jar" sourcepath="/Joseki-3.0/src"/>
-	<classpathentry kind="lib" path="lib/jena.jar" sourcepath="/Jena-2.5.4/src"/>
 	<classpathentry kind="lib" path="lib/concurrent.jar"/>
-	<classpathentry kind="lib" path="lib/arq.jar"/>
 	<classpathentry kind="lib" path="lib/antlr-2.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.12.jar"/>
 	<classpathentry kind="lib" path="lib/iri.jar"/>
@@ -15,9 +12,7 @@
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/junit.jar"/>
-	<classpathentry kind="lib" path="lib/mysql-connector-java-3.1.12-bin.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-log4j12.jar"/>
-	<classpathentry kind="lib" path="lib/d2rq-0.5.2-dev.jar" sourcepath="/D2RQ-CVS/src"/>
 	<classpathentry kind="lib" path="lib/velocity-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/commons-collections-3.2.jar"/>
@@ -26,5 +21,11 @@
 	<classpathentry kind="lib" path="lib/jetty-util-6.1.10.jar"/>
 	<classpathentry kind="lib" path="lib/postgresql-8.2dev-503.jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api-2.5-6.1.10.jar"/>
+	<classpathentry kind="lib" path="lib/arq.jar"/>
+	<classpathentry kind="lib" path="lib/jena.jar"/>
+	<classpathentry kind="lib" path="lib/joseki.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.5-bin.jar"/>
+	<classpathentry kind="lib" path="lib/ojdbc14.jar"/>
+	<classpathentry kind="lib" path="lib/d2rq-0.6.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
