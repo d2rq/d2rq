@@ -84,7 +84,7 @@ pre { speak-punctuation: code; }
 <h2 id="news">News</h2>
 
 <ul>
-  <li><strong>2009-02-19: Version 0.6 released.</strong> This version introduces serving of vocabulary data and includes D2RQ 0.6, which provides significantly improved performance and memory usage.</li>
+  <li><strong>2009-02-19: Version 0.6 released.</strong> This version introduces serving of vocabulary data and includes D2RQ 0.6, which provides significantly improved performance and memory usage, new features and several bugfixes.</li>
   <li><strong>2007-11-03: Version 0.4 released.</strong> This version can be run as a J2EE web application inside existing servlet containers and fixes several bugs.</li>
   <li><strong>2007-02-13: Version 0.3.2 released,</strong> featuring more configurability, easy installation as a Windows service, and many small improvements and bugfixes.</li>
   <li><strong>2007-01-22: dbpedia.org uses D2R Server</strong> to <a href="http://dbpedia.org/main">publish structured data</a> extracted from Wikipedia.</li>
@@ -191,10 +191,10 @@ pre { speak-punctuation: code; }
 </ol>
 
 <h2 id="customize">Customizing the database mapping</h2>
-<p>D2R Server uses the <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/">D2RQ Mapping Language</a> to map the content of a relational database to RDF. A D2RQ mapping specifies how resources are identified and which properties are used to describe the resources.</p>
+<p>D2R Server uses the <a href="http://www4.wiwiss.fu-berlin.de/bizer/D2RQ/spec/">D2RQ Mapping Language</a> to map the content of a relational database to RDF. A D2RQ mapping specifies how resources are identified and which properties are used to describe the resources.</p>
 <p>The <tt>generate-mapping</tt> script automatically generates a D2RQ mapping from the table structure of a database. The tool generates a new RDF vocabulary for each database, using table names as class names and column names as property names. Semantic Web client applications will understand more of your data if you customize the mapping and replace the auto-generated terms with terms from <a href="http://ebiquity.umbc.edu/blogger/100-most-common-rdf-namespaces/">well-known</a> and <a href="http://www.w3.org/TR/swbp-vocab-pub/">publicly accessible</a> RDF vocabularies.</p>
 <p>The mapping file can be edited with any text editor. Its syntax is described in the
-  <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/">D2RQ Manual</a>.
+  <a href="http://www4.wiwiss.fu-berlin.de/bizer/D2RQ/spec/">D2RQ Manual</a>.
   D2R Server will automatically detect changes to the mapping file and
   reload appropriately when you hit the browser's refresh button.</p>
 <p><strong>Note:</strong> The HTML and RDF browser interfaces only work
@@ -317,7 +317,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 
 
 <h2 id="development">Source code and development</h2>
-<p> D2R Server combines the <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/">D2RQ API</a>, the <a href="http://www.joseki.org/">Joseki SPARQL Server</a> and the <a href="http://jetty.mortbay.org/">Jetty webserver</a>.</p>
+<p> D2R Server combines the <a href="http://www4.wiwiss.fu-berlin.de/bizer/D2RQ/">D2RQ API</a>, the <a href="http://www.joseki.org/">Joseki SPARQL Server</a> and the <a href="http://jetty.mortbay.org/">Jetty webserver</a>.</p>
 <p>D2R Server is hosted by <a href="http://sourceforge.net/">SourceForge.net</a>
     as part of the <a href="http://sourceforge.net/projects/d2rq-map/">D2RQ project</a>.
     The latest source code is available from the project's
@@ -344,13 +344,13 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
   <li><a href="http://virtuoso.openlinksw.com/wiki/main/Main/VOSSQLRDF">OpenLink Virtuoso</a> provides flexible RDF access to a wide range of data sources, including relational data.</li>
   <li><a href="http://metamorphoses.sourceforge.net/">METAmorphoses</a> publishes RDF generated from relational databases on the Web.</li>
   <li><a href="http://esw.w3.org/topic/RdfAndSql">List of projects and publications</a> about database-to-RDF mapping at the ESW Wiki.</li>
-  <li><a href="http://www.wiwiss.fu-berlin.de/suhl/forschung/websys/opensource/">Other open source projects of our group</a></li>
+  <li><a href="http://www.wiwiss.fu-berlin.de/en/institute/pwo/bizer/research/projects/index.html">Other open source projects of our group</a></li>
 </ul>
 
-<div><a href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3"><img src="http://www.wiwiss.fu-berlin.de/suhl/_img/doap.png" align="absmiddle" /></a> (<a href="http://www4.wiwiss.fu-berlin.de/rdf_browser/?browse_uri=http%3A//www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3">View with Disco</a>)</div>
+<div><a href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3">DOAP project description</a> (<a href="http://www4.wiwiss.fu-berlin.de/rdf_browser/?browse_uri=http%3A//www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3">View with Disco</a>)</div>
 
 <div id="footer">
-  <small>$Id: index.html,v 1.24 2009/02/18 22:03:34 fatorange Exp $</small>
+  <small>$Id: index.html,v 1.25 2009/02/19 14:14:24 fatorange Exp $</small>
 </div>
 </div>
 
