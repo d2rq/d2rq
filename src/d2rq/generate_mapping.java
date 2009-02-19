@@ -14,12 +14,14 @@ import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
  * Command line interface for {@link MappingGenerator}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: generate_mapping.java,v 1.2 2006/09/07 20:32:14 cyganiak Exp $
+ * @version $Id: generate_mapping.java,v 1.3 2009/02/19 01:12:49 fatorange Exp $
  */
 public class generate_mapping {
 	private final static String[] includedDrivers = {
 			"com.mysql.jdbc.Driver"
 	};
+	
+	private final static String DEFAULT_BASE_URI = "http://localhost:2020/";
 	
 	public static void main(String[] args) {
 		for (int i = 0; i < includedDrivers.length; i++) {
@@ -30,10 +32,12 @@ public class generate_mapping {
 		ArgDecl passArg = new ArgDecl(true, "p", "pass", "password");
 		ArgDecl driverArg = new ArgDecl(true, "d", "driver");
 		ArgDecl outfileArg = new ArgDecl(true, "o", "out", "outfile");
+		ArgDecl baseUriArg = new ArgDecl(true, "b", "base", "baseuri");
 		cmd.add(userArg);
 		cmd.add(passArg);
 		cmd.add(driverArg);
 		cmd.add(outfileArg);
+		cmd.add(baseUriArg);
 		cmd.process(args);
 
 		if (cmd.numItems() == 0) {
@@ -64,7 +68,11 @@ public class generate_mapping {
 			gen.setMapNamespaceURI("file:///stdout#");
 		}
 		gen.setInstanceNamespaceURI("");
-		gen.setVocabNamespaceURI("vocab/");
+		
+		String baseURI = cmd.contains(baseUriArg) ? cmd.getArg(baseUriArg).getValue()
+												  : DEFAULT_BASE_URI;
+		
+		gen.setVocabNamespaceURI(baseURI + "vocab/resource/");
 		try {
 			PrintStream out = (outputFile == null)
 					? System.out
@@ -78,6 +86,6 @@ public class generate_mapping {
 	
 	private static void usage() {
 		System.err.println(
-				"usage: generate-mapping [-u username] [-p password] [-d driverclass] [-o outfile.n3] jdbcURL");
+				"usage: generate-mapping [-u username] [-p password] [-d driverclass] [-o outfile.n3] [-b base uri] jdbcURL");
 	}
 }

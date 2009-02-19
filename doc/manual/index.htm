@@ -309,7 +309,7 @@ on Windows and Unix systems.</p>
 analyzing the schema of an existing database. This mapping file can be used
 as-is or can be customized.</p>
 
-<pre>generate-mapping [-u username] [-p password] [-d driverclass] [-o outfile.n3] jdbcURL</pre>
+<pre>generate-mapping [-u username] [-p password] [-d driverclass] [-o outfile.n3] [-b base uri] jdbcURL</pre>
 
 <dl>
 <dt>jdbcURL</dt>
@@ -341,6 +341,12 @@ Oracle: <tt>oracle.jdbc.OracleDriver</tt></p>
 <dt>-o outfile.n3</dt>
 <dd>The generated mapping will be stored in this file in N3 syntax. If this
 parameter is omitted, the mapping will be written to standard out.</dd>
+
+<dt>-b baseURI</dt>
+<dd>The base URI is used to construct a vocabulary namespace that will automatically be served
+as Linked Data by D2R Server, following the convention <tt>http://<em>baseURI</em><strong>/vocab/resource/</strong></tt>.  
+This should be the same base URI that is used when invoking the server. Defaults to <tt>http://localhost:2020/</tt>.
+For more information on vocabulary serving, see <a href="#servingvocabularies">section 7.4</a>.</dd>
 </dl>
 
 <p>Example invocation for a local MySQL database:</p>
@@ -1375,8 +1381,8 @@ map:PaperTitleEquivalence a d2rq:AdditionalProperty;
 <p>This adds an <tt>owl:equivalentProperty</tt> statement with the fixed object <tt>dc:title</tt> to every related property definition.</p>
 
 <h3>7.4.2 Integration with D2R Server</h3>
-<p>D2R Server automatically serves data for vocabularies placed under <tt>http://<em>baseURI</em><strong>/vocab/resource/</strong></tt>.
-For more details, please refer to the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/#vocabulary">D2R documentation</a>.</p>
+<p>D2R Server automatically serves data for vocabularies placed under <tt>http://<em>baseURI</em><strong>/vocab/resource/</strong></tt>. The <a href="#generatemapping">mapping generator</a> automatically creates a compatible namespace for this purpose.
+For further details, please refer to the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/#vocabulary">D2R documentation</a>.</p>
  
 <h3>7.4.3 Controlling vocabulary serving</h3>
 <p>Vocabulary serving is enabled by default. In order to deactivate it, a <tt>d2rq:Configuration</tt> block
@@ -1620,7 +1626,7 @@ and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalprop
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.42 2009/02/18 01:15:19 fatorange Exp $</p>
+<p>$Id: index.htm,v 1.43 2009/02/19 01:12:49 fatorange Exp $</p>
 
 </BODY>
 </HTML>

@@ -41,7 +41,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.26 2008/08/26 22:09:33 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.27 2009/02/19 01:12:49 fatorange Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -190,6 +190,7 @@ public class MappingGenerator {
 		}
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
 		this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
+		this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
 		this.out.println("\t.");
 		writeLabelBridge(tableName);
 		List foreignKeys = this.schema.foreignKeys(tableName);
@@ -228,6 +229,7 @@ public class MappingGenerator {
 		this.out.println(propertyBridgeName(toRelationName(column)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(column.relationName()) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(column) + ";");
+		this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
 		this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
 		int colType = this.schema.columnType(column);
 		String xsd = DatabaseSchemaInspector.xsdTypeFor(colType);
@@ -389,6 +391,7 @@ public class MappingGenerator {
 		return result;
 	}
 	
+
 	private String toRelationName(Attribute column) {
 		return column.tableName() + "_" + column.attributeName();
 	}
@@ -403,7 +406,11 @@ public class MappingGenerator {
 		}
 		return result.toString();
 	}
-
+	
+	private String toRelationLabel(Attribute column) {
+		return column.tableName() + " " + column.attributeName();
+	}
+	
 	private void identifyLinkTables() {
 		Iterator it = this.schema.listTableNames().iterator();
 		while (it.hasNext()) {
