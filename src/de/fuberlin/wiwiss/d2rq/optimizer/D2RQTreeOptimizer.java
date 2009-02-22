@@ -717,20 +717,27 @@ public class D2RQTreeOptimizer
             notMoveableFilterExpr = new ArrayList(filterExprBeforeOpLeftJoin);
             notMoveableFilterExpr.removeAll(filterExprAfterOpLeftJoin);
 
-            
+            // try to merge left and right op and create an OpLeftJoinD2RQ
+        	// if possible, newOp is an OpLeftJoinD2RQ
+            // if not possible newOp is an OpLeftJoin
+            newOp = opLeftJoin.apply(d2rqTransform, left, right);	
+
             
             // if there are some filterexpressions which could not be moved down,
             // an opFilter must be inserted that contains this filterexpressions
             if (!notMoveableFilterExpr.isEmpty())
             {        	
-            	
-                // create the filter
-                newOp = opLeftJoin.apply(addFilterTransform, left, right); 
-                // add the conditions
+            	if (newOp instanceof OpLeftJoin)
+            	{
+	                // create the filter for an opleftjoin
+	                newOp = opLeftJoin.apply(addFilterTransform, left, right); 
+            	}else
+            	{
+            		// newOp is an OpLeftJoinD2RQ
+            		newOp = OpFilter.filter(newOp);
+            	}
+	            	// add the conditions
                 ((OpFilter)newOp).getExprs().getList().addAll(notMoveableFilterExpr);
-            }else
-            {
-            	newOp = opLeftJoin.apply(d2rqTransform, left, right);	
             }
             
             // restore filterexpressions

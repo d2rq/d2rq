@@ -203,9 +203,9 @@ public class VarFinder
             List vars = opProject.getVars() ;
             VarUsageVisitor subUsage = VarUsageVisitor.apply(opProject.getSubOp()) ;
             
-            subUsage.defines.retainAll(vars) ;
-            subUsage.optDefines.retainAll(vars) ;
-            subUsage.optDefines.retainAll(vars) ;
+//            subUsage.defines.retainAll(vars) ;
+//            subUsage.optDefines.retainAll(vars) ;
+//            subUsage.optDefines.retainAll(vars) ;
             defines.addAll(subUsage.defines) ;
             optDefines.addAll(subUsage.optDefines) ;
             filterMentions.addAll(subUsage.filterMentions) ;
