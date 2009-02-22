@@ -10,7 +10,11 @@ import com.hp.hpl.jena.sparql.expr.ExprVisitor;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.ExpressionProjectionSpec;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
@@ -263,17 +267,37 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
         String sqlVarName = null;
         NodeMaker nodeMaker;
         Attribute attribute;
+        ProjectionSpec projectionSpec;
+        ExpressionProjectionSpec expressionProjectionSpec;
+        Expression expression;
         
         if (this.nodeRelation != null && exprVar != null)
         {
             // get the nodemaker for the expr-var
             nodeMaker = nodeRelation.nodeMaker(exprVar.asVar().getVarName());
-            // TODO: can perhaps be an error !!!!!!!!!!!
-            attribute = (Attribute) ((TypedNodeMaker)nodeMaker).projectionSpecs().iterator().next();
-            
-            if (attribute != null)
+
+            if (nodeMaker instanceof TypedNodeMaker)
             {
-                sqlVarName = attribute.qualifiedName();
+            	projectionSpec = (ProjectionSpec)((TypedNodeMaker)nodeMaker).projectionSpecs().iterator().next();
+                
+            	if (projectionSpec != null)
+            	{
+            		if (projectionSpec instanceof Attribute)
+            		{
+            			attribute = (Attribute)projectionSpec;
+            			sqlVarName = attribute.qualifiedName();
+            		}
+            		else
+            		{
+            			// projectionSpec is a ExpressionProjectionSpec
+            			expressionProjectionSpec = (ExpressionProjectionSpec)projectionSpec;
+            			expression = expressionProjectionSpec.toExpression();
+            			if (expression instanceof SQLExpression)
+            			{
+            				sqlVarName = ((SQLExpression)expression).getExpression();
+            			}
+            		}
+	            }
             }
         }
         

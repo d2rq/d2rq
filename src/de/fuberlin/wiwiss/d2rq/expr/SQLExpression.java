@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * TODO: Shouldn't call to SQL so much
  *  
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLExpression.java,v 1.3 2008/04/27 22:42:38 cyganiak Exp $
+ * @version $Id: SQLExpression.java,v 1.4 2009/02/22 16:01:16 fatorange Exp $
  */
 public class SQLExpression extends Expression {
 	
@@ -78,4 +78,11 @@ public class SQLExpression extends Expression {
 	public int hashCode() {
 		return this.expression.hashCode();
 	}
+
+	public String getExpression() 
+	{
+		return expression;
+	}
+	
+	
 }
