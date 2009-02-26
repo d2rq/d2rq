@@ -19,6 +19,7 @@ public class RootServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
+		server.checkMappingFileChanged();
 		Map classMapLinks = new TreeMap();
 		Iterator it = graphD2RQ().classMapNames().iterator();
 		while (it.hasNext()) {

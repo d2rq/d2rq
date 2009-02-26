@@ -19,6 +19,7 @@ public class ResourceDescriptionServlet extends HttpServlet {
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
+		server.checkMappingFileChanged();
 		String relativeResourceURI = request.getRequestURI().substring(
 				request.getContextPath().length() + request.getServletPath().length());
 		// Some servlet containers keep the leading slash, some don't

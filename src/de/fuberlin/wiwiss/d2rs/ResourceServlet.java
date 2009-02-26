@@ -15,6 +15,8 @@ public class ResourceServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
+		server.checkMappingFileChanged();
 		String relativeResourceURI = request.getRequestURI().substring(
 				request.getContextPath().length() + request.getServletPath().length());
 		// Some servlet containers keep the leading slash, some don't
@@ -46,7 +48,6 @@ public class ResourceServlet extends HttpServlet {
 		
 		response.setStatus(303);
 		response.setContentType("text/plain");
-		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		String location;
 		if ("text/html".equals(bestMatch.getMediaType())) {
 			location = server.pageURL(serviceStem, relativeResourceURI);

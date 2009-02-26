@@ -25,6 +25,8 @@ public class DirectoryServlet extends HttpServlet {
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
+		server.checkMappingFileChanged();
 		if (request.getPathInfo() == null) {
 			response.sendError(404);
 			return;
@@ -47,7 +49,6 @@ public class DirectoryServlet extends HttpServlet {
 			String label = (labelStmt == null) ? resource.getURI() : labelStmt.getString();
 			resources.put(uri, label);
 		}
-		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		Map classMapLinks = new TreeMap();
 		Iterator it = graphD2RQ().classMapNames().iterator();
 		while (it.hasNext()) {

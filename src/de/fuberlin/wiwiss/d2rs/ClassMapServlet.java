@@ -18,6 +18,8 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 public class ClassMapServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		D2RServer server = D2RServer.fromServletContext(getServletContext());
+		server.checkMappingFileChanged();
 		if (request.getPathInfo() == null) {
 			new ModelResponse(classMapListModel(), request, response).serve();
 			return;
@@ -28,7 +30,6 @@ public class ClassMapServlet extends HttpServlet {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return;
 		}
-		D2RServer server = D2RServer.fromServletContext(getServletContext());
     	Resource classMap = resourceList.getResource(server.baseURI() + "all/" + classMapName);
     	Resource directory = resourceList.createResource(server.baseURI() + "all");
     	classMap.addProperty(RDFS.seeAlso, directory);
