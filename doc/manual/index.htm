@@ -244,7 +244,7 @@ ul.toc li li { font-weight: normal; }
 <p>The <strong>D2RQ Engine</strong> is implemented as a Jena graph, the basic information representation object within the Jena framework. A D2RQ graph wraps a local relational databases into a virtual, read-only RDF graph. It rewrites Jena or Sesame API calls, find() and SPARQL queries to application-data-model specific SQL queries. The result sets of these SQL queries are transformed into RDF triples or SPARQL result sets that are passed up to the higher layers of the framework. The D2RQ Sesame interface wraps the D2RQ Jena graph implementation behind a Sesame RDF source interface. It provides a read-only Sesame repository interface for querying and reasoning with RDF and RDF Schema.</p>
 <p><strong>D2R Server</strong> is a tool for publishing relational databases on the Semantic Web. It enables RDF and HTML browsers to navigate the content of the database, 
 and allows applications to query the database using the SPARQL query language. D2R Server builds on the D2RQ Engine. For detailed information on how to set up D2R Server please refer to the 
-separate <a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/">D2R Server website</a>. </p>
+separate <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/">D2R Server website</a>. </p>
 <p>&nbsp;</p>
 <p><strong>Example</strong></p>
 <p>We are using an example database which stores information about conferences, 
@@ -653,7 +653,7 @@ try{
 <P>The D2RQ mapping language is a declarative  language for describing the relation between 
   a relational database schemata and <a href="http://www.w3.org/TR/rdf-schema/">RDFS vocabularies</a> or <a href="http://www.w3.org/TR/owl-features/">OWL</a> ontologies. A D2RQ map is an RDF document. 
 </P>
-<P>The language is formally defined by the <a href="http://www4.wiwiss.fu-berlin.de/bizer/D2RQ/0.1">D2RQ RDFS Schema</a>. 
+<P>The language is formally defined by the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/0.1">D2RQ RDFS Schema</a>. 
   <br>
   The D2RQ namespace is http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#</P>
 <P>An ontology is mapped to a database schema using <tt>d2rq:ClassMaps</tt> and
@@ -1415,7 +1415,7 @@ with the property <tt>d2rq:serveVocabulary</tt> set to <tt>false</tt> must be cr
   <tr> 
     <td valign="top"><strong>d2rq:javaClass</strong></td>
     <td valign="top">The qualified name of a Java class that performs the mapping. 
-      The class must implement the <a href="http://www4.wiwiss.fu-berlin.de/bizer/D2RQ/javadoc/de/fuberlin/wiwiss/d2rq/Translator.html">Translator</a> 
+      The class must implement the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/javadoc/de/fuberlin/wiwiss/d2rq/Translator.html">Translator</a> 
       interface. Custom Translators might be useful for encoding and decoding 
       values, but are limited to 1:1 translations. Further datails can be found 
       in the D2RQ javadocs.</td>
@@ -1626,7 +1626,7 @@ and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalprop
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.44 2009/02/19 14:13:37 fatorange Exp $</p>
+<p>$Id: index.htm,v 1.45 2009/03/16 16:45:49 fatorange Exp $</p>
 
 </BODY>
 </HTML>

@@ -11,14 +11,14 @@ import de.fuberlin.wiwiss.d2rq.map.Mapping;
  * <p>A D2RQ read-only Jena model backed by a D2RQ-mapped non-RDF database.</p>
  *
  * <p>D2RQ is a declarative mapping language for describing mappings between ontologies and relational data models.
- * More information about D2RQ is found at: http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/</p>
+ * More information about D2RQ is found at: http://www4.wiwiss.fu-berlin.de/bizer/d2rq/</p>
  *
  * <p>This class is a thin wrapper around a {@link GraphD2RQ} and provides only
  * convenience constructors.</p>
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.13 2009/02/09 12:21:31 fatorange Exp $
+ * @version $Id: ModelD2RQ.java,v 1.14 2009/03/16 16:45:49 fatorange Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */

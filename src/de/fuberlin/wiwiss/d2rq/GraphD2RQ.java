@@ -44,11 +44,11 @@ import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
  * 
  * D2RQ is a declarative mapping language for describing mappings between
  * ontologies and relational data models. More information about D2RQ is found
- * at: http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/
+ * at: http://www4.wiwiss.fu-berlin.de/bizer/d2rq/
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.52 2009/02/14 22:37:15 fatorange Exp $
+ * @version $Id: GraphD2RQ.java,v 1.53 2009/03/16 16:45:49 fatorange Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	
