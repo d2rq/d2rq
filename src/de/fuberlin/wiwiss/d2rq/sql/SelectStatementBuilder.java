@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.optimizer.LeftJoin;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.27 2009/02/09 12:21:31 fatorange Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.28 2009/03/16 16:24:04 fatorange Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -152,7 +152,8 @@ public class SelectStatementBuilder {
 	public String getSQLStatement() {
 		
 		StringBuffer result = new StringBuffer("SELECT ");
-		if (this.database.limit() != Database.NO_LIMIT) {
+		
+		if (this.database.dbTypeIs(ConnectedDB.MSSQL) && this.database.limit() != Database.NO_LIMIT) {
 			result.append("TOP " + this.database.limit() + " ");
 		}
 		if (this.eliminateDuplicates && database.allowDistinct()) {
@@ -205,9 +206,14 @@ public class SelectStatementBuilder {
 			result.append(" WHERE ");
 			result.append(condition().toSQL(this.database, this.aliases));
 		}
-//		if (this.database.limit() != Database.NO_LIMIT) {
-//			result.append(" LIMIT " + this.database.limit());
-//		}
+
+		if (this.database.dbTypeIs(ConnectedDB.Oracle) && this.database.limit() != Database.NO_LIMIT) {
+			result.append((condition().isTrue() ? " WHERE " : " AND ") + " ROWNUM <= " + this.database.limit());
+		}
+
+		if ((this.database.dbTypeIs(ConnectedDB.MySQL) || this.database.dbTypeIs(ConnectedDB.PostgreSQL)) && this.database.limit() != Database.NO_LIMIT) {
+			result.append(" LIMIT " + this.database.limit());
+		}
 		
 //		System.out.println("SQL-Statement: " + result);
 		

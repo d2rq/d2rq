@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.20 2009/02/19 00:54:17 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.21 2009/03/16 16:24:04 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -31,6 +31,7 @@ public class ConnectedDB {
 	public static final String MySQL = "MySQL";
 	public static final String PostgreSQL = "PostgreSQL";
 	public static final String Oracle = "Oracle";
+	public static final String MSSQL = "Microsoft SQL Server";
 	public static final String Other = "Other";
 	public static final int TEXT_COLUMN = 1;
 	public static final int NUMERIC_COLUMN = 2;
@@ -218,6 +219,7 @@ public class ConnectedDB {
      * <li><tt>ConnectedDB.MySQL</tt></li>
      * <li><tt>ConnectedDB.PostgreSQL</tt></li>
      * <li><tt>ConnectedDB.Oracle</tt></li>
+     * <li><tt>ConnectedDB.MSSQL</tt></li>
      * <li><tt>ConnectedDB.Other</tt></li>
      * </ul>
      * @return The brand of RDBMS
@@ -232,6 +234,8 @@ public class ConnectedDB {
 					this.dbType = ConnectedDB.PostgreSQL;
 				} else if (productName.indexOf("oracle") >= 0) {
 					this.dbType = ConnectedDB.Oracle;
+				} else if (productName.indexOf("microsoft sql server") >= 0) {
+					this.dbType = ConnectedDB.MSSQL;
 				} else {
 					this.dbType = ConnectedDB.Other;
 				}
