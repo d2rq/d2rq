@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
@@ -119,12 +119,12 @@ pre { speak-punctuation: code; }
 <p>Data on the Semantic Web is modelled and represented in
   <a href="http://en.wikipedia.org/wiki/Resource_Description_Framework">RDF</a>.
   D2R Server uses a customizable
-  <a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/#specification">D2RQ mapping</a>
+  <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#specification">D2RQ mapping</a>
   to map database content into this format, and allows the RDF data to be
   <em>browsed</em> and <em>searched</em> &#8211; the two main access paradigms
   to the Semantic Web.</p>
 
-<p>D2R Server's <strong>Linked Data interface</strong> makes RDF descriptions of individual resources available over the HTTP protocol. An RDF description can be retrieved simply by accessing the resource's URI over the Web. Using a Semantic Web browser like <a href="http://www.w3.org/2005/ajar/tab">Tabulator</a> (<a href="http://www.w3.org/2006/Talks/1019-tab-tbl/">slides</a>) or <a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/ng4j/disco/">Disco</a>, you can follow links from one resource to the next, surfing the Web of Data.
+<p>D2R Server's <strong>Linked Data interface</strong> makes RDF descriptions of individual resources available over the HTTP protocol. An RDF description can be retrieved simply by accessing the resource's URI over the Web. Using a Semantic Web browser like <a href="http://www.w3.org/2005/ajar/tab">Tabulator</a> (<a href="http://www.w3.org/2006/Talks/1019-tab-tbl/">slides</a>) or <a href="http://www4.wiwiss.fu-berlin.de/bizer/ng4j/disco/">Disco</a>, you can follow links from one resource to the next, surfing the Web of Data.
 
 <p>The <strong>SPARQL interface</strong> enables applications to search and query the database using the <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> query language over the SPARQL protocol.</p>
 
@@ -146,7 +146,7 @@ pre { speak-punctuation: code; }
     MySQL, PostgreSQL, and any SQL-92 compatible database. Microsoft
     Access can be used with some restrictions. More information is
     available in the
-    <a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/#compatibility">D2RQ manual</a>.</li>
+    <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#compatibility">D2RQ manual</a>.</li>
   <li>a <strong>modern browser</strong> like Firefox, Opera or Safari
     for using D2R Server's AJAX SPARQL Explorer. Internet Explorer can
     only browse the HTML pages, but not use the SPARQL Explorer.</li>
@@ -191,10 +191,10 @@ pre { speak-punctuation: code; }
 </ol>
 
 <h2 id="customize">Customizing the database mapping</h2>
-<p>D2R Server uses the <a href="http://www4.wiwiss.fu-berlin.de/bizer/D2RQ/spec/">D2RQ Mapping Language</a> to map the content of a relational database to RDF. A D2RQ mapping specifies how resources are identified and which properties are used to describe the resources.</p>
+<p>D2R Server uses the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/">D2RQ Mapping Language</a> to map the content of a relational database to RDF. A D2RQ mapping specifies how resources are identified and which properties are used to describe the resources.</p>
 <p>The <tt>generate-mapping</tt> script automatically generates a D2RQ mapping from the table structure of a database. The tool generates a new RDF vocabulary for each database, using table names as class names and column names as property names. Semantic Web client applications will understand more of your data if you customize the mapping and replace the auto-generated terms with terms from <a href="http://ebiquity.umbc.edu/blogger/100-most-common-rdf-namespaces/">well-known</a> and <a href="http://www.w3.org/TR/swbp-vocab-pub/">publicly accessible</a> RDF vocabularies.</p>
 <p>The mapping file can be edited with any text editor. Its syntax is described in the
-  <a href="http://www4.wiwiss.fu-berlin.de/bizer/D2RQ/spec/">D2RQ Manual</a>.
+  <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/">D2RQ Manual</a>.
   D2R Server will automatically detect changes to the mapping file and
   reload appropriately when you hit the browser's refresh button.</p>
 <p><strong>Note:</strong> The HTML and RDF browser interfaces only work
@@ -250,7 +250,7 @@ map:offer a d2rq:ClassMap;
 <p>All statements inside the <tt>d2r:documentMetadata</tt> block will be added as document metadata to all RDF documents.</p>
 <p>The <tt>d2r:vocabularyIncludeInstances</tt> setting controls whether the RDF and HTML representations of vocabulary classes and properties will also list related instances (defaults to <tt>true</tt>).
 As an alternative to disabling the serving of vocabulary instances, <tt>d2rq:resultSizeLimit</tt> may be used to limit the amount of returned data.
-Vocabulary serving is a feature of D2RQ and may be controlled using the <a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/#configuration"><tt>d2rq:serveVocabulary</tt> property</a>.
+Vocabulary serving is a feature of D2RQ and may be controlled using the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#configuration"><tt>d2rq:serveVocabulary</tt> property</a>.
 </p>
 <p>All parts are optional.</p>
 
@@ -294,7 +294,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 
 <h2 id="dumps">Creating RDF dumps</h2>
 
-<p>Sometimes it is useful to create an RDF dump of the entire database. The <tt>dump-rdf</tt> script can be used for this purpose. See the <a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/#dumprdf">D2RQ manual</a> for details.</p>
+<p>Sometimes it is useful to create an RDF dump of the entire database. The <tt>dump-rdf</tt> script can be used for this purpose. See the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#dumprdf">D2RQ manual</a> for details.</p>
 
 <h2 id="mappingfiles">Pre-built mapping files</h2>
 
@@ -317,7 +317,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 
 
 <h2 id="development">Source code and development</h2>
-<p> D2R Server combines the <a href="http://www4.wiwiss.fu-berlin.de/bizer/D2RQ/">D2RQ API</a>, the <a href="http://www.joseki.org/">Joseki SPARQL Server</a> and the <a href="http://jetty.mortbay.org/">Jetty webserver</a>.</p>
+<p> D2R Server combines the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/">D2RQ API</a>, the <a href="http://www.joseki.org/">Joseki SPARQL Server</a> and the <a href="http://jetty.mortbay.org/">Jetty webserver</a>.</p>
 <p>D2R Server is hosted by <a href="http://sourceforge.net/">SourceForge.net</a>
     as part of the <a href="http://sourceforge.net/projects/d2rq-map/">D2RQ project</a>.
     The latest source code is available from the project's
@@ -333,7 +333,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
   <li><a href="http://spade.lbl.gov:2020/">Gene Ontology annotations</a> (Chris Mungall, <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-GO">more information</a>)</li>
   <li><a href="http://spade.lbl.gov:2021/">Annotated images of gene expression in fruitfly embryogenesis</a> (Chris Mungall, <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-InSitu">more information</a>)</li>
   <li><a href="http://www4.wiwiss.fu-berlin.de/dblp/">DBLP Bibliography Database on the Semantic Web</a></li>
-  <li><a href="http://www4.wiwiss.fu-berlin.de/is-group/">Web-based Systems Group @ Freie Universität Berlin</a> &#8211; Information about staff, projects and publications</li>
+  <li><a href="http://www4.wiwiss.fu-berlin.de/is-group/">Web-based Systems Group @ Freie Universit�t Berlin</a> &#8211; Information about staff, projects and publications</li>
   <li><a href="http://roller.blogdns.net:2020/">Roller blog server demo</a> (Henry Story, <a href="https://sommer.dev.java.net/atom/2006-06-06/applications/SPARQLingRoller.pdf">more information</a>)</li>
   <li><a href="http://www3.wiwiss.fu-berlin.de:2020/">D2R Server Live Demo</a> publishing an example conference database</li>
 </ul>
@@ -350,7 +350,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 <div><a href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3">DOAP project description</a> (<a href="http://www4.wiwiss.fu-berlin.de/rdf_browser/?browse_uri=http%3A//www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3">View with Disco</a>)</div>
 
 <div id="footer">
-  <small>$Id: index.html,v 1.25 2009/02/19 14:14:24 fatorange Exp $</small>
+  <small>$Id: index.html,v 1.26 2009/03/16 16:50:31 fatorange Exp $</small>
 </div>
 </div>
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
@@ -19,7 +19,7 @@
 
 <h2>Abstract</h2>
 
-<p><a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/">D2R Server</a> is a tool for publishing the content of relational databases on the Semantic Web. This document details how three different kinds of Web agents can access this data through simple HTTP-based interfaces: RDF browsers, traditional HTML browsers, and SPARQL query clients.</p>
+<p><a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/">D2R Server</a> is a tool for publishing the content of relational databases on the Semantic Web. This document details how three different kinds of Web agents can access this data through simple HTTP-based interfaces: RDF browsers, traditional HTML browsers, and SPARQL query clients.</p>
 
 <h2>Contents</h2>
 <ol class="toc">
@@ -33,7 +33,7 @@
 <h2 id="intro">1. Introduction</h2>
 
 <p>The <a href="http://www.w3.org/2001/sw/">Semantic Web</a> is a global information space consisting of inter-linked data about <a href="http://www.w3.org/TR/webarch/#intro">resources</a>. There are two access paradigms to the Semantic Web: browsing and searching. Using a Semantic Web browser like <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/tab.html">Tabulator</a> (<a href="http://www.w3.org/2006/Talks/1019-tab-tbl/">slides</a>), a surfer can follow links from data about one resource to data about other resources. The second access paradigm is searching. Using the <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> query language and protocol, a client application can query data-sources for information about resources. </p>
-<p><a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/">D2R Server</a> is a tool for publishing the content of relational databases on the Semantic Web. Database content is mapped to RDF by a customizable mapping which specifies how resources are identified and which properties are used to describe resources. Based on this mapping, D2R Server allows a RDF representation of the database to be browsed and searched. The server provides two interfaces: The  <strong>dereferencing interface</strong> allows instance and vocabulary URIs to be dereferenced over the HTTP protocol. The interface supports content-negotiation and serves RDF and XHTML representations of resources. The generated representations are richly interlinked on RDF and XHTML level in order to enable browsers and crawlers to navigate database content.  The <strong>SPARQL interface</strong> enables applications to query the database  using the SPARQL query language over the SPARQL protocol.</p>
+<p><a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/">D2R Server</a> is a tool for publishing the content of relational databases on the Semantic Web. Database content is mapped to RDF by a customizable mapping which specifies how resources are identified and which properties are used to describe resources. Based on this mapping, D2R Server allows a RDF representation of the database to be browsed and searched. The server provides two interfaces: The  <strong>dereferencing interface</strong> allows instance and vocabulary URIs to be dereferenced over the HTTP protocol. The interface supports content-negotiation and serves RDF and XHTML representations of resources. The generated representations are richly interlinked on RDF and XHTML level in order to enable browsers and crawlers to navigate database content.  The <strong>SPARQL interface</strong> enables applications to query the database  using the SPARQL query language over the SPARQL protocol.</p>
 
 <div class="image"><img src="images/architecture.png" alt="D2R Server architecture diagram" /></div>
 
@@ -41,7 +41,7 @@
 
 <h2 id="RDFclient">2. Access with an RDF Browser</h2>
 
-<p>RDF browsers, like <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/About.html">Tabulator</a> or <a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/ng4j/disco/">Disco</a>, retrieve data  from the Semantic Web  by <a href="http://www.w3.org/TR/2004/REC-webarch-20041215/#dereference-uri">dereferencing</a> instance and vocabulary URIs and by following <a href="http://www.w3.org/TR/2000/CR-rdf-schema-20000327/#s2.3.4"><tt>rdfs:seeAlso</tt></a> links within the data.   The screenshot below shows an <a href="../d2rq/spec/ISWC-MySQL.sql">example database</a> being browsed with the Tabulator RDF browser.</p>
+<p>RDF browsers, like <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/About.html">Tabulator</a> or <a href="http://www4.wiwiss.fu-berlin.de/bizer/ng4j/disco/">Disco</a>, retrieve data  from the Semantic Web  by <a href="http://www.w3.org/TR/2004/REC-webarch-20041215/#dereference-uri">dereferencing</a> instance and vocabulary URIs and by following <a href="http://www.w3.org/TR/2000/CR-rdf-schema-20000327/#s2.3.4"><tt>rdfs:seeAlso</tt></a> links within the data.   The screenshot below shows an <a href="../d2rq/spec/ISWC-MySQL.sql">example database</a> being browsed with the Tabulator RDF browser.</p>
 
 <div class="image"><a href="images/tabulator-screenshot.png"><img src="images/tabulator-screenshot-small.png" alt="Screenshot of Tabulator" /></a></div>
 
@@ -179,7 +179,7 @@ Accept: text/html</pre>
 &lt;/sparql&gt;</pre>
 
 <div id="footer">
-  <small>$Id: index.html,v 1.1 2007/02/12 15:58:54 cyganiak Exp $</small>
+  <small>$Id: index.html,v 1.2 2009/03/16 16:50:31 fatorange Exp $</small>
 </div>
 
 </body>

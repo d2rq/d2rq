@@ -2,7 +2,7 @@ var snorql = new Snorql();
 
 function Snorql() {
     this._endpoint = document.location.href.match(/^([^?]*)snorql\//)[1] + 'sparql';
-    this._poweredByLink = 'http://www.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/';
+    this._poweredByLink = 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/';
     this._poweredByLabel = 'D2R Server';
     this._enableNamedGraphs = false;
 
