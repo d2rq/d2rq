@@ -59,7 +59,7 @@ public class PageServlet extends HttpServlet {
 		}
 		this.prefixes = server.getPrefixes(); // model();
 		Resource resource = description.getResource(resourceURI);
-		VelocityWrapper velocity = new VelocityWrapper(this, response);
+		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
 		Context context = velocity.getContext();
 		context.put("uri", resourceURI);
 		context.put("rdf_link", server.dataURL(serviceStem, relativeResourceURI));

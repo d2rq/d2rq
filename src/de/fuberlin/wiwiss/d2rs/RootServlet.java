@@ -26,7 +26,7 @@ public class RootServlet extends HttpServlet {
 			String name = (String) it.next();
 			classMapLinks.put(name, server.baseURI() + "directory/" + name);
 		}
-		VelocityWrapper velocity = new VelocityWrapper(this, response);
+		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
 		Context context = velocity.getContext();
 		context.put("rdf_link", server.baseURI() + "all");
 		context.put("classmap_links", classMapLinks);
