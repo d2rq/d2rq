@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.21 2009/03/16 16:24:04 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.22 2009/03/24 14:00:01 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -42,6 +42,11 @@ public class ConnectedDB {
 	public static final int DEFAULT_KEEP_ALIVE_INTERVAL = 60*60; // hourly
 	public static final String KEEP_ALIVE_QUERY_PROPERTY = "keepAliveQuery"; // override default keep alive query
 	public static final String DEFAULT_KEEP_ALIVE_QUERY = "SELECT 1"; // may not work for some DBMS
+	
+	/**
+	 * How many rows the JDBC driver should retrieve at once 
+	 */
+	public static final int FETCH_SIZE = 500;
 	
 	private static final String ORACLE_SET_DATE_FORMAT = "ALTER SESSION SET NLS_DATE_FORMAT = 'SYYYY-MM-DD'";
 	private static final String ORACLE_SET_TIMESTAMP_FORMAT = "ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'SYYYY-MM-DD HH24:MI:SS'";
@@ -152,7 +157,7 @@ public class ConnectedDB {
 	
 	public Connection connection() {
 		if (this.connection == null) {
-			this.connection = connect();
+			connect();
 		}
 		return this.connection;
 	}
@@ -161,13 +166,45 @@ public class ConnectedDB {
 		return this.limit;
 	}
 	
-	private Connection connect() {
+	private void connect() {
 		try {
 			if (this.jdbcURL.contains(":oracle:")) {
 				/* The pre-JSE 6 Oracle driver requires explicit registering */
 				DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
-				Connection connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
-				Statement stmt = connection.createStatement();
+			}
+
+			this.connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
+		} catch (SQLException ex) {
+			throw new D2RQException(
+					"Database connection to " + jdbcURL + " failed " +
+					"(user: " + username + "): " + ex.getMessage(), 
+					D2RQException.D2RQ_DB_CONNECTION_FAILED);
+		}
+		
+		/* Database-dependent initialization */
+		try {
+			/* 
+			 * Disable auto-commit in PostgreSQL to support cursors
+			 * @see http://jdbc.postgresql.org/documentation/83/query.html
+			 */
+			if (dbTypeIs(PostgreSQL))
+				this.connection.setAutoCommit(false);
+			
+			/* 
+			 * Enable cursor support in MySQL
+			 * Note that the implementation is buggy in early MySQL 5.0 releases such
+			 * as 5.0.27, which may lead to incorrect results 
+			 */
+			if (dbTypeIs(MySQL)) {
+				this.connection.setClientInfo("useCursorFetch", "true");
+				this.connection.setClientInfo("useServerPrepStmts", "true"); /* prerequisite */
+			}
+			
+			/*
+			 * Set Oracle date formats 
+			 */
+			if (dbTypeIs(Oracle)) {
+				Statement stmt = this.connection.createStatement();
 				try
 				{
 					stmt.execute(ORACLE_SET_DATE_FORMAT);
@@ -179,14 +216,10 @@ public class ConnectedDB {
 				finally {
 					stmt.close();
 				}
-				return connection;
 			}
-			else 
-				return DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
 		} catch (SQLException ex) {
 			throw new D2RQException(
-					"Database connection to " + jdbcURL + " failed " +
-					"(user: " + username + "): " + ex.getMessage(), 
+					"Database initialization failed: " + ex.getMessage(), 
 					D2RQException.D2RQ_DB_CONNECTION_FAILED);
 		}
 	}
