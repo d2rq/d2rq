@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
@@ -17,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.optimizer.LeftJoin;
+
 
 /**
  * Collects parts of a SELECT query and delivers a corresponding SQL statement.
@@ -25,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.optimizer.LeftJoin;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.28 2009/03/16 16:24:04 fatorange Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.29 2009/03/26 11:01:41 dorgon Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -64,7 +62,6 @@ public class SelectStatementBuilder {
 		eliminateDuplicates = !relation.isUnique();
 	
 		addMentionedTablesFromConditions();
-		createLeftJoinExpression(relation.leftJoinConditions());
 	}
 	
 	private Expression condition() {
@@ -79,72 +76,6 @@ public class SelectStatementBuilder {
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
 			this.mentionedTables.add(column.relationName());
-		}
-	}
-	
-	/**
-	 * Creates a sql-leftJoin-Expression if there is one
-	 * @param leftJoinConditions
-	 */
-	private void createLeftJoinExpression(Set leftJoinConditions)
-	{
-		
-		RelationName relationName1, relationName2;
-		LeftJoin leftJoin;
-		Set leftJoinTableNames = new HashSet();
-		int tableNr = 1;
-		
-		// create the left-join tables (table1 left join table2, ...)
-		for (Iterator iterator = leftJoinConditions.iterator(); iterator.hasNext(); )
-		{
-			
-			leftJoin = (LeftJoin) iterator.next();
-			relationName1 = leftJoin.getRelation1(); 
-			relationName2 = leftJoin.getRelation2();
-			
-			this.mentionedTables.remove(relationName1);
-			this.mentionedTables.remove(relationName2);
-		
-			// swap if necessary
-			if (!leftJoinTableNames.contains(relationName1) && leftJoinTableNames.contains(relationName2))
-			{
-				relationName2 = relationName1;
-			}
-			
-			leftJoinTableNames.add(relationName1);
-			leftJoinTableNames.add(relationName2);
-			
-			// left-join syntax: table1 left join table2 on (...) left join table3 on (...)
-			if (tableNr == 1)
-			{
-				leftJoinExpression.append(this.database.quoteRelationName(this.aliases.originalOf(relationName1)));
-				
-				if (this.database.dbTypeIs(ConnectedDB.Oracle)) 
-				{
-					leftJoinExpression.append(" ");
-				} else {
-					leftJoinExpression.append(" AS ");
-				}
-				leftJoinExpression.append(this.database.quoteRelationName(relationName1));
-				
-				
-			}
-			tableNr++;
-
-			leftJoinExpression.append(" LEFT JOIN ");
-			leftJoinExpression.append(this.database.quoteRelationName(this.aliases.originalOf(relationName2)));
-			
-			if (this.database.dbTypeIs(ConnectedDB.Oracle)) 
-			{
-				leftJoinExpression.append(" ");
-			} else {
-				leftJoinExpression.append(" AS ");
-			}
-			leftJoinExpression.append(this.database.quoteRelationName(relationName2));
-			
-			leftJoinExpression.append(" ON ");
-			// join-conditions
-			leftJoinExpression.append(leftJoin.getJoinConditions().toSQL(this.database, this.aliases));
 		}
 	}
 	
@@ -191,17 +122,6 @@ public class SelectStatementBuilder {
 		
 		}
 		
-		// are some left joins
-		if (leftJoinExpression.length() > 0)
-		{
-			
-			if (!this.mentionedTables.isEmpty())
-			{
-				result.append(", ");
-			}
-			result.append(leftJoinExpression);
-		}
-		
 		if (!condition().isTrue()) {
 			result.append(" WHERE ");
 			result.append(condition().toSQL(this.database, this.aliases));
@@ -214,8 +134,6 @@ public class SelectStatementBuilder {
 		if ((this.database.dbTypeIs(ConnectedDB.MySQL) || this.database.dbTypeIs(ConnectedDB.PostgreSQL)) && this.database.limit() != Database.NO_LIMIT) {
 			result.append(" LIMIT " + this.database.limit());
 		}
-		
-//		System.out.println("SQL-Statement: " + result);
 		
 		return result.toString();
 	}

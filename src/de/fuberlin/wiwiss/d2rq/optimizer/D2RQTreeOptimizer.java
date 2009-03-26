@@ -49,7 +49,6 @@ import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformAddFilters;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformPrepareOpTreeForOptimizing;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformApplyD2RQOpimizingRules;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformD2RQ;
-import de.fuberlin.wiwiss.d2rq.optimizer.utility.MutableIndex;
 
 /**
  * Class for optimizing an op-tree especially for D2RQ. 
@@ -106,12 +105,9 @@ public class D2RQTreeOptimizer
             return op ;
         }
         
-        // calculate all optional vars and fixed vars
-        // this information is used in the relationstobindingsleftjoiniterator
-        VarFinder varFinder = new VarFinder(op);
         
         // visitor that applies the rules for moving down the filterconditions
-        D2RQOpTreeVisitor d2RQOpTreeVisitor = new D2RQOpTreeVisitor(graph, varFinder) ;
+        D2RQOpTreeVisitor d2RQOpTreeVisitor = new D2RQOpTreeVisitor(graph) ;
         // start visiting
         op.visit(d2RQOpTreeVisitor) ;
         Op r = d2RQOpTreeVisitor.result() ;
@@ -137,11 +133,11 @@ public class D2RQTreeOptimizer
          * Constructor
          * @param transform - Transformer to be applied on the operator-tree
          */
-        public D2RQOpTreeVisitor(GraphD2RQ graph, VarFinder varFinder)
+        public D2RQOpTreeVisitor(GraphD2RQ graph)
         { 
         	this.filterExpr = new ArrayList();
         	this.optimizingTransform = new TransformApplyD2RQOpimizingRules();
-            this.d2rqTransform = new TransformD2RQ(graph, new MutableIndex(), varFinder);
+            this.d2rqTransform = new TransformD2RQ(graph);
             this.addFilterTransform = new TransformAddFilters();
             this.stack = new Stack();
         }
@@ -717,27 +713,19 @@ public class D2RQTreeOptimizer
             notMoveableFilterExpr = new ArrayList(filterExprBeforeOpLeftJoin);
             notMoveableFilterExpr.removeAll(filterExprAfterOpLeftJoin);
 
-            // try to merge left and right op and create an OpLeftJoinD2RQ
-        	// if possible, newOp is an OpLeftJoinD2RQ
-            // if not possible newOp is an OpLeftJoin
-            newOp = opLeftJoin.apply(d2rqTransform, left, right);	
-
             
             // if there are some filterexpressions which could not be moved down,
             // an opFilter must be inserted that contains this filterexpressions
             if (!notMoveableFilterExpr.isEmpty())
             {        	
-            	if (newOp instanceof OpLeftJoin)
-            	{
-	                // create the filter for an opleftjoin
-	                newOp = opLeftJoin.apply(addFilterTransform, left, right); 
-            	}else
-            	{
-            		// newOp is an OpLeftJoinD2RQ
-            		newOp = OpFilter.filter(newOp);
-            	}
-	            	// add the conditions
+                // create the filter for an opleftjoin
+                newOp = opLeftJoin.apply(addFilterTransform, left, right); 
+            	// add the conditions
                 ((OpFilter)newOp).getExprs().getList().addAll(notMoveableFilterExpr);
+            }else
+            {
+                // nothing must be done
+            	newOp = opLeftJoin.apply(d2rqTransform, left, right);
             }
             
             // restore filterexpressions

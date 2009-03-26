@@ -7,20 +7,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.hp.hpl.jena.graph.Triple;
-
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
-import de.fuberlin.wiwiss.d2rq.optimizer.utility.MutableIndex;
 
 public class GraphPatternTranslator {
 	private final List triplePatterns;
 	private final Collection tripleRelations;
-	private MutableIndex mutableIndex; // index is now unique over one sparq-query-execution
 	
-	public GraphPatternTranslator(List triplePatterns, Collection tripleRelations, MutableIndex mutableIndex) 
+	public GraphPatternTranslator(List triplePatterns, Collection tripleRelations) 
 	{
 		this.triplePatterns = triplePatterns;
 		this.tripleRelations = tripleRelations;
-		this.mutableIndex = mutableIndex;
 	}
 
 	/**
@@ -32,18 +28,19 @@ public class GraphPatternTranslator {
 		}
 		Iterator it = triplePatterns.iterator();
 		List candidateLists = new ArrayList(triplePatterns.size());
+		int index = 1;
 		while (it.hasNext()) {
 			Triple triplePattern = (Triple) it.next();
 			// use always index
 			// index is now unique over one sparq-query-execution
 			CandidateList candidates = new CandidateList(
-					triplePattern, mutableIndex.isUseIndex(), mutableIndex.getValue());
+					triplePattern, triplePatterns.size() > 1, index);
 			if (candidates.isEmpty()) {
 				return Collections.EMPTY_LIST;
 			}
 			candidateLists.add(candidates);
 			// inc value
-			mutableIndex.incValue();
+			index++;
 		}
 		Collections.sort(candidateLists);
 		List joiners = new ArrayList();
