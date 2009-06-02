@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
+import java.sql.Driver;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -23,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.22 2009/03/24 14:00:01 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.23 2009/06/02 12:59:44 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -169,8 +170,14 @@ public class ConnectedDB {
 	private void connect() {
 		try {
 			if (this.jdbcURL.contains(":oracle:")) {
-				/* The pre-JSE 6 Oracle driver requires explicit registering */
-				DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
+				/* The pre-JSE 6 Oracle driver requires explicit registration */
+				try {
+					DriverManager.registerDriver((Driver) Class.forName("oracle.jdbc.driver.OracleDriver").getConstructor().newInstance());
+				} catch (Exception ex) {
+					throw new D2RQException(
+							"Unable to register Oracle driver: " + ex.getMessage(), 
+							D2RQException.DATABASE_MISSING_JDBCDRIVER);
+				}
 			}
 
 			this.connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
@@ -189,17 +196,7 @@ public class ConnectedDB {
 			 */
 			if (dbTypeIs(PostgreSQL))
 				this.connection.setAutoCommit(false);
-			
-			/* 
-			 * Enable cursor support in MySQL
-			 * Note that the implementation is buggy in early MySQL 5.0 releases such
-			 * as 5.0.27, which may lead to incorrect results 
-			 */
-			if (dbTypeIs(MySQL)) {
-				this.connection.setClientInfo("useCursorFetch", "true");
-				this.connection.setClientInfo("useServerPrepStmts", "true"); /* prerequisite */
-			}
-			
+						
 			/*
 			 * Set Oracle date formats 
 			 */
@@ -234,6 +231,18 @@ public class ConnectedDB {
 		if (password != null) {
 			result.setProperty("password", password);
 		}
+		
+		/* 
+		 * Enable cursor support in MySQL
+		 * Note that the implementation is buggy in early MySQL 5.0 releases such
+		 * as 5.0.27, which may lead to incorrect results.
+		 * This is placed here as a later change requires a call to setClientInfo, which is only available from Java 6 on
+		 */
+		if (this.jdbcURL.contains(":mysql:")) {
+			result.setProperty("useCursorFetch", "true");
+			result.setProperty("useServerPrepStmts", "true"); /* prerequisite */
+		}
+		
 		return result;
 	}
 	
