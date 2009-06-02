@@ -30,6 +30,6 @@
 	<classpathentry kind="lib" path="lib/db-drivers/commons-pool-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/postgresql-8.2dev-503.jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/ojdbc14.jar"/>
-	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.5-bin.jar"/>
+	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.7-bin.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
