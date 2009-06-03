@@ -27,6 +27,7 @@ import de.fuberlin.wiwiss.d2rq.map.Configuration;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+import de.fuberlin.wiwiss.d2rq.map.DynamicProperty;
 import de.fuberlin.wiwiss.d2rq.map.ResourceMap;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
@@ -39,7 +40,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.36 2009/02/14 22:37:15 fatorange Exp $
+ * @version $Id: MapParser.java,v 1.37 2009/06/03 16:02:58 fatorange Exp $
  */
 public class MapParser {
 
@@ -489,6 +490,12 @@ public class MapParser {
 		while (stmts.hasNext()) {
 			Resource classMapResource = stmts.nextStatement().getResource();
 			bridge.setRefersToClassMap(this.mapping.classMap(classMapResource));
+		}
+		stmts = r.listProperties(D2RQ.dynamicProperty);
+		while (stmts.hasNext()) {
+			String dynamicPropertyPattern = stmts.nextStatement().getString();
+			DynamicProperty dynamicProperty = new DynamicProperty(dynamicPropertyPattern);
+			bridge.addProperty(dynamicProperty);
 		}
 		stmts = r.listProperties(D2RQ.property);
 		while (stmts.hasNext()) {

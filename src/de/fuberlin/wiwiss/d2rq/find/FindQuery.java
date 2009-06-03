@@ -29,7 +29,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * relations into one SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.18 2009/02/14 22:37:15 fatorange Exp $
+ * @version $Id: FindQuery.java,v 1.19 2009/06/03 16:02:58 fatorange Exp $
  */
 public class FindQuery {
 	private final Triple triplePattern;
@@ -52,6 +52,7 @@ public class FindQuery {
 		URIMakerRule rule = new URIMakerRule();
 		List sortedTripleRelations = rule.sortRDFRelations(tripleRelations);
 		URIMakerRuleChecker subjectChecker = rule.createRuleChecker(triplePattern.getSubject());
+		URIMakerRuleChecker predicateChecker = rule.createRuleChecker(triplePattern.getPredicate());
 		URIMakerRuleChecker objectChecker = rule.createRuleChecker(triplePattern.getObject());
 		List result = new ArrayList();
 		Iterator it = sortedTripleRelations.iterator();
@@ -60,8 +61,10 @@ public class FindQuery {
 			TripleRelation selectedTripleRelation = tripleRelation.selectTriple(triplePattern);
 			if (selectedTripleRelation != null
 					&& subjectChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.SUBJECT))
+					&& predicateChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.PREDICATE))
 					&& objectChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT))) {
 				subjectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.SUBJECT));
+				predicateChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.PREDICATE));
 				objectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT));
 				result.add(new JoinOptimizer(selectedTripleRelation).optimize());
 			}

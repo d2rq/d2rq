@@ -82,6 +82,10 @@ public class PropertyBridge extends ResourceMap {
 	public void addProperty(Resource property) {
 		this.properties.add(property.as(Property.class));
 	}
+	
+	public void addProperty(DynamicProperty propertyMap) {
+		this.properties.add(propertyMap);
+	}
 
 	public void validate() throws D2RQException {
 		if (this.refersToClassMap != null) {
@@ -120,6 +124,18 @@ public class PropertyBridge extends ResourceMap {
 		if (this.refersToClassMap != null) {
 			builder.addAliased(this.refersToClassMap.relationBuilder());
 		}
+		
+		Iterator<Object> it = this.properties.iterator();
+		while (it.hasNext()) 
+		{
+			Object prop = it.next();
+			if(prop instanceof DynamicProperty)
+			{
+				DynamicProperty dynamicProperty = (DynamicProperty) prop;
+				builder.addOther(dynamicProperty.relationBuilder());
+			}
+		}
+		
 		return builder.buildRelation(this.belongsToClassMap.database().connectedDB()); 
 	}
 
@@ -127,12 +143,25 @@ public class PropertyBridge extends ResourceMap {
 		this.validate();
 		Collection results = new ArrayList();
 		Iterator it = this.properties.iterator();
-		while (it.hasNext()) {
-			Property property = (Property) it.next();
+		while (it.hasNext()) 
+		{
+			Object prop = it.next();
 			NodeMaker s = this.belongsToClassMap.nodeMaker();
-			NodeMaker p = new FixedNodeMaker(property.asNode(), false);
 			NodeMaker o = nodeMaker();
-			results.add(new TripleRelation(buildRelation(), s, p, o));
+			if(prop instanceof Property)
+			{
+				Property property = (Property) prop;
+				NodeMaker p = new FixedNodeMaker(property.asNode(), false);
+				results.add(new TripleRelation(buildRelation(), s, p, o));
+			}
+			else if(prop instanceof DynamicProperty)
+			{
+				DynamicProperty dynamicProperty = (DynamicProperty) prop;
+				NodeMaker p = dynamicProperty.nodeMaker();
+				results.add(new TripleRelation(buildRelation(), s, p, o));
+			}
+			
+			
 		}
 		return results;
 	}
