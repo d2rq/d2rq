@@ -48,7 +48,7 @@ import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.53 2009/03/16 16:45:49 fatorange Exp $
+ * @version $Id: GraphD2RQ.java,v 1.54 2009/06/03 16:28:17 fatorange Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	
@@ -123,7 +123,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		if (this.log.isDebugEnabled()) {
 			this.log.debug("Find: " + PrettyPrinter.toString(t, getPrefixMapping()));
 		}
-		return new FindQuery(t, this.mapping.compiledPropertyBridges(), this.mapping.configuration().getServeVocabulary(), this.mapping.getVocabularyModel()).iterator();
+		return new FindQuery(t, this.mapping.compiledPropertyBridges(), this.mapping.configuration().getServeVocabulary(), this.mapping.getHasDynamicProperties(), this.mapping.getVocabularyModel()).iterator();
     }
 
 	/**

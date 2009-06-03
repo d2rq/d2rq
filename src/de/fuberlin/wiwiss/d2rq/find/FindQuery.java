@@ -29,23 +29,25 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * relations into one SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.19 2009/06/03 16:02:58 fatorange Exp $
+ * @version $Id: FindQuery.java,v 1.20 2009/06/03 16:28:17 fatorange Exp $
  */
 public class FindQuery {
 	private final Triple triplePattern;
 	private final Collection tripleRelations;
 	private final boolean serveVocabulary;
+	private final boolean checkPredicates;
 	private final Model vocabularyModel;
 	
-	public FindQuery(Triple triplePattern, Collection tripleRelations, boolean serveVocabulary, Model vocabularyModel) {
+	public FindQuery(Triple triplePattern, Collection tripleRelations, boolean serveVocabulary, boolean checkPredicates, Model vocabularyModel) {
 		this.triplePattern = triplePattern;
 		this.tripleRelations = tripleRelations;
 		this.serveVocabulary = serveVocabulary;
+		this.checkPredicates = checkPredicates;
 		this.vocabularyModel = vocabularyModel;
 	}
 	
 	public FindQuery(Triple triplePattern, Collection tripleRelations) {
-		this(triplePattern, tripleRelations, false, null);
+		this(triplePattern, tripleRelations, false, true, null);
 	}	
 
 	private List selectedTripleRelations() {
@@ -61,10 +63,11 @@ public class FindQuery {
 			TripleRelation selectedTripleRelation = tripleRelation.selectTriple(triplePattern);
 			if (selectedTripleRelation != null
 					&& subjectChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.SUBJECT))
-					&& predicateChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.PREDICATE))
+					&& (checkPredicates && predicateChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.PREDICATE)))
 					&& objectChecker.canMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT))) {
 				subjectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.SUBJECT));
-				predicateChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.PREDICATE));
+				if (checkPredicates)
+					predicateChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.PREDICATE));
 				objectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT));
 				result.add(new JoinOptimizer(selectedTripleRelation).optimize());
 			}
