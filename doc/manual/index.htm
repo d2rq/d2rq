@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <?xml version="1.0" encoding="utf-8"?><HTML lang=en xml:lang="en" 
-xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>The D2RQ Platform v0.6  -  User Manual</TITLE>
+xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>The D2RQ Plattform v0.6.1  -  User Manual</TITLE>
 <META http-equiv=Content-Type content="text/html; charset=utf-8">
 <STYLE type=text/css>
 
@@ -131,7 +131,7 @@ ul.toc li li { font-weight: normal; }
 </HEAD>
 <BODY>
 <DIV class=head> 
-  <h1 id=title>The D2RQ Platform v0.6 - Treating Non-RDF Relational Databases as Virtual RDF Graphs</h1>
+  <h1 id=title>The D2RQ Platform v0.6.1 - Treating Non-RDF Relational Databases as Virtual RDF Graphs</h1>
   <h2 id=doctype>User Manual and Language Specification</h2>
 <DL>
   <DT>This Version: 
@@ -1057,6 +1057,10 @@ map:PersonsType a d2rq:PropertyBridge ;
       specified, then one triple with each property is generated per resource.</td>
   </tr>
   <tr>
+    <td width="20%" valign="top"><strong>d2rq:dynamicProperty</strong></td>
+    <td width="80%" valign="top">A URI pattern that is used to generate the property URI at runtime. If multiple <tt>d2rq:dynamicProperty</tt> are specified, then one triple with each property is generated per resource.</td>
+  </tr>
+  <tr>
     <td valign="top"><strong>d2rq:column</strong></td>
     <td valign="top">For properties with literal values.
       The database column that contains the literal values.
@@ -1626,7 +1630,7 @@ and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalprop
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.46 2009/03/24 09:48:58 fatorange Exp $</p>
+<p>$Id: index.htm,v 1.47 2009/06/03 17:01:06 fatorange Exp $</p>
 
 </BODY>
 </HTML>
