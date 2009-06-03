@@ -1,6 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,31 +17,48 @@ import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
  * map from SELECT clause entries to string values.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResultRowMap.java,v 1.5 2009/03/19 12:49:10 fatorange Exp $
+ * @version $Id: ResultRowMap.java,v 1.6 2009/06/03 14:02:19 fatorange Exp $
  */
 public class ResultRowMap implements ResultRow {
 	
 	public static ResultRowMap fromResultSet(ResultSet resultSet, List projectionSpecs) throws SQLException {
 		Map result = new HashMap();
+		ResultSetMetaData metaData = resultSet.getMetaData();
+		
 		for (int i = 0; i < projectionSpecs.size(); i++) {
 			/*
-			 * Specifically handle Oracle DATEs and TIMESTAMPs because the regular getString()
-			 * returns them in non-standard fashion, e.g. "2008-3-22.0.0. 0. 0".
-			 * This occurs independently of the NLS_DATE_FORMAT / NLS_TIMESTAMP_FORMAT in use.
+			 * Return string representations of the values using information from the type map
+			 * 
+			 * TODO Generally use resultSet.getObject(i+1).toString() instead of resultSet.getString(i+1); maybe even map to Objects instead of Strings?
+			 * This would convert at JDBC/Java level, which will likely differ from current data, so it's probably best to keep things as they are for now  
 			 */
-			Object resultObj = resultSet.getObject(i + 1);
-			if (resultObj instanceof oracle.sql.DATE)
-				result.put(projectionSpecs.get(i), resultSet.getDate(i + 1).toString());
-			else if (resultObj instanceof oracle.sql.TIMESTAMP)
-				result.put(projectionSpecs.get(i), resultSet.getTimestamp(i + 1).toString());
-			/*
-			 * Handle boolean values separately as their representation differs greatly amongst DBs (e.g. PostgreSQL employs 't' and 'f', others use 0 and 1) 
-			 * TODO Always use resultSet.getObject(i+1).toString() instead of resultSet.getString(i+1)? Maybe even map to Objects instead of Strings?
-			 */
-			else if (resultObj instanceof Boolean)
-				result.put(projectionSpecs.get(i), Boolean.toString(resultSet.getBoolean(i + 1)));
+			if (metaData != null) {
+				String classString = metaData.getColumnClassName(i + 1);
+				/*
+				 * Specifically handle Oracle DATEs and TIMESTAMPs because the regular getString()
+				 * returns them in non-standard fashion, e.g. "2008-3-22.0.0. 0. 0".
+				 * This occurs independently of the NLS_DATE_FORMAT / NLS_TIMESTAMP_FORMAT in use.
+				 * 
+				 * Note: getObject(i+1).toString() does not work in this case; the only other options seems to be Oracle's toJdbc()
+				 */
+				if (classString != null && classString.equals("oracle.sql.DATE"))
+					result.put(projectionSpecs.get(i), resultSet.getDate(i + 1).toString());
+				else if (classString != null && classString.equals("oracle.sql.TIMESTAMP"))
+					result.put(projectionSpecs.get(i), resultSet.getTimestamp(i + 1).toString());
+				/*
+				 * Let the JDBC driver convert boolean values for us as their representation differs greatly amongst DBs (e.g. PostgreSQL employs 't' and 'f', others use 0 and 1) 
+				 */
+				else if (classString != null && classString.equals("java.lang.Boolean"))
+					result.put(projectionSpecs.get(i), Boolean.toString(resultSet.getBoolean(i + 1)));
+				else {
+					 /* 
+					  * Return native string representation of the object
+					  */
+					result.put(projectionSpecs.get(i), resultSet.getString(i + 1));
+				}
+			}
 			else
-				result.put(projectionSpecs.get(i), resultSet.getString(i + 1));
+				result.put(projectionSpecs.get(i), resultSet.getString(i + 1)); /* treat everything as String if no type map is available */
 		}
 		return new ResultRowMap(result);
 	}
