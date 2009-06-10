@@ -125,7 +125,7 @@ public class PropertyBridge extends ResourceMap {
 			builder.addAliased(this.refersToClassMap.relationBuilder());
 		}
 		
-		Iterator<Object> it = this.properties.iterator();
+		Iterator it = this.properties.iterator();
 		while (it.hasNext()) 
 		{
 			Object prop = it.next();

@@ -8,7 +8,7 @@ import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 
 /*
  * @author Jšrg Hen§
- * @version $Id: DynamicProperty.java,v 1.1 2009/06/03 16:02:58 fatorange Exp $
+ * @version $Id: DynamicProperty.java,v 1.2 2009/06/10 20:46:49 fatorange Exp $
  */
 public class DynamicProperty extends ResourceMap {
 	
@@ -17,12 +17,12 @@ public class DynamicProperty extends ResourceMap {
 		this.setURIPattern(URI);
 	}
 
-	@Override
+	//@Override
 	protected Relation buildRelation() {
 		return null;
 	}
 
-	@Override
+	//@Override
 	public void validate() throws D2RQException {
 		// TODO Auto-generated method stub
 	}
