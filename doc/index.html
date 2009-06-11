@@ -252,6 +252,7 @@ map:offer a d2rq:ClassMap;
 As an alternative to disabling the serving of vocabulary instances, <tt>d2rq:resultSizeLimit</tt> may be used to limit the amount of returned data.
 Vocabulary serving is a feature of D2RQ and may be controlled using the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#configuration"><tt>d2rq:serveVocabulary</tt> property</a>.
 </p>
+<p>The <tt>d2r:autoReloadMapping</tt> setting specifies whether changes to the mapping file should be detected automatically (defaults to <tt>true</tt>). This feature has performance implications, so this value should be set to <tt>false</tt> for high-traffic production systems or when running benchmarks.</p>
 <p>All parts are optional.</p>
 
 <p>With large databases, some queries will produce too many results. Adding a <tt>d2rq:resultSizeLimit</tt> to the <tt>d2rq:Database</tt> section of the mapping file will add a <tt>LIMIT</tt> clause to all generated statements.
@@ -350,7 +351,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 <div><a href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3">DOAP project description</a> (<a href="http://www4.wiwiss.fu-berlin.de/rdf_browser/?browse_uri=http%3A//www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3">View with Disco</a>)</div>
 
 <div id="footer">
-  <small>$Id: index.html,v 1.26 2009/03/16 16:50:31 fatorange Exp $</small>
+  <small>$Id: index.html,v 1.27 2009/06/11 09:13:18 fatorange Exp $</small>
 </div>
 </div>
 

@@ -15,7 +15,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * to initialize programmatically.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQDatasetDesc.java,v 1.5 2008/09/02 11:30:05 cyganiak Exp $
+ * @version $Id: D2RQDatasetDesc.java,v 1.6 2009/06/11 09:13:18 fatorange Exp $
  */
 public class D2RQDatasetDesc extends DatasetDesc {
 	private AutoReloadableDataset dataset;
@@ -26,6 +26,7 @@ public class D2RQDatasetDesc extends DatasetDesc {
 	}
 
 	public Dataset getDataset() {
+		dataset.checkMappingFileChanged();
 		return this.dataset;
 	}
 

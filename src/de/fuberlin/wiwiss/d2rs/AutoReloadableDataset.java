@@ -54,7 +54,7 @@ public class AutoReloadableDataset implements Dataset {
 	
 	/** re-init dsg if mapping file has changed */
 	public void checkMappingFileChanged() {
-		if (!localFile || this.mappingFile == null) return;
+		if (!localFile || this.mappingFile == null || !server.getConfig().getAutoReloadMapping()) return;
 		
 		// only reload again if lastReload is older than CHECK_FREQUENCY_MS
 		long now = System.currentTimeMillis();

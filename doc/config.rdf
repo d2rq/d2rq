@@ -1,57 +1,62 @@
 <rdf:RDF
-    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:d2r="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:owl="http://www.w3.org/2002/07/owl#"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
-    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:d2rq="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#">
-  <owl:Ontology rdf:about="file:///home/christian/Desktop/d2rfix/d2r/d2r-trunk/doc/config.n3">
-    <rdfs:label xml:lang="en">D2R Server configuration vocabulary</rdfs:label>
-    <rdfs:comment xml:lang="en">This vocabulary defines RDF terms used in configuration files for D2R Server, a software application that publishes relational databases on the Semantic Web.</rdfs:comment>
+  <owl:Ontology rdf:about="">
+    <owl:versionInfo>$Id: config.rdf,v 1.4 2009/06/11 09:13:18 fatorange Exp $</owl:versionInfo>
+    <dc:creator rdf:resource="http://richard.cyganiak.de/foaf.rdf#cygri"/>
     <foaf:page>
       <rdf:Description rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/">
         <rdfs:label xml:lang="en">D2R Server homepage and documentation</rdfs:label>
       </rdf:Description>
     </foaf:page>
-    <dc:creator rdf:resource="http://richard.cyganiak.de/foaf.rdf#cygri"/>
-    <owl:versionInfo>$Id: config.rdf,v 1.3 2009/02/14 22:45:16 fatorange Exp $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This vocabulary defines RDF terms used in configuration files for D2R Server, a software application that publishes relational databases on the Semantic Web.</rdfs:comment>
+    <rdfs:label xml:lang="en">D2R Server configuration vocabulary</rdfs:label>
   </owl:Ontology>
   <rdfs:Class rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server">
-    <rdfs:label xml:lang="en">Server</rdfs:label>
+    <rdfs:isDefinedBy rdf:resource=""/>
     <rdfs:comment xml:lang="en">A configuration for a D2R Server installation.</rdfs:comment>
-    <rdfs:isDefinedBy rdf:resource="file:///home/christian/Desktop/d2rfix/d2r/d2r-trunk/doc/config.n3"/>
+    <rdfs:label xml:lang="en">Server</rdfs:label>
   </rdfs:Class>
-  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#vocabularyIncludeInstances">
-    <rdfs:label xml:lang="en">serve instance data for vocabulary resources</rdfs:label>
-    <rdfs:comment xml:lang="en">Whether views of vocabulary resources should include instance data.</rdfs:comment>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#autoReloadMapping">
+    <rdfs:isDefinedBy rdf:resource=""/>
     <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
-    <rdfs:isDefinedBy rdf:resource="file:///home/christian/Desktop/d2rfix/d2r/d2r-trunk/doc/config.n3"/>
-  </rdf:Property>
-  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#port">
-    <rdfs:label xml:lang="en">server port</rdfs:label>
-    <rdfs:comment xml:lang="en">The TCP port on which a D2R Server installation listens.</rdfs:comment>
-    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
-    <rdfs:isDefinedBy rdf:resource="file:///home/christian/Desktop/d2rfix/d2r/d2r-trunk/doc/config.n3"/>
-  </rdf:Property>
-  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#publishes">
-    <rdfs:label xml:lang="en">publishes</rdfs:label>
-    <rdfs:comment xml:lang="en">The D2RQ-mapped database that is published by a D2R Server installation.</rdfs:comment>
-    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
-    <rdfs:range rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
-    <rdfs:isDefinedBy rdf:resource="file:///home/christian/Desktop/d2rfix/d2r/d2r-trunk/doc/config.n3"/>
+    <rdfs:comment xml:lang="en">Whether D2R Server should check for an updated mapping file with every request.</rdfs:comment>
+    <rdfs:label xml:lang="en">automatically check for updated mapping file</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#baseURI">
-    <rdfs:label xml:lang="en">server base URI</rdfs:label>
-    <rdfs:comment xml:lang="en">Base URI for a D2R Server installation; the URI of the running server's start page.</rdfs:comment>
+    <rdfs:isDefinedBy rdf:resource=""/>
     <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
-    <rdfs:isDefinedBy rdf:resource="file:///home/christian/Desktop/d2rfix/d2r/d2r-trunk/doc/config.n3"/>
+    <rdfs:comment xml:lang="en">Base URI for a D2R Server installation; the URI of the running server's start page.</rdfs:comment>
+    <rdfs:label xml:lang="en">server base URI</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#vocabularyIncludeInstances">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">Whether views of vocabulary resources should include instance data.</rdfs:comment>
+    <rdfs:label xml:lang="en">serve instance data for vocabulary resources</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#documentMetadata">
-    <rdfs:label xml:lang="en">document metadata</rdfs:label>
-    <rdfs:comment xml:lang="en">A template resource whose properties will be attached as metadata to all RDF documents published by a D2R Server installation.</rdfs:comment>
+    <rdfs:isDefinedBy rdf:resource=""/>
     <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
-    <rdfs:isDefinedBy rdf:resource="file:///home/christian/Desktop/d2rfix/d2r/d2r-trunk/doc/config.n3"/>
+    <rdfs:comment xml:lang="en">A template resource whose properties will be attached as metadata to all RDF documents published by a D2R Server installation.</rdfs:comment>
+    <rdfs:label xml:lang="en">document metadata</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#port">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">The TCP port on which a D2R Server installation listens.</rdfs:comment>
+    <rdfs:label xml:lang="en">server port</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#publishes">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:range rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">The D2RQ-mapped database that is published by a D2R Server installation.</rdfs:comment>
+    <rdfs:label xml:lang="en">publishes</rdfs:label>
   </rdf:Property>
 </rdf:RDF>
-

@@ -52,6 +52,7 @@ public class ConfigLoader {
 	private String serverName = null;
 	private Resource documentMetadata = null;
 	private boolean vocabularyIncludeInstances = true;
+	private boolean autoReloadMapping = true;
 	
 	public ConfigLoader(String configURL) {
 		this.configURL = configURL;
@@ -99,7 +100,11 @@ public class ConfigLoader {
 		if (s != null) {
 			this.vocabularyIncludeInstances = s.getBoolean();
 		}		
-	}
+		s = server.getProperty(D2R.autoReloadMapping);
+		if (s != null) {
+			this.autoReloadMapping = s.getBoolean();
+		}	
+}
 	
 	public boolean isLocalMappingFile() {
 		return this.isLocalMappingFile;
@@ -139,6 +144,10 @@ public class ConfigLoader {
 	
 	public boolean getVocabularyIncludeInstances() {
 		return this.vocabularyIncludeInstances;
+	}
+	
+	public boolean getAutoReloadMapping() {
+		return this.autoReloadMapping;
 	}
 	
 	public void addDocumentMetadata(Model document, Resource documentResource) {
