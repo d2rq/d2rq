@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
  * back into Strings. All methods are static.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL.java,v 1.7 2009/02/15 01:13:35 fatorange Exp $
+ * @version $Id: SQL.java,v 1.8 2009/06/11 10:57:50 fatorange Exp $
  */
 public class SQL {
 	private static final java.util.regex.Pattern attributeRegexConservative = 
@@ -34,10 +34,10 @@ public class SQL {
 				"\\G[^']*?(?:'[^'\\\\]*?(?:\\\\.[^'\\\\]*?)*?'[^']*?)*?" +
 				// Optional schema name and dot, group 1 is schema name
 				"(?:([a-zA-Z_]\\w*)\\.)?" +
-				// Required table name and dot, group 2 is table name
-				"([a-zA-Z_]\\w*)\\." +
-				// Required column name, is group 3.
-				"([a-zA-Z_]\\w*)");
+				// Required table name and dot, group 2 is table name. Brackets are MS SQL Server delimiters
+				"(\\[?[a-zA-Z_][a-zA-Z_0-9-]*\\]?)\\." +
+				// Required column name , is group 3
+				"(\\w+)");
 	private static final java.util.regex.Pattern attributeRegexLax = 
 		java.util.regex.Pattern.compile(
 				// Optional schema name and dot, group 1 is schema name
