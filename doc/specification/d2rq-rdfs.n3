@@ -8,7 +8,7 @@
 
 # -----------------------------------------------
 #
-# D2RQ Language Specification V0.61
+# D2RQ Language Specification V0.6.1
 #
 # -----------------------------------------------
 
@@ -16,13 +16,13 @@
 # http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/
 
 <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1>
-   				rdfs:label       "D2RQ - Language Specification V0.61" ;
+   				rdfs:label       "D2RQ - Language Specification V0.6.11" ;
    				rdfs:comment     "This document specifies the D2RQ mapping language. D2RQ is a declarative language to describe mappings between relational database schemata and OWL/RDFS ontologies.  See D2RQ Users Manual for detailed explanations and examples (http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/)." ;
    				dc:creator       "Chris Bizer" ;
    				dc:creator       "Richard Cyganiak" ;
    				dc:date          "2006-08-12" ;
    				dc:format        "RDF";
-   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.22 2009/06/03 16:02:57 fatorange Exp $";
+   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.23 2009/06/11 09:47:32 fatorange Exp $";
    				.
 
 
@@ -81,6 +81,11 @@ d2rq:resultSizeLimit a rdf:Property;
 				rdfs:comment "Enforced upper limit for the size of SQL result sets.";
 				rdfs:domain d2rq:Database;
 				.
+d2rq:fetchSize	rdf:type rdf:Property ;
+				rdfs:label "fetch size" ;
+				rdfs:comment "The number of rows that should be fetched from the database at once" ; 
+	   			rdfs:domain d2rq:Database;
+       	     	.
 
 # -----------------------------------------------
 # Configuration

@@ -749,6 +749,12 @@ map:location a d2rq:PropertyBridge;
       results.</td>
   </tr>
   <tr> 
+    <td><strong>d2rq:fetchSize</strong></td>
+    <td>An integer value that specifies the number of rows to retrieve
+       with every database request, by default 500. Given adequate
+       memory resources, increasing this value may considerably improve dump performance.</td>
+  </tr>
+  <tr> 
     <td><strong>d2rq:allowDistinct</strong></td>
     <td>Specifies the databases ability to handle DISTINCT correctly. 
     Value: "true" or "false". For example MSAccess cuts fields longer than 256 chars.</td>
@@ -1630,7 +1636,7 @@ and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalprop
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.47 2009/06/03 17:01:06 fatorange Exp $</p>
+<p>$Id: index.htm,v 1.48 2009/06/11 09:47:32 fatorange Exp $</p>
 
 </BODY>
 </HTML>

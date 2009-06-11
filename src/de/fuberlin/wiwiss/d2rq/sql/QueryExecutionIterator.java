@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryExecutionIterator.java,v 1.10 2009/03/24 14:00:01 fatorange Exp $
+ * @version $Id: QueryExecutionIterator.java,v 1.11 2009/06/11 09:47:32 fatorange Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
 	public static Collection protocol=null;
@@ -136,7 +136,7 @@ public class QueryExecutionIterator implements ClosableIterator {
         try {
 			Connection con = this.database.connection();
 			this.statement = con.createStatement();
-			this.statement.setFetchSize(ConnectedDB.FETCH_SIZE);
+			this.statement.setFetchSize(database.fetchSize());
 			this.resultSet = this.statement.executeQuery(this.sql);
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {

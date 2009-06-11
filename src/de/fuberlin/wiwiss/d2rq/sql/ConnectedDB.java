@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.24 2009/06/10 20:46:48 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.25 2009/06/11 09:47:32 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -44,11 +44,6 @@ public class ConnectedDB {
 	public static final String KEEP_ALIVE_QUERY_PROPERTY = "keepAliveQuery"; // override default keep alive query
 	public static final String DEFAULT_KEEP_ALIVE_QUERY = "SELECT 1"; // may not work for some DBMS
 	
-	/**
-	 * How many rows the JDBC driver should retrieve at once 
-	 */
-	public static final int FETCH_SIZE = 500;
-	
 	private static final String ORACLE_SET_DATE_FORMAT = "ALTER SESSION SET NLS_DATE_FORMAT = 'SYYYY-MM-DD'";
 	private static final String ORACLE_SET_TIMESTAMP_FORMAT = "ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'SYYYY-MM-DD HH24:MI:SS'";
 
@@ -64,6 +59,7 @@ public class ConnectedDB {
 	private DatabaseSchemaInspector schemaInspector = null;
 	private String dbType = null;
 	private int limit;
+	private int fetchSize;
 	private Map zerofillCache = new HashMap(); // Attribute => Boolean
 	private final Properties connectionProperties;
 
@@ -120,12 +116,12 @@ public class ConnectedDB {
 	public ConnectedDB(String jdbcURL, String username, String password) {
 		this(jdbcURL, username, password, true,
 				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET, 
-				Collections.EMPTY_SET, Database.NO_LIMIT, null);
+				Collections.EMPTY_SET, Database.NO_LIMIT, Database.DEFAULT_FETCH_SIZE, null);
 	}
 	
 	public ConnectedDB(String jdbcURL, String username, String password,
 			boolean allowDistinct, Set textColumns, Set numericColumns, Set dateColumns,
-			Set timestampColumns, int limit, Properties connectionProperties) {
+			Set timestampColumns, int limit, int fetchSize, Properties connectionProperties) {
 		this.jdbcURL = jdbcURL;
 		this.allowDistinct = allowDistinct;
 		this.username = username;
@@ -135,6 +131,7 @@ public class ConnectedDB {
 		this.dateColumns = dateColumns;
 		this.timestampColumns = timestampColumns;
 		this.limit = limit;
+		this.fetchSize = fetchSize;
 		this.connectionProperties = connectionProperties;
 		
 		// create keep alive agent if enabled
@@ -167,6 +164,10 @@ public class ConnectedDB {
 		return this.limit;
 	}
 	
+	public int fetchSize() {
+		return this.fetchSize;
+	}
+
 	private void connect() {
 		try {
 			if (this.jdbcURL.contains(":oracle:")) {

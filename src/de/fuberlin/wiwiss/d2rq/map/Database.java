@@ -18,10 +18,11 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.19 2007/11/16 09:29:16 cyganiak Exp $
+ * @version $Id: Database.java,v 1.20 2009/06/11 09:47:32 fatorange Exp $
  */
 public class Database extends MapObject {
 	public static final int NO_LIMIT = -1;
+	public static final int DEFAULT_FETCH_SIZE = 500;	
 	
 	/**
 	 * Pre-registers a JDBC driver if its class can be found on the
@@ -75,6 +76,7 @@ public class Database extends MapObject {
 	private Set dateColumns = new HashSet();
 	private Set timestampColumns = new HashSet();
     private int limit = NO_LIMIT;
+    private int fetchSize = DEFAULT_FETCH_SIZE;
 	private boolean allowDistinct = true;
 	private ConnectedDB connection = null;
 	private Properties connectionProperties = new Properties();
@@ -137,6 +139,10 @@ public class Database extends MapObject {
 		this.limit = limit;
 	}
 	
+	public void setFetchSize(int fetchSize) {
+		this.fetchSize = fetchSize;
+	}
+		
 	public void setConnectionProperty(String key, String value) {
 		this.connectionProperties.setProperty(key, value);
 	}
@@ -159,7 +165,7 @@ public class Database extends MapObject {
 		}
 		this.connection = new ConnectedDB(url, this.username, this.password, this.allowDistinct,
 				this.textColumns, this.numericColumns, this.dateColumns, this.timestampColumns,
-				this.limit, this.connectionProperties);
+				this.limit, this.fetchSize, this.connectionProperties);
 		return this.connection;
 	}
 
