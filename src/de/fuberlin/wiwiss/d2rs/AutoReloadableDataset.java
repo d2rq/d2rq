@@ -41,6 +41,8 @@ public class AutoReloadableDataset implements Dataset {
 	/** (localFile) => auto-reloadable */
 	private boolean localFile;
 	
+	private Model defaultModel;
+	
 	public AutoReloadableDataset(String mappingFile, boolean localFile, D2RServer server) {
 		this.mappingFile = mappingFile;
 		this.localFile = localFile;	
@@ -80,6 +82,7 @@ public class AutoReloadableDataset implements Dataset {
 		graph.connect();
 		graph.initInventory(server.baseURI() + "all/");
 		this.datasetGraph = new D2RQDatasetGraph(graph);
+		this.defaultModel = ModelFactory.createModelForGraph(datasetGraph.getDefaultGraph());		
 		
 		if (localFile) {
 			this.lastModified = new File(this.mappingFile).lastModified();
@@ -116,7 +119,7 @@ public class AutoReloadableDataset implements Dataset {
 	public Model getDefaultModel() {
 		// check already done earlier, don't care
 		//checkMappingFileChanged();
-		return ModelFactory.createModelForGraph(datasetGraph.getDefaultGraph());
+		return defaultModel;
 	}
 
 	public boolean containsNamedModel(String uri) {

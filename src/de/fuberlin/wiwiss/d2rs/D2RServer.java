@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.24 2009/02/14 22:40:14 fatorange Exp $
+ * @version $Id: D2RServer.java,v 1.25 2009/06/12 14:21:23 fatorange Exp $
  */
 public class D2RServer {
 	private final static String SPARQL_SERVICE_NAME = "sparql";
@@ -218,7 +218,7 @@ public class D2RServer {
 		this.dataset.forceReload();
 		
 		DescribeHandlerRegistry.get().clear();
-		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory(this.dataset.getDefaultModel()));
+		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory());
 
 		Registry.add(RDFServer.ServiceRegistryName,
 				createJosekiServiceRegistry());
@@ -234,14 +234,9 @@ public class D2RServer {
 	}
 	
 	private class FindDescribeHandlerFactory implements DescribeHandlerFactory {
-		private final Model dataModel;
-		
-		FindDescribeHandlerFactory(Model dataModel) {
-			this.dataModel = dataModel;
-		}
 		
 		public DescribeHandler create() {
-			return new FindDescribeHandler(dataModel, D2RServer.this);
+			return new FindDescribeHandler(D2RServer.this);
 		}
 	}
 	
