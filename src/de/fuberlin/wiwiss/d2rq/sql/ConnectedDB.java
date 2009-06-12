@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.25 2009/06/11 09:47:32 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.26 2009/06/12 14:34:07 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -44,6 +44,11 @@ public class ConnectedDB {
 	public static final String KEEP_ALIVE_QUERY_PROPERTY = "keepAliveQuery"; // override default keep alive query
 	public static final String DEFAULT_KEEP_ALIVE_QUERY = "SELECT 1"; // may not work for some DBMS
 	
+	/* 
+	 * Backported java.sql types
+	 */
+	public final static int SQL_TYPE_NVARCHAR = -9;
+
 	private static final String ORACLE_SET_DATE_FORMAT = "ALTER SESSION SET NLS_DATE_FORMAT = 'SYYYY-MM-DD'";
 	private static final String ORACLE_SET_TIMESTAMP_FORMAT = "ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'SYYYY-MM-DD HH24:MI:SS'";
 
@@ -320,6 +325,7 @@ public class ConnectedDB {
 			// TODO There are a bunch of others, see http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Types.html
 			case Types.CHAR: return TEXT_COLUMN;
 			case Types.VARCHAR: return TEXT_COLUMN;
+			case ConnectedDB.SQL_TYPE_NVARCHAR: return TEXT_COLUMN;
 			case Types.LONGVARCHAR: return TEXT_COLUMN;
 			case Types.NUMERIC: return NUMERIC_COLUMN;
 			case Types.DECIMAL: return NUMERIC_COLUMN;

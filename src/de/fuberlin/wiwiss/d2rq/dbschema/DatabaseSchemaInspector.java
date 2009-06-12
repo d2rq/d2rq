@@ -22,12 +22,12 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.12 2009/02/06 12:31:44 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.13 2009/06/12 14:34:07 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
 	public static boolean isStringType(int columnType) {
-		return columnType == Types.CHAR || columnType == Types.VARCHAR || columnType == Types.LONGVARCHAR;
+		return columnType == Types.CHAR || columnType == Types.VARCHAR || columnType == ConnectedDB.SQL_TYPE_NVARCHAR || columnType == Types.LONGVARCHAR;
 	}
 
 	public static boolean isDateType(int columnType) {
@@ -54,6 +54,7 @@ public class DatabaseSchemaInspector {
 //		case Types.LONGVARBINARY: return "xsd:hexBinary";
 		case Types.LONGVARCHAR:   return "xsd:string";
 		case Types.NUMERIC:       return "xsd:decimal";
+		case ConnectedDB.SQL_TYPE_NVARCHAR:   return "xsd:string";
 		case Types.REAL:          return "xsd:float";
 //		case Types.REF:           return "xsd:IDREF";
 		case Types.SMALLINT:      return "xsd:short";
