@@ -41,7 +41,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.27 2009/02/19 01:12:49 fatorange Exp $
+ * @version $Id: MappingGenerator.java,v 1.28 2009/06/26 15:46:39 fatorange Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -53,6 +53,7 @@ public class MappingGenerator {
 	private String databaseUser = null;
 	private String databasePassword = null;
 	private PrintWriter out = null;
+	private PrintWriter err = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
 	private DatabaseSchemaInspector schema = null;
 	private String databaseType = null;
@@ -102,18 +103,26 @@ public class MappingGenerator {
 		this.driverClass = driverClassName;
 	}
 
-	public void writeMapping(OutputStream out) {
+	public void writeMapping(OutputStream out, OutputStream err) {
 		try {
 			Writer w = new OutputStreamWriter(out, "UTF-8");
-			writeMapping(w);
+			Writer e = (err != null) ? new OutputStreamWriter(err, "UTF-8") : null;
+			
+			writeMapping(w, e);
 			w.flush();
+			
+			if (e != null)
+				e.flush();
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 	
-	public void writeMapping(Writer out) {
+	public void writeMapping(Writer out, Writer err) {
 		this.out = new PrintWriter(out);
+		if (err != null)
+			this.err = new PrintWriter(err);
+		
 		if (this.schema == null) {
 			connectToDatabase();
 		}
@@ -123,17 +132,17 @@ public class MappingGenerator {
 		this.finished = true;
 	}
 
-	public Model vocabularyModel() {
+	public Model vocabularyModel(OutputStream err) {
 		if (!this.finished) {
 			StringWriter w = new StringWriter();
-			writeMapping(w);
+			writeMapping(w, err != null ? new PrintWriter(err) : null);
 		}
 		return this.vocabModel;
 	}
 	
-	public Model mappingModel(String baseURI) {
+	public Model mappingModel(String baseURI, OutputStream err) {
 		StringWriter w = new StringWriter();
-		writeMapping(w);
+		writeMapping(w, err != null ? new PrintWriter(err) : null);
 		String mappingAsN3 = w.toString();
 		Model result = ModelFactory.createDefaultModel();
 		result.read(new StringReader(mappingAsN3), baseURI, "N3");
@@ -185,9 +194,20 @@ public class MappingGenerator {
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
 		if (!hasPrimaryKey(tableName)) {
-			this.out.println("\t# Sorry, I don't know which columns to put into the uriPattern");
-			this.out.println("\t# because the table doesn't have a primary key");
+			String[] errorMessage = {
+				"Sorry, I don't know which columns to put into the uriPattern",
+				"for \"" + tableName + "\" because the table doesn't have a primary key.", 
+				"Please specify it manually." };
+			
+			for (int i=0; i<errorMessage.length; i++)
+				this.out.println("\t# " + errorMessage[i]);
+			
+			if (this.err != null) {
+				for (int i=0; i<errorMessage.length; i++)
+					this.err.println(errorMessage[i]);
+			}
 		}
+				
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
 		this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
 		this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");

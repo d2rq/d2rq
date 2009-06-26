@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
  * Command line interface for {@link MappingGenerator}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: generate_mapping.java,v 1.3 2009/02/19 01:12:49 fatorange Exp $
+ * @version $Id: generate_mapping.java,v 1.4 2009/06/26 15:46:39 fatorange Exp $
  */
 public class generate_mapping {
 	private final static String[] includedDrivers = {
@@ -77,7 +77,7 @@ public class generate_mapping {
 			PrintStream out = (outputFile == null)
 					? System.out
 					: new PrintStream(new FileOutputStream(outputFile));
-			gen.writeMapping(out);
+			gen.writeMapping(out, System.err);
 		} catch (IOException ex) {
 			System.err.println(ex.getMessage());
 			System.exit(1);

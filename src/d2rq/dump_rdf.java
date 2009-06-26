@@ -28,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
  * {@link MappingGenerator} or a mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: dump_rdf.java,v 1.8 2007/11/16 20:04:48 cyganiak Exp $
+ * @version $Id: dump_rdf.java,v 1.9 2009/06/26 15:46:39 fatorange Exp $
  */
 public class dump_rdf {
 	private final static String[] includedDrivers = {
@@ -216,7 +216,7 @@ public class dump_rdf {
 			gen.setMapNamespaceURI("file:tmp#");
 			gen.setInstanceNamespaceURI("");
 			gen.setVocabNamespaceURI("http://localhost/vocab/");
-			return gen.mappingModel(baseURI());
+			return gen.mappingModel(baseURI(), System.err);
 		}
 		private boolean hasMappingFile() {
 			return this.mapURL != null;

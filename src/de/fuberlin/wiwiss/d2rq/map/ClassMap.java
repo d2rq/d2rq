@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -12,7 +15,9 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.csv.TranslationTableParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.values.Pattern;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class ClassMap extends ResourceMap {
@@ -21,6 +26,7 @@ public class ClassMap extends ResourceMap {
 	private Collection classes = new ArrayList();
 	private Collection propertyBridges = new ArrayList();
 	private Collection compiledPropertyBridges = null;
+	private Log log = LogFactory.getLog(ClassMap.class);
 	
 	public ClassMap(Resource classMapResource) {
 		super(classMapResource, false);
@@ -71,6 +77,10 @@ public class ClassMap extends ResourceMap {
 			throw new D2RQException(
 					"d2rq:constantValue for class map " + toString() + " must be a URI or blank node", 
 					D2RQException.CLASSMAP_INVALID_CONSTANTVALUE);
+		}
+		if (this.uriPattern != null && new Pattern(uriPattern).attributes().size() == 0) {
+			this.log.warn(toString() + " has an uriPattern without any column specifications. This means that all table rows will be mapped to a single instance. " +
+					"If this is not what you want, please edit the mapping accordingly.");
 		}
 		Iterator it = this.propertyBridges.iterator();
 		while (it.hasNext()) {
