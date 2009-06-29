@@ -2,8 +2,10 @@ package de.fuberlin.wiwiss.d2rs;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.webapp.WebAppContext;
 
 /**
@@ -14,7 +16,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
  * parameters with values taken from the command line.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JettyLauncher.java,v 1.1 2007/11/02 14:46:25 cyganiak Exp $
+ * @version $Id: JettyLauncher.java,v 1.2 2009/06/29 11:44:41 fatorange Exp $
  */
 public class JettyLauncher {
 	public final static int DEFAULT_PORT = 2020;
@@ -47,6 +49,10 @@ public class JettyLauncher {
 	
 	public void start() {
 		Server jetty = new Server(getPort());
+		
+		// use Random (/dev/urandom) instead of SecureRandom to generate session keys - otherwise Jetty may hang during startup waiting for enough entropy
+		// see http://jira.codehaus.org/browse/JETTY-331 and http://docs.codehaus.org/display/JETTY/Connectors+slow+to+startup
+		jetty.setSessionIdManager(new HashSessionIdManager(new Random()));
 		WebAppContext context = new WebAppContext(jetty, "webapp", "");
 		context.setInitParams(getInitParams());
 		try {
