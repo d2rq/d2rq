@@ -17,12 +17,14 @@ import de.fuberlin.wiwiss.d2rq.optimizer.iterators.RelationToBindingsD2RQIterato
 
 public class OpD2RQ extends OpExt
 {
+	private static final String tagD2RQ = "d2rq"; 	
 	protected final OpBGP original;
 	protected final Relation relation;
 	protected final Collection bindingMakers;
 	
 	public OpD2RQ(OpBGP original, Relation relation, Collection bindingMakers) 
 	{
+		super(tagD2RQ);
 		this.original = original;
 		this.relation = relation;
 		this.bindingMakers = bindingMakers;
