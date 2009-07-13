@@ -366,10 +366,10 @@ mapping for the translation.</p>
 <pre>dump-rdf -m mapping.n3 [output parameters]</pre>
 
 <p>If no mapping file is provided, then the database connection must be
-specified on the command line. The meaning of all parameters is the
+specified on the command line. With the exception of <tt>fetchSize</tt>, the meaning of all parameters is the
 same as for the <a href="#generatemapping"><tt>generate-mapping</tt> script</a>.
 
-<pre>dump-rdf -u username [-p password] -d driverclass -j jdbcURL [output parameters]</pre>
+<pre>dump-rdf -u username [-p password] -d driverclass -j jdbcURL [-f fetchSize] [output parameters]</pre>
 
 <p>Several optional parameters control the RDF output:</p>
 
@@ -378,6 +378,11 @@ same as for the <a href="#generatemapping"><tt>generate-mapping</tt> script</a>.
 <dd>The RDF syntax to use for output. Supported syntaxes are "RDF/XML" (the default),
   "RDF/XML-ABBREV", "N3", "N-TRIPLE". "N-TRIPLE" works best for large 
   databases.</dd>
+  
+<dt>-s fetchSize</dt>
+<dd>The number of rows to retrieve with every database request. This value is particularily important to control memory resources of both the D2RQ and the database server when performing dumps. <tt>dump-rdf</tt> sets this value to 500 by default, or to <tt>Integer.MIN_VALUE</tt> for MySQL in order to enable <a href="http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-implementation-notes.html">streaming mode</a>.
+This value may alternatively be specified in the mapping using <a href="#database">d2rq:fetchSize</a>.
+</dd>  
 
 <dt>-b baseURI</dt>
 <dd>A base URI for resolving relative URI patterns.</dd>
@@ -751,8 +756,10 @@ map:location a d2rq:PropertyBridge;
   <tr> 
     <td><strong>d2rq:fetchSize</strong></td>
     <td>An integer value that specifies the number of rows to retrieve
-       with every database request, by default 500. Given adequate
-       memory resources, increasing this value may considerably improve dump performance.</td>
+       with every database request. This value is particularily important to control memory resources
+       of both the D2RQ and the database server when performing dumps.
+       <tt>dump-rdf</tt> sets this value to 500 by default, or to <tt>Integer.MIN_VALUE</tt> for MySQL in order to
+       enable <a href="http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-implementation-notes.html">streaming mode</a>.</td>
   </tr>
   <tr> 
     <td><strong>d2rq:allowDistinct</strong></td>
@@ -1636,7 +1643,7 @@ and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalprop
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.48 2009/06/11 09:47:32 fatorange Exp $</p>
+<p>$Id: index.htm,v 1.49 2009/07/13 15:38:56 fatorange Exp $</p>
 
 </BODY>
 </HTML>

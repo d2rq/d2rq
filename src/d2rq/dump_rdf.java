@@ -22,18 +22,21 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * Command line utility for dumping a database to RDF, using the
  * {@link MappingGenerator} or a mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: dump_rdf.java,v 1.9 2009/06/26 15:46:39 fatorange Exp $
+ * @version $Id: dump_rdf.java,v 1.10 2009/07/13 15:38:56 fatorange Exp $
  */
 public class dump_rdf {
 	private final static String[] includedDrivers = {
 			"com.mysql.jdbc.Driver"
 	};
+	
+	private final static int DEFAULT_DUMP_FETCH_SIZE = 500;
 	
 	public static void main(String[] args) {
 		for (int i = 0; i < includedDrivers.length; i++) {
@@ -44,6 +47,7 @@ public class dump_rdf {
 		ArgDecl passArg = new ArgDecl(true, "p", "pass", "password");
 		ArgDecl driverArg = new ArgDecl(true, "d", "driver");
 		ArgDecl jdbcArg = new ArgDecl(true, "j", "jdbc");
+		ArgDecl fetchsizeArg = new ArgDecl(true, "s", "fetchsize");
 		ArgDecl mapArg = new ArgDecl(true, "m", "map", "mapping");
 		ArgDecl baseArg = new ArgDecl(true, "b", "base");
 		ArgDecl formatArg = new ArgDecl(true, "f", "format");
@@ -52,6 +56,7 @@ public class dump_rdf {
 		cmd.add(passArg);
 		cmd.add(driverArg);
 		cmd.add(jdbcArg);
+		cmd.add(fetchsizeArg);
 		cmd.add(mapArg);
 		cmd.add(baseArg);
 		cmd.add(formatArg);
@@ -70,6 +75,9 @@ public class dump_rdf {
 		}
 		if (cmd.contains(jdbcArg)) {
 			dump.setJDBCURL(cmd.getArg(jdbcArg).getValue());
+		}
+		if (cmd.contains(fetchsizeArg)) {
+			dump.setFetchSize(Integer.parseInt(cmd.getArg(fetchsizeArg).getValue()));
 		}
 		if (cmd.contains(mapArg)) {
 			dump.setMapURL(cmd.getArg(mapArg).getValue());
@@ -113,6 +121,7 @@ public class dump_rdf {
 		System.out.println("    -p password     Database password for connecting to the DB");
 		System.out.println("    -d driverclass  Java class name of the JDBC driver for the DB");
 		System.out.println("    -j jdbcURL      JDBC URL for the DB, e.g. jdbc:mysql://localhost/dbname");
+		System.out.println("    -s fetchSize    JDBC fetch size. Defaults to " + DEFAULT_DUMP_FETCH_SIZE + " or for MySQL, to Integer.MIN_VALUE for streaming mode");
 		System.out.println();
 		System.out.println("  RDF output parameters");
 		System.out.println("    -m mapURL       URL of a D2RQ mapping file (optional)");
@@ -131,6 +140,8 @@ public class dump_rdf {
 		private String baseURI = null;
 		private String format = "N-TRIPLE";
 		private String outputFile = null;
+		private Integer fetchSize = null;
+		
 		private boolean hasParameter = false;
 		void setUser(String user) {
 			this.user = user;
@@ -146,6 +157,10 @@ public class dump_rdf {
 		}
 		void setJDBCURL(String jdbcURL) {
 			this.jdbcURL = jdbcURL;
+			this.hasParameter = true;
+		}
+		void setFetchSize(Integer fetchSize) {
+			this.fetchSize = fetchSize;
 			this.hasParameter = true;
 		}
 		void setMapURL(String mapURL) {
@@ -170,13 +185,20 @@ public class dump_rdf {
 		void doDump() throws DumpParameterException {
 			Model mapModel = makeMapModel();
 			
-			// Override the d2rq:resultSizeLimit given in the mapping
+			// Override the d2rq:resultSizeLimit given in the mapping and set fetchSize
 			Mapping mapping = new MapParser(mapModel, baseURI()).parse();
 			Iterator it = mapping.databases().iterator();
 			while (it.hasNext()) {
 				Database db = (Database) it.next();
 				db.setResultSizeLimit(Database.NO_LIMIT);
-			}
+				if (this.fetchSize != null)
+					db.setFetchSize(this.fetchSize);
+				else {
+					/* Supply useful fetch sizes if none set so far */
+					if (db.getFetchSize() == Database.NO_FETCH_SIZE)
+						db.setFetchSize(db.connectedDB().dbTypeIs(ConnectedDB.MySQL) ? Integer.MIN_VALUE : DEFAULT_DUMP_FETCH_SIZE);
+				}
+			}		
 			
 			Model d2rqModel = new ModelD2RQ(mapping);
 			String absoluteBaseURI = MapParser.absolutizeURI(baseURI());

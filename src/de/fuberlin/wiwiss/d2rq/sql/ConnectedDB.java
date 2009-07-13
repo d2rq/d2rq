@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.26 2009/06/12 14:34:07 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.27 2009/07/13 15:38:56 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -121,7 +121,7 @@ public class ConnectedDB {
 	public ConnectedDB(String jdbcURL, String username, String password) {
 		this(jdbcURL, username, password, true,
 				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET, 
-				Collections.EMPTY_SET, Database.NO_LIMIT, Database.DEFAULT_FETCH_SIZE, null);
+				Collections.EMPTY_SET, Database.NO_LIMIT, Database.NO_FETCH_SIZE, null);
 	}
 	
 	public ConnectedDB(String jdbcURL, String username, String password,

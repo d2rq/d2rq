@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * Executes an SQL query and delivers result rows as an iterator over {@link ResultRow}s.
@@ -20,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryExecutionIterator.java,v 1.11 2009/06/11 09:47:32 fatorange Exp $
+ * @version $Id: QueryExecutionIterator.java,v 1.12 2009/07/13 15:38:56 fatorange Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
 	public static Collection protocol=null;
@@ -135,8 +136,9 @@ public class QueryExecutionIterator implements ClosableIterator {
     	    protocol.add(this.sql);
         try {
 			Connection con = this.database.connection();
-			this.statement = con.createStatement();
-			this.statement.setFetchSize(database.fetchSize());
+			this.statement = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			if (database.fetchSize() != Database.NO_FETCH_SIZE)
+				this.statement.setFetchSize(database.fetchSize());
 			this.resultSet = this.statement.executeQuery(this.sql);
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {
