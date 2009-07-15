@@ -42,7 +42,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.29 2009/07/15 10:16:30 fatorange Exp $
+ * @version $Id: MappingGenerator.java,v 1.30 2009/07/15 11:30:09 fatorange Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -214,7 +214,7 @@ public class MappingGenerator {
 		this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
 		this.out.println("\t.");
 		writeLabelBridge(tableName);
-		List foreignKeys = this.schema.foreignKeys(tableName);
+		List foreignKeys = this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		Iterator it = this.schema.listColumns(tableName).iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
@@ -303,7 +303,7 @@ public class MappingGenerator {
 	}
 	
 	private void writeLinkTable(RelationName linkTableName) {
-		List foreignKeys = this.schema.foreignKeys(linkTableName);
+		List foreignKeys = this.schema.foreignKeys(linkTableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		Join join1 = (Join) foreignKeys.get(0);
 		Join join2 = (Join) foreignKeys.get(1);
 		RelationName table1 = join1.table2();
@@ -439,7 +439,7 @@ public class MappingGenerator {
 			if (!this.schema.isLinkTable(tableName)) {
 				continue;
 			}
-			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName).get(0);
+			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED).get(0);
 			this.linkTables.put(tableName, firstForeignKey.table2());
 		}
 	}

@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.14 2009/07/15 10:16:31 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.15 2009/07/15 11:30:12 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -72,6 +72,9 @@ public class DatabaseSchemaInspector {
 	private DatabaseMetaData schema;
 	private Map cachedColumnTypes = new HashMap();
 	private Map cachedColumnNullability = new HashMap();
+	
+	public static final int KEYS_IMPORTED = 0;
+	public static final int KEYS_EXPORTED = 1;
 	
 	public DatabaseSchemaInspector(ConnectedDB db) {
 		try {
@@ -212,15 +215,17 @@ public class DatabaseSchemaInspector {
 	}
 	
 	/**
-	 * Returns the foreign keys defined for a table.
-	 * @param tableName The table whose foreign keys we want
+	 * Returns a list of imported or exported (foreign) keys for a table.
+	 * @param tableName The table we are interested in
+	 * @param direction If set to {@link KEYS_IMPORTED}, the table's foreign keys are returned.
+	 * 					If set to {@link KEYS_EXPORTED}, the table's primary keys referenced from other tables are returned.
 	 * @return A list of {@link Join}s; the local columns are in attributes1() 
 	 */
-	public List foreignKeys(RelationName tableName) {
+	public List foreignKeys(RelationName tableName, int direction) {
 		try {
 			Map fks = new HashMap();
-			ResultSet rs = this.schema.getImportedKeys(
-					null, schemaName(tableName), tableName(tableName));
+			ResultSet rs = (direction == KEYS_IMPORTED ? this.schema.getImportedKeys(null, schemaName(tableName), tableName(tableName))
+													   : this.schema.getExportedKeys(null, schemaName(tableName), tableName(tableName)));
 			while (rs.next()) {
 				RelationName pkTable = toRelationName(
 						rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
@@ -247,7 +252,7 @@ public class DatabaseSchemaInspector {
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
 		}
-	}
+	}	
 
 	/**
 	 * A table T is considered to be a link table if it has exactly two
@@ -257,8 +262,12 @@ public class DatabaseSchemaInspector {
 	 * TODO: Should check that the table is not referenced by foreign keys from other tables
 	 */
 	public boolean isLinkTable(RelationName tableName) {
-		List foreignKeys = foreignKeys(tableName);
+		List foreignKeys = foreignKeys(tableName, KEYS_IMPORTED);
 		if (foreignKeys.size() != 2) return false;
+		
+		List exportedKeys = foreignKeys(tableName, KEYS_EXPORTED);
+		if (!exportedKeys.isEmpty()) return false;
+		
 		List columns = listColumns(tableName);
 		Iterator it = foreignKeys.iterator();
 		while (it.hasNext()) {
