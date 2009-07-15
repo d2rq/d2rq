@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.27 2009/07/13 15:38:56 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.28 2009/07/15 10:16:30 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -481,6 +481,21 @@ public class ConnectedDB {
 	 */
 	public boolean allowDistinct() {
 		return this.allowDistinct;
+	}
+	
+	/**
+	 * In some situations, MySQL stores table names using lowercase only, and then performs
+	 * case-insensitive comparison.
+	 * We need to account for this when comparing table names reported by MySQL and those from the mapping.   
+	 * 
+	 * @see http://dev.mysql.com/doc/refman/5.0/en/identifier-case-sensitivity.html
+	 */
+	public boolean lowerCaseTableNames() {
+		Connection c = connection();
+		if (c instanceof com.mysql.jdbc.ConnectionImpl)
+			return ((com.mysql.jdbc.ConnectionImpl)c).lowerCaseTableNames();
+		else
+			return false;
 	}
 
 	public void close() {

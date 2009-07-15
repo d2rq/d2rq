@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.13 2009/06/12 14:34:07 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.14 2009/07/15 10:16:31 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -284,12 +284,12 @@ public class DatabaseSchemaInspector {
 	private RelationName toRelationName(String schema, String table) {
 		if (schema == null) {
 			// Table without schema
-			return new RelationName(null, table);
+			return new RelationName(null, table, db.lowerCaseTableNames());
 		} else if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) && "public".equals(schema)) {
 			// Table in PostgreSQL default schema -- call the table "foo", not "public.foo"
-			return new RelationName(null, table);
+			return new RelationName(null, table, db.lowerCaseTableNames());
 		}
-		return new RelationName(schema, table);
+		return new RelationName(schema, table, db.lowerCaseTableNames());
 	}
 
 	/**

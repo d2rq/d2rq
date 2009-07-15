@@ -34,6 +34,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * Generates a D2RQ mapping by introspecting a database schema.
@@ -41,7 +42,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.28 2009/06/26 15:46:39 fatorange Exp $
+ * @version $Id: MappingGenerator.java,v 1.29 2009/07/15 10:16:30 fatorange Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -181,7 +182,7 @@ public class MappingGenerator {
 		if (this.databasePassword != null) {
 			this.out.println("\td2rq:password \"" + this.databasePassword + "\";");
 		}
-		if ("MySQL".equals(this.databaseType)) {
+		if (ConnectedDB.MySQL.equals(this.databaseType)) {
 			this.out.println("\tjdbc:autoReconnect \"true\";");
 			this.out.println("\tjdbc:zeroDateTimeBehavior \"convertToNull\";");
 		}

@@ -8,19 +8,21 @@ package de.fuberlin.wiwiss.d2rq.algebra;
  *       if the databases are not equal. (?)
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RelationName.java,v 1.3 2008/04/26 22:16:07 cyganiak Exp $
+ * @version $Id: RelationName.java,v 1.4 2009/07/15 10:16:30 fatorange Exp $
  */
 public class RelationName implements Comparable {
 	private String schemaName;
 	private String tableName;
 	private String qualifiedName;
+	private boolean caseUnspecified;
 	
 	/**
 	 * Constructs a new relation name.
 	 * @param schemaName The schema name, or <tt>null</tt> if none
 	 * @param tableName The table name
+	 * @param caseInsensitive Whether the case is unspecified, i.e. comparisons on this relation name need to be case-insensitive
 	 */
-	public RelationName(String schemaName, String tableName) {
+	public RelationName(String schemaName, String tableName, boolean caseUnspecified) {
 		this.schemaName = schemaName;
 		this.tableName = tableName;
 		if (this.schemaName == null) {
@@ -28,7 +30,17 @@ public class RelationName implements Comparable {
 		} else {
 			this.qualifiedName = schemaName + "." + tableName;
 		}
+		this.caseUnspecified = caseUnspecified;
 	}
+	
+	/**
+	 * Constructs a new relation name with specified case.
+	 * @param schemaName The schema name, or <tt>null</tt> if none
+	 * @param tableName The table name
+	 */
+	public RelationName(String schemaName, String tableName) {
+		this(schemaName, tableName, false);
+	}	
 	
 	/**
 	 * @return The table name
@@ -53,6 +65,10 @@ public class RelationName implements Comparable {
 		return this.qualifiedName;
 	}
 	
+	public boolean caseUnspecified() {
+		return this.caseUnspecified;
+	}
+	
 	public int hashCode() {
 		return this.qualifiedName.hashCode();
 	}
@@ -67,9 +83,13 @@ public class RelationName implements Comparable {
 			return false;
 		}
 		RelationName other = (RelationName) otherObject;
-		return this.qualifiedName.equals(other.qualifiedName);
+		
+		if (this.caseUnspecified || other.caseUnspecified)
+			return this.qualifiedName.equalsIgnoreCase(other.qualifiedName);
+		else
+			return this.qualifiedName.equals(other.qualifiedName);
 	}
-	
+
 	public String toString() {
 		return this.qualifiedName;
 	}
@@ -93,11 +113,12 @@ public class RelationName implements Comparable {
 		if (other.schemaName == null) {
 			return 1;
 		}
-		int compareSchemas = this.schemaName.compareTo(other.schemaName);
+		boolean caseUnspecified = this.caseUnspecified || other.caseUnspecified;
+		int compareSchemas = caseUnspecified ? this.schemaName.compareToIgnoreCase(other.schemaName) : this.schemaName.compareTo(other.schemaName);
 		if (compareSchemas != 0) {
 			return compareSchemas;
 		}
-		return this.tableName.compareTo(other.tableName);
+		return (caseUnspecified ? this.tableName.compareToIgnoreCase(other.tableName) : this.tableName.compareTo(other.tableName));
 	}
 	
 	public RelationName withPrefix(int index) {
