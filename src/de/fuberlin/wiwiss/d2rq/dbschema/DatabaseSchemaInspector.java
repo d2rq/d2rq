@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.16 2009/07/15 12:14:01 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.17 2009/07/15 14:53:55 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -258,8 +258,6 @@ public class DatabaseSchemaInspector {
 	 * A table T is considered to be a link table if it has exactly two
 	 * foreign key constraints, and the constraints reference other
 	 * tables (not T), and the constraints cover all columns of T.
-	 * 
-	 * TODO: Should check that the table is not referenced by foreign keys from other tables
 	 */
 	public boolean isLinkTable(RelationName tableName) {
 		List foreignKeys = foreignKeys(tableName, KEYS_IMPORTED);
