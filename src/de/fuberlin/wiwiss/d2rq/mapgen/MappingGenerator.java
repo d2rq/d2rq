@@ -42,7 +42,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.30 2009/07/15 11:30:09 fatorange Exp $
+ * @version $Id: MappingGenerator.java,v 1.31 2009/07/15 12:14:00 fatorange Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -270,13 +270,13 @@ public class MappingGenerator {
 	}
 
 	public void writeForeignKey(Join foreignKey) {
-		RelationName primaryTable = foreignKey.table1();
+		RelationName primaryTable = schema.getCorrectCapitalization(foreignKey.table1());
 		List primaryColumns = foreignKey.attributes1();
-		RelationName foreignTable = foreignKey.table2();
+		RelationName foreignTable = schema.getCorrectCapitalization(foreignKey.table2());
 		this.out.println(propertyBridgeName(toRelationName(primaryColumns)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(primaryTable) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(primaryColumns) + ";");
-		this.out.println("\td2rq:refersToClassMap " + classMapName(foreignKey.table2()) + ";");
+		this.out.println("\td2rq:refersToClassMap " + classMapName(foreignTable) + ";");
 		AliasMap alias = AliasMap.NO_ALIASES;
 		// Same-table join? Then we need to set up an alias for the table and join to that
 		if (foreignKey.isSameTable()) {
@@ -306,8 +306,8 @@ public class MappingGenerator {
 		List foreignKeys = this.schema.foreignKeys(linkTableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		Join join1 = (Join) foreignKeys.get(0);
 		Join join2 = (Join) foreignKeys.get(1);
-		RelationName table1 = join1.table2();
-		RelationName table2 = join2.table2();
+		RelationName table1 = this.schema.getCorrectCapitalization(join1.table2());
+		RelationName table2 = this.schema.getCorrectCapitalization(join2.table2());
 		boolean isSelfJoin = table1.equals(table2);
 		this.out.println("# n:m table " + linkTableName + (isSelfJoin ? " (self-join)" : ""));
 		this.out.println(propertyBridgeName(linkTableName.qualifiedName()) + " a d2rq:PropertyBridge;");
@@ -491,8 +491,8 @@ public class MappingGenerator {
 		r.addProperty(RDF.type, RDF.Property);
 		r.addProperty(RDF.type, OWL.ObjectProperty);
 		r.addProperty(RDFS.label, toRelationName(join.attributes1()));
-		r.addProperty(RDFS.domain, classResource(join.table1()));
-		r.addProperty(RDFS.range, classResource(join.table2()));
+		r.addProperty(RDFS.domain, classResource(schema.getCorrectCapitalization(join.table1())));
+		r.addProperty(RDFS.range, classResource(schema.getCorrectCapitalization(join.table2())));
 		r.addProperty(RDFS.isDefinedBy, ontologyResource());		
 	}
 	

@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.15 2009/07/15 11:30:12 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.16 2009/07/15 12:14:01 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -318,5 +318,25 @@ public class DatabaseSchemaInspector {
 					new ArrayList(foreignColumns.values()),
 					new ArrayList(primaryColumns.values()));
 		}
+	}
+
+	/**
+	 * Looks up a RelationName with the schema in order to retrieve the correct capitalization
+	 * 
+	 * @param tableName
+	 * @return
+	 */
+	public RelationName getCorrectCapitalization(RelationName relationName) {
+		if (!relationName.caseUnspecified() || !db.lowerCaseTableNames())
+			return relationName;
+		
+		List tables = listTableNames();
+		Iterator it = tables.iterator();
+		while (it.hasNext()) {
+			RelationName r = (RelationName) it.next();
+			if (r.equals(relationName))
+				return r;
+		}
+		return null;
 	}
 }
