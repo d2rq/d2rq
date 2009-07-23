@@ -1,5 +1,13 @@
 var snorql = new Snorql();
 
+String.prototype.trim = function () {
+    return this.replace(/^\s*/, "").replace(/\s*$/, "");
+}
+
+String.prototype.startsWith = function(str) {
+	return (this.match("^"+str) == str);
+}
+
 function Snorql() {
     this._endpoint = document.location.href.match(/^([^?]*)snorql\//)[1] + 'sparql';
     this._poweredByLink = 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/';
@@ -91,12 +99,29 @@ function Snorql() {
         if (this._graph) {
             service.addDefaultGraph(this._graph);
         }
-        service.setRequestHeader('Accept', 'application/sparql-results+json,*/*');
+
+        // AndyL changed MIME type and success callback depending on query form...
         var dummy = this;
+        if (querytext.trim().toLowerCase().startsWith('select')) {
+        	service.setRequestHeader('Accept', 'application/sparql-results+json,*/*');
+        	service.setOutput('json');
+        	var successFunc = function(json) {
+                dummy.displayJSONResult(json, resultTitle);
+            };
+        } else if (querytext.trim().toLowerCase().startsWith('ask')) {
+        	service.setOutput('boolean');
+        	var successFunc = function(value) {
+                dummy.displayBooleanResult(value, resultTitle);
+            };
+        } else { // construct describe
+    		service.setOutput('rdf'); // !json
+    		var successFunc = function(model) {
+                dummy.displayRDFResult(model, resultTitle);
+            };
+        }
+        
         service.query(query, {
-            success: function(json) {
-                dummy.displayResult(json, resultTitle);
-            },
+            success: successFunc,
             failure: function(report) {
                 var message = report.responseText.match(/<pre>([\s\S]*)<\/pre>/);
                 if (message) {
@@ -222,7 +247,30 @@ function Snorql() {
         this._display(pre, 'result');
     }
 
-    this.displayResult = function(json, resultTitle) {
+    this.displayBooleanResult = function(value, resultTitle) {
+        var div = document.createElement('div');
+        var title = document.createElement('h2');
+        title.appendChild(document.createTextNode(resultTitle));
+        div.appendChild(title);
+        if (value)
+        	div.appendChild(document.createTextNode("TRUE"));
+        else
+        	div.appendChild(document.createTextNode("FALSE"));
+        this._display(div, 'result');
+        this._updateGraph(this._graph); // refresh links in new result
+    }
+    
+    this.displayRDFResult = function(model, resultTitle) {
+        var div = document.createElement('div');
+        var title = document.createElement('h2');
+        title.appendChild(document.createTextNode(resultTitle));
+        div.appendChild(title);
+        div.appendChild(new RDFXMLFormatter(model));
+        this._display(div, 'result');
+        this._updateGraph(this._graph); // refresh links in new result - necessary for boolean?
+    }
+    
+    this.displayJSONResult = function(json, resultTitle) {
         var div = document.createElement('div');
         var title = document.createElement('h2');
         title.appendChild(document.createTextNode(resultTitle));
@@ -268,6 +316,18 @@ function Snorql() {
     this._betterUnescape = function(s) {
         return unescape(s.replace(/\+/g, ' '));
     }
+}
+
+
+/*
+ * RDFXMLFormatter
+ * 
+ * could be improved...
+ */
+function RDFXMLFormatter(string) {
+	var pre = document.createElement('pre');
+	pre.appendChild(document.createTextNode(string));
+	return pre;
 }
 
 /*

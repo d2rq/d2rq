@@ -337,7 +337,7 @@ SPARQL.Query = function(service, priority) {
 					alert("Cross-site requests prohibited. You will only be able to SPARQL the origin site: " + e);
                     return;
 				}
-				
+
 				xhr.open(_method, url, true /* async */);
 				
 				// set the headers, including the content-type for POSTed queries
@@ -353,7 +353,7 @@ SPARQL.Query = function(service, priority) {
 				_service._markRunning(this);
 	
 				var callbackData = {
-					scope:this, 
+					scope: this, 
 					success: this._querySuccess, 
 					failure: this._queryFailure,
 					argument: {
