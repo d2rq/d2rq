@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.find.TripleMaker;
  * TODO: groupNodeRelations and groupTripleRelations are virtually identical
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: CompatibleRelationGroup.java,v 1.2 2009/02/06 13:59:02 fatorange Exp $
+ * @version $Id: CompatibleRelationGroup.java,v 1.3 2009/07/29 12:03:53 fatorange Exp $
  */
 public class CompatibleRelationGroup {
 
@@ -140,7 +140,7 @@ public class CompatibleRelationGroup {
 		}
 		return new RelationImpl(firstBaseRelation.database(), firstBaseRelation.aliases(),
 				firstBaseRelation.condition(), firstBaseRelation.joinConditions(), 
-				projections, allUnique);
+				projections, allUnique, firstBaseRelation.order(), firstBaseRelation.orderDesc(), firstBaseRelation.limit(), firstBaseRelation.limitInverse());
 	}
 	
 	public Collection tripleMakers() {

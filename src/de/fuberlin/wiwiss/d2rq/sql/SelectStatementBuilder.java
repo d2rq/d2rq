@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.29 2009/03/26 11:01:41 dorgon Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.30 2009/07/29 12:03:53 fatorange Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -34,6 +34,9 @@ public class SelectStatementBuilder {
 	private AliasMap aliases = AliasMap.NO_ALIASES;
 	private Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
 	private StringBuffer leftJoinExpression = new StringBuffer();
+	private Attribute order;
+	private boolean orderDesc;
+	private int limit;
 	
 	public SelectStatementBuilder(Relation relation) {
 		if (relation.isTrivial()) {
@@ -62,6 +65,10 @@ public class SelectStatementBuilder {
 		eliminateDuplicates = !relation.isUnique();
 	
 		addMentionedTablesFromConditions();
+
+		this.limit = relation.limit();
+		this.order = relation.order();
+		this.orderDesc = relation.orderDesc();
 	}
 	
 	private Expression condition() {
@@ -84,8 +91,10 @@ public class SelectStatementBuilder {
 		
 		StringBuffer result = new StringBuffer("SELECT ");
 		
-		if (this.database.dbTypeIs(ConnectedDB.MSSQL) && this.database.limit() != Database.NO_LIMIT) {
-			result.append("TOP " + this.database.limit() + " ");
+		int combinedLimit = Relation.combineLimits(limit, database.limit());
+		
+		if (this.database.dbTypeIs(ConnectedDB.MSSQL) && combinedLimit != Database.NO_LIMIT) {
+			result.append("TOP " + combinedLimit + " ");
 		}
 		if (this.eliminateDuplicates && database.allowDistinct()) {
 			result.append("DISTINCT ");
@@ -127,14 +136,21 @@ public class SelectStatementBuilder {
 			result.append(condition().toSQL(this.database, this.aliases));
 		}
 
-		if (this.database.dbTypeIs(ConnectedDB.Oracle) && this.database.limit() != Database.NO_LIMIT) {
-			result.append((condition().isTrue() ? " WHERE " : " AND ") + " ROWNUM <= " + this.database.limit());
+		if (this.database.dbTypeIs(ConnectedDB.Oracle) && combinedLimit != Database.NO_LIMIT) {
+			result.append((condition().isTrue() ? " WHERE " : " AND ") + " ROWNUM <= " + combinedLimit);
 		}
 
-		if ((this.database.dbTypeIs(ConnectedDB.MySQL) || this.database.dbTypeIs(ConnectedDB.PostgreSQL)) && this.database.limit() != Database.NO_LIMIT) {
-			result.append(" LIMIT " + this.database.limit());
+		if (order!=null) {
+			result.append(" ORDER BY " + order.toSQL(database, aliases) + " ");
+			if(orderDesc) {
+				result.append("DESC ");
+			}
 		}
 		
+		if ((this.database.dbTypeIs(ConnectedDB.MySQL) || this.database.dbTypeIs(ConnectedDB.PostgreSQL)) && combinedLimit != Database.NO_LIMIT) {
+			result.append(" LIMIT " + combinedLimit);
+		}
+						
 		return result.toString();
 	}
 	

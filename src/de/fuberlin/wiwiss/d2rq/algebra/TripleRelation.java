@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TripleRelation.java,v 1.10 2008/08/13 11:27:38 cyganiak Exp $
+ * @version $Id: TripleRelation.java,v 1.11 2009/07/29 12:03:53 fatorange Exp $
  */
 public class TripleRelation {
 	public static final String SUBJECT = "subject";
@@ -86,6 +86,9 @@ public class TripleRelation {
 		projections.addAll(p.projectionSpecs());
 		projections.addAll(o.projectionSpecs());
 		newBase.project(projections);
+		if (!s.projectionSpecs().isEmpty() && o.projectionSpecs().isEmpty()) {
+		    newBase.swapLimits();
+		}
 		return new TripleRelation(newBase.immutableSnapshot(), s, p, o);
 	}
 

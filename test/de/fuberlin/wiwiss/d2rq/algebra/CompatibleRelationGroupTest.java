@@ -17,10 +17,10 @@ public class CompatibleRelationGroupTest extends TestCase {
 		Set projections2 = Collections.singleton(new Attribute(null, "table", "not_unique"));
 		RelationImpl unique = new RelationImpl(
 				new DummyDB(), AliasMap.NO_ALIASES, Expression.TRUE, Collections.EMPTY_SET, 
-				projections1, true);
+				projections1, true, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
 		RelationImpl notUnique = new RelationImpl(
 				new DummyDB(), AliasMap.NO_ALIASES, Expression.TRUE, Collections.EMPTY_SET, 
-				projections2, false);
+				projections2, false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
 		assertTrue(new CompatibleRelationGroup(unique).isCompatible(unique));
 		assertFalse(new CompatibleRelationGroup(unique).isCompatible(notUnique));
 		assertFalse(new CompatibleRelationGroup(notUnique).isCompatible(unique));

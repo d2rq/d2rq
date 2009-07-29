@@ -11,6 +11,7 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Triple;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
@@ -107,17 +108,26 @@ public class TripleRelationJoiner {
 		expressions.add(additionalCondition);
 		Set joins = new HashSet();
 		Set projections = new HashSet();
+		int limit = Relation.NO_LIMIT;
+		int limitInverse = Relation.NO_LIMIT;
+		Attribute order = null;
+		boolean orderDesc = false;
+		
 		while (it.hasNext()) {
 			Relation relation = (Relation) it.next();
 			joinedAliases = joinedAliases.applyTo(relation.aliases());
 			expressions.add(relation.condition());
 			joins.addAll(relation.joinConditions());
 			projections.addAll(relation.projections());
+			orderDesc = order==null?relation.orderDesc():orderDesc;
+			order = order==null?relation.order():order;
+			limit = Relation.combineLimits(limit, relation.limit());
+			limitInverse = Relation.combineLimits(limitInverse, relation.limitInverse());
 		}
 		// TODO: @@@ Figure out uniqueness instead of just false
 		// I think the new relation is unique if it is joined only on unique node sets.
 		// A node set is unique if it is constrained by only unique node makers.
 		return new RelationImpl(connectedDB, joinedAliases, Conjunction.create(expressions), 
-				joins, projections, false);
+				joins, projections, false, order, orderDesc, limit, limitInverse);
 	}
 }

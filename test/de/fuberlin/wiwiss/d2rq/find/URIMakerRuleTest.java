@@ -41,7 +41,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
  *     d2rq:class foaf:Document;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRuleTest.java,v 1.7 2008/08/12 17:26:22 cyganiak Exp $
+ * @version $Id: URIMakerRuleTest.java,v 1.8 2009/07/29 12:03:53 fatorange Exp $
  */
 public class URIMakerRuleTest extends TestCase {
 	private TripleRelation withURIPatternSubject;
@@ -53,7 +53,7 @@ public class URIMakerRuleTest extends TestCase {
 
 	public void setUp() {
 		Relation base = new RelationImpl(null, AliasMap.NO_ALIASES, 
-				Expression.TRUE, Collections.EMPTY_SET, Collections.EMPTY_SET, false);
+				Expression.TRUE, Collections.EMPTY_SET, Collections.EMPTY_SET, false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
 		this.withURIPatternSubject = new TripleRelation(base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new Pattern("http://test/person@@employees.ID@@"), true),

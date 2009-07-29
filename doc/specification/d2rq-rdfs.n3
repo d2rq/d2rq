@@ -22,7 +22,7 @@
    				dc:creator       "Richard Cyganiak" ;
    				dc:date          "2006-08-12" ;
    				dc:format        "RDF";
-   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.23 2009/06/11 09:47:32 fatorange Exp $";
+   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.24 2009/07/29 12:03:52 fatorange Exp $";
    				.
 
 
@@ -299,23 +299,47 @@ d2rq:valueMaxLength rdf:type rdf:Property ;
               	.
 
 d2rq:propertyDefinitionLabel	rdf:type rdf:Property ;
-				rdfs:label "property label" ; 
-		            	rdfs:comment "A label to be served as rdfs:label for all associated properties" ;
-		             	rdfs:domain d2rq:PropertyBridge ;
-	        	     	.
+		    	rdfs:label "property label" ; 
+		    	rdfs:comment "A label to be served as rdfs:label for all associated properties" ;
+		    	rdfs:domain d2rq:PropertyBridge ;
+		    	.
 
 d2rq:propertyDefinitionComment	rdf:type rdf:Property ;
-				rdfs:label "property comment" ; 
-		            	rdfs:comment "A comment to be served as rdfs:comment for all associated properties" ;
-	             		rdfs:domain d2rq:PropertyBridge ;
-        	     		.
+		    	rdfs:label "property comment" ; 
+		    	rdfs:comment "A comment to be served as rdfs:comment for all associated properties" ;
+		    	rdfs:domain d2rq:PropertyBridge ;
+		    	.
 
 d2rq:additionalPropertyDefinitionProperty	rdf:type rdf:Property ;
-						rdfs:label "additional property definition property" ; 
-			           	 	rdfs:comment "An additional property to be served for all associated property definitions" ;
-	             				rdfs:domain d2rq:PropertyBridge ;
-						rdfs:range  d2rq:AdditionalProperty ;
-		             			.
+		    	rdfs:label "additional property definition property" ; 
+		    	rdfs:comment "An additional property to be served for all associated property definitions" ;
+		    	rdfs:domain d2rq:PropertyBridge ;
+		    	rdfs:range  d2rq:AdditionalProperty ;
+		    	.
+
+d2rq:limit		rdf:type rdf:Property ;
+		    	rdfs:label "limit" ; 
+		    	rdfs:comment "The number of results to retrieve from the database for this PropertyBridge" ;
+		    	rdfs:domain d2rq:PropertyBridge ;
+		    	.
+
+d2rq:limitInverse		rdf:type rdf:Property ;
+		    	rdfs:label "limit inverse" ; 
+		    	rdfs:comment "The number of results to retrieve from the database for the inverse statements for this PropertyBridge" ;
+		    	rdfs:domain d2rq:PropertyBridge ;
+		    	.
+
+d2rq:orderAsc	rdf:type rdf:Property ;
+		    	rdfs:label "order ascending" ; 
+		    	rdfs:comment "The column after which to sort results in ascending order for this PropertyBridge" ;
+		    	rdfs:domain d2rq:PropertyBridge ;
+		    	.
+
+d2rq:orderDesc	rdf:type rdf:Property ;
+		    	rdfs:label "order descending" ; 
+		    	rdfs:comment "The column after which to sort results in descending order for this PropertyBridge" ;
+		    	rdfs:domain d2rq:PropertyBridge ;
+		    	.
 
 # -----------------------------------------------
 # Datatype and Object Property Bridge

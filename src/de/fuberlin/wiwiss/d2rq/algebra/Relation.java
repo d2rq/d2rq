@@ -14,14 +14,16 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO Add uniqueConstraints()
  * TODO Explicitly list tables!!!
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Relation.java,v 1.13 2009/02/09 12:21:31 fatorange Exp $
+ * @version $Id: Relation.java,v 1.14 2009/07/29 12:03:53 fatorange Exp $
  */
 public abstract class Relation implements RelationalOperators {
 
+	public final static int NO_LIMIT = -1;
+	
 	public static Relation createSimpleRelation(
 			ConnectedDB database, Attribute[] attributes) {
 		return new RelationImpl(database, AliasMap.NO_ALIASES, Expression.TRUE,
-				Collections.EMPTY_SET, new HashSet(Arrays.asList(attributes)), false);
+				Collections.EMPTY_SET, new HashSet(Arrays.asList(attributes)), false, null, false, -1, -1);
 	}
 	
 	public static Relation EMPTY = new Relation() {
@@ -36,6 +38,10 @@ public abstract class Relation implements RelationalOperators {
 		public Relation project(Set projectionSpecs) { return this; }
 		public boolean isUnique() { return true; }
 		public String toString() { return "Relation.EMPTY"; }
+		public Attribute order() { return null; }
+		public boolean orderDesc() { return false; }
+		public int limit() { return Relation.NO_LIMIT; }
+		public int limitInverse() { return Relation.NO_LIMIT; }
 	};
 	public static Relation TRUE = new Relation() {
 		public ConnectedDB database() { return null; }
@@ -55,8 +61,12 @@ public abstract class Relation implements RelationalOperators {
 		public Relation project(Set projectionSpecs) { return this; }
 		public boolean isUnique() { return true; }
 		public String toString() { return "Relation.TRUE"; }
+		public Attribute order() { return null; }
+		public boolean orderDesc() { return false; }
+		public int limit() { return Relation.NO_LIMIT; }
+		public int limitInverse() { return Relation.NO_LIMIT; }
 	};
-	
+
 	// TODO Can we remove this, and maybe pass the database around in an ARQ Context object?
 	public abstract ConnectedDB database();
 	
@@ -96,6 +106,30 @@ public abstract class Relation implements RelationalOperators {
 	
 	public abstract boolean isUnique();
 	
+	/**
+	 * The database used to sort the SQL result set
+	 * @return The database column name
+	 */
+	public abstract Attribute order();
+
+	/**
+	 * The sort order for the SQL result set
+	 * @return <code>true</code> if descending, <code>false</code> if ascending order
+	 */
+	public abstract boolean orderDesc();
+
+	/**
+	 * The limit clause for the SQL result set
+	 * @return number of records to return
+	 */
+	public abstract int limit();
+
+	/**
+	 * The limit clause for the SQL result set describing the inverse relation
+	 * @return number of records to return
+	 */
+	public abstract int limitInverse();
+
 	public Set allKnownAttributes() {
 		Set results = new HashSet();
 		results.addAll(condition().attributes());
@@ -125,5 +159,14 @@ public abstract class Relation implements RelationalOperators {
 	
 	public boolean isTrivial() {
 		return projections().isEmpty() && condition().isTrue() && joinConditions().isEmpty();
+	}
+		
+	public static int combineLimits(int limit1, int limit2) {
+	    if(limit1==Relation.NO_LIMIT) {
+	        return limit2;
+	    } else if(limit2==Relation.NO_LIMIT) {
+	        return limit1;
+	    }
+	    return Math.min(limit1, limit2);
 	}
 }

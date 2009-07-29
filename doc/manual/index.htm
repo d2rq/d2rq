@@ -751,7 +751,8 @@ map:location a d2rq:PropertyBridge;
       generated SQL queries. This sets an upper bound for the number
       of results returned from large databases. Note that this effectively
       &#8220;cripples&#8221; the server and can cause unpredictable
-      results.</td>
+      results. Also see <a href="#propertybridge">d2rq:limit and d2rq:limitInverse</a>, which may be used to impose
+      result limits on individual property bridges.</td>
   </tr>
   <tr> 
     <td><strong>d2rq:fetchSize</strong></td>
@@ -820,7 +821,7 @@ JDBC driver: <tt>autoReconnect=true</tt> and
 <p><strong>Keep-alive long-term connections</strong></p>
 
 <p>Some database servers like MySQL may terminate open client connections after some
-interval (MySQL default is 12 hours). To keep alive long-term connections, D2R can be
+interval (MySQL default is 8 hours). To keep alive long-term connections, D2R can be
 configured to periodically run "noop" queries. This feature can be enabled with the
 special property <tt>jdbc:keepAlive</tt>. An example is given below:</p>
 
@@ -1206,6 +1207,22 @@ map:PersonsType a d2rq:PropertyBridge ;
     <td valign="top"><strong>d2rq:additionalPropertyDefinitionProperty</strong></td>
     <td valign="top">Adds an <a href="#additionalproperty">AdditionalProperty</a>
       to all associated property definitions.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><strong>d2rq:limit</strong></td>
+    <td valign="top">The maximum number of results to retrieve from the database for this PropertyBridge. Also see <a href="#database">d2rq:resultSizeLimit</a>.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><strong>d2rq:limitInverse</strong></td>
+    <td valign="top">The maximum number of results to retrieve from the database for the inverse statements for this PropertyBridge.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><strong>d2rq:orderAsc</strong></td>
+    <td valign="top">The column after which to sort results in ascending order for this PropertyBridge.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><strong>d2rq:orderDesc</strong></td>
+    <td valign="top">The column after which to sort results in descending order for this PropertyBridge.</td>
   </tr>
 </table>
 
@@ -1643,7 +1660,7 @@ and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalprop
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.49 2009/07/13 15:38:56 fatorange Exp $</p>
+<p>$Id: index.htm,v 1.50 2009/07/29 12:03:53 fatorange Exp $</p>
 
 </BODY>
 </HTML>

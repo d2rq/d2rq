@@ -39,7 +39,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.13 2009/02/14 22:37:14 fatorange Exp $
+ * @version $Id: ResourceMap.java,v 1.14 2009/07/29 12:03:53 fatorange Exp $
  */
 public abstract class ResourceMap extends MapObject {
 
@@ -65,6 +65,10 @@ public abstract class ResourceMap extends MapObject {
 	protected String datatype = null;
 	protected String lang = null;
 	protected ClassMap refersToClassMap = null;
+	protected Integer limit = null;
+	protected Integer limitInverse = null;
+	protected String order = null;
+	protected Boolean orderDesc = null;
 
 	private NodeMaker cachedNodeMaker;
 	private Relation cachedRelation;

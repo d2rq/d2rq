@@ -6,7 +6,7 @@ import com.hp.hpl.jena.shared.JenaException;
  * Exception used to signal most D2RQ errors.
  *
  * @author Chris Bizer chris@bizer.de
- * @version $Id: D2RQException.java,v 1.18 2009/02/13 14:31:56 dorgon Exp $
+ * @version $Id: D2RQException.java,v 1.19 2009/07/29 12:03:53 fatorange Exp $
  */
 
 public class D2RQException extends JenaException {
@@ -72,6 +72,10 @@ public class D2RQException extends JenaException {
 	public static final int PROPERTYBRIDGE_DUPLICATE_SQL_EXPRESSION = 57;
 	public static final int MAPPING_TYPECONFLICT = 58;
 	public static final int PROPERTYBRIDGE_DUPLICATE_URI_SQL_EXPRESSION = 59;
+	public static final int PROPERTYBRIDGE_DUPLICATE_LIMIT = 60;
+	public static final int PROPERTYBRIDGE_DUPLICATE_LIMITINVERSE = 61;
+	public static final int PROPERTYBRIDGE_DUPLICATE_ORDER = 62;
+	public static final int PROPERTYBRIDGE_DUPLICATE_ORDERDESC = 63;
 	
 	private int code;
 	

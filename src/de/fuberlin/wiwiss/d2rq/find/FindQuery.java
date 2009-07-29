@@ -29,7 +29,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * relations into one SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.21 2009/06/11 07:19:02 fatorange Exp $
+ * @version $Id: FindQuery.java,v 1.22 2009/07/29 12:03:53 fatorange Exp $
  */
 public class FindQuery {
 	private final Triple triplePattern;
@@ -88,7 +88,7 @@ public class FindQuery {
 				selectedTripleRelations()).iterator();
 		while (it.hasNext()) {
 			CompatibleRelationGroup group = (CompatibleRelationGroup) it.next();
-			if (!group.baseRelation().equals(Relation.EMPTY)) {
+			if (!group.baseRelation().equals(Relation.EMPTY) && group.baseRelation().limit()!=0) {
 				result = result.andThen(
 						RelationToTriplesIterator.create(
 								group.baseRelation(), group.tripleMakers()));

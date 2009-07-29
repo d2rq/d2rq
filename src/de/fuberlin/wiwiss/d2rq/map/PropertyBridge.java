@@ -16,6 +16,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class PropertyBridge extends ResourceMap {
@@ -72,6 +73,22 @@ public class PropertyBridge extends ResourceMap {
 		this.lang = lang;
 	}
 	
+	public void setLimit(int limit) {
+	    assertNotYetDefined(this.limit, D2RQ.limit, D2RQException.PROPERTYBRIDGE_DUPLICATE_LIMIT);
+	    this.limit = limit;
+	}
+
+	public void setLimitInverse(int limit) {
+	    assertNotYetDefined(this.limitInverse, D2RQ.limitInverse, D2RQException.PROPERTYBRIDGE_DUPLICATE_LIMITINVERSE);
+	    this.limitInverse = limit;
+	}
+
+	public void setOrder(String column, boolean desc) {
+	    assertNotYetDefined(this.order, (desc ? D2RQ.orderDesc : D2RQ.orderAsc), D2RQException.PROPERTYBRIDGE_DUPLICATE_ORDER);
+	    this.order = column;
+	    this.orderDesc = desc;
+	}
+    
 	public void setRefersToClassMap(ClassMap classMap) {
 		assertNotYetDefined(this.refersToClassMap, D2RQ.refersToClassMap, 
 				D2RQException.PROPERTYBRIDGE_DUPLICATE_REFERSTOCLASSMAP);
@@ -136,6 +153,16 @@ public class PropertyBridge extends ResourceMap {
 			}
 		}
 		
+		if (this.limit!=null) {
+			builder.setLimit(this.limit);
+		}
+		if (this.limitInverse!=null) {
+			builder.setLimitInverse(this.limitInverse);
+		}
+		if (this.order!=null) {
+			builder.setOrder(SQL.parseAttribute(this.order), this.orderDesc);
+		}
+
 		return builder.buildRelation(this.belongsToClassMap.database().connectedDB()); 
 	}
 
