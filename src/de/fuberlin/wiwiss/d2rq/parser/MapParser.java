@@ -40,7 +40,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.40 2009/07/29 12:03:53 fatorange Exp $
+ * @version $Id: MapParser.java,v 1.41 2009/07/31 21:13:44 fatorange Exp $
  */
 public class MapParser {
 
@@ -430,11 +430,11 @@ public class MapParser {
 			bridge.setConstantValue(additionalProperty.getProperty(D2RQ.propertyValue).getObject());
 			classMap.addPropertyBridge(bridge);
 		}
-		stmts = r.listProperties(D2RQ.classDefinitionLabel);
+		stmts = r.listProperties(D2RQ.class_DefinitionLabel);
 		while (stmts.hasNext()) {
 			classMap.addDefinitionLabel(stmts.nextStatement().getLiteral());
 		}
-		stmts = r.listProperties(D2RQ.classDefinitionComment);
+		stmts = r.listProperties(D2RQ.class_DefinitionComment);
 		while (stmts.hasNext()) {
 			classMap.addDefinitionComment(stmts.nextStatement().getLiteral());
 		}
