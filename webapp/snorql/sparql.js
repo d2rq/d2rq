@@ -329,7 +329,7 @@ SPARQL.Query = function(service, priority) {
 				var content = null;
 
 				try {
-                    if (!document.domain || (url.match(/^https?:\/\//) && url.slice(7, document.domain.length + 7) != document.domain && window.netscape && netscape.security && netscape.security.PrivilegeManager)) {
+                    if (!document.domain || ((url.match(/^http:\/\//) && url.slice(7, document.domain.length + 7) != document.domain || url.match(/^https:\/\//) && url.slice(8, document.domain.length + 8) != document.domain) && window.netscape && netscape.security && netscape.security.PrivilegeManager)) {
 						netscape.security.PrivilegeManager.enablePrivilege( "UniversalBrowserRead");
 						netscape.security.PrivilegeManager.enablePrivilege( "UniversalXPConnect"); 
 					}
