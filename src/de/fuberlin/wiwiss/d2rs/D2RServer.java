@@ -26,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.25 2009/06/12 14:21:23 fatorange Exp $
+ * @version $Id: D2RServer.java,v 1.26 2009/08/02 09:12:06 fatorange Exp $
  */
 public class D2RServer {
 	private final static String SPARQL_SERVICE_NAME = "sparql";
@@ -54,6 +54,9 @@ public class D2RServer {
 	/** base URI from command line */
 	private String overrideBaseURI = null;
 	
+	/** base URI from command line */
+	private boolean overrideUseAllOptimizations = false;
+
 	/** the dataset, auto-reloadable in case of local mapping files */
 	private AutoReloadableDataset dataset;
 
@@ -85,6 +88,10 @@ public class D2RServer {
 		log.info("using custom base URI: " + baseURI);
 		this.overrideBaseURI = baseURI;
 	}
+	
+	public void overrideUseAllOptimizations(boolean overrideAllOptimizations) {
+		this.overrideUseAllOptimizations = overrideAllOptimizations;
+	}	
 	
 	public void setConfigFile(String configFileURL) {
 		configFile = configFileURL;
@@ -216,6 +223,15 @@ public class D2RServer {
 		else
 			this.dataset = new AutoReloadableDataset(config.getMappingURL(), false, this);
 		this.dataset.forceReload();
+		
+		if (this.overrideUseAllOptimizations)
+			currentGraph().getConfiguration().setUseAllOptimizations(true);
+		
+		if (currentGraph().getConfiguration().getUseAllOptimizations()) {
+			log.info("Fast mode (all optimizations)");
+		} else {
+			log.info("Safe mode (launch using --fast to use all optimizations)");
+		}
 		
 		DescribeHandlerRegistry.get().clear();
 		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory());

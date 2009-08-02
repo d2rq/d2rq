@@ -16,7 +16,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
  * parameters with values taken from the command line.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JettyLauncher.java,v 1.2 2009/06/29 11:44:41 fatorange Exp $
+ * @version $Id: JettyLauncher.java,v 1.3 2009/08/02 09:12:06 fatorange Exp $
  */
 public class JettyLauncher {
 	public final static int DEFAULT_PORT = 2020;
@@ -26,6 +26,7 @@ public class JettyLauncher {
 	private int configFilePort = -1;
 	private String baseURI = null;
 	private String homeURI;
+	private boolean useAllOptimizations = false;
 	
 	public void setConfigFile(String configFile) {
 		this.configFile = configFile;
@@ -47,6 +48,10 @@ public class JettyLauncher {
 		this.baseURI = baseURI;
 	}
 	
+	public void overrideUseAllOptimizations(boolean useAllOptimizations) {
+		this.useAllOptimizations = useAllOptimizations;
+	}
+
 	public void start() {
 		Server jetty = new Server(getPort());
 		
@@ -84,6 +89,9 @@ public class JettyLauncher {
 		}
 		if (baseURI != null) {
 			result.put("baseURI", baseURI);
+		}
+		if (useAllOptimizations) {
+			result.put("useAllOptimizations", "true");
 		}
 		result.put("overrideConfigFile", configFile);
 		return result;

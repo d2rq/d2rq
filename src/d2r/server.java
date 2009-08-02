@@ -14,11 +14,11 @@ import de.fuberlin.wiwiss.d2rs.JettyLauncher;
 /**
  * Command line launcher for D2R Server.
  * 
- * @version $Id: server.java,v 1.7 2007/11/04 17:31:04 cyganiak Exp $
+ * @version $Id: server.java,v 1.8 2009/08/02 09:12:05 fatorange Exp $
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class server {
-	private final static String usage = "usage: d2r-server [-p port] [-b serverBaseURI] mappingFileName";
+	private final static String usage = "usage: d2r-server [-p port] [-b serverBaseURI] [--fast] mappingFileName";
 	private static JettyLauncher server;
 	private final static Log log = LogFactory.getLog(server.class);
 	
@@ -29,6 +29,8 @@ public class server {
 		cmd.add(portArg);
 		ArgDecl baseURIArg = new ArgDecl(true, "b", "base");
 		cmd.add(baseURIArg);
+		ArgDecl fastArg = new ArgDecl(false, "fast");
+		cmd.add(fastArg);
 		cmd.process(args);
 		
 		if (cmd.numItems() == 0) {
@@ -47,6 +49,9 @@ public class server {
 		if (cmd.contains(baseURIArg)) {
 			setServerBaseURI(cmd.getArg(baseURIArg).getValue());
 		}
+		if (cmd.contains(fastArg)) {
+			setUseAllOptimizations(true);
+		}
 		String mappingFileName = cmd.getItem(0);
 		setMappingFileName(mappingFileName);
 		startServer();
@@ -58,6 +63,10 @@ public class server {
 
 	public static void setServerBaseURI(String baseURI) {
 		server.overrideBaseURI(baseURI);
+	}
+	
+	public static void setUseAllOptimizations(boolean useAllOptimizations) {
+		server.overrideUseAllOptimizations(useAllOptimizations);
 	}
 	
 	public static void setMappingFileName(String mappingFileName) {
