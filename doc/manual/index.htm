@@ -1523,10 +1523,11 @@ map:secondaryTopic a d2rq:PropertyBridge;
 
 
 <h2><a name="servingvocabularies"></a>7.7 Serving Vocabulary Classes and Properties</h2>
-<p>In the spirit of <a href="http://www.w3.org/DesignIssues/LinkedData.html">Linked Data</a>, vocabulary data should be dereferencable by clients. D2RQ infers types of classes and properties as <tt>rdfs:Class</tt> and <tt>rdf:Property</tt> and allows the user to provide labels
+<p>In the spirit of <a href="http://www.w3.org/DesignIssues/LinkedData.html">Linked Data</a>, vocabulary data should be dereferencable by clients. D2RQ infers types of class and property resources as <tt>rdfs:Class</tt> and <tt>rdf:Property</tt> and allows the user to provide labels
 using the <tt>d2rq:classDefinitionLabel</tt> and <tt>d2rq:propertyDefinitionLabel</tt> constructs,
 comments using the <tt>d2rq:classDefinitionComment</tt> and <tt>d2rq:propertyDefinitionComment</tt> constructs,
 as well as additional properties using the <tt>d2rq:additionalClassDefinitionProperty</tt> and <tt>d2rq:additionalPropertyDefinitionProperty</tt> constructs.</p>
+<p>This feature is meant to enable Linked Data interfaces by providing additional query results for simple (URI, ANY, ANY) or (ANY, ANY, URI) find patterns that touch on vocabulary resources. It currently does <em>not</em> work within SPARQL queries beyond <tt>DESCRIBE</tt>.</p> 
 
 <h3><a name="additionalproperty"></a>7.7.1 AdditionalProperty</h2>
 <p>A <strong>d2rq:AdditionalProperty</strong> construct can be used to add a fixed statement 
@@ -1684,7 +1685,7 @@ and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalprop
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.52 2009/08/02 19:22:10 fatorange Exp $</p>
+<p>$Id: index.htm,v 1.53 2009/08/02 21:28:11 fatorange Exp $</p>
 
 </BODY>
 </HTML>
