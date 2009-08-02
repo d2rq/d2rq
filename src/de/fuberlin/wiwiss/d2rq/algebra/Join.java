@@ -10,30 +10,36 @@ import java.util.Map;
 /**
  * Represents an SQL join between two tables, spanning one or more columns.
  *
- * TODO: Remodel as a foreign key constraint? Values of side1 must be in side2?
- *       At the moment, A=B is considered .equals(B=A) 
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.8 2008/02/06 17:26:13 cyganiak Exp $
+ * @version $Id: Join.java,v 1.9 2009/08/02 19:22:10 fatorange Exp $
  */
 public class Join {
 	private List attributes1 = new ArrayList();
 	private List attributes2 = new ArrayList();
 	private RelationName table1 = null;
 	private RelationName table2 = null;
-	private Map otherSide = new HashMap(4); 
-
-	public Join(Attribute oneSide, Attribute otherSide) {
-		this(Collections.singletonList(oneSide), Collections.singletonList(otherSide));
+	private Map otherSide = new HashMap(4);
+	
+	private int joinDirection;
+	
+	public static final int DIRECTION_UNDIRECTED = 0;
+	public static final int DIRECTION_LEFT = 1;
+	public static final int DIRECTION_RIGHT = 2;
+	
+	public static final String[] joinOperators = {"=", "<=", "=>"};	
+	
+	public Join(Attribute oneSide, Attribute otherSide, int joinDirection) {
+		this(Collections.singletonList(oneSide), Collections.singletonList(otherSide), joinDirection);
 	}
 	
-	public Join(List oneSideAttributes, List otherSideAttributes) {
+	public Join(List oneSideAttributes, List otherSideAttributes, int joinDirection) {
 		RelationName oneRelation = ((Attribute) oneSideAttributes.get(0)).relationName();
 		RelationName otherRelation = ((Attribute) otherSideAttributes.get(0)).relationName();
 		this.attributes1 = oneSideAttributes;
 		this.attributes2 = otherSideAttributes;
 		this.table1 = oneRelation;
 		this.table2 = otherRelation;
+		this.joinDirection = joinDirection;
 		for (int i = 0; i < this.attributes1.size(); i++) {
 			Attribute a1 = (Attribute) this.attributes1.get(i);
 			Attribute a2 = (Attribute) this.attributes2.get(i);
@@ -66,6 +72,10 @@ public class Join {
 	public List attributes2() {
 		return this.attributes2;
 	}
+	
+	public int joinDirection() {
+		return this.joinDirection;
+	}
 
 	public Attribute equalAttribute(Attribute column) {
 		return (Attribute) this.otherSide.get(column);
@@ -81,7 +91,7 @@ public class Join {
 				result.append(", ");
 			}
 		}
-		result.append(" <=> ");
+		result.append(joinDirection == DIRECTION_UNDIRECTED ? " <=> " : (joinDirection == DIRECTION_RIGHT ? " => " : " <= "));
 		it = this.attributes2.iterator();
 		while (it.hasNext()) {
 			Attribute attribute = (Attribute) it.next();
@@ -120,6 +130,6 @@ public class Join {
 			oneSide.add(columnRenamer.applyTo(column));
 			otherSide.add(columnRenamer.applyTo(equalAttribute(column)));
 		}
-		return new Join(oneSide, otherSide);
+		return new Join(oneSide, otherSide, joinDirection);
 	}
 }

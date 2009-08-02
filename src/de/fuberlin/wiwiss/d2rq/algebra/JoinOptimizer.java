@@ -31,32 +31,10 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * <p>In this case, J can be dropped, and all mentions of <em>T2.c_n</em>
  * can be replaced with <em>T1.c_n</em>.</p>
  * 
- * TODO: <strong>Note:</strong> The third condition is currently not enforced.
- * This is not a problem in most situations, because d2rq:join is typically
- * used along an FK constraint. At this point in the code, we don't know the
- * direction of the FK though. If the FK is on <em>T2.c_n</em>, then removing
- * the join may result in incorrect results.
- * 
- * The way 1:n and n:m joins are typically used, condition 2 will exclude most
- * cases where the FK is on <em>T2.c_n</em>.
- * 
- * Another heuristic catches many 1:1 cases: If a join looks removable, but
- * switching the order of the two tables around also results in a removable
- * join, then we don't remove it, because we have no indication in which
- * direction the FK is pointing and might pick the wrong one, so the safe
- * choice is not to optimize. 
- *  
- * However, there are still cases where a join will be incorrectly removed,
- * e.g. a 1:1 join with a condition on a column not involved in the join.
- * 
- * This is a bug. The only way to be sure if a join can be removed is to check
- * the database schema (or ask the user) if there is indeed a FK constraint on
- * <em>T1.c_n</em>.
- * 
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.21 2009/07/29 12:03:53 fatorange Exp $
+ * @version $Id: JoinOptimizer.java,v 1.22 2009/08/02 19:22:10 fatorange Exp $
  */
 public class JoinOptimizer {
 	private TripleRelation relation;
@@ -77,12 +55,9 @@ public class JoinOptimizer {
 		while (it.hasNext()) {
 			Join join = (Join) it.next();
 			if (!isRemovableJoin(join)) continue;
-			
-			boolean isRemovable1 = isRemovableJoinSide(join.table1(), join, allRequiredColumns);
-			boolean isRemovable2 = isRemovableJoinSide(join.table2(), join, allRequiredColumns);
-
-			// Ugly heuristic
-			if (isRemovable1 && isRemovable2) continue;
+						
+			boolean isRemovable1 = join.joinDirection() == Join.DIRECTION_RIGHT && isRemovableJoinSide(join.table1(), join, allRequiredColumns);
+			boolean isRemovable2 = join.joinDirection() == Join.DIRECTION_LEFT && isRemovableJoinSide(join.table2(), join, allRequiredColumns);
 
 			if (isRemovable1) {
 				requiredJoins.remove(join);

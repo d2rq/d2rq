@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.19 2009/08/02 09:15:09 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.20 2009/08/02 19:22:10 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -333,7 +333,7 @@ public class DatabaseSchemaInspector {
 		private Join toJoin() {
 			return new Join(
 					new ArrayList(foreignColumns.values()),
-					new ArrayList(primaryColumns.values()));
+					new ArrayList(primaryColumns.values()), Join.DIRECTION_RIGHT);
 		}
 	}
 

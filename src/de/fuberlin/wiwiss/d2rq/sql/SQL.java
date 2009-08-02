@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
  * back into Strings. All methods are static.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL.java,v 1.8 2009/06/11 10:57:50 fatorange Exp $
+ * @version $Id: SQL.java,v 1.9 2009/08/02 19:22:10 fatorange Exp $
  */
 public class SQL {
 	private static final java.util.regex.Pattern attributeRegexConservative = 
@@ -165,63 +165,76 @@ public class SQL {
 		List parsedConditions = new ArrayList();
 		Iterator it = joinConditions.iterator();
 		while (it.hasNext()) {
-			Attribute[] split = parseJoinCondition((String) it.next());
-			parsedConditions.add(new AttributeEqualityCondition(split[0], split[1]));
+			parsedConditions.add(AttributeEqualityCondition.parseJoinCondition((String) it.next()));
 		}
 		Collections.sort(parsedConditions);
 		Set results = new HashSet();
 		List attributes1 = new ArrayList();
 		List attributes2 = new ArrayList();
+		int joinOperator = Join.DIRECTION_UNDIRECTED;
 		AttributeEqualityCondition previousCondition = null;
 		it = parsedConditions.iterator();
 		while (it.hasNext()) {
 			AttributeEqualityCondition condition = (AttributeEqualityCondition) it.next();
 			if (previousCondition == null || !condition.sameRelations(previousCondition)) {
 				if (previousCondition != null) {
-					results.add(new Join(attributes1, attributes2));
+					results.add(new Join(attributes1, attributes2, joinOperator));
 				}
 				attributes1 = new ArrayList();
 				attributes2 = new ArrayList();
+				joinOperator = condition.joinOperator(); 
 			}
 			attributes1.add(condition.firstAttribute());
 			attributes2.add(condition.secondAttribute());
 			previousCondition = condition;
 		}
 		if (previousCondition != null) {
-			results.add(new Join(attributes1, attributes2));
+			results.add(new Join(attributes1, attributes2, joinOperator));
 		}
 		return results;
-	}
-
-	private static Attribute[] parseJoinCondition(String joinCondition) {
-		int index = joinCondition.indexOf("=");
-		if (index == -1) {
-			throw new D2RQException("d2rq:join \"" + joinCondition +
-					"\" is not in \"table1.col1 = table2.col2\" form",
-					D2RQException.SQL_INVALID_JOIN);
-		}
-		return new Attribute[]{
-				SQL.parseAttribute(joinCondition.substring(0, index).trim()),
-				SQL.parseAttribute(joinCondition.substring(index + 1).trim())};
 	}
 	
 	private static class AttributeEqualityCondition implements Comparable {
 		private Attribute firstAttribute;
 		private Attribute secondAttribute;
-		AttributeEqualityCondition(Attribute a1, Attribute a2) {
+		private int joinOperator;
+		AttributeEqualityCondition(Attribute a1, Attribute a2, int joinOperator) {
 			this.firstAttribute = (a1.compareTo(a2) < 0) ? a1 : a2;
 			this.secondAttribute = (a1.compareTo(a2) < 0) ? a2 : a1;
+			this.joinOperator = joinOperator;
 		}
 		public Attribute firstAttribute() { return this.firstAttribute; }
 		public Attribute secondAttribute() { return this.secondAttribute; }
+		public int joinOperator() { return this.joinOperator; }
 		boolean sameRelations(AttributeEqualityCondition otherCondition) {
 			return otherCondition.firstAttribute().relationName().equals(firstAttribute().relationName())
-					&& otherCondition.secondAttribute().relationName().equals(secondAttribute().relationName());
+					&& otherCondition.secondAttribute().relationName().equals(secondAttribute().relationName())
+					&& otherCondition.joinOperator() == joinOperator();
 		}
 		public int compareTo(Object otherObject) {
 			if (!(otherObject instanceof AttributeEqualityCondition)) return 0;
 			AttributeEqualityCondition otherCondition = (AttributeEqualityCondition) otherObject;
 			return this.firstAttribute.compareTo(otherCondition.firstAttribute);
+		}
+		public static AttributeEqualityCondition parseJoinCondition(String joinCondition) {
+			int joinOperator = -1;
+			int index = -1;
+			
+			for (joinOperator = Join.joinOperators.length-1; joinOperator >= 0; joinOperator--) {
+				if (-1 != (index = joinCondition.indexOf(Join.joinOperators[joinOperator])))
+					break;
+			}
+
+			if (index == -1) {
+				throw new D2RQException("d2rq:join \"" + joinCondition +
+						"\" is not in \"table1.col1 [ <= | => | = ] table2.col2\" form",
+						D2RQException.SQL_INVALID_JOIN);
+			}
+			
+			Attribute leftSide = SQL.parseAttribute(joinCondition.substring(0, index).trim());
+			Attribute rightSide = SQL.parseAttribute(joinCondition.substring(index + Join.joinOperators[joinOperator].length()).trim());
+			
+			return new AttributeEqualityCondition(leftSide, rightSide, joinOperator);
 		}
 	}
 

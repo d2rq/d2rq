@@ -42,7 +42,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.31 2009/07/15 12:14:00 fatorange Exp $
+ * @version $Id: MappingGenerator.java,v 1.32 2009/08/02 19:22:10 fatorange Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -287,7 +287,7 @@ public class MappingGenerator {
 		Iterator it = primaryColumns.iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			this.out.println("\td2rq:join \"" + column.qualifiedName() + " = " +
+			this.out.println("\td2rq:join \"" + column.qualifiedName() + " " + Join.joinOperators[foreignKey.joinDirection()] + " " +
 					alias.applyTo(foreignKey.equalAttribute(column)).qualifiedName() + "\";");
 		}
 		createObjectProperty(foreignKey);
@@ -318,7 +318,7 @@ public class MappingGenerator {
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
 			Attribute otherColumn = join1.equalAttribute(column);
-			this.out.println("\td2rq:join \"" + column.qualifiedName() + " = " + otherColumn.qualifiedName() + "\";");
+			this.out.println("\td2rq:join \"" + column.qualifiedName() + " " + Join.joinOperators[join1.joinDirection()] + " " + otherColumn.qualifiedName() + "\";");
 		}
 		AliasMap alias = AliasMap.NO_ALIASES;
 		if (isSelfJoin) {
@@ -332,7 +332,7 @@ public class MappingGenerator {
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
 			Attribute otherColumn = join2.equalAttribute(column);
-			this.out.println("\td2rq:join \"" + column.qualifiedName() + " = " + alias.applyTo(otherColumn).qualifiedName() + "\";");
+			this.out.println("\td2rq:join \"" + column.qualifiedName() + " " + Join.joinOperators[join2.joinDirection()] + " " + alias.applyTo(otherColumn).qualifiedName() + "\";");
 		}
 		this.out.println("\t.");
 		createLinkProperty(linkTableName, table1, table2);
