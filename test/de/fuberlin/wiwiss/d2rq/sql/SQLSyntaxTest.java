@@ -183,11 +183,12 @@ public class SQLSyntaxTest extends TestCase {
 	
 	public void testParseJoinTwoConditionsOnDifferentTables() {
 		Set joins = SQL.parseJoins(Arrays.asList(new String[]{
-				"foo.col1 = bar.col1", "foo.col2 = baz.col1"}));
-		assertEquals(2, joins.size());
+				"foo.col1 <= bar.col1", "foo.col2 => baz.col1", "foo.col2 = bar.col1"}));
+		assertEquals(3, joins.size());
 		assertEquals(new HashSet(Arrays.asList(new Join[]{
-				new Join(bar_col1, foo_col1),
-				new Join(baz_col1, foo_col2)})),
+				new Join(bar_col1, foo_col1, Join.DIRECTION_LEFT),
+				new Join(baz_col1, foo_col2, Join.DIRECTION_RIGHT),
+				new Join(foo_col2, bar_col1, Join.DIRECTION_UNDIRECTED)})),
 				joins);
 	}
 }

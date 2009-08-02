@@ -11,7 +11,7 @@ import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMapTest.java,v 1.8 2007/10/22 10:21:16 cyganiak Exp $
+ * @version $Id: AliasMapTest.java,v 1.9 2009/08/02 21:57:27 fatorange Exp $
  */
 public class AliasMapTest extends TestCase {
 	private final static RelationName foo = new RelationName(null, "foo");
@@ -62,13 +62,13 @@ public class AliasMapTest extends TestCase {
 	}
 	
 	public void testApplyToJoinSetDoesNotModifyUnaliasedJoin() {
-		Join join = new Join(abc_col1, xyz_col1);
+		Join join = new Join(abc_col1, xyz_col1, Join.DIRECTION_RIGHT);
 		Set joins = Collections.singleton(join);
 		assertEquals(joins, this.fooAsBarMap.applyToJoinSet(joins));
 	}
 	
 	public void testApplyToJoinSetDoesModifyAliasedJoin() {
-		Join join = new Join(foo_col1, foo_col1);
+		Join join = new Join(foo_col1, foo_col1, Join.DIRECTION_RIGHT);
 		Set aliasedSet = this.fooAsBarMap.applyToJoinSet(Collections.singleton(join));
 		assertEquals(1, aliasedSet.size());
 		Join aliased = (Join) aliasedSet.iterator().next();

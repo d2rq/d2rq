@@ -162,7 +162,7 @@ public class GraphPatternTranslatorTest extends TestCase {
 	}
 	
 	private NodeRelation translate1(List triplePatterns, Collection tripleRelations) {
-		Collection rels = new GraphPatternTranslator(triplePatterns, tripleRelations).translate();
+		Collection rels = new GraphPatternTranslator(triplePatterns, tripleRelations, true).translate();
 		if (rels.isEmpty()) return null;
 		assertEquals(1, rels.size());
 		return (NodeRelation) rels.iterator().next();
@@ -170,7 +170,7 @@ public class GraphPatternTranslatorTest extends TestCase {
 
 	private NodeRelation[] translate(String pattern, String mappingFile) {
 		Collection rels = new GraphPatternTranslator(triplesToList(pattern),
-				MapFixture.loadPropertyBridges(mappingFile)).translate();
+				MapFixture.loadPropertyBridges(mappingFile), true).translate();
 		return (NodeRelation[]) rels.toArray(new NodeRelation[rels.size()]);
 	}
 	

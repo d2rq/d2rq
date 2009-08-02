@@ -11,7 +11,7 @@ import java.util.Map;
  * Represents an SQL join between two tables, spanning one or more columns.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.9 2009/08/02 19:22:10 fatorange Exp $
+ * @version $Id: Join.java,v 1.10 2009/08/02 21:57:27 fatorange Exp $
  */
 public class Join {
 	private List attributes1 = new ArrayList();
@@ -105,7 +105,15 @@ public class Join {
 	}
 
 	public int hashCode() {
-		return this.attributes1.hashCode() ^ this.attributes2.hashCode();
+		switch (this.joinDirection) {
+			case DIRECTION_RIGHT:  
+				return 31 * (this.attributes1.hashCode() ^ this.attributes2.hashCode());
+			case DIRECTION_LEFT:
+				return 31 * (this.attributes2.hashCode() ^ this.attributes1.hashCode());
+			case DIRECTION_UNDIRECTED:
+			default:
+				return 31 * (this.attributes1.hashCode() ^ this.attributes2.hashCode()) + 1;				
+		}
 	}
 	
 	public boolean equals(Object otherObject) {
@@ -115,10 +123,12 @@ public class Join {
 		Join otherJoin = (Join) otherObject;
 		return 
 				(this.attributes1.equals(otherJoin.attributes1) 
-						&& this.attributes2.equals(otherJoin.attributes2))
+						&& this.attributes2.equals(otherJoin.attributes2) && this.joinDirection == otherJoin.joinDirection())
 				||
 				(this.attributes1.equals(otherJoin.attributes2) 
-						&& this.attributes2.equals(otherJoin.attributes1));
+						&& this.attributes2.equals(otherJoin.attributes1)
+						&& this.joinDirection == (otherJoin.joinDirection() == DIRECTION_UNDIRECTED ? DIRECTION_UNDIRECTED : 
+								(otherJoin.joinDirection() == DIRECTION_LEFT ? DIRECTION_RIGHT : DIRECTION_LEFT)));
 	}
 	
 	public Join renameColumns(ColumnRenamer columnRenamer) {
