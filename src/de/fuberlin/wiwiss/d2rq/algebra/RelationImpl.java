@@ -109,7 +109,7 @@ public class RelationImpl extends Relation {
 	public Relation renameColumns(ColumnRenamer renames) {
 		return new RelationImpl(database, renames.applyTo(aliases),
 				renames.applyTo(condition), renames.applyToJoinSet(joinConditions),
-				renames.applyToProjectionSet(projections), isUnique, order, orderDesc, limit, limitInverse);
+				renames.applyToProjectionSet(projections), isUnique, order != null ? renames.applyTo(order) : null, orderDesc, limit, limitInverse);
 	}
 
 	public Relation project(Set projectionSpecs) {
