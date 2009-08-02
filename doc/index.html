@@ -99,6 +99,7 @@ pre { speak-punctuation: code; }
   <li><a href="#customize">Customizing the database mapping</a> </li>
   <li><a href="#vocabulary">Serving vocabulary classes and properties</a> </li>  
   <li><a href="#configuration">Server configuration</a></li>
+  <li><a href="#performance">Optimizing performance</a></li>
   <li><a href="#windows">Running D2R Server as a service on Windows</a></li>
   <li><a href="#container">Running D2R Server in an existing Servlet Container</a></li>
   <li><a href="#dumps">Creating RDF dumps</a></li>
@@ -261,6 +262,20 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 
 <p>Not that this effectively &#8220;cripples&#8221; the server and can cause somewhat unpredictable results. We still recommend it until we can offer a better solution.</p>
 
+<h2 id="performance">Optimizing performance</h2>
+
+<p>Here are some simple hints to improve D2R's performance:
+<ul>
+	<li>Define primary keys whenever you can and create indexes where applicable (e.g. on foreign keys) &ndash; besides optimizing database performance, these will be picked up and used by various optimizations within D2RQ.</li>
+	<li>Use the latest optimizations by launching with <tt>--fast</tt> (or activate <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#configuration"><tt>d2rq:useAllOptimizations</tt></a>).</li>
+	<li>Provide <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#propertybridge">hint properties</a>.</li>
+	<li>Indicate directions in <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#propertybridge"><tt>d2rq:joins</tt></a> to enable join optimizations.</li>
+	<li>Set <a href="#configuration"><tt>d2rq:autoReloadMapping</tt></a> to <tt>false</tt> where it is not required.</li>
+	<li>Databases often ship with development configurations that are designed for a small footprint rather than performance. For instance, some good pointers for optimizing MySQL can be found <a href="http://www.mysqlperformanceblog.com/2006/09/29/what-to-tune-in-mysql-server-after-installation/">here</a>.</li>
+</ul> 
+</p>
+
+
 <h2 id="windows">Running D2R Server as a service on Windows</h2>
 
 <p>To run D2R Server as a service on Windows, use the <tt>install-service</tt> script:</p>
@@ -351,7 +366,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 <div><a href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3">DOAP project description</a> (<a href="http://www4.wiwiss.fu-berlin.de/rdf_browser/?browse_uri=http%3A//www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3">View with Disco</a>)</div>
 
 <div id="footer">
-  <small>$Id: index.html,v 1.27 2009/06/11 09:13:18 fatorange Exp $</small>
+  <small>$Id: index.html,v 1.28 2009/08/02 20:50:16 fatorange Exp $</small>
 </div>
 </div>
 
