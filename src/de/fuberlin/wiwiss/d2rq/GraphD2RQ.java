@@ -32,6 +32,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.engine.D2RQDatasetGraph;
 import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
+import de.fuberlin.wiwiss.d2rq.map.Configuration;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
@@ -48,7 +49,7 @@ import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.54 2009/06/03 16:28:17 fatorange Exp $
+ * @version $Id: GraphD2RQ.java,v 1.55 2009/08/02 09:15:08 fatorange Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	
@@ -217,5 +218,9 @@ public class GraphD2RQ extends GraphBase implements Graph {
     
     public Collection tripleRelations() {
     	return mapping.compiledPropertyBridges();
+    }
+    
+    public Configuration getConfiguration() {
+    	return this.mapping.configuration();
     }
 }

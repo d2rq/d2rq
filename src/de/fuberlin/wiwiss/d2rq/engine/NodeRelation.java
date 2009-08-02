@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeRelation.java,v 1.6 2008/08/13 11:27:35 cyganiak Exp $
+ * @version $Id: NodeRelation.java,v 1.7 2009/08/02 09:15:08 fatorange Exp $
  */
 public class NodeRelation {
 	
@@ -63,6 +63,19 @@ public class NodeRelation {
 		AliasMap renamer = new AliasMap(newAliases);
 		Map renamedNodeMakers = new HashMap();
 		it = variableNames().iterator();
+		while (it.hasNext()) {
+			String variableName = (String) it.next();
+			renamedNodeMakers.put(variableName, nodeMaker(variableName).renameAttributes(renamer));
+		}
+		return new NodeRelation(baseRelation().renameColumns(renamer), renamedNodeMakers);
+	}
+	
+	public NodeRelation renameSingleRelation(RelationName oldName, RelationName newName) {
+		AliasMap renamer = AliasMap.create1(oldName, newName);
+		Map renamedNodeMakers = new HashMap();
+		
+		// This is only done for consistency as the NodeMakers won't be used
+		Iterator it = variableNames().iterator();
 		while (it.hasNext()) {
 			String variableName = (String) it.next();
 			renamedNodeMakers.put(variableName, nodeMaker(variableName).renameAttributes(renamer));

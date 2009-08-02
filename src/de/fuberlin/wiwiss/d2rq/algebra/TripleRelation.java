@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TripleRelation.java,v 1.11 2009/07/29 12:03:53 fatorange Exp $
+ * @version $Id: TripleRelation.java,v 1.12 2009/08/02 09:15:09 fatorange Exp $
  */
 public class TripleRelation {
 	public static final String SUBJECT = "subject";
@@ -73,6 +73,10 @@ public class TripleRelation {
 		return new TripleRelation(nodeRelation.withPrefix(index));
 	}
 	
+	public TripleRelation renameSingleRelation(RelationName oldName, RelationName newName) {
+		return new TripleRelation(nodeRelation.renameSingleRelation(oldName, newName));
+	}
+	
 	public TripleRelation selectTriple(Triple t) {
 		MutableRelation newBase = new MutableRelation(baseRelation());
 		NodeMaker s = nodeMaker(SUBJECT).selectNode(t.getSubject(), newBase);
@@ -118,9 +122,9 @@ public class TripleRelation {
 		
 		// Collect variable names and their bound node makers 
 		NamesToNodeMakersMap nodeMakers = new NamesToNodeMakersMap();
-		nodeMakers.addIfVariable(s, nodeMaker(SUBJECT));
-		nodeMakers.addIfVariable(p, nodeMaker(PREDICATE));
-		nodeMakers.addIfVariable(o, nodeMaker(OBJECT));
+		nodeMakers.addIfVariable(s, nodeMaker(SUBJECT), nodeRelation.baseRelation().aliases());
+		nodeMakers.addIfVariable(p, nodeMaker(PREDICATE), nodeRelation.baseRelation().aliases());
+		nodeMakers.addIfVariable(o, nodeMaker(OBJECT), nodeRelation.baseRelation().aliases());
 
 		// Did the same variable occur more than once in the pattern, rendering it unsatisfiable?
 		if (!nodeMakers.satisfiable()) {

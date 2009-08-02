@@ -209,6 +209,11 @@
     <rdfs:comment>The number of results to retrieve from the database for the inverse statements for this PropertyBridge</rdfs:comment>
     <rdfs:label>limit inverse</rdfs:label>
   </rdf:Property>
+  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#useAllOptimizations">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Configuration"/>
+    <rdfs:comment>Whether to use bleeding edge optimizations</rdfs:comment>
+    <rdfs:label>use all optimizations</rdfs:label>
+  </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#propertyValue">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#AdditionalProperty"/>
     <rdfs:label>property value</rdfs:label>
@@ -349,7 +354,7 @@
     <rdfs:label>RDF value</rdfs:label>
   </rdf:Property>
   <rdf:Description rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1">
-    <owl:versionInfo>$Id: d2rq-rdfs.rdf,v 1.13 2009/07/29 12:03:52 fatorange Exp $</owl:versionInfo>
+    <owl:versionInfo>$Id: d2rq-rdfs.rdf,v 1.14 2009/08/02 09:15:08 fatorange Exp $</owl:versionInfo>
     <dc:format>RDF</dc:format>
     <dc:date>2006-08-12</dc:date>
     <dc:creator>Richard Cyganiak</dc:creator>

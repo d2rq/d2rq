@@ -12,11 +12,13 @@ import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 public class GraphPatternTranslator {
 	private final List triplePatterns;
 	private final Collection tripleRelations;
+	boolean useAllOptimizations;
 	
-	public GraphPatternTranslator(List triplePatterns, Collection tripleRelations) 
+	public GraphPatternTranslator(List triplePatterns, Collection tripleRelations, boolean useAllOptimizations) 
 	{
 		this.triplePatterns = triplePatterns;
 		this.tripleRelations = tripleRelations;
+		this.useAllOptimizations = useAllOptimizations;
 	}
 
 	/**
@@ -44,7 +46,7 @@ public class GraphPatternTranslator {
 		}
 		Collections.sort(candidateLists);
 		List joiners = new ArrayList();
-		joiners.add(TripleRelationJoiner.create());
+		joiners.add(TripleRelationJoiner.create(this.useAllOptimizations));
 		it = candidateLists.iterator();
 		while (it.hasNext()) {
 			CandidateList candidates = (CandidateList) it.next();

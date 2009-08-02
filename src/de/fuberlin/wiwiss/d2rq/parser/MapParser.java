@@ -40,7 +40,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.41 2009/07/31 21:13:44 fatorange Exp $
+ * @version $Id: MapParser.java,v 1.42 2009/08/02 09:15:09 fatorange Exp $
  */
 public class MapParser {
 
@@ -191,6 +191,10 @@ public class MapParser {
 			StmtIterator stmts = configResource.listProperties(D2RQ.serveVocabulary);
 			while (stmts.hasNext()) {
 				configuration.setServeVocabulary(stmts.nextStatement().getBoolean());
+			}			
+			stmts = configResource.listProperties(D2RQ.useAllOptimizations);
+			while (stmts.hasNext()) {
+				configuration.setUseAllOptimizations(stmts.nextStatement().getBoolean());
 			}			
 			this.mapping.setConfiguration(configuration);
 

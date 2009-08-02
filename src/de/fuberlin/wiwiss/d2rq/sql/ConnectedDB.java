@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.28 2009/07/15 10:16:30 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.29 2009/08/02 09:15:09 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -66,6 +66,7 @@ public class ConnectedDB {
 	private int limit;
 	private int fetchSize;
 	private Map zerofillCache = new HashMap(); // Attribute => Boolean
+	private Map uniqueIndexCache = new HashMap(); // RelationName => String => List of Strings
 	private final Properties connectionProperties;
 
 	private class KeepAliveAgent extends Thread {
@@ -253,7 +254,7 @@ public class ConnectedDB {
 	}
 	
 	public DatabaseSchemaInspector schemaInspector() {
-		if (this.schemaInspector == null) {
+		if (this.schemaInspector == null && this.jdbcURL != null) {
 			this.schemaInspector = new DatabaseSchemaInspector(this);
 		}
 		return this.schemaInspector;
@@ -389,6 +390,12 @@ public class ConnectedDB {
 					new Boolean(schemaInspector().isZerofillColumn(column)));
 		}
 		return ((Boolean) zerofillCache.get(column)).booleanValue();
+	}
+	
+	public HashMap getUniqueKeyColumns(RelationName tableName) {
+		if (!uniqueIndexCache.containsKey(tableName) && schemaInspector() != null)
+			uniqueIndexCache.put(tableName, schemaInspector().uniqueColumns(tableName));
+		return (HashMap) uniqueIndexCache.get(tableName);
 	}
     
 	private final static Pattern singleQuoteEscapePattern = Pattern.compile("([\\\\'])");

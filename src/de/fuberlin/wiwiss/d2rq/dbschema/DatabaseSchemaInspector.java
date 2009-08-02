@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.18 2009/07/15 14:55:20 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.19 2009/08/02 09:15:09 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -213,6 +213,24 @@ public class DatabaseSchemaInspector {
 			throw new D2RQException("Database exception", ex);
 		}
 	}
+	
+	public HashMap uniqueColumns(RelationName tableName) {
+		HashMap result = new HashMap();
+		try {
+			ResultSet rs = this.schema.getIndexInfo(
+					null, schemaName(tableName), tableName(tableName), true, false);
+			while (rs.next()) {
+				String indexKey = rs.getString("INDEX_NAME");
+				if (!result.containsKey(indexKey))
+					result.put(indexKey, new ArrayList());
+				((List)result.get(indexKey)).add(rs.getString("COLUMN_NAME"));
+			}
+			rs.close();
+			return result;
+		} catch (SQLException ex) {
+			throw new D2RQException("Database exception", ex);
+		}
+	}	
 	
 	/**
 	 * Returns a list of imported or exported (foreign) keys for a table.

@@ -117,7 +117,7 @@ public class TransformD2RQ extends TransformCopy
         CompatibleRelationGroup group;
         OpD2RQ opD2RQ;
         
-        nodeRelations = new GraphPatternTranslator(opBGP.getPattern().getList(), graph.tripleRelations()).translate();
+        nodeRelations = new GraphPatternTranslator(opBGP.getPattern().getList(), graph.tripleRelations(), graph.getConfiguration().getUseAllOptimizations()).translate();
         
         // no noderelation available 
         if (nodeRelations.isEmpty()) 

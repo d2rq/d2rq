@@ -201,11 +201,12 @@ ul.toc li li { font-weight: normal; }
       <li>7.1. <a href="#database">d2rq:Database</a></li>
       <li>7.2. <a href="#classmap">d2rq:ClassMap</a></li>
       <li>7.3. <a href="#propertybridge">d2rq:PropertyBridge</a></li>
-      <li>7.4. <a href="#servingvocabularies">Serving Vocabulary Classes and Properties</a></li>
-      <li>7.5. <a href="#translationtable">d2rq:TranslationTable</a></li>
-      <li>7.6. <a href="#conditional">Conditional Mappings</a></li>
-      <li>7.7. <a href="#hint">Performance Optimization using Hint Properties</a></li>
-      <li>7.8. <a href="#deprecated">Deprecated Language Constructs</a></li>
+      <li>7.4. <a href="#translationtable">d2rq:TranslationTable</a></li>
+      <li>7.5. <a href="#configuration">d2rq:Configuration</a></li>
+      <li>7.6. <a href="#servingvocabularies">Serving Vocabulary Classes and Properties</a></li>
+      <li>7.7. <a href="#conditional">Conditional Mappings</a></li>
+      <li>7.8. <a href="#hint">Performance Optimization using Hint Properties</a></li>
+      <li>7.9. <a href="#deprecated">Deprecated Language Constructs</a></li>
     </ul>
   </li>
   <li>8. <a href="#change_log">Change Log</a></li>
@@ -1361,73 +1362,7 @@ map:seeAlsoBridge a d2rq:PropertyBridge;
 <p>This adds an <tt>rdfs:seeAlso</tt> statement with a fixed URL object
   to every instance of the <tt>map:PersonsClassMap</tt> class map.</p>
 
-<h2><a name="servingvocabularies"></a>7.4 Serving Vocabulary Classes and Properties</h2>
-<p>In the spirit of <a href="http://www.w3.org/DesignIssues/LinkedData.html">Linked Data</a>, vocabulary data should be dereferencable by clients. D2RQ infers types of classes and properties as <tt>rdfs:Class</tt> and <tt>rdf:Property</tt> and allows the user to provide labels
-using the <tt>d2rq:classDefinitionLabel</tt> and <tt>d2rq:propertyDefinitionLabel</tt> constructs,
-comments using the <tt>d2rq:classDefinitionComment</tt> and <tt>d2rq:propertyDefinitionComment</tt> constructs,
-as well as additional properties using the <tt>d2rq:additionalClassDefinitionProperty</tt> and <tt>d2rq:additionalPropertyDefinitionProperty</tt> constructs.</p>
-
-<h3><a name="additionalproperty"></a>7.4.1 AdditionalProperty</h2>
-<p>A <strong>d2rq:AdditionalProperty</strong> construct can be used to add a fixed statement 
-  to all class definitions of a class map, or to all property definitions of a property bridge.
-  The statement is added to the result sets, if patterns like (ANY, ANY, ANY), (URI, ANY, ANY) or (URI, additionalPropertyName, 
-  ANY) are used. 
-  
-  The usage of <tt>d2rq:AdditionalProperty</tt> to add instance data is now deprecated (<a href="#additionalproperty_deprecated">details</a>).
-  
-  The <tt>d2rq:additionalClassDefinitionProperty</tt> and <tt>d2rq:additionalPropertyDefinitionProperty</tt> properties are used to link from the class map
-  or property bridge to the <tt>d2rq:AdditionalProperty</tt> definition.</p>
-<P><strong>Properties</strong></P>
-<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
-  <tr> 
-    <td width="20%" valign="top"><strong>d2rq:propertyName </strong></td>
-    <td width="80%" valign="top">The RDF property to be used as the predicate
-      of all fixed statements.</td>
-
-  </tr>
-  <tr> 
-    <td valign="top"><strong>d2rq:propertyValue</strong></td>
-    <td valign="top">The value to be used as the object of all fixed statements.</td>
-  </tr>
-</table>
-<P><strong>Example: Providing an additional property for a class definition</strong></P>
-  <pre>map:PersonsClassMap a d2rq:ClassMap;
-        d2rq:class :Person;
-        d2rq:additionalClassDefinitionProperty map:PersonEquivalence.
-
-map:PersonEquivalence a d2rq:AdditionalProperty;
-        d2rq:propertyName owl:equivalentClass;
-        d2rq:propertyValue foaf:Person.</pre>
-
-<p>This adds an <tt>owl:equivalentClass</tt> statement with the fixed object <tt>foaf:Person</tt> to every related class definition.</p>
-
-<P><strong>Example: Providing an additional property for a property definition</strong></P>
-  <pre>map:PaperTitle a d2rq:PropertyBridge;
-    	d2rq:belongsToClassMap map:Paper;
-    	d2rq:property :title;
-    	d2rq:column "Papers.Title";
-    	d2rq:additionalPropertyDefinitionProperty map:PaperTitleEquivalence.
-
-map:PaperTitleEquivalence a d2rq:AdditionalProperty;
-        d2rq:propertyName owl:equivalentProperty;
-        d2rq:propertyValue dc:title.</pre>
-
-<p>This adds an <tt>owl:equivalentProperty</tt> statement with the fixed object <tt>dc:title</tt> to every related property definition.</p>
-
-<h3>7.4.2 Integration with D2R Server</h3>
-<p>D2R Server automatically serves data for vocabularies placed under <tt>http://<em>baseURI</em><strong>/vocab/resource/</strong></tt>. The <a href="#generatemapping">mapping generator</a> automatically creates a compatible namespace for this purpose.
-For further details, please refer to the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/#vocabulary">D2R documentation</a>.</p>
- 
-<h3>7.4.3 Controlling vocabulary serving</h3>
-<p>Vocabulary serving is enabled by default. In order to deactivate it, a <tt>d2rq:Configuration</tt> block
-with the property <tt>d2rq:serveVocabulary</tt> set to <tt>false</tt> must be created:
-
-<P><strong>Example: Deactivating vocabulary serving</strong></P>
-  <pre>map:Configuration a d2rq:Configuration;
-	d2rq:serveVocabulary false.</pre>
-
-
-<h2><a name="translationtable"></a>7.5 Translation Tables</h2>
+<h2><a name="translationtable"></a>7.4 Translation Tables</h2>
 <p>A <strong>d2rq:TranslationTable</strong> is an additional layer between the 
   database and the RDF world. It translates back and forth between values taken 
   from the database and RDF URIs or literals. A translation table can be attached 
@@ -1456,7 +1391,7 @@ with the property <tt>d2rq:serveVocabulary</tt> set to <tt>false</tt> must be cr
   </tr>
 </table>
 
-<h3><a name="translation"></a>7.5.1 Translation</h3>
+<h3><a name="translation"></a>7.4.1 Translation</h3>
 <p>A <strong>d2rq:Translation</strong> is a single entry in a
   d2rq:TranslationTable.
   
@@ -1502,6 +1437,24 @@ map:ColorTable a d2rq:TranslationTable;
   and not by the node type of the rdfValues. map:ColorBridge uses d2rq:uriColumn.
   Thus, the translation will create URI nodes. If it used d2rq:column,
   then literals would be created.</p>
+
+<h2><a name="configuration"></a>7.5 Configuration</h2>
+<p>A <strong>d2rq:Configuration</strong> controls global behaviour of D2RQ. It is generally not required if the defaults are satisfactory.
+<p><strong>Properties</strong>
+<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
+  <tr>
+    <td width="20%" valign="top"><strong>d2rq:serveVocabulary</strong></td>
+    <td width="80%" valign="top">Whether to serve inferred and user-supplied vocabulary data (boolean; <tt>true</tt> by default). This option is automatically set when using D2R Server's <tt>--fast</tt> command-line option.</td>
+  </tr>
+  <tr>
+    <td valign="top"><strong>d2rq:useAllOptimizations</strong></td>
+    <td valign="top">Whether to use bleeding edge optimizations (boolean; <tt>false</tt> by default).</td>
+  </tr>
+</table>
+<P><strong>Example: Activating optimizations</strong></P>
+<P>In order to activate bleeding edge optimizations, a <tt>d2rq:Configuration</tt> block with the property <tt>d2rq:useAllOptimizations</tt> set to <tt>true</tt> is created:</P>
+<pre>map:Configuration a d2rq:Configuration;
+	d2rq:useAllOptimizations true.</pre>
 
 <h2><a name="conditional" id="conditional"></a>7.6 Conditional Mappings</h2>
 <p>Sometimes only certain information from a database should be accessible, because 
@@ -1563,7 +1516,73 @@ map:secondaryTopic a d2rq:PropertyBridge;
             d2rq:join "Rel_Paper_Topic.TopicID = Topics.TopicID";
             d2rq:condition "Rel_Paper_Topic.RelationType = 2".</pre>
 
-<h2><a name="hint" id="hint"></a>7.7 Performance Optimization using Hint Properties</h2>
+
+<h2><a name="servingvocabularies"></a>7.7 Serving Vocabulary Classes and Properties</h2>
+<p>In the spirit of <a href="http://www.w3.org/DesignIssues/LinkedData.html">Linked Data</a>, vocabulary data should be dereferencable by clients. D2RQ infers types of classes and properties as <tt>rdfs:Class</tt> and <tt>rdf:Property</tt> and allows the user to provide labels
+using the <tt>d2rq:classDefinitionLabel</tt> and <tt>d2rq:propertyDefinitionLabel</tt> constructs,
+comments using the <tt>d2rq:classDefinitionComment</tt> and <tt>d2rq:propertyDefinitionComment</tt> constructs,
+as well as additional properties using the <tt>d2rq:additionalClassDefinitionProperty</tt> and <tt>d2rq:additionalPropertyDefinitionProperty</tt> constructs.</p>
+
+<h3><a name="additionalproperty"></a>7.7.1 AdditionalProperty</h2>
+<p>A <strong>d2rq:AdditionalProperty</strong> construct can be used to add a fixed statement 
+  to all class definitions of a class map, or to all property definitions of a property bridge.
+  The statement is added to the result sets, if patterns like (ANY, ANY, ANY), (URI, ANY, ANY) or (URI, additionalPropertyName, 
+  ANY) are used. 
+  
+  The usage of <tt>d2rq:AdditionalProperty</tt> to add instance data is now deprecated (<a href="#additionalproperty_deprecated">details</a>).
+  
+  The <tt>d2rq:additionalClassDefinitionProperty</tt> and <tt>d2rq:additionalPropertyDefinitionProperty</tt> properties are used to link from the class map
+  or property bridge to the <tt>d2rq:AdditionalProperty</tt> definition.</p>
+<P><strong>Properties</strong></P>
+<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
+  <tr> 
+    <td width="20%" valign="top"><strong>d2rq:propertyName </strong></td>
+    <td width="80%" valign="top">The RDF property to be used as the predicate
+      of all fixed statements.</td>
+
+  </tr>
+  <tr> 
+    <td valign="top"><strong>d2rq:propertyValue</strong></td>
+    <td valign="top">The value to be used as the object of all fixed statements.</td>
+  </tr>
+</table>
+<P><strong>Example: Providing an additional property for a class definition</strong></P>
+  <pre>map:PersonsClassMap a d2rq:ClassMap;
+        d2rq:class :Person;
+        d2rq:additionalClassDefinitionProperty map:PersonEquivalence.
+
+map:PersonEquivalence a d2rq:AdditionalProperty;
+        d2rq:propertyName owl:equivalentClass;
+        d2rq:propertyValue foaf:Person.</pre>
+
+<p>This adds an <tt>owl:equivalentClass</tt> statement with the fixed object <tt>foaf:Person</tt> to every related class definition.</p>
+
+<P><strong>Example: Providing an additional property for a property definition</strong></P>
+  <pre>map:PaperTitle a d2rq:PropertyBridge;
+    	d2rq:belongsToClassMap map:Paper;
+    	d2rq:property :title;
+    	d2rq:column "Papers.Title";
+    	d2rq:additionalPropertyDefinitionProperty map:PaperTitleEquivalence.
+
+map:PaperTitleEquivalence a d2rq:AdditionalProperty;
+        d2rq:propertyName owl:equivalentProperty;
+        d2rq:propertyValue dc:title.</pre>
+
+<p>This adds an <tt>owl:equivalentProperty</tt> statement with the fixed object <tt>dc:title</tt> to every related property definition.</p>
+
+<h3>7.7.2 Integration with D2R Server</h3>
+<p>D2R Server automatically serves data for vocabularies placed under <tt>http://<em>baseURI</em><strong>/vocab/resource/</strong></tt>. The <a href="#generatemapping">mapping generator</a> automatically creates a compatible namespace for this purpose.
+For further details, please refer to the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/#vocabulary">D2R documentation</a>.</p>
+ 
+<h3>7.7.3 Controlling vocabulary serving</h3>
+<p>Vocabulary serving is enabled by default. In order to deactivate it, a <a href="#configuration"><tt>d2rq:Configuration</tt></a> block
+with the property <tt>d2rq:serveVocabulary</tt> set to <tt>false</tt> must be created:
+
+<P><strong>Example: Deactivating vocabulary serving</strong></P>
+  <pre>map:Configuration a d2rq:Configuration;
+	d2rq:serveVocabulary false.</pre>
+
+<h2><a name="hint" id="hint"></a>7.8 Performance Optimization using Hint Properties</h2>
 <p>This section covers hint properties that can be added to property bridges in 
   order to speed up queries: d2rq:valueMaxLength, d2rq:valueRegex and d2rq:valueContains.</p>
 
@@ -1608,13 +1627,13 @@ map:secondaryTopic a d2rq:PropertyBridge;
   or a <a href="#translationtable">translation table</a> with a custom Java class 
   that returns <tt>null</tt> for unwanted database values.</p>
 
-<h2 id="deprecated">7.8 Deprecated Language Constructs</h2>
+<h2 id="deprecated">7.9 Deprecated Language Constructs</h2>
 
 <p>This section lists several language constructs from older versions
 of the D2RQ mapping language that have been replaced by better
 alternatives and should no longer be used.</p>
 
-<h3 id="datatype-object">7.8.1 <tt>d2rq:DatatypePropertyBridge</tt> and <tt>d2rq:ObjectPropertyBridge</tt></h3>
+<h3 id="datatype-object">7.9.1 <tt>d2rq:DatatypePropertyBridge</tt> and <tt>d2rq:ObjectPropertyBridge</tt></h3>
 
 <p>Older versions of the language used two different classes to
 distinguish between property bridges that produce literals, and
@@ -1627,7 +1646,7 @@ is made by using an appropriate property on the bridge declaration:
 <tt>d2rq:uriColumn</tt>, <tt>d2rq:uriPattern</tt> and
 <tt>d2rq:bNodeIdColumns</tt> for resources.</dd></p>
 
-<h3 id="additionalproperty_deprecated"><a name="additionalproperty_deprecated"></a>7.8.2 d2rq:additionalProperty</h3>
+<h3 id="additionalproperty_deprecated"><a name="additionalproperty_deprecated"></a>7.9.2 d2rq:additionalProperty</h3>
 <p>Up until D2RQ 0.5.1, the <tt>d2rq:AdditionalProperty</tt> construct could be used
   to add a constant property-value pairs to all instances of a class map. An example
   is shown below:</p>
@@ -1660,7 +1679,7 @@ and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalprop
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.50 2009/07/29 12:03:53 fatorange Exp $</p>
+<p>$Id: index.htm,v 1.51 2009/08/02 09:15:08 fatorange Exp $</p>
 
 </BODY>
 </HTML>

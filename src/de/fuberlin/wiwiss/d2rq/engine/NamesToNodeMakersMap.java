@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
@@ -25,14 +26,15 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilterImpl;
  * same node for any result row that matches the expression. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NamesToNodeMakersMap.java,v 1.1 2008/08/13 11:27:35 cyganiak Exp $
+ * @version $Id: NamesToNodeMakersMap.java,v 1.2 2009/08/02 09:15:08 fatorange Exp $
  */
 public class NamesToNodeMakersMap {
 	private final Map nodeSets = new HashMap();
 	private final Map nodeMakers = new HashMap();
+	private final Map nodeRelationAliases = new HashMap();
 	private final Set projections = new HashSet();
 
-	public void add(String name, NodeMaker nodeMaker) {
+	public void add(String name, NodeMaker nodeMaker, AliasMap aliases) {
 		if (!nodeMakers.containsKey(name)) {
 			nodeMakers.put(name, nodeMaker);
 			projections.addAll(nodeMaker.projectionSpecs());
@@ -42,18 +44,21 @@ public class NamesToNodeMakersMap {
 		}
 		NodeSetFilterImpl nodeSet = (NodeSetFilterImpl) nodeSets.get(name);
 		nodeMaker.describeSelf(nodeSet);
+		if (!nodeRelationAliases.containsKey(name)) {
+			nodeRelationAliases.put(name, aliases);
+		}
 	}
 	
-	public void addIfVariable(Node possibleVariable, NodeMaker nodeMaker) {
+	public void addIfVariable(Node possibleVariable, NodeMaker nodeMaker, AliasMap aliases) {
 		if (!possibleVariable.isVariable()) return;
-		add(possibleVariable.getName(), nodeMaker);
+		add(possibleVariable.getName(), nodeMaker, aliases);
 	}
 
 	public void addAll(NodeRelation nodeRelation) {
 		Iterator it = nodeRelation.variableNames().iterator();
 		while (it.hasNext()) {
 			String variableName = (String) it.next();
-			add(variableName, nodeRelation.nodeMaker(variableName));
+			add(variableName, nodeRelation.nodeMaker(variableName), nodeRelation.baseRelation().aliases());
 		}
 	}
 	
@@ -93,6 +98,10 @@ public class NamesToNodeMakersMap {
 		return nodeMakers.keySet();
 	}
 	
+	public Map relationAliases() {
+		return nodeRelationAliases;
+	}
+
 	/**
 	 * @return All projections needed by any of the retained node makers 
 	 */
