@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.hp.hpl.jena.graph.Triple;
+
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 
 public class GraphPatternTranslator {
@@ -62,7 +64,9 @@ public class GraphPatternTranslator {
 		it = joiners.iterator();
 		while (it.hasNext()) {
 			TripleRelationJoiner joiner = (TripleRelationJoiner) it.next();
-			results.add(joiner.toNodeRelation());
+			NodeRelation nodeRelation = joiner.toNodeRelation();
+			if (!nodeRelation.baseRelation().equals(Relation.EMPTY) || !useAllOptimizations)
+				results.add(nodeRelation);
 		}
 		return results;
 	}
