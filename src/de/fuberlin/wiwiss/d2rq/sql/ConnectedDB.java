@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.29 2009/08/02 09:15:09 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.30 2009/08/04 08:41:14 dorgon Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -70,9 +70,9 @@ public class ConnectedDB {
 	private final Properties connectionProperties;
 
 	private class KeepAliveAgent extends Thread {
-		private boolean shutdown = false;
 		private final int interval;
 		private final String query;
+		volatile boolean shutdown = false;
 		
 		/**
 		 * @param interval in seconds
@@ -107,7 +107,8 @@ public class ConnectedDB {
 		}
 		
 		public void shutdown() {
-			this.shutdown = true;
+			shutdown = true;
+			keepAliveAgent.interrupt();
 		}
 	};
 	
@@ -506,10 +507,10 @@ public class ConnectedDB {
 	}
 
 	public void close() {
-		if (this.connection == null) {
-			return;
-		}
-		try {
+		if (keepAliveAgent != null)
+			keepAliveAgent.shutdown();
+		
+		if (connection != null) try {
 			this.connection.close();
 		} catch (SQLException ex) {
 			throw new D2RQException(ex);
