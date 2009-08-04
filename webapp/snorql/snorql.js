@@ -102,23 +102,28 @@ function Snorql() {
 
         // AndyL changed MIME type and success callback depending on query form...
         var dummy = this;
-        if (querytext.trim().toLowerCase().startsWith('select')) {
-        	service.setRequestHeader('Accept', 'application/sparql-results+json,*/*');
-        	service.setOutput('json');
-        	var successFunc = function(json) {
-                dummy.displayJSONResult(json, resultTitle);
-            };
-        } else if (querytext.trim().toLowerCase().startsWith('ask')) {
-        	service.setOutput('boolean');
-        	var successFunc = function(value) {
-                dummy.displayBooleanResult(value, resultTitle);
-            };
-        } else { // construct describe
-    		service.setOutput('rdf'); // !json
-    		var successFunc = function(model) {
-                dummy.displayRDFResult(model, resultTitle);
-            };
-        }
+        
+   	    var exp = /^\s*(?:prefix\s+\w*:\s+<[^>]*>\s*)*(\w+)\s*.*/i;
+   	    var match = exp.exec(querytext);
+   	    if (match) {
+	        if (match[1] == 'ask') {
+	        	service.setOutput('boolean');
+	        	var successFunc = function(value) {
+	                dummy.displayBooleanResult(value, resultTitle);
+	            };
+	        } else if (match[1] == 'construct' || match[1] == 'describe'){ // construct describe
+	    		service.setOutput('rdf'); // !json
+	    		var successFunc = function(model) {
+	                dummy.displayRDFResult(model, resultTitle);
+	            };
+	        } else {
+	        	service.setRequestHeader('Accept', 'application/sparql-results+json,*/*');
+	        	service.setOutput('json');
+	        	var successFunc = function(json) {
+	        		dummy.displayJSONResult(json, resultTitle);
+	        	};
+	        }
+   	    }
         
         service.query(query, {
             success: successFunc,
