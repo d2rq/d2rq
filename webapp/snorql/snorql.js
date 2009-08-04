@@ -103,15 +103,15 @@ function Snorql() {
         // AndyL changed MIME type and success callback depending on query form...
         var dummy = this;
         
-   	    var exp = /^\s*(?:prefix\s+\w*:\s+<[^>]*>\s*)*(\w+)\s*.*/i;
+   	    var exp = /^\s*(?:PREFIX\s+\w*:\s+<[^>]*>\s*)*(\w+)\s*.*/i;
    	    var match = exp.exec(querytext);
    	    if (match) {
-	        if (match[1] == 'ask') {
+	        if (match[1].toUpperCase() == 'ASK') {
 	        	service.setOutput('boolean');
 	        	var successFunc = function(value) {
 	                dummy.displayBooleanResult(value, resultTitle);
 	            };
-	        } else if (match[1] == 'construct' || match[1] == 'describe'){ // construct describe
+	        } else if (match[1].toUpperCase() == 'CONSTRUCT' || match[1].toUpperCase() == 'DESCRIBE'){ // construct describe
 	    		service.setOutput('rdf'); // !json
 	    		var successFunc = function(model) {
 	                dummy.displayRDFResult(model, resultTitle);
@@ -124,7 +124,7 @@ function Snorql() {
 	        	};
 	        }
    	    }
-        
+   	    
         service.query(query, {
             success: successFunc,
             failure: function(report) {
@@ -327,7 +327,7 @@ function Snorql() {
 /*
  * RDFXMLFormatter
  * 
- * could be improved...
+ * maybe improve...
  */
 function RDFXMLFormatter(string) {
 	var pre = document.createElement('pre');
