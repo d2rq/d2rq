@@ -29,7 +29,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * {@link MappingGenerator} or a mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: dump_rdf.java,v 1.10 2009/07/13 15:38:56 fatorange Exp $
+ * @version $Id: dump_rdf.java,v 1.11 2009/08/05 11:11:40 fatorange Exp $
  */
 public class dump_rdf {
 	private final static String[] includedDrivers = {
@@ -77,7 +77,7 @@ public class dump_rdf {
 			dump.setJDBCURL(cmd.getArg(jdbcArg).getValue());
 		}
 		if (cmd.contains(fetchsizeArg)) {
-			dump.setFetchSize(Integer.parseInt(cmd.getArg(fetchsizeArg).getValue()));
+			dump.setFetchSize(Integer.valueOf(cmd.getArg(fetchsizeArg).getValue()));
 		}
 		if (cmd.contains(mapArg)) {
 			dump.setMapURL(cmd.getArg(mapArg).getValue());
@@ -192,7 +192,7 @@ public class dump_rdf {
 				Database db = (Database) it.next();
 				db.setResultSizeLimit(Database.NO_LIMIT);
 				if (this.fetchSize != null)
-					db.setFetchSize(this.fetchSize);
+					db.setFetchSize(this.fetchSize.intValue());
 				else {
 					/* Supply useful fetch sizes if none set so far */
 					if (db.getFetchSize() == Database.NO_FETCH_SIZE)
