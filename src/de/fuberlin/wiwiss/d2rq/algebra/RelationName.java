@@ -8,7 +8,7 @@ package de.fuberlin.wiwiss.d2rq.algebra;
  *       if the databases are not equal. (?)
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RelationName.java,v 1.4 2009/07/15 10:16:30 fatorange Exp $
+ * @version $Id: RelationName.java,v 1.5 2009/08/05 11:23:52 fatorange Exp $
  */
 public class RelationName implements Comparable {
 	private String schemaName;
@@ -20,7 +20,7 @@ public class RelationName implements Comparable {
 	 * Constructs a new relation name.
 	 * @param schemaName The schema name, or <tt>null</tt> if none
 	 * @param tableName The table name
-	 * @param caseInsensitive Whether the case is unspecified, i.e. comparisons on this relation name need to be case-insensitive
+	 * @param caseUnspecified Whether the case is unspecified, i.e. comparisons on this relation name need to be case-insensitive
 	 */
 	public RelationName(String schemaName, String tableName, boolean caseUnspecified) {
 		this.schemaName = schemaName;

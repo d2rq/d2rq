@@ -55,7 +55,6 @@ public class OpD2RQ extends OpExt
 
 	/**
 	 * used for linking 2 OpD2RQs with an left-join
-	 * @return
 	 */
 	public Relation getRelation() {
 		return relation;
@@ -63,7 +62,6 @@ public class OpD2RQ extends OpExt
 
 	/**
 	 * used for linking 2 OpD2RQs with an left-join
-	 * @return
 	 */
 	public Collection getBindingMakers() 
 	{

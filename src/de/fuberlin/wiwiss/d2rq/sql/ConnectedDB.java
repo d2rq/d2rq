@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.30 2009/08/04 08:41:14 dorgon Exp $
+ * @version $Id: ConnectedDB.java,v 1.31 2009/08/05 11:23:52 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -496,7 +496,7 @@ public class ConnectedDB {
 	 * case-insensitive comparison.
 	 * We need to account for this when comparing table names reported by MySQL and those from the mapping.   
 	 * 
-	 * @see http://dev.mysql.com/doc/refman/5.0/en/identifier-case-sensitivity.html
+	 * @see <a href="http://dev.mysql.com/doc/refman/5.0/en/identifier-case-sensitivity.html">MySQL Manual, Identifier Case Sensitivity</a>
 	 */
 	public boolean lowerCaseTableNames() {
 		Connection c = connection();

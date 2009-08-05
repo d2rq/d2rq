@@ -43,8 +43,6 @@ public class TransformAddFilters extends TransformCopy
 	
 	/**
 	 * Constructor
-	 * 
-	 * @param graph - a D2RQ-Graph
 	 */
 	public TransformAddFilters() 
 	{

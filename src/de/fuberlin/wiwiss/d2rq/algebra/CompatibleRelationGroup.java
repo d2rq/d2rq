@@ -13,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.find.TripleMaker;
 
 /**
  * A group of {@link Relation}s that can be combined into a single
- * relation without changing the semantics of {@link NodeMaker}s.
+ * relation without changing the semantics of {@link de.fuberlin.wiwiss.d2rq.nodes.NodeMaker}s.
  * 
  * Relations can be combined iff they access the same database and 
  * they contain exactly the same joins and WHERE clauses. If they
@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.find.TripleMaker;
  * TODO: groupNodeRelations and groupTripleRelations are virtually identical
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: CompatibleRelationGroup.java,v 1.3 2009/07/29 12:03:53 fatorange Exp $
+ * @version $Id: CompatibleRelationGroup.java,v 1.4 2009/08/05 11:23:52 fatorange Exp $
  */
 public class CompatibleRelationGroup {
 

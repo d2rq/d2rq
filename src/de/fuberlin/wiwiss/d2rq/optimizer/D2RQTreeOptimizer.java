@@ -75,7 +75,7 @@ public class D2RQTreeOptimizer
      * move the Filter-Conditions as far as possible down in the tree. In the optimal way, the filterconditions
      * is the parent of an opBGP 
      * @param op
-     * @return
+     * @return Optimized op
      */
     public static Op optimize(Op op, GraphD2RQ graph)
     {

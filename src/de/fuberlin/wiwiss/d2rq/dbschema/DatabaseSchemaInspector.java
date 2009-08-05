@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.20 2009/08/02 19:22:10 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.21 2009/08/05 11:23:52 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -235,8 +235,8 @@ public class DatabaseSchemaInspector {
 	/**
 	 * Returns a list of imported or exported (foreign) keys for a table.
 	 * @param tableName The table we are interested in
-	 * @param direction If set to {@link KEYS_IMPORTED}, the table's foreign keys are returned.
-	 * 					If set to {@link KEYS_EXPORTED}, the table's primary keys referenced from other tables are returned.
+	 * @param direction If set to {@link #KEYS_IMPORTED}, the table's foreign keys are returned.
+	 * 					If set to {@link #KEYS_EXPORTED}, the table's primary keys referenced from other tables are returned.
 	 * @return A list of {@link Join}s; the local columns are in attributes1() 
 	 */
 	public List foreignKeys(RelationName tableName, int direction) {
@@ -340,8 +340,8 @@ public class DatabaseSchemaInspector {
 	/**
 	 * Looks up a RelationName with the schema in order to retrieve the correct capitalization
 	 * 
-	 * @param tableName
-	 * @return
+	 * @param relationName
+	 * @return The correctly captialized RelationName
 	 */
 	public RelationName getCorrectCapitalization(RelationName relationName) {
 		if (!relationName.caseUnspecified() || !db.lowerCaseTableNames())
