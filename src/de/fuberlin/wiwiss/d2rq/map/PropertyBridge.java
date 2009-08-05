@@ -75,18 +75,18 @@ public class PropertyBridge extends ResourceMap {
 	
 	public void setLimit(int limit) {
 	    assertNotYetDefined(this.limit, D2RQ.limit, D2RQException.PROPERTYBRIDGE_DUPLICATE_LIMIT);
-	    this.limit = limit;
+	    this.limit = new Integer(limit);
 	}
 
 	public void setLimitInverse(int limit) {
 	    assertNotYetDefined(this.limitInverse, D2RQ.limitInverse, D2RQException.PROPERTYBRIDGE_DUPLICATE_LIMITINVERSE);
-	    this.limitInverse = limit;
+	    this.limitInverse = new Integer(limit);
 	}
 
 	public void setOrder(String column, boolean desc) {
 	    assertNotYetDefined(this.order, (desc ? D2RQ.orderDesc : D2RQ.orderAsc), D2RQException.PROPERTYBRIDGE_DUPLICATE_ORDER);
 	    this.order = column;
-	    this.orderDesc = desc;
+	    this.orderDesc = new Boolean(desc);
 	}
     
 	public void setRefersToClassMap(ClassMap classMap) {
@@ -154,13 +154,13 @@ public class PropertyBridge extends ResourceMap {
 		}
 		
 		if (this.limit!=null) {
-			builder.setLimit(this.limit);
+			builder.setLimit(this.limit.intValue());
 		}
 		if (this.limitInverse!=null) {
-			builder.setLimitInverse(this.limitInverse);
+			builder.setLimitInverse(this.limitInverse.intValue());
 		}
 		if (this.order!=null) {
-			builder.setOrder(SQL.parseAttribute(this.order), this.orderDesc);
+			builder.setOrder(SQL.parseAttribute(this.order), this.orderDesc.booleanValue());
 		}
 
 		return builder.buildRelation(this.belongsToClassMap.database().connectedDB()); 
