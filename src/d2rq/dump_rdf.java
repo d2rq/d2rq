@@ -29,7 +29,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * {@link MappingGenerator} or a mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: dump_rdf.java,v 1.11 2009/08/05 11:11:40 fatorange Exp $
+ * @version $Id: dump_rdf.java,v 1.12 2009/08/06 09:51:53 fatorange Exp $
  */
 public class dump_rdf {
 	private final static String[] includedDrivers = {
@@ -217,6 +217,7 @@ public class dump_rdf {
 			} else {
 				writer.write(d2rqModel, out, absoluteBaseURI);
 			}
+			d2rqModel.close();
 		}
 		private Model makeMapModel() throws DumpParameterException {
 			if (hasMappingFile()) {
