@@ -275,11 +275,7 @@ public class TransformD2RQ extends TransformCopy
     {
     	if (expr instanceof ExprNode) { // only handle SPARQL, no RDQL
 	        // convert to a sql-string
-	        String sqlString = ExprUtility.convertExprToSQL(expr, nodeRelation);
-	        
-	        // converting sucessfully ?
-	        if (sqlString != null)
-	            return SQLExpression.create(sqlString);
+	        return ExprUtility.convertExprToSQL(expr, nodeRelation);
     	}
     	
     	return null;

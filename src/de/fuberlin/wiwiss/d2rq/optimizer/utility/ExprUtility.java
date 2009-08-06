@@ -2,6 +2,7 @@ package de.fuberlin.wiwiss.d2rq.optimizer.utility;
 
 import com.hp.hpl.jena.sparql.expr.Expr;
 import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
 /**
  * Utility-class for expr. 
@@ -18,19 +19,14 @@ public class ExprUtility
      * @param expr - root-node of an expression-tree
      * @return String - the corresponding sql-string
      */
-    public static String convertExprToSQL(final Expr expr, final NodeRelation nodeRelation)
+    public static Expression convertExprToSQL(final Expr expr, final NodeRelation nodeRelation)
     {
-        TransformExprToSQLApplyer transformExprToSQLApplyer;
-        String sqlString;
-        
+        TransformExprToSQLApplyer transformExprToSQLApplyer;        
         transformExprToSQLApplyer = new TransformExprToSQLApplyer(nodeRelation);
-        sqlString = null;
         
         // start converting expr to sql
         expr.visit(transformExprToSQLApplyer);
 
-        sqlString = transformExprToSQLApplyer.result(); 
-        
-        return sqlString;
+        return transformExprToSQLApplyer.result(); 
     }
 }

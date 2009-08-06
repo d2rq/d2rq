@@ -1,6 +1,14 @@
 package de.fuberlin.wiwiss.d2rq.optimizer.utility;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.E_Equals;
+import com.hp.hpl.jena.sparql.expr.E_NotEquals;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprFunction;
 import com.hp.hpl.jena.sparql.expr.ExprFunction1;
@@ -8,11 +16,14 @@ import com.hp.hpl.jena.sparql.expr.ExprFunction2;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.ExprVisitor;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueNode;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ExpressionProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
+import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
@@ -22,6 +33,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
 /**
  * Transforms an expr to a sql-string
+ * TODO Move away from sqlExpression.append() and build an expression tree instead
  *  
  * @author Herwig Leimer
  *
@@ -29,6 +41,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 public final class TransformExprToSQLApplyer implements ExprVisitor 
 {
 	private StringBuffer sqlExpression;
+	private Expression expression = null;
 	private boolean convertAbleSuccessful;     // flag if converting was possible
 	private NodeRelation nodeRelation;
 	
@@ -116,7 +129,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
     public void visit(ExprVar exprVar)
     {        
         String varName;
-        String sqlColumnName;
+        List sqlColumnNames;
         
         varName = exprVar.getVarName();
         
@@ -124,12 +137,12 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
         if (!Var.isBlankNodeVarName(varName))
         {
             // get the sql-column for the sparql-var
-            sqlColumnName = getSqlColumnNameForSparqlVar(exprVar);
+            sqlColumnNames = getSqlColumnNamesForSparqlVar(exprVar);
             
-            if (sqlColumnName != null)
+            if (sqlColumnNames.size() == 1)
             {
-                sqlExpression.append(sqlColumnName);
-            }else
+                sqlExpression.append(sqlColumnNames.get(0));
+            } else
             {
                 // no sql-column for sparql-var does exist
                 // break up convertion
@@ -154,16 +167,12 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
 	 * @return String - the transformed sql-string if converting 
 	 *                  was possible, otherwise null.
 	 */
-	public String result()
+	public Expression result()
     { 
-	    String result = null;
-    
 	    if (this.convertAbleSuccessful)
-	    {
-	        result = sqlExpression.toString();
-	    }
-	    
-	    return result;
+	    	return (expression != null ? expression : SQLExpression.create(sqlExpression.toString()));
+	    else
+	    	return null;
     }
 		
 	/**
@@ -239,7 +248,39 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
         	}
         	
         }
+        
+        /*
+         * Translate node constants
+         */
+        if ((expr instanceof E_Equals || expr instanceof E_NotEquals) &&
+        		((expr.getArg1().isConstant() && expr.getArg2().isVariable())
+        		|| (expr.getArg2().isConstant() && expr.getArg1().isVariable()))) {
         	
+        	Expr constant = expr.getArg1().isConstant() ? expr.getArg1() : expr.getArg2(); 
+        	Expr variable = expr.getArg1().isVariable() ? expr.getArg1() : expr.getArg2(); 
+        	
+        	NodeMaker nm = this.nodeRelation.nodeMaker(variable.getVarName());
+        	if (nm instanceof TypedNodeMaker && constant instanceof NodeValueNode)
+            {
+        		ValueMaker vm = ((TypedNodeMaker)nm).valueMaker();
+        		NodeValueNode nvn =  ((NodeValueNode)constant);
+        		Node node = nvn.getNode();
+        			
+    			if (node.isURI() && vm instanceof Pattern) {
+    				if (!nm.selectNode(node, RelationalOperators.DUMMY).equals(NodeMaker.EMPTY)) {
+    					if (expr instanceof E_Equals) {
+        					expression = vm.valueExpression(node.getURI());
+        					return;
+    					}
+    					else if (expr instanceof E_NotEquals) {
+        					expression = Equality.create(Expression.FALSE, vm.valueExpression(node.getURI()));
+        					return;
+    					}
+    				}
+    			}
+        	}
+        }
+                
         if (!sqlOperator.equals("") && compatible)
         {
             sqlExpression.append("(") ;
@@ -258,13 +299,13 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
     }
 
     /**
-     * Delivers the coresponding sql-column-name for a sparql-var
+     * Delivers the coresponding sql-column-names for a sparql-var
      * @param exprVar - a sparql-expr-var
      * @return String - the equivalent sql-column-name if it does exist, otherwise null
      */
-    private String getSqlColumnNameForSparqlVar(ExprVar exprVar)
+    private List getSqlColumnNamesForSparqlVar(ExprVar exprVar)
     {
-        String sqlVarName = null;
+        ArrayList sqlVarNames = new ArrayList();
         NodeMaker nodeMaker;
         Attribute attribute;
         ProjectionSpec projectionSpec;
@@ -278,14 +319,17 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
 
             if (nodeMaker instanceof TypedNodeMaker)
             {
-            	projectionSpec = (ProjectionSpec)((TypedNodeMaker)nodeMaker).projectionSpecs().iterator().next();
-                
-            	if (projectionSpec != null)
-            	{
-            		if (projectionSpec instanceof Attribute)
+            	Iterator it = ((TypedNodeMaker)nodeMaker).projectionSpecs().iterator();
+            	while (it.hasNext()) {
+	            	projectionSpec = (ProjectionSpec)it.next();
+	                
+	            	if (projectionSpec == null)
+	            		return Collections.EMPTY_LIST;
+
+	            	if (projectionSpec instanceof Attribute)
             		{
             			attribute = (Attribute)projectionSpec;
-            			sqlVarName = attribute.qualifiedName();
+            			sqlVarNames.add(attribute.qualifiedName());
             		}
             		else
             		{
@@ -294,13 +338,15 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
             			expression = expressionProjectionSpec.toExpression();
             			if (expression instanceof SQLExpression)
             			{
-            				sqlVarName = ((SQLExpression)expression).getExpression();
+            				sqlVarNames.add(((SQLExpression)expression).getExpression());
             			}
-            		}
-	            }
+            			else
+            				return Collections.EMPTY_LIST;
+		            }
+            	}
             }
         }
         
-        return sqlVarName;
+        return sqlVarNames;
     }
 }
