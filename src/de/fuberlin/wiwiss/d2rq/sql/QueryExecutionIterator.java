@@ -21,7 +21,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryExecutionIterator.java,v 1.12 2009/07/13 15:38:56 fatorange Exp $
+ * @version $Id: QueryExecutionIterator.java,v 1.13 2009/08/06 10:51:34 fatorange Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
 	public static Collection protocol=null;
@@ -137,8 +137,12 @@ public class QueryExecutionIterator implements ClosableIterator {
         try {
 			Connection con = this.database.connection();
 			this.statement = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			if (database.fetchSize() != Database.NO_FETCH_SIZE)
-				this.statement.setFetchSize(database.fetchSize());
+			if (database.fetchSize() != Database.NO_FETCH_SIZE) {
+				try {
+					this.statement.setFetchSize(database.fetchSize());
+				}
+				catch (SQLException e) {} /* Some drivers don't support fetch sizes, e.g. JDBC-ODBC */
+			}
 			this.resultSet = this.statement.executeQuery(this.sql);
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {
