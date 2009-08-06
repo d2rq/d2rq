@@ -1,6 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.optimizer.utility;
 
 import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
+import com.hp.hpl.jena.sparql.expr.E_LogicalNot;
 import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprFunction;
@@ -42,12 +43,13 @@ public final class DistributiveLawApplyer implements ExprVisitor
 		Expr leftLeftExpr, rightLeftExpr, leftRightExpr, rightRightExpr;
 		Expr newAndExpr, newOrExpr1, newOrExpr2;
 		
-		if (curExpr instanceof ExprFunction1)
+		if (curExpr instanceof E_LogicalNot)
 		{
 			subExpr = curExpr;
 			// step down
 			this.resultExpr = curExpr;
 			((ExprFunction1) subExpr).getArg().visit(this);
+			this.resultExpr = new E_LogicalNot(this.resultExpr);
 			
 		}else if (curExpr instanceof ExprFunction2)
 		{

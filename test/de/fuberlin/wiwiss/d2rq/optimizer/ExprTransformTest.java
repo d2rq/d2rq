@@ -15,20 +15,20 @@ import junit.framework.TestCase;
  */
 public class ExprTransformTest extends TestCase {
 
-	public void testExprDeMorganDoubleNot() {
+	public void testExprDeMorganDoubleNotA() {
 		Expr expr = ExprUtils.parse("!(!(?a))");
 		DeMorganLawApplyer apply = new DeMorganLawApplyer();
 		expr.visit(apply);
 		assertEquals("?a", apply.result().toString());
 	}
 	
-	public void testExprDeMorganAnd() {
-		Expr expr = ExprUtils.parse("!(?a && ?b)");
+	public void testExprDeMorganDoubleNotAB() {
+		Expr expr = ExprUtils.parse("!(!(?a && ?b))");
 		DeMorganLawApplyer apply = new DeMorganLawApplyer();
 		expr.visit(apply);
-		assertEquals("( ( ! ?a ) || ( ! ?b ) )", apply.result().toString());
+		assertEquals("( ?a && ?b )", apply.result().toString());
 	}
-
+	
 	public void testExprDeMorganOr() {
 		Expr expr = ExprUtils.parse("!(?a || ?b)");
 		DeMorganLawApplyer apply = new DeMorganLawApplyer();
@@ -36,21 +36,35 @@ public class ExprTransformTest extends TestCase {
 		assertEquals("( ( ! ?a ) && ( ! ?b ) )", apply.result().toString());
 	}
 
-	public void testExprDistributiveOr() {
+	public void testExprDeMorganAndDontChange() {
+		Expr expr = ExprUtils.parse("!(?a && ?b)");
+		DeMorganLawApplyer apply = new DeMorganLawApplyer();
+		expr.visit(apply);
+		assertEquals("( ! ( ?a && ?b ) )", apply.result().toString());
+	}
+	
+	public void testExprDistributiveABOrC() {
 		Expr expr = ExprUtils.parse("(( ?a && ?b ) || ?c )");
 		DistributiveLawApplyer apply = new DistributiveLawApplyer();
 		expr.visit(apply);
 		assertEquals("( ( ?a || ?c ) && ( ?b || ?c ) )", apply.result().toString());
 	}
 
-	public void testExprDistributiveAnd() {
+	public void testExprDistributiveCOrAB() {
 		Expr expr = ExprUtils.parse("?c || ( ?a && ?b )");
 		DistributiveLawApplyer apply = new DistributiveLawApplyer();
 		expr.visit(apply);
 		assertEquals("( ( ?c || ?a ) && ( ?c || ?b ) )", apply.result().toString());
 	}
 
-	public void testExprDistributiveX() {
+	public void testExprDistributiveAndDontChange() {
+		Expr expr = ExprUtils.parse("!(?a || ?b) && ?c");
+		DistributiveLawApplyer apply = new DistributiveLawApplyer();
+		expr.visit(apply);
+		assertEquals("( ( ! ( ?a || ?b ) ) && ?c )", apply.result().toString());
+	}
+	
+	public void testExprDistributiveOrComplex() {
 		Expr expr = ExprUtils.parse("(?c || ( ?a && ?b )) || (?d && ?e)");
 		DistributiveLawApplyer apply = new DistributiveLawApplyer();
 		expr.visit(apply);
