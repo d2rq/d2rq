@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.21 2009/08/05 11:23:52 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.22 2009/08/06 21:49:40 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -173,6 +173,12 @@ public class DatabaseSchemaInspector {
 						&& table.startsWith("BIN$")) {
 					// Skip deleted tables in Oracle's Recycling Bin.
 					// They have names like MYSCHEMA.BIN$FoHqtx6aQ4mBaMQmlTCPTQ==$0
+					continue;
+				}
+				if (this.db.dbTypeIs(ConnectedDB.MSSQL) 
+						&& ("sys".equals(schema)
+								|| "INFORMATION_SCHEMA".equals(schema))) {
+					// MS SQL Server has schemas "sys" and "information_schema" in every DB
 					continue;
 				}
 				result.add(toRelationName(schema, table));
