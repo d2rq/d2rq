@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.30 2009/07/29 12:03:53 fatorange Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.31 2009/08/06 11:15:54 fatorange Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -93,12 +93,14 @@ public class SelectStatementBuilder {
 		
 		int combinedLimit = Relation.combineLimits(limit, database.limit());
 		
-		if (this.database.dbTypeIs(ConnectedDB.MSSQL) && combinedLimit != Database.NO_LIMIT) {
-			result.append("TOP " + combinedLimit + " ");
-		}
 		if (this.eliminateDuplicates && database.allowDistinct()) {
 			result.append("DISTINCT ");
 		}
+		
+		if ((this.database.dbTypeIs(ConnectedDB.MSSQL) || this.database.dbTypeIs(ConnectedDB.MSAccess)) && combinedLimit != Database.NO_LIMIT) {
+			result.append("TOP " + combinedLimit + " ");
+		}
+		
 		Iterator it = this.selectSpecs.iterator();
 		if (!it.hasNext()) {
 			result.append("1");

@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.31 2009/08/05 11:23:52 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.32 2009/08/06 11:15:54 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -33,6 +33,7 @@ public class ConnectedDB {
 	public static final String PostgreSQL = "PostgreSQL";
 	public static final String Oracle = "Oracle";
 	public static final String MSSQL = "Microsoft SQL Server";
+	public static final String MSAccess = "Microsoft Access";
 	public static final String Other = "Other";
 	public static final int TEXT_COLUMN = 1;
 	public static final int NUMERIC_COLUMN = 2;
@@ -286,6 +287,8 @@ public class ConnectedDB {
 					this.dbType = ConnectedDB.Oracle;
 				} else if (productName.indexOf("microsoft sql server") >= 0) {
 					this.dbType = ConnectedDB.MSSQL;
+				} else if (productName.indexOf("access") >= 0) {
+					this.dbType = ConnectedDB.MSAccess;
 				} else {
 					this.dbType = ConnectedDB.Other;
 				}
