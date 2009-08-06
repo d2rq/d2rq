@@ -2,7 +2,7 @@
 <project name="D2RQ" default="all" basedir=".">
 
 	<property name="name" value="d2rq"/>
-	<property name="version" value="0.6-dev"/>
+	<property name="version" value="0.6.1-dev"/>
 	<property name="project.package" value="de.fuberlin.wiwiss.d2rq"/>
 	<property name="project.path" value="de/fuberlin/wiwiss/d2rq"/>
 	<property name="src" value="src"/>
