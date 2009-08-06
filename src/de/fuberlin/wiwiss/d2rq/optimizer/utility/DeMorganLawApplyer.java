@@ -48,9 +48,14 @@ public final class DeMorganLawApplyer implements ExprVisitor
 			
 			if (curExpr instanceof E_LogicalNot)
 			{
+				// !!a ==> a
+				if (subExpr instanceof E_LogicalNot) {
+					this.resultExpr = ((ExprFunction1) subExpr).getArg();
+				}
+				
 				// subexpr a AND or OR 
 				// apply DeMorgan
-				if ((subExpr instanceof E_LogicalAnd || subExpr instanceof E_LogicalOr))
+				else if (subExpr instanceof E_LogicalAnd || subExpr instanceof E_LogicalOr)
 				{
 					// step down
 					leftExpr = ((ExprFunction2)subExpr).getArg1();
@@ -63,7 +68,6 @@ public final class DeMorganLawApplyer implements ExprVisitor
 					rightExpr = this.resultExpr;
 					
 					
-					// !!a ==> a
 					// !(a || b) ==> !a && !b
 					// !(a && b) ==> !a || !b
 					if (!(leftExpr instanceof E_LogicalNot))
@@ -123,7 +127,7 @@ public final class DeMorganLawApplyer implements ExprVisitor
 				rightExpr.visit(this);
 				rightExpr = this.resultExpr;
 				
-				// don't change the operator, no DeMorgan-Law
+				// create new And/Or with resultExpr
 				if (curExpr instanceof E_LogicalOr)
 				{
 					this.resultExpr = new E_LogicalOr(leftExpr, rightExpr);
