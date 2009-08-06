@@ -25,6 +25,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.expr.Negation;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
@@ -273,7 +274,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
         					return;
     					}
     					else if (expr instanceof E_NotEquals) {
-        					expression = Equality.create(Expression.FALSE, vm.valueExpression(node.getURI()));
+        					expression = new Negation(vm.valueExpression(node.getURI()));
         					return;
     					}
     				}
