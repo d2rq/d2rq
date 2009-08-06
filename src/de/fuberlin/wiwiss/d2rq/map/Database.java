@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.21 2009/07/13 15:38:56 fatorange Exp $
+ * @version $Id: Database.java,v 1.22 2009/08/06 10:34:21 fatorange Exp $
  */
 public class Database extends MapObject {
 	public static final int NO_LIMIT = -1;
@@ -88,54 +88,69 @@ public class Database extends MapObject {
 	public void setODBCDSN(String odbcDSN) {
 		assertNotYetDefined(this.odbcDSN, D2RQ.odbcDSN, 
 				D2RQException.DATABASE_DUPLICATE_ODBCDSN);
+		checkNotConnected();		
 		this.odbcDSN = odbcDSN;
 	}
 
 	public void setJDBCDSN(String jdbcDSN) {
 		assertNotYetDefined(this.jdbcDSN, D2RQ.jdbcDSN,
 				D2RQException.DATABASE_DUPLICATE_JDBCDSN);
+		checkNotConnected();		
 		this.jdbcDSN = jdbcDSN;
+	}
+	
+	public String getJDBCDSN() {
+		return this.jdbcDSN;
 	}
 
 	public void setJDBCDriver(String jdbcDriver) {
 		assertNotYetDefined(this.jdbcDriver, D2RQ.jdbcDriver,
 				D2RQException.DATABASE_DUPLICATE_JDBCDRIVER);
+		checkNotConnected();		
 		this.jdbcDriver = jdbcDriver;
 	}
 
 	public void setUsername(String username) {
 		assertNotYetDefined(this.username, D2RQ.username,
 				D2RQException.DATABASE_DUPLICATE_USERNAME);
+		checkNotConnected();		
 		this.username = username;
 	}
 
 	public void setPassword(String password) {
 		assertNotYetDefined(this.password, D2RQ.password,
 				D2RQException.DATABASE_DUPLICATE_PASSWORD);
+		checkNotConnected();		
 		this.password = password;
 	}
 
 	public void addTextColumn(String column) {
+		checkNotConnected();		
 		this.textColumns.add(column);
 	}
 	
 	public void addNumericColumn(String column) {
+		checkNotConnected();		
 		this.numericColumns.add(column);
 	}
 	
 	public void addDateColumn(String column) {
+		checkNotConnected();		
 		this.dateColumns.add(column);
 	}
 	
 	public void addTimestampColumn(String column) {
+		checkNotConnected();		
 		this.timestampColumns.add(column);
 	}
 	
 	public void setAllowDistinct(boolean b) {
+		checkNotConnected();		
 		this.allowDistinct = b;
 	}
 
 	public void setResultSizeLimit(int limit) {
+		checkNotConnected();		
 		this.limit = limit;
 	}
 	
@@ -144,10 +159,12 @@ public class Database extends MapObject {
 	}
 	
 	public void setFetchSize(int fetchSize) {
+		checkNotConnected();		
 		this.fetchSize = fetchSize;
 	}
 		
 	public void setConnectionProperty(String key, String value) {
+		checkNotConnected();		
 		this.connectionProperties.setProperty(key, value);
 	}
 	
@@ -195,5 +212,12 @@ public class Database extends MapObject {
 					D2RQException.DATABASE_ODBC_WITH_JDBCDRIVER);
 		}
 		// TODO
+	}
+	
+	private void checkNotConnected() {
+		if (this.connection != null) {
+			throw new D2RQException("Cannot modify Database as it is already connected",
+					D2RQException.DATABASE_ALREADY_CONNECTED);
+		}
 	}
 }
