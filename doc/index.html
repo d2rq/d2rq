@@ -74,7 +74,7 @@ pre { speak-punctuation: code; }
 
 <div id="download">
   <h2><a href="http://sourceforge.net/project/showfiles.php?group_id=111002&amp;package_id=188901">Download D2R Server</a></h2>
-  <small>v0.6 (alpha), released 2009-02-19</small>
+  <small>v0.7 (alpha), released 2009-08-10</small>
 </div>
 <div id="demo">
   <h2><a href="http://www4.wiwiss.fu-berlin.de/is-group/">Live Demo</a></h2>
@@ -84,6 +84,7 @@ pre { speak-punctuation: code; }
 <h2 id="news">News</h2>
 
 <ul>
+  <li><strong>2009-08-10: Version 0.7 released.</strong> This version provides several bugfixes, better dump performance, several new features as well as new optimizations that must be enabled using the new <tt>--fast</tt> switch.</li>
   <li><strong>2009-02-19: Version 0.6 released.</strong> This version introduces serving of vocabulary data and includes D2RQ 0.6, which provides significantly improved performance and memory usage, new features and several bugfixes.</li>
   <li><strong>2007-11-03: Version 0.4 released.</strong> This version can be run as a J2EE web application inside existing servlet containers and fixes several bugs.</li>
   <li><strong>2007-02-13: Version 0.3.2 released,</strong> featuring more configurability, easy installation as a Windows service, and many small improvements and bugfixes.</li>
@@ -144,7 +145,7 @@ pre { speak-punctuation: code; }
   <li><strong>Java 1.4</strong> or newer on the path (check with
     <tt>java -version</tt> if you're not sure),</li>
   <li><strong>A supported database</strong>. D2R Server works with Oracle,
-    MySQL, PostgreSQL, and any SQL-92 compatible database. Microsoft
+    MySQL, PostgreSQL, Microsoft SQL Server, and any SQL-92 compatible database. Microsoft
     Access can be used with some restrictions. More information is
     available in the
     <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#compatibility">D2RQ manual</a>.</li>
@@ -169,7 +170,7 @@ pre { speak-punctuation: code; }
     <tt>oracle.jdbc.driver.OracleDriver</tt> for Oracle) and
     <strong>JDBC URL pattern</strong> (e.g.
     <tt>jdbc:mysql://<em>servername</em>/<em>database</em></tt>
-    for MySQL) from the driver's documentation. A driver for MySQL is
+    for MySQL) from the driver's documentation. Drivers for MySQL and PostgreSQL are
     already included with D2R Server.</p></li>
   <li><p><strong>Generate a mapping file</strong> for your database schema.
     Change into the D2R Server directory and run:</p>
@@ -270,6 +271,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 	<li>Use the latest optimizations by launching with <tt>--fast</tt> (or activate <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#configuration"><tt>d2rq:useAllOptimizations</tt></a>).</li>
 	<li>Provide <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#propertybridge">hint properties</a>.</li>
 	<li>Indicate directions in <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#propertybridge"><tt>d2rq:joins</tt></a> to enable join optimizations.</li>
+	<li>Give D2R adequate heap space by means of Java's <tt>-Xmx</tt> parameter in <tt>d2r-server</tt> or <tt>d2r-server.bat</tt> (default: <tt>-Xmx256M</tt>).</li>
 	<li>Set <a href="#configuration"><tt>d2rq:autoReloadMapping</tt></a> to <tt>false</tt> where it is not required.</li>
 	<li>Databases often ship with development configurations that are designed for a small footprint rather than performance. For instance, some good pointers for optimizing MySQL can be found <a href="http://www.mysqlperformanceblog.com/2006/09/29/what-to-tune-in-mysql-server-after-installation/">here</a>.</li>
 </ul> 
@@ -366,7 +368,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 <div><a href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3">DOAP project description</a> (<a href="http://www4.wiwiss.fu-berlin.de/rdf_browser/?browse_uri=http%3A//www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3">View with Disco</a>)</div>
 
 <div id="footer">
-  <small>$Id: index.html,v 1.28 2009/08/02 20:50:16 fatorange Exp $</small>
+  <small>$Id: index.html,v 1.29 2009/08/10 13:06:32 fatorange Exp $</small>
 </div>
 </div>
 
