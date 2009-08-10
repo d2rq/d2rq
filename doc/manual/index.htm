@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <?xml version="1.0" encoding="utf-8"?><HTML lang=en xml:lang="en" 
-xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>The D2RQ Plattform v0.6.1  -  User Manual</TITLE>
+xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>The D2RQ Plattform v0.7  -  User Manual</TITLE>
 <META http-equiv=Content-Type content="text/html; charset=utf-8">
 <STYLE type=text/css>
 
@@ -131,12 +131,12 @@ ul.toc li li { font-weight: normal; }
 </HEAD>
 <BODY>
 <DIV class=head> 
-  <h1 id=title>The D2RQ Platform v0.6.1 - Treating Non-RDF Relational Databases as Virtual RDF Graphs</h1>
+  <h1 id=title>The D2RQ Platform v0.7 - Treating Non-RDF Relational Databases as Virtual RDF Graphs</h1>
   <h2 id=doctype>User Manual and Language Specification</h2>
 <DL>
   <DT>This Version: 
     <DD><A 
-  href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/20090219/">http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/20090219/</A> 
+  href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/20090810/">http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/20090810/</A> 
     <DT>Latest Version: 
     <DD><A 
   href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/">http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/</A>
@@ -272,6 +272,9 @@ separate <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/">D2R Server 
 <dt>PostgreSQL</dt>
 <dd>Works with PostgreSQL.</dd>
 
+<dt>Microsoft SQL Server</dt>
+<dd>Works with Microsoft SQL Server.</dd>
+
 <dt>ODBC data sources (e.g. Microsoft Access)</dt>
 <dd>D2RQ can connect to ODBC data sources over the Java's ODBC-JDBC bridge. This works
   with the following limitations:
@@ -318,7 +321,8 @@ as-is or can be customized.</p>
 for the format for your database engine. Examples:</p>
 <p>MySQL: <tt>jdbc:mysql://<em>servername</em>/<em>databasename</em></tt><br />
 PostgreSQL: <tt>jdbc:postgresql://<em>servername</em>/<em>databasename</em></tt><br />
-Oracle: <tt>jdbc:oracle:thin:@<em>servername</em>:1521:<em>databasename</em></tt></p>
+Oracle: <tt>jdbc:oracle:thin:@<em>servername</em>:1521:<em>databasename</em></tt><br />
+Microsoft SQL Server: <tt>jdbc:sqlserver://<em>servername</em>;databaseName=<em>databasename</em></tt> (due to the semicolon, the URL must be put in quotes when passed as a command-line argument in Linux/Unix shells)</p>
 </dd>
 
 <dt>-u username</dt>
@@ -330,13 +334,14 @@ Oracle: <tt>jdbc:oracle:thin:@<em>servername</em>:1521:<em>databasename</em></tt
 <dt>-d driverclass</dt>
 <dd><p>The fully qualified Java class name of the database driver. The jar file
 containing the JDBC driver has to be in D2RQ's <tt>/lib/db-drivers/</tt>
-directory. Drivers for MySQL, PostgreSQL and Oracle are provided with the
+directory. Drivers for MySQL and PostgreSQL are provided with the
 download, for other databases a driver has to be downloaded from the vendor
 or a third party. To find the driver class name, consult the driver
 documentation. Examples:</p>
 <p>MySQL: <tt>com.mysql.jdbc.Driver</tt><br />
 PostgreSQL: <tt>org.postgresql.Driver</tt><br />
-Oracle: <tt>oracle.jdbc.OracleDriver</tt></p>
+Oracle: <tt>oracle.jdbc.OracleDriver</tt><br />
+Microsoft SQL Server: <tt>com.microsoft.sqlserver.jdbc.SQLServerDriver</tt></p>
 </dd>
 
 <dt>-o outfile.n3</dt>
@@ -906,7 +911,7 @@ mailto:@@<em>Persons.email</em>@@</pre>
 <dt>Singleton classmaps</dt>
 <dd><p>A <tt>d2rq:ClassMap</tt> usually produces many resources. Sometimes
   it is desirable to have a class map that only produces a single resource
-  with fixed, static identity. In that case, one cas use the
+  with fixed, static identity. In that case, one can use the
   <tt>d2rq:constantValue</tt> property to name the single instance.</p></dd>
 
 <h3>Properties of <tt>d2rq:ClassMap</tt></h3>
@@ -1676,6 +1681,7 @@ and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalprop
 
 <h1 id="change_log">8. Change Log</h1>
 <ul>
+  <li>2009-08-10: Updated for D2RQ v0.7 and D2R Server v0.7.</li>
   <li>2009-02-19: Updated for D2RQ v0.6 and D2R Server v0.6.</li>
   <li>2007-10-25: Updated for D2RQ v0.5.1 and D2R Server v0.4. </li>
   <li>2006-10-26: Updated for D2RQ v0.5.</li>
@@ -1685,7 +1691,7 @@ and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalprop
   <li>2004-06-15: Initial version of this document.</li>
 </ul>
 <hr />
-<p>$Id: index.htm,v 1.53 2009/08/02 21:28:11 fatorange Exp $</p>
+<p>$Id: index.htm,v 1.54 2009/08/10 12:59:47 fatorange Exp $</p>
 
 </BODY>
 </HTML>
