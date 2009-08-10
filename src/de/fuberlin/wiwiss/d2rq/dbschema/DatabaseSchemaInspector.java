@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * Inspects a database to retrieve schema information. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.22 2009/08/06 21:49:40 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.23 2009/08/10 12:45:36 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -156,6 +156,10 @@ public class DatabaseSchemaInspector {
 		try {
 			String searchInSchema = null;
 			if (this.db.dbTypeIs(ConnectedDB.Oracle)) {
+				/*
+				 * "A schema is a collection of database objects. A schema is owned by a database user and has the same name as that user"
+				 * @see http://download-east.oracle.com/docs/cd/B19306_01/server.102/b14220/schema.htm#sthref673
+				 */
 				searchInSchema = this.schema.getUserName();
 			}
 			ResultSet rs = this.schema.getTables(
@@ -223,8 +227,19 @@ public class DatabaseSchemaInspector {
 	public HashMap uniqueColumns(RelationName tableName) {
 		HashMap result = new HashMap();
 		try {
+			/*
+			 * When requesting index info from an Oracle database, accept approximate
+			 * data, as requesting exact results will invoke an ANALYZE, for which the
+			 * querying user must have proper write permissions.
+			 * If he doesn't, an SQLException is thrown right here.
+			 * Note that the "approximate" parameter was not handled by the Oracle JDBC
+			 * driver before release 10.2.0.4, which may result in an exception here.
+			 * @see http://forums.oracle.com/forums/thread.jspa?threadID=210782
+			 * @see http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/htdocs/readme_jdbc_10204.html
+			 */
+			boolean approximate = this.db.dbTypeIs(ConnectedDB.Oracle);
 			ResultSet rs = this.schema.getIndexInfo(
-					null, schemaName(tableName), tableName(tableName), true, false);
+					null, schemaName(tableName), tableName(tableName), true, approximate);
 			while (rs.next()) {
 				String indexKey = rs.getString("INDEX_NAME");
 				if (!result.containsKey(indexKey))
@@ -234,7 +249,7 @@ public class DatabaseSchemaInspector {
 			rs.close();
 			return result;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception (unable to determine unique columns)", ex);
 		}
 	}	
 	
