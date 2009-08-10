@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.32 2009/08/06 11:15:54 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.33 2009/08/10 12:44:30 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -178,17 +178,6 @@ public class ConnectedDB {
 
 	private void connect() {
 		try {
-			if (this.jdbcURL.contains(":oracle:")) {
-				/* The pre-JSE 6 Oracle driver requires explicit registration */
-				try {
-					DriverManager.registerDriver((Driver) Class.forName("oracle.jdbc.driver.OracleDriver").getConstructor((Class[])null).newInstance((Object[])null));
-				} catch (Exception ex) {
-					throw new D2RQException(
-							"Unable to register Oracle driver: " + ex.getMessage(), 
-							D2RQException.DATABASE_MISSING_JDBCDRIVER);
-				}
-			}
-
 			this.connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
 		} catch (SQLException ex) {
 			throw new D2RQException(
