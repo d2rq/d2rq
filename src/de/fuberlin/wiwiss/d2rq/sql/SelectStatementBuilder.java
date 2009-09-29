@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
@@ -14,7 +15,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
-import de.fuberlin.wiwiss.d2rq.map.Database;
 
 
 /**
@@ -23,7 +23,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.31 2009/08/06 11:15:54 fatorange Exp $
+ * @version $Id: SelectStatementBuilder.java,v 1.32 2009/09/29 19:56:53 cyganiak Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
@@ -33,7 +33,6 @@ public class SelectStatementBuilder {
 	private boolean eliminateDuplicates = false;
 	private AliasMap aliases = AliasMap.NO_ALIASES;
 	private Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
-	private StringBuffer leftJoinExpression = new StringBuffer();
 	private Attribute order;
 	private boolean orderDesc;
 	private int limit;
@@ -46,6 +45,9 @@ public class SelectStatementBuilder {
 			throw new IllegalArgumentException("Cannot create SQL for empty relation");
 		}
 		database = relation.database();
+		this.limit = Relation.combineLimits(relation.limit(), database.limit());
+		this.order = relation.order();
+		this.orderDesc = relation.orderDesc();
 		this.aliases = this.aliases.applyTo(relation.aliases());
 		Iterator it = relation.joinConditions().iterator();
 		while (it.hasNext()) {
@@ -63,12 +65,9 @@ public class SelectStatementBuilder {
 			addSelectSpec((ProjectionSpec) it.next());
 		}
 		eliminateDuplicates = !relation.isUnique();
+		addCondition(database.getSyntax().getRowNumLimitAsExpression(limit));
 	
-		addMentionedTablesFromConditions();
-
-		this.limit = relation.limit();
-		this.order = relation.order();
-		this.orderDesc = relation.orderDesc();
+		addMentionedTablesFromConditions();		
 	}
 	
 	private Expression condition() {
@@ -86,19 +85,18 @@ public class SelectStatementBuilder {
 		}
 	}
 	
-	
 	public String getSQLStatement() {
 		
 		StringBuffer result = new StringBuffer("SELECT ");
 		
-		int combinedLimit = Relation.combineLimits(limit, database.limit());
-		
 		if (this.eliminateDuplicates && database.allowDistinct()) {
 			result.append("DISTINCT ");
 		}
-		
-		if ((this.database.dbTypeIs(ConnectedDB.MSSQL) || this.database.dbTypeIs(ConnectedDB.MSAccess)) && combinedLimit != Database.NO_LIMIT) {
-			result.append("TOP " + combinedLimit + " ");
+
+		String s = database.getSyntax().getRowNumLimitAsSelectModifier(limit);
+		if (!"".equals(s)) {
+			result.append(s);
+			result.append(" ");
 		}
 		
 		Iterator it = this.selectSpecs.iterator();
@@ -119,14 +117,11 @@ public class SelectStatementBuilder {
 		while (it.hasNext()) {			
 			RelationName tableName = (RelationName) it.next();
 			if (this.aliases.isAlias(tableName)) {
-				result.append(this.database.quoteRelationName(this.aliases.originalOf(tableName)));
-				if (this.database.dbTypeIs(ConnectedDB.Oracle)) {
-					result.append(" ");
-				} else {
-					result.append(" AS ");
-				}
+				result.append(database.getSyntax().getRelationNameAliasExpression(
+						aliases.originalOf(tableName), tableName));
+			} else {
+				result.append(database.getSyntax().quoteRelationName(tableName));
 			}
-			result.append(this.database.quoteRelationName(tableName));
 			if (it.hasNext()) {
 				result.append(", ");
 			}
@@ -138,10 +133,6 @@ public class SelectStatementBuilder {
 			result.append(condition().toSQL(this.database, this.aliases));
 		}
 
-		if (this.database.dbTypeIs(ConnectedDB.Oracle) && combinedLimit != Database.NO_LIMIT) {
-			result.append((condition().isTrue() ? " WHERE " : " AND ") + " ROWNUM <= " + combinedLimit);
-		}
-
 		if (order!=null) {
 			result.append(" ORDER BY " + order.toSQL(database, aliases) + " ");
 			if(orderDesc) {
@@ -149,8 +140,10 @@ public class SelectStatementBuilder {
 			}
 		}
 		
-		if ((this.database.dbTypeIs(ConnectedDB.MySQL) || this.database.dbTypeIs(ConnectedDB.PostgreSQL)) && combinedLimit != Database.NO_LIMIT) {
-			result.append(" LIMIT " + combinedLimit);
+		s = database.getSyntax().getRowNumLimitAsQueryAppendage(limit);
+		if (!"".equals(s)) {
+			result.append(" ");
+			result.append(s);
 		}
 						
 		return result.toString();

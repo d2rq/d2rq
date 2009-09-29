@@ -1,10 +1,9 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
-import java.sql.Driver;
-import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,8 +22,10 @@ import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
+ * TODO Move all engine-specific code from ConnectedDB to this interface and its implementing classes
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.33 2009/08/10 12:44:30 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.34 2009/09/29 19:56:53 cyganiak Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -63,13 +64,16 @@ public class ConnectedDB {
 	private Set timestampColumns;
 	private Connection connection = null;
 	private DatabaseSchemaInspector schemaInspector = null;
+	
+	// Lazy initialization for these two -- use the getSyntax() and dbType() for access!
 	private String dbType = null;
+	private SQLSyntax syntax = null;
+	
 	private int limit;
 	private int fetchSize;
 	private Map zerofillCache = new HashMap(); // Attribute => Boolean
 	private Map uniqueIndexCache = new HashMap(); // RelationName => String => List of Strings
 	private final Properties connectionProperties;
-
 	private class KeepAliveAgent extends Thread {
 		private final int interval;
 		private final String query;
@@ -264,27 +268,8 @@ public class ConnectedDB {
      * </ul>
      * @return The brand of RDBMS
      */
-	public String dbType() {
-		if (this.dbType == null) {
-			try {
-				String productName = connection().getMetaData().getDatabaseProductName().toLowerCase();
-				if (productName.indexOf("mysql") >= 0) {
-					this.dbType = ConnectedDB.MySQL;
-				} else if (productName.indexOf("postgresql") >= 0) {
-					this.dbType = ConnectedDB.PostgreSQL;
-				} else if (productName.indexOf("oracle") >= 0) {
-					this.dbType = ConnectedDB.Oracle;
-				} else if (productName.indexOf("microsoft sql server") >= 0) {
-					this.dbType = ConnectedDB.MSSQL;
-				} else if (productName.indexOf("access") >= 0) {
-					this.dbType = ConnectedDB.MSAccess;
-				} else {
-					this.dbType = ConnectedDB.Other;
-				}
-			} catch (SQLException ex) {
-				throw new D2RQException("Database exception", ex);
-			}
-		}
+	private String dbType() {
+		ensureDatabaseTypeInitialized();
 		return this.dbType;
 	}
 	
@@ -292,9 +277,52 @@ public class ConnectedDB {
 	 * Reports the brand of RDBMS.
 	 * @return <tt>true</tt> if this database is of the given brand
 	 * @see #dbType()
+	 * 
+	 * TODO make private, use {@link #getSyntax()} and its methods instead
 	 */
 	public boolean dbTypeIs(String candidateType) {
 		return candidateType.equals(dbType());
+	}
+	
+	/**
+	 * @return A helper for generating SQL statements conforming to the syntax
+	 * of the database engine used in this connection
+	 */
+	public SQLSyntax getSyntax() {
+		ensureDatabaseTypeInitialized();
+		return syntax;
+	}
+
+	protected String getDatabaseProductType() throws SQLException {
+		return connection().getMetaData().getDatabaseProductName();
+	}
+	
+	private void ensureDatabaseTypeInitialized() {
+		if (this.dbType != null) return;
+		try {
+			String productName = getDatabaseProductType().toLowerCase();
+			if (productName.indexOf("mysql") >= 0) {
+				this.dbType = ConnectedDB.MySQL;
+				this.syntax = new MySQLSyntax();
+			} else if (productName.indexOf("postgresql") >= 0) {
+				this.dbType = ConnectedDB.PostgreSQL;
+				this.syntax = new SQL92Syntax();
+			} else if (productName.indexOf("oracle") >= 0) {
+				this.dbType = ConnectedDB.Oracle;
+				this.syntax = new OracleSyntax();
+			} else if (productName.indexOf("microsoft sql server") >= 0) {
+				this.dbType = ConnectedDB.MSSQL;
+				this.syntax = new MSSQLSyntax();
+			} else if (productName.indexOf("access") >= 0) {
+				this.dbType = ConnectedDB.MSAccess;
+				this.syntax = new MSSQLSyntax();
+			} else {
+				this.dbType = ConnectedDB.Other;
+				this.syntax = new SQL92Syntax();
+			}
+		} catch (SQLException ex) {
+			throw new D2RQException("Database exception", ex);
+		}
 	}
 	
     /**
@@ -393,8 +421,6 @@ public class ConnectedDB {
     
 	private final static Pattern singleQuoteEscapePattern = Pattern.compile("([\\\\'])");
 	private final static Pattern singleQuoteEscapePatternOracle = Pattern.compile("(')");
-	private final static Pattern doubleQuoteEscapePattern = Pattern.compile("(\")");
-	private final static Pattern backtickEscapePatternMySQL = Pattern.compile("([\\\\`])");
 	
 	/**
 	 * Wraps s in single quotes and escapes special characters to avoid SQL injection
@@ -406,22 +432,6 @@ public class ConnectedDB {
 		}
 		return "'" + singleQuoteEscapePattern.matcher(s).
 				replaceAll("$1$1") + "'";
-	}
-
-	/**
-	 * Wraps s in single quotes and escapes special characters to avoid SQL injection
-	 */
-	public String doubleQuote(String s) {
-		return "\"" + doubleQuoteEscapePattern.matcher(s).
-				replaceAll("$1$1") + "\"";
-	}
-
-	/**
-	 * Wraps s in backticks and escapes special characters to avoid SQL injection
-	 */
-	public String backtickQuote(String s) {
-		return "`" + backtickEscapePatternMySQL.matcher(s).
-				replaceAll("$1$1") + "`";
 	}
 
 	public String quoteValue(String value, int columnType) {
@@ -450,27 +460,6 @@ public class ConnectedDB {
 	
 	public String quoteValue(String value, Attribute column) {
 	    return quoteValue(value, columnType(column));
-	}
-	
-	public String quoteAttribute(Attribute attribute) {
-		return quoteRelationName(attribute.relationName()) + "." + 
-				quoteIdentifier(attribute.attributeName());
-	}
-	
-	public String quoteRelationName(RelationName relationName) {
-		if (relationName.schemaName() == null) {
-			return quoteIdentifier(relationName.tableName());
-		}
-		return quoteIdentifier(relationName.schemaName()) + "." + quoteIdentifier(relationName.tableName());
-	}
-	
-	private String quoteIdentifier(String identifier) {
-		// MySQL uses backticks
-		if (dbTypeIs(ConnectedDB.MySQL)) {
-			return backtickQuote(identifier);
-		}
-		// PostgreSQL and Oracle (and SQL-92) use double quotes
-		return doubleQuote(identifier);
 	}
 	
 	/** 

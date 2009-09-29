@@ -67,17 +67,12 @@ public class Concatenation extends Expression {
 	}
 
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
-		StringBuffer result = new StringBuffer("CONCAT(");
-		Iterator it = parts.iterator();
-		while (it.hasNext()) {
-			Expression part = (Expression) it.next();
-			result.append(part.toSQL(database, aliases));
-			if (it.hasNext()) {
-				result.append(", ");
-			}
+		String[] fragments = new String[parts.size()];
+		for (int i = 0; i < parts.size(); i++) {
+			Expression part = (Expression) parts.get(i);
+			fragments[i] = part.toSQL(database, aliases);
 		}
-		result.append(")");
-		return result.toString();
+		return database.getSyntax().getConcatenationExpression(fragments);
 	}
 	
 	public boolean equals(Object other) {

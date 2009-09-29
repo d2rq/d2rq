@@ -15,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO: Attribute should track wether it is nullable
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Attribute.java,v 1.9 2008/04/28 14:33:21 cyganiak Exp $
+ * @version $Id: Attribute.java,v 1.10 2009/09/29 19:56:54 cyganiak Exp $
  */
 public class Attribute implements Comparable, ProjectionSpec {
 	private String attributeName;
@@ -48,7 +48,7 @@ public class Attribute implements Comparable, ProjectionSpec {
 	}
 	
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
-		return database.quoteAttribute(this);
+		return database.getSyntax().quoteAttribute(this);
 	}
 	
 	/**

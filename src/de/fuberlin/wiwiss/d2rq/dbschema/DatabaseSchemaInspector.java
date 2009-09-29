@@ -21,8 +21,10 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 /**
  * Inspects a database to retrieve schema information. 
  * 
+ * TODO: All the dbType checks should be moved to the {@link SQLSyntax} subclasses
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.23 2009/08/10 12:45:36 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.24 2009/09/29 19:56:54 cyganiak Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -130,7 +132,7 @@ public class DatabaseSchemaInspector {
 		try {
 			if (!db.dbTypeIs(ConnectedDB.MySQL)) return false;
 			Statement stmt = db.connection().createStatement();
-			ResultSet rs = stmt.executeQuery("DESCRIBE " + db.quoteRelationName(column.relationName()));		
+			ResultSet rs = stmt.executeQuery("DESCRIBE " + db.getSyntax().quoteRelationName(column.relationName()));		
 
 			while (rs.next()) {
 				if (column.attributeName().equals(rs.getString("Field"))) {

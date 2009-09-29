@@ -32,7 +32,7 @@ public class AttributeExpr extends Expression {
 	}
 
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
-		return database.quoteAttribute(attribute);
+		return database.getSyntax().quoteAttribute(attribute);
 	}
 
 	public String toString() {

@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
  * back into Strings. All methods are static.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL.java,v 1.9 2009/08/02 19:22:10 fatorange Exp $
+ * @version $Id: SQL.java,v 1.10 2009/09/29 19:56:53 cyganiak Exp $
  */
 public class SQL {
 	private static final java.util.regex.Pattern attributeRegexConservative = 
@@ -103,7 +103,7 @@ public class SQL {
 				   				   : expression.length();
 		result.append(expression.substring(0, firstPartEnd));
 		while (matched) {
-			result.append(database.quoteAttribute(
+			result.append(database.getSyntax().quoteAttribute(
 					new Attribute(match.group(1), match.group(2), match.group(3))));
 			int nextPartStart = match.end();
 			matched = match.find();

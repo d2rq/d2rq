@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
 
 /**
  * Generates a D2RQ mapping by introspecting a database schema.
@@ -42,7 +43,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.32 2009/08/02 19:22:10 fatorange Exp $
+ * @version $Id: MappingGenerator.java,v 1.33 2009/09/29 19:56:54 cyganiak Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -57,7 +58,7 @@ public class MappingGenerator {
 	private PrintWriter err = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
 	private DatabaseSchemaInspector schema = null;
-	private String databaseType = null;
+	private SQLSyntax databaseSyntax = null;
 	private Map linkTables = new HashMap(); // name of n:m link table => name of n table
 	private boolean finished = false;
 
@@ -77,7 +78,7 @@ public class MappingGenerator {
 		database.setUsername(this.databaseUser);
 		database.setPassword(this.databasePassword);
 		this.schema = database.connectedDB().schemaInspector();
-		this.databaseType = database.connectedDB().dbType();
+		this.databaseSyntax = database.connectedDB().getSyntax();
 	}
 	
 	public void setMapNamespaceURI(String uri) {
@@ -182,9 +183,12 @@ public class MappingGenerator {
 		if (this.databasePassword != null) {
 			this.out.println("\td2rq:password \"" + this.databasePassword + "\";");
 		}
-		if (ConnectedDB.MySQL.equals(this.databaseType)) {
-			this.out.println("\tjdbc:autoReconnect \"true\";");
-			this.out.println("\tjdbc:zeroDateTimeBehavior \"convertToNull\";");
+		Properties props = databaseSyntax.getDefaultConnectionProperties();
+		Iterator it = props.keySet().iterator();
+		while (it.hasNext()) {
+			String property = (String) it.next();
+			String value = props.getProperty(property);
+			this.out.println("\tjdbc:" + property + " \"" + value + "\";");
 		}
 		this.out.println("\t.");
 		this.out.println();
