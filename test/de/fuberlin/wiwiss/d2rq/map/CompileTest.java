@@ -103,7 +103,7 @@ public class CompileTest extends TestCase {
 		assertEquals(
 				new AliasMap(Arrays.asList(new Alias[]{
 						SQL.parseAlias("employees AS e"), 
-						SQL.parseAlias("e AS m")})),
+						SQL.parseAlias("employees AS m")})),
 				relation.baseRelation().aliases());
 	}
 	

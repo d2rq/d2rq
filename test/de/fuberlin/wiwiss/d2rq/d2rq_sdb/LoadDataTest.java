@@ -117,7 +117,7 @@ public abstract class LoadDataTest extends TestCase
             Class.forName(HSQL_DRIVER_NAME);
         } catch (ClassNotFoundException e) 
         {
-            throw new SQLException(e);
+            throw new SQLException(e.getMessage());
         }
         
         hsqlConnection = DriverManager.getConnection(HSQL_URL, HSQL_USER, HSQL_PASS);
@@ -183,7 +183,7 @@ public abstract class LoadDataTest extends TestCase
             
             if (entry != null)
             { 
-            	assertFalse("Entry-Name is not empty", entry.getName().isEmpty());
+            	assertFalse("Entry-Name is not empty", "".equals(entry.getName()));
             	sdbDataModel = sdbDataModel.read(zipInputStream, null, "TTL");
                 assertTrue("sdbModel is not emtpy", sdbDataModel.size() > 0);
             }
