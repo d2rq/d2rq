@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
+import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.map.Database;
  
@@ -26,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * TODO Move all engine-specific code from ConnectedDB to this interface and its implementing classes
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.35 2010/01/26 13:28:18 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.36 2010/01/26 16:15:46 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -350,8 +351,8 @@ public class ConnectedDB {
     	if (this.timestampColumns.contains(column.qualifiedName())) {
     		return TIMESTAMP_COLUMN;
     	}
-		int type = schemaInspector().columnType(column);
-		switch (type) {
+		ColumnType type = schemaInspector().columnType(column);
+		switch (type.typeId()) {
 			// TODO There are a bunch of others, see http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Types.html
 			case Types.CHAR: return TEXT_COLUMN;
 			case Types.VARCHAR: return TEXT_COLUMN;
@@ -379,8 +380,13 @@ public class ConnectedDB {
 			case Types.TIME: return DATE_COLUMN;
 			case Types.TIMESTAMP: return TIMESTAMP_COLUMN;
 			
-			default: throw new D2RQException("Unsupported database type code (" + type + ") for column "
-					+ column.qualifiedName());
+			default:
+				if ("NVARCHAR2".equals(type.typeName()))
+					return TEXT_COLUMN;
+				else
+					throw new D2RQException("Unsupported database type code (" + type + ") for column "
+						+ column.qualifiedName());		
+				
 		}
 	}
 

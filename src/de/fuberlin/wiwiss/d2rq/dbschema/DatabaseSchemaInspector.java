@@ -24,20 +24,21 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO: All the dbType checks should be moved to the {@link SQLSyntax} subclasses
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.25 2010/01/26 13:28:18 fatorange Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.26 2010/01/26 16:15:46 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
-	public static boolean isStringType(int columnType) {
-		return columnType == Types.CHAR || columnType == Types.VARCHAR || columnType == ConnectedDB.SQL_TYPE_NVARCHAR || columnType == Types.LONGVARCHAR;
+	public static boolean isStringType(ColumnType columnType) {
+		return columnType.typeId() == Types.CHAR || columnType.typeId() == Types.VARCHAR || columnType.typeId() == ConnectedDB.SQL_TYPE_NVARCHAR
+					|| columnType.typeId() == Types.LONGVARCHAR	|| "NVARCHAR2".equals(columnType.typeName());
 	}
 
-	public static boolean isDateType(int columnType) {
-		return columnType == Types.DATE || columnType == Types.TIME || columnType == Types.TIMESTAMP;
+	public static boolean isDateType(ColumnType columnType) {
+		return columnType.typeId() == Types.DATE || columnType.typeId() == Types.TIME || columnType.typeId() == Types.TIMESTAMP;
 	}
 	
-	public static String xsdTypeFor(int columnType) {
-		switch (columnType) {
+	public static String xsdTypeFor(ColumnType columnType) {
+		switch (columnType.typeId()) {
 		case Types.BIGINT:        return "xsd:long";
 //		case Types.BINARY:        return "xsd:hexBinary";
 		// TODO: BIT is a bit string, not a single boolean
@@ -66,7 +67,11 @@ public class DatabaseSchemaInspector {
 		case Types.TINYINT:       return "xsd:byte";
 //		case Types.VARBINARY:     return "xsd:hexBinary";
 		case Types.VARCHAR:       return "xsd:string";
-		default: return null;
+		default:
+			if ("NVARCHAR2".equals(columnType.typeName()))
+				return "xsd:string";
+			else
+				return null;
 		}
 	}
 	
@@ -87,9 +92,9 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public int columnType(Attribute column) {
+	public ColumnType columnType(Attribute column) {
 		if (this.cachedColumnTypes.containsKey(column)) {
-			return ((Integer) this.cachedColumnTypes.get(column)).intValue();
+			return (ColumnType) this.cachedColumnTypes.get(column);
 		}
 		try {
 			ResultSet rs = this.schema.getColumns(null, column.schemaName(), 
@@ -97,9 +102,10 @@ public class DatabaseSchemaInspector {
 			if (!rs.next()) {
 				throw new D2RQException("Column " + column + " not found in database");
 			}
-			int type = rs.getInt("DATA_TYPE");
+			
+			ColumnType type = new ColumnType(rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"));
 			rs.close();
-			this.cachedColumnTypes.put(column, new Integer(type));
+			this.cachedColumnTypes.put(column, type);
 			return type;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);

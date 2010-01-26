@@ -33,6 +33,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
+import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
@@ -43,7 +44,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.34 2010/01/26 13:28:14 fatorange Exp $
+ * @version $Id: MappingGenerator.java,v 1.35 2010/01/26 16:15:39 fatorange Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -261,7 +262,7 @@ public class MappingGenerator {
 		this.out.println("\td2rq:property " + vocabularyTermQName(column) + ";");
 		this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
 		this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
-		int colType = this.schema.columnType(column);
+		ColumnType colType = this.schema.columnType(column);
 		String xsd = DatabaseSchemaInspector.xsdTypeFor(colType);
 		if (xsd != null && !"xsd:string".equals(xsd)) {
 			// We use plain literals instead of xsd:strings, so skip
@@ -304,7 +305,7 @@ public class MappingGenerator {
 	}
 
 	// TODO Factor out into its own interface & classes for different RDBMS?
-	public void writeColumnHacks(Attribute column, int colType) {
+	public void writeColumnHacks(Attribute column, ColumnType colType) {
 //		if (DatabaseSchemaInspector.isStringType(colType)) {
 //			// Suppress empty strings ('')
 //			out.println("\td2rq:condition \"" + column.getQualifiedName() + " != ''\";");			
