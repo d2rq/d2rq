@@ -24,7 +24,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO: All the dbType checks should be moved to the {@link SQLSyntax} subclasses
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.24 2009/09/29 19:56:54 cyganiak Exp $
+ * @version $Id: DatabaseSchemaInspector.java,v 1.25 2010/01/26 13:28:18 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
@@ -153,41 +153,22 @@ public class DatabaseSchemaInspector {
 		throw new D2RQException("Column not found in DESCRIBE result: " + column);
 	}
 
-	public List listTableNames() {
+	/**
+	 * Lists available table names
+	 * @param searchInSchema	Schema to list tables from; <tt>null</tt> to list tables from all schemas
+	 * @return
+	 */
+	public List listTableNames(String searchInSchema) {
 		List result = new ArrayList();
 		try {
-			String searchInSchema = null;
-			if (this.db.dbTypeIs(ConnectedDB.Oracle)) {
-				/*
-				 * "A schema is a collection of database objects. A schema is owned by a database user and has the same name as that user"
-				 * @see http://download-east.oracle.com/docs/cd/B19306_01/server.102/b14220/schema.htm#sthref673
-				 */
-				searchInSchema = this.schema.getUserName();
-			}
 			ResultSet rs = this.schema.getTables(
 					null, searchInSchema, null, new String[] {"TABLE", "VIEW"});
 			while (rs.next()) {
 				String schema = rs.getString("TABLE_SCHEM");
 				String table = rs.getString("TABLE_NAME");
-				if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) 
-						&& ("information_schema".equals(schema)
-								|| "pg_catalog".equals(schema))) {
-					// PostgreSQL has schemas "information_schema" and "pg_catalog" in every DB
-					continue;
+				if (!this.db.isIgnoredTable(schema, table)) {
+					result.add(toRelationName(schema, table));
 				}
-				if (this.db.dbTypeIs(ConnectedDB.Oracle)
-						&& table.startsWith("BIN$")) {
-					// Skip deleted tables in Oracle's Recycling Bin.
-					// They have names like MYSCHEMA.BIN$FoHqtx6aQ4mBaMQmlTCPTQ==$0
-					continue;
-				}
-				if (this.db.dbTypeIs(ConnectedDB.MSSQL) 
-						&& ("sys".equals(schema)
-								|| "INFORMATION_SCHEMA".equals(schema))) {
-					// MS SQL Server has schemas "sys" and "information_schema" in every DB
-					continue;
-				}
-				result.add(toRelationName(schema, table));
 			}
 			rs.close();
 			return result;
@@ -370,7 +351,7 @@ public class DatabaseSchemaInspector {
 		if (!relationName.caseUnspecified() || !db.lowerCaseTableNames())
 			return relationName;
 		
-		List tables = listTableNames();
+		List tables = listTableNames(null);
 		Iterator it = tables.iterator();
 		while (it.hasNext()) {
 			RelationName r = (RelationName) it.next();

@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
  * Command line interface for {@link MappingGenerator}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: generate_mapping.java,v 1.4 2009/06/26 15:46:39 fatorange Exp $
+ * @version $Id: generate_mapping.java,v 1.5 2010/01/26 13:28:18 fatorange Exp $
  */
 public class generate_mapping {
 	private final static String[] includedDrivers = {
@@ -30,11 +30,13 @@ public class generate_mapping {
 		CommandLine cmd = new CommandLine();
 		ArgDecl userArg = new ArgDecl(true, "u", "user", "username");
 		ArgDecl passArg = new ArgDecl(true, "p", "pass", "password");
+		ArgDecl schemaArg = new ArgDecl(true, "s", "schema");
 		ArgDecl driverArg = new ArgDecl(true, "d", "driver");
 		ArgDecl outfileArg = new ArgDecl(true, "o", "out", "outfile");
 		ArgDecl baseUriArg = new ArgDecl(true, "b", "base", "baseuri");
 		cmd.add(userArg);
 		cmd.add(passArg);
+		cmd.add(schemaArg);
 		cmd.add(driverArg);
 		cmd.add(outfileArg);
 		cmd.add(baseUriArg);
@@ -56,6 +58,9 @@ public class generate_mapping {
 		}
 		if (cmd.contains(passArg)) {
 			gen.setDatabasePassword(cmd.getArg(passArg).getValue());
+		}
+		if (cmd.contains(schemaArg)) {
+			gen.setDatabaseSchema(cmd.getArg(schemaArg).getValue());
 		}
 		if (cmd.contains(driverArg)) {
 			gen.setJDBCDriverClass(cmd.getArg(driverArg).getValue());
@@ -86,6 +91,6 @@ public class generate_mapping {
 	
 	private static void usage() {
 		System.err.println(
-				"usage: generate-mapping [-u username] [-p password] [-d driverclass] [-o outfile.n3] [-b base uri] jdbcURL");
+				"usage: generate-mapping [-u username] [-p password] [-s database schema] [-d driverclass] [-o outfile.n3] [-b base uri] jdbcURL");
 	}
 }

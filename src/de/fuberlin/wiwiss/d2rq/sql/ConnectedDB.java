@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +26,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * TODO Move all engine-specific code from ConnectedDB to this interface and its implementing classes
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.34 2009/09/29 19:56:53 cyganiak Exp $
+ * @version $Id: ConnectedDB.java,v 1.35 2010/01/26 13:28:18 fatorange Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -53,7 +54,14 @@ public class ConnectedDB {
 
 	private static final String ORACLE_SET_DATE_FORMAT = "ALTER SESSION SET NLS_DATE_FORMAT = 'SYYYY-MM-DD'";
 	private static final String ORACLE_SET_TIMESTAMP_FORMAT = "ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'SYYYY-MM-DD HH24:MI:SS'";
-
+	
+	/*
+	 * Definitions of ignored schemas
+	 */
+	private static final String[] POSTGRESQL_IGNORED_SCHEMAS = {"information_schema", "pg_catalog"};
+	private static final String[] ORACLE_IGNORED_SCHEMAS = {"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", "SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
+	private static final String[] MSSQL_IGNORED_SCHEMAS = {"sys", "INFORMATION_SCHEMA"};
+	
 	private String jdbcURL;
 	private String username;
 	private String password;
@@ -485,6 +493,23 @@ public class ConnectedDB {
 			return ((com.mysql.jdbc.ConnectionImpl)c).lowerCaseTableNames();
 		else
 			return false;
+	}
+	
+	public boolean isIgnoredTable(String schema, String table) {
+		// PostgreSQL has schemas "information_schema" and "pg_catalog" in every DB
+		if (this.dbTypeIs(ConnectedDB.PostgreSQL))
+			return Arrays.binarySearch(POSTGRESQL_IGNORED_SCHEMAS, schema) >= 0;
+
+		// Skip Oracle system schemas as well as deleted tables in Oracle's Recycling Bin.
+		// The latter have names like MYSCHEMA.BIN$FoHqtx6aQ4mBaMQmlTCPTQ==$0
+		if (this.dbTypeIs(ConnectedDB.Oracle))
+			return Arrays.binarySearch(ORACLE_IGNORED_SCHEMAS, schema) >= 0 || table.startsWith("BIN$");
+			
+		// MS SQL Server has schemas "sys" and "information_schema" in every DB
+		if (this.dbTypeIs(ConnectedDB.MSSQL))
+			return Arrays.binarySearch(MSSQL_IGNORED_SCHEMAS, schema) >= 0;
+		
+		return false;
 	}
 
 	public void close() {

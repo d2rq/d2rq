@@ -43,7 +43,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.33 2009/09/29 19:56:54 cyganiak Exp $
+ * @version $Id: MappingGenerator.java,v 1.34 2010/01/26 13:28:14 fatorange Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
@@ -54,6 +54,7 @@ public class MappingGenerator {
 	private String driverClass = null;
 	private String databaseUser = null;
 	private String databasePassword = null;
+	private String databaseSchema = null;
 	private PrintWriter out = null;
 	private PrintWriter err = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
@@ -99,6 +100,10 @@ public class MappingGenerator {
 
 	public void setDatabasePassword(String password) {
 		this.databasePassword = password;
+	}
+
+	public void setDatabaseSchema(String schema) {
+		this.databaseSchema = schema;
 	}
 
 	public void setJDBCDriverClass(String driverClassName) {
@@ -164,7 +169,7 @@ public class MappingGenerator {
 		writeDatabase();
 		initVocabularyModel();
 		identifyLinkTables();
-		Iterator it = schema.listTableNames().iterator();
+		Iterator it = schema.listTableNames(databaseSchema).iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
 			if (!this.schema.isLinkTable(tableName)) {
@@ -437,7 +442,7 @@ public class MappingGenerator {
 	}
 	
 	private void identifyLinkTables() {
-		Iterator it = this.schema.listTableNames().iterator();
+		Iterator it = this.schema.listTableNames(databaseSchema).iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
 			if (!this.schema.isLinkTable(tableName)) {
