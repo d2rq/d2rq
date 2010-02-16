@@ -49,18 +49,47 @@ public class PageServlet extends HttpServlet {
 		String serviceStem = request.getServletPath().substring(1, servicePos + 1);		
 		
 		String resourceURI = server.resourceBaseURI(serviceStem) + relativeResourceURI;
-		
-		Model description = QueryExecutionFactory.create(
-				"DESCRIBE <" + resourceURI + ">",
-				server.dataset()).execDescribe();			
+		String documentURL = server.dataURL(serviceStem, relativeResourceURI);
+
+		String sparqlQuery = "DESCRIBE <" + resourceURI + ">";
+		Model description = QueryExecutionFactory.create(sparqlQuery, server.dataset()).execDescribe();			
 		if (description.size() == 0) {
 			response.sendError(404);
 			return;
 		}
+		
 		this.prefixes = server.getPrefixes(); // model();
 		Resource resource = description.getResource(resourceURI);
 		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
 		Context context = velocity.getContext();
+		
+		try {
+			// create and add metadata to context
+			MetadataCreator mc = new MetadataCreator(server, velocity);
+			mc.setResourceURI(resourceURI);
+			mc.setDocumentURL(documentURL);
+			mc.setSparqlQuery(sparqlQuery);
+			
+			Model metadata = mc.addMetadataFromTemplate(description.createResource(resourceURI), getServletContext());
+			if (!metadata.isEmpty()) {
+				context.put("metadata", metadata.getResource(documentURL).listProperties().toList());
+	
+				// add prefixes to context
+				Map nsSet = metadata.getNsPrefixMap();
+				nsSet.putAll(description.getNsPrefixMap());
+				
+				context.put("prefixes", nsSet.entrySet());
+				
+				// add a empty map for keeping track of blank nodes aliases
+				context.put("blankNodesMap", new HashMap());
+			} else {
+				context.put("metadata", Boolean.FALSE);				
+			}
+		}
+		catch (Exception e) {
+			context.put("metadata", Boolean.FALSE);
+		}
+		
 		context.put("uri", resourceURI);
 		context.put("rdf_link", server.dataURL(serviceStem, relativeResourceURI));
 		context.put("label", resource.getProperty(RDFS.label));

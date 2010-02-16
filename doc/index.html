@@ -100,6 +100,7 @@ pre { speak-punctuation: code; }
   <li><a href="#customize">Customizing the database mapping</a> </li>
   <li><a href="#vocabulary">Serving vocabulary classes and properties</a> </li>  
   <li><a href="#configuration">Server configuration</a></li>
+  <li><a href="#metadata">Publishing metadata</a></li>
   <li><a href="#performance">Optimizing performance</a></li>
   <li><a href="#windows">Running D2R Server as a service on Windows</a></li>
   <li><a href="#container">Running D2R Server in an existing Servlet Container</a></li>
@@ -233,7 +234,7 @@ map:offer a d2rq:ClassMap;
 
 <h2 id="configuration">Server configuration</h2>
 
-<p>The server can be configured by adding a <em>configuration block</em> to the mapping file:
+<p>The server can be configured by adding a <em>configuration block</em> to the mapping file (all parts are optional):
 
 <pre>@prefix d2r: &lt;http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#&gt; .
 
@@ -241,27 +242,125 @@ map:offer a d2rq:ClassMap;
     rdfs:label "D2R Server";
     d2r:baseURI &lt;http://localhost:2020/&gt;;
     d2r:port 2020;
+    d2r:vocabularyIncludeInstances true;
+    d2r:metadataTemplate "metadata.n3";
     d2r:documentMetadata [
         rdfs:comment "This comment is custom document metadata.";
     ];
-	d2r:vocabularyIncludeInstances true;    
     .</pre>
 
 <p>The <tt>rdfs:label</tt> is the server name displayed throughout the HTML interface.</p>
 <p>The <tt>d2r:baseURI</tt> and <tt>d2r:port</tt> must be changed to make the D2R Server accessible to remote machines.</p>
-<p>All statements inside the <tt>d2r:documentMetadata</tt> block will be added as document metadata to all RDF documents.</p>
 <p>The <tt>d2r:vocabularyIncludeInstances</tt> setting controls whether the RDF and HTML representations of vocabulary classes and properties will also list related instances (defaults to <tt>true</tt>).
 As an alternative to disabling the serving of vocabulary instances, <tt>d2rq:resultSizeLimit</tt> may be used to limit the amount of returned data.
 Vocabulary serving is a feature of D2RQ and may be controlled using the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#configuration"><tt>d2rq:serveVocabulary</tt> property</a>.
 </p>
 <p>The <tt>d2r:autoReloadMapping</tt> setting specifies whether changes to the mapping file should be detected automatically (defaults to <tt>true</tt>). This feature has performance implications, so this value should be set to <tt>false</tt> for high-traffic production systems or when running benchmarks.</p>
-<p>All parts are optional.</p>
 
-<p>With large databases, some queries will produce too many results. Adding a <tt>d2rq:resultSizeLimit</tt> to the <tt>d2rq:Database</tt> section of the mapping file will add a <tt>LIMIT</tt> clause to all generated statements.
+<p>With large databases, some queries will produce too many results. Adding a <tt>d2rq:resultSizeLimit</tt> to the <tt>d2rq:Database</tt> section of the mapping file will add a <tt>LIMIT</tt> clause to all generated statements.</p>
 
 <pre>d2rq:resultSizeLimit 500;</pre>
 
 <p>Not that this effectively &#8220;cripples&#8221; the server and can cause somewhat unpredictable results. We still recommend it until we can offer a better solution.</p>
+
+<p><tt>d2r:metadataTemplate</tt> is used to specify a metadata template file within the directory <code>WEB-INF/templates</code> <a href="#metadata">(more details)</a>.</p>
+
+<p>All statements inside the <tt>d2r:documentMetadata</tt> block will be added as document metadata to all RDF documents.</p>
+
+<h2 id="metadata">Publishing metadata</h2>
+<p>D2R Server provides a mechanism for adding metadata such as licensing and provenance information to the RDF graphs served by its Linked Data interface. The supplied metadata will be shown in a "Metadata" table below the usual property-value table, which provides a tree-like visualization of the metadata. The <em>(more)</em> links in the visualization allow to expand the view to show the properties of the corresponding entities.</p>
+
+<p>The metadata added to the provided RDF graphs is generated from a template RDF graph by replacing placeholders in the template. These placeholders refer to run-time data, typical configuration options, as well as to additional configuration variables. The metadata extension includes the default template <tt>metadata.n3</tt>, which adds various pieces of provenance information to the published data.</p>
+
+<p>In order to include metadata along with the graphs served by D2R Server, the path to the metadata template is specified relative to <code>WEB-INF/templates</code> subdirectory using the predicate <tt>d2r:metadataTemplate</tt> in a <a href="#configuration"><tt>d2r:Server</tt> configuration block</a>:</p>
+
+<pre>
+&lt;&gt; a d2r:Server;
+    d2r:metadataTemplate &quot;metadata.n3&quot;;
+</pre>
+
+<h3>Template RDF Graph</h3>
+<p>The metadata template is an RDF graph that may contain placeholder URIs. These placeholders allow a customization of the metadata that is served for each resource. They use the <code>about:</code> URI scheme and may be specified in the subject and object position of the triples in the template graph.</p>
+
+<p>Template placeholders are organized into three groups that represent the available data sources: <tt>runtime</tt>, <tt>config</tt>, and <tt>metadata</tt>. All placeholder URIs follow the scheme <tt>about:metadata:<em>groupname</em>:<em>identifier</em></tt>.</p>
+
+The following placeholder groups are currently available:
+
+<h4>runtime</h4>
+<p>Placeholders in this group are replaced with D2R Server runtime data. Currently, D2R Server supports the following runtime placeholders:
+</p>
+
+<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
+  <tr> 
+    <td valign="top"><tt>about:metadata:runtime:time</tt></td>
+    <td>Replaced by a <tt>xsd:dateTime</tt> literal which represents the current date and time.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>about:metadata:runtime:query</tt></td>
+    <td>Replaced by a string literal with the SPARQL <tt>DESCRIBE</tt> query which has been used to get the data about the requested resource.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>about:metadata:runtime:resource</tt></td>
+    <td>Replaced by the URI of the requested resource.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>about:metadata:runtime:graph</tt></td>
+    <td>Replaced by the URI of the current RDF graph that is served by Pubby.</td>
+  </tr>
+</table>
+
+<h4>config</h4>
+<p>This group of placeholders corresponds to the configuration options for the <tt>d2r:Server</tt> instance. For example, the placeholder <code>about:metadata:config:baseURI</code> is replaced with the value of the <code>d2r:baseURI</code> property defined on the <tt>d2r:Server</tt> instance.</p>
+
+<h4>metadata</h4>
+<p>Placeholders in this group allow the inclusion of additional metadata attributes, whose replacement attributes are defined as properties of the <tt>d2r:Server</tt> instance from the <tt>http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#</tt> namespace (abbreviated with the prefix <tt>meta:</tt> in the following). Each placeholder <tt>about:metadata:metadata:<em>identifier</em></tt> is replaced by the value of the property specified using a corresponding <tt>meta:<em>identifier</em></tt> predicate.</p>
+<p>In the following example, the property <tt>meta:d2rUser</tt> is provided, whose value will replace mentions of <tt>about:metadata:metadata:d2rUser</tt> in the metadata template:</p>
+
+<pre>
+@prefix meta: &lt;http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#&gt; .
+
+&lt;&gt; a d2r:Server;
+    d2r:metadataTemplate &quot;metadata.n3&quot;;
+    meta:d2rUser &lt;http://example.org/URI_of_publisher&gt;&nbsp;;
+</pre>
+<h4>Sample Template</h4>
+<pre>
+@prefix foaf: &lt;http://xmlns.com/foaf/0.1/&gt; .
+@prefix xhv:  &lt;http://www.w3.org/1999/xhtml/vocab#&gt; .
+
+&lt;about:metadata:runtime:graph&gt; foaf:primaryTopic &lt;about:metadata:runtime:resource&gt; .
+&lt;about:metadata:runtime:graph&gt; xhv:license &lt;about:metadata:metadata:license&gt; .
+</pre>
+<p>This template adds two triples to the RDF graphs served by the corresponding D2R Server instance. The first triple asserts that the primary topic of the served RDF graph is the resource that was requested. The second triple identifies the license of the served RDF graph and requires the metadata attribute <tt>http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#license</tt> to be specified in the mapping file.</p>
+
+<h3>Default Template</h3>
+<p>The default metadata template that comes with D2R Server automatically provides a description of the provenance of the served RDF graphs. This description uses the <a href="http://purl.org/net/provenance/">Provenance Vocabulary</a> and includes information about the creation of served RDF graphs, the D2R Server instance, the <tt>DESCRIBE</tt> query used for creation, etc. The following additional metadata attributes may be configured in the mapping file to provide more detailed information about the D2R Server instance:
+</p>
+
+<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
+  <tr> 
+    <td valign="top"><tt>meta:d2rUser</tt></td>
+    <td>This property refers to the URI of the data publisher who uses this D2R Server instance to publish her/his data. The URI should be an HTTP URI that links to data about the publisher.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>meta:d2rUserName</tt>, <tt>meta:d2rUserHomepage</tt></td>
+    <td>These properties provide the name and the homepage address of the data publisher who uses this D2R Server instance. They could be used as an alternative to <code>meta:d2rUser</code> if the publisher has no HTTP-dereferencable URI yet.
+</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>meta:d2rOperator</tt></td>
+    <td>This property refers to the URI of the service provider who operates this D2R Server instance. The service provider and the data publisher may be the same entity; nonetheless, it is recommended to specify both properties (using the same value) so that an application can infer the fact that publisher and operator are the same.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>meta:d2rOperatorName</tt>, <tt>meta:d2rOperatorHomepage</tt></td>
+    <td>These properties provide the name and the homepage address of the service provider who operates this D2R Server instance. These properties could be used as an alternative to <code>meta:d2rOperator</code>.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>meta:dataset</tt></td>
+    <td>This property refers to the URI of the whole linked dataset that is published by this D2R Server instance. This URI usually links to the <a href="http://rdfs.org/ns/void">voiD description</a> of the dataset.
+</td>
+  </tr>
+</table>
 
 <h2 id="performance">Optimizing performance</h2>
 
@@ -351,7 +450,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
   <li><a href="http://spade.lbl.gov:2020/">Gene Ontology annotations</a> (Chris Mungall, <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-GO">more information</a>)</li>
   <li><a href="http://spade.lbl.gov:2021/">Annotated images of gene expression in fruitfly embryogenesis</a> (Chris Mungall, <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-InSitu">more information</a>)</li>
   <li><a href="http://www4.wiwiss.fu-berlin.de/dblp/">DBLP Bibliography Database on the Semantic Web</a></li>
-  <li><a href="http://www4.wiwiss.fu-berlin.de/is-group/">Web-based Systems Group @ Freie Universität Berlin</a> &#8211; Information about staff, projects and publications</li>
+  <li><a href="http://www4.wiwiss.fu-berlin.de/is-group/">Web-based Systems Group @ Freie Universit√§t Berlin</a> &#8211; Information about staff, projects and publications</li>
   <li><a href="http://roller.blogdns.net:2020/">Roller blog server demo</a> (Henry Story, <a href="https://sommer.dev.java.net/atom/2006-06-06/applications/SPARQLingRoller.pdf">more information</a>)</li>
   <li><a href="http://www3.wiwiss.fu-berlin.de:2020/">D2R Server Live Demo</a> publishing an example conference database</li>
 </ul>
@@ -368,7 +467,7 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 <div><a href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3">DOAP project description</a> (<a href="http://www4.wiwiss.fu-berlin.de/rdf_browser/?browse_uri=http%3A//www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3">View with Disco</a>)</div>
 
 <div id="footer">
-  <small>$Id: index.html,v 1.30 2010/01/16 18:41:08 cyganiak Exp $</small>
+  <small>$Id: index.html,v 1.31 2010/02/16 13:46:06 fatorange Exp $</small>
 </div>
 </div>
 

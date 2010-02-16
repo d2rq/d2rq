@@ -1,0 +1,23 @@
+
+.metadata-table a small  { font-size: 100%; color: #55a; }
+.metadata-table a small  { font-size: 100%; color: #666; }
+
+.metadata-label {
+	font-size: 100%;
+	background: #f0fcf0;
+	padding: 3px;
+}
+
+.metadata-table {
+	font-size: 100%;
+	border-left: 3px solid #f0fcf0;
+	border-bottom: 3px solid #f0fcf0;
+	border-right: 3px solid #f0fcf0;
+	background: #d4f6d4;
+	border-top: 0px solid none;
+	margin: 0px;
+}
+
+.metadata-table td {
+	padding: 3px;
+}

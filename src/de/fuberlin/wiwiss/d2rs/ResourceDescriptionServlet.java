@@ -40,9 +40,8 @@ public class ResourceDescriptionServlet extends HttpServlet {
 				server.resourceBaseURI(serviceStem) + relativeResourceURI);
 		String documentURL = server.dataURL(serviceStem, relativeResourceURI);
 
-		Model description = QueryExecutionFactory.create(
-				"DESCRIBE <" + resourceURI + ">",
-				server.dataset()).execDescribe();
+		String sparqlQuery = "DESCRIBE <" + resourceURI + ">";
+		Model description = QueryExecutionFactory.create(sparqlQuery, server.dataset()).execDescribe();	
 			
 		if (description.size() == 0) {
 			response.sendError(404);
@@ -59,6 +58,14 @@ public class ResourceDescriptionServlet extends HttpServlet {
 			document.addProperty(RDFS.label, "RDF Description of " + label.getString());
 		}
 		server.addDocumentMetadata(description, document);
+		
+		MetadataCreator mc = new MetadataCreator(server, new VelocityWrapper(this, request, response));
+		mc.setResourceURI(resourceURI);
+		mc.setDocumentURL(documentURL);
+		mc.setSparqlQuery(sparqlQuery);
+
+		description.add(mc.addMetadataFromTemplate(description.createResource(resourceURI), getServletContext()));
+				
 // TODO: Add a Content-Location header
 		new ModelResponse(description, request, response).serve();
 //		Resource resource = description.getResource(resourceURI);

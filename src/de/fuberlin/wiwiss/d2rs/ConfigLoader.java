@@ -172,7 +172,7 @@ public class ConfigLoader {
 		}
 	}
 	
-	private Resource findServerResource() {
+	protected Resource findServerResource() {
 		ResIterator it = this.model.listSubjectsWithProperty(RDF.type, D2R.Server);
 		if (!it.hasNext()) {
 			return null;

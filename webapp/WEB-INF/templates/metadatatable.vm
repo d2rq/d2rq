@@ -1,0 +1,58 @@
+#macro (prettyNode $node) 
+	#set ($foundSth = false)
+
+	#if ($node.asNode().isURI())
+		#foreach ($entry in $prefixes)
+			#if ($node.getURI().startsWith($entry.getValue()))
+				<a class="uri" href="$node.getURI()" title="$node.getURI()"><small>$entry.getKey()</small>:$node.getURI().substring($entry.getValue().length())</a>
+				#set ($foundSth = true)
+			#end
+		#end
+
+	#elseif ($node.asNode().isBlank())
+		#if (!$blankNodesMap.containsKey($node))
+			#set ($bnid = "Anon_$bnidCount")
+			#set ($test = $blankNodesMap.put($node,$bnid))
+			#set ($bnidCount = $bnidCount + 1)
+		#end
+		#set ($bnidP = $blankNodesMap.get($node))
+		$bnidP
+		#set ($foundSth = true)	
+
+	#elseif ($node.asNode().isLiteral())
+		$node.asNode().getLiteralValue().toString().replace("<","&lt;").replace(">","&gt;")
+		#set ($foundSth = true)
+	#end
+
+	#if (!$foundSth)
+		<small>&lt;</small><a class="uri" href="$node.toString()">$node.toString()</a><small>&gt;</small>
+	#end
+#end
+
+#macro( listProperties $name $metadataPropList $style)
+	#set ($idadd = $idadd + 1)
+	<div class="metadata-label">#prettyNode ($name)&nbsp;
+
+	#if ($metadataPropList.size() > 0 && $style != "block")
+		<a name="anchor_$idadd"></a>
+		(<a href="#anchor_$idadd" onclick="document.getElementById('ele_$idadd').style.display = 'block';">more</a>)
+	#end
+	</div>
+
+	<table id="ele_$idadd" class="metadata-table" style="display: $style">
+	#foreach  ($statement in $metadataPropList)
+		<tr>
+			<td valign="top" class="metadata-property">#prettyNode ($statement.getPredicate())</td>
+			<td class="metadata-object">
+				#set ($object = $statement.getObject())
+				#if ($object.isResource() && $object.listProperties().toList().size() > 0 && !$statement.getSubject().equals($statement.getObject()))
+					#listProperties ($object $object.listProperties().toList() 'none')
+				#else
+					#prettyNode ($statement.getObject())
+				#end
+			</td>
+		</tr>
+	#end
+	</table>
+#end
+

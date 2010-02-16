@@ -11,7 +11,7 @@
     rdfs:comment "This vocabulary defines RDF terms used in configuration files for D2R Server, a software application that publishes relational databases on the Semantic Web."@en;
     foaf:page <http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/>;
     dc:creator <http://richard.cyganiak.de/foaf.rdf#cygri>;
-    owl:versionInfo "$Id: config.n3,v 1.4 2009/06/11 09:13:18 fatorange Exp $";
+    owl:versionInfo "$Id: config.n3,v 1.5 2010/02/16 13:46:06 fatorange Exp $";
     .
 <http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/>
     rdfs:label "D2R Server homepage and documentation"@en;
@@ -57,6 +57,13 @@ d2r:vocabularyIncludeInstances a rdf:Property;
 d2r:autoReloadMapping a rdf:Property;
     rdfs:label "automatically check for updated mapping file"@en;
     rdfs:comment "Whether D2R Server should check for an updated mapping file with every request."@en;
+    rdfs:domain d2r:Server;
+    rdfs:isDefinedBy <>;
+    .
+
+d2r:metadataTemplate a rdf:Property;
+    rdfs:label "metadata template"@en;
+    rdfs:comment "A RDF metadata template."@en;
     rdfs:domain d2r:Server;
     rdfs:isDefinedBy <>;
     .

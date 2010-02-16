@@ -75,6 +75,10 @@ public class VelocityWrapper {
 	public Context getContext() {
 		return context;
 	}
+	
+	public VelocityEngine getEngine() {
+		return engine;
+	}
 
 	public void mergeTemplateXHTML(String templateName) {
 		MediaRangeSpec bestMatch = xhtmlNegotiator.getBestMatch(
