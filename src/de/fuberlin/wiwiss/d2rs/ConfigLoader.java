@@ -26,13 +26,14 @@ public class ConfigLoader {
 	 * etc) and returns an equivalent full absolute URI.
 	 */
 	public static String toAbsoluteURI(String fileName) {
-		// Windows? Convert \ to / in mapping file name
-		// because we treat it as a URL, not a file name
+		// Permit backslashes when using the file: URI scheme under Windows
+		// This is not required for the latter File.toURL() call
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") != -1) {
 			fileName = fileName.replaceAll("\\\\", "/");
 		}
 		try {
-			if (fileName.matches("[a-zA-Z0-9]+:.*") && new URI(fileName).isAbsolute()) {
+			// Check if it's an absolute URI already - but don't confuse Windows drive letters with URI schemes
+			if (fileName.matches("[a-zA-Z0-9]{2,}:.*") && new URI(fileName).isAbsolute()) {
 				return fileName;
 			}
 			return new File(fileName).getAbsoluteFile().toURL().toExternalForm();
