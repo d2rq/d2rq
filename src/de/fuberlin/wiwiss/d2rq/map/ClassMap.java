@@ -79,8 +79,8 @@ public class ClassMap extends ResourceMap {
 					D2RQException.CLASSMAP_INVALID_CONSTANTVALUE);
 		}
 		if (this.uriPattern != null && new Pattern(uriPattern).attributes().size() == 0) {
-			this.log.warn(toString() + " has an uriPattern without any column specifications. This means that all table rows will be mapped to a single instance. " +
-					"If this is not what you want, please edit the mapping accordingly.");
+			this.log.warn(toString() + " has an uriPattern without any column specifications. This usually happens when no primary keys are defined for a table. If the configuration is left as is, all table rows will be mapped to a single instance. " +
+					"If this is not what you want, please define the keys in the database and re-run the mapping generator, or edit the mapping to provide the relevant keys.");
 		}
 		Iterator it = this.propertyBridges.iterator();
 		while (it.hasNext()) {
