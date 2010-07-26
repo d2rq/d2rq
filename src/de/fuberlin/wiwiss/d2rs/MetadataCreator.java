@@ -150,7 +150,12 @@ public class MetadataCreator {
 			}
 			// <about:metadata:runtime:graph> - URI of the graph
 			if (phName.equals("graph")) {
-				return model.createResource(documentURL);
+				// Replaced the commented line by the following one because the
+				// RDF graph we want to talk about is a specific representation
+				// of the data identified by the documentURL.
+				//                                       Olaf, Jul 26, 2010
+				//return model.createResource(documentURL);
+				return model.createResource("");
 			}
 			// <about:metadata:runtime:resource> - URI of the resource
 			if (phName.equals("resource")) {
