@@ -1,8 +1,10 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
  * map from SELECT clause entries to string values.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResultRowMap.java,v 1.6 2009/06/03 14:02:19 fatorange Exp $
+ * @version $Id: ResultRowMap.java,v 1.7 2010/08/13 13:45:29 cyganiak Exp $
  */
 public class ResultRowMap implements ResultRow {
 	
@@ -41,10 +43,21 @@ public class ResultRowMap implements ResultRow {
 				 * 
 				 * Note: getObject(i+1).toString() does not work in this case; the only other options seems to be Oracle's toJdbc()
 				 */
-				if (classString != null && classString.equals("oracle.sql.DATE"))
-					result.put(projectionSpecs.get(i), resultSet.getDate(i + 1).toString());
-				else if (classString != null && classString.equals("oracle.sql.TIMESTAMP"))
-					result.put(projectionSpecs.get(i), resultSet.getTimestamp(i + 1).toString());
+				if (classString != null && classString.equals("oracle.sql.DATE")) {
+					Date oracleDate = resultSet.getDate(i + 1);
+					if (!resultSet.wasNull()) {
+						result.put(projectionSpecs.get(i), oracleDate.toString());
+					} else {
+						result.put(projectionSpecs.get(i), null);
+					}
+				} else if (classString != null && classString.equals("oracle.sql.TIMESTAMP")) {
+					Timestamp oracleTimestamp = resultSet.getTimestamp(i + 1);
+					if (!resultSet.wasNull()) {
+						result.put(projectionSpecs.get(i), oracleTimestamp.toString());
+					} else {
+						result.put(projectionSpecs.get(i), null);
+					}
+				}
 				/*
 				 * Let the JDBC driver convert boolean values for us as their representation differs greatly amongst DBs (e.g. PostgreSQL employs 't' and 'f', others use 0 and 1) 
 				 */
