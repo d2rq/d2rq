@@ -1,0 +1,206 @@
+@prefix : <#> .
+@prefix db: <jdbc:mysql://127.0.0.1/wordpress#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix sioc: <http://rdfs.org/sioc/ns#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix tdl: <http://www.eyrie.org/~zednenem/2002/web-threads/> .
+
+:database a d2rq:Database;
+	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
+	d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/wordpress";
+	d2rq:username "root";
+	.
+
+# Table categories
+:classMap_categories a d2rq:ClassMap;
+	d2rq:dataStorage :database;
+	d2rq:uriPattern "http://example.org/data#category-@@categories.category_nicename@@";
+	d2rq:class skos:Concept;
+	.
+:propertyBridge_categories_cat_name a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_categories;
+	d2rq:property skos:prefLabel;
+	d2rq:column "categories.cat_name";
+	.
+:propertyBridge_categories_category_nicename a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_categories;
+	d2rq:property foaf:page;
+	d2rq:uriPattern "@@options.option_value@@category/@@categories.category_nicename@@";
+	d2rq:condition "options.option_name='siteurl'";
+	.
+:propertyBridge_categories_category_description a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_categories;
+	d2rq:property rdfs:comment;
+	d2rq:column "categories.category_description";
+	d2rq:condition "categories.category_description!=''";
+	.
+:propertyBridge_categories_category_parent a d2rq:PropertyBridge;
+    d2rq:belongsToClassMap :classMap_categories;
+    d2rq:property skos:broader;
+    d2rq:refersToClassMap :classMap_categories;
+    d2rq:join "categories.category_parent = parent_cat.cat_ID";
+    d2rq:alias "categories AS parent_cat";
+    .
+
+# Table comments
+:classMap_comments a d2rq:ClassMap;
+	d2rq:dataStorage :database;
+	d2rq:uriPattern "@@posts.guid@@#comment-@@comments.comment_ID@@";
+	d2rq:condition "posts.ID=comments.comment_post_ID";
+	d2rq:condition "comments.comment_approved='1'";
+	d2rq:class sioc:Post;
+	.
+:propertyBridge_comments_comment_date a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_comments;
+	d2rq:property dc:date;
+	d2rq:column "comments.comment_date";
+	d2rq:datatype xsd:dateTime;
+	d2rq:condition "comments.comment_date != '0000'";
+	.
+:propertyBridge_comments_comment_content a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_comments;
+	d2rq:property sioc:content;
+	d2rq:column "comments.comment_content";
+	.
+:propertyBridge_comments_user_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_comments;
+	d2rq:property dc:creator;
+	d2rq:refersToClassMap :classMap_users;
+	d2rq:join "comments.user_id=users.ID";
+	d2rq:condition "comments.user_id!=0";
+	.
+:propertyBridge_commentAuthors a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_comments;
+	d2rq:property dc:creator;
+	d2rq:refersToClassMap :commentAuthors;
+	.
+
+# Table comments -- comment authors
+:commentAuthors a d2rq:ClassMap;
+	d2rq:dataStorage :database;
+	# hm ... that isn't good RDF modelling since one person may post often; blank nodes?
+	d2rq:uriPattern "http://example.org/data#commenter@@comments.comment_ID@@";
+	# those with a user_id are joined to the users classmap
+	d2rq:condition "comments.user_id=0";
+	d2rq:class foaf:Person;
+	.
+:propertyBridge_comments_comment_author a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :commentAuthors;
+	d2rq:property foaf:name;
+	d2rq:column "comments.comment_author";
+	.
+:propertyBridge_comments_comment_author_email a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :commentAuthors;
+	d2rq:property foaf:mbox;
+	d2rq:uriPattern "mailto:@@comments.comment_author_email@@";
+	d2rq:condition "comments.comment_author_email!=''";
+	.
+:propertyBridge_comments_comment_author_url a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :commentAuthors;
+	d2rq:property foaf:homepage;
+	d2rq:uriColumn "comments.comment_author_url";
+	d2rq:condition "comments.comment_author_url!=''";
+	.
+
+
+# Table options
+:classMap_options a d2rq:ClassMap;
+	d2rq:dataStorage :database;
+	d2rq:uriColumn "options.option_value";
+	d2rq:class tdl:Weblog;
+	d2rq:class sioc:Forum;
+	d2rq:condition "options.option_name='siteurl'";
+	.
+:propertyBridge_container a d2rq:PropertyBridge;
+    d2rq:belongsToClassMap :classMap_options;
+    d2rq:property sioc:container_of;
+    d2rq:refersToClassMap :classMap_posts;
+    .
+
+
+# Table posts
+:classMap_posts a d2rq:ClassMap;
+	d2rq:dataStorage :database;
+	d2rq:uriColumn "posts.guid";
+	d2rq:class sioc:Post;
+	d2rq:condition "posts.post_status='publish'";
+	.
+:propertyBridge_posts_post_author a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_posts;
+	d2rq:property dc:creator;
+	d2rq:refersToClassMap :classMap_users;
+	d2rq:join "posts.post_author=users.ID";
+	.
+:propertyBridge_posts_post_date a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_posts;
+	d2rq:property dc:date;
+	d2rq:column "posts.post_date";
+	d2rq:datatype xsd:dateTime;
+	d2rq:condition "posts.post_date != '0000'";
+	.
+:propertyBridge_posts_post_content a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_posts;
+	d2rq:property sioc:content;
+	d2rq:column "posts.post_content";
+	.
+:propertyBridge_posts_post_title a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_posts;
+	d2rq:property dc:title;
+	d2rq:column "posts.post_title";
+	.
+:propertyBridge_comments_comment_post_ID a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_posts;
+	d2rq:property sioc:has_reply;
+	d2rq:refersToClassMap :classMap_comments;
+	d2rq:join "comments.comment_post_ID=posts.ID";
+	.
+# Table post2cat - n:m relationship
+:propertyBridge_post_subjects a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_posts;
+	d2rq:property skos:subject;
+	d2rq:refersToClassMap :classMap_categories;
+	d2rq:join "posts.ID=post2cat.post_id";
+	d2rq:join "post2cat.category_id=categories.cat_ID";
+	.
+
+
+# Table users
+:classMap_users a d2rq:ClassMap;
+	d2rq:dataStorage :database;
+	d2rq:uriPattern "http://example.org/data#user@@users.ID@@";
+	d2rq:class foaf:Person;
+	.
+:propertyBridge_users_user_email a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_users;
+	d2rq:property foaf:mbox;
+	d2rq:uriPattern "mailto:@@users.user_email@@";
+	.
+:propertyBridge_users_user_url a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_users;
+	d2rq:property foaf:homepage;
+	d2rq:uriColumn "users.user_url";
+	.
+:propertyBridge_users_display_name a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_users;
+	d2rq:property foaf:name;
+	d2rq:column "users.display_name";
+	.
+:propertyBridge_users_nick a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_users;
+	d2rq:property foaf:nick;
+	d2rq:join "users.ID=usermeta.user_ID";
+	d2rq:condition "usermeta.meta_key='nickname'";
+	d2rq:column "usermeta.meta_value";
+	.
+:propertyBridge_users_description a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap :classMap_users;
+	d2rq:property rdfs:comment;
+	d2rq:join "users.ID=usermeta.user_ID";
+	d2rq:condition "usermeta.meta_key='description'";
+	d2rq:column "usermeta.meta_value";
+	.

@@ -1,0 +1,46 @@
+body { font-family: sans-serif; line-height: 1.4em; margin: 0; padding: 2.5em 3em; }
+:link { color: #00c; }
+:visited { color: #609; }
+a:link img { border: none; }
+a:visited img { border: none; }
+p { text-align: justify }
+h1, h2, h3 { color: #800; }
+h1 { font: 170% sans-serif; margin: 0; }
+h2 { font: 140% sans-serif; margin: 2em 0 -0.3em 0; }
+h3 { font: 120% sans-serif; margin: 1.7em 0 -0.3em 0; }
+h4 { font: bold 100% sans-serif; }
+h5 { font: italic 100% sans-serif; }
+h6 { font: small-caps 100% sans-serif; }
+.hide { display: none; }
+pre { background: #fff6bb; font-family: monospace; line-height: 1.2em; padding: 1em 2em; }
+dt { font-weight: bold; margin-top: 0; margin-bottom: 0; }
+dd { margin-top: 0; margin-bottom: 0; }
+code, tt { font: 115% monospace; }
+ul.toc { list-style-type: none; }
+ol.toc li a { text-decoration: none; }
+.image { text-align: center; }
+.note { color: red; }
+#header { background: url(images/fu-logo.gif) no-repeat top right; padding: 0 0 2em 0; }
+#download { font-family: sans-serif; margin-bottom: 1em; text-align: center; }
+#download h2 { font-size: 125%; margin: 1.5em 0 -0.2em 0; }
+#download small { color: #888; font-size: 80%; }
+#footer { border-top: 1px solid #ccc; color: #aaa; margin: 2em 0 0; }
+
+@media Print {
+h1, h2, h3, h4, h5, h6 { color: black; font-family: serif; }
+body { font-family: serif; }
+pre { background: transparent; font-size: 75%; }
+tt { font-size: 85%; }
+:link, :visited { color: #006; text-decoration: none; }
+#header, #authors { background: white; text-align: center; }
+#authors a, .toc a { color: black; }
+#footer { display: none; }
+}
+@media Aural {
+h1 { stress: 20; richness: 90; }
+h2 { stress: 20; richness: 90; }
+h3 { stress: 20; richness: 90; }
+.hide { speak: none; }
+dt { pause-before: 20%; }
+pre { speak-punctuation: code; }
+}

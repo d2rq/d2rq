@@ -16,36 +16,51 @@
 	<property name="jar" value="${lib}/${distname}.jar"/>
 	<property name="zip" value="${distname}.zip"/>
 	<property name="tar" value="${distname}.tar.gz"/>
-	<property name="junit.jar" value="${lib}/junit-4.0.jar"/>
-	<property name="vocab.dir" value="doc/specification"/>
-	<property name="vocab.n3" value="${vocab.dir}/d2rq-rdfs.n3"/>
-	<property name="vocab.rdf" value="${vocab.dir}/d2rq-rdfs.rdf"/>
-	<property name="vocab.java" value="${src}/${project.path}/vocab/D2RQ.java"/>
-	<property name="vocab.namespace" value="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#"/>
+    <property name="war" value="${name}.war" />
+
+	<property name="vocab.language.dir" value="doc/specification"/>
+	<property name="vocab.language.n3" value="${vocab.language.dir}/d2rq-rdfs.n3"/>
+	<property name="vocab.language.rdf" value="${vocab.language.dir}/d2rq-rdfs.rdf"/>
+	<property name="vocab.language.java" value="${src}/${project.path}/vocab/D2RQ.java"/>
+	<property name="vocab.language.namespace" value="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#"/>
+
+	<property name="vocab.config.n3" value="${doc}/config.n3"/>
+	<property name="vocab.config.rdf" value="${doc}/config.rdf"/>
+	<property name="vocab.config.namespace" value="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#"/>
+	<property name="vocab.config.name" value="D2RConfig"/>
+	<property name="vocab.config.package" value="${project.package}.vocab"/>
+	<property name="vocab.config.java" value="${src}/${project.path}/vocab/${vocab.config.name}.java"/>
 	
 	<path id="project.class.path">
 		<fileset dir="${lib}">
 			<include name="**/*.jar"/>
-			<exclude name="${junit.jar}"/>
 		</fileset>
 		<pathelement path="${java.class.path}"/>
 	</path>
 	
 	<patternset id="distfiles">
 		<include name="**/*"/>
+        <exclude name=".git/**"/>
 		<exclude name="${build}/**"/>
 		<exclude name="${build.tests}/**"/>
 		<exclude name="build/**"/>
 		<exclude name="${zip}"/>
 		<exclude name="${tar}"/>
+		<exclude name="${war}"/>
+		<exclude name=".project"/>
+		<exclude name=".classpath"/>
+		<exclude name=".settings"/>
+		<exclude name=".gitignore"/>
+		<exclude name="velocity.log"/>
 	</patternset>
 
-	<property name="execfiles" value="dump-rdf generate-mapping"/>
+	<property name="execfiles" value="dump-rdf generate-mapping d2r-server"/>
 
 	<target name="clean">
 		<delete dir="${build}" failonerror="false"/>
 		<delete dir="${build.tests}" failonerror="false"/>
 		<delete dir="${javadoc}" failonerror="false"/>
+		<delete file="${war}" failonerror="false"/>
 		<delete failonerror="false">
 			<fileset dir="." includes="${lib}/${name}-*.jar,${name}-*.zip,${name}-*.tar.gz"/>
 		</delete>
@@ -60,15 +75,7 @@
 			<classpath refid="project.class.path"/>
 		</javac>
 	</target>
-<!--	
-	<target name="copyfiles" depends="init">
-		<copy todir="${build}/">
-			<fileset dir="${src}/">
-				<include name="${project.path}/trix/*.xsd"/>
-			</fileset>
-		</copy>
-	</target>
--->
+
 	<target name="init.tests">
 		<mkdir dir="${build.tests}"/>
 	</target>
@@ -92,8 +99,7 @@
 	</target>
 
 	<target name="test" depends="compile.tests,copyfiles.tests">
-		<java classname="junit.textui.TestRunner" fork="yes" failonerror="true">
-			<arg value="${project.package}.D2RQTestSuite"/>
+		<java classname="${project.package}.D2RQTestSuite" fork="yes" failonerror="true">
 			<classpath>
 				<path refid="project.class.path"/>
 				<pathelement path="${build}"/>
@@ -141,11 +147,9 @@
 		</zip>
 	</target>
 
-	<target name="tar" depends="jar">
+	<target name="tar" depends="jar,javadoc">
 		<tar destfile="${tar}" compression="gzip">
-<!--
 			<tarfileset prefix="${distname}" dir="." includes="${execfiles}" mode="755"/>
--->
 			<tarfileset prefix="${distname}" dir="." excludes="${execfiles}">
 				<patternset refid="distfiles"/>
 			</tarfileset>
@@ -154,15 +158,15 @@
 
 	<target name="all" depends="zip,tar"/>
 	
-	<target name="vocab.d2rq.schemagen">
+	<target name="vocab.language.schemagen">
 		<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
 				failonerror="true">
 			<arg value="-i" />
-			<arg value="file:${vocab.n3}" />
+			<arg value="file:${vocab.language.n3}" />
 			<arg value="-o" />
-			<arg value="${vocab.java}" />
+			<arg value="${vocab.language.java}" />
 			<arg value="-a" />
-			<arg value="${vocab.namespace}" />
+			<arg value="${vocab.language.namespace}" />
 			<arg value="-n" />
 			<arg value="D2RQ" />
 			<arg value="--package" />
@@ -171,20 +175,66 @@
 		</java>
 		<!-- schemagen generates broken Java code for the "class" property,
 		     we fix it by search&replace -->
-		<replace file="${vocab.java}" token="Property class" value="Property class_"/>
+		<replace file="${vocab.language.java}" token="Property class" value="Property class_"/>
 		<!-- schemagen generates a field "class_Map" for d2rq:classMap for some reason,
 		     we fix it by search&replace -->
-		<replace file="${vocab.java}" token="class_Map" value="classMap"/>
+		<replace file="${vocab.language.java}" token="class_Map" value="classMap"/>
+	</target>
+
+	<target name="vocab.config.schemagen">
+		<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
+				failonerror="true">
+			<arg value="-i"/>
+			<arg value="file:${vocab.config.n3}"/>
+			<arg value="-o"/>
+			<arg value="${vocab.config.java}"/>
+			<arg value="-a"/>
+			<arg value="${vocab.config.namespace}"/>
+			<arg value="-n"/>
+			<arg value="${vocab.config.name}"/>
+			<arg value="--package"/>
+			<arg value="${vocab.config.package}"/>
+			<arg value="--rdfs"/>
+		</java>
 	</target>
 	
-	<target name="vocab.d2rq.toXML">
+	
+	<target name="vocab.language.toXML">
 		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
-				output="${vocab.rdf}" logError="yes" failonerror="true">
-			<arg value="${vocab.n3}"/>
+				output="${vocab.language.rdf}" logError="yes" failonerror="true">
+			<arg value="${vocab.language.n3}"/>
 			<arg value="N3"/>
 			<arg value="RDF/XML-ABBREV"/>
 		</java>
 	</target>
 	
-	<target name="vocab.d2rq" depends="vocab.d2rq.toXML,vocab.d2rq.schemagen"/>
+	<target name="vocab.config.toXML">
+		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
+				output="${vocab.config.rdf}" logError="yes" failonerror="true">
+			<arg value="${vocab.config.n3}"/>
+			<arg value="N3"/>
+			<arg value="RDF/XML-ABBREV"/>
+		</java>
+	</target>
+	
+	<target name="vocab" depends="vocab.language.toXML,vocab.language.schemagen,vocab.config.toXML,vocab.config.schemagen"/>
+
+	<target name="war" depends="jar">
+		<war destfile="${war}" needxmlfile="false">
+			<fileset dir="webapp/">
+				<include name="**"/>
+				<exclude name="WEB-INF"/>
+			</fileset>
+			<lib dir="${lib}">
+				<exclude name="servlet-api-*.jar"/>
+			</lib>
+			<lib file="${jar}"/>
+			<webinf dir="webapp/WEB-INF">
+				<include name="*"/>
+				<exclude name="templates"/>
+			</webinf>
+			<classes dir="etc"/>
+			<classes dir="webapp/WEB-INF/templates"/>
+		</war>
+	</target>
 </project>

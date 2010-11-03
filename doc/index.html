@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>D2R Server &#8211; Publishing Relational Databases on the Semantic Web</title>
+  <link rel="DOAP" type="application/rdf+xml" href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3" />
+<style type=text/css>
+body { background: white; color: black; font-family: sans-serif; line-height: 1.4em; padding: 2.5em 3em; margin: 0; }
+:link { color: #00c; }
+:visited { color: #609; }
+a:link img { border: none; }
+a:visited img { border: none; }
+h1, h2, h3 { background: white; color: #800; }
+h1 { font: 170% sans-serif; margin: 0; }
+h2 { clear: both; font: 140% sans-serif; margin: 1.5em 0 -0.5em 0; }
+h3 { font: 120% sans-serif; margin: 1.5em 0 -0.5em 0; }
+h4 { font: bold 100% sans-serif; }
+h5 { font: italic 100% sans-serif; }
+h6 { font: small-caps 100% sans-serif; }
+.hide { display: none; }
+pre { background: #fff6bb; font-family: monospace; line-height: 1.2em; padding: 1em 2em; }
+dt { font-weight: bold; margin-top: 0; margin-bottom: 0; }
+dd { margin-top: 0; margin-bottom: 0; }
+code, tt { font-family: monospace; }
+ul.toc { list-style-type: none; }
+ol.toc li a { text-decoration: none; }
+.note { color: red; }
+#header { border-bottom: 1px solid #ccc; }
+#logo { float: right; }
+#authors { clear: right; float: right; font-size: 80%; text-align: right; }
+#content { clear: both; margin: 2em auto 0 0; text-align: justify }
+#download, #demo { float: left; font-family: sans-serif; margin: 1em 0 1.5em; text-align: center; width: 50%; }
+#download h2, #demo h2 { font-size: 125%; margin: 1.5em 0 -0.2em 0; }
+#download small, #demo small { color: #888; font-size: 80%; }
+#footer { border-top: 1px solid #ccc; color: #aaa; margin: 2em 0 0; }
+
+@media Print {
+* { font-size: 92%; }
+body { padding: 0; line-height: 1.2em; }
+#content { margin: 0; width: 100%; }
+}
+@media Aural {
+h1 { stress: 20; richness: 90; }
+h2 { stress: 20; richness: 90; }
+h3 { stress: 20; richness: 90; }
+.hide { speak: none; }
+dt { pause-before: 20%; }
+pre { speak-punctuation: code; }
+}
+.Stil1 {color: #FF0000}
+</style>
+</head>
+<body>
+
+<div id="logo">
+  <a href="http://www.fu-berlin.de/"><img src="images/fu-logo.gif" alt="Freie Universit&auml;t Berlin Logo" /></a>
+</div>
+
+<div id="header">
+  <h1 style="font-size: 250%">D2R Server</h1>
+  <div id="tagline">Publishing Relational Databases on the Semantic Web </div>
+</div>
+
+<div id="authors">
+  <a href="http://www.bizer.de/">Chris Bizer</a><br />
+  <a href="http://richard.cyganiak.de/">Richard Cyganiak</a>
+</div>
+
+<div id="content">
+
+<p>D2R Server is a tool for publishing relational databases on the Semantic Web.<br />
+  It enables RDF and HTML browsers to navigate the content of the database,<br />
+  and allows applications to query the database using the SPARQL query language.</p>
+
+<div id="download">
+  <h2><a href="http://sourceforge.net/project/showfiles.php?group_id=111002&amp;package_id=188901">Download D2R Server</a></h2>
+  <small>v0.7 (alpha), released 2009-08-10</small>
+</div>
+<div id="demo">
+  <h2><a href="http://www4.wiwiss.fu-berlin.de/is-group/">Live Demo</a></h2>
+  <small>Web-based Systems Group database</small>
+</div>
+
+<h2 id="news">News</h2>
+
+<ul>
+  <li><strong>2009-08-10: Version 0.7 released.</strong> This version provides several bugfixes, better dump performance, several new features as well as new optimizations that must be enabled using the new <tt>--fast</tt> switch.</li>
+  <li><strong>2009-02-19: Version 0.6 released.</strong> This version introduces serving of vocabulary data and includes D2RQ 0.6, which provides significantly improved performance and memory usage, new features and several bugfixes.</li>
+  <li><strong>2007-11-03: Version 0.4 released.</strong> This version can be run as a J2EE web application inside existing servlet containers and fixes several bugs.</li>
+  <li><strong>2007-02-13: Version 0.3.2 released,</strong> featuring more configurability, easy installation as a Windows service, and many small improvements and bugfixes.</li>
+  <li><strong>2007-01-22: dbpedia.org uses D2R Server</strong> to <a href="http://dbpedia.org/main">publish structured data</a> extracted from Wikipedia.</li>
+  <li><strong>2006-12-20: Gene Ontology servers:</strong> Chris Mungall (Berkeley Drosophila Genome Project) has set up D2R Servers for <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-GO">Gene Ontology annotations</a> and <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-InSitu">gene expression in fruitfly embryogenesis</a>.</li>
+  <li><strong>2006-11-02: DBLP Bibliography server:</strong> We have published the <a href="http://www4.wiwiss.fu-berlin.de/dblp/">DBLP Bibliography Database on the Semantic Web</a> using D2R Server.</li>
+</ul>
+
+<h2 id="contents">Contents</h2>
+<ol class="toc">
+  <li><a href="#about">About D2R Server</a></li>
+  <li><a href="#quickstart">Quick start</a></li>
+  <li><a href="#customize">Customizing the database mapping</a> </li>
+  <li><a href="#vocabulary">Serving vocabulary classes and properties</a> </li>  
+  <li><a href="#configuration">Server configuration</a></li>
+  <li><a href="#metadata">Publishing metadata</a></li>
+  <li><a href="#performance">Optimizing performance</a></li>
+  <li><a href="#windows">Running D2R Server as a service on Windows</a></li>
+  <li><a href="#container">Running D2R Server in an existing Servlet Container</a></li>
+  <li><a href="#dumps">Creating RDF dumps</a></li>
+  <li><a href="#mappingfiles">Pre-built mapping files</a></li>
+  <li><a href="#support">Support and Feedback</a></li>
+  <li><a href="#development">Source code and development</a></li>
+  <li><a href="#publicservers">Public servers</a></li>
+  <li><a href="#relatedprojects">Related projects</a></li>
+</ol>
+
+<h2 id="about">About D2R Server</h2>
+
+<p>D2R Server is a tool for publishing the content of relational databases
+  on the <a href="http://www.w3.org/2001/sw/">Semantic Web</a>, a global
+  information space consisting of
+  <a href="http://www.w3.org/DesignIssues/LinkedData.html">linked data</a>.</p>
+
+<p>Data on the Semantic Web is modelled and represented in
+  <a href="http://en.wikipedia.org/wiki/Resource_Description_Framework">RDF</a>.
+  D2R Server uses a customizable
+  <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#specification">D2RQ mapping</a>
+  to map database content into this format, and allows the RDF data to be
+  <em>browsed</em> and <em>searched</em> &#8211; the two main access paradigms
+  to the Semantic Web.</p>
+
+<p>D2R Server's <strong>Linked Data interface</strong> makes RDF descriptions of individual resources available over the HTTP protocol. An RDF description can be retrieved simply by accessing the resource's URI over the Web. Using a Semantic Web browser like <a href="http://www.w3.org/2005/ajar/tab">Tabulator</a> (<a href="http://www.w3.org/2006/Talks/1019-tab-tbl/">slides</a>) or <a href="http://www4.wiwiss.fu-berlin.de/bizer/ng4j/disco/">Disco</a>, you can follow links from one resource to the next, surfing the Web of Data.
+
+<p>The <strong>SPARQL interface</strong> enables applications to search and query the database using the <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> query language over the SPARQL protocol.</p>
+
+<p>A traditional <strong>HTML interface</strong> offers access to the familiar Web browsers.</p>
+
+<p align="center"><img src="images/architecture.png" alt="D2R Server architecture diagram" /></p>
+
+<p>Requests from the Web are rewritten into SQL queries via the mapping. This on-the-fly translation allows publishing of RDF from large live databases and eliminates the need for replicating the data into a dedicated RDF triple store.</p>
+
+<p><strong>Read more</strong> about the interfaces offered by D2R Server, including example HTTP requests and responses, in the Technical Note <a href="publishing/">Publishing Databases on the Semantic Web</a>.</p>
+
+<h2 id="quickstart">Quick start</h2>
+
+<p>You need:</p>
+<ul>
+  <li><strong>Java 1.4</strong> or newer on the path (check with
+    <tt>java -version</tt> if you're not sure),</li>
+  <li><strong>A supported database</strong>. D2R Server works with Oracle,
+    MySQL, PostgreSQL, Microsoft SQL Server, and any SQL-92 compatible database. Microsoft
+    Access can be used with some restrictions. More information is
+    available in the
+    <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#compatibility">D2RQ manual</a>.</li>
+  <li>a <strong>modern browser</strong> like Firefox, Opera or Safari
+    for using D2R Server's AJAX SPARQL Explorer. Internet Explorer can
+    only browse the HTML pages, but not use the SPARQL Explorer.</li>
+  <li>Optionally, a <strong>J2EE servlet container</strong> as a
+    deployment target. D2R Server can be run either as a stand-alone
+    web server or inside an existing servlet container.</li>
+</ul>
+
+<p>What to do:</p>
+<ol>
+  <li><p><strong><a href="#download">Download</a> and extract the
+    archive</strong> into a suitable location.</p></li>
+  <li><p><strong>Download a JDBC driver</strong> from your database vendor.
+    Place the driver's JAR file into D2R Server's <tt>/lib</tt> directory.
+    A <a href="http://developers.sun.com/product/jdbc/drivers">list of JDBC drivers</a>
+    from different vendors is maintained by Sun. Also take
+    note of the <strong>driver class name</strong> (e.g.
+    <tt>org.postgresql.Driver</tt> for PostgreSQL or
+    <tt>oracle.jdbc.driver.OracleDriver</tt> for Oracle) and
+    <strong>JDBC URL pattern</strong> (e.g.
+    <tt>jdbc:mysql://<em>servername</em>/<em>database</em></tt>
+    for MySQL) from the driver's documentation. Drivers for MySQL and PostgreSQL are
+    already included with D2R Server.</p></li>
+  <li><p><strong>Generate a mapping file</strong> for your database schema.
+    Change into the D2R Server directory and run:</p>
+    <pre>generate-mapping -o <em>mapping.n3</em> -d <em>driver.class.name</em>
+    -u <em>db-user</em> -p <em>db-password</em> <em>jdbc:url:...</em></pre>
+    <p><tt><em>mapping.n3</em></tt> is the name for the new mapping file.
+    <tt>-d</tt> can be skipped for MySQL.</p></li>
+  <li><p><strong>Start the server:</strong></p>
+    <pre>d2r-server <em>mapping.n3</em></pre>
+    </li>
+  <li>
+    <p><strong>Test the Server: </strong> Open <a href="http://localhost:2020/">http://localhost:2020/</a>
+    in a web browser.</p>
+    <div><img src="images/d2rs-screenshot-start.png" alt="Screenshot of D2R Server's web interface" style="margin: -4px -15px -15px -10px;"/></div>
+    <p>You can browse the database content or use the SPARQL Explorer to execute
+      queries and display results in a number of formats.</p>
+    <p>To test the data in an RDF browser, open any resource URI in
+      <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/tab.html">Tabulator</a>.
+      You may have to tweak your Firefox settings first &#8211; see the Tabulator help.</p></li>
+</ol>
+
+<h2 id="customize">Customizing the database mapping</h2>
+<p>D2R Server uses the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/">D2RQ Mapping Language</a> to map the content of a relational database to RDF. A D2RQ mapping specifies how resources are identified and which properties are used to describe the resources.</p>
+<p>The <tt>generate-mapping</tt> script automatically generates a D2RQ mapping from the table structure of a database. The tool generates a new RDF vocabulary for each database, using table names as class names and column names as property names. Semantic Web client applications will understand more of your data if you customize the mapping and replace the auto-generated terms with terms from <a href="http://ebiquity.umbc.edu/blogger/100-most-common-rdf-namespaces/">well-known</a> and <a href="http://www.w3.org/TR/swbp-vocab-pub/">publicly accessible</a> RDF vocabularies.</p>
+<p>The mapping file can be edited with any text editor. Its syntax is described in the
+  <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/">D2RQ Manual</a>.
+  D2R Server will automatically detect changes to the mapping file and
+  reload appropriately when you hit the browser's refresh button.</p>
+<p><strong>Note:</strong> The HTML and RDF browser interfaces only work
+  for URI patterns that are <em>relative</em> and <em>do not contain the
+  hash (#) character</em>. For example, a URI pattern such as
+  <tt>entries/@@mytable.id@@</tt> is browsable, but
+  <tt>http://example.com/entries#@@mytable.id@@</tt> is not. The mapping
+  generator only creates browsable patterns. Non-browsable patterns still
+  work in the SPARQL interface and in RDF dumps.</p>
+
+<h2 id="vocabulary">Serving vocabulary classes and properties</h2>
+<p>A D2R deployment often requires the introduction of custom classes and properties.
+In the spirit of <a href="http://www.w3.org/DesignIssues/LinkedData.html">Linked Data</a>, vocabulary data should be dereferencable by clients. D2RQ infers types of classes and properties, and allows the user to provide labels, comments
+and additional properties.</p>
+
+<p>D2R Server automatically serves data for vocabularies placed under <tt>http://<em>baseURI</em><strong>/vocab/resource/</strong></tt>, 
+with RDF and HTML representations located at <tt>http://<em>baseURI</em><strong>/vocab/data/</strong></tt> and <tt>http://<em>baseURI</em><strong>/vocab/page/</strong></tt>, respectively.
+The following mapping illustrates the intended usage: 
+</p>
+
+<pre>@prefix vocabClass: &lt;http://localhost:2020/vocab/resource/class/&gt; .
+@prefix vocabProperty: &lt;http://localhost:2020/vocab/resource/property/&gt; .
+
+map:offer a d2rq:ClassMap;
+	d2rq:classDefinitionLabel "Offer"@en;
+	d2rq:classDefinitionComment "This is an offer"@en;
+	d2rq:class vocabClass:Offer;
+	.
+</pre>
+
+<p>When dereferenced, <tt>http://localhost:2020/vocab/resource/class/Offer</tt> will return the specified label and comment as well as the automatically inferred type <tt>rdfs:Class</tt>. Note that the prefixes are bound to absolute URIs because relative URIs would be based under <tt>http://localhost:2020/resource/</tt>.</p>
+
+<p>D2RQ offers several constructs to provide data for classes and properties. Please refer to the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#vocabularyserving">D2RQ Language Specification</a> for more details.</p>
+
+<h2 id="configuration">Server configuration</h2>
+
+<p>The server can be configured by adding a <em>configuration block</em> to the mapping file (all parts are optional):
+
+<pre>@prefix d2r: &lt;http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#&gt; .
+
+&lt;&gt; a d2r:Server;
+    rdfs:label "D2R Server";
+    d2r:baseURI &lt;http://localhost:2020/&gt;;
+    d2r:port 2020;
+    d2r:vocabularyIncludeInstances true;
+    d2r:metadataTemplate "metadata.n3";
+    d2r:documentMetadata [
+        rdfs:comment "This comment is custom document metadata.";
+    ];
+    .</pre>
+
+<p>The <tt>rdfs:label</tt> is the server name displayed throughout the HTML interface.</p>
+<p>The <tt>d2r:baseURI</tt> and <tt>d2r:port</tt> must be changed to make the D2R Server accessible to remote machines.</p>
+<p>The <tt>d2r:vocabularyIncludeInstances</tt> setting controls whether the RDF and HTML representations of vocabulary classes and properties will also list related instances (defaults to <tt>true</tt>).
+As an alternative to disabling the serving of vocabulary instances, <tt>d2rq:resultSizeLimit</tt> may be used to limit the amount of returned data.
+Vocabulary serving is a feature of D2RQ and may be controlled using the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#configuration"><tt>d2rq:serveVocabulary</tt> property</a>.
+</p>
+<p>The <tt>d2r:autoReloadMapping</tt> setting specifies whether changes to the mapping file should be detected automatically (defaults to <tt>true</tt>). This feature has performance implications, so this value should be set to <tt>false</tt> for high-traffic production systems or when running benchmarks.</p>
+
+<p>With large databases, some queries will produce too many results. Adding a <tt>d2rq:resultSizeLimit</tt> to the <tt>d2rq:Database</tt> section of the mapping file will add a <tt>LIMIT</tt> clause to all generated statements.</p>
+
+<pre>d2rq:resultSizeLimit 500;</pre>
+
+<p>Not that this effectively &#8220;cripples&#8221; the server and can cause somewhat unpredictable results. We still recommend it until we can offer a better solution.</p>
+
+<p><tt>d2r:metadataTemplate</tt> is used to specify a metadata template file within the directory <code>WEB-INF/templates</code> <a href="#metadata">(more details)</a>.</p>
+
+<p>All statements inside the <tt>d2r:documentMetadata</tt> block will be added as document metadata to all RDF documents.</p>
+
+<h2 id="metadata">Publishing metadata</h2>
+<p>D2R Server provides a mechanism for adding metadata such as licensing and provenance information to the RDF graphs served by its Linked Data interface. The supplied metadata will be shown in a "Metadata" table below the usual property-value table, which provides a tree-like visualization of the metadata. The <em>(more)</em> links in the visualization allow to expand the view to show the properties of the corresponding entities.</p>
+
+<p>The metadata added to the provided RDF graphs is generated from a template RDF graph by replacing placeholders in the template. These placeholders refer to run-time data, typical configuration options, as well as to additional configuration variables. The metadata extension includes the default template <tt>metadata.n3</tt>, which adds various pieces of provenance information to the published data.</p>
+
+<p>In order to include metadata along with the graphs served by D2R Server, the path to the metadata template is specified relative to <code>WEB-INF/templates</code> subdirectory using the predicate <tt>d2r:metadataTemplate</tt> in a <a href="#configuration"><tt>d2r:Server</tt> configuration block</a>:</p>
+
+<pre>
+&lt;&gt; a d2r:Server;
+    d2r:metadataTemplate &quot;metadata.n3&quot;;
+</pre>
+
+<h3>Template RDF Graph</h3>
+<p>The metadata template is an RDF graph that may contain placeholder URIs. These placeholders allow a customization of the metadata that is served for each resource. They use the <code>about:</code> URI scheme and may be specified in the subject and object position of the triples in the template graph.</p>
+
+<p>Template placeholders are organized into three groups that represent the available data sources: <tt>runtime</tt>, <tt>config</tt>, and <tt>metadata</tt>. All placeholder URIs follow the scheme <tt>about:metadata:<em>groupname</em>:<em>identifier</em></tt>.</p>
+
+The following placeholder groups are currently available:
+
+<h4>runtime</h4>
+<p>Placeholders in this group are replaced with D2R Server runtime data. Currently, D2R Server supports the following runtime placeholders:
+</p>
+
+<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
+  <tr> 
+    <td valign="top"><tt>about:metadata:runtime:time</tt></td>
+    <td>Replaced by a <tt>xsd:dateTime</tt> literal which represents the current date and time.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>about:metadata:runtime:query</tt></td>
+    <td>Replaced by a string literal with the SPARQL <tt>DESCRIBE</tt> query which has been used to get the data about the requested resource.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>about:metadata:runtime:resource</tt></td>
+    <td>Replaced by the URI of the requested resource.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>about:metadata:runtime:graph</tt></td>
+    <td>Replaced by the URI of the current RDF graph that is served by Pubby.</td>
+  </tr>
+</table>
+
+<h4>config</h4>
+<p>This group of placeholders corresponds to the configuration options for the <tt>d2r:Server</tt> instance. For example, the placeholder <code>about:metadata:config:baseURI</code> is replaced with the value of the <code>d2r:baseURI</code> property defined on the <tt>d2r:Server</tt> instance.</p>
+
+<h4>metadata</h4>
+<p>Placeholders in this group allow the inclusion of additional metadata attributes, whose replacement attributes are defined as properties of the <tt>d2r:Server</tt> instance from the <tt>http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#</tt> namespace (abbreviated with the prefix <tt>meta:</tt> in the following). Each placeholder <tt>about:metadata:metadata:<em>identifier</em></tt> is replaced by the value of the property specified using a corresponding <tt>meta:<em>identifier</em></tt> predicate.</p>
+<p>In the following example, the property <tt>meta:d2rUser</tt> is provided, whose value will replace mentions of <tt>about:metadata:metadata:d2rUser</tt> in the metadata template:</p>
+
+<pre>
+@prefix meta: &lt;http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#&gt; .
+
+&lt;&gt; a d2r:Server;
+    d2r:metadataTemplate &quot;metadata.n3&quot;;
+    meta:d2rUser &lt;http://example.org/URI_of_publisher&gt;&nbsp;;
+</pre>
+<h4>Sample Template</h4>
+<pre>
+@prefix foaf: &lt;http://xmlns.com/foaf/0.1/&gt; .
+@prefix xhv:  &lt;http://www.w3.org/1999/xhtml/vocab#&gt; .
+
+&lt;about:metadata:runtime:graph&gt; foaf:primaryTopic &lt;about:metadata:runtime:resource&gt; .
+&lt;about:metadata:runtime:graph&gt; xhv:license &lt;about:metadata:metadata:license&gt; .
+</pre>
+<p>This template adds two triples to the RDF graphs served by the corresponding D2R Server instance. The first triple asserts that the primary topic of the served RDF graph is the resource that was requested. The second triple identifies the license of the served RDF graph and requires the metadata attribute <tt>http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#license</tt> to be specified in the mapping file.</p>
+
+<h3>Default Template</h3>
+<p>The default metadata template that comes with D2R Server automatically provides a description of the provenance of the served RDF graphs. This description uses the <a href="http://purl.org/net/provenance/">Provenance Vocabulary</a> and includes information about the creation of served RDF graphs, the D2R Server instance, the <tt>DESCRIBE</tt> query used for creation, etc. The following additional metadata attributes may be configured in the mapping file to provide more detailed information about the D2R Server instance:
+</p>
+
+<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
+  <tr> 
+    <td valign="top"><tt>meta:d2rUser</tt></td>
+    <td>This property refers to the URI of the data publisher who uses this D2R Server instance to publish her/his data. The URI should be an HTTP URI that links to data about the publisher.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>meta:d2rUserName</tt>, <tt>meta:d2rUserHomepage</tt></td>
+    <td>These properties provide the name and the homepage address of the data publisher who uses this D2R Server instance. They could be used as an alternative to <code>meta:d2rUser</code> if the publisher has no HTTP-dereferencable URI yet.
+</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>meta:d2rOperator</tt></td>
+    <td>This property refers to the URI of the service provider who operates this D2R Server instance. The service provider and the data publisher may be the same entity; nonetheless, it is recommended to specify both properties (using the same value) so that an application can infer the fact that publisher and operator are the same.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>meta:d2rOperatorName</tt>, <tt>meta:d2rOperatorHomepage</tt></td>
+    <td>These properties provide the name and the homepage address of the service provider who operates this D2R Server instance. These properties could be used as an alternative to <code>meta:d2rOperator</code>.</td>
+  </tr>
+  <tr> 
+    <td valign="top"><tt>meta:dataset</tt></td>
+    <td>This property refers to the URI of the whole linked dataset that is published by this D2R Server instance. This URI usually links to the <a href="http://rdfs.org/ns/void">voiD description</a> of the dataset.
+</td>
+  </tr>
+</table>
+
+<h2 id="performance">Optimizing performance</h2>
+
+<p>Here are some simple hints to improve D2R's performance:
+<ul>
+	<li>Define primary keys whenever you can and create indexes where applicable (e.g. on foreign keys) &ndash; besides optimizing database performance, these will be picked up and used by various optimizations within D2RQ.</li>
+	<li>Use the latest optimizations by launching with <tt>--fast</tt> (or activate <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#configuration"><tt>d2rq:useAllOptimizations</tt></a>).</li>
+	<li>Provide <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#propertybridge">hint properties</a>.</li>
+	<li>Indicate directions in <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#propertybridge"><tt>d2rq:joins</tt></a> to enable join optimizations.</li>
+	<li>Give D2R adequate heap space by means of Java's <tt>-Xmx</tt> parameter in <tt>d2r-server</tt> or <tt>d2r-server.bat</tt> (default: <tt>-Xmx256M</tt>).</li>
+	<li>Set <a href="#configuration"><tt>d2rq:autoReloadMapping</tt></a> to <tt>false</tt> where it is not required.</li>
+	<li>Databases often ship with development configurations that are designed for a small footprint rather than performance. For instance, some good pointers for optimizing MySQL can be found <a href="http://www.mysqlperformanceblog.com/2006/09/29/what-to-tune-in-mysql-server-after-installation/">here</a>.</li>
+</ul> 
+</p>
+
+
+<h2 id="windows">Running D2R Server as a service on Windows</h2>
+
+<p>To run D2R Server as a service on Windows, use the <tt>install-service</tt> script:</p>
+
+<pre>install-service <em>servicename mapping.n3</em></pre>
+
+<p>The service can be started from the Services panel in the management console. The service will log all output including startup errors to the files <tt>stdout.log</tt> and <tt>stderr.log</tt>.</p>
+
+<p>To uninstall the service, use <tt>uninstall-service</tt>. You have to uninstall and re-install the service when upgrading to a later version of D2R Server.</p>
+
+<h2 id="container">Running D2R Server in an existing Servlet Container</h2>
+
+<p>By default, D2R Server is a stand-alone server application that includes
+  its own web server. But D2R Server can also be run as a J2EE web application
+  inside an existing servlet container, such as Tomcat:</p>
+
+<ol>
+  <li>Make sure that your mapping file includes a configuration block, as
+    described in the <a href="#configuration">server configuration section</a>.
+    Set the port number to that of the servlet container, and set the base
+    URI to something like <tt>http://<em>servername</em>/<em>webappname</em>/</tt>.</li>
+  <li>Change the <tt>configFile</tt> param in <tt>/webapp/WEB-INF/web.xml</tt>
+    to the name of your configuration file. For deployment, we recommend placing
+    the mapping file into the <tt>/webapp/WEB-INF/</tt> directory.</li>
+  <li>In D2R Server's main directory, Run <tt>ant war</tt>. This creates the
+    <tt>d2r-server.war</tt> file. You need Apache Ant for this step.</li>
+  <li>Optionally, if you want a different name for your web application,
+    rename the file to <tt><em>webappname</em>.war</tt></li>
+  <li>Deploy the war file into your servlet container, e.g. by copying it
+    into Tomcat's <tt>webapps</tt> directory.</li>
+</ol>
+
+<h2 id="dumps">Creating RDF dumps</h2>
+
+<p>Sometimes it is useful to create an RDF dump of the entire database. The <tt>dump-rdf</tt> script can be used for this purpose. See the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#dumprdf">D2RQ manual</a> for details.</p>
+
+<h2 id="mappingfiles">Pre-built mapping files</h2>
+
+<p>We collect mapping files for popular database-driven applications.</p>
+
+<ul>
+  <li><a href="mappings/wordpress.txt">Wordpress</a></li>
+</ul>
+
+<p>Have another one?
+  <a href="mailto:d2rq-map-devel@lists.sourceforge.net">Please share it</a>.</p>
+
+
+<h2><a name="support" id="support"></a>Support and feedback</h2>
+
+<p>You can contact us on the
+  <a href="https://lists.sourceforge.net/lists/listinfo/d2rq-map-devel">D2RQ
+  mailing list</a> at
+  <a href="mailto:d2rq-map-devel@lists.sourceforge.net">d2rq-map-devel@lists.sourceforge.net</a>.</p>
+
+
+<h2 id="development">Source code and development</h2>
+<p> D2R Server combines the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/">D2RQ API</a>, the <a href="http://www.joseki.org/">Joseki SPARQL Server</a> and the <a href="http://jetty.mortbay.org/">Jetty webserver</a>.</p>
+<p>D2R Server is hosted by <a href="http://sourceforge.net/">SourceForge.net</a>
+    as part of the <a href="http://sourceforge.net/projects/d2rq-map/">D2RQ project</a>.
+    The latest source code is available from the project's
+    <a href="http://sourceforge.net/cvs/?group_id=111002">CVS repository</a>
+    and can be
+    <a href="http://d2rq-map.cvs.sourceforge.net/d2rq-map/d2r-server/">browsed
+    online</a>.</p>
+<p><a href="http://sourceforge.net/projects/d2rq-map/"><img src="http://sourceforge.net/sflogo.php?group_id=111002&amp;type=5" alt="SourceForge Logo" border="0" /></a></p>
+
+
+<h2 id="publicservers">Public servers</h2>
+<ul>
+  <li><a href="http://spade.lbl.gov:2020/">Gene Ontology annotations</a> (Chris Mungall, <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-GO">more information</a>)</li>
+  <li><a href="http://spade.lbl.gov:2021/">Annotated images of gene expression in fruitfly embryogenesis</a> (Chris Mungall, <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-InSitu">more information</a>)</li>
+  <li><a href="http://www4.wiwiss.fu-berlin.de/dblp/">DBLP Bibliography Database on the Semantic Web</a></li>
+  <li><a href="http://www4.wiwiss.fu-berlin.de/is-group/">Web-based Systems Group @ Freie Universität Berlin</a> &#8211; Information about staff, projects and publications</li>
+  <li><a href="http://roller.blogdns.net:2020/">Roller blog server demo</a> (Henry Story, <a href="https://sommer.dev.java.net/atom/2006-06-06/applications/SPARQLingRoller.pdf">more information</a>)</li>
+  <li><a href="http://www3.wiwiss.fu-berlin.de:2020/">D2R Server Live Demo</a> publishing an example conference database</li>
+</ul>
+
+<h2 id="relatedprojects">Related projects</h2>
+<ul>
+  <li><a href="http://jena.sourceforge.net/SquirrelRDF/">SquirrelRDF</a> provides SPARQL access to relational databases and LDAP directories.</li>
+  <li><a href="http://virtuoso.openlinksw.com/wiki/main/Main/VOSSQLRDF">OpenLink Virtuoso</a> provides flexible RDF access to a wide range of data sources, including relational data.</li>
+  <li><a href="http://metamorphoses.sourceforge.net/">METAmorphoses</a> publishes RDF generated from relational databases on the Web.</li>
+  <li><a href="http://esw.w3.org/topic/RdfAndSql">List of projects and publications</a> about database-to-RDF mapping at the ESW Wiki.</li>
+  <li><a href="http://www.wiwiss.fu-berlin.de/en/institute/pwo/bizer/research/projects/index.html">Other open source projects of our group</a></li>
+</ul>
+
+<div><a href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3">DOAP project description</a> (<a href="http://www4.wiwiss.fu-berlin.de/rdf_browser/?browse_uri=http%3A//www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3">View with Disco</a>)</div>
+
+<div id="footer">
+  <small>$Id: index.html,v 1.31 2010/02/16 13:46:06 fatorange Exp $</small>
+</div>
+</div>
+
+</body>
+</html>

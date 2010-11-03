@@ -23,11 +23,22 @@
 	<classpathentry kind="lib" path="lib/db-drivers/commons-dbcp-1.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/commons-pool-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/postgresql-8.2dev-503.jdbc3.jar"/>
-	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.7-bin.jar" sourcepath="/Users/Christian/Downloads/mysql-connector-java-5.1.7/src"/>
+	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.7-bin.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/sdb.jar"/>
 	<classpathentry kind="lib" path="lib/logging/commons-logging-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/logging/log4j-1.2.12.jar"/>
 	<classpathentry kind="lib" path="lib/logging/slf4j-api-1.5.6.jar"/>
 	<classpathentry kind="lib" path="lib/logging/slf4j-log4j12-1.5.6.jar"/>
+	<classpathentry kind="lib" path="lib/concurrent.jar"/>
+	<classpathentry kind="lib" path="lib/antlr-2.7.5.jar"/>
+	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-6.1.10.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-util-6.1.10.jar"/>
+	<classpathentry kind="lib" path="lib/servlet-api-2.5-6.1.10.jar"/>
+	<classpathentry kind="lib" path="lib/joseki.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

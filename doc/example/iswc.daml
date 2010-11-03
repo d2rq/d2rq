@@ -10,7 +10,7 @@
 >
     
     <daml:Ontology rdf:about="">
-	<daml:versionInfo>$Id: iswc.daml,v 1.1 2006/09/06 17:53:39 cyganiak Exp $</daml:versionInfo> 
+	<daml:versionInfo>$Id: iswc.daml,v 1.1 2006/10/27 14:23:39 cyganiak Exp $</daml:versionInfo> 
 	  <rdfs:comment>
 	    ISWC Ontology
 	  </rdfs:comment>
