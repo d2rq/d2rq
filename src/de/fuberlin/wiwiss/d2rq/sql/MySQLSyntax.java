@@ -7,10 +7,14 @@ import java.util.regex.Pattern;
  * This syntax class implements MySQL-compatible SQL syntax.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MySQLSyntax.java,v 1.1 2009/09/29 19:56:53 cyganiak Exp $
+ * @version $Id: MySQLSyntax.java,v 1.2 2010/11/03 18:48:17 cyganiak Exp $
  */
 public class MySQLSyntax extends SQL92Syntax {
 
+	public MySQLSyntax() {
+		super(true);
+	}
+	
 	public String getConcatenationExpression(String[] sqlFragments) {
 		StringBuffer result = new StringBuffer("CONCAT(");
 		for (int i = 0; i < sqlFragments.length; i++) {

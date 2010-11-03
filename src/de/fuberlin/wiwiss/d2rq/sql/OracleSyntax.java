@@ -1,6 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
-import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -9,13 +8,12 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * This syntax class implements MySQL-compatible SQL syntax.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: OracleSyntax.java,v 1.1 2009/09/29 19:56:53 cyganiak Exp $
+ * @version $Id: OracleSyntax.java,v 1.2 2010/11/03 18:48:17 cyganiak Exp $
  */
 public class OracleSyntax extends SQL92Syntax {
 
-	public String getRelationNameAliasExpression(RelationName relationName,
-			RelationName aliasName) {
-		return quoteRelationName(relationName) + " " + quoteRelationName(aliasName);
+	public OracleSyntax() {
+		super(false);
 	}
 	
 	public Expression getRowNumLimitAsExpression(int limit) {

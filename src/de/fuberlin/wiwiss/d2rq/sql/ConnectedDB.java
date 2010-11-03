@@ -27,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * TODO Move all engine-specific code from ConnectedDB to this interface and its implementing classes
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.36 2010/01/26 16:15:46 fatorange Exp $
+ * @version $Id: ConnectedDB.java,v 1.37 2010/11/03 18:48:17 cyganiak Exp $
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -38,6 +38,8 @@ public class ConnectedDB {
 	public static final String MSSQL = "Microsoft SQL Server";
 	public static final String MSAccess = "Microsoft Access";
 	public static final String Other = "Other";
+	public static final String Firebird = "Firebird";
+	
 	public static final int TEXT_COLUMN = 1;
 	public static final int NUMERIC_COLUMN = 2;
 	public static final int DATE_COLUMN = 3;
@@ -315,7 +317,10 @@ public class ConnectedDB {
 				this.syntax = new MySQLSyntax();
 			} else if (productName.indexOf("postgresql") >= 0) {
 				this.dbType = ConnectedDB.PostgreSQL;
-				this.syntax = new SQL92Syntax();
+				this.syntax = new SQL92Syntax(true);
+			} else if (productName.indexOf("firebird") >= 0) {
+				this.dbType = ConnectedDB.Firebird;
+				this.syntax = new SQL92Syntax(false);
 			} else if (productName.indexOf("oracle") >= 0) {
 				this.dbType = ConnectedDB.Oracle;
 				this.syntax = new OracleSyntax();
@@ -327,7 +332,7 @@ public class ConnectedDB {
 				this.syntax = new MSSQLSyntax();
 			} else {
 				this.dbType = ConnectedDB.Other;
-				this.syntax = new SQL92Syntax();
+				this.syntax = new SQL92Syntax(true);
 			}
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);

@@ -4,8 +4,10 @@ package de.fuberlin.wiwiss.d2rq.sql;
  * A class for capturing performance information.
  * We grant read/write access to instance variables.
  * 
+ * TODO: Remove?
+ * 
  * @author jgarbers
- * @version $Id: BeanCounter.java,v 1.1 2006/09/11 23:22:25 cyganiak Exp $
+ * @version $Id: BeanCounter.java,v 1.2 2010/11/03 18:48:17 cyganiak Exp $
  */
 public class BeanCounter implements Cloneable {
     

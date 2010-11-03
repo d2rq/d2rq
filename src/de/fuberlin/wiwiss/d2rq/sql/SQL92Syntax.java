@@ -13,10 +13,20 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * can override individual methods to implement different syntax.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL92Syntax.java,v 1.1 2009/09/29 19:56:53 cyganiak Exp $
+ * @version $Id: SQL92Syntax.java,v 1.2 2010/11/03 18:48:17 cyganiak Exp $
  */
 public class SQL92Syntax implements SQLSyntax {
-
+	private boolean useAS;
+	
+	/**
+	 * Initializes a new instance.
+	 * 
+	 * @param useAS Use "Table AS Alias" or "Table Alias" in FROM clauses? In standard SQL, either is fine.
+	 */
+	public SQL92Syntax(boolean useAS) {
+		this.useAS = useAS;
+	}
+	
 	public String getConcatenationExpression(String[] sqlFragments) {
 		StringBuffer result = new StringBuffer();
 		for (int i = 0; i < sqlFragments.length; i++) {
@@ -30,7 +40,7 @@ public class SQL92Syntax implements SQLSyntax {
 
 	public String getRelationNameAliasExpression(RelationName relationName,
 			RelationName aliasName) {
-		return quoteRelationName(relationName) + " AS " + quoteRelationName(aliasName);
+		return quoteRelationName(relationName) + (useAS ? " AS " : " ") + quoteRelationName(aliasName);
 	}
 	
 	public String quoteAttribute(Attribute attribute) {

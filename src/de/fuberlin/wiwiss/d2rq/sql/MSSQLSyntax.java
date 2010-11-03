@@ -7,10 +7,14 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * and MS Access.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MSSQLSyntax.java,v 1.1 2009/09/29 19:56:53 cyganiak Exp $
+ * @version $Id: MSSQLSyntax.java,v 1.2 2010/11/03 18:48:17 cyganiak Exp $
  */
 public class MSSQLSyntax extends SQL92Syntax {
 
+	public MSSQLSyntax() {
+		super(true);
+	}
+	
 	public String getRowNumLimitAsSelectModifier(int limit) {
 		if (limit == Database.NO_LIMIT) return "";
 		return "TOP " + limit;
