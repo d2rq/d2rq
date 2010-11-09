@@ -38,7 +38,7 @@ public class ConnectedDB {
 	public static final String MSSQL = "Microsoft SQL Server";
 	public static final String MSAccess = "Microsoft Access";
 	public static final String Other = "Other";
-	public static final String Firebird = "Firebird";
+	public static final String InterbaseOrFirebird = "Interbase/Firebird";
 	
 	public static final int TEXT_COLUMN = 1;
 	public static final int NUMERIC_COLUMN = 2;
@@ -318,8 +318,8 @@ public class ConnectedDB {
 			} else if (productName.indexOf("postgresql") >= 0) {
 				this.dbType = ConnectedDB.PostgreSQL;
 				this.syntax = new SQL92Syntax(true);
-			} else if (productName.indexOf("firebird") >= 0) {
-				this.dbType = ConnectedDB.Firebird;
+			} else if (productName.indexOf("interbase") >= 0) {
+				this.dbType = ConnectedDB.InterbaseOrFirebird;
 				this.syntax = new SQL92Syntax(false);
 			} else if (productName.indexOf("oracle") >= 0) {
 				this.dbType = ConnectedDB.Oracle;
