@@ -4,7 +4,7 @@
 <head>
   <title>D2R Server &#8211; Publishing Relational Databases on the Semantic Web</title>
   <link rel="DOAP" type="application/rdf+xml" href="http://www4.wiwiss.fu-berlin.de/is-group/data/projects/Project3" />
-<style type=text/css>
+<style type="text/css">
 body { background: white; color: black; font-family: sans-serif; line-height: 1.4em; padding: 2.5em 3em; margin: 0; }
 :link { color: #00c; }
 :visited { color: #609; }
@@ -21,6 +21,9 @@ h6 { font: small-caps 100% sans-serif; }
 pre { background: #fff6bb; font-family: monospace; line-height: 1.2em; padding: 1em 2em; }
 dt { font-weight: bold; margin-top: 0; margin-bottom: 0; }
 dd { margin-top: 0; margin-bottom: 0; }
+table { border-collapse: collapse; }
+td, th { border: 2px solid #ccc; padding: 0.3em 0.6em; }
+th { vertical-align: top; }
 code, tt { font-family: monospace; }
 ul.toc { list-style-type: none; }
 ol.toc li a { text-decoration: none; }
@@ -128,13 +131,13 @@ pre { speak-punctuation: code; }
   <em>browsed</em> and <em>searched</em> &#8211; the two main access paradigms
   to the Semantic Web.</p>
 
-<p>D2R Server's <strong>Linked Data interface</strong> makes RDF descriptions of individual resources available over the HTTP protocol. An RDF description can be retrieved simply by accessing the resource's URI over the Web. Using a Semantic Web browser like <a href="http://www.w3.org/2005/ajar/tab">Tabulator</a> (<a href="http://www.w3.org/2006/Talks/1019-tab-tbl/">slides</a>) or <a href="http://www4.wiwiss.fu-berlin.de/bizer/ng4j/disco/">Disco</a>, you can follow links from one resource to the next, surfing the Web of Data.
+<p>D2R Server's <strong>Linked Data interface</strong> makes RDF descriptions of individual resources available over the HTTP protocol. An RDF description can be retrieved simply by accessing the resource's URI over the Web. Using a Semantic Web browser like <a href="http://www.w3.org/2005/ajar/tab">Tabulator</a> (<a href="http://www.w3.org/2006/Talks/1019-tab-tbl/">slides</a>) or <a href="http://www4.wiwiss.fu-berlin.de/bizer/ng4j/disco/">Disco</a>, you can follow links from one resource to the next, surfing the Web of Data.</p>
 
 <p>The <strong>SPARQL interface</strong> enables applications to search and query the database using the <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> query language over the SPARQL protocol.</p>
 
 <p>A traditional <strong>HTML interface</strong> offers access to the familiar Web browsers.</p>
 
-<p align="center"><img src="images/architecture.png" alt="D2R Server architecture diagram" /></p>
+<p style="text-align:center"><img src="images/architecture.png" alt="D2R Server architecture diagram" /></p>
 
 <p>Requests from the Web are rewritten into SQL queries via the mapping. This on-the-fly translation allows publishing of RDF from large live databases and eliminates the need for replicating the data into a dedicated RDF triple store.</p>
 
@@ -237,7 +240,7 @@ map:offer a d2rq:ClassMap;
 
 <h2 id="configuration">Server configuration</h2>
 
-<p>The server can be configured by adding a <em>configuration block</em> to the mapping file (all parts are optional):
+<p>The server can be configured by adding a <em>configuration block</em> to the mapping file (all parts are optional):</p>
 
 <pre>@prefix d2r: &lt;http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#&gt; .
 
@@ -293,21 +296,21 @@ The following placeholder groups are currently available:
 <p>Placeholders in this group are replaced with D2R Server runtime data. Currently, D2R Server supports the following runtime placeholders:
 </p>
 
-<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
+<table>
   <tr> 
-    <td valign="top"><tt>about:metadata:runtime:time</tt></td>
+    <th><tt>about:metadata:runtime:time</tt></th>
     <td>Replaced by a <tt>xsd:dateTime</tt> literal which represents the current date and time.</td>
   </tr>
   <tr> 
-    <td valign="top"><tt>about:metadata:runtime:query</tt></td>
+    <th><tt>about:metadata:runtime:query</tt></th>
     <td>Replaced by a string literal with the SPARQL <tt>DESCRIBE</tt> query which has been used to get the data about the requested resource.</td>
   </tr>
   <tr> 
-    <td valign="top"><tt>about:metadata:runtime:resource</tt></td>
+    <th><tt>about:metadata:runtime:resource</tt></th>
     <td>Replaced by the URI of the requested resource.</td>
   </tr>
   <tr> 
-    <td valign="top"><tt>about:metadata:runtime:graph</tt></td>
+    <th><tt>about:metadata:runtime:graph</tt></th>
     <td>Replaced by the URI of the current RDF graph that is served by Pubby.</td>
   </tr>
 </table>
@@ -340,26 +343,26 @@ The following placeholder groups are currently available:
 <p>The default metadata template that comes with D2R Server automatically provides a description of the provenance of the served RDF graphs. This description uses the <a href="http://purl.org/net/provenance/">Provenance Vocabulary</a> and includes information about the creation of served RDF graphs, the D2R Server instance, the <tt>DESCRIBE</tt> query used for creation, etc. The following additional metadata attributes may be configured in the mapping file to provide more detailed information about the D2R Server instance:
 </p>
 
-<table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
+<table>
   <tr> 
-    <td valign="top"><tt>meta:d2rUser</tt></td>
+    <th><tt>meta:d2rUser</tt></th>
     <td>This property refers to the URI of the data publisher who uses this D2R Server instance to publish her/his data. The URI should be an HTTP URI that links to data about the publisher.</td>
   </tr>
   <tr> 
-    <td valign="top"><tt>meta:d2rUserName</tt>, <tt>meta:d2rUserHomepage</tt></td>
+    <th><tt>meta:d2rUserName</tt>, <tt>meta:d2rUserHomepage</tt></th>
     <td>These properties provide the name and the homepage address of the data publisher who uses this D2R Server instance. They could be used as an alternative to <code>meta:d2rUser</code> if the publisher has no HTTP-dereferencable URI yet.
 </td>
   </tr>
   <tr> 
-    <td valign="top"><tt>meta:d2rOperator</tt></td>
+    <th><tt>meta:d2rOperator</tt></th>
     <td>This property refers to the URI of the service provider who operates this D2R Server instance. The service provider and the data publisher may be the same entity; nonetheless, it is recommended to specify both properties (using the same value) so that an application can infer the fact that publisher and operator are the same.</td>
   </tr>
   <tr> 
-    <td valign="top"><tt>meta:d2rOperatorName</tt>, <tt>meta:d2rOperatorHomepage</tt></td>
+    <th><tt>meta:d2rOperatorName</tt>, <tt>meta:d2rOperatorHomepage</tt></th>
     <td>These properties provide the name and the homepage address of the service provider who operates this D2R Server instance. These properties could be used as an alternative to <code>meta:d2rOperator</code>.</td>
   </tr>
   <tr> 
-    <td valign="top"><tt>meta:dataset</tt></td>
+    <th><tt>meta:dataset</tt></th>
     <td>This property refers to the URI of the whole linked dataset that is published by this D2R Server instance. This URI usually links to the <a href="http://rdfs.org/ns/void">voiD description</a> of the dataset.
 </td>
   </tr>
@@ -367,7 +370,8 @@ The following placeholder groups are currently available:
 
 <h2 id="performance">Optimizing performance</h2>
 
-<p>Here are some simple hints to improve D2R's performance:
+<p>Here are some simple hints to improve D2R's performance:</p>
+
 <ul>
 	<li>Define primary keys whenever you can and create indexes where applicable (e.g. on foreign keys) &ndash; besides optimizing database performance, these will be picked up and used by various optimizations within D2RQ.</li>
 	<li>Use the latest optimizations by launching with <tt>--fast</tt> (or activate <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#configuration"><tt>d2rq:useAllOptimizations</tt></a>).</li>
@@ -377,7 +381,6 @@ The following placeholder groups are currently available:
 	<li>Set <a href="#configuration"><tt>d2rq:autoReloadMapping</tt></a> to <tt>false</tt> where it is not required.</li>
 	<li>Databases often ship with development configurations that are designed for a small footprint rather than performance. For instance, some good pointers for optimizing MySQL can be found <a href="http://www.mysqlperformanceblog.com/2006/09/29/what-to-tune-in-mysql-server-after-installation/">here</a>.</li>
 </ul> 
-</p>
 
 
 <h2 id="windows">Running D2R Server as a service on Windows</h2>
@@ -445,7 +448,7 @@ The following placeholder groups are currently available:
     and can be
     <a href="http://d2rq-map.cvs.sourceforge.net/d2rq-map/d2r-server/">browsed
     online</a>.</p>
-<p><a href="http://sourceforge.net/projects/d2rq-map/"><img src="http://sourceforge.net/sflogo.php?group_id=111002&amp;type=5" alt="SourceForge Logo" border="0" /></a></p>
+<p><a href="http://sourceforge.net/projects/d2rq-map/"><img src="http://sourceforge.net/sflogo.php?group_id=111002&amp;type=5" alt="SourceForge Logo" /></a></p>
 
 
 <h2 id="publicservers">Public servers</h2>
