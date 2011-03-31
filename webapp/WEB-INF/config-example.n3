@@ -16,7 +16,7 @@
 <> a d2r:Server;
 	rdfs:label "Example D2R Server";
 	d2r:port 8080;
-	d2r:baseURI <http://localhost:8080/d2r-server/>;
+	d2r:baseURI <http://localhost:8080/d2rq/>;
 	d2r:documentMetadata [
 		rdfs:comment "This comment is custom document metadata.";
 	];

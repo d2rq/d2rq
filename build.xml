@@ -16,7 +16,7 @@
 	<property name="jar" value="${lib}/${distname}.jar"/>
 	<property name="zip" value="${distname}.zip"/>
 	<property name="tar" value="${distname}.tar.gz"/>
-    <property name="war" value="${name}.war" />
+	<property name="war" value="${name}.war" />
 
 	<property name="vocab.language.dir" value="doc/specification"/>
 	<property name="vocab.language.n3" value="${vocab.language.dir}/d2rq-rdfs.n3"/>
@@ -40,7 +40,7 @@
 	
 	<patternset id="distfiles">
 		<include name="**/*"/>
-        <exclude name=".git/**"/>
+		<exclude name=".git/**"/>
 		<exclude name="${build}/**"/>
 		<exclude name="${build.tests}/**"/>
 		<exclude name="build/**"/>
@@ -71,7 +71,12 @@
 	</target>
 
 	<target name="compile" depends="init">
-		<javac srcdir="${src}" destdir="${build}" debug="on" source="1.4" target="1.4">
+		<javac srcdir="${src}"
+				destdir="${build}"
+				debug="on"
+				source="1.4"
+				target="1.4"
+				includeAntRuntime="false">
 			<classpath refid="project.class.path"/>
 		</javac>
 	</target>
@@ -174,10 +179,10 @@
 			<arg value="--rdfs" />
 		</java>
 		<!-- schemagen generates broken Java code for the "class" property,
-		     we fix it by search&replace -->
+			 we fix it by search&replace -->
 		<replace file="${vocab.language.java}" token="Property class" value="Property class_"/>
 		<!-- schemagen generates a field "class_Map" for d2rq:classMap for some reason,
-		     we fix it by search&replace -->
+			 we fix it by search&replace -->
 		<replace file="${vocab.language.java}" token="class_Map" value="classMap"/>
 	</target>
 
@@ -227,8 +232,15 @@
 			</fileset>
 			<lib dir="${lib}">
 				<exclude name="servlet-api-*.jar"/>
+				<exclude name="*/*"/><!-- Do not recurse into subdirectories -->
 			</lib>
-			<lib file="${jar}"/>
+			<!-- Include subdirectories directly, so that the files are all
+				 in the main lib directory. Otherwise, Tomcat won't pick up the jars -->
+			<lib dir="${lib}/arq"/>
+			<lib dir="${lib}/logging">
+				<exclude name="logging/commons-logging-*.jar"/>
+			</lib>
+			<lib dir="${lib}/db-drivers"/>
 			<webinf dir="webapp/WEB-INF">
 				<include name="*"/>
 				<exclude name="templates"/>

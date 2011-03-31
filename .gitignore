@@ -1,6 +1,7 @@
 build
 bldsrc
 bldtests
+d2rq.war
 d2rq-*.tar.gz
 d2rq-*.zip
 doc/javadoc
