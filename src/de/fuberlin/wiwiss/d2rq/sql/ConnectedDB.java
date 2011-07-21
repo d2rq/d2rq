@@ -27,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * TODO Move all engine-specific code from ConnectedDB to this interface and its implementing classes
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ConnectedDB.java,v 1.37 2010/11/03 18:48:17 cyganiak Exp $
+ * @author kurtjx (http://github.com/kurtjx)
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
@@ -386,12 +386,15 @@ public class ConnectedDB {
 			case Types.TIMESTAMP: return TIMESTAMP_COLUMN;
 			
 			default:
-				if ("NVARCHAR2".equals(type.typeName()))
+				if ("NVARCHAR2".equals(type.typeName())) {
 					return TEXT_COLUMN;
-				else
-					throw new D2RQException("Unsupported database type code (" + type + ") for column "
-						+ column.qualifiedName());		
-				
+				} else if ("uuid".equals(type.typeName())) {
+					return TEXT_COLUMN;
+				} else {
+					throw new D2RQException("Unsupported database type code (" +
+						type + ") or type name ('" + type.typeName() +
+						"') for column " + column.qualifiedName());
+				}
 		}
 	}
 
