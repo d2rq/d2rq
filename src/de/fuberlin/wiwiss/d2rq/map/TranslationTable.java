@@ -18,7 +18,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Represents a d2rq:TranslationTable.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTable.java,v 1.9 2006/09/18 08:55:00 cyganiak Exp $
+ * @author zazi (http://github.com/zazi)
  */
 public class TranslationTable extends MapObject {
 	private Collection translations = new ArrayList();
@@ -100,7 +100,7 @@ public class TranslationTable extends MapObject {
 	private Translator instantiateJavaClass() {
 		try {
 			Class translatorClass = Class.forName(this.javaClass);
-			if (!implementsTranslator(translatorClass)) {
+			if (!checkTranslatorClassImplementation(translatorClass)) {
 				throw new D2RQException("d2rq:javaClass " + this.javaClass + " must implement " + Translator.class.getName());
 			}
 			if (hasConstructorWithArg(translatorClass)) {
@@ -113,6 +113,26 @@ public class TranslationTable extends MapObject {
 		} catch (ClassNotFoundException e) {
 			throw new D2RQException("d2rq:javaClass not on classpath: " + this.javaClass);
 		}
+	}
+
+	/**
+	 * Checks whether the Translator class or a super class of it implements the
+	 * Translator class interface.
+	 * 
+	 * @param translatorClass
+	 *		a specific translator class or a more generic parent
+	 * @return true, if the currently checked translator class implements the
+	 *	 Translator class interface
+	 */
+	private boolean checkTranslatorClassImplementation(Class translatorClass) {
+		if (implementsTranslator(translatorClass)) {
+			return true;
+		}
+		if (translatorClass.getSuperclass() == null) {
+			return false;
+		}
+		return this.checkTranslatorClassImplementation(translatorClass
+				.getSuperclass());
 	}
 
 	private boolean implementsTranslator(Class aClass) {
