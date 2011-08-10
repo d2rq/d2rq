@@ -13,8 +13,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -30,7 +30,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * @author kurtjx (http://github.com/kurtjx)
  */
 public class ConnectedDB {
-	private static final Log log = LogFactory.getLog(ConnectedDB.class);
+	private static final Logger log = LoggerFactory.getLogger(ConnectedDB.class);
 	
 	public static final String MySQL = "MySQL";
 	public static final String PostgreSQL = "PostgreSQL";
@@ -85,6 +85,7 @@ public class ConnectedDB {
 	private Map zerofillCache = new HashMap(); // Attribute => Boolean
 	private Map uniqueIndexCache = new HashMap(); // RelationName => String => List of Strings
 	private final Properties connectionProperties;
+	
 	private class KeepAliveAgent extends Thread {
 		private final int interval;
 		private final String query;
@@ -92,8 +93,10 @@ public class ConnectedDB {
 		
 		/**
 		 * @param interval in seconds
+		 * @param query the noop query to execute
 		 */
 		public KeepAliveAgent(int interval, String query) {
+			super("keepalive");
 			this.interval = interval;
 			this.query = query;
 		}
@@ -107,13 +110,13 @@ public class ConnectedDB {
 				
 				try {
 					if (log.isDebugEnabled())
-						log.debug("Keep alive agent is executing noop query '" + query + "'...");
+						log.debug("Keep alive agent is executing noop query '{}'...");
 					c = connection();
 					s = c.createStatement();
 					s.execute(query);
 					s.close();
 				} catch (Throwable e) { // may throw D2RQException at runtime
-					log.error("Keep alive connection test failed: " + e.getMessage());
+					log.error("Keep alive connection test failed: " + e.getMessage(), e);
 				} finally {
 					if (s != null) try { s.close(); } catch (Exception ignore) {}
 				}
@@ -123,16 +126,17 @@ public class ConnectedDB {
 		}
 		
 		public void shutdown() {
+			log.info("shutting down");
 			shutdown = true;
-			keepAliveAgent.interrupt();
+			this.interrupt();
 		}
 	};
 	
-	private final Thread shutdownHook = new Thread() {
-		public void run() {
-			keepAliveAgent.shutdown();
-		}
-	};
+//	private final Thread shutdownHook = new Thread() {
+//		public void run() {
+//			keepAliveAgent.shutdown();
+//		}
+//	};
 	
 	private final KeepAliveAgent keepAliveAgent;
 	
@@ -170,7 +174,7 @@ public class ConnectedDB {
 			
 			this.keepAliveAgent = new KeepAliveAgent(interval, query);
 			this.keepAliveAgent.start();
-			Runtime.getRuntime().addShutdownHook(shutdownHook);
+//			Runtime.getRuntime().addShutdownHook(shutdownHook);
 			log.info("Keep alive agent is enabled (interval: " + interval + " seconds, noop query: '" + query + "').");
 		} else
 			this.keepAliveAgent = null;
@@ -526,6 +530,9 @@ public class ConnectedDB {
 		return false;
 	}
 
+	/**
+	 * Closes the database connection and shuts down the keep alive agent.
+	 */
 	public void close() {
 		if (keepAliveAgent != null)
 			keepAliveAgent.shutdown();

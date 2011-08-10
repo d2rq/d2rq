@@ -40,7 +40,9 @@ public class WebappInitListener implements ServletContextListener {
 	}
 
 	public void contextDestroyed(ServletContextEvent event) {
-		// Do nothing
+		D2RServer server = D2RServer.fromServletContext(event.getServletContext());
+		if (server != null)
+			server.shutdown();
 	}
 	
 	private String absolutize(String fileName, ServletContext context) {
