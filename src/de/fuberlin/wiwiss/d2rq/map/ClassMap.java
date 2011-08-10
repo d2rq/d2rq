@@ -4,18 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.csv.TranslationTableParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
@@ -26,7 +23,7 @@ public class ClassMap extends ResourceMap {
 	private Collection classes = new ArrayList();
 	private Collection propertyBridges = new ArrayList();
 	private Collection compiledPropertyBridges = null;
-	private Log log = LogFactory.getLog(ClassMap.class);
+	private static final Logger log = LoggerFactory.getLogger(ClassMap.class);
 	
 	public ClassMap(Resource classMapResource) {
 		super(classMapResource, false);
@@ -73,14 +70,15 @@ public class ClassMap extends ResourceMap {
 					" has no d2rq:PropertyBridges and no d2rq:class",
 					D2RQException.CLASSMAP_NO_PROPERTYBRIDGES);
 		}
-		if (this.constantValue != null && !this.constantValue.isLiteral()) {
+		if (this.constantValue != null && this.constantValue.isLiteral()) {
 			throw new D2RQException(
 					"d2rq:constantValue for class map " + toString() + " must be a URI or blank node", 
 					D2RQException.CLASSMAP_INVALID_CONSTANTVALUE);
 		}
 		if (this.uriPattern != null && new Pattern(uriPattern).attributes().size() == 0) {
-			this.log.warn(toString() + " has an uriPattern without any column specifications. This usually happens when no primary keys are defined for a table. If the configuration is left as is, all table rows will be mapped to a single instance. " +
-					"If this is not what you want, please define the keys in the database and re-run the mapping generator, or edit the mapping to provide the relevant keys.");
+			if (log.isWarnEnabled())
+				log.warn("{} has an uriPattern without any column specifications. This usually happens when no primary keys are defined for a table. If the configuration is left as is, all table rows will be mapped to a single instance. " +
+				         "If this is not what you want, please define the keys in the database and re-run the mapping generator, or edit the mapping to provide the relevant keys.", this);
 		}
 		Iterator it = this.propertyBridges.iterator();
 		while (it.hasNext()) {
@@ -120,6 +118,6 @@ public class ClassMap extends ResourceMap {
 	}
 	
 	public String toString() {
-		return "d2rq:ClassMap " + PrettyPrinter.toString(this.resource);		
+		return "d2rq:ClassMap " + PrettyPrinter.toString(this.resource);
 	}
 }
