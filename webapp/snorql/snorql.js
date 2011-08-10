@@ -319,7 +319,8 @@ function Snorql() {
     }
 
     this._betterUnescape = function(s) {
-        return unescape(s.replace(/\+/g, ' '));
+        //return unescape(s.replace(/\+/g, ' ')); causes trouble with UTF-8
+        return decodeURIComponent(s.replace(/\+/g, ' '));
     }
 }
 
