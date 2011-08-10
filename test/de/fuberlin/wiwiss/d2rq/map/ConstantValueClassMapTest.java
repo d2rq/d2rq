@@ -4,6 +4,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
+
 import junit.framework.TestCase;
 
 public class ConstantValueClassMapTest extends TestCase {
@@ -65,6 +67,10 @@ public class ConstantValueClassMapTest extends TestCase {
 	
 	public void testValidate()
 	{
-		collection.validate();
+		try {
+			collection.validate();
+		} catch (D2RQException e) {
+			fail("Should validate without exceptions");
+		}
 	}
 }
