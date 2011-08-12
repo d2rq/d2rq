@@ -3,6 +3,8 @@ package de.fuberlin.wiwiss.d2rq.engine;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -12,9 +14,12 @@ import com.hp.hpl.jena.graph.Triple;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 public class GraphPatternTranslatorTest extends TestCase {
@@ -181,5 +186,47 @@ public class GraphPatternTranslatorTest extends TestCase {
 			results.add(Triple.create(MapFixture.prefixes(), parts[i]));
 		}
 		return results;
+	}
+	
+
+
+	public void testSameDomainAndRange()
+	{
+		Collection c = MapFixture.loadPropertyBridges("engine/samedomainandrange.n3");
+		
+		ConnectedDB db = new ConnectedDB(null, null, null) {
+			
+			// pretend there is primary key constraint on person.id
+			public HashMap getUniqueKeyColumns(RelationName tableName)
+			{
+				HashMap result = null;
+				if (tableName.tableName().equals("person")) {
+					result = new HashMap();
+					result.put("primary key", Collections.singletonList("id"));
+				}
+				System.out.println(tableName);
+				return result;
+			}
+		};
+		
+		Collection newCollection = new ArrayList();
+		Iterator i = c.iterator();
+		while (i.hasNext()) {
+			TripleRelation r = (TripleRelation) i.next();
+			Relation base = r.baseRelation();
+			base = new RelationImpl(db, base.aliases(), base.condition(), base.joinConditions(), base.projections(), base.isUnique(), base.order(), base.orderDesc(), base.limit(), base.limitInverse());
+			TripleRelation n = new TripleRelation(base, r.nodeMaker(TripleRelation.SUBJECT),  r.nodeMaker(TripleRelation.PREDICATE),  r.nodeMaker(TripleRelation.OBJECT));
+			newCollection.add(n);
+		}
+		
+		Collection rels = new GraphPatternTranslator(triplesToList("?x foaf:knows ?y . ?y foaf:name \"Giovanni\" . ?x foaf:name ?n"),
+				newCollection, true).translate();
+		
+		System.out.println(rels);
+		
+		rels = new GraphPatternTranslator(triplesToList("?x foaf:name \"Giovanni\" . ?x foaf:knows ?y . ?y foaf:name ?n"),
+				newCollection, true).translate();
+		
+		System.out.println(rels);
 	}
 }
