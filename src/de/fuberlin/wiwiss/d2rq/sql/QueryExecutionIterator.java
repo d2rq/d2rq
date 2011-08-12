@@ -4,11 +4,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
@@ -24,8 +24,9 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * @version $Id: QueryExecutionIterator.java,v 1.13 2009/08/06 10:51:34 fatorange Exp $
  */
 public class QueryExecutionIterator implements ClosableIterator {
-	public static Collection protocol=null;
-
+	
+	private static Logger logger = LoggerFactory.getLogger(QueryExecutionIterator.class);
+	
 	private String sql;
 	private List columns;
 	private ConnectedDB database;
@@ -35,12 +36,14 @@ public class QueryExecutionIterator implements ClosableIterator {
 	private int numCols = 0;
 	private boolean queryExecuted = false;
 	private boolean explicitlyClosed = false;
+	
+	private int numOfRowsFetched = 0;
 
 	public QueryExecutionIterator(String sql, List columns, ConnectedDB db) {
 		this.sql = sql;
 		this.columns = columns;
 		this.database = db;
-    }
+	}
 
 	public boolean hasNext() {
 		if (this.explicitlyClosed) {
@@ -73,16 +76,17 @@ public class QueryExecutionIterator implements ClosableIterator {
 	}
 
 	private ResultRow tryFetchNextRow() {
-	    ensureQueryExecuted();
-	    if (this.resultSet == null) {
-	    	return null;
-	    }
+		ensureQueryExecuted();
+		if (this.resultSet == null) {
+			return null;
+		}
 		try {
 			if (!this.resultSet.next()) {
 				this.resultSet.close();
 				this.resultSet = null;
 				return null;
 			}
+			numOfRowsFetched++;
 			BeanCounter.totalNumberOfReturnedRows++;
 			BeanCounter.totalNumberOfReturnedFields+=this.numCols;
 			return ResultRowMap.fromResultSet(this.resultSet, this.columns);
@@ -96,28 +100,30 @@ public class QueryExecutionIterator implements ClosableIterator {
 	 * record-set is exhausted.
 	 */
 	public void close() {
-	    this.explicitlyClosed = true;
-	    
-	    /* JDBC 4+ requires manual closing of result sets and statements */
-	    if (this.resultSet != null) {
+		this.explicitlyClosed = true;
+		
+		/* JDBC 4+ requires manual closing of result sets and statements */
+		if (this.resultSet != null) {
 			try {
 				this.resultSet.close();
 				this.resultSet = null;
 			} catch (SQLException ex) {
 				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
 			}
-	    }
-	    
-	    if (this.statement != null) {
+		}
+		
+		if (this.statement != null) {
 			try {
 				this.statement.close();
 				this.statement = null;
 			} catch (SQLException ex) {
 				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
 			}
-	    }
-
-	    this.prefetchedRow = null;
+		}
+		
+		this.prefetchedRow = null;
+		
+		logger.debug("resultset closed, returned {} rows", Integer.valueOf(numOfRowsFetched));
 
 	}
 
@@ -126,15 +132,13 @@ public class QueryExecutionIterator implements ClosableIterator {
 	}
 
 	private void ensureQueryExecuted() {
-	    if (this.queryExecuted) {
-	    	return;
-	    }
-    	this.queryExecuted = true;
-    	LogFactory.getLog(QueryExecutionIterator.class).debug(this.sql);
-    	BeanCounter.totalNumberOfExecutedSQLQueries++;
-    	if (protocol!=null)
-    	    protocol.add(this.sql);
-        try {
+		if (this.queryExecuted) {
+			return;
+		}
+		this.queryExecuted = true;
+		logger.debug(this.sql);
+		BeanCounter.totalNumberOfExecutedSQLQueries++;
+		try {
 			Connection con = this.database.connection();
 			this.statement = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			if (database.fetchSize() != Database.NO_FETCH_SIZE) {
@@ -143,10 +147,13 @@ public class QueryExecutionIterator implements ClosableIterator {
 				}
 				catch (SQLException e) {} /* Some drivers don't support fetch sizes, e.g. JDBC-ODBC */
 			}
+			long start = System.currentTimeMillis();
 			this.resultSet = this.statement.executeQuery(this.sql);
+			long stop = System.currentTimeMillis();
+			logger.debug("SQL query took {} ms", Long.valueOf(stop - start));
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
-        } catch (SQLException ex) {
-        	throw new D2RQException(ex.getMessage() + ": " + this.sql);
-        }
-    }
+		} catch (SQLException ex) {
+			throw new D2RQException(ex.getMessage() + ": " + this.sql);
+		}
+	}
 }
