@@ -3,8 +3,8 @@ package de.fuberlin.wiwiss.d2rq.server;
 import java.io.File;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.graph.Capabilities;
 import com.hp.hpl.jena.graph.query.QueryHandler;
@@ -23,14 +23,14 @@ import de.fuberlin.wiwiss.d2rq.engine.D2RQDatasetGraph;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class AutoReloadableDataset implements Dataset {
-	private static Log log = LogFactory.getLog(AutoReloadableDataset.class);
+	private static Logger log = LoggerFactory.getLogger(AutoReloadableDataset.class);
 	
-	/** only reload any this mili seconds */
+	/** only reload any this milliseconds */
 	private static long RELOAD_FREQUENCY_MS = 1000;
 
 	private D2RServer server;
 	private D2RQDatasetGraph datasetGraph = null;
-    
+	
 	private String mappingFile;
 	private long lastModified = Long.MAX_VALUE;
 	private long lastReload = Long.MIN_VALUE;
