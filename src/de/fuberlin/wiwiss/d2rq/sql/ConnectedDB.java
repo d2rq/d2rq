@@ -110,7 +110,7 @@ public class ConnectedDB {
 				
 				try {
 					if (log.isDebugEnabled())
-						log.debug("Keep alive agent is executing noop query '{}'...");
+						log.debug("Keep alive agent is executing noop query '{}'...", query);
 					c = connection();
 					s = c.createStatement();
 					s.execute(query);
