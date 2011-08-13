@@ -8,7 +8,6 @@ import com.hp.hpl.jena.sparql.algebra.op.OpExt;
 import com.hp.hpl.jena.sparql.engine.ExecutionContext;
 import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.serializer.SerializationContext;
-import com.hp.hpl.jena.sparql.sse.writers.WriterOp;
 import com.hp.hpl.jena.sparql.util.IndentedWriter;
 import com.hp.hpl.jena.sparql.util.NodeIsomorphismMap;
 
@@ -38,7 +37,7 @@ public class OpD2RQ extends OpExt
 	public boolean equalTo(Op other, NodeIsomorphismMap labelMap) {
 		if (!(other instanceof OpD2RQ)) return false;
 		OpD2RQ other2 = (OpD2RQ) other;
-        return original.getPattern().equiv(other2.original.getPattern(), labelMap);
+		return original.getPattern().equiv(other2.original.getPattern(), labelMap);
 	}
 
 	public int hashCode() {
@@ -73,10 +72,8 @@ public class OpD2RQ extends OpExt
 	}
 
 	public void outputArgs(IndentedWriter out, SerializationContext sCxt) {
-		int line = out.getRow() ;
-		WriterOp.output(out, this, sCxt) ;
-		if ( line != out.getRow() )
-			out.ensureStartOfLine() ;
+		out.println(relation);
+		out.println(bindingMakers);
 	}
 	
 }

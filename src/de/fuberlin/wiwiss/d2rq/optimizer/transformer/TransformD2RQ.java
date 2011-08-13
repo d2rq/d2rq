@@ -9,25 +9,33 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.TransformCopy;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
+import com.hp.hpl.jena.sparql.algebra.op.OpConditional;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpLabel;
+import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpNull;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.main.LeftJoinClassifier;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprNode;
+
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.CompatibleRelationGroup;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.engine.BindingMaker;
 import de.fuberlin.wiwiss.d2rq.engine.GraphPatternTranslator;
 import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.engine.OpD2RQ;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
-import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.optimizer.ops.OpFilteredBGP;
 import de.fuberlin.wiwiss.d2rq.optimizer.utility.ExprUtility;
 
@@ -40,7 +48,11 @@ import de.fuberlin.wiwiss.d2rq.optimizer.utility.ExprUtility;
  */
 public class TransformD2RQ extends TransformCopy
 {
-//	private final Log log = LogFactory.getLog(TransformD2RQAndRemoveUnneededOps.class);
+
+	private Logger logger = LoggerFactory.getLogger(TransformD2RQ.class);
+	
+	static final boolean LINEAR_LEFT_JOIN = false;
+	
 	private GraphD2RQ graph;
 	
 	/**
@@ -53,6 +65,37 @@ public class TransformD2RQ extends TransformCopy
 		this.graph = graph;
 	}
 	
+	
+    ///////////// EXPERIMENTAL /////////////////
+    public Op transform(OpLeftJoin opLeftJoin, Op opLeft, Op opRight)
+    {
+        if (LINEAR_LEFT_JOIN) {
+            // Test whether we can do an indexed substitute into the right if possible.
+            boolean canDoLinear = LeftJoinClassifier.isLinear(opLeftJoin);
+            
+            logger.debug("TransformD2RQ.transform() OpLeftJoin linear? {}", String.valueOf(canDoLinear));
+            if (canDoLinear) {
+                // Pass left into right for substitution before right side evaluation.
+                // In an indexed left join, the LHS bindings are visible to the
+                // RHS execution so the expression is evaluated by moving it to be 
+                // a filter over the RHS pattern. 
+                // In D2R, this means that for each LHS binding a new SQL is launched for the RHS pattern.
+                // In the other case only one (unconstrained) SQL query is launched for the RHS and the LHS
+                // and RHS bindings must be left-joined in memory. This can easily go wrong, because simple RHS patterns
+                // can yield a HUGE set of bindings. 
+                
+                
+                if (opLeftJoin.getExprs() != null )
+                     opRight = OpFilter.filter(opLeftJoin.getExprs(), opRight) ;
+                return new OpConditional(opLeft, opRight) ;
+            }
+        }
+        // Not index-able (or disabled) 
+        return super.transform(opLeftJoin, opLeft, opRight) ;
+    }
+    ///////////// EXPERIMENTAL /////////////////
+    
+    
 	/**
 	 * If the filter does not contain any filterexpressions, then remove it 
 	 */
@@ -126,9 +169,15 @@ public class TransformD2RQ extends TransformCopy
         }
         
         // when a filter is available, try to integrate its expressions into the noderelations
-        if (opFilter != null)
+        if (opFilter != null && graph.getConfiguration().getUseAllOptimizations())
         {
             nodeRelations = integrateFilterExprIntoNodeRelations(nodeRelations, opFilter);
+        }
+        
+        // no noderelation available 
+        if (nodeRelations.isEmpty()) 
+        {
+            return OpNull.create();
         }
         
         // only one noderelation
@@ -192,81 +241,100 @@ public class TransformD2RQ extends TransformCopy
      */
     private List integrateFilterExprIntoNodeRelations(List nodeRelations, OpFilter opFilter)
     {
-        List exprList, newNodeRelations;
-        Expr expr;
-        Set mentionedVars;
-        NodeRelation nodeRelation;
-        Expression sqlExpression;
-        MutableRelation mutableRelation;
-        String varName;
-        Map variablesToNodeMakers;
-        Var var;
-        
-        sqlExpression = null;
         // all expressions of the filter
-        exprList = new ArrayList(opFilter.getExprs().getList());
+        List exprList = new ArrayList(opFilter.getExprs().getList());
+        
+        int numberOfNodeRelations = nodeRelations.size();
         
         // check every expression
         for(Iterator exprIterator = exprList.iterator(); exprIterator.hasNext();)
         {
-            expr = (Expr)exprIterator.next();
+            Expr expr = (Expr)exprIterator.next();
             
-            mentionedVars = new HashSet();
+            Set mentionedVars = new HashSet();
             
             // all possible vars of the expression
             // workaround to remove the questionmark from the varname
             for(Iterator varIterator = expr.getVarsMentioned().iterator(); varIterator.hasNext();)
             {
-                var = (Var)varIterator.next();
+                Var var = (Var)varIterator.next();
                 mentionedVars.add(var.getName());
             }           
             
             
             // contains the new nodeRelations
-            newNodeRelations = new ArrayList();
+            List newNodeRelations = new ArrayList();
             
             // now check every noderelation for integrating the expression
+            boolean filterConversionSuccesfulForEveryNodeRelation = true;
             for(Iterator nodeRelationIterator = nodeRelations.iterator(); nodeRelationIterator.hasNext(); )
             {
-                nodeRelation = (NodeRelation)nodeRelationIterator.next();
+                NodeRelation nodeRelation = (NodeRelation)nodeRelationIterator.next();
                 
-                if (nodeRelation.variableNames().containsAll(mentionedVars) && (sqlExpression = convertFilterExprToSQLExpression(expr, nodeRelation)) != null)
+                if (nodeRelation.variableNames().containsAll(mentionedVars))
                 {
                     // noderelation contains all vars of the expression
-                    // the expr can be transformed to sql
-                    // sqlExpression contains the transformed sql-string
                     
-                    // make the noderelation mutable
-                    mutableRelation = new MutableRelation(nodeRelation.baseRelation());
-                    // add the new sqlExpression, that will later be added to the sql-query
-                    mutableRelation.select(sqlExpression);
+                    Expression expression = convertFilterExprToSQLExpression(expr, nodeRelation);
                     
-                    // workaround - this map is needed to create a noderelation
-                    variablesToNodeMakers = new HashMap();
-                    for(Iterator varNamesIterator = nodeRelation.variableNames().iterator(); varNamesIterator.hasNext();)
-                    {
-                        varName = (String)varNamesIterator.next();
-                        variablesToNodeMakers.put(varName, nodeRelation.nodeMaker(varName));
+                    if (expression != null) {
+                        // the expr can be transformed to sql
+                        
+                        if (expression.isTrue()) {
+                            // no change needed
+                        } if (expression.isFalse()) {
+                            nodeRelation = NodeRelation.empty(nodeRelation.variableNames());
+                        } else {
+                            // make the noderelation mutable
+                            MutableRelation mutableRelation = new MutableRelation(nodeRelation.baseRelation());
+                            // add the new sqlExpression, that will later be added to the sql-query
+                            mutableRelation.select(expression);
+                            
+                            // workaround - this map is needed to create a noderelation
+                            Map variablesToNodeMakers = new HashMap();
+                            for(Iterator varNamesIterator = nodeRelation.variableNames().iterator(); varNamesIterator.hasNext();)
+                            {
+                                String  varName = (String)varNamesIterator.next();
+                                variablesToNodeMakers.put(varName, nodeRelation.nodeMaker(varName));
+                            }
+                            // now create the nodeRelation from the mutablenoderelation
+                            nodeRelation = new NodeRelation(mutableRelation.immutableSnapshot(), variablesToNodeMakers);
+                        }
+                    } else {
+                        filterConversionSuccesfulForEveryNodeRelation = false;
                     }
-                    // now create the nodeRelation from the mutablenoderelation
-                    nodeRelation = new NodeRelation(mutableRelation.immutableSnapshot(), variablesToNodeMakers);
-                    // remove the expression from the filter, because it was convertable to sql
-                    opFilter.getExprs().getList().remove(expr);
+                } else {
+                    logger.warn("contains not all vars {} {}", nodeRelation, expr);
+                    filterConversionSuccesfulForEveryNodeRelation = false; // TODO correct?
                 }
                 
                 // add noderelation (either the changed or original one, depending on the filterexpr)
-                newNodeRelations.add(nodeRelation);
+                if (nodeRelation.baseRelation() != Relation.EMPTY)
+                    newNodeRelations.add(nodeRelation);
             }
             // new noderelations with the (possible) converted expressions
             nodeRelations = newNodeRelations;
+            logger.debug("{} convertable for every node relation? {}", expr, Boolean.valueOf(filterConversionSuccesfulForEveryNodeRelation));
+            if (filterConversionSuccesfulForEveryNodeRelation) {
+                // remove the expression from the filter, because it was convertable to sql
+                opFilter.getExprs().getList().remove(expr);
+            } 
         }
         
-        return nodeRelations;
+        logger.debug("remaining filters {}", opFilter.getExprs().getList());
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug("NodeRelations remaining: " + nodeRelations.size() + " (was " + numberOfNodeRelations + ")");
+            for (int i = 0; i < nodeRelations.size(); i++) {
+                logger.debug("{}", nodeRelations.get(i));
+            }
+        }
+        return nodeRelations; // better solution would be to return list of (noderelation, not convertable filters for that noderelation) pairs
     }
     
     
     /**
-     * Tries to convert a filterexpression to a SQLExpression. 
+     * Tries to convert a SPARQL filter expression to a SQL expression. 
      * 
      * @param expr
      * @return

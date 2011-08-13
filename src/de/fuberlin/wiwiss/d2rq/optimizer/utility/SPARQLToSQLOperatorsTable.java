@@ -2,6 +2,9 @@ package de.fuberlin.wiwiss.d2rq.optimizer.utility;
 
 import java.util.Hashtable;
 
+/**
+ * @deprecated
+ */
 public class SPARQLToSQLOperatorsTable
 {
     /** Hashtable with the keywords, used for efficient search. */
