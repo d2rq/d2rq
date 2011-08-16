@@ -743,6 +743,12 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		} else if (arg instanceof ConstantEx) {
 			ConstantEx constant = (ConstantEx) arg;
 			Node node = constant.getNode();
+			if (!node.isLiteral()) {
+				// type error, return false?
+				logger.warn("type error: {} is not a literal, returning FALSE", node);
+				expression.push(Expression.FALSE);
+				return;
+			}
 			String lang = node.getLiteralLanguage();
 			logger.debug("lang {}", lang);
 			if (lang == null)
