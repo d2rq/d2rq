@@ -5,12 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -63,7 +58,7 @@ public class ConnectedDB {
 	 */
 	private static final String[] POSTGRESQL_IGNORED_SCHEMAS = {"information_schema", "pg_catalog"};
 	private static final String[] ORACLE_IGNORED_SCHEMAS = {"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", "SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
-	private static final String[] MSSQL_IGNORED_SCHEMAS = {"sys", "INFORMATION_SCHEMA"};
+    private static final List MSSQL_IGNORED_SCHEMAS = Arrays.asList(new String[]{"sys", "INFORMATION_SCHEMA"});
 	
 	private String jdbcURL;
 	private String username;
@@ -520,9 +515,10 @@ public class ConnectedDB {
 			return Arrays.binarySearch(ORACLE_IGNORED_SCHEMAS, schema) >= 0 || table.startsWith("BIN$");
 			
 		// MS SQL Server has schemas "sys" and "information_schema" in every DB
+        // along with tables which need to be ignored
 		if (this.dbTypeIs(ConnectedDB.MSSQL))
-			return Arrays.binarySearch(MSSQL_IGNORED_SCHEMAS, schema) >= 0;
-		
+			return MSSQL_IGNORED_SCHEMAS.contains(schema) || "sysdiagrams".equals(table);
+
 		return false;
 	}
 
