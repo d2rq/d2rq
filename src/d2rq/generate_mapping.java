@@ -70,11 +70,12 @@ public class generate_mapping {
             vocabModelOutfile = new File(cmd.getArg(vocabModelFileArg).getValue());
         }
 		File outputFile = null;
+        String mapUriEnding;
 		if (cmd.contains(outfileArg)) {
 			outputFile = new File(cmd.getArg(outfileArg).getValue());
-			gen.setMapNamespaceURI(outputFile.toURI().toString() + "#");
+            mapUriEnding = outputFile.getName();
 		} else {
-			gen.setMapNamespaceURI("file:///stdout#");
+            mapUriEnding = "stdout";
 		}
         if(vocabModelOutfile != null && outputFile != null) {
             System.err.println("either -o or -v are permitted, but not both");
@@ -87,6 +88,7 @@ public class generate_mapping {
 												  : DEFAULT_BASE_URI;
 		
 		gen.setVocabNamespaceURI(baseURI + "vocab/resource/");
+        gen.setMapNamespaceURI("d2r-mappings/" + mapUriEnding + "#");
 		try {
             if(vocabModelOutfile != null) {
                 Model model = gen.vocabularyModel(System.err);
