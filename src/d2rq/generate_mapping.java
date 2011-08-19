@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
+import com.hp.hpl.jena.rdf.model.Model;
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -32,12 +33,14 @@ public class generate_mapping {
 		ArgDecl passArg = new ArgDecl(true, "p", "pass", "password");
 		ArgDecl schemaArg = new ArgDecl(true, "s", "schema");
 		ArgDecl driverArg = new ArgDecl(true, "d", "driver");
+		ArgDecl vocabAsOutput = new ArgDecl(false, "v", "vocab");
 		ArgDecl outfileArg = new ArgDecl(true, "o", "out", "outfile");
 		ArgDecl baseUriArg = new ArgDecl(true, "b", "base", "baseuri");
 		cmd.add(userArg);
 		cmd.add(passArg);
 		cmd.add(schemaArg);
 		cmd.add(driverArg);
+		cmd.add(vocabAsOutput);
 		cmd.add(outfileArg);
 		cmd.add(baseUriArg);
 		cmd.process(args);
@@ -66,11 +69,12 @@ public class generate_mapping {
 			gen.setJDBCDriverClass(cmd.getArg(driverArg).getValue());
 		}
 		File outputFile = null;
+		String mapUriEnding;
 		if (cmd.contains(outfileArg)) {
 			outputFile = new File(cmd.getArg(outfileArg).getValue());
-			gen.setMapNamespaceURI(outputFile.toURI().toString() + "#");
+			mapUriEnding = outputFile.getName();
 		} else {
-			gen.setMapNamespaceURI("file:///stdout#");
+			mapUriEnding = "stdout";
 		}
 		gen.setInstanceNamespaceURI("");
 		
@@ -78,11 +82,18 @@ public class generate_mapping {
 												  : DEFAULT_BASE_URI;
 		
 		gen.setVocabNamespaceURI(baseURI + "vocab/resource/");
+		gen.setMapNamespaceURI("d2r-mappings/" + mapUriEnding + "#");
 		try {
 			PrintStream out = (outputFile == null)
 					? System.out
 					: new PrintStream(new FileOutputStream(outputFile));
-			gen.writeMapping(out, System.err);
+
+			if(cmd.contains(vocabAsOutput)) {
+				Model model = gen.vocabularyModel(System.err);
+				model.write(out, "N3");
+			} else {
+				gen.writeMapping(out, System.err);
+			}
 		} catch (IOException ex) {
 			System.err.println(ex.getMessage());
 			System.exit(1);
@@ -91,6 +102,6 @@ public class generate_mapping {
 	
 	private static void usage() {
 		System.err.println(
-				"usage: generate-mapping [-u username] [-p password] [-s database schema] [-d driverclass] [-o outfile.n3] [-b base uri] jdbcURL");
+			"generate-mapping [-u username] [-p password] [-s database schema] [-d driverclass] [-v] [-o outfile.n3] [-b base uri] jdbcURL");
 	}
 }
