@@ -1,6 +1,9 @@
 package d2rq;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import jena.cmdline.ArgDecl;
@@ -30,14 +33,14 @@ public class generate_mapping {
 		ArgDecl passArg = new ArgDecl(true, "p", "pass", "password");
 		ArgDecl schemaArg = new ArgDecl(true, "s", "schema");
 		ArgDecl driverArg = new ArgDecl(true, "d", "driver");
-        ArgDecl vocabModelFileArg = new ArgDecl(true, "v", "vocabfile");
+		ArgDecl vocabAsOutput = new ArgDecl(false, "v", "vocab");
 		ArgDecl outfileArg = new ArgDecl(true, "o", "out", "outfile");
 		ArgDecl baseUriArg = new ArgDecl(true, "b", "base", "baseuri");
 		cmd.add(userArg);
 		cmd.add(passArg);
 		cmd.add(schemaArg);
 		cmd.add(driverArg);
-        cmd.add(vocabModelFileArg);
+		cmd.add(vocabAsOutput);
 		cmd.add(outfileArg);
 		cmd.add(baseUriArg);
 		cmd.process(args);
@@ -65,41 +68,32 @@ public class generate_mapping {
 		if (cmd.contains(driverArg)) {
 			gen.setJDBCDriverClass(cmd.getArg(driverArg).getValue());
 		}
-        File vocabModelOutfile = null;
-        if(cmd.contains(vocabModelFileArg)) {
-            vocabModelOutfile = new File(cmd.getArg(vocabModelFileArg).getValue());
-        }
 		File outputFile = null;
-        String mapUriEnding;
+		String mapUriEnding;
 		if (cmd.contains(outfileArg)) {
 			outputFile = new File(cmd.getArg(outfileArg).getValue());
-            mapUriEnding = outputFile.getName();
+			mapUriEnding = outputFile.getName();
 		} else {
-            mapUriEnding = "stdout";
+			mapUriEnding = "stdout";
 		}
-        if(vocabModelOutfile != null && outputFile != null) {
-            System.err.println("either -o or -v are permitted, but not both");
-            usage();
-            System.exit(1);
-        }
 		gen.setInstanceNamespaceURI("");
 		
 		String baseURI = cmd.contains(baseUriArg) ? cmd.getArg(baseUriArg).getValue()
 												  : DEFAULT_BASE_URI;
 		
 		gen.setVocabNamespaceURI(baseURI + "vocab/resource/");
-        gen.setMapNamespaceURI("d2r-mappings/" + mapUriEnding + "#");
+		gen.setMapNamespaceURI("d2r-mappings/" + mapUriEnding + "#");
 		try {
-            if(vocabModelOutfile != null) {
-                Model model = gen.vocabularyModel(System.err);
-                OutputStream vocabStream = new FileOutputStream(vocabModelOutfile);
-                model.write(vocabStream, "N3");
-            } else {
-			    PrintStream out = (outputFile == null)
-				    	? System.out
-					    : new PrintStream(new FileOutputStream(outputFile));
-			    gen.writeMapping(out, System.err);
-            }
+			PrintStream out = (outputFile == null)
+					? System.out
+					: new PrintStream(new FileOutputStream(outputFile));
+
+			if(cmd.contains(vocabAsOutput)) {
+				Model model = gen.vocabularyModel(System.err);
+				model.write(out, "N3");
+			} else {
+				gen.writeMapping(out, System.err);
+			}
 		} catch (IOException ex) {
 			System.err.println(ex.getMessage());
 			System.exit(1);
@@ -107,11 +101,7 @@ public class generate_mapping {
 	}
 	
 	private static void usage() {
-        String usageBegin = "generate-mapping [-u username] [-p password] [-s database schema] [-d driverclass] ";
-        String usageEnd = " [-b base uri] jdbcURL";
-        String outfileUsage = "usage: " + usageBegin +  "[-o outfile.n3]" + usageEnd;
-        String vocabUsage = "       " + usageBegin + "[-v vocabfile.n3]" + usageEnd;
-		System.err.println(outfileUsage);
-        System.err.println(vocabUsage);
+		System.err.println(
+			"generate-mapping [-u username] [-p password] [-s database schema] [-d driverclass] [-v] [-o outfile.n3] [-b base uri] jdbcURL");
 	}
 }
