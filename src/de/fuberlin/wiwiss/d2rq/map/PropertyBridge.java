@@ -37,46 +37,82 @@ public class PropertyBridge extends ResourceMap {
 		return this.properties;
 	}
 	
+    public ClassMap getBelongsToClassMap() {
+        return belongsToClassMap;
+    }
+
 	public void setBelongsToClassMap(ClassMap classMap) {
 		assertNotYetDefined(this.belongsToClassMap, D2RQ.belongsToClassMap, D2RQException.PROPERTYBRIDGE_DUPLICATE_BELONGSTOCLASSMAP);
 		assertArgumentNotNull(classMap, D2RQ.belongsToClassMap, D2RQException.PROPERTYBRIDGE_INVALID_BELONGSTOCLASSMAP);
 		this.belongsToClassMap = classMap;
 	}
 	
+    public String getColumn() {
+        return column;
+    }
+
 	public void setColumn(String column) {
 		assertNotYetDefined(this.column, D2RQ.column, D2RQException.PROPERTYBRIDGE_DUPLICATE_COLUMN);
 		this.column = column;
 	}
+
+    public String getPattern() {
+        return pattern;
+    }
 
 	public void setPattern(String pattern) {
 		assertNotYetDefined(this.pattern, D2RQ.pattern, D2RQException.PROPERTYBRIDGE_DUPLICATE_PATTERN);
 		this.pattern = pattern;
 	}
 
+    public String getSQLExpression() {
+        return sqlExpression;
+    }
+
 	public void setSQLExpression(String sqlExpression) {
 		assertNotYetDefined(this.column, D2RQ.sqlExpression, D2RQException.PROPERTYBRIDGE_DUPLICATE_SQL_EXPRESSION);
 		this.sqlExpression = sqlExpression;
 	}
+
+    public String getUriSQLExpression() {
+        return uriSqlExpression;
+    }
 	
 	public void setUriSQLExpression(String uriSqlExpression) {
 		assertNotYetDefined(this.column, D2RQ.uriSqlExpression, D2RQException.PROPERTYBRIDGE_DUPLICATE_URI_SQL_EXPRESSION);
 		this.uriSqlExpression = uriSqlExpression;
 	}
 	
+    public String getDatatype() {
+        return datatype;
+    }
+
 	public void setDatatype(String datatype) {
 		assertNotYetDefined(this.datatype, D2RQ.datatype, D2RQException.PROPERTYBRIDGE_DUPLICATE_DATATYPE);
 		this.datatype = datatype;
 	}
 
+    public String getLang() {
+        return lang;
+    }
+
 	public void setLang(String lang) {
 		assertNotYetDefined(this.lang, D2RQ.lang, D2RQException.PROPERTYBRIDGE_DUPLICATE_LANG);
 		this.lang = lang;
 	}
+
+    public int getLimit() {
+        return limit.intValue();
+    }
 	
 	public void setLimit(int limit) {
 	    assertNotYetDefined(this.limit, D2RQ.limit, D2RQException.PROPERTYBRIDGE_DUPLICATE_LIMIT);
 	    this.limit = new Integer(limit);
 	}
+
+    public int getLimitInverse() {
+        return limitInverse.intValue();
+    }
 
 	public void setLimitInverse(int limit) {
 	    assertNotYetDefined(this.limitInverse, D2RQ.limitInverse, D2RQException.PROPERTYBRIDGE_DUPLICATE_LIMITINVERSE);
@@ -89,6 +125,10 @@ public class PropertyBridge extends ResourceMap {
 	    this.orderDesc = new Boolean(desc);
 	}
     
+    public ClassMap getRefersToClassMap() {
+        return refersToClassMap;
+    }
+
 	public void setRefersToClassMap(ClassMap classMap) {
 		assertNotYetDefined(this.refersToClassMap, D2RQ.refersToClassMap, 
 				D2RQException.PROPERTYBRIDGE_DUPLICATE_REFERSTOCLASSMAP);
