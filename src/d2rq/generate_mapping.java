@@ -101,7 +101,19 @@ public class generate_mapping {
 	}
 	
 	private static void usage() {
-		System.err.println(
-			"generate-mapping [-u username] [-p password] [-s database schema] [-d driverclass] [-v] [-o outfile.n3] [-b base uri] jdbcURL");
+		System.err.println("usage: generate-mapping [options] jdbcURL");
+		System.err.println();
+		System.err.println("  Arguments:");
+        System.err.println("    jdbcURL         JDBC URL for the DB, e.g. jdbc:mysql://localhost/dbname");
+		System.err.println();
+		System.err.println("  Options:");
+		System.err.println("    -u username     Database user for connecting to the DB");
+		System.err.println("    -p password     Database password for connecting to the DB");
+		System.err.println("    -d driverclass  Java class name of the JDBC driver for the DB");
+		System.err.println("    -s db_schema    Only map tables in a specific named DB schema");
+		System.err.println("    -v              Generate RDFS+OWL vocabulary instead of mapping file");
+		System.err.println("    -b baseURI      Base URI for generated RDF (optional)");
+		System.err.println("    -o outfile.n3   Output file name (default: stdout)");
+		System.err.println();
 	}
 }
