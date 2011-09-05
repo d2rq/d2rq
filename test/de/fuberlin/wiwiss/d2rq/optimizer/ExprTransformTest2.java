@@ -18,6 +18,7 @@ import com.hp.hpl.jena.sparql.expr.E_IsLiteral;
 import com.hp.hpl.jena.sparql.expr.E_Lang;
 import com.hp.hpl.jena.sparql.expr.E_LangMatches;
 import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
+import com.hp.hpl.jena.sparql.expr.E_SameTerm;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
@@ -216,6 +217,29 @@ public class ExprTransformTest2 extends TestCase {
 		Expression expected = e1.or(e2);
 		
 		assertEquals("?o = \"1\"^^xsd:int || ?o = \"2\"^^xsd:int", expected, result);
+	}
+	
+	public void testSameTerm()
+	{
+		List pattern = new ArrayList();
+		pattern.add(Triple.create(Node.createVariable("s"), Node.createURI("http://example.org/value"), Node.createVariable("o")));
+		NodeRelation[] rels = translate(pattern, "optimizer/filtertests.n3");
+		
+		NodeRelation intvalue = search("table2", "intvalue", rels);
+	
+		Expr sameTerm = new E_SameTerm(new ExprVar("o"),  NodeValue.makeNode("1", XSDDatatype.XSDint));
+		
+		Expression result = ExprUtility.convertExprToSQL(sameTerm, intvalue);
+		TypedNodeMaker nm = (TypedNodeMaker) intvalue.nodeMaker("o");
+		Expression expected = nm.valueMaker().valueExpression("1");
+		
+		assertEquals("sameTerm(?o, \"1\"^^xsd:int)", expected, result);
+		
+		sameTerm = new E_SameTerm(new ExprVar("o"),  NodeValue.makeNode("1", XSDDatatype.XSDdecimal));
+		
+		result = ExprUtility.convertExprToSQL(sameTerm, intvalue);
+		
+		assertEquals("sameTerm(?o, \"1\"^^xsd:decimal)", Expression.FALSE, result);
 	}
 	
 	private NodeRelation[] translate(List pattern, String mappingFile) {
