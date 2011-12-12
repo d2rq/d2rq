@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import RelationName;
+
 
 /**
  * A relation name, including an optional schema name.
@@ -121,9 +123,23 @@ public class RelationName implements Comparable {
 	}
 	
 	public RelationName withPrefix(int index) {
-		return new RelationName(null, 
-				"T" + index + "_" + 
+		
+		String name = "T" + index + "_" + 
 				(schemaName == null ? "" : schemaName + "_") +
-				tableName);		
+				tableName ;
+		
+		/*
+		 * Oracle can't handle identifier names longer than 30 characters.
+		 * To prevent the oracle error "ORA-00972: identifier is too long"
+		 * we need to cut those longer names off but keep them unique.
+		 * 
+		 * TODO: Make this dependent on whether we're dealing with an Oracle
+		 * database or not.
+		 */
+		if (name.length() > 30) {
+			name = "T" + index + "_" + name.hashCode() ;
+		}
+		
+		return new RelationName(null, name);		
 	}
 }
