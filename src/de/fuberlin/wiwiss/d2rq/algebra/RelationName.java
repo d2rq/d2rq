@@ -1,8 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
-import RelationName;
-
-
 /**
  * A relation name, including an optional schema name.
  *
