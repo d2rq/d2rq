@@ -5,8 +5,8 @@ import java.net.URLEncoder;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joseki.RDFServer;
 import org.joseki.Registry;
 import org.joseki.Service;
@@ -40,7 +40,7 @@ public class D2RServer {
 	private final static String DEFAULT_BASE_URI = "http://localhost";
 	private final static String DEFAULT_SERVER_NAME = "D2R Server";
 	private final static String SERVER_INSTANCE = "D2RServer.SERVER_INSTANCE";
-	private static final Log log = LogFactory.getLog(D2RServer.class);
+	private static final Logger log = LoggerFactory.getLogger(D2RServer.class);
 	
 	/** d2rq mapping file */
 	private String configFile;
