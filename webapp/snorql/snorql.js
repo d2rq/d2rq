@@ -149,8 +149,8 @@ function Snorql() {
     }
 
     this._displayPoweredBy = function() {
-        $('#poweredby').prop ('href', this._poweredByLink);
-        $('#poweredby').text (this._poweredByLabel);
+        jQuery('#poweredby').prop ('href', this._poweredByLink);
+        jQuery('#poweredby').text (this._poweredByLabel);
     }
     
     this.setNamespaces = function(namespaces) {
@@ -168,9 +168,9 @@ function Snorql() {
 
     this._updateGraph = function(uri, effect) {
     	if (!this._enableNamedGraphs) {
-            $('#default-graph-section').hide();
-            $('#named-graph-section').hide();
-            $('#browse-named-graphs-link').hide();
+            jQuery('#default-graph-section').hide();
+            jQuery('#named-graph-section').hide();
+            jQuery('#browse-named-graphs-link').hide();
             return;
         }
         var changed = (uri != this._graph);
@@ -181,28 +181,28 @@ function Snorql() {
         if (this._graph == null) {
             var show = '#default-graph-section';
             var hide = '#named-graph-section';
-            $('a.graph-link').each(function(link) {
+            jQuery('a.graph-link').each(function(link) {
                 match = link.href.match(/^(.*)[&?]graph=/);
                 if (match) link.href = match[1];
             });
         } else {
             var show = '#named-graph-section';
             var hide = '#default-graph-section';
-            $('#selected-named-graph').update(this._graph);
+            jQuery('#selected-named-graph').update(this._graph);
             var uri = this._graph;
-            $('a.graph-link').each(function(link) {
+            jQuery('a.graph-link').each(function(link) {
                 match = link.href.match(/^(.*)[&?]graph=/);
                 if (!match) link.href = link.href + '&graph=' + uri;
             });
         }
-        $(hide).hide();
-        $(show).show();
+        jQuery(hide).hide();
+        jQuery(show).show();
         if (effect && changed) {
             new Effect.Highlight(show,
                 {startcolor: '#ffff00', endcolor: '#ccccff', resotrecolor: '#ccccff'});
         }
-        $('#graph-uri').disabled = (this._graph == null);
-        $('#graph-uri').value = this._graph;
+        jQuery('#graph-uri').disabled = (this._graph == null);
+        jQuery('#graph-uri').value = this._graph;
     }
 
     this.updateOutputMode = function() {
