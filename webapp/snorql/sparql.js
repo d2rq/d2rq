@@ -336,7 +336,7 @@ SPARQL.Query = function(service, priority) {
 					data = this.queryParameters();
 				}
 
-				$.ajax ({
+				jQuery.ajax ({
 					url: url,
 					type: _method,
 					data: data,
