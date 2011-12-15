@@ -312,11 +312,6 @@ SPARQL.Query = function(service, priority) {
 		));
 	};
 	
-	function getXmlHttpRequest(url) {
-		// right now, this only does Firefox (Opera? Safari?)
-		return new XMLHttpRequest();
-	}
-	
 	this._doQuery = function(queryString, callback, transformer) {
 		_user_query = queryString;
 		if (_service._canRun()) {
@@ -325,33 +320,8 @@ SPARQL.Query = function(service, priority) {
 					throw("HTTP methods other than GET and POST are not supported.");
 			
 				var url = _method == 'GET' ? this.queryUrl() : this.service().endpoint();
-				var xhr = getXmlHttpRequest(url);
-				var content = null;
-
-				try {
-                    if (!document.domain || ((url.match(/^http:\/\//) && url.slice(7, document.domain.length + 7) != document.domain || url.match(/^https:\/\//) && url.slice(8, document.domain.length + 8) != document.domain) && window.netscape && netscape.security && netscape.security.PrivilegeManager)) {
-						netscape.security.PrivilegeManager.enablePrivilege( "UniversalBrowserRead");
-						netscape.security.PrivilegeManager.enablePrivilege( "UniversalXPConnect"); 
-					}
-				} catch(e) {
-					alert("Cross-site requests prohibited. You will only be able to SPARQL the origin site: " + e);
-                    return;
-				}
-
-				xhr.open(_method, url, true /* async */);
-				
-				// set the headers, including the content-type for POSTed queries
-				for (var header in this.requestHeaders())
-                    if (typeof(this.requestHeaders()[header]) != "function")
-	    				xhr.setRequestHeader(header, this.requestHeaders()[header]);
-				if (_method == 'POST') {
-					xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-					content = this.queryParameters();
-				}
-	
-				SPARQL.statistics.queries_sent++;
-				_service._markRunning(this);
-	
+				var data = {} ;
+				var that = this ;
 				var callbackData = {
 					scope: this, 
 					success: this._querySuccess, 
@@ -361,27 +331,35 @@ SPARQL.Query = function(service, priority) {
 						callback: callback
 					}
 				};
-				
-				// I've seen some strange race-condition behavior (strange since normally
-				// JS is single-threaded, so synchronization conditions don't occur barring 
-				// reentrancy) with onreadystatechange. Instead, we poll asynchronously to
-				// determine when the request is done.
-				var token = window.setInterval(
-					function () {
-						if (xhr.readyState == 4) { // ready!
-							// clear this handler
-							window.clearInterval(token);
-							// we check the status to know which callback to call
-							if (xhr.status >= 200 && xhr.status < 300)
-								callbackData.success.apply(callbackData.scope, [xhr, callbackData.argument]);
-							else
-								callbackData.failure.apply(callbackData.scope, [xhr, callbackData.argument]);
+
+				if (_method == 'POST') {
+					data = this.queryParameters();
+				}
+
+				$.ajax ({
+					url: url,
+					type: _method,
+					data: data,
+					beforeSend: function (xhr_) {
+						// set the headers, including the content-type for POSTed queries
+						for (var header in that.requestHeaders())
+		                    if (typeof(that.requestHeaders()[header]) != "function")
+			    				xhr_.setRequestHeader(header, that.requestHeaders()[header]);
+						if (_method == 'POST') {
+							xhr_.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 						}
 					},
-					200 /* maybe this should be customizable */
-				);			
+					success: function (data_, textStatus_, xhr_) {
+						callbackData.success.apply(callbackData.scope, [xhr_, callbackData.argument]);
+					},
+					error: function (xhr_, textStatus_, errorThrown_) {
+						callbackData.failure.apply(callbackData.scope, [xhr_, callbackData.argument]);
+					}
+				}) ;
+
+				SPARQL.statistics.queries_sent++;
+				_service._markRunning(this);
 	
-				xhr.send(content);
 			} catch (e) {
 				alert("Error sending SPARQL query: " + e);
 			}
@@ -390,7 +368,6 @@ SPARQL.Query = function(service, priority) {
 			_service._queue(self, function() { self._doQuery(queryString, callback, transformer); }, _priority);
 		}
 	};
-
 	
 	//----------
 	// accessors

@@ -149,10 +149,10 @@ function Snorql() {
     }
 
     this._displayPoweredBy = function() {
-        $('poweredby').href = this._poweredByLink;
-        $('poweredby').update(this._poweredByLabel);
+        $('#poweredby').prop ('href', this._poweredByLink);
+        $('#poweredby').text (this._poweredByLabel);
     }
-
+    
     this.setNamespaces = function(namespaces) {
         this._namespaces = namespaces;
         this._display(document.createTextNode(this._getPrefixes()), 'prefixestext');
@@ -167,10 +167,10 @@ function Snorql() {
     }
 
     this._updateGraph = function(uri, effect) {
-        if (!this._enableNamedGraphs) {
-            $('default-graph-section').hide();
-            $('named-graph-section').hide();
-            $('browse-named-graphs-link').hide();
+    	if (!this._enableNamedGraphs) {
+            $('#default-graph-section').hide();
+            $('#named-graph-section').hide();
+            $('#browse-named-graphs-link').hide();
             return;
         }
         var changed = (uri != this._graph);
@@ -179,18 +179,18 @@ function Snorql() {
         el.disabled = (this._graph == null);
         el.value = this._graph;
         if (this._graph == null) {
-            var show = 'default-graph-section';
-            var hide = 'named-graph-section';
-            $$('a.graph-link').each(function(link) {
+            var show = '#default-graph-section';
+            var hide = '#named-graph-section';
+            $('a.graph-link').each(function(link) {
                 match = link.href.match(/^(.*)[&?]graph=/);
                 if (match) link.href = match[1];
             });
         } else {
-            var show = 'named-graph-section';
-            var hide = 'default-graph-section';
-            $('selected-named-graph').update(this._graph);
+            var show = '#named-graph-section';
+            var hide = '#default-graph-section';
+            $('#selected-named-graph').update(this._graph);
             var uri = this._graph;
-            $$('a.graph-link').each(function(link) {
+            $('a.graph-link').each(function(link) {
                 match = link.href.match(/^(.*)[&?]graph=/);
                 if (!match) link.href = link.href + '&graph=' + uri;
             });
@@ -201,8 +201,8 @@ function Snorql() {
             new Effect.Highlight(show,
                 {startcolor: '#ffff00', endcolor: '#ccccff', resotrecolor: '#ccccff'});
         }
-        $('graph-uri').disabled = (this._graph == null);
-        $('graph-uri').value = this._graph;
+        $('#graph-uri').disabled = (this._graph == null);
+        $('#graph-uri').value = this._graph;
     }
 
     this.updateOutputMode = function() {
