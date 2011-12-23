@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import junit.framework.TestCase;
 
@@ -65,16 +65,16 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	}
 	
 	private final static String pckg = "de.fuberlin.wiwiss.d2rq.testing.";
-	protected static Logger bigStringInResultLogger = Logger.getLogger(pckg + "BigStringInResult");
+	protected static Logger bigStringInResultLogger = LoggerFactory.getLogger(pckg + "BigStringInResult");
 	// Loggers used for switching on/off output
-	protected Logger dumpLogger = Logger.getLogger(pckg + "Dump");
-	protected Logger usingLogger = Logger.getLogger(pckg + "Using");
-	protected Logger testCaseSeparatorLogger = Logger.getLogger(pckg + "TestCaseSeparator");
-	protected Logger performanceLogger = Logger.getLogger(pckg + "Performance");
-	protected Logger rdqlLogger = Logger.getLogger(pckg + "RDQL");
-	protected Logger differentLogger = Logger.getLogger(pckg + "Different");
-	protected Logger differenceLogger = Logger.getLogger(pckg + "Difference");
-	protected Logger sqlResultSetLogger = Logger.getLogger(pckg + "SQLResultSet");
+	protected Logger dumpLogger = LoggerFactory.getLogger(pckg + "Dump");
+	protected Logger usingLogger = LoggerFactory.getLogger(pckg + "Using");
+	protected Logger testCaseSeparatorLogger = LoggerFactory.getLogger(pckg + "TestCaseSeparator");
+	protected Logger performanceLogger = LoggerFactory.getLogger(pckg + "Performance");
+	protected Logger rdqlLogger = LoggerFactory.getLogger(pckg + "RDQL");
+	protected Logger differentLogger = LoggerFactory.getLogger(pckg + "Different");
+	protected Logger differenceLogger = LoggerFactory.getLogger(pckg + "Difference");
+	protected Logger sqlResultSetLogger = LoggerFactory.getLogger(pckg + "SQLResultSet");
 	protected Logger oldSQLResultSetLogger;
 	protected Logger oldSQLResultSetSeparatorLogger;
 	
@@ -86,33 +86,33 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	protected void setUpShowPerformance() {
 	    nTimes=10;
 	    compareQueryHandlers=true;
-	    rdqlLogger.setLevel(Level.DEBUG);
-		rdqlLogger.setLevel(Level.DEBUG);
-		performanceLogger.setLevel(Level.DEBUG);
+//	    rdqlLogger.setLevel(Level.DEBUG);
+//		rdqlLogger.setLevel(Level.DEBUG);
+//		performanceLogger.setLevel(Level.DEBUG);
 	}
 	protected void setUpMixOutputs(boolean v) {
 	    compareQueryHandlers=v;
-	    usingLogger.setLevel(v ? Level.DEBUG : Level.INFO);	    
-		testCaseSeparatorLogger.setLevel(v ? Level.DEBUG : Level.INFO);
+//	    usingLogger.setLevel(v ? Level.DEBUG : Level.INFO);	    
+//		testCaseSeparatorLogger.setLevel(v ? Level.DEBUG : Level.INFO);
 	}
-	protected void setUpShowStatements() {
-	    rdqlLogger.setLevel(Level.DEBUG);
-		sqlResultSetLogger.setLevel(Level.DEBUG);	    
-	}
-	protected void setUpShowErrors() {
-		differentLogger.setLevel(Level.DEBUG);
-		differenceLogger.setLevel(Level.DEBUG);	    
-	}
-	protected void setUpShowWarnings() {
-		bigStringInResultLogger.setLevel(Level.DEBUG);	    
-	}
+//	protected void setUpShowStatements() {
+//	    rdqlLogger.setLevel(Level.DEBUG);
+//		sqlResultSetLogger.setLevel(Level.DEBUG);	    
+//	}
+//	protected void setUpShowErrors() {
+//		differentLogger.setLevel(Level.DEBUG);
+//		differenceLogger.setLevel(Level.DEBUG);	    
+//	}
+//	protected void setUpShowWarnings() {
+//		bigStringInResultLogger.setLevel(Level.DEBUG);	    
+//	}
 	protected void setUpShowAll() {
 	    setUpMixOutputs(true);
 	    verbatim[0]=true;
 	    setUpShowPerformance();
-	    setUpShowStatements();
-	    setUpShowErrors();
-	    setUpShowWarnings();
+//	    setUpShowStatements();
+//	    setUpShowErrors();
+//	    setUpShowWarnings();
 	}
 	
 	protected abstract String mapURL();
@@ -120,7 +120,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	protected void setUp() throws Exception {
 		this.model = new ModelD2RQ(mapURL(), "N3", "http://test/");
 //		this.model.enableDebug();
-	    setUpShowErrors(); // should be activated all the time
+//	    setUpShowErrors(); // should be activated all the time
 //	    setUpShowPerformance(); // activate (only) to test performance (only)
 	    //setUpShowStatements(); // activate to analyse generated SQL statements
 	    //setUpMixOutputs(true); // activate to mix output from two QueryHandlers nicely
@@ -139,19 +139,19 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 			super.runTest();
 			return;
 		}		
-		Level oldRDQLLoggerState=rdqlLogger.getLevel();
-		Level oldSqlResultSetLoggerState=sqlResultSetLogger.getLevel();
+//		Level oldRDQLLoggerState=rdqlLogger.getLevel();
+//		Level oldSqlResultSetLoggerState=sqlResultSetLogger.getLevel();
 		try {
 			for (int i=0; i<configs; i++) {
-			    rdqlLogger.setLevel(verbatim[i] ? oldRDQLLoggerState : Level.INFO);
-			    sqlResultSetLogger.setLevel(verbatim[i] ? oldSqlResultSetLoggerState: Level.INFO);
-			    usingLogger.debug("using " + handlerDescription[i] + " ...");
+//			    rdqlLogger.setLevel(verbatim[i] ? oldRDQLLoggerState : Level.INFO);
+//			    sqlResultSetLogger.setLevel(verbatim[i] ? oldSqlResultSetLoggerState: Level.INFO);
+//			    usingLogger.debug("using " + handlerDescription[i] + " ...");
 			    startInst=BeanCounter.instance();
 			    for (int j=0; j< nTimes; j++) {
-			        if (j>0) {
-					    rdqlLogger.setLevel(Level.INFO);
-					    sqlResultSetLogger.setLevel(Level.INFO);
-			        }
+//			        if (j>0) {
+//					    rdqlLogger.setLevel(Level.INFO);
+//					    sqlResultSetLogger.setLevel(Level.INFO);
+//			        }
 			        super.runTest();
 			    }
 				diffInfo[i]=BeanCounter.instanceMinus(startInst);
@@ -181,9 +181,9 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 			assertEquals(resultMaps[0],resultMaps[1]);
 		} catch (Exception e) {
 			throw e; 
-		} finally {
-			rdqlLogger.setLevel(oldRDQLLoggerState);
-			sqlResultSetLogger.setLevel(oldSqlResultSetLoggerState);
+//		} finally {
+//			rdqlLogger.setLevel(oldRDQLLoggerState);
+//			sqlResultSetLogger.setLevel(oldSqlResultSetLoggerState);
 		}
 	}
 	
