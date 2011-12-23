@@ -237,9 +237,7 @@
 			<!-- Include subdirectories directly, so that the files are all
 				 in the main lib directory. Otherwise, Tomcat won't pick up the jars -->
 			<lib dir="${lib}/arq"/>
-			<lib dir="${lib}/logging">
-				<exclude name="logging/commons-logging-*.jar"/>
-			</lib>
+			<lib dir="${lib}/logging" />
 			<lib dir="${lib}/db-drivers"/>
 			<webinf dir="webapp/WEB-INF">
 				<include name="*"/>
