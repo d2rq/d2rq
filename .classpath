@@ -10,7 +10,7 @@
 	<classpathentry kind="lib" path="lib/arq/jena.jar"/>
 	<classpathentry kind="lib" path="lib/arq/jenatest.jar"/>
 	<classpathentry kind="lib" path="lib/arq/json.jar"/>
-	<classpathentry kind="lib" path="lib/arq/junit-4.5.jar"/>	
+	<classpathentry kind="lib" path="lib/arq/junit-4.5.jar"/>
 	<classpathentry kind="lib" path="lib/arq/lucene-core-2.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/arq/stax-api-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/arq/wstx-asl-3.0.0.jar"/>
@@ -25,10 +25,6 @@
 	<classpathentry kind="lib" path="lib/db-drivers/postgresql-8.2dev-503.jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.7-bin.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/sdb.jar"/>
-	<classpathentry kind="lib" path="lib/logging/commons-logging-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/logging/log4j-1.2.12.jar"/>
-	<classpathentry kind="lib" path="lib/logging/slf4j-api-1.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/logging/slf4j-log4j12-1.5.6.jar"/>
 	<classpathentry kind="lib" path="lib/concurrent.jar"/>
 	<classpathentry kind="lib" path="lib/antlr-2.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
@@ -40,5 +36,9 @@
 	<classpathentry kind="lib" path="lib/jetty-util-6.1.10.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api-2.5-6.1.10.jar"/>
 	<classpathentry kind="lib" path="lib/joseki.jar"/>
+	<classpathentry kind="lib" path="lib/logging/logback-classic-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/logging/logback-core-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/logging/logback-access-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/logging/slf4j-api-1.6.4.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
