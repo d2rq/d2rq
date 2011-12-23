@@ -1,16 +1,23 @@
 #!/bin/bash
-if [ ! -e "./d2r-server" ]
-then
-  echo "Please cd into the D2R Server directory to run the server"
+#
+# Start the D2RQ Server
+#
+D2RQ_ROOT="$(cd ${0%/*} ; echo ${PWD})"
+if [ ! -f "${D2RQ_ROOT}/d2r-server" ] ; then
+  echo "ERROR: ${D2RQ_ROOT} is not the D2RQ root directory"
   exit 1
 fi
-D2RQ_ROOT=${0%/*}
-CP="$D2RQ_ROOT/build"
+if [ -d "${D2RQ_ROOT}/build" ] ; then
+  CP="${D2RQ_ROOT}/build"
+fi
 SEP=':'
-if [ "$(uname)" = "Cygwin" ]; then SEP=';'; fi
-for jar in "$D2RQ_ROOT"/lib/*.jar "$D2RQ_ROOT"/lib/*/*.jar
-do
-  if [ ! -e "$jar" ]; then continue; fi
+if [ "$(uname)" = "Cygwin" ] ; then 
+  SEP=';' 
+fi
+for jar in "${D2RQ_ROOT}"/lib/*.jar "${D2RQ_ROOT}"/lib/*/*.jar ; do
+  if [ ! -e "$jar" ] ; then
+    continue
+  fi
   CP="$CP$SEP$jar"
 done
 LOGCONFIG=${LOGCONFIG:-file:$D2RQ_ROOT/etc/logback-server.xml}
