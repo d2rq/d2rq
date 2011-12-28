@@ -582,7 +582,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 	
 	/*
-	 * See http://www.w3.org/TR/rdf-sparql-query § 11.4.2
+	 * See http://www.w3.org/TR/rdf-sparql-query ï¿½ 11.4.2
 	 * 
 	 * "(ISIRI) Returns true if term is an IRI. Returns false otherwise."
 	 * 
@@ -711,7 +711,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 	
 	/*
-	 * See http://www.w3.org/TR/rdf-sparql-query Â§ 11.4.6
+	 * See http://www.w3.org/TR/rdf-sparql-query paragraph 11.4.6
 	 * 
 	 * "(LANG) Returns the language tag of ltrl, if it has one. It returns "" if ltrl has no language tag."
 	 * @see http://www.w3.org/TR/rdf-sparql-query 
