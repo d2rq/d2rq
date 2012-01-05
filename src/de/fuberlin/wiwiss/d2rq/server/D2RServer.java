@@ -56,6 +56,9 @@ public class D2RServer {
 	
 	/** base URI from command line */
 	private boolean overrideUseAllOptimizations = false;
+	
+	/** vocabulary stem from command line */
+	private String overrideVocabularyStem = null;
 
 	/** the dataset, auto-reloadable in case of local mapping files */
 	private AutoReloadableDataset dataset;
@@ -92,6 +95,14 @@ public class D2RServer {
 	public void overrideUseAllOptimizations(boolean overrideAllOptimizations) {
 		this.overrideUseAllOptimizations = overrideAllOptimizations;
 	}	
+	
+	public void overrideVocabularyStem(String overrideVocabularyStem) {
+		
+		if (overrideVocabularyStem == null) return ;
+		
+		log.info("using vocabulary stem: " + overrideVocabularyStem);
+		this.overrideVocabularyStem = overrideVocabularyStem + "/";
+	}
 	
 	public void setConfigFile(String configFileURL) {
 		configFile = configFileURL;
@@ -177,6 +188,9 @@ public class D2RServer {
 	}
 	
 	public boolean isVocabularyResource(Resource r) {
+		if (this.overrideVocabularyStem != null) {
+			return r.getURI().startsWith(resourceBaseURI(this.overrideVocabularyStem));
+		}
 		return r.getURI().startsWith(resourceBaseURI(VOCABULARY_STEM));
 	}
 
@@ -259,4 +273,6 @@ public class D2RServer {
 	public ConfigLoader getConfig() {
 		return config;
 	}
+
+
 }
