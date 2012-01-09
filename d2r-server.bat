@@ -7,7 +7,7 @@ set D2RQ_ROOT=%~p0
 set CP="%D2RQ_ROOT%build"
 call :findjars "%D2RQ_ROOT%lib"
 set LOGCONFIG=file:%D2RQ_ROOT%etc/logback-server.xml
-java -cp %CP% -Xmx256M "-Dlogback.configurationFile=%LOGCONFIG%" d2rq.server %1 %2 %3 %4 %5 %6 %7 %8 %9
+%JAVA_HOME%\bin\java -cp %CP% -Xmx256M "-Dlogback.configurationFile=%LOGCONFIG%" d2rq.server %1 %2 %3 %4 %5 %6 %7 %8 %9
 exit /B
 
 :findjars
