@@ -22,7 +22,6 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * Command line utility for dumping a database to RDF, using the
