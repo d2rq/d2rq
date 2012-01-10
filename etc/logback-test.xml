@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss} %-5p %-20c{1} :: %m%n</pattern>
+    </encoder>
+  </appender>
+  <logger name="org.joseki" level="INFO"/>
+  <logger name="com.hp.hpl.jena" level="WARN"/>
+  <logger name="com.hp.hpl.jena.util" level="WARN" />
+  <logger name="de.fuberlin.wiwiss.d2rq.sql.ConnectedDB" level="WARN" />  
+  <logger name="de.fuberlin.wiwiss.d2rq.server.velocity" level="WARN"/>
+  <logger name="de.fuberlin.wiwiss.d2rq.testing" level="DEBUG" />
+  <logger name="de.fuberlin.wiwiss.d2rq.testing.BigStringInResult" level="DEBUG" />
+  <logger name="de.fuberlin.wiwiss.d2rq.testing.Dump" level="DEBUG" />
+  <logger name="de.fuberlin.wiwiss.d2rq.testing.Using" level="DEBUG" />
+  <logger name="de.fuberlin.wiwiss.d2rq.testing.TestCaseSeparator" level="DEBUG" />
+  <logger name="de.fuberlin.wiwiss.d2rq.testing.Performance" level="DEBUG" />
+  <logger name="de.fuberlin.wiwiss.d2rq.testing.RDQL" level="DEBUG" />
+  <logger name="de.fuberlin.wiwiss.d2rq.testing.Different" level="DEBUG" />
+  <logger name="de.fuberlin.wiwiss.d2rq.testing.Difference" level="DEBUG" />
+  <logger name="de.fuberlin.wiwiss.d2rq.testing.SQLResultSet" level="DEBUG" />
+  <root level="INFO">
+    <appender-ref ref="stdout"/>
+  </root>
+</configuration>

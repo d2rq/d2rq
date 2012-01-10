@@ -1,12 +1,21 @@
 #!/bin/bash
-D2RQ_ROOT=${0%/*}
-CP="$D2RQ_ROOT/build"
+D2RQ_ROOT="$(cd ${0%/*} ; echo ${PWD})"
+if [ ! -f "${D2RQ_ROOT}/d2r-server" ] ; then
+  echo "ERROR: ${D2RQ_ROOT} is not the D2RQ root directory"
+  exit 1
+fi
+if [ -d "${D2RQ_ROOT}/build" ] ; then
+  CP="${D2RQ_ROOT}/build"
+fi
 SEP=':'
-if [ "$(uname)" = "Cygwin" ]; then SEP=';'; fi
-for jar in "$D2RQ_ROOT"/lib/*.jar "$D2RQ_ROOT"/lib/*/*.jar
-do
-  if [ ! -e "$jar" ]; then continue; fi
+if [ "$(uname)" = "Cygwin" ] ; then 
+  SEP=';' 
+fi
+for jar in "${D2RQ_ROOT}"/lib/*.jar "${D2RQ_ROOT}"/lib/*/*.jar ; do
+  if [ ! -e "$jar" ] ; then
+    continue
+  fi
   CP="$CP$SEP$jar"
 done
-LOGCONFIG=${LOGCONFIG:-file:$D2RQ_ROOT/etc/log4j.properties}
-exec java -cp "$CP" -Xmx256M "-Dlog4j.configuration=${LOGCONFIG}" d2rq.dump_rdf "$@"
+LOGCONFIG=${LOGCONFIG:-file:$D2RQ_ROOT/etc/logback.xml}
+exec java -cp "$CP" -Xmx1G "-Dlogback.configurationFile=${LOGCONFIG}" d2rq.dump_rdf "$@"

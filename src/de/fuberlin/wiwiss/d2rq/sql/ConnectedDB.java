@@ -8,8 +8,8 @@ import java.sql.Types;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -25,7 +25,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * @author kurtjx (http://github.com/kurtjx)
  */
 public class ConnectedDB {
-	private static final Log log = LogFactory.getLog(ConnectedDB.class);
+	private static final Logger log = LoggerFactory.getLogger(ConnectedDB.class);
 	
 	public static final String MySQL = "MySQL";
 	public static final String PostgreSQL = "PostgreSQL";
@@ -355,8 +355,9 @@ public class ConnectedDB {
 		switch (type.typeId()) {
 			// TODO There are a bunch of others, see http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Types.html
 			case Types.CHAR: return TEXT_COLUMN;
+			case Types.NCHAR: return TEXT_COLUMN;
 			case Types.VARCHAR: return TEXT_COLUMN;
-			case ConnectedDB.SQL_TYPE_NVARCHAR: return TEXT_COLUMN;
+			case Types.NVARCHAR: return TEXT_COLUMN;
 			case Types.LONGVARCHAR: return TEXT_COLUMN;
 			case Types.NUMERIC: return NUMERIC_COLUMN;
 			case Types.DECIMAL: return NUMERIC_COLUMN;
@@ -369,27 +370,42 @@ public class ConnectedDB {
 			case Types.FLOAT: return NUMERIC_COLUMN;
 			case Types.DOUBLE: return NUMERIC_COLUMN;
 			case Types.BOOLEAN: return NUMERIC_COLUMN;
+			case Types.ROWID: return NUMERIC_COLUMN;
 			
 			// TODO: What to do with binary columns?
 			case Types.BINARY: return TEXT_COLUMN;
 			case Types.VARBINARY: return TEXT_COLUMN;
 			case Types.LONGVARBINARY: return TEXT_COLUMN;
 			case Types.CLOB: return TEXT_COLUMN;
-	
+			case Types.NCLOB: return TEXT_COLUMN;
+			case Types.BLOB: return TEXT_COLUMN;
+
 			case Types.DATE: return DATE_COLUMN;
 			case Types.TIME: return DATE_COLUMN;
 			case Types.TIMESTAMP: return TIMESTAMP_COLUMN;
 			
 			default:
-				if ("NVARCHAR2".equals(type.typeName())) {
+				if ("VARCHAR2".equals(type.typeName())) {
 					return TEXT_COLUMN;
 				} else if ("uuid".equals(type.typeName())) {
 					return TEXT_COLUMN;
+				} else if ("NVARCHAR2".equals(type.typeName())) {
+					return TEXT_COLUMN;
+				} else if ("TIMESTAMP(0)".equals(type.typeName())) {
+					return TIMESTAMP_COLUMN;
+				} else if ("TIMESTAMP(6)".equals(type.typeName())) {
+					return TIMESTAMP_COLUMN;
+				} else if ("TIMESTAMP(9)".equals(type.typeName())) {
+					return TIMESTAMP_COLUMN;
+				} else if ("NCHAR".equals(type.typeName())) { // NCHAR somehow not mapped to Type.NCHAR
+					return TEXT_COLUMN;
+				} else if ("NCLOB".equals(type.typeName())) { // NCLOB somehow not mapped to Type.NCLOB
+					return TEXT_COLUMN;
 				} else {
 					throw new D2RQException("Unsupported database type code (" +
-						type + ") or type name ('" + type.typeName() +
+						type.typeId() + ") or type name ('" + type.typeName() +
 						"') for column " + column.qualifiedName());
-				}
+				}				
 		}
 	}
 

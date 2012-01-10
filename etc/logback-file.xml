@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="fileout" class="ch.qos.logback.core.FileAppender">
+    <File>d2rq.log</File>
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss} - %-25c{1} :: %m%n</pattern>
+    </encoder>
+  </appender>
+  <logger name="org.joseki" level="INFO"/>
+  <logger name="com.hp.hpl.jena" level="WARN"/>
+  <logger name="de.fuberlin.wiwiss.d2rq.server.velocity" level="WARN"/>
+  <root level="INFO">
+    <appender-ref ref="fileout"/>
+  </root>
+</configuration>

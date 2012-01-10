@@ -428,12 +428,9 @@ This value may alternatively be specified in the mapping using <a href="#databas
 </ol>
 
 <p><strong>Debugging</strong></p>
-<p>D2RQ uses the <a href="http://jakarta.apache.org/commons/logging/">Apache Commons - Logging</a>
+<p>D2RQ uses the <a href="http://www.slf4j.org/">Simple Logging Facade for Java (SLF4J)</a>
   API for logging. To enable D2RQ debug messages, set the log level for logger
-  <tt>de.fuberlin.wiwiss.d2rq</tt> to <tt>ALL</tt>. An easy way to do this is:
-<pre>org.apache.log4j.Logger.getLogger(
-        "de.fuberlin.wiwiss.d2rq").setLevel(
-                org.apache.log4j.Level.ALL);</pre>
+  <tt>de.fuberlin.wiwiss.d2rq</tt> to <tt>ALL</tt>. 
 
 <h2 id="usingmodel">5.1 Using Jena's Model API</h2>
 

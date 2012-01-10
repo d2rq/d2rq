@@ -5,8 +5,8 @@ import java.net.URLEncoder;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joseki.RDFServer;
 import org.joseki.Registry;
 import org.joseki.Service;
@@ -40,7 +40,7 @@ public class D2RServer {
 	private final static String DEFAULT_BASE_URI = "http://localhost";
 	private final static String DEFAULT_SERVER_NAME = "D2R Server";
 	private final static String SERVER_INSTANCE = "D2RServer.SERVER_INSTANCE";
-	private static final Log log = LogFactory.getLog(D2RServer.class);
+	private static final Logger log = LoggerFactory.getLogger(D2RServer.class);
 	
 	/** d2rq mapping file */
 	private String configFile;
@@ -56,6 +56,9 @@ public class D2RServer {
 	
 	/** base URI from command line */
 	private boolean overrideUseAllOptimizations = false;
+	
+	/** vocabulary stem from command line */
+	private String overrideVocabularyStem = null;
 
 	/** the dataset, auto-reloadable in case of local mapping files */
 	private AutoReloadableDataset dataset;
@@ -92,6 +95,14 @@ public class D2RServer {
 	public void overrideUseAllOptimizations(boolean overrideAllOptimizations) {
 		this.overrideUseAllOptimizations = overrideAllOptimizations;
 	}	
+	
+	public void overrideVocabularyStem(String overrideVocabularyStem) {
+		
+		if (overrideVocabularyStem == null) return ;
+		
+		log.info("using vocabulary stem: " + overrideVocabularyStem);
+		this.overrideVocabularyStem = overrideVocabularyStem + "/";
+	}
 	
 	public void setConfigFile(String configFileURL) {
 		configFile = configFileURL;
@@ -177,6 +188,9 @@ public class D2RServer {
 	}
 	
 	public boolean isVocabularyResource(Resource r) {
+		if (this.overrideVocabularyStem != null) {
+			return r.getURI().startsWith(resourceBaseURI(this.overrideVocabularyStem));
+		}
 		return r.getURI().startsWith(resourceBaseURI(VOCABULARY_STEM));
 	}
 
@@ -259,4 +273,6 @@ public class D2RServer {
 	public ConfigLoader getConfig() {
 		return config;
 	}
+
+
 }

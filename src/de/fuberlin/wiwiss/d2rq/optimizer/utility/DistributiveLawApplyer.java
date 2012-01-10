@@ -116,7 +116,7 @@ public final class DistributiveLawApplyer implements ExprVisitor
 			}
 		}else
 		{
-			// TODO: what is with ExpressionFunctionN
+			this.resultExpr = curExpr; // TODO correct?
 		}
 	}
 
@@ -132,7 +132,7 @@ public final class DistributiveLawApplyer implements ExprVisitor
 
 	
 	public Expr result()
-    { 
-        return resultExpr; 
-    }
+	{ 
+		return resultExpr; 
+	}
 }

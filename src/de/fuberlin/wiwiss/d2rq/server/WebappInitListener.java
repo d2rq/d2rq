@@ -33,6 +33,9 @@ public class WebappInitListener implements ServletContextListener {
 		if (context.getInitParameter("useAllOptimizations") != null) {
 			server.overrideUseAllOptimizations(context.getInitParameter("useAllOptimizations").equalsIgnoreCase("true"));
 		}
+		if (context.getInitParameter("vocabularyStem") != null) {
+			server.overrideVocabularyStem(context.getInitParameter("vocabularyStem"));
+		}
 		server.setConfigFile(configFile);
 		server.start();
 		server.putIntoServletContext(context);

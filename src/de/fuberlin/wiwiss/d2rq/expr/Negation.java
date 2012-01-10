@@ -20,6 +20,10 @@ public class Negation extends Expression {
 		this.base = base;
 	}
 
+	public Expression getBase() {
+		return base;
+	}
+	
 	public Set attributes() {
 		return base.attributes();
 	}
