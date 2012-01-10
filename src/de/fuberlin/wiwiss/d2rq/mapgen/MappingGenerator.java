@@ -88,6 +88,7 @@ public class MappingGenerator {
 	}
 
 	private void connectToDatabase() {
+		log.info("Connecting to {}", this.jdbcURL);
 		// TODO What URI to use here?
 		Database database = new Database(ResourceFactory.createResource());
 		database.setJDBCDSN(this.jdbcURL);
@@ -292,7 +293,7 @@ public class MappingGenerator {
 			iter = this.includePatterns.iterator();
 			while (iter.hasNext()) {
 				p = (Pattern) iter.next();
-				if (p.matcher(tableName.qualifiedName()).matches()) continue ;
+				if (! p.matcher(tableName.qualifiedName()).matches()) continue ;
 				log.info("Accepted table {} due to include pattern {}", 
 					tableName.qualifiedName(), p.pattern());
 				return true;
@@ -303,6 +304,7 @@ public class MappingGenerator {
 	}
 	
 	private void writeDatabase() {
+		log.info("Generating d2rq:Database instance for {}", this.jdbcURL) ;
 		this.out.println(databaseName() + " a d2rq:Database;");
 		this.out.println("\td2rq:jdbcDriver \"" + this.driverClass + "\";");
 		this.out.println("\td2rq:jdbcDSN \"" + this.jdbcURL + "\";");
@@ -567,6 +569,7 @@ public class MappingGenerator {
 	}
 	
 	private void identifyLinkTables() {
+		log.info("Identifying Link Tables") ;
 		Iterator it = this.schema.listTableNames(databaseSchema).iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
@@ -576,6 +579,7 @@ public class MappingGenerator {
 			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED).get(0);
 			this.linkTables.put(tableName, firstForeignKey.table2());
 		}
+		log.info("Found {} Link Tables", String.valueOf(this.linkTables.size())) ;
 	}
 
 	private boolean isInForeignKey(Attribute column, List foreignKeys) {
