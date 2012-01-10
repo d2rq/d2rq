@@ -323,6 +323,7 @@ public class MappingGenerator {
 		}
 		this.out.println("\t.");
 		this.out.println();
+		this.out.flush(); // Let a tail see that we're working
 	}
 	
 	public void writeTable(RelationName tableName) {
@@ -372,6 +373,11 @@ public class MappingGenerator {
 		}
 		this.out.println();
 		createVocabularyClass(tableName);
+		//
+		// Let a tail see that we're working and ensure that every table that did
+		// NOT generate an exception is actually saved...
+		//
+		this.out.flush();
 	}
 
 	public void writeLabelBridge(RelationName tableName) {
