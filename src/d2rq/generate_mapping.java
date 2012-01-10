@@ -36,6 +36,8 @@ public class generate_mapping {
 		ArgDecl vocabAsOutput = new ArgDecl(false, "v", "vocab");
 		ArgDecl outfileArg = new ArgDecl(true, "o", "out", "outfile");
 		ArgDecl baseUriArg = new ArgDecl(true, "b", "base", "baseuri");
+		ArgDecl includePatternsArg = new ArgDecl(true, "i", "include", "includepatterns");
+		ArgDecl excludePatternsArg = new ArgDecl(true, "e", "exclude", "excludepatterns");
 		cmd.add(userArg);
 		cmd.add(passArg);
 		cmd.add(schemaArg);
@@ -43,6 +45,8 @@ public class generate_mapping {
 		cmd.add(vocabAsOutput);
 		cmd.add(outfileArg);
 		cmd.add(baseUriArg);
+		cmd.add(includePatternsArg);
+		cmd.add(excludePatternsArg);
 		cmd.process(args);
 
 		if (cmd.numItems() == 0) {
@@ -64,6 +68,12 @@ public class generate_mapping {
 		}
 		if (cmd.contains(schemaArg)) {
 			gen.setDatabaseSchema(cmd.getArg(schemaArg).getValue());
+		}
+		if (cmd.contains(includePatternsArg)) {
+			gen.setIncludePatterns(cmd.getArg(includePatternsArg).getValue());
+		}
+		if (cmd.contains(excludePatternsArg)) {
+			gen.setIncludePatterns(cmd.getArg(excludePatternsArg).getValue());
 		}
 		if (cmd.contains(driverArg)) {
 			gen.setJDBCDriverClass(cmd.getArg(driverArg).getValue());
@@ -114,6 +124,11 @@ public class generate_mapping {
 		System.err.println("    -v              Generate RDFS+OWL vocabulary instead of mapping file");
 		System.err.println("    -b baseURI      Base URI for generated RDF (optional)");
 		System.err.println("    -o outfile.n3   Output file name (default: stdout)");
+		System.err.println("    -i pattern-file File with a regular expression on each line, matched");
+		System.err.println("                    with schema and table names. Each match means: include.");
+		System.err.println("    -e pattern-file File with a regular expression on each line, matched");
+		System.err.println("                    with schema and table names. Each match means: exclude.");
+		System.err.println("                    Exclude patterns overrule include patterns.");
 		System.err.println();
 	}
 }

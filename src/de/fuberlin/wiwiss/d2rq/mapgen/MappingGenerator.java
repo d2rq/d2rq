@@ -1,21 +1,32 @@
 package de.fuberlin.wiwiss.d2rq.mapgen;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
@@ -35,6 +46,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
+import de.fuberlin.wiwiss.d2rq.map.ClassMap;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
 
@@ -56,6 +68,8 @@ public class MappingGenerator {
 	private String databaseUser = null;
 	private String databasePassword = null;
 	private String databaseSchema = null;
+	private Set includePatterns = null;
+	private Set excludePatterns = null;
 	private PrintWriter out = null;
 	private PrintWriter err = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
@@ -63,6 +77,7 @@ public class MappingGenerator {
 	private SQLSyntax databaseSyntax = null;
 	private Map linkTables = new HashMap(); // name of n:m link table => name of n table
 	private boolean finished = false;
+	private static final Logger log = LoggerFactory.getLogger(MappingGenerator.class);
 
 	public MappingGenerator(String jdbcURL) {
 		this.jdbcURL = jdbcURL;
@@ -105,6 +120,66 @@ public class MappingGenerator {
 
 	public void setDatabaseSchema(String schema) {
 		this.databaseSchema = schema;
+	}
+	
+	/**
+	 * Read the file with the given name line by line, where each line
+	 * represents a regular expression. Return a set with Pattern instances.
+	 * 
+	 * @note No use of templates here as this needs to compile on Java 1.4
+	 * 
+	 * @param file The name of the file containing regular expressions
+	 * @param type The purpose of the regular expressions, either "include" or "exclude"
+	 * @author https://github.com/jgeluk
+	 */
+	private Set readPatterns (String file, String type) {
+		
+		InputStreamReader r;
+		
+		try {
+			r = new FileReader(file);
+		} catch (FileNotFoundException e1) {
+			log.error("File not found: {}", file);
+			return null ;
+		}
+		
+		log.info("Processing {} patterns in {}", type, file) ;
+		
+		BufferedReader br = new BufferedReader(r);
+		String pattern;
+
+		try {
+
+			Set patterns = new HashSet (); 
+
+			while ((pattern = br.readLine()) != null) {
+				Pattern p = Pattern.compile(pattern);
+				patterns.add(p);
+				log.info("Registered {} pattern: {}", type, p.toString());
+			}
+			
+			return patterns ;
+		} catch (IOException e) {
+			log.error("I/O Exception while reading: {}", file);
+		} finally {
+			try {
+				br.close ();
+			} catch (IOException e) {
+				log.error("Could not close: {}", file);
+			}
+		}
+		
+		return null ;
+	}
+	
+	public void setIncludePatterns(String includePatterns) {
+		
+		this.includePatterns = readPatterns(includePatterns, "include") ;
+	}
+
+	public void setExcludePatterns(String excludePatterns) {
+		
+		this.excludePatterns = readPatterns(excludePatterns, "exclude") ;
 	}
 
 	public void setJDBCDriverClass(String driverClassName) {
@@ -173,10 +248,58 @@ public class MappingGenerator {
 		Iterator it = schema.listTableNames(databaseSchema).iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
-			if (!this.schema.isLinkTable(tableName)) {
+			if (shouldWriteTable(tableName)) {
 				writeTable(tableName);
 			}
 		}
+	}
+	
+	/**
+	 * Determine whether the ClassMap & PropertyBridges for the given
+	 * table/relation should be generated.
+	 * 
+	 * @param tableName
+	 * @return true if it should be generated
+	 * @author https://github.com/jgeluk
+	 */
+	private boolean shouldWriteTable (RelationName tableName) {
+
+		Pattern p;
+		Iterator iter;
+
+		if (this.schema.isLinkTable(tableName)) {
+			return false;
+		}
+		
+		//
+		// Process the exclude patterns
+		//
+		if (this.excludePatterns != null) {
+			iter = this.excludePatterns.iterator();
+			while (iter.hasNext()) {
+				p = (Pattern) iter.next();
+				if (! p.matcher(tableName.qualifiedName()).matches()) continue ;
+				log.info("Rejected table {} due to exclude pattern {}", 
+					tableName.qualifiedName(), p.pattern());
+				return false ;
+			}
+		}
+
+		//
+		// Process the include patterns
+		//
+		if (this.includePatterns != null) {
+			iter = this.includePatterns.iterator();
+			while (iter.hasNext()) {
+				p = (Pattern) iter.next();
+				if (p.matcher(tableName.qualifiedName()).matches()) continue ;
+				log.info("Accepted table {} due to include pattern {}", 
+					tableName.qualifiedName(), p.pattern());
+				return true;
+			}
+		}
+
+		return false;
 	}
 	
 	private void writeDatabase() {
@@ -543,4 +666,5 @@ public class MappingGenerator {
 		}
 		return uri.substring(0, uri.length() - 1);
 	}
+
 }
