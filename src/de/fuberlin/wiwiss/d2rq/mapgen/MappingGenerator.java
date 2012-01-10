@@ -324,6 +324,7 @@ public class MappingGenerator {
 	}
 	
 	public void writeTable(RelationName tableName) {
+		log.info("Generating ClassMap {} ", tableName.qualifiedName()) ;
 		this.out.println("# Table " + tableName);
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
