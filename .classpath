@@ -8,7 +8,7 @@
 	<classpathentry kind="lib" path="lib/arq/arq-extra.jar"/>
 	<classpathentry kind="lib" path="lib/arq/icu4j_3_4.jar"/>
 	<classpathentry kind="lib" path="lib/arq/iri.jar"/>
-	<classpathentry kind="lib" path="lib/arq/jena.jar"/>
+	<classpathentry kind="lib" path="lib/arq/jena.jar" sourcepath="C:/Data/I396191/Shared/mavenrepos/com/hp/hpl/jena/jena/2.6.0/jena-2.6.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/arq/jenatest.jar"/>
 	<classpathentry kind="lib" path="lib/arq/json.jar"/>
 	<classpathentry kind="lib" path="lib/arq/junit-4.5.jar"/>
