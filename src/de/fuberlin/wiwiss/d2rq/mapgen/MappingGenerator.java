@@ -266,10 +266,6 @@ public class MappingGenerator {
 	 */
 	private boolean isMatchingTableName (RelationName tableName) {
 
-		if (this.schema.isLinkTable(tableName)) {
-			return false;
-		}
-		
 		//
 		// Process the exclude patterns
 		//
