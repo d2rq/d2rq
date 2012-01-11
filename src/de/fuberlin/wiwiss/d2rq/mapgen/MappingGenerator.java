@@ -258,19 +258,10 @@ public class MappingGenerator {
 	 * @author https://github.com/jgeluk
 	 */
 	private boolean isMatchingTableName (RelationName tableName) {
-		//
-		// Process the exclude patterns
-		//
 		if (isPatternMatch(this.excludePatterns, tableName, false)) {
 			return false;
 		}
-		//
-		// Process the include patterns
-		//
-		if (! isPatternMatch(this.includePatterns, tableName, false)) {
-			return false;
-		}
-		return true;
+		return isPatternMatch(this.includePatterns, tableName, true) ;
 	}
 	
 	/**
@@ -283,7 +274,7 @@ public class MappingGenerator {
 		Pattern p;
 		Iterator iter;
 		if (patterns == null) {
-			return false;
+			return isInclude;
 		}
 		iter = patterns.iterator();
 		while (iter.hasNext()) {
