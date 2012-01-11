@@ -249,7 +249,7 @@ public class MappingGenerator {
 		Iterator it = schema.listTableNames(databaseSchema).iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
-			if (this.schema.isLinkTable(tableName) || ! isMatchingTableName(tableName)) {
+			if (!isMatchingTableName(tableName) || this.schema.isLinkTable(tableName)) {
 				continue;
 			}
 			writeTable(tableName);
@@ -591,7 +591,7 @@ public class MappingGenerator {
 		Iterator it = this.schema.listTableNames(databaseSchema).iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
-			if (!this.schema.isLinkTable(tableName) || ! isMatchingTableName(tableName)) {
+			if (!isMatchingTableName(tableName) || !this.schema.isLinkTable(tableName)) {
 				continue;
 			}
 			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED).get(0);
