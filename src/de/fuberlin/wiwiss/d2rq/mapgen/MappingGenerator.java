@@ -249,9 +249,10 @@ public class MappingGenerator {
 		Iterator it = schema.listTableNames(databaseSchema).iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
-			if (shouldWriteTable(tableName)) {
-				writeTable(tableName);
+			if (this.schema.isLinkTable(tableName) || ! isMatchingTableName(tableName)) {
+				continue;
 			}
+			writeTable(tableName);
 		}
 	}
 	
@@ -263,10 +264,7 @@ public class MappingGenerator {
 	 * @return true if it should be generated
 	 * @author https://github.com/jgeluk
 	 */
-	private boolean shouldWriteTable (RelationName tableName) {
-
-		Pattern p;
-		Iterator iter;
+	private boolean isMatchingTableName (RelationName tableName) {
 
 		if (this.schema.isLinkTable(tableName)) {
 			return false;
@@ -275,31 +273,45 @@ public class MappingGenerator {
 		//
 		// Process the exclude patterns
 		//
-		if (this.excludePatterns != null) {
-			iter = this.excludePatterns.iterator();
-			while (iter.hasNext()) {
-				p = (Pattern) iter.next();
-				if (! p.matcher(tableName.qualifiedName()).matches()) continue ;
-				log.info("Rejected table {} due to exclude pattern {}", 
-					tableName.qualifiedName(), p.pattern());
-				return false ;
-			}
+		if (isPatternMatch(this.excludePatterns, tableName, false)) {
+			return false;
 		}
 
 		//
 		// Process the include patterns
 		//
-		if (this.includePatterns != null) {
-			iter = this.includePatterns.iterator();
-			while (iter.hasNext()) {
-				p = (Pattern) iter.next();
-				if (! p.matcher(tableName.qualifiedName()).matches()) continue ;
-				log.info("Accepted table {} due to include pattern {}", 
-					tableName.qualifiedName(), p.pattern());
-				return true;
-			}
+		if (! isPatternMatch(this.excludePatterns, tableName, false)) {
+			return false;
 		}
 
+		return true;
+	}
+	
+	/**
+	 * Check if the given table name matches with any of the given patterns.
+	 * 
+	 * @return true if match
+	 * @author https://github.com/jgeluk
+	 */
+	private boolean isPatternMatch (Set patterns, RelationName tableName, boolean isInclude) {
+		Pattern p;
+		Iterator iter;
+		if (patterns == null) {
+			return false;
+		}
+		iter = patterns.iterator();
+		while (iter.hasNext()) {
+			p = (Pattern) iter.next();
+			if (! p.matcher(tableName.qualifiedName()).matches()) continue ;
+			if (isInclude) {
+				log.info("Accepted table {} due to include pattern \"{}\"", 
+						tableName.qualifiedName(), p.pattern());
+			} else {
+				log.info("Rejected table {} due to exclude pattern \"{}\"", 
+						tableName.qualifiedName(), p.pattern());
+			}
+			return true;
+		}
 		return false;
 	}
 	
@@ -579,7 +591,7 @@ public class MappingGenerator {
 		Iterator it = this.schema.listTableNames(databaseSchema).iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
-			if (!this.schema.isLinkTable(tableName)) {
+			if (!this.schema.isLinkTable(tableName) || ! isMatchingTableName(tableName)) {
 				continue;
 			}
 			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED).get(0);
