@@ -246,14 +246,7 @@ public class MappingGenerator {
 		writeDatabase();
 		initVocabularyModel();
 		identifyLinkTables();
-		Iterator it = schema.listTableNames(databaseSchema).iterator();
-		while (it.hasNext()) {
-			RelationName tableName = (RelationName) it.next();
-			if (!isMatchingTableName(tableName) || this.schema.isLinkTable(tableName)) {
-				continue;
-			}
-			writeTable(tableName);
-		}
+		writeTables();
 	}
 	
 	/**
@@ -265,21 +258,18 @@ public class MappingGenerator {
 	 * @author https://github.com/jgeluk
 	 */
 	private boolean isMatchingTableName (RelationName tableName) {
-
 		//
 		// Process the exclude patterns
 		//
 		if (isPatternMatch(this.excludePatterns, tableName, false)) {
 			return false;
 		}
-
 		//
 		// Process the include patterns
 		//
-		if (! isPatternMatch(this.excludePatterns, tableName, false)) {
+		if (! isPatternMatch(this.includePatterns, tableName, false)) {
 			return false;
 		}
-
 		return true;
 	}
 	
@@ -333,7 +323,20 @@ public class MappingGenerator {
 		this.out.println();
 		this.out.flush(); // Let a tail see that we're working
 	}
-	
+
+	private void writeTables() {
+		log.info("Generating ClassMaps");
+		Iterator it = schema.listTableNames(databaseSchema).iterator();
+		while (it.hasNext()) {
+			RelationName tableName = (RelationName) it.next();
+			if (!isMatchingTableName(tableName) || this.schema.isLinkTable(tableName)) {
+				continue;
+			}
+			writeTable(tableName);
+		}
+		log.info("Finished generating ClassMaps");
+	}
+
 	public void writeTable(RelationName tableName) {
 		log.info("Generating ClassMap {} ", tableName.qualifiedName()) ;
 		this.out.println("# Table " + tableName);
