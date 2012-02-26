@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -36,10 +35,8 @@ public class ConfigLoader {
 			if (fileName.matches("[a-zA-Z0-9]{2,}:.*") && new URI(fileName).isAbsolute()) {
 				return fileName;
 			}
-			return new File(fileName).getAbsoluteFile().toURL().toExternalForm();
+			return new File(fileName).getAbsoluteFile().toURI().normalize().toString();
 		} catch (URISyntaxException ex) {
-			throw new D2RQException(ex);
-		} catch (MalformedURLException ex) {
 			throw new D2RQException(ex);
 		}
 	}
