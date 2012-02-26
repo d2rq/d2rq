@@ -2,11 +2,12 @@ package de.fuberlin.wiwiss.d2rq.server;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.HashSessionIdManager;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.session.HashSessionIdManager;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * Starts a Jetty instance with D2R Server as the
@@ -59,7 +60,9 @@ public class JettyLauncher {
 		// see http://jira.codehaus.org/browse/JETTY-331 and http://docs.codehaus.org/display/JETTY/Connectors+slow+to+startup
 		jetty.setSessionIdManager(new HashSessionIdManager(new Random()));
 		WebAppContext context = new WebAppContext(jetty, "webapp", "");
-		context.setInitParams(getInitParams());
+		for (Entry<String,String> entry : getInitParams().entrySet()) {
+			context.setInitParameter(entry.getKey(), entry.getValue());
+		}
 		try {
 			jetty.start();
 		} catch (Exception ex) {
@@ -82,8 +85,8 @@ public class JettyLauncher {
 		return DEFAULT_PORT;
 	}
 	
-	private Map getInitParams() {
-		Map result = new HashMap();
+	private Map<String,String> getInitParams() {
+		Map<String,String> result = new HashMap<String,String>();
 		if (cmdLinePort != -1) {
 			result.put("port", Integer.toString(cmdLinePort));
 		}

@@ -3,18 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/arq/arq.jar"/>
-	<classpathentry kind="lib" path="lib/arq/arq-extra.jar"/>
-	<classpathentry kind="lib" path="lib/arq/icu4j_3_4.jar"/>
-	<classpathentry kind="lib" path="lib/arq/iri.jar"/>
-	<classpathentry kind="lib" path="lib/arq/jena.jar"/>
-	<classpathentry kind="lib" path="lib/arq/jenatest.jar"/>
-	<classpathentry kind="lib" path="lib/arq/json.jar"/>
-	<classpathentry kind="lib" path="lib/arq/junit-4.5.jar"/>
-	<classpathentry kind="lib" path="lib/arq/lucene-core-2.3.1.jar"/>
-	<classpathentry kind="lib" path="lib/arq/stax-api-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/arq/wstx-asl-3.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/arq/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/hsqldb-1.8/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/commons-dbcp-1.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/commons-pool-1.4.jar"/>
@@ -23,15 +11,34 @@
 	<classpathentry kind="lib" path="lib/db-drivers/sdb.jar"/>
 	<classpathentry kind="lib" path="lib/logging/commons-logging-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/logging/log4j-1.2.12.jar"/>
-	<classpathentry kind="lib" path="lib/logging/slf4j-api-1.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/logging/slf4j-log4j12-1.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-6.1.10.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-util-6.1.10.jar"/>
-	<classpathentry kind="lib" path="lib/servlet-api-2.5-6.1.10.jar"/>
-	<classpathentry kind="lib" path="lib/joseki/joseki.jar"/>
-	<classpathentry kind="lib" path="lib/velocity/commons-collections-3.2.jar"/>
-	<classpathentry kind="lib" path="lib/velocity/velocity-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/velocity/commons-lang-2.3.jar"/>
-	<classpathentry kind="lib" path="lib/velocity/jakarta-oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/arq-extra.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/arq.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/icu4j_3_4.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/iri.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/jena.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/jenatest.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/json.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/junit-4.5.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/lucene-core-2.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/stax-api-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/wstx-asl-3.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.7/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.1/servlet-api-3.0.jar"/>
+	<classpathentry kind="lib" path="lib/joseki-3.3/joseki.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-1.5/commons-collections-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-1.5/commons-lang-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-1.5/jakarta-oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-1.5/velocity-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-server-8.1.1.v20120215.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-util-8.1.1.v20120215.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-webapp-8.1.1.v20120215.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-servlet-8.1.1.v20120215.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-continuation-8.1.1.v20120215.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-http-8.1.1.v20120215.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-io-8.1.1.v20120215.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-security-8.1.1.v20120215.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-xml-8.1.1.v20120215.jar"/>
+	<classpathentry kind="lib" path="lib/logging/slf4j-api-1.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/logging/slf4j-log4j12-1.6.4.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
