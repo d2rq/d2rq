@@ -25,10 +25,6 @@
 	<classpathentry kind="lib" path="lib/arq-2.7/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.1/servlet-api-3.0.jar"/>
 	<classpathentry kind="lib" path="lib/joseki-3.3/joseki.jar"/>
-	<classpathentry kind="lib" path="lib/velocity-1.5/commons-collections-3.2.jar"/>
-	<classpathentry kind="lib" path="lib/velocity-1.5/commons-lang-2.3.jar"/>
-	<classpathentry kind="lib" path="lib/velocity-1.5/jakarta-oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="lib/velocity-1.5/velocity-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-server-8.1.1.v20120215.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-util-8.1.1.v20120215.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-webapp-8.1.1.v20120215.jar"/>
@@ -40,5 +36,9 @@
 	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-xml-8.1.1.v20120215.jar"/>
 	<classpathentry kind="lib" path="lib/logging/slf4j-api-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/logging/slf4j-log4j12-1.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-1.7/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-1.7/commons-lang-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-1.7/oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-1.7/velocity-1.7.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

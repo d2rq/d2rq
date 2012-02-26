@@ -245,7 +245,7 @@
 			<lib dir="${lib}/logging">
 				<exclude name="commons-logging-*.jar"/>
 			</lib>
-			<lib dir="${lib}/velocity-1.5"/>
+			<lib dir="${lib}/velocity-1.7"/>
 			<lib dir="${lib}/db-drivers"/>
 			<webinf dir="webapp/WEB-INF">
 				<include name="*"/>
