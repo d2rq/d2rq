@@ -86,7 +86,7 @@
 	</target>
 
 	<target name="compile.tests" depends="init.tests,compile">
-		<javac srcdir="${src.tests}" destdir="${build.tests}" debug="on" source="1.4" target="1.4">
+		<javac srcdir="${src.tests}" destdir="${build.tests}" debug="on" source="1.5" target="1.5">
 			<classpath>
 				<path refid="project.class.path"/>
 				<pathelement path="${build}"/>
@@ -230,16 +230,22 @@
 				<include name="**"/>
 				<exclude name="WEB-INF"/>
 			</fileset>
+			<!-- Include subdirectories directly, so that the files are all
+				 in the main lib directory. Otherwise, Tomcat won't pick up the jars.
+				 TODO: Do this by copying the libs to a temp dir with flatten="true" -->
 			<lib dir="${lib}">
-				<exclude name="servlet-api-*.jar"/>
 				<exclude name="*/*"/><!-- Do not recurse into subdirectories -->
 			</lib>
-			<!-- Include subdirectories directly, so that the files are all
-				 in the main lib directory. Otherwise, Tomcat won't pick up the jars -->
-			<lib dir="${lib}/arq"/>
-			<lib dir="${lib}/logging">
-				<exclude name="logging/commons-logging-*.jar"/>
+			<lib dir="${lib}/arq-2.7"/>
+			<lib dir="${lib}/hsqldb-1.8"/>
+			<lib dir="${lib}/jetty-8.1.1">
+				<exclude name="servlet-api-*.jar"/>
 			</lib>
+			<lib dir="${lib}/joseki-3.3"/>
+			<lib dir="${lib}/logging">
+				<exclude name="commons-logging-*.jar"/>
+			</lib>
+			<lib dir="${lib}/velocity-1.5"/>
 			<lib dir="${lib}/db-drivers"/>
 			<webinf dir="webapp/WEB-INF">
 				<include name="*"/>
