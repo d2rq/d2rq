@@ -166,9 +166,8 @@ ul.toc li li { font-weight: normal; }
   RDF applications to access the content of huge, live, non-RDF, legacy databases 
   without having to replicate the whole database into RDF. This document describes 
   the  D2RQ mapping language  for treating non-RDF
-  relational databases as virtual RDF graphs, and the D2RQ Platform that enables applications to access these graphs through the <a href="http://jena.sourceforge.net/" target="_blank">Jena</a> and
-  <a href="http://www.openrdf.org/" target="_blank">Sesame</a>
-  APIs, as well as over the Web via the <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol</a> and as <a href="http://en.wikipedia.org/wiki/Linked_Data">Linked Data</a>.</P>
+  relational databases as virtual RDF graphs, and the D2RQ Platform that enables applications to access these graphs through the <a href="http://jena.sourceforge.net/" target="_blank">Jena</a> API,
+  as well as over the Web via the <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol</a> and as <a href="http://en.wikipedia.org/wiki/Linked_Data">Linked Data</a>.</P>
 
 <h2 id="toc">Table of Contents</h2>
 
@@ -191,25 +190,20 @@ ul.toc li li { font-weight: normal; }
       <li>5.5. <a href="#unit-tests">Running the D2RQ unit tests</a></li>
     </ul>
   </li>
-  <li>6. <a href="#usingSesame">Using D2RQ within Sesame</a>
+  <li>6. <a href="#specification">D2RQ Language Specification</a>
     <ul>
-      <li>6.1. <a href="#usingSesameRepository">Using D2RQ as Sesame repository</a></li>
+      <li>6.1. <a href="#database">d2rq:Database</a></li>
+      <li>6.2. <a href="#classmap">d2rq:ClassMap</a></li>
+      <li>6.3. <a href="#propertybridge">d2rq:PropertyBridge</a></li>
+      <li>6.4. <a href="#translationtable">d2rq:TranslationTable</a></li>
+      <li>6.5. <a href="#configuration">d2rq:Configuration</a></li>
+      <li>6.6. <a href="#servingvocabularies">Serving Vocabulary Classes and Properties</a></li>
+      <li>6.7. <a href="#conditional">Conditional Mappings</a></li>
+      <li>6.8. <a href="#hint">Performance Optimization using Hint Properties</a></li>
+      <li>6.9. <a href="#deprecated">Deprecated Language Constructs</a></li>
     </ul>
   </li>
-  <li>7. <a href="#specification">D2RQ Language Specification</a>
-    <ul>
-      <li>7.1. <a href="#database">d2rq:Database</a></li>
-      <li>7.2. <a href="#classmap">d2rq:ClassMap</a></li>
-      <li>7.3. <a href="#propertybridge">d2rq:PropertyBridge</a></li>
-      <li>7.4. <a href="#translationtable">d2rq:TranslationTable</a></li>
-      <li>7.5. <a href="#configuration">d2rq:Configuration</a></li>
-      <li>7.6. <a href="#servingvocabularies">Serving Vocabulary Classes and Properties</a></li>
-      <li>7.7. <a href="#conditional">Conditional Mappings</a></li>
-      <li>7.8. <a href="#hint">Performance Optimization using Hint Properties</a></li>
-      <li>7.9. <a href="#deprecated">Deprecated Language Constructs</a></li>
-    </ul>
-  </li>
-  <li>8. <a href="#change_log">Change Log</a></li>
+  <li>7. <a href="#change_log">Change Log</a></li>
 </ul>
 <hr />
 
@@ -222,7 +216,7 @@ ul.toc li li { font-weight: normal; }
 <p>Using D2RQ you can:</p>
 <ul>
   <li>query a non-RDF database using <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> or find(spo) queries,</li>
-  <li>access information in a non-RDF database using the <a href="http://jena.sourceforge.net/">Jena</a> API or the <a href="http://www.openrdf.org/">Sesame</a> API,</li>
+  <li>access information in a non-RDF database using the <a href="http://jena.sourceforge.net/">Jena</a> API,</li>
   <li>access the content of the database as <a href="http://en.wikipedia.org/wiki/Linked_Data">Linked Data</a> over the Web,</li>
   <li>ask <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> queries over the <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol</a> against the database. </li>
 </ul>
@@ -234,15 +228,15 @@ ul.toc li li { font-weight: normal; }
   <li>the <strong>D2RQ Mapping Language</strong>, a declarative mapping language 
     for describing the relation between an ontology and an relational data model. 
   </li>
-  <li>the <strong>D2RQ Engine</strong>, a plug-in for the Jena and Sesame Semantic Web toolkits, 
-    which uses the mappings to rewrite Jena and Sesame API calls to SQL queries against the database and passes 
+  <li>the <strong>D2RQ Engine</strong>, a plug-in for the Jena Semantic Web toolkit, 
+    which uses the mappings to rewrite Jena API calls to SQL queries against the database and passes 
     query results  up to the higher layers of the frameworks.</li>
   <li><strong>D2R Server</strong>, an HTTP server that can be used to provide a Linked Data view, a HTML view for debugging and a SPARQL Protocol endpoint over the database.</li>
 </ul>
 
 <p>The figure below depicts the architecture of the D2RQ Platform: </p>
 <p><img src="architecture.png" alt="D2RQ Platform architecture diagram" /></p>
-<p>The <strong>D2RQ Engine</strong> is implemented as a Jena graph, the basic information representation object within the Jena framework. A D2RQ graph wraps a local relational databases into a virtual, read-only RDF graph. It rewrites Jena or Sesame API calls, find() and SPARQL queries to application-data-model specific SQL queries. The result sets of these SQL queries are transformed into RDF triples or SPARQL result sets that are passed up to the higher layers of the framework. The D2RQ Sesame interface wraps the D2RQ Jena graph implementation behind a Sesame RDF source interface. It provides a read-only Sesame repository interface for querying and reasoning with RDF and RDF Schema.</p>
+<p>The <strong>D2RQ Engine</strong> is implemented as a Jena graph, the basic information representation object within the Jena framework. A D2RQ graph wraps a local relational databases into a virtual, read-only RDF graph. It rewrites Jena API calls, find() and SPARQL queries to application-data-model specific SQL queries. The result sets of these SQL queries are transformed into RDF triples or SPARQL result sets that are passed up to the higher layers of the framework.</p>
 <p><strong>D2R Server</strong> is a tool for publishing relational databases on the Semantic Web. It enables RDF and HTML browsers to navigate the content of the database, 
 and allows applications to query the database using the SPARQL query language. D2R Server builds on the D2RQ Engine. For detailed information on how to set up D2R Server please refer to the 
 separate <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/">D2R Server website</a>. </p>
@@ -352,7 +346,7 @@ parameter is omitted, the mapping will be written to standard out.</dd>
 <dd>The base URI is used to construct a vocabulary namespace that will automatically be served
 as Linked Data by D2R Server, following the convention <tt>http://<em>baseURI</em><strong>/vocab/resource/</strong></tt>.  
 This should be the same base URI that is used when invoking the server. Defaults to <tt>http://localhost:2020/</tt>.
-For more information on vocabulary serving, see <a href="#servingvocabularies">section 7.4</a>.</dd>
+For more information on vocabulary serving, see <a href="#servingvocabularies">section 6.4</a>.</dd>
 </dl>
 
 <p>Example invocation for a local MySQL database:</p>
@@ -590,77 +584,7 @@ m.write(System.out);</pre>
 
 
 <HR>
-<h1 id="usingSesame">6. Using D2RQ within Sesame</h1>
-<P>This section describes how the D2RQ Engine is used within the Sesame 1.2 RDF API. 
-</P>
-<P><strong>Download</strong></P>
-<P>You have to download the following packages: </P>
-<ul>
-  <li>Sesame 1.2 can be downloaded form <a href="http://www.openrdf.org/" target="_blank">http://www.openrdf.org/</a></li>
-<li>Jena 2 can be downloaded from <a href="http://jena.sourceforge.net/downloads.html" target="_blank">http://jena.sourceforge.net/downloads.html </a> (The Jena package is neccessary, because the Sesame interface is just providing a wrapper around the Jena D2RQ interface)</li>
-<li>D2RQ can be downloaded from <a href="http://sourceforge.net/projects/d2rq-map/" target="_blank">http://sourceforge.net/projects/d2rq-map/</a></li>
-</ul>
-<P><strong>Installation</strong></P>
-<P> You have to add the &quot;d2rq.jar&quot; and &quot;d2rq-to-sesame.jar&quot; files from the &quot;bin&quot; directory 
-  of the D2RQ distribution together with the Jena 2 and Sesame 1.2 jar files to your classpath. To run D2RQ only the jar files
-  <ul>
-    <li>jena.jar</li>
-    <li>antlr-2.7.5.jar</li>
-    <li>commons-logging.jar</li>
-    <li>concurrent.jar</li>
-    <li>xercesImpl.jar</li>
-    <li>and xml-apis.jar</li>
-  </ul>
-  from the &quot;lib&quot; folder of the Jena 2.3 distribution are required.</P>
-
-<h2><a name="usingSesameRepository" id="usingSesameRepository"></a>6.1 Using D2RQ as Sesame repository</h2>
-<p>The following example shows how RDQL is used to get all information about the paper with the URI
-  "http://www.conference.org/conf02004/paper#Paper1" out of a D2RQRepository.</p>
-  <pre>
-import de.fuberlin.wiwiss.d2rq.sesame.D2RQRepository;
-import de.fuberlin.wiwiss.d2rq.sesame.D2RQSource;
-
-import org.openrdf.model.Value;
-import org.openrdf.sesame.Sesame;
-import org.openrdf.sesame.constants.QueryLanguage;
-import org.openrdf.sesame.query.QueryResultsTable;
-import org.openrdf.sesame.repository.SesameRepository;
-
-...
-
-try{
-    // Initialize repository
-    D2RQSource source = new D2RQSource("file:///where/you/stored/the/d2rq-mapping.n3", "N3");
-    SesameRepository repos = new D2RQRepository("urn:youRepository", source, Sesame.getService());
-
-    // Query the repository
-    String query = "SELECT ?x, ?y WHERE (&lt;http://www.conference.org/conf02004/paper#Paper1&gt;, ?x, ?y)";        
-    QueryResultsTable result = repos.performTableQuery(QueryLanguage.RDQL, query);
-
-    // print the result
-    int rows = result.getRowCount();
-    int cols = result.getColumnCount();
-    for(int i = 0; i &lt; rows; i++){
-        for(int j = 0; j &lt; cols; j++){
-            Value v = result.getValue(i,j);
-            System.out.print(v.toString() + "    ");                  
-        }
-        System.out.println();
-    }
-} catch(Exception e){
-    // catches D2RQException from D2RQSource construcor
-    // catches java.io.IOException,
-    //         org.openrdf.sesame.query.MalformedQueryException,
-    //         org.openrdf.sesame.query.QueryEvaluationException, 
-    //         org.openrdf.sesame.config.AccessDeniedException
-    //         from performTableQuery
-    e.printStackTrace();
-}
-  </pre>
-
-<hr />
-
-<h1 id="specification">7. Language Specification</h1>
+<h1 id="specification">6. Language Specification</h1>
 <P>The D2RQ mapping language is a declarative  language for describing the relation between 
   a relational database schemata and <a href="http://www.w3.org/TR/rdf-schema/">RDFS vocabularies</a> or <a href="http://www.w3.org/TR/owl-features/">OWL</a> ontologies. A D2RQ map is an RDF document. 
 </P>
@@ -721,7 +645,7 @@ map:location a d2rq:PropertyBridge;
 <p>The constructs of the D2RQ mapping language are described in detail below.</p>
 
 
-<h2><a name="database"></a>7.1 Database</h2>
+<h2><a name="database"></a>6.1 Database</h2>
 <P>A <strong>d2rq:Database</strong> defines a JDBC or ODBC connection to a local relational database 
   and specifies the type of the database columns used by D2RQ. A D2RQ map can 
   contain several d2rq:Databases for accessing different local databases.</P>
@@ -842,13 +766,13 @@ map:database a d2rq:Database;
 <p>By default the noop query is "SELECT 1", which may not work with some DBMS.
 For this purpose, the default query may be overridden with a custom noop query.</p>
 
-<h2><a name="classmap"></a>7.2 ClassMap</h2>
+<h2><a name="classmap"></a>6.2 ClassMap</h2>
 <p>A <strong>d2rq:ClassMap</strong> represents a class or a group of similar classes 
   of an OWL ontology or RDFS schema. A class map defines how instances of the 
   class are identified. It is connected to a <tt>d2rq:Database</tt> and has
   a set of <tt>d2rq:PropertyBridges</tt> which attach properties to the instances.</p>
 
-<h3>7.2.1 Resource Identity</h3>
+<h3>6.2.1 Resource Identity</h3>
 
 <p>D2RQ provides four different mechanisms of assigning identifiers to the instances
   in the database:</p>
@@ -1049,7 +973,7 @@ map:PersonsType a d2rq:PropertyBridge ;
   be constructed directly from values of the Persons.Type column, then a <a href="#translationtable">TranslationTable</a> 
   could be used for aligning class names and database values.</P>
   
-<h2><a name="propertybridge"></a>7.3 Property Bridges</h2>
+<h2><a name="propertybridge"></a>6.3 Property Bridges</h2>
 
 <p>Property Bridges relate database table columns to RDF properties. They are 
   used to attach properties to the RDF resources created by a class map.
@@ -1372,7 +1296,7 @@ map:seeAlsoBridge a d2rq:PropertyBridge;
 <p>This adds an <tt>rdfs:seeAlso</tt> statement with a fixed URL object
   to every instance of the <tt>map:PersonsClassMap</tt> class map.</p>
 
-<h2><a name="translationtable"></a>7.4 Translation Tables</h2>
+<h2><a name="translationtable"></a>6.4 Translation Tables</h2>
 <p>A <strong>d2rq:TranslationTable</strong> is an additional layer between the 
   database and the RDF world. It translates back and forth between values taken 
   from the database and RDF URIs or literals. A translation table can be attached 
@@ -1401,7 +1325,7 @@ map:seeAlsoBridge a d2rq:PropertyBridge;
   </tr>
 </table>
 
-<h3><a name="translation"></a>7.4.1 Translation</h3>
+<h3><a name="translation"></a>6.4.1 Translation</h3>
 <p>A <strong>d2rq:Translation</strong> is a single entry in a
   d2rq:TranslationTable.
   
@@ -1448,7 +1372,7 @@ map:ColorTable a d2rq:TranslationTable;
   Thus, the translation will create URI nodes. If it used d2rq:column,
   then literals would be created.</p>
 
-<h2><a name="configuration"></a>7.5 Configuration</h2>
+<h2><a name="configuration"></a>6.5 Configuration</h2>
 <p>A <strong>d2rq:Configuration</strong> controls global behaviour of D2RQ. It is generally not required if the defaults are satisfactory.
 <p><strong>Properties</strong>
 <table width="100%" border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC">
@@ -1466,7 +1390,7 @@ map:ColorTable a d2rq:TranslationTable;
 <pre>map:Configuration a d2rq:Configuration;
 	d2rq:useAllOptimizations true.</pre>
 
-<h2><a name="conditional" id="conditional"></a>7.6 Conditional Mappings</h2>
+<h2><a name="conditional" id="conditional"></a>6.6 Conditional Mappings</h2>
 <p>Sometimes only certain information from a database should be accessible, because 
   parts of the database might be confidential or outdated. Using <strong>d2rq:condition</strong> 
   you can specify conditions, which must be satisfied by all accessible data.</p>
@@ -1527,7 +1451,7 @@ map:secondaryTopic a d2rq:PropertyBridge;
             d2rq:condition "Rel_Paper_Topic.RelationType = 2".</pre>
 
 
-<h2><a name="servingvocabularies"></a>7.7 Serving Vocabulary Classes and Properties</h2>
+<h2><a name="servingvocabularies"></a>6.7 Serving Vocabulary Classes and Properties</h2>
 
 <p>In the spirit of <a href="http://www.w3.org/DesignIssues/LinkedData.html">Linked Data</a>, the URIs of classes and properties should be dereferenceable.</p>
 
@@ -1540,7 +1464,7 @@ map:secondaryTopic a d2rq:PropertyBridge;
 <p>For further details, please refer to the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/#vocabulary">D2R documentation</a>.</p>
  
 
-<h3><a name="vocab-label-comment"></a>7.7.1 Labels and Comments for Vocabulary Terms</h3>
+<h3><a name="vocab-label-comment"></a>6.7.1 Labels and Comments for Vocabulary Terms</h3>
 
 <p>An <code>rdfs:label</code> can be added to a term URI by ading <code>d2rq:classDefinitionLabel</code> or <code>d2rq:propertyDefinitionLabel</code> to the class map or property map.</p>
 
@@ -1549,7 +1473,7 @@ map:secondaryTopic a d2rq:PropertyBridge;
 <p>Other properties can be added by creating a <code>d2rq:AdditionalProperty</code> construct, described below, and by linking to it from the class map or property map using <code>d2rq:additionalClassDefinitionProperty</code> and <code>d2rq:additionalPropertyDefinitionProperty</code>.</p>
 
 
-<h3><a name="additionalproperty"></a>7.7.2 AdditionalProperty</h3>
+<h3><a name="additionalproperty"></a>6.7.2 AdditionalProperty</h3>
 
 <p>A <strong>d2rq:AdditionalProperty</strong> construct can be used to add a fixed statement 
   to all class definitions of a class map, or to all property definitions of a property bridge.
@@ -1598,7 +1522,7 @@ map:PaperTitleEquivalence a d2rq:AdditionalProperty;
 <p>This adds an <tt>owl:equivalentProperty</tt> statement with the fixed object <tt>dc:title</tt> to every related property definition.</p>
 
 
-<h3><a name="vocabulary-serving"></a>7.7.3 Controlling vocabulary serving</h3>
+<h3><a name="vocabulary-serving"></a>6.7.3 Controlling vocabulary serving</h3>
 <p>Vocabulary serving is enabled by default. In order to deactivate it, a <a href="#configuration"><tt>d2rq:Configuration</tt></a> block
 with the property <tt>d2rq:serveVocabulary</tt> set to <tt>false</tt> must be created:
 
@@ -1606,7 +1530,7 @@ with the property <tt>d2rq:serveVocabulary</tt> set to <tt>false</tt> must be cr
   <pre>map:Configuration a d2rq:Configuration;
 	d2rq:serveVocabulary false.</pre>
 
-<h2><a name="hint" id="hint"></a>7.8 Performance Optimization using Hint Properties</h2>
+<h2><a name="hint" id="hint"></a>6.8 Performance Optimization using Hint Properties</h2>
 <p>This section covers hint properties that can be added to property bridges in 
   order to speed up queries: d2rq:valueMaxLength, d2rq:valueRegex and d2rq:valueContains.</p>
 
@@ -1651,13 +1575,13 @@ with the property <tt>d2rq:serveVocabulary</tt> set to <tt>false</tt> must be cr
   or a <a href="#translationtable">translation table</a> with a custom Java class 
   that returns <tt>null</tt> for unwanted database values.</p>
 
-<h2 id="deprecated">7.9 Deprecated Language Constructs</h2>
+<h2 id="deprecated">6.9 Deprecated Language Constructs</h2>
 
 <p>This section lists several language constructs from older versions
 of the D2RQ mapping language that have been replaced by better
 alternatives and should no longer be used.</p>
 
-<h3 id="datatype-object">7.9.1 <tt>d2rq:DatatypePropertyBridge</tt> and <tt>d2rq:ObjectPropertyBridge</tt></h3>
+<h3 id="datatype-object">6.9.1 <tt>d2rq:DatatypePropertyBridge</tt> and <tt>d2rq:ObjectPropertyBridge</tt></h3>
 
 <p>Older versions of the language used two different classes to
 distinguish between property bridges that produce literals, and
@@ -1670,7 +1594,7 @@ is made by using an appropriate property on the bridge declaration:
 <tt>d2rq:uriColumn</tt>, <tt>d2rq:uriPattern</tt> and
 <tt>d2rq:bNodeIdColumns</tt> for resources.</dd></p>
 
-<h3 id="additionalproperty_deprecated"><a name="additionalproperty_deprecated"></a>7.9.2 d2rq:additionalProperty</h3>
+<h3 id="additionalproperty_deprecated"><a name="additionalproperty_deprecated"></a>6.9.2 d2rq:additionalProperty</h3>
 <p>Up until D2RQ 0.5.1, the <tt>d2rq:AdditionalProperty</tt> construct could be used
   to add a constant property-value pairs to all instances of a class map. An example
   is shown below:</p>
@@ -1688,11 +1612,11 @@ map:SeeAlsoStatement a d2rq:AdditionalProperty;
   shown in <a href="#exconstantvalue">this example</a>.
 </p>
 <p><tt>d2rq:AdditionalProperty</tt> constructs are still used with <tt>d2rq:additionalClassDefinitionProperty</tt>
-and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalproperty">see section 7.4.1</a>).
+and <tt>d2rq:additionalPropertyDefinitionProperty</tt> (<a href="#additionalproperty">see section 6.4.1</a>).
 
 <hr />
 
-<h1 id="change_log">8. Change Log</h1>
+<h1 id="change_log">7. Change Log</h1>
 <ul>
   <li>2009-08-10: Updated for D2RQ v0.7 and D2R Server v0.7.</li>
   <li>2009-02-19: Updated for D2RQ v0.6 and D2R Server v0.6.</li>
