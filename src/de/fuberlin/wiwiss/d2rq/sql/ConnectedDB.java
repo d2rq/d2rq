@@ -80,6 +80,7 @@ public class ConnectedDB {
 	private Map zerofillCache = new HashMap(); // Attribute => Boolean
 	private Map uniqueIndexCache = new HashMap(); // RelationName => String => List of Strings
 	private final Properties connectionProperties;
+
 	private class KeepAliveAgent extends Thread {
 		private final int interval;
 		private final String query;
@@ -369,7 +370,7 @@ public class ConnectedDB {
 			case Types.FLOAT: return NUMERIC_COLUMN;
 			case Types.DOUBLE: return NUMERIC_COLUMN;
 			case Types.BOOLEAN: return NUMERIC_COLUMN;
-			
+		
 			// TODO: What to do with binary columns?
 			case Types.BINARY: return TEXT_COLUMN;
 			case Types.VARBINARY: return TEXT_COLUMN;
@@ -466,10 +467,10 @@ public class ConnectedDB {
 				}
 			}
 		} else if (columnType == ConnectedDB.DATE_COLUMN) {
-			// TODO: Acces requires "#2006-09-15#"
+			// TODO: MS Access requires "#2006-09-15#"
 			return "DATE '" + value + "'";
 		} else if (columnType == ConnectedDB.TIMESTAMP_COLUMN) {
-			// TODO: Acces requires "#2006-09-15 23:59:00#" (?)
+			// TODO: MS Access requires "#2006-09-15 23:59:00#" (?)
 			return "TIMESTAMP '" + value + "'";
 		}
 		return singleQuote(value);
