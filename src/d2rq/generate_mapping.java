@@ -72,6 +72,7 @@ public class generate_mapping {
 		if (cmd.contains(outfileArg)) {
 			outputFile = new File(cmd.getArg(outfileArg).getValue());
 			mapUriEnding = outputFile.getName();
+			gen.setSilent(false);	// We can print progress info if writing to file
 		} else {
 			mapUriEnding = "stdout";
 		}

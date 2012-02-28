@@ -43,6 +43,10 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
  * Result is available as a high-quality Turtle serialization, or
  * as a parsed model.
  * 
+ * TODO: This does some progress logging to stdout if writing to
+ *       a file. This should perhaps be done via log.info(É) with
+ *       an appropriately configured log writer.
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class MappingGenerator {
@@ -62,7 +66,8 @@ public class MappingGenerator {
 	private SQLSyntax databaseSyntax = null;
 	private Map linkTables = new HashMap(); // name of n:m link table => name of n table
 	private boolean finished = false;
-
+	private boolean silent = true;
+	
 	public MappingGenerator(String jdbcURL) {
 		this.jdbcURL = jdbcURL;
 		this.mapNamespaceURI = "#";
@@ -72,6 +77,7 @@ public class MappingGenerator {
 	}
 
 	private void connectToDatabase() {
+		if (!silent) System.out.println("Connecting to " + this.jdbcURL);
 		// TODO What URI to use here?
 		Database database = new Database(ResourceFactory.createResource());
 		database.setJDBCDSN(this.jdbcURL);
@@ -80,6 +86,13 @@ public class MappingGenerator {
 		database.setPassword(this.databasePassword);
 		this.schema = database.connectedDB().schemaInspector();
 		this.databaseSyntax = database.connectedDB().getSyntax();
+	}
+	
+	/**
+	 * @param silent If <tt>true</tt> (default), no progress info will be logged.
+	 */
+	public void setSilent(boolean silent) {
+		this.silent = silent;
 	}
 	
 	public void setMapNamespaceURI(String uri) {
@@ -120,6 +133,7 @@ public class MappingGenerator {
 			
 			if (e != null)
 				e.flush();
+			System.out.println("Done!");
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -179,6 +193,7 @@ public class MappingGenerator {
 	}
 	
 	private void writeDatabase() {
+		if (!silent) System.out.println("Generating d2rq:Database instance");
 		this.out.println(databaseName() + " a d2rq:Database;");
 		this.out.println("\td2rq:jdbcDriver \"" + this.driverClass + "\";");
 		this.out.println("\td2rq:jdbcDSN \"" + this.jdbcURL + "\";");
@@ -197,9 +212,11 @@ public class MappingGenerator {
 		}
 		this.out.println("\t.");
 		this.out.println();
+		this.out.flush(); // Let a tail see that we're working
 	}
 	
 	public void writeTable(RelationName tableName) {
+		if (!silent) System.out.println("Generating d2rq:ClassMap instance for table " + tableName.qualifiedName()) ;
 		this.out.println("# Table " + tableName);
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
@@ -245,6 +262,11 @@ public class MappingGenerator {
 		}
 		this.out.println();
 		createVocabularyClass(tableName);
+		//
+		// Let a tail see that we're working and ensure that every table that did
+		// NOT generate an exception is actually saved...
+		//
+		this.out.flush();
 	}
 
 	public void writeLabelBridge(RelationName tableName) {
@@ -442,6 +464,7 @@ public class MappingGenerator {
 	}
 	
 	private void identifyLinkTables() {
+		if (!silent) System.out.println("Identifying link tables") ;
 		Iterator it = this.schema.listTableNames(databaseSchema).iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
@@ -451,6 +474,7 @@ public class MappingGenerator {
 			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED).get(0);
 			this.linkTables.put(tableName, firstForeignKey.table2());
 		}
+		if (!silent) System.out.println("Found " + String.valueOf(this.linkTables.size()) + " link tables") ;
 	}
 
 	private boolean isInForeignKey(Attribute column, List foreignKeys) {
