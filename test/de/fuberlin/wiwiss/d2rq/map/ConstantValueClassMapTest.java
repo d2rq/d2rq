@@ -65,6 +65,10 @@ public class ConstantValueClassMapTest extends TestCase {
 	
 	public void testValidate()
 	{
-		collection.validate();
+		try {
+			collection.validate();
+		} catch (D2RQException e) {
+			fail("Should validate without exceptions");
+		}
 	}
 }
