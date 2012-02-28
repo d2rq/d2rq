@@ -11,10 +11,10 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 
 /**
- * Functional tests that exercise a ModelD2RQ by running RDQL queries against it. 
+ * Functional tests that exercise a ModelD2RQ by running SPARQL queries against it. 
  * For notes on running the tests, see {@link AllTests}.
  * 
- * Each test method runs one RDQL query and automatically compares the actual
+ * Each test method runs one SPARQL query and automatically compares the actual
  * results to the expected results. For some tests, only the number of returned triples
  * is checked. For others, the returned values are compared against expected values.
  * 
