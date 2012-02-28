@@ -238,9 +238,7 @@
 				<exclude name="servlet-api-*.jar"/>
 			</lib>
 			<lib dir="${lib}/joseki-3.4.4"/>
-			<lib dir="${lib}/logging">
-				<exclude name="commons-logging-*.jar"/>
-			</lib>
+			<lib dir="${lib}/logging"/>
 			<lib dir="${lib}/velocity-1.7"/>
 			<lib dir="${lib}/db-drivers"/>
 			<webinf dir="webapp/WEB-INF">
