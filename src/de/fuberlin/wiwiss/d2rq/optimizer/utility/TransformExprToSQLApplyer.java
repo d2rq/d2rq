@@ -630,7 +630,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 	
 	/*
-	 * See http://www.w3.org/TR/rdf-sparql-query § 11.4.2
+	 * See http://www.w3.org/TR/rdf-sparql-query paragraph 11.4.2
 	 * 
 	 * "(ISIRI) Returns true if term is an IRI. Returns false otherwise."
 	 * 
@@ -660,7 +660,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 	
 	/*
-	 * See http://www.w3.org/TR/rdf-sparql-query § 11.4.3
+	 * See http://www.w3.org/TR/rdf-sparql-query paragraph 11.4.3
 	 * 
 	 * "(ISBLANK) Returns true if term is a blank node. Returns false otherwise."
 	 * 
@@ -690,7 +690,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 	
 	/*
-	 * See http://www.w3.org/TR/rdf-sparql-query § 11.4.4
+	 * See http://www.w3.org/TR/rdf-sparql-query paragraph 11.4.4
 	 * 
 	 * "(ISLITERAL) Returns true if term is a literal. Returns false otherwise."
 	 * 
@@ -723,7 +723,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 	
 	/*
-	 * See http://www.w3.org/TR/rdf-sparql-query § 11.4.4
+	 * See http://www.w3.org/TR/rdf-sparql-query paragraph 11.4.4
 	 * 
 	 * "(STR) Returns the lexical form of a literal; returns the codepoint representation of an IRI."
 	 * 
@@ -759,7 +759,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 	
 	/*
-	 * See http://www.w3.org/TR/rdf-sparql-query § 11.4.6
+	 * See http://www.w3.org/TR/rdf-sparql-query paragraph 11.4.6
 	 * 
 	 * "(LANG) Returns the language tag of ltrl, if it has one. It returns "" if ltrl has no language tag."
 	 * @see http://www.w3.org/TR/rdf-sparql-query 
@@ -807,7 +807,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 	
 	/*
-	 * See http://www.w3.org/TR/rdf-sparql-query § 11.4.7
+	 * See http://www.w3.org/TR/rdf-sparql-query paragraph 11.4.7
 	 * 
 	 * "(DATATYPE) Returns the datatype IRI of typedLit; returns xsd:string if the parameter is a simple literal."
 	 * 
@@ -861,7 +861,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 	
 	/*
-	 * See http://www.w3.org/TR/rdf-sparql-query § 11.4.11
+	 * See http://www.w3.org/TR/rdf-sparql-query paragraph 11.4.11
 	 * 
 	 * "(SAMETERM) Returns TRUE if term1 and term2 are the same RDF term as defined
 	 * in Resource Description Framework (RDF): Concepts and Abstract Syntax [CONCEPTS]; returns FALSE otherwise."
@@ -877,7 +877,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 	
 	/*
-	 * See http://www.w3.org/TR/rdf-sparql-query § 11.4.12
+	 * See http://www.w3.org/TR/rdf-sparql-query paragraph 11.4.12
 	 * 
 	 * "(LANGMATCHES) returns true if language-tag (first argument) matches language-range (second argument)
 	 * per the basic filtering scheme defined in [RFC4647] section 3.3.1. language-range is a basic language
