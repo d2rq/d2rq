@@ -5,7 +5,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -115,7 +121,7 @@ public class ConnectedDB {
 				}
 			}
 			
-			log.info("Keep alive agent terminated.");
+			log.debug("Keep alive agent terminated.");
 		}
 		
 		public void shutdown() {
@@ -167,7 +173,7 @@ public class ConnectedDB {
 			this.keepAliveAgent = new KeepAliveAgent(interval, query);
 			this.keepAliveAgent.start();
 			Runtime.getRuntime().addShutdownHook(shutdownHook);
-			log.info("Keep alive agent is enabled (interval: " + interval + " seconds, noop query: '" + query + "').");
+			log.debug("Keep alive agent is enabled (interval: " + interval + " seconds, noop query: '" + query + "').");
 		} else
 			this.keepAliveAgent = null;
 	}
