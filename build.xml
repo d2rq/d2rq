@@ -86,11 +86,15 @@
 	</target>
 
 	<target name="compile.tests" depends="init.tests,compile">
-		<javac srcdir="${src.tests}" destdir="${build.tests}" debug="on" source="1.5" target="1.5">
+		<javac srcdir="${src.tests}"
+				destdir="${build.tests}"
+				debug="on"
+				source="1.5"
+				target="1.5"
+				includeAntRuntime="false">
 			<classpath>
 				<path refid="project.class.path"/>
 				<pathelement path="${build}"/>
-				<pathelement path="${junit.jar}"/>
 			</classpath>
 		</javac>
 	</target>
@@ -100,6 +104,7 @@
 			<fileset dir="${src.tests}/">
 				<include name="${project.path}/**/*.n3"/>
 			</fileset>
+			<fileset file="etc/log4j.properties"/>
 		</copy>
 	</target>
 
@@ -109,7 +114,6 @@
 				<path refid="project.class.path"/>
 				<pathelement path="${build}"/>
 				<pathelement path="${build.tests}"/>
-				<pathelement path="${junit.jar}"/>
 			</classpath>
 		</java>
 	</target>
@@ -131,9 +135,9 @@
 				breakiterator="yes"
 				windowtitle="D2RQ"
 				doctitle="D2RQ">
-			<link href="http://jena.sourceforge.net/javadoc/"/>
-			<link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
-			<link href="http://jena.sourceforge.net/ARQ/javadoc/"/>
+			<link href="http://incubator.apache.org/jena/documentation/javadoc/jena/"/>
+			<link href="http://docs.oracle.com/javase/1.5.0/docs/api/"/>
+			<link href="http://incubator.apache.org/jena/documentation/javadoc/arq/"/>
 		</javadoc>
 	</target>
 

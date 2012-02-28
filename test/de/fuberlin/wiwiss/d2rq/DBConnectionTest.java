@@ -15,6 +15,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * @author jgarbers
@@ -26,7 +27,8 @@ public class DBConnectionTest extends TestCase {
 
 	private Collection databases;
 	private Database firstDatabase;
-
+	private ConnectedDB cdb;
+	
 	private String simplestQuery;
 	private String mediumQuery;
 	private String complexQuery;
@@ -46,13 +48,15 @@ public class DBConnectionTest extends TestCase {
 
 	protected void tearDown() throws Exception {
 		mapModel.close();
+		if (cdb != null) cdb.close();
 	}
 
 	public void testConnections() throws SQLException {
 		Iterator it = databases.iterator();
 		while (it.hasNext()) {
 			Database db = (Database) it.next();
-			Connection c = db.connectedDB().connection();
+			cdb = db.connectedDB();
+			Connection c = cdb.connection();
 			String result = performQuery(c, simplestQuery); // 
 			assertEquals(result, "1");
 		}
@@ -131,7 +135,8 @@ public class DBConnectionTest extends TestCase {
 	public void testDistinct() throws SQLException {
 	    // there seems to be a problem with MSAccess databases
 	    // when using the DISTINCT keyword, Strings are truncated to 256 chars
-	    Connection c = firstDatabase.connectedDB().connection(); 
+		cdb = firstDatabase.connectedDB();
+		Connection c = cdb.connection();
 	    //Connection c=manuallyConfiguredConnection();
 		String nonDistinct = "SELECT T0_Papers.Abstract FROM papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
 		String distinct = "SELECT DISTINCT T0_Papers.Abstract FROM papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
@@ -152,7 +157,8 @@ public class DBConnectionTest extends TestCase {
 	// fails with wrong MSAccess Iswc DB (doc/manual/ISWC.mdb revision < 1.5)
 	// succeeds with revision 1.5
 	public void testMedium() throws SQLException {
-	     Connection c = firstDatabase.connectedDB().connection(); 
+		cdb = firstDatabase.connectedDB();
+		Connection c = cdb.connection();
 	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 		String query = mediumQuery;
 		String query_results = performQuery(c, query);
@@ -162,7 +168,8 @@ public class DBConnectionTest extends TestCase {
 
 	// fails with MSAccess
 	public void testLongComplexSQLQuery() throws SQLException {
-	     Connection c = firstDatabase.connectedDB().connection(); 
+		cdb = firstDatabase.connectedDB();
+		Connection c = cdb.connection();
 	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 		String query = complexQuery;
 		try {

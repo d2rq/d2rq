@@ -89,7 +89,7 @@ public class VelocityWrapper {
 		response.addHeader("Cache-Control", "no-cache");
 		response.addHeader("Pragma", "no-cache");
 		try {
-			engine.mergeTemplate(templateName, context, response.getWriter());
+			engine.mergeTemplate(templateName, "utf-8", context, response.getWriter());
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
