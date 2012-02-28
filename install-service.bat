@@ -64,7 +64,7 @@ set CP="%D2RQ_ROOT%\build"
 call :findjars "%D2RQ_ROOT%\lib"
 set LOGCONFIG=%D2RQ_ROOT%/etc/log4j.properties
 rem "-Dlog4j.configuration=%LOGCONFIG%" 
-set JAVA_OPTIONS=-Djava.class.path=%CP% -Xms64M -Xmx256M
+set JAVA_OPTIONS=-Djava.class.path=%CP% -Xms64M -Xmx1G
 "%D2RQ_ROOT%\etc\D2Rservice.exe" -install %1 "%JVM_DLL%" %JAVA_OPTIONS% -start d2r.server -params %2 %3 %4 %5 %6 %7 %8 %9 -out "%D2RQ_ROOT%\stdout.log" -err "%D2RQ_ROOT%\stderr.log" -current "%D2RQ_ROOT%" -append -description "D2R Server"
 echo.
 IF ERRORLEVEL 1 EXIT /B
