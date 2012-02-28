@@ -7,15 +7,12 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.csv.TranslationTableParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
@@ -73,7 +70,7 @@ public class ClassMap extends ResourceMap {
 					" has no d2rq:PropertyBridges and no d2rq:class",
 					D2RQException.CLASSMAP_NO_PROPERTYBRIDGES);
 		}
-		if (this.constantValue != null && !this.constantValue.isLiteral()) {
+		if (this.constantValue != null && this.constantValue.isLiteral()) {
 			throw new D2RQException(
 					"d2rq:constantValue for class map " + toString() + " must be a URI or blank node", 
 					D2RQException.CLASSMAP_INVALID_CONSTANTVALUE);
@@ -120,6 +117,6 @@ public class ClassMap extends ResourceMap {
 	}
 	
 	public String toString() {
-		return "d2rq:ClassMap " + PrettyPrinter.toString(this.resource);		
+		return "d2rq:ClassMap " + PrettyPrinter.toString(this.resource);
 	}
 }
