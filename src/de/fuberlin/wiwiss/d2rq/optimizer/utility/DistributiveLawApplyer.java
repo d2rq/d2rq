@@ -4,9 +4,13 @@ import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
 import com.hp.hpl.jena.sparql.expr.E_LogicalNot;
 import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
 import com.hp.hpl.jena.sparql.expr.Expr;
-import com.hp.hpl.jena.sparql.expr.ExprFunction;
+import com.hp.hpl.jena.sparql.expr.ExprAggregator;
+import com.hp.hpl.jena.sparql.expr.ExprFunction0;
 import com.hp.hpl.jena.sparql.expr.ExprFunction1;
 import com.hp.hpl.jena.sparql.expr.ExprFunction2;
+import com.hp.hpl.jena.sparql.expr.ExprFunction3;
+import com.hp.hpl.jena.sparql.expr.ExprFunctionN;
+import com.hp.hpl.jena.sparql.expr.ExprFunctionOp;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.ExprVisitor;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
@@ -29,20 +33,41 @@ public final class DistributiveLawApplyer implements ExprVisitor
 	{		
 	}
 
+	@Override
 	public void finishVisit() 
 	{
 	}
 
+	@Override
 	public void startVisit() 
 	{
 	}
 
-	public void visit(ExprFunction curExpr) 
+	@Override
+	public void visit(NodeValue nv) 
 	{
-		Expr subExpr, leftExpr, rightExpr;
-		Expr leftLeftExpr, rightLeftExpr, leftRightExpr, rightRightExpr;
-		Expr newAndExpr, newOrExpr1, newOrExpr2;
-		
+		this.resultExpr = nv;
+	}
+
+	@Override
+	public void visit(ExprVar nv) 
+	{
+		this.resultExpr = nv;
+	}
+
+	public Expr result()
+    { 
+        return resultExpr; 
+    }
+
+	@Override
+	public void visit(ExprFunction0 func) {
+		this.resultExpr = func;
+	}
+
+	@Override
+	public void visit(ExprFunction1 curExpr) {
+		Expr subExpr;
 		if (curExpr instanceof E_LogicalNot)
 		{
 			subExpr = curExpr;
@@ -50,89 +75,95 @@ public final class DistributiveLawApplyer implements ExprVisitor
 			this.resultExpr = curExpr;
 			((ExprFunction1) subExpr).getArg().visit(this);
 			this.resultExpr = new E_LogicalNot(this.resultExpr);
-			
-		}else if (curExpr instanceof ExprFunction2)
-		{
-			if (curExpr instanceof E_LogicalOr || curExpr instanceof E_LogicalAnd)
-			{
-				// step down
-				leftExpr = ((ExprFunction2)curExpr).getArg1();
-				leftExpr.visit(this);
-				leftExpr = this.resultExpr;
-
-				// step down
-				rightExpr = ((ExprFunction2)curExpr).getArg2();
-				rightExpr.visit(this);
-				rightExpr = this.resultExpr;
-				
-				if (curExpr instanceof E_LogicalOr)
-				{
-					if (!(leftExpr instanceof E_LogicalAnd) && !(rightExpr instanceof E_LogicalAnd))
-					{
-						// no distributive law - normal or
-						this.resultExpr = new E_LogicalOr(leftExpr, rightExpr);
-					}else
-					{
-						// criterion for distributive law - first OR, then AND
-						
-						if (leftExpr instanceof E_LogicalAnd)
-						{
-							leftLeftExpr = ((E_LogicalAnd)leftExpr).getArg1();
-							rightLeftExpr = ((E_LogicalAnd)leftExpr).getArg2();
-							
-							// OR AND will become to AND OR OR
-							newOrExpr1 = new E_LogicalOr(leftLeftExpr, rightExpr);
-							newOrExpr2 = new E_LogicalOr(rightLeftExpr, rightExpr);
-							newAndExpr = new E_LogicalAnd(newOrExpr1, newOrExpr2);
-							
-							this.resultExpr = newAndExpr;
-							// apply for subexpression again
-							newAndExpr.visit(this);
-						}
-						
-						if (rightExpr instanceof E_LogicalAnd)
-						{
-							leftRightExpr = ((E_LogicalAnd)rightExpr).getArg1();
-							rightRightExpr = ((E_LogicalAnd)rightExpr).getArg2();
-						
-							// OR AND will become to AND OR OR
-							newOrExpr1 = new E_LogicalOr(leftExpr, leftRightExpr);
-							newOrExpr2 = new E_LogicalOr(leftExpr, rightRightExpr);
-							newAndExpr = new E_LogicalAnd(newOrExpr1, newOrExpr2);
-						
-							this.resultExpr = newAndExpr;
-							// apply for subexpression again
-							newAndExpr.visit(this);
-						}
-					}					
-				}else
-				{
-					// E_LogicalAnd
-					this.resultExpr = new E_LogicalAnd(leftExpr, rightExpr);
-				}				
-			}else
-			{
-				this.resultExpr = curExpr;
-			}
-		}else
-		{
-			// TODO: what is with ExpressionFunctionN
 		}
 	}
 
-	public void visit(NodeValue nv) 
-	{
-		this.resultExpr = nv;
+	@Override
+	public void visit(ExprFunction2 curExpr) {
+		Expr leftExpr, rightExpr;
+		Expr leftLeftExpr, rightLeftExpr, leftRightExpr, rightRightExpr;
+		Expr newAndExpr, newOrExpr1, newOrExpr2;
+
+		if (curExpr instanceof E_LogicalOr || curExpr instanceof E_LogicalAnd)
+		{
+			// step down
+			leftExpr = ((ExprFunction2)curExpr).getArg1();
+			leftExpr.visit(this);
+			leftExpr = this.resultExpr;
+
+			// step down
+			rightExpr = ((ExprFunction2)curExpr).getArg2();
+			rightExpr.visit(this);
+			rightExpr = this.resultExpr;
+			
+			if (curExpr instanceof E_LogicalOr)
+			{
+				if (!(leftExpr instanceof E_LogicalAnd) && !(rightExpr instanceof E_LogicalAnd))
+				{
+					// no distributive law - normal or
+					this.resultExpr = new E_LogicalOr(leftExpr, rightExpr);
+				}else
+				{
+					// criterion for distributive law - first OR, then AND
+					
+					if (leftExpr instanceof E_LogicalAnd)
+					{
+						leftLeftExpr = ((E_LogicalAnd)leftExpr).getArg1();
+						rightLeftExpr = ((E_LogicalAnd)leftExpr).getArg2();
+						
+						// OR AND will become to AND OR OR
+						newOrExpr1 = new E_LogicalOr(leftLeftExpr, rightExpr);
+						newOrExpr2 = new E_LogicalOr(rightLeftExpr, rightExpr);
+						newAndExpr = new E_LogicalAnd(newOrExpr1, newOrExpr2);
+						
+						this.resultExpr = newAndExpr;
+						// apply for subexpression again
+						newAndExpr.visit(this);
+					}
+					
+					if (rightExpr instanceof E_LogicalAnd)
+					{
+						leftRightExpr = ((E_LogicalAnd)rightExpr).getArg1();
+						rightRightExpr = ((E_LogicalAnd)rightExpr).getArg2();
+					
+						// OR AND will become to AND OR OR
+						newOrExpr1 = new E_LogicalOr(leftExpr, leftRightExpr);
+						newOrExpr2 = new E_LogicalOr(leftExpr, rightRightExpr);
+						newAndExpr = new E_LogicalAnd(newOrExpr1, newOrExpr2);
+					
+						this.resultExpr = newAndExpr;
+						// apply for subexpression again
+						newAndExpr.visit(this);
+					}
+				}					
+			}else
+			{
+				// E_LogicalAnd
+				this.resultExpr = new E_LogicalAnd(leftExpr, rightExpr);
+			}				
+		}else
+		{
+			this.resultExpr = curExpr;
+		}
 	}
 
-	public void visit(ExprVar nv) 
-	{
-		this.resultExpr = nv;
+	@Override
+	public void visit(ExprFunction3 func) {
+		this.resultExpr = func;
 	}
 
-	
-	public Expr result()
-    { 
-        return resultExpr; 
-    }
+	@Override
+	public void visit(ExprFunctionN func) {
+		this.resultExpr = func;
+	}
+
+	@Override
+	public void visit(ExprFunctionOp funcOp) {
+		this.resultExpr = funcOp;
+	}
+
+	@Override
+	public void visit(ExprAggregator eAgg) {
+		this.resultExpr = eAgg;
+	}
 }

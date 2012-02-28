@@ -8,6 +8,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.graph.test.NodeCreateUtils;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -178,7 +179,7 @@ public class GraphPatternTranslatorTest extends TestCase {
 		List results = new ArrayList();
 		String[] parts = pattern.split("\\s+\\.\\s*");
 		for (int i = 0; i < parts.length; i++) {
-			results.add(Triple.create(MapFixture.prefixes(), parts[i]));
+			results.add(NodeCreateUtils.createTriple(MapFixture.prefixes(), parts[i]));
 		}
 		return results;
 	}

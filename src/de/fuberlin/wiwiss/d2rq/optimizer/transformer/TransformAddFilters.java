@@ -1,21 +1,25 @@
 package de.fuberlin.wiwiss.d2rq.optimizer.transformer;
 
 import java.util.List;
+
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.TransformCopy;
 import com.hp.hpl.jena.sparql.algebra.op.OpAssign;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpDatasetNames;
 import com.hp.hpl.jena.sparql.algebra.op.OpDiff;
+import com.hp.hpl.jena.sparql.algebra.op.OpDisjunction;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
 import com.hp.hpl.jena.sparql.algebra.op.OpExt;
+import com.hp.hpl.jena.sparql.algebra.op.OpExtend;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
-import com.hp.hpl.jena.sparql.algebra.op.OpGroupAgg;
+import com.hp.hpl.jena.sparql.algebra.op.OpGroup;
 import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpLabel;
 import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpList;
+import com.hp.hpl.jena.sparql.algebra.op.OpMinus;
 import com.hp.hpl.jena.sparql.algebra.op.OpNull;
 import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
 import com.hp.hpl.jena.sparql.algebra.op.OpPath;
@@ -28,9 +32,9 @@ import com.hp.hpl.jena.sparql.algebra.op.OpSequence;
 import com.hp.hpl.jena.sparql.algebra.op.OpService;
 import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.algebra.op.OpTable;
+import com.hp.hpl.jena.sparql.algebra.op.OpTopN;
 import com.hp.hpl.jena.sparql.algebra.op.OpTriple;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
-import com.hp.hpl.jena.sparql.core.VarExprList;
 
 /**
  * Adds needed filters.
@@ -109,7 +113,7 @@ public class TransformAddFilters extends TransformCopy
     {
     	OpService newOpService;
     	
-    	newOpService = new OpService(opService.getService(), subOp);
+    	newOpService = new OpService(opService.getService(), subOp, opService.getSilent());
         return OpFilter.filter(newOpService);
     }
 
@@ -135,7 +139,7 @@ public class TransformAddFilters extends TransformCopy
         return subOp;
     }
 
-    public Op transform(OpSequence opSequence, List elts)
+    public Op transform(OpSequence opSequence, List<Op> elts)
     {
         return OpFilter.filter(opSequence);
     }
@@ -182,9 +186,9 @@ public class TransformAddFilters extends TransformCopy
 
     public Op transform(OpReduced opReduced, Op subOp)
     {
-    	OpReduced newOpReduced;
+    	Op newOpReduced;
     	
-    	newOpReduced = new OpReduced(subOp);
+    	newOpReduced = OpReduced.create(subOp);
         return OpFilter.filter(newOpReduced);
     }
 
@@ -196,12 +200,12 @@ public class TransformAddFilters extends TransformCopy
         return OpFilter.filter(newOpSlice);
     }
 
-    public Op transform(OpGroupAgg opGroupAgg, Op subOp)
+    public Op transform(OpGroup opGroup, Op subOp)
     {
-    	OpGroupAgg newOpGroupAgg;
+    	OpGroup newOpGroup;
     	
-    	newOpGroupAgg = new OpGroupAgg(subOp, opGroupAgg.getGroupVars(), opGroupAgg.getAggregators());
-        return OpFilter.filter(newOpGroupAgg);
+    	newOpGroup = new OpGroup(subOp, opGroup.getGroupVars(), opGroup.getAggregators());
+        return OpFilter.filter(newOpGroup);
     }
 
     public Op transform(OpLeftJoin opLeftJoin, Op left, Op right)
@@ -227,5 +231,28 @@ public class TransformAddFilters extends TransformCopy
     	newOpBGP = new OpBGP(opBGP.getPattern());
         return OpFilter.filter(newOpBGP);
     }
-    
+
+	@Override
+	public Op transform(OpExtend opExtend, Op subOp) {
+		return OpFilter.filter(OpExtend.extend(subOp, opExtend.getVarExprList()));
+	}
+
+	@Override
+	public Op transform(OpMinus opMinus, Op left, Op right) {
+		return OpFilter.filter(OpMinus.create(left, right));
+	}
+
+	@Override
+	public Op transform(OpDisjunction opDisjunction, List<Op> elts) {
+		// OpDisjunction doesn't have a constructor or static factory method
+		// that takes multiple arguments, but the copy method seems to do
+		// what we need. Why is it not static?
+		return OpFilter.filter(opDisjunction.copy(elts));
+	}
+
+	@Override
+	public Op transform(OpTopN opTop, Op subOp) {
+		return OpFilter.filter(
+				new OpTopN(subOp, opTop.getLimit(), opTop.getConditions()));
+	}
 }

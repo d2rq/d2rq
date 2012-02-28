@@ -35,6 +35,7 @@ public class D2RQTestSuite {
 		suite.addTest(de.fuberlin.wiwiss.d2rq.values.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.engine.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.d2rq_sdb.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.optimizer.AllTests.suite());
 		return suite;
 	}
 }

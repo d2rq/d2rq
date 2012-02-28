@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
+
+import org.openjena.atlas.io.IndentedWriter;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.ExecutionContext;
@@ -15,8 +18,8 @@ import com.hp.hpl.jena.sparql.engine.iterator.QueryIter;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIterNullIterator;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIterRepeatApply;
 import com.hp.hpl.jena.sparql.serializer.SerializationContext;
-import com.hp.hpl.jena.sparql.util.IndentedWriter;
 import com.hp.hpl.jena.sparql.util.Utils;
+
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.engine.BindingMaker;
@@ -244,6 +247,9 @@ public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
     			}
     		}
     	}
+        
+        @Override
+        protected void requestCancel() { }
     }
 	
 	

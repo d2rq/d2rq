@@ -8,7 +8,6 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.algebra.Op;
-import com.hp.hpl.jena.sparql.algebra.OpExtRegistry;
 import com.hp.hpl.jena.sparql.algebra.Transform;
 import com.hp.hpl.jena.sparql.algebra.op.Op0;
 import com.hp.hpl.jena.sparql.algebra.op.Op1;
@@ -18,15 +17,18 @@ import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpConditional;
 import com.hp.hpl.jena.sparql.algebra.op.OpDatasetNames;
 import com.hp.hpl.jena.sparql.algebra.op.OpDiff;
+import com.hp.hpl.jena.sparql.algebra.op.OpDisjunction;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
 import com.hp.hpl.jena.sparql.algebra.op.OpExt;
+import com.hp.hpl.jena.sparql.algebra.op.OpExtend;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
-import com.hp.hpl.jena.sparql.algebra.op.OpGroupAgg;
+import com.hp.hpl.jena.sparql.algebra.op.OpGroup;
 import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpLabel;
 import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpList;
+import com.hp.hpl.jena.sparql.algebra.op.OpMinus;
 import com.hp.hpl.jena.sparql.algebra.op.OpN;
 import com.hp.hpl.jena.sparql.algebra.op.OpNull;
 import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
@@ -40,6 +42,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpSequence;
 import com.hp.hpl.jena.sparql.algebra.op.OpService;
 import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.algebra.op.OpTable;
+import com.hp.hpl.jena.sparql.algebra.op.OpTopN;
 import com.hp.hpl.jena.sparql.algebra.op.OpTriple;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
@@ -372,7 +375,7 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		return addLabelToOp1((Op1)newOpLabel);
 	}
 
-	public Op transform(OpSequence opSequence, List elts) 
+	public Op transform(OpSequence opSequence, List<Op> elts) 
 	{
 		Op newOpSequence;
 		
@@ -449,15 +452,15 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		return addLabelToOp1((Op1)newOpSlice);
 	}
 
-	public Op transform(OpGroupAgg opGroupAgg, Op subOp) 
+	public Op transform(OpGroup opGroup, Op subOp) 
 	{
-		Op newOpGroupAgg;
+		Op newOpGroup;
 		
 		// copy opgroupagg
-		newOpGroupAgg = opGroupAgg.copy(subOp);
+		newOpGroup = opGroup.copy(subOp);
 		
 		// add label
-		return addLabelToOp1((Op1)newOpGroupAgg);
+		return addLabelToOp1((Op1)newOpGroup);
 	}
 
 	public Op transform(OpDiff opDiff, Op left, Op right) 
@@ -481,6 +484,25 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		return addLabelToOp2((Op2)newOpCond);
 	}
 	
+	@Override
+	public Op transform(OpExtend opExtend, Op subOp) {
+		return addLabelToOp1((Op1) opExtend.copy(subOp));
+	}
+
+	@Override
+	public Op transform(OpMinus opMinus, Op left, Op right) {
+		return addLabelToOp2((Op2) opMinus.copy(left, right));
+	}
+
+	@Override
+	public Op transform(OpDisjunction opDisjunction, List<Op> elts) {
+		return addLabelToOpN((OpN) opDisjunction.copy(elts));
+	}
+
+	@Override
+	public Op transform(OpTopN opTop, Op subOp) {
+		return addLabelToOp1((Op1) opTop.copy(subOp));
+	}
 
 	/**
 	 * Method for adding an oplabel to an op0. The oplabel
@@ -607,5 +629,4 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		// add the label
 		return OpLabel.create(threatedVars, opExt);
 	}
-
 }

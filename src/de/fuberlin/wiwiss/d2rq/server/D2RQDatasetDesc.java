@@ -3,6 +3,8 @@ package de.fuberlin.wiwiss.d2rq.server;
 import java.util.Map;
 
 import org.joseki.DatasetDesc;
+import org.joseki.Request;
+import org.joseki.Response;
 
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -25,36 +27,18 @@ public class D2RQDatasetDesc extends DatasetDesc {
 		this.dataset = dataset;
 	}
 
-	public Dataset getDataset() {
+	@Override
+	public Dataset acquireDataset(Request request, Response response) {
 		dataset.checkMappingFileChanged();
 		return this.dataset;
 	}
 
-	public void clearDataset() {
-		this.dataset = null;
-	}
-
-	public void freeDataset() {
-		this.dataset = null;
-	}
-
-	public void setDefaultGraph(Resource dftGraph) {
-		throw new RuntimeException("D2RQDatasetDecl.setDefaultGraph is not implemented");
-	}
-	
-	public Resource getDefaultGraph() {
-		throw new RuntimeException("D2RQDatasetDecl.getDefaultGraph is not implemented");
-	}
-
-	public void addNamedGraph(String uri, Resource r) {
-		throw new RuntimeException("D2RQDatasetDecl.addNamedGraph is not implemented");
-	}
-
-	public Map getNamedGraphs() {
-		throw new RuntimeException("D2RQDatasetDecl.getNamedGraphs is not implemented");
+	@Override
+    public void returnDataset(Dataset ds) {
+		// do nothing
 	}
 
 	public String toString() {
-		return "D2RQDatasetDecl(" + this.dataset + ")";
+		return "D2RQDatasetDesc(" + this.dataset + ")";
 	}
 }

@@ -1,10 +1,14 @@
 package de.fuberlin.wiwiss.d2rq.optimizer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+
+import org.openjena.atlas.logging.Log;
+
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.OpVisitor;
 import com.hp.hpl.jena.sparql.algebra.Transform;
@@ -17,15 +21,18 @@ import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpConditional;
 import com.hp.hpl.jena.sparql.algebra.op.OpDatasetNames;
 import com.hp.hpl.jena.sparql.algebra.op.OpDiff;
+import com.hp.hpl.jena.sparql.algebra.op.OpDisjunction;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
 import com.hp.hpl.jena.sparql.algebra.op.OpExt;
+import com.hp.hpl.jena.sparql.algebra.op.OpExtend;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
-import com.hp.hpl.jena.sparql.algebra.op.OpGroupAgg;
+import com.hp.hpl.jena.sparql.algebra.op.OpGroup;
 import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpLabel;
 import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpList;
+import com.hp.hpl.jena.sparql.algebra.op.OpMinus;
 import com.hp.hpl.jena.sparql.algebra.op.OpN;
 import com.hp.hpl.jena.sparql.algebra.op.OpNull;
 import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
@@ -39,16 +46,17 @@ import com.hp.hpl.jena.sparql.algebra.op.OpSequence;
 import com.hp.hpl.jena.sparql.algebra.op.OpService;
 import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.algebra.op.OpTable;
+import com.hp.hpl.jena.sparql.algebra.op.OpTopN;
 import com.hp.hpl.jena.sparql.algebra.op.OpTriple;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprList;
-import com.hp.hpl.jena.sparql.util.ALog;
+
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformAddFilters;
-import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformPrepareOpTreeForOptimizing;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformApplyD2RQOpimizingRules;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformD2RQ;
+import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformPrepareOpTreeForOptimizing;
 
 /**
  * Class for optimizing an op-tree especially for D2RQ. 
@@ -101,7 +109,7 @@ public class D2RQTreeOptimizer
     {  
         if ( op == null )
         {
-            ALog.warn(D2RQTreeOptimizer.class, "Attempt to transform a null Op - ignored") ;
+            Log.warn(D2RQTreeOptimizer.class, "Attempt to transform a null Op - ignored") ;
             return op ;
         }
         
@@ -149,7 +157,7 @@ public class D2RQTreeOptimizer
         public Op result()
         { 
             if ( stack.size() != 1 )
-                ALog.warn(this, "Stack is not aligned") ;
+                Log.warn(this, "Stack is not aligned") ;
             return (Op)this.stack.pop() ; 
         }
                         
@@ -196,6 +204,10 @@ public class D2RQTreeOptimizer
          *    filterexpression is only referenced to M1
          * 2) Filter(Union(M1, M2), F)) will become Union(M1, Filter(M2, F)) when the 
          *    filterexpression is only referenced to M2
+         *    
+         * TODO: Dubious! Shouldn't this be Union(Filter(M1,F), Filter(M2,F))?
+         *       What does the code actually do?
+         *       
          * 3) Filter(Union(M1, M2), F)) will become Join(Union(M1, F), Union(M2, F)) when the 
          *    filterexpression is referenced to M1 and M2
          */
@@ -432,12 +444,53 @@ public class D2RQTreeOptimizer
             notMoveDownFilterExprAndVisitOp1(opSlice); 
         }
         
-        public void visit(OpGroupAgg opGroupAgg)
+        public void visit(OpGroup opGroup)
         { 
-            notMoveDownFilterExprAndVisitOp1(opGroupAgg); 
+            notMoveDownFilterExprAndVisitOp1(opGroup); 
         }        
         
-        /**
+		@Override
+		public void visit(OpExtend opExtend) {
+			// TODO Might be able to move down filter past the OpExtend
+			notMoveDownFilterExprAndVisitOp1(opExtend);
+		}
+
+		/**
+		 * TODO I have no clue if this actually works
+		 * 
+		 * Filter(A-B,e) = Filter(A,e)-B
+		 */
+		@Override
+		public void visit(OpMinus opMinus) {
+			// Walk into A subtree
+			opMinus.getLeft().visit(this);
+			Op leftWithFilter = (Op) stack.pop();
+			
+			// Walk into B subtree with empty expression list
+			List tmp = filterExpr;
+			filterExpr = new ArrayList();
+			opMinus.getRight().visit(this);
+			Op right = (Op) stack.pop();
+			
+			// Remove the entire filter expression on the way up
+			filterExpr = tmp;
+			
+			stack.push(OpMinus.create(leftWithFilter, right));
+		}
+
+		@Override
+		public void visit(OpDisjunction opDisjunction) {
+			// TODO What the heck is an OpDisjunction anyway?
+			notMoveDownFilterExprAndVisitOpN(opDisjunction);
+		}
+
+		@Override
+		public void visit(OpTopN opTop) {
+			// TODO Might be able to move down filter past the OpTopN
+			notMoveDownFilterExprAndVisitOp1(opTop);
+		}
+
+		/**
          * Calculates the set of valid filterexpressions as a subset from the whole set of 
          * possibilities. 
          * @param possiblities - the whole set
@@ -975,7 +1028,5 @@ public class D2RQTreeOptimizer
             this.filterExpr = notMoveableFilterExpr; 
             this.stack.push(newOp);
         }
-        
     }
-    
 }

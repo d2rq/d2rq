@@ -10,9 +10,13 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.E_Equals;
 import com.hp.hpl.jena.sparql.expr.E_NotEquals;
 import com.hp.hpl.jena.sparql.expr.Expr;
-import com.hp.hpl.jena.sparql.expr.ExprFunction;
+import com.hp.hpl.jena.sparql.expr.ExprAggregator;
+import com.hp.hpl.jena.sparql.expr.ExprFunction0;
 import com.hp.hpl.jena.sparql.expr.ExprFunction1;
 import com.hp.hpl.jena.sparql.expr.ExprFunction2;
+import com.hp.hpl.jena.sparql.expr.ExprFunction3;
+import com.hp.hpl.jena.sparql.expr.ExprFunctionN;
+import com.hp.hpl.jena.sparql.expr.ExprFunctionOp;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.ExprVisitor;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
@@ -23,7 +27,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.ExpressionProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
-import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.Negation;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
@@ -39,7 +42,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * @author Herwig Leimer
  *
  */
-public final class TransformExprToSQLApplyer implements ExprVisitor 
+public final class TransformExprToSQLApplyer implements ExprVisitor
 {
 	private StringBuffer sqlExpression;
 	private Expression expression = null;
@@ -56,45 +59,12 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
 	    this.nodeRelation = nodeRelation;
 	}
 
+	@Override
 	public void startVisit() 
 	{ 	    
-	}
-    
-    public void visit(ExprFunction func)
-    {
-        if (this.convertAbleSuccessful)
-        {
-            if ( func.getOpName() != null && func instanceof ExprFunction2)
-            {
-                // convert binary sparql-function-expression
-                convertFunctionExpr2((ExprFunction2)func) ;
-                return ;
-            }else if ( func.getOpName() != null && func instanceof ExprFunction1)
-            {
-                // convert unary sparql-function-expression
-                convertFunctionExpr1((ExprFunction1)func) ;
-                return ;
-            }else if (func instanceof ExprFunction)
-            {
-                // exists, regex cannot be translated
-                this.convertAbleSuccessful = false;
-                return ;
-            }
-            
-            sqlExpression.append("(") ;
-            for ( int i = 1 ; ; i++ )
-            {
-                Expr expr = func.getArg(i) ;
-                if ( expr == null )
-                    break ; 
-                if ( i != 1 )
-                    sqlExpression.append(", ") ;
-                expr.visit(this) ;
-            }
-            sqlExpression.append(")");
-        }
-    }
+	}    
 
+	@Override
     public void visit(NodeValue nv)
     {
     	if (nv.isLiteral())
@@ -106,6 +76,8 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
     		else if (nv.isDateTime())
     		{
     			/*
+    			 * TODO This should use NodeType and ConnectedDB.quoteValue
+    			 * 
     			 * Convert xsd:dateTime: CCYY-MM-DDThh:mm:ss
     			 * to SQL-92 TIMESTAMP: CCYY-MM-DD hh:mm:ss[.fraction]
     			 * TODO support time zones (WITH TIME ZONE columns)
@@ -127,6 +99,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
     	
     }
 
+	@Override
     public void visit(ExprVar exprVar)
     {        
         String varName;
@@ -158,6 +131,52 @@ public final class TransformExprToSQLApplyer implements ExprVisitor
         
     }
 
+	@Override
+	public void visit(ExprFunction0 func) {
+		convertAbleSuccessful = false;		
+	}
+
+	@Override
+	public void visit(ExprFunction1 func) {
+		if (!this.convertAbleSuccessful) return;
+		if (func.getOpName() == null) {
+			convertAbleSuccessful = false;		
+			return;
+		}
+		convertFunctionExpr1(func);
+	}
+
+	@Override
+	public void visit(ExprFunction2 func) {
+		if (!this.convertAbleSuccessful) return;
+		if (func.getOpName() == null) {
+			convertAbleSuccessful = false;		
+			return;
+		}
+		convertFunctionExpr2(func);
+	}
+
+	@Override
+	public void visit(ExprFunction3 func) {
+		convertAbleSuccessful = false;		
+	}
+
+	@Override
+	public void visit(ExprFunctionN func) {
+		convertAbleSuccessful = false;		
+	}
+
+	@Override
+	public void visit(ExprFunctionOp funcOp) {
+		convertAbleSuccessful = false;		
+	}
+
+	@Override
+	public void visit(ExprAggregator eAgg) {
+		convertAbleSuccessful = false;		
+	}
+	
+	@Override
     public void finishVisit() 
     {        
     }

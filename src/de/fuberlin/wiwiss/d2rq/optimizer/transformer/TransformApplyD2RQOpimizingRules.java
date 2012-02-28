@@ -1,22 +1,26 @@
 package de.fuberlin.wiwiss.d2rq.optimizer.transformer;
 
 import java.util.List;
+
 import com.hp.hpl.jena.sparql.algebra.Op;
-import com.hp.hpl.jena.sparql.algebra.Transform;
+import com.hp.hpl.jena.sparql.algebra.TransformBase;
 import com.hp.hpl.jena.sparql.algebra.op.OpAssign;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpConditional;
 import com.hp.hpl.jena.sparql.algebra.op.OpDatasetNames;
 import com.hp.hpl.jena.sparql.algebra.op.OpDiff;
+import com.hp.hpl.jena.sparql.algebra.op.OpDisjunction;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
 import com.hp.hpl.jena.sparql.algebra.op.OpExt;
+import com.hp.hpl.jena.sparql.algebra.op.OpExtend;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
-import com.hp.hpl.jena.sparql.algebra.op.OpGroupAgg;
+import com.hp.hpl.jena.sparql.algebra.op.OpGroup;
 import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpLabel;
 import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpList;
+import com.hp.hpl.jena.sparql.algebra.op.OpMinus;
 import com.hp.hpl.jena.sparql.algebra.op.OpNull;
 import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
 import com.hp.hpl.jena.sparql.algebra.op.OpPath;
@@ -29,8 +33,10 @@ import com.hp.hpl.jena.sparql.algebra.op.OpSequence;
 import com.hp.hpl.jena.sparql.algebra.op.OpService;
 import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.algebra.op.OpTable;
+import com.hp.hpl.jena.sparql.algebra.op.OpTopN;
 import com.hp.hpl.jena.sparql.algebra.op.OpTriple;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
+
 import de.fuberlin.wiwiss.d2rq.optimizer.ops.OpFilteredBGP;
 
 /**
@@ -39,7 +45,7 @@ import de.fuberlin.wiwiss.d2rq.optimizer.ops.OpFilteredBGP;
  * @author Herwig Leimer
  *
  */
-public class TransformApplyD2RQOpimizingRules implements Transform 
+public class TransformApplyD2RQOpimizingRules extends TransformBase 
 {
 
 	/**
@@ -153,7 +159,7 @@ public class TransformApplyD2RQOpimizingRules implements Transform
 		return opLabel;
 	}
 
-	public Op transform(OpSequence opSequence, List elts) 
+	public Op transform(OpSequence opSequence, List<Op> elts) 
 	{
 		return opSequence;
 	}
@@ -188,9 +194,9 @@ public class TransformApplyD2RQOpimizingRules implements Transform
 		return opSlice;
 	}
 
-	public Op transform(OpGroupAgg opGroupAgg, Op subOp) 
+	public Op transform(OpGroup opGroup, Op subOp) 
 	{
-		return opGroupAgg;
+		return opGroup;
 	}
 
 	public Op transform(OpDiff opDiff, Op left, Op right) 
@@ -202,5 +208,4 @@ public class TransformApplyD2RQOpimizingRules implements Transform
 	{
 		return opCondition;
 	}
-	
 }

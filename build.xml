@@ -236,12 +236,12 @@
 			<lib dir="${lib}">
 				<exclude name="*/*"/><!-- Do not recurse into subdirectories -->
 			</lib>
-			<lib dir="${lib}/arq-2.7"/>
+			<lib dir="${lib}/arq-2.8.8"/>
 			<lib dir="${lib}/hsqldb-1.8"/>
 			<lib dir="${lib}/jetty-8.1.1">
 				<exclude name="servlet-api-*.jar"/>
 			</lib>
-			<lib dir="${lib}/joseki-3.3"/>
+			<lib dir="${lib}/joseki-3.4.4"/>
 			<lib dir="${lib}/logging">
 				<exclude name="commons-logging-*.jar"/>
 			</lib>
