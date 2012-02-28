@@ -9,7 +9,6 @@
 	<classpathentry kind="lib" path="lib/db-drivers/postgresql-8.2dev-503.jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.7-bin.jar"/>
 	<classpathentry kind="lib" path="lib/logging/commons-logging-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/logging/log4j-1.2.12.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.1/servlet-api-3.0.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-server-8.1.1.v20120215.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.1/jetty-util-8.1.1.v20120215.jar"/>
@@ -35,5 +34,6 @@
 	<classpathentry kind="lib" path="lib/arq-2.8.8/sdb-1.3.4.jar"/>
 	<classpathentry kind="lib" path="lib/arq-2.8.8/xercesImpl-2.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/arq-2.8.8/arq-2.8.8.jar" sourcepath="/arq/src/main/java"/>
+	<classpathentry kind="lib" path="lib/logging/log4j-1.2.16.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
