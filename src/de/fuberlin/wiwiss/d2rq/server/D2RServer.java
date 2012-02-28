@@ -235,8 +235,14 @@ public class D2RServer {
 		DescribeHandlerRegistry.get().clear();
 		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory());
 
-		Registry.add(RDFServer.ServiceRegistryName,
-				createJosekiServiceRegistry());
+		Registry.add(RDFServer.ServiceRegistryName, createJosekiServiceRegistry());
+	}
+	
+	public void shutdown()
+	{
+		log.info("shutting down");
+		
+		currentGraph().close();
 	}
 	
 	protected ServiceRegistry createJosekiServiceRegistry() {

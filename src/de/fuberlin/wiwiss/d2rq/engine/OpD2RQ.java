@@ -39,7 +39,7 @@ public class OpD2RQ extends OpExt
 	public boolean equalTo(Op other, NodeIsomorphismMap labelMap) {
 		if (!(other instanceof OpD2RQ)) return false;
 		OpD2RQ other2 = (OpD2RQ) other;
-        return original.getPattern().equiv(other2.original.getPattern(), labelMap);
+		return original.getPattern().equiv(other2.original.getPattern(), labelMap);
 	}
 
 	public int hashCode() {

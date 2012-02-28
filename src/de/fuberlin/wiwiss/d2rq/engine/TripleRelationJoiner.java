@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.hp.hpl.jena.graph.Triple;
 
@@ -21,10 +22,9 @@ import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
-import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
-public class TripleRelationJoiner {
+class TripleRelationJoiner {
 	
 	public static TripleRelationJoiner create(boolean allOptimizations) {
 		return new TripleRelationJoiner(new NamesToNodeMakersMap(), 
@@ -57,6 +57,88 @@ public class TripleRelationJoiner {
 		return results;
 	}
 	
+	private static boolean isUnique(ConnectedDB database, RelationName originalName, Set attributeNames)
+	{
+		boolean found = false;
+		HashMap uniqueKeys = database.getUniqueKeyColumns(originalName);
+		if (uniqueKeys != null) {
+			Iterator keyIterator = uniqueKeys.values().iterator();
+			while (!found && keyIterator.hasNext()) {
+				List indexColumns = (List)(keyIterator.next());
+				found = attributeNames.containsAll(indexColumns);
+			}
+		}
+		return found;
+	}
+	
+	private static class AttributeSet {
+		RelationName relationName = null;
+		Set attributeNames = new TreeSet();
+		
+		/*
+		 * Determine the attributes that make up a nodemakers projection spec
+		 * all must stem from the same table 
+		 */
+		static AttributeSet createFrom(NodeMaker nodeMaker)
+		{
+			AttributeSet attributes = new AttributeSet();
+			Set projectionSpecs = nodeMaker.projectionSpecs();
+			boolean err = projectionSpecs.isEmpty();
+			
+			Iterator projectionIterator = projectionSpecs.iterator();
+			while (projectionIterator.hasNext() && !err) {
+				ProjectionSpec projection = (ProjectionSpec) projectionIterator.next();
+				
+				Set reqAttr = projection.requiredAttributes();
+				Iterator j = reqAttr.iterator();
+				while (j.hasNext() && !err) {
+					Attribute a = (Attribute) j.next();
+					if (attributes.relationName == null)
+						attributes.relationName = a.relationName();
+					else if (!attributes.relationName.equals(a.relationName()))
+						err = true;
+					
+					attributes.attributeNames.add(a.attributeName());
+				}
+				
+//				if (projection instanceof Attribute) {
+//					Attribute a = (Attribute) projection;
+//					if (attributes.relationName == null)
+//						attributes.relationName = a.relationName();
+//					else if (!attributes.relationName.equals(a.relationName()))
+//						err = true;
+//					
+//					attributes.attributeNames.add(a.attributeName());
+//				} else {
+//					err = true;
+//				}
+			}
+			
+			if (!err)
+				return attributes;
+			
+			return null;
+		}
+	}
+	
+	private List getRelationNames(NodeMaker nodeMaker)
+	{
+		ArrayList result = new ArrayList();
+		Set projectionSpecs = nodeMaker.projectionSpecs();
+		Iterator projectionIterator = projectionSpecs.iterator();
+		while (projectionIterator.hasNext()) {
+			ProjectionSpec spec = (ProjectionSpec) projectionIterator.next();
+			Set reqAttr = spec.requiredAttributes();
+			Iterator j = reqAttr.iterator();
+			while (j.hasNext()) {
+				Attribute a = (Attribute) j.next();
+				result.add(a.relationName());
+			}
+		
+		}
+		return result;
+	}
+	
 	public TripleRelationJoiner join(Triple pattern, TripleRelation relation) {
 		List newPatterns = new ArrayList(joinedTriplePatterns);
 		newPatterns.add(pattern);
@@ -73,6 +155,7 @@ public class TripleRelationJoiner {
 				 * Before adding a NodeMaker, try to adopt aliases from existing NodeMakers
 				 * in order to prevent unnecessary self-joins (#2798308) 
 				 */
+				// This failed when originalName had more than 1 alias r.baseRelation (fixed, GM)
 				ArrayList names = new ArrayList();
 	
 				if (t.getSubject().isVariable())
@@ -85,72 +168,94 @@ public class TripleRelationJoiner {
 				Iterator nameIterator = names.iterator();
 				while (nameIterator.hasNext()) {
 					String name = (String)nameIterator.next();
-					Object n = nodeSets.toMap().get(name);
-					if (n != null && n instanceof TypedNodeMaker) {
-						Iterator projectionIterator = ((TypedNodeMaker)n).projectionSpecs().iterator();
-						
-						/*
-						 * Determine the attributes that make up the node maker
-						 * All must stem from the same table 
-						 */
-						ArrayList attributeNames = new ArrayList();
-						RelationName relationName = null;
-						boolean err = !projectionIterator.hasNext();
-						
-						while (projectionIterator.hasNext()) {
-							Object o = projectionIterator.next();
-							if (o instanceof Attribute) {
-								Attribute a = (Attribute)o;
-								if (relationName == null)
-									relationName = a.relationName();
-								else if (!relationName.equals(a.relationName())) {
-									err = true;
-									break;
-								}
-								attributeNames.add(a.attributeName());
-							} else {
-								err = true;
-								break;
-							}
-						}
-						
+					NodeMaker n = (NodeMaker) nodeSets.toMap().get(name);
+					if (n != null/* && n instanceof TypedNodeMaker*/) {
+
+						AttributeSet attributes = AttributeSet.createFrom(n);
 						/*
 						 * If we would set an alias to this table...
 						 */
-						if (err == false) {
-							RelationName originalName = ((AliasMap)nodeSets.relationAliases().get(name)).originalOf(relationName);
-							if (r.baseRelation().aliases().hasAlias(originalName)) {
+						if (attributes != null) {
+							RelationName originalName = ((AliasMap)nodeSets.relationAliases().get(name)).originalOf(attributes.relationName);
+							if (r.baseRelation().aliases().hasAlias(originalName)) { 
+
 								/*
 								 * ... and indexes are in place to guarantee uniqueness of the attribute combination...
 								 */
-								HashMap uniqueKeys = r.baseRelation().database().getUniqueKeyColumns(originalName);
-								if (uniqueKeys != null) {
-									boolean found = false;
-									Iterator keyIterator = uniqueKeys.values().iterator();
-									while (!found && keyIterator.hasNext()) {
-										List indexColumns = (List)(keyIterator.next());
-										found = attributeNames.containsAll(indexColumns);
+								if (isUnique(r.baseRelation().database(), originalName, attributes.attributeNames)) {
+									
+									if (t.getSubject().isVariable() && t.getSubject().getName().equals(name)) {
+										// ... then first find the right relation name...
+										AttributeSet existing = AttributeSet.createFrom(r.nodeMaker(TripleRelation.SUBJECT));
+										if (existing != null && existing.attributeNames.equals(attributes.attributeNames)) {
+											// ... then apply it
+											r = r.renameSingleRelation(existing.relationName, attributes.relationName);
+											newRelations.set(i, r);
+										}
 									}
-									if (found) {
-										/*
-										 * ... then apply alias.
-										 */
-										r = r.renameSingleRelation(r.baseRelation().aliases().applyTo(originalName), relationName);
-										newRelations.set(i, r);
-									}							
-								}
+									
+									if (t.getPredicate().isVariable() && t.getPredicate().getName().equals(name)) {
+										// ... then first find the right relation name...
+										AttributeSet existing = AttributeSet.createFrom(r.nodeMaker(TripleRelation.PREDICATE));
+										if (existing != null && existing.attributeNames.equals(attributes.attributeNames)) {
+											// ... then apply it
+											r = r.renameSingleRelation(existing.relationName, attributes.relationName);
+											newRelations.set(i, r);
+										}
+									}
+									
+									if (t.getObject().isVariable() && t.getObject().getName().equals(name)) {
+										// ... then first find the right relation name...
+										AttributeSet existing = AttributeSet.createFrom(r.nodeMaker(TripleRelation.OBJECT));
+										if (existing != null && existing.attributeNames.equals(attributes.attributeNames)) {
+											// ... then apply it
+											r = r.renameSingleRelation(existing.relationName, attributes.relationName);
+											newRelations.set(i, r);
+										}
+									}
+								}							
 							}
 						}
 					}
 				}
 			}
 			
-			nodeSets.addIfVariable(t.getSubject(), 
-					r.nodeMaker(TripleRelation.SUBJECT), r.baseRelation().aliases());
-			nodeSets.addIfVariable(t.getPredicate(), 
-					r.nodeMaker(TripleRelation.PREDICATE), r.baseRelation().aliases());
-			nodeSets.addIfVariable(t.getObject(), 
-					r.nodeMaker(TripleRelation.OBJECT), r.baseRelation().aliases());
+			if (t.getObject().isVariable()) {
+				List relationNames = getRelationNames(r.nodeMaker(TripleRelation.OBJECT));
+				Set aliases = new HashSet();
+								
+				for (int n = 0; n < relationNames.size(); n++) {
+					RelationName rname = (RelationName) relationNames.get(n);
+					if (r.baseRelation().aliases().isAlias(rname))
+						aliases.add(new AliasMap.Alias(r.baseRelation().aliases().originalOf(rname), rname));
+				}
+				nodeSets.add(t.getObject().getName(), r.nodeMaker(TripleRelation.OBJECT), new AliasMap(aliases));
+			}
+			
+			if (t.getPredicate().isVariable()) {
+				List relationNames = getRelationNames(r.nodeMaker(TripleRelation.PREDICATE));
+				Set aliases = new HashSet();
+								
+				for (int n = 0; n < relationNames.size(); n++) {
+					RelationName rname = (RelationName) relationNames.get(n);
+					if (r.baseRelation().aliases().isAlias(rname))
+						aliases.add(new AliasMap.Alias(r.baseRelation().aliases().originalOf(rname), rname));
+				}
+				nodeSets.add(t.getPredicate().getName(), r.nodeMaker(TripleRelation.PREDICATE), new AliasMap(aliases));
+			}
+			
+			if (t.getSubject().isVariable()) {
+				List relationNames = getRelationNames(r.nodeMaker(TripleRelation.SUBJECT));
+				Set aliases = new HashSet();
+								
+				for (int n = 0; n < relationNames.size(); n++) {
+					RelationName rname = (RelationName) relationNames.get(n);
+					if (r.baseRelation().aliases().isAlias(rname))
+						aliases.add(new AliasMap.Alias(r.baseRelation().aliases().originalOf(rname), rname));
+				}
+				nodeSets.add(t.getSubject().getName(), r.nodeMaker(TripleRelation.SUBJECT), new AliasMap(aliases));
+			}
+
 		}
 		if (!nodeSets.satisfiable()) {
 			return null;

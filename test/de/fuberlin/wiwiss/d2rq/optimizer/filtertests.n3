@@ -1,0 +1,52 @@
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix ex: <http://example.org/> .
+@prefix map: <#> .
+@prefix test: <http://d2rq.org/terms/test#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . 
+
+map:Table1 a d2rq:ClassMap;
+	d2rq:uriPattern "http://example.org/res@@table1.id@@";
+	d2rq:class ex:Class1;
+	d2rq:dataStorage test:DummyDatabase;
+	.
+	
+map:Bridge1 a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:Table1;
+	d2rq:property rdfs:label;
+	d2rq:column "table1.label_en";
+	d2rq:lang "en";
+	.
+
+map:Bridge2 a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:Table1;
+	d2rq:property rdfs:label;
+	d2rq:column "table1.label_fr_be";
+	d2rq:lang "fr-BE";
+	.
+
+map:Bridge3 a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:Table1;
+	d2rq:property rdfs:label;
+	d2rq:column "table1.label";
+	.
+	
+map:Table2 a d2rq:ClassMap;
+	d2rq:bNodeIdColumns "table2.id";
+	d2rq:class ex:Class2;
+	d2rq:dataStorage test:DummyDatabase;
+	.
+	
+map:Bridge4 a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:Table2;
+	d2rq:property ex:value;
+	d2rq:column "table2.intvalue";
+	d2rq:datatype xsd:int
+	.
+	
+map:Bridge5 a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:Table2;
+	d2rq:property ex:value;
+	d2rq:column "table2.value";
+	.
+	

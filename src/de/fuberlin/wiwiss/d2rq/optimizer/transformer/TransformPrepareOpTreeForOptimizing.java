@@ -105,7 +105,6 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
     	OpLabel opLabel;
     	BasicPattern basicPattern;
 		Triple triple;
-		Node object;
 		OpBGP newOpBGP;
 		
 		// contains the threated object-vars of the BGP
@@ -113,16 +112,24 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		
 		if ((basicPattern = opBGP.getPattern()) != null)
 		{
-			// extract object-vars from tripple-pattern
+			// extract object-vars from triple-pattern
 	        for (Iterator iter = basicPattern.iterator() ; iter.hasNext() ; )
 	        {
 	            triple = (Triple)iter.next();
-	            object = triple.getObject();
+	            Node node = triple.getObject();
 	            
-	            if (object != null && object.isVariable())
+	            if (node != null && node.isVariable())
 	            {
-	            	threatedVars.add(object);
-	            }            
+	            	threatedVars.add(node);
+	            }  
+	
+				// extract subject-vars from triple
+				node = triple.getSubject();
+				
+				if (node != null && node.isVariable())
+				{
+					threatedVars.add(node);
+				}	
 	        }
 		}
         
@@ -197,7 +204,6 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		Triple triple;
 		Set threatedVars;
 		OpLabel opLabel;
-		Node object;
 		
 		// contains the threated object-vars of the Triple
 		threatedVars = new HashSet();
@@ -206,13 +212,21 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		
 		if (triple != null)
 		{
-			// extract object-vars from tripple
-			object = triple.getObject();
+			// extract object-vars from triple
+			Node node = triple.getObject();
             
-            if (object != null && object.isVariable())
+            if (node != null && node.isVariable())
             {
-            	threatedVars.add(object);
-            }	
+            	threatedVars.add(node);
+            }
+            
+			// extract subject-vars from triple
+			node = triple.getSubject();
+			
+			if (node != null && node.isVariable())
+			{
+				threatedVars.add(node);
+			}	
 		}
 		
 		// copy optriple
@@ -229,24 +243,30 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 	{
 		Op newOpPath;
 		TriplePath triplePath;
-		Node object;
 		Set threatedVars;
 		OpLabel opLabel;
 		
-		// contains the threated object-vars of the tripplepath
+		// contains the threated object-vars of the triplepath
 		threatedVars = new HashSet();
 		
 		triplePath = opPath.getTriplePath();
 		
 		if (triplePath != null)
 		{
-			// extract object-vars from tripplepath
-			object = triplePath.getObject();
+			// extract object-vars from triplepath
+			Node node = triplePath.getObject();
 			
-			if (object != null && object.isVariable())
+			if (node != null && node.isVariable())
             {
-            	threatedVars.add(object);
-            }			
+            	threatedVars.add(node);
+            }
+			
+			node = triplePath.getSubject();
+			
+			if (node != null && node.isVariable())
+			{
+				threatedVars.add(node);
+			}	
 		}
 		// copy oppath
 		newOpPath = opPath.copy();

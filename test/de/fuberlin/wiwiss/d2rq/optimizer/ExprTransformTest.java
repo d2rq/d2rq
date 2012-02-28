@@ -78,6 +78,20 @@ public class ExprTransformTest extends TestCase {
 		assertNotNull(apply.result());
 		assertEquals("( ( ( ( ?c || ?a ) || ?d ) && ( ( ?c || ?b ) || ?d ) ) && ( ( ( ?c || ?a ) || ?e ) && ( ( ?c || ?b ) || ?e ) ) )", apply.result().toString()); // correct
 	}
+	
+	public void testExprDistributiveABC() {
+		Expr expr = ExprUtils.parse("(( ?a && ?b ) && ?c )");
+		DistributiveLawApplyer apply = new DistributiveLawApplyer();
+		expr.visit(apply);
+		assertEquals("( ( ?a && ?b ) && ?c )", apply.result().toString());
+	}
+	
+	public void testExprDistributiveUsingFunctions() {
+		Expr expr = ExprUtils.parse("( ( ( ?n = 1 ) && bound(?pref) ) && bound(?n) )");
+		DistributiveLawApplyer apply = new DistributiveLawApplyer();
+		expr.visit(apply);
+		assertEquals("( ( ( ?n = 1 ) && bound(?pref) ) && bound(?n) )", apply.result().toString());
+	}
 
 	public void testDeMorganNotEqual() {
 		Expr expr = ExprUtils.parse("?x != ?z");

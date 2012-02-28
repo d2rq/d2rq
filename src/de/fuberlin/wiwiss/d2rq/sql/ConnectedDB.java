@@ -94,8 +94,10 @@ public class ConnectedDB {
 		
 		/**
 		 * @param interval in seconds
+		 * @param query the noop query to execute
 		 */
 		public KeepAliveAgent(int interval, String query) {
+			super("keepalive");
 			this.interval = interval;
 			this.query = query;
 		}
@@ -125,14 +127,9 @@ public class ConnectedDB {
 		}
 		
 		public void shutdown() {
+			log.debug("shutting down");
 			shutdown = true;
-			keepAliveAgent.interrupt();
-		}
-	};
-	
-	private final Thread shutdownHook = new Thread() {
-		public void run() {
-			keepAliveAgent.shutdown();
+			this.interrupt();
 		}
 	};
 	
@@ -172,7 +169,6 @@ public class ConnectedDB {
 			
 			this.keepAliveAgent = new KeepAliveAgent(interval, query);
 			this.keepAliveAgent.start();
-			Runtime.getRuntime().addShutdownHook(shutdownHook);
 			log.debug("Keep alive agent is enabled (interval: " + interval + " seconds, noop query: '" + query + "').");
 		} else
 			this.keepAliveAgent = null;
@@ -529,6 +525,9 @@ public class ConnectedDB {
 		return false;
 	}
 
+	/**
+	 * Closes the database connection and shuts down the keep alive agent.
+	 */
 	public void close() {
 		if (keepAliveAgent != null)
 			keepAliveAgent.shutdown();

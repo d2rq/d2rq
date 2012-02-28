@@ -230,9 +230,11 @@ public class DatabaseSchemaInspector {
 					null, schemaName(tableName), tableName(tableName), true, approximate);
 			while (rs.next()) {
 				String indexKey = rs.getString("INDEX_NAME");
-				if (!result.containsKey(indexKey))
-					result.put(indexKey, new ArrayList());
-				((List)result.get(indexKey)).add(rs.getString("COLUMN_NAME"));
+				if (indexKey != null) { // is null when type = tableIndexStatistic, ignore
+					if (!result.containsKey(indexKey))
+						result.put(indexKey, new ArrayList());
+					((List)result.get(indexKey)).add(rs.getString("COLUMN_NAME"));
+				}
 			}
 			rs.close();
 			return result;

@@ -1,12 +1,16 @@
 package de.fuberlin.wiwiss.d2rq.optimizer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import org.openjena.atlas.logging.Log;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openjena.atlas.io.IndentedWriter;
 
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.OpVisitor;
@@ -51,12 +55,15 @@ import com.hp.hpl.jena.sparql.algebra.op.OpTriple;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprList;
+import com.hp.hpl.jena.sparql.serializer.SerializationContext;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformAddFilters;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformApplyD2RQOpimizingRules;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformD2RQ;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformPrepareOpTreeForOptimizing;
+import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformRemoveEmptyUnion;
+
 
 /**
  * Class for optimizing an op-tree especially for D2RQ. 
@@ -66,6 +73,9 @@ import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformPrepareOpTreeForOp
  */
 public class D2RQTreeOptimizer
 {
+	
+	private static Log logger = LogFactory.getLog(D2RQTreeOptimizer.class);
+	
 	/**
 	 * Constructor
 	 */
@@ -95,6 +105,18 @@ public class D2RQTreeOptimizer
         // OpD2RQs and removes unneeded Ops like labels and filters with no conditions
         transformedOp = optimizeAndGenerate(transformedOp, graph);
         
+        transformedOp = Transformer.transform(new TransformRemoveEmptyUnion(), transformedOp); 
+ 
+        if (logger.isDebugEnabled()) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            transformedOp.output(new IndentedWriter(out), new SerializationContext());
+            try {
+                logger.debug(out.toString("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
         return transformedOp;
     }
     
@@ -109,7 +131,7 @@ public class D2RQTreeOptimizer
     {  
         if ( op == null )
         {
-            Log.warn(D2RQTreeOptimizer.class, "Attempt to transform a null Op - ignored") ;
+            logger.warn("Attempt to transform a null Op - ignored") ;
             return op ;
         }
         
@@ -157,7 +179,7 @@ public class D2RQTreeOptimizer
         public Op result()
         { 
             if ( stack.size() != 1 )
-                Log.warn(this, "Stack is not aligned") ;
+                logger.warn("Stack is not aligned") ;
             return (Op)this.stack.pop() ; 
         }
                         
@@ -277,7 +299,7 @@ public class D2RQTreeOptimizer
          * When visiting an OpDiff 3 conditions for moving down the filterconditions are
          * checked. Only when a condition is satisfied, the filtercondition can be moved
          * down to the next operator in the tree. Otherwise the condition will stay here 
-         * and during the bottum-up-stepping an OpFilter containing these remained 
+         * and during the bottom-up-stepping an OpFilter containing these remained 
          * filterconditions will be inserted in the operator-tree.
          * Conditions for moving down a filtercondition:
          * (M1, M2 are graphpatterns, F is a filtercondition)
@@ -766,7 +788,7 @@ public class D2RQTreeOptimizer
             
             
             
-            // note: filterExprAfterOpUnion contains now all filterexpressions which could
+            // note: filterExprAfterOpLeftJoin contains now all filterexpressions which could
             // be moved down
             // now calculate all filterexpressions which were not moveable
             notMoveableFilterExpr = new ArrayList(filterExprBeforeOpLeftJoin);

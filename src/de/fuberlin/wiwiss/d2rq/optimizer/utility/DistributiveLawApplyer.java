@@ -55,11 +55,6 @@ public final class DistributiveLawApplyer implements ExprVisitor
 		this.resultExpr = nv;
 	}
 
-	public Expr result()
-    { 
-        return resultExpr; 
-    }
-
 	@Override
 	public void visit(ExprFunction0 func) {
 		this.resultExpr = func;
@@ -165,5 +160,10 @@ public final class DistributiveLawApplyer implements ExprVisitor
 	@Override
 	public void visit(ExprAggregator eAgg) {
 		this.resultExpr = eAgg;
+	}
+
+	public Expr result()
+	{ 
+		return resultExpr; 
 	}
 }
