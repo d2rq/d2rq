@@ -15,7 +15,7 @@ public class JenaGraphExample {
 
 	public static void main(String[] args) {
 		// Load mapping file
-		Model mapping = FileManager.get().loadModel("doc/example/mapping-iswc.n3");
+		Model mapping = FileManager.get().loadModel("doc/example/mapping-iswc.ttl");
 		
 		// Set up the GraphD2RQ
 		GraphD2RQ g = new GraphD2RQ(mapping, "http://localhost:2020/");
@@ -27,11 +27,11 @@ public class JenaGraphExample {
 		Triple pattern = new Triple(subject, predicate, object);
 
 		// Query the graph
-		Iterator it = g.find(pattern);
+		Iterator<Triple> it = g.find(pattern);
 		
 		// Output query results
 		while (it.hasNext()) {
-			Triple t = (Triple) it.next();
+			Triple t = it.next();
 		    System.out.println("Published in 2003: " + t.getSubject());
 		}
 	}

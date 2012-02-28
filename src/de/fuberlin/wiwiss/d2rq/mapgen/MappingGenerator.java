@@ -40,7 +40,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
 
 /**
  * Generates a D2RQ mapping by introspecting a database schema.
- * Result is available as a high-quality N3 serialization, or
+ * Result is available as a high-quality Turtle serialization, or
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
@@ -151,9 +151,9 @@ public class MappingGenerator {
 	public Model mappingModel(String baseURI, OutputStream err) {
 		StringWriter w = new StringWriter();
 		writeMapping(w, err != null ? new PrintWriter(err) : null);
-		String mappingAsN3 = w.toString();
+		String mappingAsTurtle = w.toString();
 		Model result = ModelFactory.createDefaultModel();
-		result.read(new StringReader(mappingAsN3), baseURI, "N3");
+		result.read(new StringReader(mappingAsTurtle), baseURI, "TURTLE");
 		return result;
 	}
 	

@@ -90,7 +90,7 @@ public class generate_mapping {
 
 			if(cmd.contains(vocabAsOutput)) {
 				Model model = gen.vocabularyModel(System.err);
-				model.write(out, "N3");
+				model.write(out, "TURTLE");
 			} else {
 				gen.writeMapping(out, System.err);
 			}
@@ -113,7 +113,7 @@ public class generate_mapping {
 		System.err.println("    -s db_schema    Only map tables in a specific named DB schema");
 		System.err.println("    -v              Generate RDFS+OWL vocabulary instead of mapping file");
 		System.err.println("    -b baseURI      Base URI for generated RDF (optional)");
-		System.err.println("    -o outfile.n3   Output file name (default: stdout)");
+		System.err.println("    -o outfile.ttl  Output file name (default: stdout)");
 		System.err.println();
 	}
 }

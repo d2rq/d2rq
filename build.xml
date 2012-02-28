@@ -19,17 +19,15 @@
 	<property name="war" value="${name}.war" />
 
 	<property name="vocab.language.dir" value="doc/specification"/>
-	<property name="vocab.language.n3" value="${vocab.language.dir}/d2rq-rdfs.n3"/>
+	<property name="vocab.language.ttl" value="${vocab.language.dir}/d2rq-rdfs.ttl"/>
 	<property name="vocab.language.rdf" value="${vocab.language.dir}/d2rq-rdfs.rdf"/>
-	<property name="vocab.language.java" value="${src}/${project.path}/vocab/D2RQ.java"/>
 	<property name="vocab.language.namespace" value="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#"/>
 
-	<property name="vocab.config.n3" value="${doc}/config.n3"/>
+	<property name="vocab.config.ttl" value="${doc}/config.ttl"/>
 	<property name="vocab.config.rdf" value="${doc}/config.rdf"/>
 	<property name="vocab.config.namespace" value="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#"/>
 	<property name="vocab.config.name" value="D2RConfig"/>
 	<property name="vocab.config.package" value="${project.package}.vocab"/>
-	<property name="vocab.config.java" value="${src}/${project.path}/vocab/${vocab.config.name}.java"/>
 	
 	<path id="project.class.path">
 		<fileset dir="${lib}">
@@ -171,9 +169,9 @@
 		<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
 				failonerror="true">
 			<arg value="-i" />
-			<arg value="file:${vocab.language.n3}" />
+			<arg value="file:${vocab.language.ttl}" />
 			<arg value="-o" />
-			<arg value="${vocab.language.java}" />
+			<arg value="${src}" />
 			<arg value="-a" />
 			<arg value="${vocab.language.namespace}" />
 			<arg value="-n" />
@@ -182,21 +180,15 @@
 			<arg value="${project.package}.vocab" />
 			<arg value="--rdfs" />
 		</java>
-		<!-- schemagen generates broken Java code for the "class" property,
-			 we fix it by search&replace -->
-		<replace file="${vocab.language.java}" token="Property class" value="Property class_"/>
-		<!-- schemagen generates a field "class_Map" for d2rq:classMap for some reason,
-			 we fix it by search&replace -->
-		<replace file="${vocab.language.java}" token="class_Map" value="classMap"/>
 	</target>
 
 	<target name="vocab.config.schemagen">
 		<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
 				failonerror="true">
 			<arg value="-i"/>
-			<arg value="file:${vocab.config.n3}"/>
+			<arg value="file:${vocab.config.ttl}"/>
 			<arg value="-o"/>
-			<arg value="${vocab.config.java}"/>
+			<arg value="${src}"/>
 			<arg value="-a"/>
 			<arg value="${vocab.config.namespace}"/>
 			<arg value="-n"/>
@@ -211,8 +203,8 @@
 	<target name="vocab.language.toXML">
 		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
 				output="${vocab.language.rdf}" logError="yes" failonerror="true">
-			<arg value="${vocab.language.n3}"/>
-			<arg value="N3"/>
+			<arg value="${vocab.language.ttl}"/>
+			<arg value="TURTLE"/>
 			<arg value="RDF/XML-ABBREV"/>
 		</java>
 	</target>
@@ -220,8 +212,8 @@
 	<target name="vocab.config.toXML">
 		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
 				output="${vocab.config.rdf}" logError="yes" failonerror="true">
-			<arg value="${vocab.config.n3}"/>
-			<arg value="N3"/>
+			<arg value="${vocab.config.ttl}"/>
+			<arg value="TURTLE"/>
 			<arg value="RDF/XML-ABBREV"/>
 		</java>
 	</target>

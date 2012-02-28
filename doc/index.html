@@ -181,12 +181,12 @@ pre { speak-punctuation: code; }
     already included with D2R Server.</p></li>
   <li><p><strong>Generate a mapping file</strong> for your database schema.
     Change into the D2R Server directory and run:</p>
-    <pre>generate-mapping -o <em>mapping.n3</em> -d <em>driver.class.name</em>
+    <pre>generate-mapping -o <em>mapping.ttl</em> -d <em>driver.class.name</em>
     -u <em>db-user</em> -p <em>db-password</em> <em>jdbc:url:...</em></pre>
-    <p><tt><em>mapping.n3</em></tt> is the name for the new mapping file.
+    <p><tt><em>mapping.ttl</em></tt> is the name for the new mapping file.
     <tt>-d</tt> can be skipped for MySQL.</p></li>
   <li><p><strong>Start the server:</strong></p>
-    <pre>d2r-server <em>mapping.n3</em></pre>
+    <pre>d2r-server <em>mapping.ttl</em></pre>
     </li>
   <li>
     <p><strong>Test the Server: </strong> Open <a href="http://localhost:2020/">http://localhost:2020/</a>
@@ -249,7 +249,7 @@ map:offer a d2rq:ClassMap;
     d2r:baseURI &lt;http://localhost:2020/&gt;;
     d2r:port 2020;
     d2r:vocabularyIncludeInstances true;
-    d2r:metadataTemplate "metadata.n3";
+    d2r:metadataTemplate "metadata.ttl";
     d2r:documentMetadata [
         rdfs:comment "This comment is custom document metadata.";
     ];
@@ -276,13 +276,13 @@ Vocabulary serving is a feature of D2RQ and may be controlled using the <a href=
 <h2 id="metadata">Publishing metadata</h2>
 <p>D2R Server provides a mechanism for adding metadata such as licensing and provenance information to the RDF graphs served by its Linked Data interface. The supplied metadata will be shown in a "Metadata" table below the usual property-value table, which provides a tree-like visualization of the metadata. The <em>(more)</em> links in the visualization allow to expand the view to show the properties of the corresponding entities.</p>
 
-<p>The metadata added to the provided RDF graphs is generated from a template RDF graph by replacing placeholders in the template. These placeholders refer to run-time data, typical configuration options, as well as to additional configuration variables. The metadata extension includes the default template <tt>metadata.n3</tt>, which adds various pieces of provenance information to the published data.</p>
+<p>The metadata added to the provided RDF graphs is generated from a template RDF graph by replacing placeholders in the template. These placeholders refer to run-time data, typical configuration options, as well as to additional configuration variables. The metadata extension includes the default template <tt>metadata.ttl</tt>, which adds various pieces of provenance information to the published data.</p>
 
 <p>In order to include metadata along with the graphs served by D2R Server, the path to the metadata template is specified relative to <code>WEB-INF/templates</code> subdirectory using the predicate <tt>d2r:metadataTemplate</tt> in a <a href="#configuration"><tt>d2r:Server</tt> configuration block</a>:</p>
 
 <pre>
 &lt;&gt; a d2r:Server;
-    d2r:metadataTemplate &quot;metadata.n3&quot;;
+    d2r:metadataTemplate &quot;metadata.ttl&quot;;
 </pre>
 
 <h3>Template RDF Graph</h3>
@@ -326,7 +326,7 @@ The following placeholder groups are currently available:
 @prefix meta: &lt;http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#&gt; .
 
 &lt;&gt; a d2r:Server;
-    d2r:metadataTemplate &quot;metadata.n3&quot;;
+    d2r:metadataTemplate &quot;metadata.ttl&quot;;
     meta:d2rUser &lt;http://example.org/URI_of_publisher&gt;&nbsp;;
 </pre>
 <h4>Sample Template</h4>
@@ -387,7 +387,7 @@ The following placeholder groups are currently available:
 
 <p>To run D2R Server as a service on Windows, use the <tt>install-service</tt> script:</p>
 
-<pre>install-service <em>servicename mapping.n3</em></pre>
+<pre>install-service <em>servicename mapping.ttl</em></pre>
 
 <p>The service can be started from the Services panel in the management console. The service will log all output including startup errors to the files <tt>stdout.log</tt> and <tt>stderr.log</tt>.</p>
 

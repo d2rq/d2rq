@@ -37,7 +37,7 @@ public class ModelD2RQ extends ModelCom implements Model {
 
 	/** 
 	 * Create a non-RDF database-based model. The model is created
-	 * from a D2RQ map that may be in "RDF/XML", "N-TRIPLES" or "N3"
+	 * from a D2RQ map that may be in "RDF/XML", "N-TRIPLES" or "TURTLE"
 	 * format.
 	 * @param mapURL URL of the D2RQ map to be used for this model
 	 * @param serializationFormat the format of the map, or <tt>null</tt>

@@ -74,7 +74,7 @@ public class AutoReloadableDataset implements Dataset {
 			log.info("Reloading mapping file");
 		
 		Model mapModel = ModelFactory.createDefaultModel();
-		mapModel.read((this.localFile) ? "file:" + this.mappingFile : this.mappingFile, server.resourceBaseURI(), "N3");
+		mapModel.read((this.localFile) ? "file:" + this.mappingFile : this.mappingFile, server.resourceBaseURI(), "TURTLE");
 		
 		this.hasTruncatedResults = mapModel.contains(null, D2RQ.resultSizeLimit, (RDFNode) null);
 		ModelD2RQ result = new ModelD2RQ(mapModel, server.resourceBaseURI());

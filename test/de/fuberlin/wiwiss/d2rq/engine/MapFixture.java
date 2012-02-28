@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 import de.fuberlin.wiwiss.d2rq.vocab.Test;
 
 /**
- * Helper for loading mappings as test fixtures from N3 files.
+ * Helper for loading mappings as test fixtures from Turtle files.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @version $Id: MapFixture.java,v 1.1 2008/04/27 22:42:37 cyganiak Exp $
@@ -39,7 +39,7 @@ public class MapFixture {
 		Model m = ModelFactory.createDefaultModel();
 		Resource dummyDB = m.getResource(Test.DummyDatabase.getURI());
 		dummyDB.addProperty(RDF.type, D2RQ.Database);
-		m.read(D2RQTestSuite.class.getResourceAsStream(mappingFileName), null, "N3");
+		m.read(D2RQTestSuite.class.getResourceAsStream(mappingFileName), null, "TURTLE");
 		Mapping mapping = new MapParser(m, null).parse();
 		return mapping.compiledPropertyBridges();
 	}

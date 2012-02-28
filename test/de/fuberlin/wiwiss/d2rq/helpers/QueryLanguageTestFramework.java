@@ -118,7 +118,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	protected abstract String mapURL();
 	
 	protected void setUp() throws Exception {
-		this.model = new ModelD2RQ(mapURL(), "N3", "http://test/");
+		this.model = new ModelD2RQ(mapURL(), "TURTLE", "http://test/");
 //		this.model.enableDebug();
 	    setUpShowErrors(); // should be activated all the time
 //	    setUpShowPerformance(); // activate (only) to test performance (only)

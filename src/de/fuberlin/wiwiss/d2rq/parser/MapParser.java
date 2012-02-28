@@ -417,7 +417,7 @@ public class MapParser {
 			classMap.setDatabase(this.mapping.database(
 					stmts.nextStatement().getResource()));
 		}
-		stmts = r.listProperties(D2RQ.class__);
+		stmts = r.listProperties(D2RQ.class_);
 		while (stmts.hasNext()) {
 			classMap.addClass(stmts.nextStatement().getResource());
 		}
@@ -434,11 +434,11 @@ public class MapParser {
 			bridge.setConstantValue(additionalProperty.getProperty(D2RQ.propertyValue).getObject());
 			classMap.addPropertyBridge(bridge);
 		}
-		stmts = r.listProperties(D2RQ.class_DefinitionLabel);
+		stmts = r.listProperties(D2RQ.classDefinitionLabel);
 		while (stmts.hasNext()) {
 			classMap.addDefinitionLabel(stmts.nextStatement().getLiteral());
 		}
-		stmts = r.listProperties(D2RQ.class_DefinitionComment);
+		stmts = r.listProperties(D2RQ.classDefinitionComment);
 		while (stmts.hasNext()) {
 			classMap.addDefinitionComment(stmts.nextStatement().getLiteral());
 		}

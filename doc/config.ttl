@@ -11,7 +11,6 @@
     rdfs:comment "This vocabulary defines RDF terms used in configuration files for D2R Server, a software application that publishes relational databases on the Semantic Web."@en;
     foaf:page <http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/>;
     dc:creator <http://richard.cyganiak.de/foaf.rdf#cygri>;
-    owl:versionInfo "$Id: config.n3,v 1.5 2010/02/16 13:46:06 fatorange Exp $";
     .
 <http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/>
     rdfs:label "D2R Server homepage and documentation"@en;

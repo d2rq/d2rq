@@ -13,7 +13,7 @@ public class JenaModelExample {
 	
 	public static void main(String[] args) {
 		// Set up the ModelD2RQ using a mapping file
-		ModelD2RQ m = new ModelD2RQ("file:doc/example/mapping-iswc.n3");
+		ModelD2RQ m = new ModelD2RQ("file:doc/example/mapping-iswc.ttl");
 		
 		// Find anything with an rdf:type of iswc:InProceedings
 		StmtIterator paperIt = m.listStatements(null, RDF.type, ISWC.InProceedings);

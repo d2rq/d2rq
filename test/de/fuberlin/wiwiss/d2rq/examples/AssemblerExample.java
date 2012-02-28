@@ -9,7 +9,7 @@ public class AssemblerExample {
 
 	public static void main(String[] args) {
 		// Load assembler specification from file
-		Model assemblerSpec = FileManager.get().loadModel("doc/example/assembler.n3");
+		Model assemblerSpec = FileManager.get().loadModel("doc/example/assembler.ttl");
 		
 		// Get the model resource
 		Resource modelSpec = assemblerSpec.createResource(assemblerSpec.expandPrefix(":myModel"));

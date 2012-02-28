@@ -1,24 +1,32 @@
-@prefix map: <file:/Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.n3#> .
+@prefix map: <file:/Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.ttl#> .
 @prefix vocab: <vocab/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix d2r: <http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix iswc: <http://annotation.semanticweb.org/iswc/iswc.daml#> .
 @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
-@prefix jdbc: <http://d2rq.org/terms/jdbc/> .
+
+<> a d2r:Server;
+	rdfs:label "Example D2R Server";
+	d2r:port 8080;
+	d2r:baseURI <http://localhost:8080/>;
+    d2r:metadataTemplate "metadata.ttl";
+	d2r:documentMetadata [
+		rdfs:comment "This comment is custom document metadata.";
+	];
+	.
 
 map:database a d2rq:Database;
 	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-	d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/iswc?autoReconnect=true";
+	d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/iswc";
 	d2rq:username "root";
-	jdbc:keepAlive "3600";				# sends noop-query every 3600 seconds
-#	jdbc:keepAliveQuery "SELECT 1";		# optional custom noop-query
 	.
 
 # Table conferences
@@ -26,22 +34,11 @@ map:Conferences a d2rq:ClassMap;
 	d2rq:dataStorage map:database;
 	d2rq:uriPattern "conferences/@@conferences.ConfID@@";
 	d2rq:class iswc:Conference;
-	
-	# Some unrelated properties to test class definitions
-	d2rq:classDefinitionLabel "conference";
-	d2rq:classDefinitionComment "A conference";
-	d2rq:additionalClassDefinitionProperty map:conferenceSubClassOf;
 	.
-	
 map:conferences_Name a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Conferences;
 	d2rq:property rdfs:label;
 	d2rq:column "conferences.Name";
-
-	# Some properties to test property definitions
-	d2rq:propertyDefinitionLabel "label";
-	d2rq:propertyDefinitionComment "A human-readable name for the subject.";
-	d2rq:additionalPropertyDefinitionProperty map:labelDomain;
 	.
 map:conferences_Date a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Conferences;
@@ -250,12 +247,8 @@ map:rel_person_organization a d2rq:PropertyBridge;
 map:Topics a d2rq:ClassMap;
 	d2rq:dataStorage map:database;
 	d2rq:uriPattern "topics/@@topics.TopicID@@";
+	d2rq:class skos:Concept;
 	.
-map:topics_Type a d2rq:PropertyBridge;
-    d2rq:belongsToClassMap map:Topics;
-    d2rq:property rdf:type;
-    d2rq:constantValue skos:Concept;
-    .
 map:topics_TopicName a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Topics;
 	d2rq:property skos:prefLabel;
@@ -276,13 +269,3 @@ map:topics_ParentID a d2rq:PropertyBridge;
     d2rq:alias "topics AS parentTopics";
     .
 
-# Unrelated property definitions for testing
-map:conferenceSubClassOf a d2rq:AdditionalProperty;
-	d2rq:propertyName rdfs:subClassOf;
-	d2rq:propertyValue iswc:Event;
-	.
-
-map:labelDomain a d2rq:AdditionalProperty;
-	d2rq:propertyName rdfs:domain;
-	d2rq:propertyValue rdfs:Resource;
-	.	

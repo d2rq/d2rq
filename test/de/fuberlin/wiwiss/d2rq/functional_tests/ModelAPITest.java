@@ -25,7 +25,7 @@ public class ModelAPITest extends TestCase {
 	private ModelD2RQ model;
 
 	protected void setUp() throws Exception {
-		this.model = new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "N3", "http://test/");
+		this.model = new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "TURTLE", "http://test/");
 //		this.model.enableDebug();
 	}
 

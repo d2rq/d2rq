@@ -35,7 +35,7 @@ public class DBConnectionTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		mapModel = ModelFactory.createDefaultModel();
-		mapModel.read(D2RQTestSuite.ISWC_MAP, "http://test/", "N3");
+		mapModel.read(D2RQTestSuite.ISWC_MAP, "http://test/", "TURTLE");
 		MapParser parser = new MapParser(mapModel, null);
 		databases = parser.parse().databases();
 		firstDatabase = (Database)databases.iterator().next();

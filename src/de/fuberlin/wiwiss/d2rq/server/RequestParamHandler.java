@@ -32,8 +32,8 @@ public class RequestParamHandler {
 	static {
 		mimeTypes.put("rdfxml", "application/rdf+xml");
 		mimeTypes.put("xml", "application/rdf+xml");
-		mimeTypes.put("turtle", "application/x-turtle");
-		mimeTypes.put("ttl", "application/x-turtle");
+		mimeTypes.put("turtle", "text/turtle;charset=utf-8");
+		mimeTypes.put("ttl", "text/turtle;charset=utf-8");
 		mimeTypes.put("n3", "text/rdf+n3;charset=utf-8");
 		mimeTypes.put("nt", "text/plain");
 		mimeTypes.put("text", "text/plain");

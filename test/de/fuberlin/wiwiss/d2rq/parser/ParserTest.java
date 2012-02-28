@@ -62,7 +62,7 @@ public class ParserTest extends TestCase {
 	}
 
 	public void testParseAlias() {
-		Mapping mapping = parse("parser/alias.n3").parse();
+		Mapping mapping = parse("parser/alias.ttl").parse();
 		assertEquals(1, mapping.compiledPropertyBridges().size());
 		TripleRelation bridge = (TripleRelation) mapping.compiledPropertyBridges().iterator().next();
 		assertTrue(bridge.baseRelation().condition().isTrue());
@@ -73,7 +73,7 @@ public class ParserTest extends TestCase {
 	
 	public void testParseResourceInsteadOfLiteral() {
 		try {
-			parse("parser/resource-instead-of-literal.n3").parse();
+			parse("parser/resource-instead-of-literal.ttl").parse();
 		} catch (D2RQException ex) {
 			assertEquals(D2RQException.MAPPING_RESOURCE_INSTEADOF_LITERAL, ex.errorCode());
 		}
@@ -81,27 +81,27 @@ public class ParserTest extends TestCase {
 	
 	public void testParseLiteralInsteadOfResource() {
 		try {
-			parse("parser/literal-instead-of-resource.n3").parse();
+			parse("parser/literal-instead-of-resource.ttl").parse();
 		} catch (D2RQException ex) {
 			assertEquals(D2RQException.MAPPING_LITERAL_INSTEADOF_RESOURCE, ex.errorCode());
 		}
 	}
 
 	public void testTranslationTableRDFValueCanBeLiteral() {
-		Mapping m = parse("parser/translation-table.n3").parse();
+		Mapping m = parse("parser/translation-table.ttl").parse();
 		TranslationTable tt = m.translationTable(ResourceFactory.createResource("http://example.org/tt"));
 		assertEquals("http://example.org/foo", tt.translator().toRDFValue("literal"));
 	}
 	
 	public void testTranslationTableRDFValueCanBeURI() {
-		Mapping m = parse("parser/translation-table.n3").parse();
+		Mapping m = parse("parser/translation-table.ttl").parse();
 		TranslationTable tt = m.translationTable(ResourceFactory.createResource("http://example.org/tt"));
 		assertEquals("http://example.org/foo", tt.translator().toRDFValue("uri"));
 	}
 	
 	public void testTypeConflictClassMapAndBridgeIsDetected() {
 		try {
-			parse("parser/type-classmap-and-propertybridge.n3").parse();
+			parse("parser/type-classmap-and-propertybridge.ttl").parse();
 		} catch (D2RQException ex) {
 			assertEquals(D2RQException.MAPPING_TYPECONFLICT, ex.errorCode());
 		}
@@ -109,7 +109,7 @@ public class ParserTest extends TestCase {
 	
 	private MapParser parse(String testFileName) {
 		Model m = ModelFactory.createDefaultModel();
-		m.read(D2RQTestSuite.DIRECTORY_URL + testFileName, "N3");
+		m.read(D2RQTestSuite.DIRECTORY_URL + testFileName, "TURTLE");
 		MapParser result = new MapParser(m, null);
 		result.parse();
 		return result;

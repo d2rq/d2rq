@@ -22,7 +22,6 @@
    				dc:creator       "Richard Cyganiak" ;
    				dc:date          "2006-08-12" ;
    				dc:format        "RDF";
-   				owl:versionInfo "$Id: d2rq-rdfs.n3,v 1.26 2009/08/10 13:00:25 fatorange Exp $";
    				.
 
 

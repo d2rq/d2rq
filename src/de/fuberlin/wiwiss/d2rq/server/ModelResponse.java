@@ -82,8 +82,8 @@ public class ModelResponse {
 		if ("application/rdf+xml".equals(mediaType)) {
 			return new RDFXMLWriter();
 		}
-		if ("application/x-turtle".equals(mediaType)) {
-			return new N3Writer();
+		if ("text/turtle;charset=utf-8".equals(mediaType)) {
+			return new TurtleWriter();
 		}
 		if ("text/rdf+n3;charset=utf-8".equals(mediaType)) {
 			return new N3Writer();
@@ -104,6 +104,12 @@ public class ModelResponse {
 	private class N3Writer implements ModelWriter {
 		public void write(Model model, HttpServletResponse response) throws IOException {
 			model.getWriter("N3").write(model, response.getOutputStream(), null);
+		}
+	}
+	
+	private class TurtleWriter implements ModelWriter {
+		public void write(Model model, HttpServletResponse response) throws IOException {
+			model.getWriter("TURTLE").write(model, response.getOutputStream(), null);
 		}
 	}
 	

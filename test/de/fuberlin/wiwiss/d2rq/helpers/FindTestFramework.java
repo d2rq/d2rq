@@ -29,7 +29,7 @@ public class FindTestFramework extends TestCase {
 	private Set resultTriples; 
 
 	protected void setUp() throws Exception {
-		this.graph = (GraphD2RQ) new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "N3", "http://test/").getGraph();
+		this.graph = (GraphD2RQ) new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "TURTLE", "http://test/").getGraph();
 	}
 
 	protected void tearDown() throws Exception {

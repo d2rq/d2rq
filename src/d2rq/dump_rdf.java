@@ -126,7 +126,7 @@ public class dump_rdf {
 		System.out.println("  RDF output parameters");
 		System.out.println("    -m mapURL       URL of a D2RQ mapping file (optional)");
 		System.out.println("    -b baseURI      Base URI for generated RDF (optional)");
-		System.out.println("    -f format       One of N-TRIPLE (default), RDF/XML, RDF/XML-ABBREV, N3");
+		System.out.println("    -f format       One of N-TRIPLE (default), RDF/XML, RDF/XML-ABBREV, TURTLE");
 		System.out.println("    -o outfile      Output file name (default: stdout)");
 		System.out.println();
 	}

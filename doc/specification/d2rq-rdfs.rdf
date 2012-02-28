@@ -360,7 +360,6 @@
     <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
   </owl:DeprecatedClass>
   <rdf:Description rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1">
-    <owl:versionInfo>$Id: d2rq-rdfs.n3,v 1.26 2009/08/10 13:00:25 fatorange Exp $</owl:versionInfo>
     <dc:format>RDF</dc:format>
     <dc:date>2006-08-12</dc:date>
     <dc:creator>Richard Cyganiak</dc:creator>

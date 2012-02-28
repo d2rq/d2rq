@@ -246,7 +246,7 @@ separate <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/">D2R Server 
   papers, authors and topics throughout this manual. The database is mapped to the 
   International Semantic Web Community (ISWC) Ontology.</p>
 <ul>
-  <li>ISWC D2RQ mapping file: <a href="../example/mapping-iswc.n3">mapping-iswc.n3</a></li>
+  <li>ISWC D2RQ mapping file: <a href="../example/mapping-iswc.ttl">mapping-iswc.ttl</a></li>
   <li>Example database (with some entries from the ISWC 2002 conference):
     <a href="../example/iswc-mysql.sql">iswc-mysql.sql</a> (MySQL dump)</li>
   <li>ISWC ontology: <a href="http://annotation.semanticweb.org/iswc/iswc.daml">iswc.daml</a></li>
@@ -307,7 +307,7 @@ on Windows and Unix systems.</p>
 analyzing the schema of an existing database. This mapping file can be used
 as-is or can be customized.</p>
 
-<pre>generate-mapping [-u username] [-p password] [-d driverclass] [-o outfile.n3] [-b base uri] jdbcURL</pre>
+<pre>generate-mapping [-u username] [-p password] [-d driverclass] [-o outfile.ttl] [-b base uri] jdbcURL</pre>
 
 <dl>
 <dt>jdbcURL</dt>
@@ -338,8 +338,8 @@ Oracle: <tt>oracle.jdbc.OracleDriver</tt><br />
 Microsoft SQL Server: <tt>com.microsoft.sqlserver.jdbc.SQLServerDriver</tt></p>
 </dd>
 
-<dt>-o outfile.n3</dt>
-<dd>The generated mapping will be stored in this file in N3 syntax. If this
+<dt>-o outfile.ttl</dt>
+<dd>The generated mapping will be stored in this file in Turtle syntax. If this
 parameter is omitted, the mapping will be written to standard out.</dd>
 
 <dt>-b baseURI</dt>
@@ -363,7 +363,7 @@ to translate the database contents to RDF. If no mapping file is specified,
 then the script will invoke <tt>generate-mapping</tt> and use its default
 mapping for the translation.</p>
 
-<pre>dump-rdf -m mapping.n3 [output parameters]</pre>
+<pre>dump-rdf -m mapping.ttl [output parameters]</pre>
 
 <p>If no mapping file is provided, then the database connection must be
 specified on the command line. With the exception of <tt>fetchSize</tt>, the meaning of all parameters is the
@@ -376,7 +376,7 @@ same as for the <a href="#generatemapping"><tt>generate-mapping</tt> script</a>.
 <dl>
 <dt>-f format</dt>
 <dd>The RDF syntax to use for output. Supported syntaxes are "RDF/XML" (the default),
-  "RDF/XML-ABBREV", "N3", "N-TRIPLE". "N-TRIPLE" works best for large 
+  "RDF/XML-ABBREV", "TURTLE", "N3", "N-TRIPLE". "N-TRIPLE" works best for large 
   databases.</dd>
   
 <dt>-s fetchSize</dt>
@@ -393,7 +393,7 @@ This value may alternatively be specified in the mapping using <a href="#databas
 
 <p>Example invocation using a mapping file:</p>
 
-<pre>dump-rdf -m mapping-iswc.n3 -f N-TRIPLE -b http://localhost:2020/ &gt; iswc.nt</pre>
+<pre>dump-rdf -m mapping-iswc.ttl -f N-TRIPLE -b http://localhost:2020/ &gt; iswc.nt</pre>
 
 <hr />
 
@@ -443,7 +443,7 @@ information about papers and their authors from the model.</p>
 tool. The DC and RDF classes are part of Jena.</p>
 
 <pre>// Set up the ModelD2RQ using a mapping file
-Model m = new ModelD2RQ("file:doc/example/mapping-iswc.n3");
+Model m = new ModelD2RQ("file:doc/example/mapping-iswc.ttl");
 
 // Find anything with an rdf:type of iswc:InProceedings
 StmtIterator paperIt = m.listStatements(null, RDF.type, ISWC.InProceedings);
@@ -474,7 +474,7 @@ of the Graph interface, the GraphD2RQ.</p>
 that have been published in 2003.</p>
 
 <pre>// Load mapping file
-Model mapping = FileManager.get().loadModel("doc/example/mapping-iswc.n3");
+Model mapping = FileManager.get().loadModel("doc/example/mapping-iswc.ttl");
 
 // Set up the GraphD2RQ
 GraphD2RQ g = new GraphD2RQ(mapping, "http://localhost:2020/");
@@ -509,7 +509,7 @@ are processed by Jena's ARQ query engine. The example shows how a D2RQ model
 is set up, how a SPARQL query is executed, and how the results are written
 to the console.</p>
 
-<pre>ModelD2RQ m = new ModelD2RQ("file:doc/example/mapping-iswc.n3");
+<pre>ModelD2RQ m = new ModelD2RQ("file:doc/example/mapping-iswc.ttl");
 String sparql = 
     "PREFIX dc: &lt;http://purl.org/dc/elements/1.1/>" +
     "PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/>" +
@@ -542,7 +542,7 @@ information on Jena assemblers, see the
 
 :myModel
   a d2rq:D2RQModel;
-  d2rq:mappingFile &lt;mapping-iswc.n3&gt;;
+  d2rq:mappingFile &lt;mapping-iswc.ttl&gt;;
   d2rq:resourceBaseURI &lt;http://localhost:2020/&gt;;
   .</pre>
 
@@ -559,7 +559,7 @@ information on Jena assemblers, see the
 <p>This usage example will create a D2RQ model from a model specification, and write it to the console:</p>
 
 <pre>// Load assembler specification from file
-Model assemblerSpec = FileManager.get().loadModel("doc/example/assembler.n3");
+Model assemblerSpec = FileManager.get().loadModel("doc/example/assembler.ttl");
 
 // Get the model resource
 Resource modelSpec = assemblerSpec.createResource(assemblerSpec.expandPrefix(":myModel"));
@@ -577,7 +577,7 @@ m.write(System.out);</pre>
 
 <ol>
   <li>Set up a MySQL database and import the database dump from <tt>/doc/example/iswc-mysql.sql</tt>.</li>
-  <li>Change the JDBC database connection string, username and password in <tt>/doc/example/mapping-iswc.n3</tt>
+  <li>Change the JDBC database connection string, username and password in <tt>/doc/example/mapping-iswc.ttl</tt>
     to match your configuration.</li>
   <li>Run the <tt>D2RQTestSuite</tt> class as a JUnit test.</li>
 </ol>
@@ -609,7 +609,7 @@ m.write(System.out);</pre>
 @prefix : &lt;http://annotation.semanticweb.org/iswc/iswc.daml#&gt; .
 
 # Namespace of the mapping file; does not appear in mapped data
-@prefix map: &lt;file:///Users/d2r/example.n3#&gt; .
+@prefix map: &lt;file:///Users/d2r/example.ttl#&gt; .
 
 # Other namespaces
 @prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .
