@@ -90,12 +90,9 @@ public class GraphPatternTranslatorTest extends TestCase {
 		NodeRelation nodeRel = translate1("?x rdf:type ?x", "engine/object-uricolumn.n3");
 		Relation r = nodeRel.baseRelation();
 		assertEquals(Collections.singleton(table1), r.tables());
-		assertEquals(Collections.singleton(table1id), r.projections());
 		assertTrue(r.condition() instanceof Equality);	// Too lazy to check both sides
 		assertEquals(AliasMap.NO_ALIASES, r.aliases());
 		assertEquals(Collections.singleton("x"), nodeRel.variableNames());
-		assertEquals("URI(Pattern(http://example.org/res@@table1.id@@))", 
-				nodeRel.nodeMaker("x").toString());
 	}
 
 	public void testReturnMultipleMatchesForSingleTriplePattern() {

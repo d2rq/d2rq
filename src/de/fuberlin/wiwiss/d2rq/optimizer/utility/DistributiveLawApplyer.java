@@ -70,6 +70,8 @@ public final class DistributiveLawApplyer implements ExprVisitor
 			this.resultExpr = curExpr;
 			((ExprFunction1) subExpr).getArg().visit(this);
 			this.resultExpr = new E_LogicalNot(this.resultExpr);
+		} else {
+			this.resultExpr = curExpr;
 		}
 	}
 
@@ -82,12 +84,12 @@ public final class DistributiveLawApplyer implements ExprVisitor
 		if (curExpr instanceof E_LogicalOr || curExpr instanceof E_LogicalAnd)
 		{
 			// step down
-			leftExpr = ((ExprFunction2)curExpr).getArg1();
+			leftExpr = curExpr.getArg1();
 			leftExpr.visit(this);
 			leftExpr = this.resultExpr;
 
 			// step down
-			rightExpr = ((ExprFunction2)curExpr).getArg2();
+			rightExpr = curExpr.getArg2();
 			rightExpr.visit(this);
 			rightExpr = this.resultExpr;
 			
