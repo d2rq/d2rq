@@ -19,7 +19,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.Test;
  * Helper for loading mappings as test fixtures from Turtle files.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapFixture.java,v 1.1 2008/04/27 22:42:37 cyganiak Exp $
  */
 public class MapFixture {
 	private final static PrefixMapping prefixes = new PrefixMappingImpl() {{

@@ -14,7 +14,6 @@ import de.fuberlin.wiwiss.d2rq.server.JettyLauncher;
 /**
  * Command line launcher for D2R Server.
  * 
- * @version $Id: server.java,v 1.8 2009/08/02 09:12:05 fatorange Exp $
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class server {

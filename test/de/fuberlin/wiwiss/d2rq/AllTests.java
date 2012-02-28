@@ -7,7 +7,6 @@ import junit.framework.TestSuite;
  * Tests for d2rq package
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AllTests.java,v 1.15 2006/09/03 13:45:46 cyganiak Exp $
  */
 public class AllTests {
 	public static Test suite() {

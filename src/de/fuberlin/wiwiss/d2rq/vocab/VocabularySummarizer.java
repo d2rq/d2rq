@@ -15,7 +15,6 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * vocabulary class, such as the {@link D2RQ} class.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: VocabularySummarizer.java,v 1.1 2007/11/16 12:10:16 cyganiak Exp $
  */
 public class VocabularySummarizer {
 	private final Class vocabularyJavaClass;

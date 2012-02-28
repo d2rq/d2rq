@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * thing is smelly. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RequestParamHandler.java,v 1.3 2008/09/02 00:20:11 cyganiak Exp $
  */
 public class RequestParamHandler {
 	private static final String ATTRIBUTE_NAME_IS_HANDLED =

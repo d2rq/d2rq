@@ -33,7 +33,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: QueryLanguageTestFramework.java,v 1.7 2008/08/13 11:27:39 cyganiak Exp $
  */
 public abstract class QueryLanguageTestFramework extends TestCase {
 	protected ModelD2RQ model;

@@ -23,7 +23,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Unit tests for {@link MapParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ParserTest.java,v 1.18 2008/08/11 08:28:24 cyganiak Exp $
  */
 public class ParserTest extends TestCase {
 	private final static String TABLE_URI = "http://example.org/map#table1";

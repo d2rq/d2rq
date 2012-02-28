@@ -13,7 +13,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Pretty printer for various kinds of objects.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PrettyPrinter.java,v 1.5 2007/11/06 10:06:18 cyganiak Exp $
  */
 public class PrettyPrinter {
 

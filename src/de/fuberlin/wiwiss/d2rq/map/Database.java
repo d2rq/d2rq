@@ -18,7 +18,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Database.java,v 1.22 2009/08/06 10:34:21 fatorange Exp $
  */
 public class Database extends MapObject {
 	public static final int NO_LIMIT = -1;

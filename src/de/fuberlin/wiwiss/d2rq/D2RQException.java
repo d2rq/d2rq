@@ -6,7 +6,6 @@ import com.hp.hpl.jena.shared.JenaException;
  * Exception used to signal most D2RQ errors.
  *
  * @author Chris Bizer chris@bizer.de
- * @version $Id: D2RQException.java,v 1.20 2009/08/06 10:34:36 fatorange Exp $
  */
 
 public class D2RQException extends JenaException {

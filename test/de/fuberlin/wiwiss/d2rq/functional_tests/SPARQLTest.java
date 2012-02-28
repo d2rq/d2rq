@@ -24,7 +24,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SPARQLTest.java,v 1.8 2006/09/28 14:00:22 cyganiak Exp $
  */
 public class SPARQLTest extends QueryLanguageTestFramework {
 

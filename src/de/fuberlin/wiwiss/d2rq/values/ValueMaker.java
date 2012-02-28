@@ -31,7 +31,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * of a set of RDF nodes.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ValueMaker.java,v 1.10 2008/04/25 16:27:41 cyganiak Exp $
  */
 public interface ValueMaker {
     

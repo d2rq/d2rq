@@ -19,7 +19,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
  * map from SELECT clause entries to string values.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResultRowMap.java,v 1.7 2010/08/13 13:45:29 cyganiak Exp $
  */
 public class ResultRowMap implements ResultRow {
 	

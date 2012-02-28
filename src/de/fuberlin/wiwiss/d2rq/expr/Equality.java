@@ -12,7 +12,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * An expression that is TRUE iff its two constituent expressions are true.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Equality.java,v 1.2 2008/04/27 22:42:37 cyganiak Exp $
  */
 public class Equality extends Expression {
 

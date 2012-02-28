@@ -19,7 +19,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * @author jgarbers
- * @version $Id: DBConnectionTest.java,v 1.25 2009/02/07 14:51:32 fatorange Exp $
  */
 public class DBConnectionTest extends TestCase {
 

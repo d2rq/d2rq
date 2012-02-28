@@ -9,7 +9,6 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * graph and no named graphs.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQDatasetGraph.java,v 1.2 2009/02/09 12:21:30 fatorange Exp $
  */
 public class D2RQDatasetGraph extends DatasetGraphOne {
 	

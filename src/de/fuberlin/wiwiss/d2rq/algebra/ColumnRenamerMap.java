@@ -12,7 +12,6 @@ import java.util.Map;
  * original and replacement columns.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerMap.java,v 1.2 2007/10/22 10:21:16 cyganiak Exp $
  */
 public class ColumnRenamerMap extends ColumnRenamer {
 	private Map originalsToReplacements;

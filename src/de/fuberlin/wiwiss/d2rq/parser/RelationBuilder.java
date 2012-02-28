@@ -22,7 +22,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO isUnique is not properly handled yet
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RelationBuilder.java,v 1.11 2009/07/29 12:03:53 fatorange Exp $
  */
 public class RelationBuilder {
 	private Expression condition = Expression.TRUE;

@@ -14,7 +14,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO Add uniqueConstraints()
  * TODO Explicitly list tables!!!
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Relation.java,v 1.14 2009/07/29 12:03:53 fatorange Exp $
  */
 public abstract class Relation implements RelationalOperators {
 

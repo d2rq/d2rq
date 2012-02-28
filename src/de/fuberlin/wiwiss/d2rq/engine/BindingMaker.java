@@ -18,7 +18,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * Produces {@link Binding}s from {@link ResultRow}s.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BindingMaker.java,v 1.4 2009/03/26 11:01:42 dorgon Exp $
  */
 public class BindingMaker {
 	private final Map variableNamesToNodeMakers;

@@ -14,7 +14,6 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * TODO: NodeSetFilter doesn't handle ColumnFunctions or TranslationTables yet
  * 
  * @author Richard Cyganiak
- * @version $Id: NodeSetFilter.java,v 1.3 2008/04/27 22:42:38 cyganiak Exp $
  */
 public interface NodeSetFilter {
 

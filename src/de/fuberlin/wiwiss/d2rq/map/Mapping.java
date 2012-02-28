@@ -30,7 +30,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.17 2009/06/03 16:28:17 fatorange Exp $
  */
 public class Mapping {
 	private final Model model = ModelFactory.createDefaultModel();

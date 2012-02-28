@@ -24,7 +24,6 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TripleRelation.java,v 1.12 2009/08/02 09:15:09 fatorange Exp $
  */
 public class TripleRelation {
 	public static final String SUBJECT = "subject";

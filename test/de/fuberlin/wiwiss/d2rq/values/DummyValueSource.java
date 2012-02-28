@@ -11,7 +11,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * Dummy implementation of {@link ValueMaker}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DummyValueSource.java,v 1.5 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class DummyValueSource implements ValueMaker {
 	private String returnValue = null;

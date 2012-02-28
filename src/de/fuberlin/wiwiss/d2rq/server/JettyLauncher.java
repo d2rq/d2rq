@@ -17,7 +17,6 @@ import org.eclipse.jetty.webapp.WebAppContext;
  * parameters with values taken from the command line.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JettyLauncher.java,v 1.3 2009/08/02 09:12:06 fatorange Exp $
  */
 public class JettyLauncher {
 	public final static int DEFAULT_PORT = 2020;

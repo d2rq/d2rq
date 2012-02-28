@@ -27,7 +27,6 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
  * from the second.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTableParser.java,v 1.4 2007/10/23 15:17:53 cyganiak Exp $
  */
 public class TranslationTableParser {
 	private Log log = LogFactory.getLog(TranslationTableParser.class);

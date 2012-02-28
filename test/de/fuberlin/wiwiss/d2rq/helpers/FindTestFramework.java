@@ -20,7 +20,6 @@ import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTestFramework.java,v 1.3 2006/09/10 22:18:46 cyganiak Exp $
  */
 public class FindTestFramework extends TestCase {
     protected static final Model m = ModelFactory.createDefaultModel();

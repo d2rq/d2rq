@@ -19,7 +19,6 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelAPITest.java,v 1.11 2009/02/14 22:37:15 fatorange Exp $
  */
 public class ModelAPITest extends TestCase {
 	private ModelD2RQ model;

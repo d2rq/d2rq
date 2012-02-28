@@ -9,7 +9,6 @@ import junit.framework.TestCase;
  * Unit test cases for {@link Attribute}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AttributeTest.java,v 1.6 2008/04/26 22:16:08 cyganiak Exp $
  */
 public class AttributeTest extends TestCase {
 	private final static RelationName table1 = new RelationName(null, "table1");

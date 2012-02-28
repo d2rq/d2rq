@@ -44,7 +44,6 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
  * as a parsed model.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.35 2010/01/26 16:15:39 fatorange Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";

@@ -16,7 +16,6 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeRelation.java,v 1.7 2009/08/02 09:15:08 fatorange Exp $
  */
 public class NodeRelation {
 	

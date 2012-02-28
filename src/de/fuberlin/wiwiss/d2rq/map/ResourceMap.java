@@ -39,7 +39,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResourceMap.java,v 1.14 2009/07/29 12:03:53 fatorange Exp $
  */
 public abstract class ResourceMap extends MapObject {
 

@@ -13,7 +13,6 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  * Something that can rename columns in various objects.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamer.java,v 1.6 2008/04/27 22:42:36 cyganiak Exp $
  */
 public abstract class ColumnRenamer {
 	

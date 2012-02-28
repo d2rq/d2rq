@@ -49,7 +49,6 @@ import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.55 2009/08/02 09:15:08 fatorange Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	

@@ -14,7 +14,6 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  * TODO Move all engine-specific code from ConnectedDB to this interface and its implementing classes
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLSyntax.java,v 1.1 2009/09/29 19:56:53 cyganiak Exp $
  */
 public interface SQLSyntax {
 

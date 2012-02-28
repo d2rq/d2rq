@@ -24,7 +24,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO: All the dbType checks should be moved to the {@link SQLSyntax} subclasses
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.26 2010/01/26 16:15:46 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	

@@ -27,7 +27,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * might not work with some hypothetical subclasses of Column.)
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: BlankNodeID.java,v 1.10 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class BlankNodeID implements ValueMaker {
 	private final static String DELIMITER = "@@";

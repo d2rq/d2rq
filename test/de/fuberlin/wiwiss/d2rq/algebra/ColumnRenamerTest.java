@@ -11,7 +11,6 @@ import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ColumnRenamerTest.java,v 1.6 2007/10/22 10:21:16 cyganiak Exp $
  */
 public class ColumnRenamerTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "foo", "col1");

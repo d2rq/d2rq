@@ -29,7 +29,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * {@link MappingGenerator} or a mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: dump_rdf.java,v 1.14 2009/08/06 10:51:34 fatorange Exp $
  */
 public class dump_rdf {
 	private final static String[] includedDrivers = {

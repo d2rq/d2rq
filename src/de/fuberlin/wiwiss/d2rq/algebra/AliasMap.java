@@ -25,7 +25,6 @@ import java.util.Map;
  * be separate classes. AliasMap might also be better called Aliases or AliasSet.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AliasMap.java,v 1.9 2008/08/13 11:27:38 cyganiak Exp $
  */
 public class AliasMap extends ColumnRenamer {
 	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_SET);

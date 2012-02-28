@@ -15,7 +15,6 @@ import com.hp.hpl.jena.util.iterator.WrappedIterator;
  * queries on an LRU basis.
  * 
  * @author Holger Knublauch (holger@topquadrant.com)
- * @version $Id: CachingGraphD2RQ.java,v 1.1 2006/09/11 23:22:25 cyganiak Exp $
  */
 public class CachingGraphD2RQ extends GraphD2RQ {
 

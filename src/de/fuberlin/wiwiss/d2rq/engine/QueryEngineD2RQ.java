@@ -25,7 +25,6 @@ import de.fuberlin.wiwiss.d2rq.optimizer.D2RQTreeOptimizer;
  * TODO: @@@ QueryEngineD2RQ and the whole package is work in progress
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: QueryEngineD2RQ.java,v 1.5 2009/02/09 12:21:30 fatorange Exp $
  */
 public class QueryEngineD2RQ extends QueryEngineMain {
 	private GraphD2RQ graph;

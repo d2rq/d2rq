@@ -7,7 +7,6 @@ package de.fuberlin.wiwiss.d2rq.sql;
  * TODO: Remove?
  * 
  * @author jgarbers
- * @version $Id: BeanCounter.java,v 1.2 2010/11/03 18:48:17 cyganiak Exp $
  */
 public class BeanCounter implements Cloneable {
     

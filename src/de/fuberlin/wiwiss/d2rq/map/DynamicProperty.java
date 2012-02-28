@@ -1,14 +1,10 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
-import com.hp.hpl.jena.rdf.model.Resource;
-
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 
-/*
- * @author J√∂rg Hen√ü
- * @version $Id: DynamicProperty.java,v 1.3 2009/08/05 11:01:09 fatorange Exp $
+/**
+ * @author Jörg Henß
  */
 public class DynamicProperty extends ResourceMap {
 	

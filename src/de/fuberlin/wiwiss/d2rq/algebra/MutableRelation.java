@@ -12,7 +12,6 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  * The MutableRelation solves this problem.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MutableRelation.java,v 1.7 2009/07/29 12:03:53 fatorange Exp $
  */
 public class MutableRelation implements RelationalOperators {
 	private Relation relation;

@@ -10,7 +10,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * literals.
  * 
  * @author Richard Cyganiak
- * @version $Id: JDBC.java,v 1.1 2007/11/16 09:29:16 cyganiak Exp $ 
  */
 public class JDBC {
 

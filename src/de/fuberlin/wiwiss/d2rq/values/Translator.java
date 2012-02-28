@@ -26,7 +26,6 @@ package de.fuberlin.wiwiss.d2rq.values;
  * is not critical.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Translator.java,v 1.1 2006/09/11 22:29:19 cyganiak Exp $
  */
 public interface Translator {
 

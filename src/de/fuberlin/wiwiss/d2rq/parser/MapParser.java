@@ -40,7 +40,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * of a D2RQ mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapParser.java,v 1.42 2009/08/02 09:15:09 fatorange Exp $
  */
 public class MapParser {
 

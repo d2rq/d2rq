@@ -23,7 +23,6 @@ import de.fuberlin.wiwiss.d2rq.find.TripleMaker;
  * TODO: groupNodeRelations and groupTripleRelations are virtually identical
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: CompatibleRelationGroup.java,v 1.4 2009/08/05 11:23:52 fatorange Exp $
  */
 public class CompatibleRelationGroup {
 

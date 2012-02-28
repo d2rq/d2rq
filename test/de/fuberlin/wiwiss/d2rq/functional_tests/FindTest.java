@@ -26,7 +26,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTest.java,v 1.15 2009/02/14 22:37:15 fatorange Exp $
  */
 public class FindTest extends FindTestFramework {
     

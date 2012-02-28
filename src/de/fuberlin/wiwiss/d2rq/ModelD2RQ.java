@@ -18,7 +18,6 @@ import de.fuberlin.wiwiss.d2rq.map.Mapping;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.14 2009/03/16 16:45:49 fatorange Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */

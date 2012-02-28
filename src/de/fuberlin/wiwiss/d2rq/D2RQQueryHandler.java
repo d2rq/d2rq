@@ -28,7 +28,6 @@ import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
  * A D2RQQueryHandler handles queries on behalf of a {@link GraphD2RQ}.
  * 
  * @author Richard Cyganiak
- * @version $Id: D2RQQueryHandler.java,v 1.5 2008/08/12 13:40:19 cyganiak Exp $
  */
 public class D2RQQueryHandler extends SimpleQueryHandler {
 	private D2RQDatasetGraph dataset;

@@ -17,7 +17,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * 		underlying Relation
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeMaker.java,v 1.6 2008/04/25 16:27:41 cyganiak Exp $
  */
 public interface NodeMaker {
 

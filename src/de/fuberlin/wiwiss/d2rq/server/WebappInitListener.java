@@ -8,7 +8,6 @@ import javax.servlet.ServletContextListener;
  * Initialize D2R server on startup of an appserver such as Tomcat. This listener should
  * be included in the web.xml. This is compatible with Servlet 2.3 spec compliant appservers.
  *
- * @version $Id: WebappInitListener.java,v 1.6 2009/08/02 09:12:06 fatorange Exp $
  * @author Inigo Surguy
  * @author Richard Cyganiak (richard@cyganiak.de)
  */

@@ -10,7 +10,6 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ExpressionTest.java,v 1.3 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class ExpressionTest extends TestCase {
 	private AliasMap aliases;

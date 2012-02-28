@@ -15,7 +15,6 @@ import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
  * Command line interface for {@link MappingGenerator}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: generate_mapping.java,v 1.5 2010/01/26 13:28:18 fatorange Exp $
  */
 public class generate_mapping {
 	private final static String[] includedDrivers = {

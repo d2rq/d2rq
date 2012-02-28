@@ -7,7 +7,6 @@ import junit.framework.TestSuite;
  * Tests for the map package
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AllTests.java,v 1.11 2006/09/15 12:25:26 cyganiak Exp $
  */
 public class AllTests {
 

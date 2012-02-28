@@ -44,7 +44,6 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * RDFRelations in an order that puts URI patterns first.</p>
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRule.java,v 1.6 2008/08/12 17:26:22 cyganiak Exp $
  */
 public class URIMakerRule implements Comparator {
 	private Map identifierCache = new HashMap();

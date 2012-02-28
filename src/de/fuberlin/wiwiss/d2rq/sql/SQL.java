@@ -22,7 +22,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
  * back into Strings. All methods are static.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL.java,v 1.10 2009/09/29 19:56:53 cyganiak Exp $
  */
 public class SQL {
 	private static final java.util.regex.Pattern attributeRegexConservative = 

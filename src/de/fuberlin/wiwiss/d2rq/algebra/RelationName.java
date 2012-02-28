@@ -8,7 +8,6 @@ package de.fuberlin.wiwiss.d2rq.algebra;
  *       if the databases are not equal. (?)
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RelationName.java,v 1.5 2009/08/05 11:23:52 fatorange Exp $
  */
 public class RelationName implements Comparable {
 	private String schemaName;

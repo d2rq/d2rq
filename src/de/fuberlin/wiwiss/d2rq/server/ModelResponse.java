@@ -22,7 +22,6 @@ import de.fuberlin.wiwiss.pubby.negotiation.PubbyNegotiator;
  * required methods are not visible.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelResponse.java,v 1.1 2008/09/01 11:35:07 cyganiak Exp $
  */
 public class ModelResponse {
 	private final Model model;

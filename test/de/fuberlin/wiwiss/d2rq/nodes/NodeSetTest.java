@@ -27,7 +27,6 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * - Attributes with obviously incompatible types should not match
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeSetTest.java,v 1.3 2008/08/13 11:27:38 cyganiak Exp $
  */
 public class NodeSetTest extends TestCase {
 	private final static Attribute table1foo = SQL.parseAttribute("table1.foo");

@@ -11,7 +11,6 @@ import junit.framework.TestSuite;
  * beginning of the map file to fit your database server.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AllTests.java,v 1.6 2006/09/06 21:48:46 cyganiak Exp $
  */
 public class AllTests {
 

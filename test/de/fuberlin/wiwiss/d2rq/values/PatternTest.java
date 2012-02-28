@@ -22,7 +22,6 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
  * Tests the {@link Pattern} class.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: PatternTest.java,v 1.10 2008/04/27 22:42:37 cyganiak Exp $
  */
 public class PatternTest extends TestCase {
 	private final static Attribute col1 = new Attribute(null, "table", "col1");
