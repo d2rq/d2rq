@@ -23,7 +23,6 @@ public class AllTests {
 		TestSuite suite = new TestSuite(
 				"Test for de.fuberlin.wiwiss.d2rq.functional_tests");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(RDQLTest.class);
 		suite.addTestSuite(FindTest.class);
 		suite.addTestSuite(SPARQLTest.class);
 		suite.addTestSuite(ModelAPITest.class);

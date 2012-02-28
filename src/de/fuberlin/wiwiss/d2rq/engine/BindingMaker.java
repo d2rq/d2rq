@@ -8,7 +8,9 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
 import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
+
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -36,7 +38,7 @@ public class BindingMaker {
 	}
 	
 	public Binding makeBinding(ResultRow row) {
-		BindingMap result = new BindingMap();
+		BindingMap result = new BindingHashMap();
 		Iterator it = variableNamesToNodeMakers.keySet().iterator();
 		while (it.hasNext()) {
 			String variableName = (String) it.next();

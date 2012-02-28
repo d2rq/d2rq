@@ -21,19 +21,23 @@
 	<classpathentry kind="lib" path="lib/velocity-1.7/oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/velocity-1.7/velocity-1.7.jar"/>
 	<classpathentry kind="lib" path="lib/joseki-3.4.4/joseki-3.4.4.jar" sourcepath="/Joseki-3.4.4/joseki-3.4.4-sources.jar"/>
-	<classpathentry kind="lib" path="lib/arq-2.8.8/jena-2.6.4.jar"/>
-	<classpathentry kind="lib" path="lib/arq-2.8.8/junit-4.5.jar"/>
-	<classpathentry kind="lib" path="lib/arq-2.8.8/jena-2.6.4-tests.jar"/>
-	<classpathentry kind="lib" path="lib/arq-2.8.8/icu4j-3.4.4.jar"/>
-	<classpathentry kind="lib" path="lib/arq-2.8.8/iri-0.8.jar"/>
-	<classpathentry kind="lib" path="lib/arq-2.8.8/sdb-1.3.4.jar"/>
-	<classpathentry kind="lib" path="lib/arq-2.8.8/xercesImpl-2.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/arq-2.8.8/arq-2.8.8.jar" sourcepath="/arq/src/main/java"/>
 	<classpathentry kind="lib" path="lib/logging/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/commons-dbcp-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/commons-pool-1.6.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.18-bin.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/postgresql-9.1-901.jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/hsqldb-2.8.8/hsqldb.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/commons-codec-1.6.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/httpclient-4.1.3.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/httpcore-4.1.4.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/jena-arq-2.9.0-incubating.jar" sourcepath="/arq/src/main/java"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/jena-core-2.7.0-incubating-tests.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/jena-core-2.7.0-incubating.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/jena-iri-0.9.0-incubating.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/junit-4.9.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/db-drivers/sdb-1.3.4.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/icu4j-3.4.4.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/xml-apis.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

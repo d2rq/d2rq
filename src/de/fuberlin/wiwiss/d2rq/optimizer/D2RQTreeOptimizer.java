@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.optimizer;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +39,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpPath;
 import com.hp.hpl.jena.sparql.algebra.op.OpProcedure;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
 import com.hp.hpl.jena.sparql.algebra.op.OpPropFunc;
+import com.hp.hpl.jena.sparql.algebra.op.OpQuad;
 import com.hp.hpl.jena.sparql.algebra.op.OpQuadPattern;
 import com.hp.hpl.jena.sparql.algebra.op.OpReduced;
 import com.hp.hpl.jena.sparql.algebra.op.OpSequence;
@@ -488,6 +488,12 @@ public class D2RQTreeOptimizer
 		public void visit(OpTopN opTop) {
 			// TODO Might be able to move down filter past the OpTopN
 			notMoveDownFilterExprAndVisitOp1(opTop);
+		}
+
+		@Override
+		public void visit(OpQuad opQuad) {
+			// TODO What the heck is an OpQuad anyway?
+			notMoveDownFilterExprAndVisitOp0(opQuad);
 		}
 
 		/**

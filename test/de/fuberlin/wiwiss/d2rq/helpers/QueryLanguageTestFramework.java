@@ -235,23 +235,6 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	    return printArray(a);
 	}
 	
-	protected void rdql(String rdql) {
-	    rdqlLogger.debug("RDQL-Query: " + rdql);
-	    queryString=rdql;
-		this.results = new HashSet();
-		rdql += "\nUSING\n";
-		rdql += "dc FOR <" + DC.NS + ">\n";
-		rdql += "foaf FOR <" + FOAF.NS + ">\n";
-		rdql += "skos FOR <" + SKOS.NS + ">\n";
-		rdql += "iswc FOR <" + ISWC.NS + ">\n";
-		Query query = QueryFactory.create(rdql, Syntax.syntaxRDQL);
-		ResultSet qr = QueryExecutionFactory.create(query, this.model).execSelect();
-		while (qr.hasNext()) {
-			QuerySolution binding = (QuerySolution) qr.next();
-			this.results.add(solutionToMap(binding, qr.getResultVars()));
-		}
-	}
-
 	protected void sparql(String sparql) {
 //	    rdqlLogger.debug("RDQL-Query: " + rdql);
 		queryString=sparql;

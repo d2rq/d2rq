@@ -13,6 +13,7 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.ExecutionContext;
 import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
 import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIter;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIterNullIterator;
@@ -208,7 +209,7 @@ public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
     	public Binding moveToNextBinding() 
     	{
     		Binding b =  (Binding) queue.removeFirst();
-    		Binding binding = new BindingMap(this.parentBinding) ;
+    		BindingMap binding = new BindingHashMap(this.parentBinding) ;
     		
     		
     		for (Iterator iterator = vars.iterator(); iterator.hasNext();)

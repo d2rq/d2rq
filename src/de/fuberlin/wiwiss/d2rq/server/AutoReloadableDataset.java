@@ -6,9 +6,9 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.hp.hpl.jena.graph.Capabilities;
-import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.query.Dataset;
+import com.hp.hpl.jena.query.LabelExistsException;
+import com.hp.hpl.jena.query.ReadWrite;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -90,11 +90,6 @@ public class AutoReloadableDataset implements Dataset {
 		}
 	}
 
-	public Capabilities getCapabilities() {
-		//checkMappingFileChanged();
-		return this.datasetGraph.getDefaultGraph().getCapabilities();
-	}
-
 	public PrefixMapping getPrefixMapping() {
 		//checkMappingFileChanged();
 		return this.datasetGraph.getDefaultGraph().getPrefixMapping();
@@ -105,11 +100,6 @@ public class AutoReloadableDataset implements Dataset {
 		return hasTruncatedResults;
 	}
 
-	public QueryHandler queryHandler() {
-		checkMappingFileChanged();
-		return this.datasetGraph.getDefaultGraph().queryHandler();
-	}
-	
 	public DatasetGraph asDatasetGraph() {
 		// check already done by servlets before getting the graph
 		//checkMappingFileChanged();
@@ -141,5 +131,55 @@ public class AutoReloadableDataset implements Dataset {
 	public void close() {
 		datasetGraph.close();
 	}
-	
+
+	@Override
+	public void setDefaultModel(Model model) {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	@Override
+	public void addNamedModel(String uri, Model model)
+			throws LabelExistsException {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	@Override
+	public void removeNamedModel(String uri) {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	@Override
+	public void replaceNamedModel(String uri, Model model) {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	@Override
+	public boolean supportsTransactions() {
+		return false;
+	}
+
+	@Override
+	public void begin(ReadWrite readWrite) {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	@Override
+	public void commit() {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	@Override
+	public void abort() {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	@Override
+	public boolean isInTransaction() {
+		return false;
+	}
+
+	@Override
+	public void end() {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
 }

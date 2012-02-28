@@ -36,6 +36,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpPath;
 import com.hp.hpl.jena.sparql.algebra.op.OpProcedure;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
 import com.hp.hpl.jena.sparql.algebra.op.OpPropFunc;
+import com.hp.hpl.jena.sparql.algebra.op.OpQuad;
 import com.hp.hpl.jena.sparql.algebra.op.OpQuadPattern;
 import com.hp.hpl.jena.sparql.algebra.op.OpReduced;
 import com.hp.hpl.jena.sparql.algebra.op.OpSequence;
@@ -502,6 +503,11 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 	@Override
 	public Op transform(OpTopN opTop, Op subOp) {
 		return addLabelToOp1((Op1) opTop.copy(subOp));
+	}
+
+	@Override
+	public Op transform(OpQuad opQuad) {
+		return addLabelToOp0((Op0) opQuad.copy());
 	}
 
 	/**
