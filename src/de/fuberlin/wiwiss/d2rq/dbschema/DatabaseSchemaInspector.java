@@ -28,7 +28,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 public class DatabaseSchemaInspector {
 	
 	public static boolean isStringType(ColumnType columnType) {
-		return columnType.typeId() == Types.CHAR || columnType.typeId() == Types.VARCHAR || columnType.typeId() == ConnectedDB.SQL_TYPE_NVARCHAR
+		return columnType.typeId() == Types.CHAR || columnType.typeId() == Types.VARCHAR || columnType.typeId() == Types.NVARCHAR
 					|| columnType.typeId() == Types.LONGVARCHAR	|| "NVARCHAR2".equals(columnType.typeName());
 	}
 
@@ -56,7 +56,7 @@ public class DatabaseSchemaInspector {
 //		case Types.LONGVARBINARY: return "xsd:hexBinary";
 		case Types.LONGVARCHAR:   return "xsd:string";
 		case Types.NUMERIC:       return "xsd:decimal";
-		case ConnectedDB.SQL_TYPE_NVARCHAR:   return "xsd:string";
+		case Types.NVARCHAR:      return "xsd:string";
 		case Types.REAL:          return "xsd:float";
 //		case Types.REF:           return "xsd:IDREF";
 		case Types.SMALLINT:      return "xsd:short";
