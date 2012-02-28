@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.OpVisitor;
@@ -69,7 +69,7 @@ import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformRemoveEmptyUnion;
 public class D2RQTreeOptimizer
 {
 	
-	private static Logger logger = LoggerFactory.getLogger(D2RQTreeOptimizer.class);
+	private static Log logger = LogFactory.getLog(D2RQTreeOptimizer.class);
 	
 	/**
 	 * Constructor

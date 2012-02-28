@@ -1,7 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.nodes;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
 
 public class DetermineNodeType implements NodeSetFilter {
 
-	private final Logger logger = LoggerFactory.getLogger(DetermineNodeType.class);
+	private final Log logger = LogFactory.getLog(DetermineNodeType.class);
 	
 	private boolean limitedToURIs       = false;
 	private boolean limitedToBlankNodes = false;
@@ -44,7 +44,7 @@ public class DetermineNodeType implements NodeSetFilter {
 	}
 	
 	public void limitTo(Node node) {
-		logger.debug("limitting to {}", node);
+		logger.debug("limitting to " + node);
 
 		if (node.isURI())
 			limitedToURIs = true;
@@ -79,23 +79,23 @@ public class DetermineNodeType implements NodeSetFilter {
 	}
 
 	public void limitValues(String constant) {
-		logger.warn("TODO DetermineNodeType.limitValues() {}", constant);
+		logger.warn("TODO DetermineNodeType.limitValues() " + constant);
 	}
 
 	public void limitValuesToAttribute(Attribute attribute) {
-		logger.warn("TODO DetermineNodeType.limitValuesToAttribute() {}", attribute);
+		logger.warn("TODO DetermineNodeType.limitValuesToAttribute() " + attribute);
 	}
 
 	public void limitValuesToBlankNodeID(BlankNodeID id) {
-		logger.warn("TODO DetermineNodeType.limitValuesToBlankNodeID() {}", id);
+		logger.warn("TODO DetermineNodeType.limitValuesToBlankNodeID() " + id);
 	}
 
 	public void limitValuesToExpression(Expression expression) {
-		logger.warn("TODO DetermineNodeType.limitValuesToExpression() {}", expression);
+		logger.warn("TODO DetermineNodeType.limitValuesToExpression() " + expression);
 	}
 
 	public void limitValuesToPattern(Pattern pattern) {
-		logger.warn("TODO DetermineNodeType.limitValuesToPattern() {}", pattern);
+		logger.warn("TODO DetermineNodeType.limitValuesToPattern() " + pattern);
 	}
 
 }

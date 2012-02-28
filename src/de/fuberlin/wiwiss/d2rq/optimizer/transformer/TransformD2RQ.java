@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.TransformCopy;
@@ -49,7 +49,7 @@ import de.fuberlin.wiwiss.d2rq.optimizer.utility.ExprUtility;
 public class TransformD2RQ extends TransformCopy
 {
 
-	private Logger logger = LoggerFactory.getLogger(TransformD2RQ.class);
+	private Log logger = LogFactory.getLog(TransformD2RQ.class);
 	
 	static final boolean LINEAR_LEFT_JOIN = false;
 	
@@ -73,7 +73,7 @@ public class TransformD2RQ extends TransformCopy
             // Test whether we can do an indexed substitute into the right if possible.
             boolean canDoLinear = LeftJoinClassifier.isLinear(opLeftJoin);
             
-            logger.debug("TransformD2RQ.transform() OpLeftJoin linear? {}", String.valueOf(canDoLinear));
+            logger.debug("TransformD2RQ.transform() OpLeftJoin linear? " + String.valueOf(canDoLinear));
             if (canDoLinear) {
                 // Pass left into right for substitution before right side evaluation.
                 // In an indexed left join, the LHS bindings are visible to the
@@ -304,7 +304,7 @@ public class TransformD2RQ extends TransformCopy
                         filterConversionSuccesfulForEveryNodeRelation = false;
                     }
                 } else {
-                    logger.warn("contains not all vars {} {}", nodeRelation, expr);
+                    logger.warn("contains not all vars " + nodeRelation + " " + expr);
                     filterConversionSuccesfulForEveryNodeRelation = false; // TODO correct?
                 }
                 
@@ -314,19 +314,19 @@ public class TransformD2RQ extends TransformCopy
             }
             // new noderelations with the (possible) converted expressions
             nodeRelations = newNodeRelations;
-            logger.debug("{} convertable for every node relation? {}", expr, Boolean.valueOf(filterConversionSuccesfulForEveryNodeRelation));
+            logger.debug(expr + " convertable for every node relation? " + Boolean.valueOf(filterConversionSuccesfulForEveryNodeRelation));
             if (filterConversionSuccesfulForEveryNodeRelation) {
                 // remove the expression from the filter, because it was convertable to sql
                 opFilter.getExprs().getList().remove(expr);
             } 
         }
         
-        logger.debug("remaining filters {}", opFilter.getExprs().getList());
+        logger.debug("remaining filters " + opFilter.getExprs().getList());
         
         if (logger.isDebugEnabled()) {
             logger.debug("NodeRelations remaining: " + nodeRelations.size() + " (was " + numberOfNodeRelations + ")");
             for (int i = 0; i < nodeRelations.size(); i++) {
-                logger.debug("{}", nodeRelations.get(i));
+                logger.debug(nodeRelations.get(i));
             }
         }
         return nodeRelations; // better solution would be to return list of (noderelation, not convertable filters for that noderelation) pairs
