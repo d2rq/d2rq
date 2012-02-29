@@ -67,9 +67,10 @@ import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformRemoveEmptyUnion;
 
 /**
  * Class for optimizing an op-tree especially for D2RQ. 
- *  
+ * 
+ * TODO God what a mess, this can be done in 20% the lines
+ * 
  * @author Herwig Leimer
- *
  */
 public class D2RQTreeOptimizer
 {
@@ -383,11 +384,17 @@ public class D2RQTreeOptimizer
             notMoveDownFilterExprAndVisitOp1(opGraph); 
         }
 
-        public void visit(OpService opService)
-        { 
-            notMoveDownFilterExprAndVisitOp1(opService); 
+        public void visit(OpService opService) {
+        	// Don't recurse into the OpService, just return it
+        	// (with any filters that were pushed down to us applied)
+        	if (filterExpr.isEmpty()) {
+        		stack.push(opService);
+        	} else {
+        		stack.push(OpFilter.filter(new ExprList(filterExpr), opService));
+        	}
         }
         
+        // This is really an OpD2RQ?
         public void visit(OpExt opExt)
         { 
             Op newOp;
