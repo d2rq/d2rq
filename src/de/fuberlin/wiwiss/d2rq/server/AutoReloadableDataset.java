@@ -40,12 +40,16 @@ public class AutoReloadableDataset implements Dataset {
 	
 	/** (localFile) => auto-reloadable */
 	private boolean localFile;
+
+	/** true if --fast setting is overridden in server config */
+	private boolean overrideUseAllOptimizations;
 	
 	private Model defaultModel;
 	
-	public AutoReloadableDataset(String mappingFile, boolean localFile, D2RServer server) {
+	public AutoReloadableDataset(String mappingFile, boolean localFile, boolean overrideUseAllOptimizations, D2RServer server) {
 		this.mappingFile = mappingFile;
-		this.localFile = localFile;	
+		this.localFile = localFile;
+		this.overrideUseAllOptimizations = overrideUseAllOptimizations;
 		this.server = server;
 	}
 
@@ -70,8 +74,10 @@ public class AutoReloadableDataset implements Dataset {
 	}
 	
 	private void initD2RQDatasetGraph() {
-		if (this.datasetGraph != null)
+		if (this.datasetGraph != null) {
 			log.info("Reloading mapping file");
+			datasetGraph.close();
+		}
 		
 		Model mapModel = ModelFactory.createDefaultModel();
 		mapModel.read((this.localFile) ? "file:" + this.mappingFile : this.mappingFile, server.resourceBaseURI(), "TURTLE");
@@ -79,11 +85,13 @@ public class AutoReloadableDataset implements Dataset {
 		this.hasTruncatedResults = mapModel.contains(null, D2RQ.resultSizeLimit, (RDFNode) null);
 		ModelD2RQ result = new ModelD2RQ(mapModel, server.resourceBaseURI());
 		GraphD2RQ graph = (GraphD2RQ) result.getGraph();
+		if (overrideUseAllOptimizations) {
+			graph.getConfiguration().setUseAllOptimizations(true);
+		}
 		graph.connect();
 		graph.initInventory(server.baseURI() + "all/");
 		this.datasetGraph = new D2RQDatasetGraph(graph);
 		this.defaultModel = ModelFactory.createModelForGraph(datasetGraph.getDefaultGraph());		
-		
 		if (localFile) {
 			this.lastModified = new File(this.mappingFile).lastModified();
 			this.lastReload = System.currentTimeMillis();

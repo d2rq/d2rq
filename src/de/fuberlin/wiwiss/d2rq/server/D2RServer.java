@@ -218,13 +218,10 @@ public class D2RServer {
 		this.config.load();
 		
 		if (config.isLocalMappingFile())
-			this.dataset = new AutoReloadableDataset(config.getLocalMappingFilename(), true, this);
+			this.dataset = new AutoReloadableDataset(config.getLocalMappingFilename(), true, overrideUseAllOptimizations, this);
 		else
-			this.dataset = new AutoReloadableDataset(config.getMappingURL(), false, this);
+			this.dataset = new AutoReloadableDataset(config.getMappingURL(), false, overrideUseAllOptimizations, this);
 		this.dataset.forceReload();
-		
-		if (this.overrideUseAllOptimizations)
-			currentGraph().getConfiguration().setUseAllOptimizations(true);
 		
 		if (currentGraph().getConfiguration().getUseAllOptimizations()) {
 			log.info("Fast mode (all optimizations)");
