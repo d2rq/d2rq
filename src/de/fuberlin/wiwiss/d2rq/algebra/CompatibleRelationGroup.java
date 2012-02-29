@@ -113,10 +113,13 @@ public class CompatibleRelationGroup {
 				return false;
 			}
 		}
-		if (!firstBaseRelation.isUnique() || !otherRelation.isUnique()) {
-			return false;
+		if (firstBaseRelation.projections().equals(otherRelation.projections())) {
+			return true;
 		}
-		return true;
+		if (firstBaseRelation.isUnique() && otherRelation.isUnique()) {
+			return true;
+		}
+		return false;
 	}
 
 	public void addRelation(Relation relation) {
