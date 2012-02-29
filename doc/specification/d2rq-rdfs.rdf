@@ -51,6 +51,11 @@
     <rdfs:comment>Lookup table for translations used in the mapping process.</rdfs:comment>
     <rdfs:label>Translation table</rdfs:label>
   </rdfs:Class>
+  <rdfs:Class rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#DownloadMap">
+    <rdfs:comment>Makes the contents of some database column downloadable.</rdfs:comment>
+    <rdfs:label>Download map</rdfs:label>
+    <rdfs:subClassOf rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ResourceMap"/>
+  </rdfs:Class>
   <rdfs:Class rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge">
     <rdfs:comment>Maps an RDF property to one or more database columns.</rdfs:comment>
     <rdfs:label>Property bridge</rdfs:label>
@@ -131,6 +136,11 @@
     <rdfs:comment>Links a d2rq:PropertyBridge to a dynamic property.</rdfs:comment>
     <rdfs:label>Property</rdfs:label>
   </rdf:Property>
+  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#mediaType">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#DownloadMap"/>
+    <rdfs:comment>The Internet media type, such as image/png, of the downloadable content, suitable for use in the HTTP Content-Type header.</rdfs:comment>
+    <rdfs:label>Media type</rdfs:label>
+  </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#condition">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ResourceMap"/>
     <rdfs:comment>SQL WHERE condition that must be satisfied for a database row to be mapped.</rdfs:comment>
@@ -201,6 +211,11 @@
     <rdfs:comment>Enforced upper limit for the size of SQL result sets.</rdfs:comment>
     <rdfs:label>Result size limit</rdfs:label>
   </rdf:Property>
+  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#contentColumn">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#DownloadMap"/>
+    <rdfs:comment>A database column containing data to be made downloadable.</rdfs:comment>
+    <rdfs:label>Content column</rdfs:label>
+  </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#classDefinitionLabel">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ClassMap"/>
     <rdfs:comment>A label to be served as rdfs:label for all associated class definitions</rdfs:comment>
@@ -248,14 +263,14 @@
     <rdfs:comment>Set to true if the table, after applying d2rq:joins and d2rq:conditions, may contain duplicate records.</rdfs:comment>
     <rdfs:label>Contains duplicates</rdfs:label>
   </rdf:Property>
-  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#pattern">
-    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
-    <rdfs:label>Pattern</rdfs:label>
-  </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#orderDesc">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
     <rdfs:comment>The column after which to sort results in descending order for this PropertyBridge</rdfs:comment>
     <rdfs:label>Order descending</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#pattern">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
+    <rdfs:label>Pattern</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#additionalProperty">
     <rdfs:range rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#AdditionalProperty"/>
