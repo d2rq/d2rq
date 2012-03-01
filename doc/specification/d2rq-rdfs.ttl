@@ -30,11 +30,6 @@ d2rq:Database a rdfs:Class;
 	rdfs:label "Database";
 	rdfs:comment "Represents a database.";
 	.
-d2rq:odbcDSN a rdf:Property;
-	rdfs:comment "ODBC DSN";
-	rdfs:label "ODBC data source name.";
-	rdfs:domain d2rq:Database;
-	.
 d2rq:jdbcDriver a rdf:Property;
 	rdfs:label "JDBC driver";
 	rdfs:domain d2rq:Database;
@@ -42,6 +37,12 @@ d2rq:jdbcDriver a rdf:Property;
 d2rq:jdbcDSN a rdf:Property;
 	rdfs:label "JDBC DSN";
 	rdfs:comment "JDBC data source name.";
+	rdfs:domain d2rq:Database;
+	.
+d2rq:odbcDSN a rdf:Property;
+    a owl:DeprecatedProperty;
+	rdfs:comment "ODBC DSN";
+	rdfs:label "ODBC data source name. Deprecated, use JDBC instead (with ODBC-JDBC bridge if necessary).";
 	rdfs:domain d2rq:Database;
 	.
 d2rq:username a rdf:Property;

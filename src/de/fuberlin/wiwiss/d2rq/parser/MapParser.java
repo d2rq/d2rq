@@ -207,10 +207,6 @@ public class MapParser {
 
 	private void parseDatabase(Database database, Resource r) {
 		StmtIterator stmts;
-		stmts = r.listProperties(D2RQ.odbcDSN);
-		while (stmts.hasNext()) {
-			database.setODBCDSN(stmts.nextStatement().getString());
-		}
 		stmts = r.listProperties(D2RQ.jdbcDSN);
 		while (stmts.hasNext()) {
 			database.setJDBCDSN(stmts.nextStatement().getString());

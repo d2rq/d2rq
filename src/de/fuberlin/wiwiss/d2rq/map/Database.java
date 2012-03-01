@@ -65,15 +65,14 @@ public class Database extends MapObject {
 		}
 	}
 		
-	private String odbcDSN;
 	private String jdbcDSN;
 	private String jdbcDriver;
 	private String username;
 	private String password;
-	private Set textColumns = new HashSet();
-	private Set numericColumns = new HashSet();
-	private Set dateColumns = new HashSet();
-	private Set timestampColumns = new HashSet();
+	private Set<String> textColumns = new HashSet<String>();
+	private Set<String> numericColumns = new HashSet<String>();
+	private Set<String> dateColumns = new HashSet<String>();
+	private Set<String> timestampColumns = new HashSet<String>();
     private int limit = NO_LIMIT;
     private int fetchSize = NO_FETCH_SIZE;
 	private boolean allowDistinct = true;
@@ -82,13 +81,6 @@ public class Database extends MapObject {
 	
 	public Database(Resource resource) {
 		super(resource);
-	}
-
-	public void setODBCDSN(String odbcDSN) {
-		assertNotYetDefined(this.odbcDSN, D2RQ.odbcDSN, 
-				D2RQException.DATABASE_DUPLICATE_ODBCDSN);
-		checkNotConnected();		
-		this.odbcDSN = odbcDSN;
 	}
 
 	public void setJDBCDSN(String jdbcDSN) {
@@ -173,13 +165,8 @@ public class Database extends MapObject {
 		}
 		String url;
 		String driver = null;
-		if (this.odbcDSN != null) {
-			driver = "sun.jdbc.odbc.JdbcOdbcDriver";
-			url = "jdbc:odbc:" + this.odbcDSN;
-		} else {
-			driver = this.jdbcDriver;
-			url = this.jdbcDSN;
-		}
+		driver = this.jdbcDriver;
+		url = this.jdbcDSN;
 		if (driver != null) {
 			registerJDBCDriver(driver);
 		}
@@ -194,21 +181,13 @@ public class Database extends MapObject {
 	}
 
 	public void validate() throws D2RQException {
-		if (this.jdbcDSN == null && this.odbcDSN == null) {
-			throw new D2RQException("d2rq:Database must have either d2rq:jdbcDSN or d2rq:odbcDSN",
+		if (this.jdbcDSN == null) {
+			throw new D2RQException("d2rq:Database must have d2rq:jdbcDSN",
 					D2RQException.DATABASE_MISSING_DSN);
-		}
-		if (this.jdbcDSN != null && this.odbcDSN != null) {
-			throw new D2RQException("Can't combine d2rq:odbcDSN with d2rq:jdbcDSN",
-					D2RQException.DATABASE_ODBC_WITH_JDBC);
 		}
 		if (this.jdbcDSN != null && this.jdbcDriver == null) {
 			throw new D2RQException("Missing d2rq:jdbcDriver",
 					D2RQException.DATABASE_MISSING_JDBCDRIVER);
-		}
-		if (this.odbcDSN != null && this.jdbcDriver != null) {
-			throw new D2RQException("Can't use d2rq:jdbcDriver with jdbc:odbcDSN",
-					D2RQException.DATABASE_ODBC_WITH_JDBCDRIVER);
 		}
 		// TODO
 	}

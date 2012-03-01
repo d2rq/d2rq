@@ -6,6 +6,7 @@
 <style type="text/css">
 body { padding: 2em 4em 4em; font-family: sans-serif; line-height: 1.6em; }
 h1, h2, h3, h4 { background: white; color: #005a9c; font-weight: normal; margin: 2.3em 0 0.8em; }
+h1 code, h2 code, h3 code, h4 code { color: #005a9c; }
 h1 { font-size: 170%; margin-top: 1.3em; }
 h2 { font-size: 160%; margin-top: 2em; }
 h3 { font-size: 130%; }
@@ -156,8 +157,15 @@ separate <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/">D2R Server 
 <dt>Microsoft SQL Server</dt>
 <dd>Works with Microsoft SQL Server.</dd>
 
+<dt>Other SQL-92 compatible databases</dt>
+<dd>By default, D2RQ will interact with the database using the SQL-92 standard.
+  Any compatible database <em>should</em> work out of the box.</dd>
+
+<dt>Other databases</dt>
+<dd>Not tested; may or may not work. We are interested in feedback about D2RQ running with other database engines.</dd>
+
 <dt>ODBC data sources (e.g. Microsoft Access)</dt>
-<dd>D2RQ can connect to ODBC data sources over the Java's ODBC-JDBC bridge. This works
+<dd>D2RQ can connect to ODBC data sources by using an ODBC-JDBC bridge. This works
   with the following limitations:
   <ul>
   <li>The mapping generator does not work.</li>
@@ -168,15 +176,9 @@ separate <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/">D2R Server 
     <code>d2rq:timestampColumn</code> statements to the <code>d2rq:Database</code>.</li>
   </ul>
   If possible, a dedicated JDBC driver for the database engine should be used
-  instead of the ODBC-JDBC bridge to avoid these problems.
+  instead of an ODBC-JDBC bridge to avoid these problems.
 </dd>
 
-<dt>Other SQL-92 compatible databases</dt>
-<dd>By default, D2RQ will interact with the database using the SQL-92 standard.
-  Any compatible database <em>should</em> work out of the box.</dd>
-
-<dt>Other databases</dt>
-<dd>Not tested; may or may not work. We are interested in feedback about D2RQ running with other database engines.</dd>
 </dl>
 
 
@@ -541,9 +543,10 @@ map:location a d2rq:PropertyBridge;
 
 <h3 id="database">6.1 Database</h3>
 
-<p>A <strong>d2rq:Database</strong> defines a JDBC or ODBC connection to a local relational database 
+<p>A <strong>d2rq:Database</strong> defines a JDBC connection to a local or
+  remote relational database 
   and specifies the type of the database columns used by D2RQ. A D2RQ map can 
-  contain several d2rq:Databases for accessing different local databases.</p>
+  contain several d2rq:Databases for accessing different databases.</p>
 
 
 <h4 id="database-properties">6.1.1 Properties of <code>d2rq:Database</code></h4>
@@ -560,10 +563,6 @@ map:location a d2rq:PropertyBridge;
     <th>d2rq:jdbcDriver</th>
     <td>The JDBC driver class name for the database. Used together with d2rq:jdbcDSN.
       Example: <code>com.mysql.jdbc.Driver</code> for MySQL.</td>
-  </tr>
-  <tr> 
-    <th>d2rq:odbcDSN</th>
-    <td>The ODBC data source name of the database.</td>
   </tr>
   <tr> 
     <th>d2rq:username </th>
@@ -1726,8 +1725,10 @@ map:SeeAlsoStatement a d2rq:AdditionalProperty;
   <code>d2rq:constantValue</code> property with the fixed URL as the object, as
   shown in <a href="#example-constant">this example</a>.
 </p>
-<p><code>d2rq:AdditionalProperty</code> constructs are still used with <code>d2rq:additionalClassDefinitionProperty</code>
-and <code>d2rq:additionalPropertyDefinitionProperty</code> (<a href="#additionalproperty">see section 6.4.1</a>).
+<p><code>d2rq:AdditionalProperty</code> constructs
+<a href="#additionalproperty">are still used</a> with
+<code>d2rq:additionalClassDefinitionProperty</code>
+and <code>d2rq:additionalPropertyDefinitionProperty</code>.</p>
 
 
 <h4 id="deprecated-class-map-property-bridge">6.10.3 <code>d2rq:classMap</code> and <code>d2rq:propertyBridge</code> properties</h4>
@@ -1747,5 +1748,18 @@ and <code>d2rq:additionalPropertyDefinitionProperty</code> (<a href="#additional
   </tr>
 </table>
 
+
+<h4 id="deprecated-odbc-dsn">6.10.4 <code>d2rq:odbcDSN</code></h4>
+
+<p>Up to D2RQ 0.7, the <code>d2rq:odbcDSN</code> property could be
+used on <code>d2rq:Database</code> to connect to ODBC data sources
+using Sun's ODBC-JDBC bridge. This has been deprecated since JDBC
+drivers are now readily available for most if not all data sources
+and generally work better.</p>
+
+<p>Users can still use ODBC data sources by downloading an
+ODBC-JDBC bridge from a vendor and using it like any other
+JDBC driver, with a <code>d2rq:jdbcDSN</code> such as
+<code>jdbc:odbc:<em>mydatabase</em></code>.</p>
 </body>
 </html>

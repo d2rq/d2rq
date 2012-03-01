@@ -329,11 +329,6 @@
     <rdfs:comment>Qualified name of a Java class that implements de.fuberlin.wiwiss.d2rq.Translator and translates between database and RDF.</rdfs:comment>
     <rdfs:label>Java class</rdfs:label>
   </rdf:Property>
-  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#odbcDSN">
-    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
-    <rdfs:label>ODBC data source name.</rdfs:label>
-    <rdfs:comment>ODBC DSN</rdfs:comment>
-  </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#useAllOptimizations">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Configuration"/>
     <rdfs:comment>Whether to use bleeding edge optimizations</rdfs:comment>
@@ -389,4 +384,10 @@
     <rdfs:label>Datatype property bridge</rdfs:label>
     <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
   </owl:DeprecatedClass>
+  <owl:DeprecatedProperty rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#odbcDSN">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
+    <rdfs:label>ODBC data source name. Deprecated, use JDBC instead (with ODBC-JDBC bridge if necessary).</rdfs:label>
+    <rdfs:comment>ODBC DSN</rdfs:comment>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+  </owl:DeprecatedProperty>
 </rdf:RDF>

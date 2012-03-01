@@ -82,35 +82,20 @@ public class DBConnectionTest extends TestCase {
 	}
 
 	public Connection manuallyConfiguredConnection() {
-		final int configure = 1; // TODO change this to your local DB configuration
 		String driverClass;
 		String url;
 		String name;
 		String pass;
 
-		if (configure == 1) { // omit ODBC. (You must install jdbc driver in advance)
-			driverClass = "com.mysql.jdbc.Driver";
-			url = "jdbc:mysql:///iswc";
-			name = "root"; //  "@localhost";
-			pass = ""; // "";
-		} else if (configure == 2) { // use Mysql on ODBC (Windows) (name and passwd may be not necessary)
-			driverClass = "sun.jdbc.odbc.JdbcOdbcDriver";
-			url = "jdbc:odbc:myiswc";
-			name = "jg";
-			pass = "";
-		} else if (configure == 3) { // use MSAccess ODBC (Windows)
-			driverClass = "sun.jdbc.odbc.JdbcOdbcDriver";
-			url = "jdbc:odbc:IswcDB";
-		} else
-			return null;
+		driverClass = "com.mysql.jdbc.Driver";
+		url = "jdbc:mysql:///iswc";
+		name = "root"; //  "@localhost";
+		pass = ""; // "";
 
 		Connection c=null;
 		try {
 			Class.forName(driverClass);
-			if (configure == 1)
-				c = DriverManager.getConnection(url, name, pass);
-			else if (configure == 2 || configure == 3)
-				c = DriverManager.getConnection(url);
+			c = DriverManager.getConnection(url, name, pass);
 			return c;
 		} //end try
 		catch (Exception x) {
