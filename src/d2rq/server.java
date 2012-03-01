@@ -82,7 +82,10 @@ public class server {
 	}
 	
 	public static void startServer() {
-		server.start();
-		log.info("[[[ Server started at " + server.getHomeURI() + " ]]]");
+		if (server.start()) {
+			log.info("[[[ Server started at " + server.getHomeURI() + " ]]]");
+		} else {
+			log.warn("[[[ Server startup failed, see messages above ]]]");
+		}
 	}
 }

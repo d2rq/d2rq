@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
+import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
@@ -52,7 +53,12 @@ public class JettyLauncher {
 		this.useAllOptimizations = useAllOptimizations;
 	}
 
-	public void start() {
+	/**
+	 * Starts a Jetty server with D2R Server as root webapp.
+	 * 
+	 * @return <code>true</code> on success, <code>false</code> if webapp init failed 
+	 */
+	public boolean start() {
 		Server jetty = new Server(getPort());
 		
 		// use Random (/dev/urandom) instead of SecureRandom to generate session keys - otherwise Jetty may hang during startup waiting for enough entropy
@@ -64,10 +70,16 @@ public class JettyLauncher {
 		}
 		try {
 			jetty.start();
+			D2RServer server = D2RServer.fromServletContext(context.getServletContext());
+			if (server == null) {
+				jetty.stop();
+				return false;
+			}
+			homeURI = server.baseURI();
+			return true;
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
-		homeURI = D2RServer.fromServletContext(context.getServletContext()).baseURI();
 	}
 
 	public String getHomeURI() {
