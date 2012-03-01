@@ -5,6 +5,7 @@ import java.util.Properties;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
  * Encapsulates differences in SQL syntax between database engines.
@@ -50,7 +51,7 @@ public interface SQLSyntax {
 	/**
 	 * Handles special characters in relation names.
 	 * 
-	 * @param attribute A relation name (table name)
+	 * @param relationName A relation name (table name)
 	 * @return Quoted form for use in SQL statements
 	 */
 	String quoteRelationName(RelationName relationName);
@@ -69,7 +70,7 @@ public interface SQLSyntax {
 	 * for engines that support this (<code>ROWNUM &lt;= n</code>)
 	 * 
 	 * @param limit A maximum number of rows, or {@link Database#NO_LIMIT}
-	 * @return An expression that limits the number of rows, or {@link Expression.TRUE}
+	 * @return An expression that limits the number of rows, or {@link Expression#TRUE}
 	 * if not supported by the engine
 	 */
 	Expression getRowNumLimitAsExpression(int limit);
