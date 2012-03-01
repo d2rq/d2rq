@@ -76,3 +76,12 @@ Edit `/webapp/WEB-INF/web.xml` to point the `configFile` parameter to the locati
 Build a war file with `ant war`.
 
 Deploy the war file, e.g., by copying it into the servlet container's `webapps` directory.
+
+### Running the unit tests
+
+The unit tests can be executed with `ant test`.
+
+Some unit tests rely on MySQL being present, with a database called `iswc` that contains the data from `/doc/example/iswc-mysql.sql`:
+
+```echo "CREATE DATABASE iswc" | mysql -u root
+mysql -u root iswc < doc/example/iswc-mysql.sql```
