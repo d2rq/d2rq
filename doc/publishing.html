@@ -3,7 +3,54 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <title>Publishing Databases on the Semantic Web</title>
-  <link rel="stylesheet" type="text/css" href="article.css"/>
+  <style type="text/css">
+body { font-family: sans-serif; line-height: 1.4em; margin: 0; padding: 2.5em 3em; }
+:link { color: #00c; }
+:visited { color: #609; }
+a:link img { border: none; }
+a:visited img { border: none; }
+p { text-align: justify }
+h1, h2, h3 { color: #800; }
+h1 { font: 170% sans-serif; margin: 0; }
+h2 { font: 140% sans-serif; margin: 2em 0 -0.3em 0; }
+h3 { font: 120% sans-serif; margin: 1.7em 0 -0.3em 0; }
+h4 { font: bold 100% sans-serif; }
+h5 { font: italic 100% sans-serif; }
+h6 { font: small-caps 100% sans-serif; }
+.hide { display: none; }
+pre { background: #fff6bb; font-family: monospace; line-height: 1.2em; padding: 1em 2em; }
+dt { font-weight: bold; margin-top: 0; margin-bottom: 0; }
+dd { margin-top: 0; margin-bottom: 0; }
+code, tt { font: 115% monospace; }
+ul.toc { list-style-type: none; }
+ol.toc li a { text-decoration: none; }
+.image { text-align: center; }
+.note { color: red; }
+#header { background: url(images/fu-logo.gif) no-repeat top right; padding: 0 0 2em 0; }
+#download { font-family: sans-serif; margin-bottom: 1em; text-align: center; }
+#download h2 { font-size: 125%; margin: 1.5em 0 -0.2em 0; }
+#download small { color: #888; font-size: 80%; }
+#footer { border-top: 1px solid #ccc; color: #aaa; margin: 2em 0 0; }
+
+@media Print {
+h1, h2, h3, h4, h5, h6 { color: black; font-family: serif; }
+body { font-family: serif; }
+pre { background: transparent; font-size: 75%; }
+tt { font-size: 85%; }
+:link, :visited { color: #006; text-decoration: none; }
+#header, #authors { background: white; text-align: center; }
+#authors a, .toc a { color: black; }
+#footer { display: none; }
+}
+@media Aural {
+h1 { stress: 20; richness: 90; }
+h2 { stress: 20; richness: 90; }
+h3 { stress: 20; richness: 90; }
+.hide { speak: none; }
+dt { pause-before: 20%; }
+pre { speak-punctuation: code; }
+}
+  </style>
 </head>
 <body>
 
@@ -14,7 +61,7 @@
 
 <div id="authors">
   <a href="http://www.bizer.de/">Chris Bizer</a>,
-  <a href="http://richard.cyganiak.de/">Richard Cyganiak</a>
+  <a href="http://richard.cyganiak.de/">Richard Cyganiak</a> - Feb 12, 2007
 </div>
 
 <h2>Abstract</h2>
@@ -35,7 +82,7 @@
 <p>The <a href="http://www.w3.org/2001/sw/">Semantic Web</a> is a global information space consisting of inter-linked data about <a href="http://www.w3.org/TR/webarch/#intro">resources</a>. There are two access paradigms to the Semantic Web: browsing and searching. Using a Semantic Web browser like <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/tab.html">Tabulator</a> (<a href="http://www.w3.org/2006/Talks/1019-tab-tbl/">slides</a>), a surfer can follow links from data about one resource to data about other resources. The second access paradigm is searching. Using the <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> query language and protocol, a client application can query data-sources for information about resources. </p>
 <p><a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/">D2R Server</a> is a tool for publishing the content of relational databases on the Semantic Web. Database content is mapped to RDF by a customizable mapping which specifies how resources are identified and which properties are used to describe resources. Based on this mapping, D2R Server allows a RDF representation of the database to be browsed and searched. The server provides two interfaces: The  <strong>dereferencing interface</strong> allows instance and vocabulary URIs to be dereferenced over the HTTP protocol. The interface supports content-negotiation and serves RDF and XHTML representations of resources. The generated representations are richly interlinked on RDF and XHTML level in order to enable browsers and crawlers to navigate database content.  The <strong>SPARQL interface</strong> enables applications to query the database  using the SPARQL query language over the SPARQL protocol.</p>
 
-<div class="image"><img src="images/architecture.png" alt="D2R Server architecture diagram" /></div>
+<div class="image"><img src="images/d2r-server-architecture.png" alt="D2R Server architecture diagram" /></div>
 
 <p>The server takes requests from the Web and rewrites them via a <a href="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/spec/">D2RQ mapping</a> into SQL queries against a relational database. This on-the-fly translation allows clients to access the content of large databases without having to replicate them into RDF. </p>
 
@@ -177,10 +224,6 @@ Accept: text/html</pre>
     &lt;/result&gt;
   &lt;/results&gt;
 &lt;/sparql&gt;</pre>
-
-<div id="footer">
-  <small>$Id$</small>
-</div>
 
 </body>
 </html>

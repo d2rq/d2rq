@@ -122,7 +122,7 @@ ul.toc li li { font-weight: normal; }
 </ul>
 
 <p>The figure below depicts the architecture of the D2RQ Platform: </p>
-<p><img src="architecture.png" alt="D2RQ Platform architecture diagram" /></p>
+<p><img src="images/architecture.png" alt="D2RQ Platform architecture diagram" /></p>
 <p>The <strong>D2RQ Engine</strong> is implemented as a Jena graph, the basic information representation object within the Jena framework. A D2RQ graph wraps a local relational databases into a virtual, read-only RDF graph. It rewrites Jena API calls, find() and SPARQL queries to application-data-model specific SQL queries. The result sets of these SQL queries are transformed into RDF triples or SPARQL result sets that are passed up to the higher layers of the framework.</p>
 <p><strong>D2R Server</strong> is a tool for publishing relational databases on the Semantic Web. It enables RDF and HTML browsers to navigate the content of the database, 
 and allows applications to query the database using the SPARQL query language. D2R Server builds on the D2RQ Engine. For detailed information on how to set up D2R Server please refer to the 
@@ -495,7 +495,7 @@ m.write(System.out);</pre>
   specifies how instances of the class are identified. It has a set of PropertyBridges, 
   which specify how the properties of an instance are created. </p>
 <p>The figure below shows the structure of an example D2RQ map:</p>
-<p><img src="mapping.png" alt="Diagram: Structure of a typical D2RQ map" /></p>
+<p><img src="images/mapping.png" alt="Diagram: Structure of a typical D2RQ map" /></p>
 <p>The following example D2RQ map relates the table conferences in a database to the class 
   conference in an ontology. You can use the map as a template for writing your own 
   maps.</p>
