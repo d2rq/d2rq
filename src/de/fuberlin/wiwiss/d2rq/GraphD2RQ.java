@@ -85,6 +85,10 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		getPrefixMapping().setNsPrefixes(mapping.getPrefixMapping());
 	}
 
+	public Mapping getMapping() {
+		return mapping;
+	}
+	
 	/**
 	 * Returns a QueryHandler for this graph.
 	 * The query handler class can be set by the mapping.

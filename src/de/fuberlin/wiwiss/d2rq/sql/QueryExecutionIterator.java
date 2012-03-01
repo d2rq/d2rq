@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -13,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 /**
@@ -22,11 +22,9 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class QueryExecutionIterator implements ClosableIterator {
-	public static Collection protocol=null;
-
+public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
 	private String sql;
-	private List columns;
+	private List<ProjectionSpec> columns;
 	private ConnectedDB database;
 	private Statement statement = null;
 	private ResultSet resultSet = null;
@@ -46,23 +44,15 @@ public class QueryExecutionIterator implements ClosableIterator {
 			return false;
 		}
 		if (this.prefetchedRow == null) {
-			this.prefetchedRow = tryFetchNextRow();
+			tryFetchNextRow();
 		}
 		return this.prefetchedRow != null;
 	}
 
 	/**
-	 * Delivers the next query result row.
-	 * @return An array of strings, each representing one cell of the row.
-	 */
-	public Object next() {
-		return nextRow();
-	}
-
-	/**
 	 * @return The next query ResultRow.
 	 */
-	public ResultRow nextRow() {
+	public ResultRow next() {
 		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
@@ -71,22 +61,31 @@ public class QueryExecutionIterator implements ClosableIterator {
 		return result;
 	}
 
-	private ResultRow tryFetchNextRow() {
+	/**
+	 * @deprecated Use {@link #next()} instead
+	 */
+	public ResultRow nextRow() {
+		return next();
+	}
+
+	private void tryFetchNextRow() {
 	    ensureQueryExecuted();
 	    if (this.resultSet == null) {
-	    	return null;
+	    	this.prefetchedRow = null;
+	    	return;
 	    }
 		try {
 			if (!this.resultSet.next()) {
 				this.resultSet.close();
 				this.resultSet = null;
-				return null;
+		    	this.prefetchedRow = null;
+		    	return;
 			}
 			BeanCounter.totalNumberOfReturnedRows++;
 			BeanCounter.totalNumberOfReturnedFields+=this.numCols;
-			return ResultRowMap.fromResultSet(this.resultSet, this.columns);
+			this.prefetchedRow = ResultRowMap.fromResultSet(this.resultSet, this.columns);
 		} catch (SQLException ex) {
-			throw new D2RQException(ex.getMessage());
+			throw new D2RQException(ex);
 		}
 	}
 	
@@ -131,8 +130,6 @@ public class QueryExecutionIterator implements ClosableIterator {
     	this.queryExecuted = true;
     	LogFactory.getLog(QueryExecutionIterator.class).debug(this.sql);
     	BeanCounter.totalNumberOfExecutedSQLQueries++;
-    	if (protocol!=null)
-    	    protocol.add(this.sql);
         try {
 			Connection con = this.database.connection();
 			this.statement = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);

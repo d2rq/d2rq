@@ -45,6 +45,7 @@ public class Mapping {
 	private Configuration configuration = new Configuration();
 	private final Map classMaps = new HashMap();
 	private final Map translationTables = new HashMap();
+	private final Map<Resource,DownloadMap> downloadMaps = new HashMap<Resource,DownloadMap>();
 	private final PrefixMapping prefixes = new PrefixMappingImpl();
 	private Collection compiledPropertyBridges;
 	private boolean hasDynamicProperties = false;
@@ -88,6 +89,9 @@ public class Mapping {
 		while (it.hasNext()) {
 			ClassMap classMap = (ClassMap) it.next();
 			classMap.validate();	// Also validates attached bridges
+		}
+		for (DownloadMap dlm : downloadMaps.values()) {
+			dlm.validate();
 		}
 		it = compiledPropertyBridges().iterator();
 		while (it.hasNext()) {
@@ -134,6 +138,18 @@ public class Mapping {
 	
 	public TranslationTable translationTable(Resource name) {
 		return (TranslationTable) this.translationTables.get(name);
+	}
+	
+	public void addDownloadMap(DownloadMap downloadMap) {
+		downloadMaps.put(downloadMap.resource(), downloadMap);
+	}
+	
+	public Collection<Resource> downloadMapResources() {
+		return downloadMaps.keySet();
+	}
+	
+	public DownloadMap downloadMap(Resource name) {
+		return downloadMaps.get(name);
 	}
 	
 	/**

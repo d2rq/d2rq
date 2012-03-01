@@ -23,6 +23,7 @@ public class D2RQTestSuite {
 		suite.addTest(de.fuberlin.wiwiss.d2rq.algebra.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.csv.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.dbschema.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.download.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.expr.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.find.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.functional_tests.AllTests.suite());

@@ -269,6 +269,7 @@ d2rq:lang a rdf:Property;
 	.
 d2rq:belongsToClassMap a rdf:Property;
 	rdfs:label "Belongs to class map";
+	# TODO: Domain also includes d2rq:DownloadMap
 	rdfs:domain d2rq:PropertyBridge;
 	rdfs:range d2rq:ClassMap;
 	.

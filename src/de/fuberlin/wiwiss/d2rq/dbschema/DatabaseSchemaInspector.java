@@ -161,7 +161,7 @@ public class DatabaseSchemaInspector {
 	/**
 	 * Lists available table names
 	 * @param searchInSchema	Schema to list tables from; <tt>null</tt> to list tables from all schemas
-	 * @return
+	 * @return A list of {@link RelationName}s
 	 */
 	public List listTableNames(String searchInSchema) {
 		List result = new ArrayList();

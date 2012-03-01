@@ -1,6 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.parser;
 
 import java.util.Collections;
+import java.util.HashSet;
 
 import junit.framework.TestCase;
 
@@ -10,9 +11,11 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.helpers.MappingHelper;
+import de.fuberlin.wiwiss.d2rq.map.DownloadMap;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
@@ -61,7 +64,7 @@ public class ParserTest extends TestCase {
 	}
 
 	public void testParseAlias() {
-		Mapping mapping = parse("parser/alias.ttl").parse();
+		Mapping mapping = MappingHelper.readFromTestFile("parser/alias.ttl");
 		assertEquals(1, mapping.compiledPropertyBridges().size());
 		TripleRelation bridge = (TripleRelation) mapping.compiledPropertyBridges().iterator().next();
 		assertTrue(bridge.baseRelation().condition().isTrue());
@@ -72,7 +75,7 @@ public class ParserTest extends TestCase {
 	
 	public void testParseResourceInsteadOfLiteral() {
 		try {
-			parse("parser/resource-instead-of-literal.ttl").parse();
+			MappingHelper.readFromTestFile("parser/resource-instead-of-literal.ttl");
 		} catch (D2RQException ex) {
 			assertEquals(D2RQException.MAPPING_RESOURCE_INSTEADOF_LITERAL, ex.errorCode());
 		}
@@ -80,38 +83,51 @@ public class ParserTest extends TestCase {
 	
 	public void testParseLiteralInsteadOfResource() {
 		try {
-			parse("parser/literal-instead-of-resource.ttl").parse();
+			MappingHelper.readFromTestFile("parser/literal-instead-of-resource.ttl");
 		} catch (D2RQException ex) {
 			assertEquals(D2RQException.MAPPING_LITERAL_INSTEADOF_RESOURCE, ex.errorCode());
 		}
 	}
 
 	public void testTranslationTableRDFValueCanBeLiteral() {
-		Mapping m = parse("parser/translation-table.ttl").parse();
+		Mapping m = MappingHelper.readFromTestFile("parser/translation-table.ttl");
 		TranslationTable tt = m.translationTable(ResourceFactory.createResource("http://example.org/tt"));
 		assertEquals("http://example.org/foo", tt.translator().toRDFValue("literal"));
 	}
 	
 	public void testTranslationTableRDFValueCanBeURI() {
-		Mapping m = parse("parser/translation-table.ttl").parse();
+		Mapping m = MappingHelper.readFromTestFile("parser/translation-table.ttl");
 		TranslationTable tt = m.translationTable(ResourceFactory.createResource("http://example.org/tt"));
 		assertEquals("http://example.org/foo", tt.translator().toRDFValue("uri"));
 	}
 	
 	public void testTypeConflictClassMapAndBridgeIsDetected() {
 		try {
-			parse("parser/type-classmap-and-propertybridge.ttl").parse();
+			MappingHelper.readFromTestFile("parser/type-classmap-and-propertybridge.ttl");
 		} catch (D2RQException ex) {
 			assertEquals(D2RQException.MAPPING_TYPECONFLICT, ex.errorCode());
 		}
 	}
 	
-	private MapParser parse(String testFileName) {
-		Model m = ModelFactory.createDefaultModel();
-		m.read(D2RQTestSuite.DIRECTORY_URL + testFileName, "TURTLE");
-		MapParser result = new MapParser(m, null);
-		result.parse();
-		return result;
+	public void testGenerateDownloadMap() {
+		Mapping m = MappingHelper.readFromTestFile("parser/download-map.ttl");
+		Resource name = ResourceFactory.createResource("http://example.org/dm");
+		assertTrue(m.downloadMapResources().contains(name));
+		DownloadMap d = m.downloadMap(name);
+		assertNotNull(d);
+		assertEquals("image/png", d.getMediaType());
+		assertEquals("People.pic", d.getContentColumn().qualifiedName());
+		assertEquals("URI(Pattern(http://example.org/downloads/@@People.ID@@))", 
+				d.nodeMaker().toString());
+		assertEquals(
+				new HashSet<ProjectionSpec>() {{ 
+					add(SQL.parseAttribute("People.ID"));
+					add(SQL.parseAttribute("People.pic"));
+				}}, 
+				d.getRelation().projections());
+		assertTrue(d.getRelation().isUnique());
+		assertTrue(d.getRelation().condition().isTrue());
+		assertTrue(d.getRelation().joinConditions().isEmpty());
 	}
 	
 	private Resource addTranslationTableResource() {

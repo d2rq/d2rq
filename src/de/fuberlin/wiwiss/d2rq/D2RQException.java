@@ -76,6 +76,15 @@ public class D2RQException extends JenaException {
 	public static final int PROPERTYBRIDGE_DUPLICATE_ORDER = 62;
 	public static final int PROPERTYBRIDGE_DUPLICATE_ORDERDESC = 63;
 	public static final int DATABASE_ALREADY_CONNECTED = 64;
+	public static final int DOWNLOADMAP_DUPLICATE_BELONGSTOCLASSMAP = 65;
+	public static final int DOWNLOADMAP_INVALID_BELONGSTOCLASSMAP = 66;
+	public static final int DOWNLOADMAP_DUPLICATE_MEDIATYPE = 67;
+	public static final int DOWNLOADMAP_DUPLICATE_CONTENTCOLUMN = 68;
+	public static final int DOWNLOADMAP_INVALID_CONSTANTVALUE = 69;
+	public static final int DOWNLOADMAP_NO_CONTENTCOLUMN = 70;
+	public static final int DOWNLOADMAP_DUPLICATE_DATABASE = 71;
+	public static final int DOWNLOADMAP_INVALID_DATABASE = 72;
+	public static final int DOWNLOADMAP_NO_DATASTORAGE = 73;
 	
 	private int code;
 	

@@ -147,6 +147,13 @@ map:papers_Abstract a d2rq:PropertyBridge;
     d2rq:property dcterms:abstract;
 	d2rq:column "papers.Abstract";
 	.
+map:papers_Abstract_Download a d2rq:PropertyBridge, d2rq:DownloadMap;
+    d2rq:belongsToClassMap map:Papers;
+    d2rq:uriPattern "papers/@@papers.PaperID@@/abstract";
+    d2rq:contentColumn "papers.Abstract";
+    d2rq:property vocab:textAbstract;
+    d2rq:mediaType "text/plain";
+    .
 map:papers_Year a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Papers;
 	d2rq:property dc:date;

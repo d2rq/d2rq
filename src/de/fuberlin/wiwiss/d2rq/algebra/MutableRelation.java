@@ -57,4 +57,19 @@ public class MutableRelation implements RelationalOperators {
 	public Relation project(Set projectionSpecs) {
 		return relation = relation.project(projectionSpecs);
 	}
+	
+	public Relation limit(int limit) {
+		return relation = new RelationImpl(
+				relation.database(),
+	            relation.aliases(),
+	            relation.condition(),
+	            relation.joinConditions(),
+	            relation.projections(),
+	            relation.leftJoinConditions(),
+	            relation.isUnique(),
+	            relation.order(),
+	            relation.orderDesc(),
+	            Math.min(relation.limit(), limit),
+				relation.limitInverse());
+	}
 }

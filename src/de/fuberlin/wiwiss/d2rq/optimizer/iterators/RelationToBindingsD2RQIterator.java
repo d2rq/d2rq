@@ -188,7 +188,7 @@ public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
     		
     		while (queue.isEmpty() && wrapped != null && wrapped.hasNext()) 
     		{
-    			enqueueBindings(wrapped.nextRow());
+    			enqueueBindings(wrapped.next());
     		}
     		
     		return !queue.isEmpty();

@@ -4,10 +4,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.hp.hpl.jena.n3.IRIResolver;
+import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.LiteralRequiredException;
@@ -25,9 +26,10 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.map.ClassMap;
 import de.fuberlin.wiwiss.d2rq.map.Configuration;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.map.DownloadMap;
+import de.fuberlin.wiwiss.d2rq.map.DynamicProperty;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
-import de.fuberlin.wiwiss.d2rq.map.DynamicProperty;
 import de.fuberlin.wiwiss.d2rq.map.ResourceMap;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
@@ -98,6 +100,7 @@ public class MapParser {
 			parseTranslationTables();
 			parseClassMaps();
 			parsePropertyBridges();
+			parseDownloadMaps();
 			this.mapping.buildVocabularyModel();
 		} catch (LiteralRequiredException ex) {
 			throw new D2RQException("Expected URI resource, found literal instead: " + ex.getMessage(),
@@ -549,6 +552,39 @@ public class MapParser {
 		}
 	}
 
+	private void parseDownloadMaps() {
+		Iterator<Individual> it = this.model.listIndividuals(D2RQ.DownloadMap);
+		while (it.hasNext()) {
+			Resource downloadMapResource = it.next();
+			DownloadMap downloadMap = new DownloadMap(downloadMapResource);
+			parseResourceMap(downloadMap, downloadMapResource);
+			parseDownloadMap(downloadMap, downloadMapResource);
+			mapping.addDownloadMap(downloadMap);
+		}
+	}
+	
+	private void parseDownloadMap(DownloadMap dm, Resource r) {
+		StmtIterator stmts;
+		stmts = r.listProperties(D2RQ.dataStorage);
+		while (stmts.hasNext()) {
+			dm.setDatabase(mapping.database(
+					stmts.nextStatement().getResource()));
+		}
+		stmts = r.listProperties(D2RQ.belongsToClassMap);
+		while (stmts.hasNext()) {
+			dm.setBelongsToClassMap(mapping.classMap(
+					stmts.nextStatement().getResource()));
+		}
+		stmts = r.listProperties(D2RQ.contentColumn);
+		while (stmts.hasNext()) {
+			dm.setContentColumn(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.mediaType);
+		while (stmts.hasNext()) {
+			dm.setMediaType(stmts.nextStatement().getString());
+		}
+	}
+	
 	// TODO: I guess this should be done at map compile time
 	private String ensureIsAbsolute(String uriPattern) {
 		if (uriPattern.indexOf(":") == -1) {
