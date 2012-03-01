@@ -12,7 +12,7 @@
     <dc:contributor>Richard Cyganiak</dc:contributor>
     <dc:contributor>Chris Bizer</dc:contributor>
     <dc:description>This document specifies the D2RQ mapping language. D2RQ is a declarative language to describe mappings between relational database schemata and OWL/RDFS ontologies. See D2RQ Users Manual for detailed explanations and examples (http://www.wiwiss.fu-berlin.de/suhl/bizer/d2rq/spec/).</dc:description>
-    <dc:title>D2RQ - Language Specification V0.9</dc:title>
+    <dc:title>D2RQ - Language Specification v0.8</dc:title>
   </owl:Ontology>
   <rdfs:Class rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#D2RQModel">
     <ja:assembler>de.fuberlin.wiwiss.d2rq.assembler.D2RQAssembler</ja:assembler>
