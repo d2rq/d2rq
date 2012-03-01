@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="D2RQ" default="all" basedir=".">
+<project name="D2RQ" basedir="." default="all">
 
 	<property name="name" value="d2rq"/>
 	<property name="version" value="0.8-dev"/>
@@ -54,7 +54,7 @@
 
 	<property name="execfiles" value="dump-rdf generate-mapping d2r-server"/>
 
-	<target name="clean">
+	<target name="clean" description="Deletes all generated artefacts">
 		<delete dir="${build}" failonerror="false"/>
 		<delete dir="${build.tests}" failonerror="false"/>
 		<delete dir="${javadoc}" failonerror="false"/>
@@ -68,7 +68,7 @@
 		<mkdir dir="${build}"/>
 	</target>
 
-	<target name="compile" depends="init">
+	<target name="compile" depends="init" description="Compile project classes">
 		<javac srcdir="${src}"
 				destdir="${build}"
 				debug="on"
@@ -83,7 +83,7 @@
 		<mkdir dir="${build.tests}"/>
 	</target>
 
-	<target name="compile.tests" depends="init.tests,compile">
+	<target name="compile.tests" depends="init.tests,compile" description="Compile test classes">
 		<javac srcdir="${src.tests}"
 				destdir="${build.tests}"
 				debug="on"
@@ -106,7 +106,7 @@
 		</copy>
 	</target>
 
-	<target name="test" depends="compile.tests,copyfiles.tests">
+	<target name="test" depends="compile.tests,copyfiles.tests" description="Run tests">
 		<java classname="${project.package}.D2RQTestSuite" fork="yes" failonerror="true">
 			<classpath>
 				<path refid="project.class.path"/>
@@ -116,7 +116,7 @@
 		</java>
 	</target>
 
-	<target name="javadoc">
+	<target name="javadoc" description="Generate Javadoc API documentation">
 		<!-- Creates javadoc documentation for the source
 			 (but not for the tests) -->
 		<delete dir="${javadoc}"/>
@@ -142,11 +142,11 @@
 <!--
  	<target name="jar" depends="compile,test">
 -->
-	<target name="jar" depends="compile">
+	<target name="jar" depends="compile" description="Generate project jar file">
 		<jar jarfile="${jar}" basedir="${build}"/>
 	</target>
 
-	<target name="zip" depends="jar,javadoc">
+	<target name="zip" depends="jar,javadoc" description="Generate distribution file in zip format">
 		<zip destfile="${zip}">
 			<zipfileset prefix="${distname}" dir=".">
 				<patternset refid="distfiles"/>
@@ -154,7 +154,7 @@
 		</zip>
 	</target>
 
-	<target name="tar" depends="jar,javadoc">
+	<target name="tar" depends="jar,javadoc" description="Generate distribution file in tar.gz format">
 		<tar destfile="${tar}" compression="gzip">
 			<tarfileset prefix="${distname}" dir="." includes="${execfiles}" mode="755"/>
 			<tarfileset prefix="${distname}" dir="." excludes="${execfiles}">
@@ -163,9 +163,9 @@
 		</tar>
 	</target>
 
-	<target name="all" depends="zip,tar"/>
+	<target name="all" depends="zip,tar" description="Generate distribution files in zip and tar.gz formats"/>
 	
-	<target name="vocab.language.schemagen">
+	<target name="vocab.d2rq" description="Regenerate D2RQ vocabulary files from Turtle source">
 		<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
 				failonerror="true">
 			<arg value="-i" />
@@ -180,9 +180,15 @@
 			<arg value="${project.package}.vocab" />
 			<arg value="--rdfs" />
 		</java>
+		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
+				output="${vocab.language.rdf}" logError="yes" failonerror="true">
+			<arg value="${vocab.language.ttl}"/>
+			<arg value="TURTLE"/>
+			<arg value="RDF/XML-ABBREV"/>
+		</java>
 	</target>
 
-	<target name="vocab.config.schemagen">
+	<target name="vocab.config" description="Regenerate Config vocabulary files from Turtle source">
 		<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
 				failonerror="true">
 			<arg value="-i"/>
@@ -197,19 +203,6 @@
 			<arg value="${vocab.config.package}"/>
 			<arg value="--rdfs"/>
 		</java>
-	</target>
-	
-	
-	<target name="vocab.language.toXML">
-		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
-				output="${vocab.language.rdf}" logError="yes" failonerror="true">
-			<arg value="${vocab.language.ttl}"/>
-			<arg value="TURTLE"/>
-			<arg value="RDF/XML-ABBREV"/>
-		</java>
-	</target>
-	
-	<target name="vocab.config.toXML">
 		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
 				output="${vocab.config.rdf}" logError="yes" failonerror="true">
 			<arg value="${vocab.config.ttl}"/>
@@ -218,9 +211,7 @@
 		</java>
 	</target>
 	
-	<target name="vocab" depends="vocab.language.toXML,vocab.language.schemagen,vocab.config.toXML,vocab.config.schemagen"/>
-
-	<target name="war" depends="jar">
+	<target name="war" depends="jar" description="Generate war archive for deployment in servlet container">
 		<war destfile="${war}" needxmlfile="false">
 			<fileset dir="webapp/">
 				<include name="**"/>
