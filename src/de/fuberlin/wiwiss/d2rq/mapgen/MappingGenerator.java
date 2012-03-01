@@ -133,7 +133,7 @@ public class MappingGenerator {
 			
 			if (e != null)
 				e.flush();
-			System.out.println("Done!");
+			if (!silent) System.out.println("Done!");
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
