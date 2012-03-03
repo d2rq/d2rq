@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>dump-rdf: Dumping the database to an RDF file | The D2RQ Platform</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="document-collection">This document is part of the <a href="/">D2RQ documentation</a>.</div>
+      <h1><code>dump-rdf</code>: Dumping the database to an RDF file</h1>
+    </header>
+
+<p>The <code>dump-rdf</code> script uses <a href="/">D2RQ</a> to
+<strong>dump the contents of the
+whole database into a single RDF file</strong>. This can be done with or without a
+D2RQ mapping file. If a mapping file is specified, then the script will use it
+to translate the database contents to RDF. If no mapping file is specified,
+then the script will internally invoke
+<a href="generate-mapping"><code>generate-mapping</code></a>
+and use its default mapping for the translation.</p>
+
+
+<h2 id="usage-mapping">Usage with mapping file</h2>
+
+<pre>dump-rdf -m mapping.ttl [output parameters]</pre>
+
+
+<h2 id="usage-default">Usage without mapping file (default mapping)</h2>
+
+<p>If no mapping file is provided, then the database connection must be
+specified on the command line. With the exception of <code>fetchSize</code>,
+the meaning of all parameters is the
+same as for the <a href="generate-mapping"><code>generate-mapping</code> script</a>.
+
+<pre>dump-rdf -u username [-p password] -d driverclass -j jdbcURL [-f fetchSize] [output parameters]</pre>
+
+
+<h2 id="output-params">Output parameters</h2>
+
+<p>Several optional parameters control the RDF output:</p>
+
+<dl>
+<dt><code>-f format</code></dt>
+<dd>The RDF syntax to use for output. Supported syntaxes are "RDF/XML" (the default),
+  "RDF/XML-ABBREV", "TURTLE", "N3", "N-TRIPLE". "N-TRIPLE" works best for large 
+  databases.</dd>
+  
+<dt><code>-s fetchSize</code></dt>
+<dd>The number of rows to retrieve with every database request. This value is particularily important to control memory resources of both the D2RQ and the database server when performing dumps. <code>dump-rdf</code> sets this value to 500 by default, or to <code>Integer.MIN_VALUE</code> for MySQL in order to enable <a href="http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-implementation-notes.html">streaming mode</a>.
+This value may alternatively be specified in the mapping file using <a href="d2rq-language#d2rq:fetchSize">d2rq:fetchSize</a>.
+</dd>  
+
+<dt><code>-b baseURI</code></dt>
+<dd>A base URI for resolving relative URI patterns.</dd>
+
+<dt><code>-o outfile</code></dt>
+<dd>Name of the destination file. Defaults to standard output.</dd>
+</dl>
+
+<h2 id="example-mapping">Example invocation using a mapping file</h2>
+
+<pre>dump-rdf -m mapping-iswc.ttl -f N-TRIPLE -b http://localhost:2020/ &gt; iswc.nt</pre>
+
+<h2 id="example-default">Example invocation with default mapping</h2>
+
+<pre>dump-rdf -u root -j jdbc:mysql:///iswc -o -f RDF/XML-ABBREV iswc-dump.rdf</pre>
+
+  </body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Getting Started with D2RQ | The D2RQ Platform</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="document-collection">This document is part of the <a href="/">D2RQ documentation</a>.</div>
+      <h1>Getting Started with D2RQ</h1>
+    </header>
+
+
+<p>This page gives a quick introduction to get you up and running with <a href="/">D2RQ</a>.</p>
+
+<p><em>Note: Vadim Eisenberg has written a <a href="http://sw.cs.technion.ac.il/d2rq/tutorial">more detailed step-by-step guide to setting up D2R Server with an example database</a>.</em></p>
+
+
+<h2 id="quickstart">Quick start</h2>
+
+<p>You need:</p>
+<ul>
+  <li><strong>Java 1.5</strong> or newer on the path (check with
+    <code>java -version</code> if you're not sure),</li>
+  <li><strong>A supported database</strong>, such as Oracle, SQL Server, PostgreSQL,
+    MySQL or HSQLDB. See <a href="/#compatibility">here</a>.
+  <li>Optionally, a <strong>J2EE servlet container</strong> as a
+    deployment target. D2R Server can be run either as a stand-alone
+    web server or inside an existing servlet container.</li>
+</ul>
+
+<p>What to do:</p>
+<ol>
+  <li><p><strong><a href="/">Download</a> and extract the
+    archive</strong> into a suitable location.</p></li>
+  <li><p><strong>Download a JDBC driver</strong> from your database vendor.
+    Place the driver's JAR file into D2R Server's <code>/lib</code> directory.
+    A <a href="http://developers.sun.com/product/jdbc/drivers">list of JDBC drivers</a>
+    from different vendors is maintained by Sun. Also take
+    note of the <strong>driver class name</strong> (e.g.
+    <code>org.postgresql.Driver</code> for PostgreSQL or
+    <code>oracle.jdbc.driver.OracleDriver</code> for Oracle) and
+    <strong>JDBC URL pattern</strong> (e.g.
+    <code>jdbc:mysql://<em>servername</em>/<em>database</em></code>
+    for MySQL) from the driver's documentation. Drivers for MySQL and PostgreSQL are
+    already included with D2R Server.</p></li>
+  <li><p><strong>Generate a mapping file</strong> for your database schema.
+    Change into the D2R Server directory and run:</p>
+    <pre><a href="generate-mapping">generate-mapping</a> -o <em>mapping.ttl</em> -d <em>driver.class.name</em>
+    -u <em>db-user</em> -p <em>db-password</em> <em>jdbc:url:...</em></pre>
+    <p><code><em>mapping.ttl</em></code> is the name for the new mapping file.
+    <code>-d</code> can be skipped for MySQL.</p></li>
+  <li><p><strong>Start <a href="d2r-server">D2R Server</a>:</strong></p>
+    <pre>d2r-server <em>mapping.ttl</em></pre>
+    </li>
+  <li>
+    <p><strong>Test the Server:</strong> Open <a href="http://localhost:2020/">http://localhost:2020/</a>
+    in a web browser.</p>
+    <div><img src="images/d2rs-screenshot-start.png" alt="Screenshot of D2R Server's web interface" style="margin: -4px -15px -15px -10px;"/></div>
+    <p>You can browse the database content or use the SPARQL Explorer to execute
+      queries and display results in a number of formats.</p></li>
+  <li>
+    <p><strong>Generate an RDF dump:</strong> You can do this by running</p>
+    <pre><a href="dump-rdf">dump-rdf</a> -m <em>mapping.ttl</em> -o <em>dump.nt</em></pre></li>
+</ol>
+
+
+<h2 id="customize">Customizing the D2RQ mapping</h2>
+
+<p>After you're up and running, the next step is typically to refine the RDF output by customizing the D2RQ mapping.</p>
+
+<p>The D2RQ Platform uses the <a href="d2rq-language">D2RQ Mapping Language</a> to map the content of a relational database to RDF. A D2RQ mapping specifies how resources are identified and which properties are used to describe the resources.</p>
+
+<p>The <a href="generate-mapping"><code>generate-mapping</code> script</a> automatically generates a D2RQ mapping from the table structure of a database. The tool generates a new RDF vocabulary for each database, using table names as class names and column names as property names. Semantic Web client applications will understand more of your data if you customize the mapping and replace the auto-generated terms with terms from well-known and publicly accessible RDF vocabularies.</p>
+
+<p>The mapping file can be edited with any text editor. Its syntax is described in the
+<a href="d2rq-language">D2RQ language specification</a>.</p>
+
+<p>D2R Server will automatically detect changes to the mapping file and
+  reload appropriately when you hit the browser's refresh button.</p>
+
+<p><strong>Note:</strong> The HTML and RDF browser interfaces only work
+  for URI patterns that are <em>relative</em> and <em>do not contain the
+  hash (#) character</em>. For example, a URI pattern such as
+  <code>entries/@@mytable.id@@</code> is browsable, but
+  <code>http://example.com/entries#@@mytable.id@@</code> is not. The mapping
+  generator only creates browsable patterns. Non-browsable patterns still
+  work in the SPARQL interface and in RDF dumps.</p>
+
+  </body>
+</html>
