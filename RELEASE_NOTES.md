@@ -21,17 +21,48 @@
 
 ## D2RQ v0.7 – 2009-08-12
 
-### Features
-- Support for dynamic properties (Jörg Henß)
-- Support for limits on property bridge level (Matthias Quasthoff)
-- Support for Microsoft SQL Server
+Version 0.7 provides several bugfixes, better dump performance, several new features as well as new optimizations that must be enabled using d2rq:useAllOptimizations, or via D2R Server's --fast switch.
 
-### Performance
-- Better dump performance
-- New optimizations that must be enabled using D2R Server's --fast switch or using d2rq:useAllOptimizations
+### Features
+- Added support for Microsoft SQL Server
+- Added support for dynamic properties (by Jörg Henß)
+- Added support for d2rq:limit, d2rq:limitInverse, d2rq:orderAsc and d2rq:orderDesc (thanks to Matthias Quasthoff)
+- Added d2rq:useAllOptimizations option for bleeding-edge optimizations
+- Added d2rq:fetchSize to control the number of rows retrieved per database query. Activated by default from dump_rdf.
+
+### Enhancements
+- Added SQL cursor support and MySQL streaming to facilitate dumping of large databases (based on a patch by Alistair Miles)
+- Added support for !!a => a in DeMorganLawApplyer; improved DistributiveLawApplyer
+- Added output warning about uriPatterns without columns during both mapping generation and loading
+- Updated to MySQL Connector/J 5.1.7 due to reported hanging errors
+- Updated to ARQ 2.7 (Jena 2.6), Joseki CVS (2008-12), SDB 1.3
+- Removed dependencies on Oracle and MySQL libraries
+- Removed non-open source JDBC drivers from distribution
+- Added note to documentation: Vocabulary serving does not work with SPARQL 
 
 ### Bugfixes
-- Several bugfixes
+- Added Database-specific LIMIT implementations
+- Fixed filtering on variables with an sqlExpression property bridge (#2620006, Herwig Leimer)
+- Modified treatment of nonmoveable filter expressions in D2RQTreeOptimizer, skip variable retention on subUsage in VarFinder (Herwig Leimer)
+- Fully removed buggy leftjoin optimization (#2634088, #2645486)
+- Let the JDBC driver convert boolean values separately as their representation differs greatly amongst DBs (thanks to Alistair Miles)
+- Fixed JDBC-ODBC Bridge interoperability (MS Access etc.) - refactored ResultRowMap to return values with a single get???() call
+- Relaxed table naming conditions to support hyphens and numbers in table names (thanks to Heinz Doerrer, bug #2664865)
+- Properly iterate over trivial relations (fixes ResultRow to Tripe casting bug)
+- Don't create a link table if it exports foreign keys (#2787278) 
+- Support case-insensitive RelationName comparison for MySQL and allow map generation from keys with unspecified capitalization
+- Fixed a bug with the keepAliveAgent which didn't terminate when dump_rdf is used
+- Handle multiple projection specs for SPARQL variable within TransformExprToSQLApplyer 
+- Moved DISTINCT before TOP in SQL queries
+- Fixed a bug in DistributiveLawApplyer
+
+### Performance
+- Added self-join optimization (#2798308). Enable using --fast command-line option in D2R Server, or d2rq:useAllOptimizations.
+- Added support for directed arrows in d2rq:join to indicate foreign key relationship and to utilize them for correct join optimization (#1794042)
+- Omit empty NodeRelations when translating graph patterns
+- Keep uniqueness when working with just one Relation in TripleRelationJoiner (requires --fast) 
+- Only check for predicate URI matches only if dynamic properties are present in the mapping 
+- Translate filter expressions involving constant nodes to SQL
 
 
 ## D2RQ v0.6 – 2009-02-19
