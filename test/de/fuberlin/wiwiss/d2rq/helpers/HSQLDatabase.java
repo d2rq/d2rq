@@ -2,6 +2,7 @@ package de.fuberlin.wiwiss.d2rq.helpers;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -52,6 +53,10 @@ public class HSQLDatabase {
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	public PreparedStatement prepareSQL(String sql) throws SQLException {
+		return conn.prepareStatement(sql);
 	}
 	
 	public void clear() {
