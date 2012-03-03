@@ -32,8 +32,8 @@ It is part of the <a href="/">D2RQ Platform</a>.
   </li>
   <li>4. <a href="#configuration">D2R Server configuration</a>
     <ul>
-      <li>4.1 <a href="#basic">Server configuration block in mapping file</a></li>
-      <li>4.2 <a href="#metadata-template">Metadata template graph</a></li>
+      <li>4.1 <a href="#configuration-options">Server-level configuration options</a></li>
+      <li>4.2 <a href="#metadata-template">Metadata templates</a></li>
       <li>4.3 <a href="#default-template">Default template</a></li>
     </ul>
   </li>
@@ -46,14 +46,14 @@ It is part of the <a href="/">D2RQ Platform</a>.
 <p>D2R Server is a tool for publishing the content of relational databases
   on the <a href="http://www.w3.org/2001/sw/">Semantic Web</a>, a global
   information space consisting of
-  <a href="http://www.w3.org/DesignIssues/LinkedData.html">linked data</a>.</p>
+  <a href="http://en.wikipedia.org/wiki/Linked_Data">Linked Data</a>.</p>
 
 <div style="float:right; margin-left: 2em"><img src="images/architecture.png" alt="D2R Server architecture diagram" /></div>
 
 <p>Data on the Semantic Web is modelled and represented in
   <a href="http://en.wikipedia.org/wiki/Resource_Description_Framework">RDF</a>.
   D2R Server uses a customizable
-  <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/spec/#specification">D2RQ mapping</a>
+  <a href="d2rq-language">D2RQ mapping</a>
   to map database content into this format, and allows the RDF data to be
   <em>browsed</em> and <em>searched</em> &#8211; the two main access paradigms
   to the Semantic Web.</p>
@@ -68,7 +68,7 @@ It is part of the <a href="/">D2RQ Platform</a>.
 <dd>A simple web interface allows navigation through the database's contents and gives users of the RDF data a “human-readable” preview.</dd>
 
 <dt>Resolvable URIs</dt>
-<dd>Following the <a href="http://linkeddatabook.com/editions/1.0/#htoc8">Linked Data principles</a>, D2R Server assigns a URI to each entity that is described in the database, and makes those URIs resolvable – that is, an RDF description can be retrieved simply by accessing the entity's URI over the Web. Semantic Web browsers like <a href="http://www4.wiwiss.fu-berlin.de/bizer/ng4j/disco/">Disco</a> or <a href="http://linksailor.com/">LinkSailor</a> can follow links from one entity to the next, surfing the Web of Data.</dd>
+<dd>Following the <a href="http://linkeddatabook.com/editions/1.0/#htoc8">Linked Data principles</a>, D2R Server assigns a URI to each entity that is described in the database, and makes those URIs resolvable – that is, an RDF description can be retrieved simply by accessing the entity's URI over the Web. Semantic Web browsers like <a href="http://marbles.sourceforge.net/">Marbles</a> or <a href="http://linksailor.com/">LinkSailor</a> can follow links from one entity to the next, surfing the Web of Data.</dd>
 
 <dt>Content negotiation</dt>
 <dd>Following <a href="http://www.w3.org/TR/cooluris/">best practices</a>, the regular web interface and the browsable RDF graph share the same URIs. Read more about the interfaces offered by D2R Server, including example HTTP requests and responses, in the Technical Note <a href="publishing"><em>Publishing Databases on the Semantic Web</em></a>.</dd>
@@ -321,7 +321,7 @@ instance</a>.</p>
   </tr>
   <tr> 
     <th>meta:dataset</th>
-    <td>This property refers to the URI of the whole linked dataset that is published by this D2R Server instance. This URI usually links to the <a href="http://rdfs.org/ns/void">voiD description</a> of the dataset.
+    <td>This property refers to the URI of the whole linked dataset that is published by this D2R Server instance. This URI usually links to the <a href="http://www.w3.org/TR/void/">VoID description</a> of the dataset.
 </td>
   </tr>
 </table>

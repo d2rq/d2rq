@@ -50,7 +50,7 @@ same as for the <a href="generate-mapping"><code>generate-mapping</code> script<
   
 <dt><code>-s fetchSize</code></dt>
 <dd>The number of rows to retrieve with every database request. This value is particularily important to control memory resources of both the D2RQ and the database server when performing dumps. <code>dump-rdf</code> sets this value to 500 by default, or to <code>Integer.MIN_VALUE</code> for MySQL in order to enable <a href="http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-implementation-notes.html">streaming mode</a>.
-This value may alternatively be specified in the mapping file using <a href="d2rq-language#database">d2rq:fetchSize</a>.
+This value may alternatively be specified in the mapping file using <a href="d2rq-language#d2rq:fetchSize">d2rq:fetchSize</a>.
 </dd>  
 
 <dt><code>-b baseURI</code></dt>

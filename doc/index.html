@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>The D2RQ Platform – Accessing Relational Databases as RDF Graphs</title>
+    <title>The D2RQ Platform – Accessing Relational Databases as Virtual RDF Graphs</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="script.js"></script>
@@ -67,10 +67,10 @@ article#main { margin: 35px 50px 0 320px; }
   Using D2RQ you can:</p>
 
 <ul>
-  <li>query a non-RDF database using <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a></li>
-  <li>access information in a non-RDF database using the <a href="http://jena.sourceforge.net/">Jena API</a></li>
+  <li>query a non-RDF database using <a href="http://www.w3.org/TR/sparql11-query/">SPARQL</a></li>
   <li>access the content of the database as <a href="http://en.wikipedia.org/wiki/Linked_Data">Linked Data</a> over the Web</li>
-  <li>ask <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> queries over the <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol</a> against the database</li>
+  <li>create custom dumps of the database in RDF formats for loading into an RDF store</li>
+  <li>access information in a non-RDF database using the <a href="http://incubator.apache.org/jena/">Apache Jena API</a></li>
 </ul>
 
 <p>D2RQ is Open Source software and published under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache license</a>. The source code is <a href="http://github.com/d2rq/d2rq">available on GitHub</a>. You can contact the dev team on the <a href="https://lists.sourceforge.net/lists/listinfo/d2rq-map-devel">D2RQ mailing list</a> at <a href="mailto:d2rq-map-devel@lists.sourceforge.net">d2rq-map-devel@lists.sourceforge.net</a>.</p>
@@ -84,7 +84,7 @@ article#main { margin: 35px 50px 0 320px; }
 
 <li><strong>Version 0.8 released.</strong> @@@ Great new features! More details in the <a href="https://github.com/d2rq/d2rq/blob/master/RELEASE_NOTES.md">release notes</a>. <small>2012-03-09</small></li>
 
-<li><strong>DERI/UCB collaboration.</strong> <a href="http://deri.ie/">DERI</a> and <a href="">UCB</a> have <a href="http://www.siliconrepublic.com/innovation/item/25955-deri-teams-up-with-belgium">announced a collaboration</a> to improve D2RQ. <small>2012-02-24</small></li>
+<li><strong>DERI/UCB collaboration.</strong> <a href="http://www.deri.ie/">DERI</a> and <a href="">UCB</a> have <a href="http://www.siliconrepublic.com/innovation/item/25955-deri-teams-up-with-belgium">announced a collaboration</a> to improve D2RQ. <small>2012-02-24</small></li>
 
 <li><strong>SPARQL/Update Extension released.</strong> Vadim Eisenberg has released a <a href="http://d2rqupdate.cs.technion.ac.il/">D2RQ/Update and D2R/Update Server Extension</a>  to the D2RQ Framework which allows you to use <a href="http://www.w3.org/TR/2009/WD-sparql11-update-20091022/">SPARQL/Update</a>  to change/delete/add data to a D2R-mapped relation database. D2RQ/Update uses the same mapping used by D2RQ, no additional information is required. The extension takes into account the database constraints, such as primary/foreign keys and non-nullable columns. A tutorial on how to use the extension is available <a href="http://d2rqupdate.cs.technion.ac.il/tutorial">here</a>. <small>2010-11-29</small></li>
 
@@ -149,7 +149,7 @@ article#main { margin: 35px 50px 0 320px; }
 <a href="http://www.wiwiss.fu-berlin.de/en/institute/pwo/bizer/team/BeckerChristian.html">Christian Becker</a><br />
 </dd>
 <dt>Project founder</dt>
-<dd><a href="http://www.bizer.de">Chris Bizer</a></dd>
+<dd><a href="http://www.wiwiss.fu-berlin.de/en/institute/pwo/bizer/team/BizerChristian.html">Chris Bizer</a></dd>
 <dt>Contributors</dt>
 <dd>
 <a href="http://www.deri.ie/about/team/member/aftab_iqbal/">Aftab Iqbal</a><br />
