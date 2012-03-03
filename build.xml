@@ -18,7 +18,7 @@
 	<property name="tar" value="${distname}.tar.gz"/>
 	<property name="war" value="${name}.war" />
 
-	<property name="vocab.dir" value="${doc}/vocab"/>
+	<property name="vocab.dir" value="${doc}/terms"/>
 	<property name="vocab.language.ttl" value="${vocab.dir}/d2rq.ttl"/>
 	<property name="vocab.language.rdf" value="${vocab.dir}/d2rq.rdf"/>
 	<property name="vocab.language.namespace" value="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#"/>

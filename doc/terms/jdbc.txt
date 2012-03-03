@@ -1,0 +1,9 @@
+The namespace <http://d2rq.org/terms/jdbc/> is used in D2RQ [1] to indicate
+JDBC connection properties. See the D2RQ language specification [2] for more
+information.
+
+Currently, no machine-readable version of this namespace is available.
+
+
+[1] http://d2rq.org/
+[2] http://d2rq.org/d2rq-language#jdbc-connection-properties
