@@ -116,7 +116,7 @@ public class ParserTest extends TestCase {
 		DownloadMap d = m.downloadMap(name);
 		assertNotNull(d);
 		assertEquals("image/png", d.getMediaType());
-		assertEquals("People.pic", d.getContentColumn().qualifiedName());
+		assertEquals("People.pic", d.getContentDownloadColumn().qualifiedName());
 		assertEquals("URI(Pattern(http://example.org/downloads/@@People.ID@@))", 
 				d.nodeMaker().toString());
 		assertEquals(

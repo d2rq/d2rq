@@ -10,12 +10,12 @@
 :downloadCLOB a d2rq:DownloadMap;
 	d2rq:dataStorage :database;
 	d2rq:uriPattern "downloads/clob/@@PEOPLE.ID@@";
-	d2rq:contentColumn "PEOPLE.PIC_CLOB";
+	d2rq:contentDownloadColumn "PEOPLE.PIC_CLOB";
 	d2rq:mediaType "text/plain";
 	.
 :downloadBLOB a d2rq:DownloadMap;
 	d2rq:dataStorage :database;
 	d2rq:uriPattern "downloads/blob/@@PEOPLE.ID@@";
-	d2rq:contentColumn "PEOPLE.PIC_BLOB";
+	d2rq:contentDownloadColumn "PEOPLE.PIC_BLOB";
 	d2rq:mediaType "image/png";
 	.

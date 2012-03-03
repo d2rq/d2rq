@@ -211,11 +211,6 @@
     <rdfs:comment>Enforced upper limit for the size of SQL result sets.</rdfs:comment>
     <rdfs:label>Result size limit</rdfs:label>
   </rdf:Property>
-  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#contentColumn">
-    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#DownloadMap"/>
-    <rdfs:comment>A database column containing data to be made downloadable.</rdfs:comment>
-    <rdfs:label>Content column</rdfs:label>
-  </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#classDefinitionLabel">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ClassMap"/>
     <rdfs:comment>A label to be served as rdfs:label for all associated class definitions</rdfs:comment>
@@ -372,6 +367,11 @@
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#jdbcDriver">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
     <rdfs:label>JDBC driver</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#contentDownloadColumn">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#DownloadMap"/>
+    <rdfs:comment>A database column containing data to be made downloadable.</rdfs:comment>
+    <rdfs:label>Content download column</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#bNodeIdColumns">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ResourceMap"/>

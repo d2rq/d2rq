@@ -82,7 +82,7 @@ public class DownloadContentQuery {
 		NodeMaker x = downloadMap.nodeMaker().selectNode(Node.createURI(uri), newRelation);
 		// URI didn't fit the node maker
 		if (x.equals(NodeMaker.EMPTY)) return;
-		newRelation.project(Collections.singleton(downloadMap.getContentColumn()));
+		newRelation.project(Collections.singleton(downloadMap.getContentDownloadColumn()));
 		newRelation.limit(1);
 		Relation filteredRelation = newRelation.immutableSnapshot();
 		String sql = new SelectStatementBuilder(filteredRelation).getSQLStatement();

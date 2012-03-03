@@ -571,9 +571,9 @@ public class MapParser {
 			dm.setBelongsToClassMap(mapping.classMap(
 					stmts.nextStatement().getResource()));
 		}
-		stmts = r.listProperties(D2RQ.contentColumn);
+		stmts = r.listProperties(D2RQ.contentDownloadColumn);
 		while (stmts.hasNext()) {
-			dm.setContentColumn(stmts.nextStatement().getString());
+			dm.setContentDownloadColumn(stmts.nextStatement().getString());
 		}
 		stmts = r.listProperties(D2RQ.mediaType);
 		while (stmts.hasNext()) {

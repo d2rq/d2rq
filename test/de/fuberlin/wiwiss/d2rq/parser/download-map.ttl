@@ -9,6 +9,6 @@
 :dm a d2rq:DownloadMap;
 	d2rq:dataStorage :database;
 	d2rq:uriPattern "downloads/@@People.ID@@";
-	d2rq:contentColumn "People.pic";
+	d2rq:contentDownloadColumn "People.pic";
 	d2rq:mediaType "image/png";
 	.

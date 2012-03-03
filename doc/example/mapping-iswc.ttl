@@ -150,7 +150,7 @@ map:papers_Abstract a d2rq:PropertyBridge;
 map:papers_Abstract_Download a d2rq:PropertyBridge, d2rq:DownloadMap;
     d2rq:belongsToClassMap map:Papers;
     d2rq:uriPattern "papers/@@papers.PaperID@@/abstract";
-    d2rq:contentColumn "papers.Abstract";
+    d2rq:contentDownloadColumn "papers.Abstract";
     d2rq:property vocab:textAbstract;
     d2rq:mediaType "text/plain";
     .

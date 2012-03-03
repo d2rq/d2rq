@@ -1059,7 +1059,7 @@ from where the content is to be made downloadable. An instance of
     <td>A <a href="#database"><code>d2rq:Database</code></a> instance</td>
   </tr>
   <tr>
-    <th id="d2rq:contentColumn">d2rq:contentColumn</th>
+    <th id="d2rq:contentDownloadColumn">d2rq:contentDownloadColumn</th>
     <td>The column containing downloadable resources, in
     <code>[SCHEMA.]TABLE.COLUMN</code> notation</td>
   </tr>
@@ -1107,7 +1107,7 @@ assumed to contain PDF files.</p>
 map:PaperDownload a d2rq:DownloadMap;
     d2rq:dataStorage map:database;
     d2rq:uriPattern "downloads/@@PAPER.ID@@.pdf";
-    d2rq:contentColumn "PAPER.PDF";
+    d2rq:contentDownloadColumn "PAPER.PDF";
     d2rq:mediaType "application/pdf";
     .
 </pre>
@@ -1130,7 +1130,7 @@ as well as any conditions, aliases and joins.</p>
 map:PaperDownload a d2rq:DownloadMap, d2rq:PropertyBridge;
     d2rq:belongsToClassMap map:Paper;
     d2rq:uriPattern "downloads/@@PAPER.ID@@.pdf";
-    d2rq:contentColumn "PAPER.PDF";
+    d2rq:contentDownloadColumn "PAPER.PDF";
     d2rq:mediaType "application/pdf";
     d2rq:property ex:download;
     d2rq:condition "PAPER.PDF IS NOT NULL";
@@ -1159,14 +1159,14 @@ download maps with appropriate <code>d2rq:condition</code>s.</p>
 map:PaperDownloadPDF a d2rq:DownloadMap;
     d2rq:dataStorage map:database;
     d2rq:uriPattern "downloads/@@PAPER.ID@@.pdf";
-    d2rq:contentColumn "PAPER.DOWNLOAD";
+    d2rq:contentDownloadColumn "PAPER.DOWNLOAD";
     d2rq:mediaType "application/pdf";
     d2rq:condition "PAPER.FORMAT = 'PDF'";
     .
 map:PaperDownloadWord a d2rq:DownloadMap;
     d2rq:dataStorage map:database;
     d2rq:uriPattern "downloads/@@PAPER.ID@@.doc";
-    d2rq:contentColumn "PAPER.DOWNLOAD";
+    d2rq:contentDownloadColumn "PAPER.DOWNLOAD";
     d2rq:mediaType "application/msword";
     d2rq:condition "PAPER.FORMAT = 'DOC'";
     .

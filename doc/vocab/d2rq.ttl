@@ -452,8 +452,8 @@ d2rq:DownloadMap a rdfs:Class;
 	rdfs:label "Download map"; 
 	rdfs:comment "Makes the contents of some database column downloadable.";
 	.
-d2rq:contentColumn a rdf:Property;
-	rdfs:label "Content column";
+d2rq:contentDownloadColumn a rdf:Property;
+	rdfs:label "Content download column";
 	rdfs:comment "A database column containing data to be made downloadable.";
 	rdfs:domain d2rq:DownloadMap;
 	.

@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * provide further relation elements (joins, aliases, conditions),
  * and additionally has a d2rq:mediaType and d2rq:contentColumn.
  * 
- * Results can be retrieved via {@link #getContentColumn()},
+ * Results can be retrieved via {@link #getContentDownloadColumn()},
  * {@link #getMediaType()}, {@link #nodeMaker()} (for the URI spec),
  * and {@link #getRelation()}.
  * 
@@ -31,7 +31,7 @@ public class DownloadMap extends ResourceMap {
 	private ClassMap belongsToClassMap = null;
 	private Database database = null;
 	private String mediaType = null;
-	private Attribute contentColumn = null;
+	private Attribute contentDownloadColumn = null;
 	
 	public DownloadMap(Resource downloadMapResource) {
 		super(downloadMapResource, false);
@@ -59,10 +59,10 @@ public class DownloadMap extends ResourceMap {
 		this.mediaType = mediaType;
 	}
 	
-	public void setContentColumn(String contentColumn) {
-		assertNotYetDefined(this.contentColumn, D2RQ.contentColumn, 
+	public void setContentDownloadColumn(String contentColumn) {
+		assertNotYetDefined(this.contentDownloadColumn, D2RQ.contentDownloadColumn, 
 				D2RQException.DOWNLOADMAP_DUPLICATE_CONTENTCOLUMN);
-		this.contentColumn = SQL.parseAttribute(contentColumn);
+		this.contentDownloadColumn = SQL.parseAttribute(contentColumn);
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class DownloadMap extends ResourceMap {
 					"Download map " + toString() + " needs a d2rq:dataStorage (or d2rq:belongsToClassMap)", 
 					D2RQException.DOWNLOADMAP_NO_DATASTORAGE);
 		}
-		assertHasBeenDefined(contentColumn, D2RQ.contentColumn, 
+		assertHasBeenDefined(contentDownloadColumn, D2RQ.contentDownloadColumn, 
 				D2RQException.DOWNLOADMAP_NO_CONTENTCOLUMN);
 		if (this.constantValue != null && !this.constantValue.isURIResource()) {
 			throw new D2RQException(
@@ -91,7 +91,7 @@ public class DownloadMap extends ResourceMap {
 	@Override
 	protected Relation buildRelation() {
 		RelationBuilder builder = relationBuilder();
-		builder.addProjection(contentColumn);
+		builder.addProjection(contentDownloadColumn);
 		if (belongsToClassMap != null) {
 			builder.addOther(belongsToClassMap.relationBuilder());
 		}
@@ -108,7 +108,7 @@ public class DownloadMap extends ResourceMap {
 		return mediaType;
 	}
 	
-	public Attribute getContentColumn() {
-		return contentColumn;
+	public Attribute getContentDownloadColumn() {
+		return contentDownloadColumn;
 	}
 }
