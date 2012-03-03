@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Using the D2RQ Engine with Jena | The D2RQ Platform</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="document-collection">This document is part of the <a href="http://d2rq.org/">D2RQ documentation</a>.</div>
+      <h1>Using the D2RQ Engine with Jena</h1>
+    </header>
+
+<p><a href="http://incubator.apache.org/jena/">Apache Jena</a>
+is a Java framework for building Semantic Web applications. 
+The <a href="http://d2rq.org/">D2RQ Engine</a> can be used as a
+component in such applications to access a virtual RDF view
+on data in relatonal databases.</p>
+
+<ul class="toc small">
+  <li>1. <a href="#versions">Jena Versions</a></li>
+  <li>2. <a href="#installation">Installation</a></li>
+  <li>3. <a href="#logging">Logging</a></li>
+  <li>4. <a href="#model-api">Using D2RQ with Jena's Model API</a></li>
+  <li>5. <a href="#usingfind">Using D2RQ with Jena's Graph API</a>
+    <ul>
+      <li>5.1 <a href="#caching-graph">The <code>CachingGraphD2RQ</code></a></li>
+    </ul>
+  </li>
+  <li>6. <a href="#sparql">Executing SPARQL queries against a <code>ModelD2RQ</code></a></li>
+  <li>7. <a href="#assembler">The D2RQ Assembler</a></li>
+  <li>8. <a href="#javadoc">Javadoc API documentation</a></li>
+</ul>
+
+
+<h2 id="versions">1. Jena Versions</h2>
+
+<p>Since D2RQ plugs into the internals of Jena and its SPARQL query
+engine,
+<a href="http://incubator.apache.org/jena/documentation/query/">ARQ</a>,
+it is sensitive to the version of Jena
+and ARQ that is being used. D2RQ will usually not work with other
+Jena versions than the one it is shipped with. Check the
+<code>/lib/arq-<em>X.Y</em></code> directory in the D2RQ distribution
+for the version used.</p>
+
+
+<h2 id="installation">2. Installation</h2>
+
+<ol>
+<li><a href="http://d2rq.org/">Download</a> D2RQ</li>
+<li>Add the <code>d2rq-<em>X.Y</em>.jar</code> file from D2RQ's
+<code>/lib</code> directory to your classpath.</li>
+<li>Add all jar files from the <code>/lib/arq-1.4</code> directory
+  to your application's classpath.</li>
+<li>Add <code>commons-logging-<em>X.Y</em>.jar</code> from D2RQ's
+<code>/lib/logging</code> directory to your application's classpath.
+If your application doesn't configure its own logging system, add
+the other jars from that directory as well.</li>
+<li>Add a JDBC driver for your database to your application's
+  classpath. Drivers for some popular databases are found
+  in D2RQ's <code>/lib/db-drivers</code> directory.</li>
+</ol>
+
+
+<h2 id="logging">3. Logging</h2>
+
+<p>D2RQ logs to the
+<a href="http://jakarta.apache.org/commons/logging/">Apache Commons Logging</a>
+API and ships with
+<a href="http://logging.apache.org/log4j/1.2/">Apache log4j</a> as a
+logging system. To enable D2RQ debug messages, set the log level for logger
+<code>de.fuberlin.wiwiss.d2rq</code> to <code>ALL</code>.
+An easy way to do this is:</p>
+
+<pre>org.apache.log4j.Logger.getLogger(
+        "de.fuberlin.wiwiss.d2rq").setLevel(
+                org.apache.log4j.Level.ALL);</pre>
+
+
+<h2 id="model-api">4. Using D2RQ with Jena's Model API</h2>
+
+<p>The <code>ModelD2RQ</code> class provides a Jena
+<a href="http://incubator.apache.org/jena/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Model</a>
+view on the data
+in a D2RQ-mapped database.</p>
+
+<p>The following example shows how a <code>ModelD2RQ</code> is set up
+using a previously created mapping file, and how Jena API calls
+are used to extract
+information about papers and their authors from the model.</p>
+
+<pre>// Set up the ModelD2RQ using a mapping file
+Model m = new ModelD2RQ("file:doc/example/mapping-iswc.ttl");
+
+// Find anything with an rdf:type of iswc:InProceedings
+StmtIterator paperIt = m.listStatements(null, RDF.type, ISWC.InProceedings);
+
+// List found papers and print their titles
+while (paperIt.hasNext()) {
+    Resource paper = paperIt.nextStatement().getSubject();
+    System.out.println("Paper: " + paper.getProperty(DC.title).getString());
+
+    // List authors of the paper and print their names
+    StmtIterator authorIt = paper.listProperties(DC.creator);
+    while (authorIt.hasNext()) {
+        Resource author = authorIt.nextStatement().getResource();
+        System.out.println("Author: " + author.getProperty(FOAF.name).getString());
+    }
+    System.out.println();
+}</pre>
+
+<p>The ISWC and FOAF classes have been created with Jena's
+<a href="http://jena.sourceforge.net/how-to/schemagen.html">schemagen</a>
+tool. The DC and RDF classes are part of Jena.</p>
+
+
+<h2 id="usingfind">5. Using D2RQ with Jena's Graph API</h2>
+
+<p>In some situations, it is better to use Jena's low-level
+<a href="http://incubator.apache.org/jena/documentation/javadoc/jena/com/hp/hpl/jena/graph/Graph.html">Graph</a>
+API instead of the Model API. D2RQ provides an implementation
+of the Graph interface, the <code>GraphD2RQ</code>.</p>
+
+<p>The following example shows how the Graph API is used to find all papers
+that have been published in 2003.</p>
+
+<pre>// Load mapping file
+Model mapping = FileManager.get().loadModel("doc/example/mapping-iswc.ttl");
+
+// Set up the GraphD2RQ
+GraphD2RQ g = new GraphD2RQ(mapping, "http://localhost:2020/");
+
+// Create a find(spo) pattern 
+Node subject = Node.ANY;
+Node predicate = DC.date.asNode();
+Node object = Node.createLiteral("2003", null, XSDDatatype.XSDgYear);
+Triple pattern = new Triple(subject, predicate, object);
+
+// Query the graph
+Iterator it = g.find(pattern);
+
+// Output query results
+while (it.hasNext()) {
+    Triple t = (Triple) it.next();
+    System.out.println("Published in 2003: " + t.getSubject());
+}</pre>
+
+
+<h3 id="caching-graph">5.1 The <code>CachingGraphD2RQ</code></h3>
+
+<p>In addition to the <code>GraphD2RQ</code>, there is a
+<code>CachingGraphD2RQ</code> which supports
+the same API and uses a LRU cache to remember a number of recent query
+results. This will improve performance for repeated queries, but will
+report inconsistent results if the database is updated during the lifetime
+of the <code>CachingGraphD2RQ</code>.</p>
+
+
+<h2 id="sparql">6. Executing SPARQL queries against a <code>ModelD2RQ</code></h2>
+
+<p>D2RQ can answer SPARQL queries against a D2RQ model.
+The example shows how a D2RQ model
+is set up, how a SPARQL query is executed, and how the results are written
+to the console.</p>
+
+<pre>ModelD2RQ m = new ModelD2RQ("file:doc/example/mapping-iswc.ttl");
+String sparql = 
+    "PREFIX dc: &lt;http://purl.org/dc/elements/1.1/>" +
+    "PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/>" +
+    "SELECT ?paperTitle ?authorName WHERE {" +
+    "    ?paper dc:title ?paperTitle . " +
+    "    ?paper dc:creator ?author ." +
+    "    ?author foaf:name ?authorName ." +
+    "}";
+Query q = QueryFactory.create(sparql); 
+ResultSet rs = QueryExecutionFactory.create(q, m).execSelect();
+while (rs.hasNext()) {
+    QuerySolution row = rs.nextSolution();
+    System.out.println("Title: " + row.getLiteral("paperTitle").getString());
+    System.out.println("Author: " + row.getLiteral("authorName").getString());
+}</pre>
+
+
+<h2 id="assembler">7. The D2RQ Assembler</h2>
+
+<p>D2RQ comes with a Jena assembler. Jena assembler specifications are RDF
+configuration files that describe how to construct a Jena model. For more
+information on Jena assemblers, see the
+<a href="http://incubator.apache.org/jena/documentation/assembler/index.html">Jena Assembler quickstart page</a>.</p>
+
+<p>The following example shows an assembler specification for a D2RQ model:</p>
+
+<pre>@prefix : &lt;#&gt; .
+@prefix ja: &lt;http://jena.hpl.hp.com/2005/11/Assembler#&gt; .
+@prefix d2rq: &lt;http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#&gt; .
+
+&lt;&gt; ja:imports d2rq: .
+
+:myModel
+    a d2rq:D2RQModel;
+    d2rq:mappingFile &lt;mapping-iswc.ttl&gt;;
+    d2rq:resourceBaseURI &lt;http://localhost:2020/&gt;;
+    .</pre>
+
+<p>D2RQ model specifications support these two properties:
+
+<table class="properties">
+  <tr>
+    <th>d2rq:mappingFile</th>
+    <td>Required. The URI of a D2RQ mapping file to use for setting up the model.</td>
+  </tr>
+  <tr>
+    <th>d2rq:resourceBaseURI</th>
+    <td>The base URI for turning relative URI patterns into full URIs.
+    If not specified, D2RQ will pick an appropriate base URI.</td>
+  </tr>
+</table>
+
+<p>This usage example will create a D2RQ model from a model specification, and write it to the console:</p>
+
+<pre>// Load assembler specification from file
+Model assemblerSpec = FileManager.get().loadModel("doc/example/assembler.ttl");
+
+// Get the model resource
+Resource modelSpec = assemblerSpec.createResource(assemblerSpec.expandPrefix(":myModel"));
+
+// Assemble a model
+Model m = Assembler.general.openModel(modelSpec);
+
+// Write it to System.out
+m.write(System.out);</pre>
+
+
+<h2 id="javadoc">Javadoc API documentation</h2>
+
+<p>Javadoc API documentation for the latest release <a href="javadoc">is available</a>.</p>
+
+  </body>
+</html>

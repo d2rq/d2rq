@@ -4,27 +4,29 @@
     <title>The D2RQ Mapping Language</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="script.js"></script>
   </head>
   <body>
-    <div class="document-collection">This document is part of the <a href="http://d2rq.org/">D2RQ documentation</a>.</div>
-    <h1>The D2RQ Mapping Language</h1>
-    <dl>
-      <dt>Version:</dt>
-      <dd>v0.8 – 2012-03-09</dd>
-      <dt>Authors:</dt>
-      <dd><a href="http://richard.cyganiak.de/">Richard Cyganiak</a> (DERI, NUI Galway, Ireland)</dd>
-      <dd><a href="http://www.wiwiss.fu-berlin.de/en/institute/pwo/bizer/team/BizerChristian.html">Chris Bizer</a> (Freie Universit&auml;t Berlin, Germany)</dd>
-      <dd>J&ouml;rg Garbers (Freie Universit&auml;t Berlin, Germany)</dd>
-      <dd><a href="http://www.oliver-maresch.de/">Oliver Maresch</a> (Technische Universit&auml;t Berlin, Germany)</dd>
-      <dd><a href="http://beckr.org/">Christian Becker</a> (Freie Universit&auml;t Berlin, Germany)</dd>
-      <dt>Abstract:</dt>
-      <dd>This document describes the <strong>D2RQ Mapping Language</strong>,
-        a declarative language for mapping relational database schemas to
-        RDF vocabularies and OWL ontologies. The language is implemented in
-        the <a href="http://d2rq.org/">D2RQ Platform</a>.</dd>
-    </dl>
-
-<h2 id="toc">Table of Contents</h2>
+    <header>
+      <div class="document-collection">This document is part of the <a href="http://d2rq.org/">D2RQ documentation</a>.</div>
+      <h1>The D2RQ Mapping Language</h1>
+      <dl>
+        <dt>Version:</dt>
+        <dd>v0.8 – 2012-03-09</dd>
+        <dt>Authors:</dt>
+        <dd><a href="http://richard.cyganiak.de/">Richard Cyganiak</a> (DERI, NUI Galway, Ireland)</dd>
+        <dd><a href="http://www.wiwiss.fu-berlin.de/en/institute/pwo/bizer/team/BizerChristian.html">Chris Bizer</a> (Freie Universit&auml;t Berlin, Germany)</dd>
+        <dd>J&ouml;rg Garbers (Freie Universit&auml;t Berlin, Germany)</dd>
+        <dd><a href="http://www.oliver-maresch.de/">Oliver Maresch</a> (Technische Universit&auml;t Berlin, Germany)</dd>
+        <dd><a href="http://beckr.org/">Christian Becker</a> (Freie Universit&auml;t Berlin, Germany)</dd>
+        <dt>Abstract:</dt>
+        <dd>This document describes the <strong>D2RQ Mapping Language</strong>,
+          a declarative language for mapping relational database schemas to
+          RDF vocabularies and OWL ontologies. The language is implemented in
+          the <a href="http://d2rq.org/">D2RQ Platform</a>.</dd>
+      </dl>
+    </header>
 
 <ul class="toc">
   <li>1. <a href="#introduction">Introduction</a></li>
@@ -110,8 +112,6 @@
     </ul>
   </li>
 </ul>
-
-<hr />
 
 
 <h2 id="introduction">1. Introduction</h2>
@@ -237,27 +237,27 @@ map:location a d2rq:PropertyBridge;
 
 <table class="properties">
   <tr> 
-    <th>d2rq:jdbcDSN</th>
+    <th id="d2rq:jdbcDSN">d2rq:jdbcDSN</th>
     <td>The JDBC database URL. This is a string of the form
       <code>jdbc:<em>subprotocol</em>:<em>subname</em></code>. For a MySQL database,
       this is something like <code>jdbc:mysql://hostname:port/dbname</code>.
       <a href="http://www.devx.com/tips/Tip/28818">Examples for other databases</a></td>
   </tr>
   <tr> 
-    <th>d2rq:jdbcDriver</th>
+    <th id="d2rq:jdbcDriver">d2rq:jdbcDriver</th>
     <td>The JDBC driver class name for the database. Used together with <code>d2rq:jdbcDSN</code>.
       Example: <code>com.mysql.jdbc.Driver</code> for MySQL.</td>
   </tr>
   <tr> 
-    <th>d2rq:username </th>
+    <th id="d2rq:username">d2rq:username</th>
     <td>A username if required by the database.</td>
   </tr>
   <tr> 
-    <th>d2rq:password </th>
+    <th id="d2rq:password">d2rq:password</th>
     <td>A password if required by the database.</td>
   </tr>
   <tr> 
-    <th>d2rq:resultSizeLimit </th>
+    <th id="d2rq:resultSizeLimit">d2rq:resultSizeLimit</th>
     <td>An integer value that will be added as a LIMIT clause to all
       generated SQL queries. This sets an upper bound for the number
       of results returned from large databases. Note that this effectively
@@ -267,7 +267,7 @@ map:location a d2rq:PropertyBridge;
       result limits on individual property bridges.</td>
   </tr>
   <tr> 
-    <th>d2rq:fetchSize</th>
+    <th id="d2rq:fetchSize">d2rq:fetchSize</th>
     <td>An integer value that specifies the number of rows to retrieve
        with every database request. This value is particularily important to control memory resources
        of both the D2RQ and the database server when performing dumps.
@@ -275,12 +275,12 @@ map:location a d2rq:PropertyBridge;
        enable <a href="http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-implementation-notes.html">streaming mode</a>.</td>
   </tr>
   <tr> 
-    <th>d2rq:allowDistinct</th>
-    <td>Specifies the databases ability to handle DISTINCT correctly. 
+    <th id="d2rq:allowDistinct">d2rq:allowDistinct</th>
+    <td>Specifies the databases ability to handle <code>DISTINCT</code> correctly. 
     Value: "true" or "false". For example MSAccess cuts fields longer than 256 chars.</td>
   </tr>
   <tr> 
-    <th>d2rq:textColumn<br />d2rq:numericColumn<br />d2rq:dateColumn<br />d2rq:timestampColumn</th>
+    <th id="d2rq:textColumn">d2rq:textColumn<br />d2rq:numericColumn<br />d2rq:dateColumn<br />d2rq:timestampColumn</th>
     <td>These properties are used to declare the column type of database columns.
       Values are column names in <code>Table_name.column_name</code> notation.
       These properties do not need to be specified <em>unless</em>
@@ -357,11 +357,11 @@ For this purpose, the default query may be overridden with a custom noop query.<
 
 <table class="properties">
   <tr>
-    <th>d2rq:serveVocabulary</th>
+    <th id="d2rq:serveVocabulary">d2rq:serveVocabulary</th>
     <td>Whether to serve inferred and user-supplied vocabulary data (boolean; <code>true</code> by default). This option is automatically set when using D2R Server's <code>--fast</code> command-line option.</td>
   </tr>
   <tr>
-    <th>d2rq:useAllOptimizations</th>
+    <th id="d2rq:useAllOptimizations">d2rq:useAllOptimizations</th>
     <td>Whether to use bleeding edge optimizations (boolean; <code>false</code> by default).</td>
   </tr>
 </table>
@@ -432,8 +432,13 @@ mailto:@@<em>Persons.email</em>@@</pre>
 <dd><p>In some cases, the database may already contain URIs that
   can be used as resource identifiers, such as web page and
   document URLs. URI are generated from columns
-  with the <code>d2rq:uriColumns</code> property.</p>
+  with the <code>d2rq:uriColumn</code> property.</p>
 </dd>
+
+<dt>URI expressions</dt>
+<dd><p>URIs can be generated with a SQL expression, specified
+   via <code>d2rq:uriSqlExpression</code>. The expression
+  must yield a valid URI.</p></dd>
 
 <dt>Blank nodes</dt>
 <dd><p>RDF also has the concept of blank nodes, existential qualifiers
@@ -456,84 +461,96 @@ mailto:@@<em>Persons.email</em>@@</pre>
 
 <table class="properties">
   <tr> 
-    <th>d2rq:dataStorage</th>
+    <th id="d2rq:dataStorage">d2rq:dataStorage</th>
     <td>Reference to a <code>d2rq:Database</code> where the instance data is stored.</td>
   </tr>
   <tr> 
-    <th>d2rq:class</th>
+    <th id="d2rq:class">d2rq:class</th>
     <td>An RDF-S or OWL class. All resources generated by this
         ClassMap are instances of this class.</td>
   </tr>
   <tr> 
-    <th>d2rq:uriPattern</th>
+    <th id="d2rq:uriPattern">d2rq:uriPattern</th>
     <td>Specifies a URI pattern that will be used to
       identify instances of this class map.</td>
   </tr>
   <tr> 
-    <th>d2rq:uriColumn</th>
+    <th id="d2rq:uriColumn">d2rq:uriColumn</th>
     <td>A database column containing URIrefs for identifying
       instances of this class map. The column name has to be in the form
       <code>&quot;TableName.ColumnName&quot;</code>.</td>
   </tr>
+  <tr>
+    <th id="d2rq:uriSqlExpression">d2rq:uriSqlExpression</th>
+    <td>A SQL expression that generates the URI identifiers
+      for instances of this class map. Similar to <code>d2rq:sqlExpression</code>.
+      The output must be a valid URI. Note that querying
+      for such a computed value might put a heavy load on the database.
+      See <a href="#example-uri-sql-expression">example</a> below.</td>
+  </tr>
   <tr> 
-    <th>d2rq:bNodeIdColumns</th>
+    <th id="d2rq:bNodeIdColumns">d2rq:bNodeIdColumns</th>
     <td>A comma-seperated list of column names in
       <code>"TableName.ColumnName"</code> notation. The instances of
       this class map will be blank nodes, one distinct blank node
       per distinct tuple of these columns.</td>
   </tr>
   <tr> 
-    <th>d2rq:constantValue</th>
+    <th id="d2rq:constantValue">d2rq:constantValue</th>
     <td>This class map will only have a single instance, which is
       named by the value of this property. This can be a blank node or a URI.</td>
   </tr>
   <tr> 
-    <th>d2rq:translateWith</th>
-    <td>Assigns a <code>d2rq:TranslationTable</code> to the class map. Values 
-      from the <code>d2rq:uriColumn</code> or <code>d2rq:uriPattern</code> will be translated by the table 
-      before a resource is generated. See <a href="#translationtable">below</a>
-      for details.</td>
-  </tr>
-  <tr> 
-    <th>d2rq:containsDuplicates</th>
+    <th id="d2rq:containsDuplicates">d2rq:containsDuplicates</th>
     <td> Must be specified if a class map uses information from tables 
       that are not fully normalized. If the <code>d2rq:containsDuplicates</code> property value 
-      is set to "true", then D2RQ adds a DISTINCT clause to all queries using 
+      is set to "true", then D2RQ adds a <code>DISTINCT</code> clause to all queries using 
       this classMap. &quot;False&quot; is the default value, which doesn't have 
       to be explicitly declared. Adding this property to class maps based on normalized 
       database tables degrades query performance, but doesn't affect query results.</td>
   </tr>
   <tr>
-    <th>d2rq:additionalProperty</th>
+    <th id="d2rq:additionalProperty">d2rq:additionalProperty</th>
     <td>Adds an <a href="#additionalproperty">AdditionalProperty</a>
       to all instances of this class. 
       This might be useful for adding <code>rdfs:seeAlso</code> properties or other fixed
       statements to all instances of the class. </td>
   </tr>
   <tr> 
-    <th>d2rq:condition</th>
-    <td>Specifies an SQL WHERE condition. An instance of this class 
+    <th id="d2rq:condition">d2rq:condition</th>
+    <td>Specifies an SQL <code>WHERE</code> condition. An instance of this class 
       will only be generated for database rows that satisfy the condition. Conditions 
       can be used to hide parts of the database from D2RQ, e.g. deny access to 
       data which is older or newer than a certain date. See section <a href="#conditional">Conditional 
       Mappings</a> for details.</td>
   </tr>
   <tr> 
-    <th>d2rq:classDefinitionLabel</th>
+    <th id="d2rq:classDefinitionLabel">d2rq:classDefinitionLabel</th>
     <td>Specifies a label that will be served as <code>rdfs:label</code>
      for all associated class definitions. Multiple lables, e.g. in several languages, are supported.</td>
   </tr>
   <tr> 
-    <th>d2rq:classDefinitionComment</th>
+    <th id="d2rq:classDefinitionComment">d2rq:classDefinitionComment</th>
     <td>Specifies a comment that will be served as <code>rdfs:comment</code>
      for all associated class definitions. Multiple comments are supported.</td>
   </tr>
   <tr> 
-    <th>d2rq:additionalClassDefinitionProperty</th>
+    <th id="d2rq:additionalClassDefinitionProperty">d2rq:additionalClassDefinitionProperty</th>
     <td>Adds an <a href="#additionalproperty">AdditionalProperty</a>
       to all associated class definitions.</td>
   </tr>
 </table>
+
+<p>Furthermore,
+<a href="#d2rq:valueMaxLength"><code>d2rq:valueMaxLength</code></a>,
+<a href="#d2rq:valueRegex"><code>d2rq:valueRegex</code></a>,
+<a href="#d2rq:valueContains"><code>d2rq:valueContains</code></a>,
+and <a href="#d2rq:translateWith"><code>d2rq:translateWith</code></a>
+can be used and work the same way as on property bridges.</p>
+
+<p><a href="#d2rq:join"><code>d2rq:join</code></a> and
+<a href="#d2rq:alias"><code>d2rq:alias</code></a> can be used too,
+and are inherited by the map's property bridges.</p>
 
 
 <h3 id="example-uri-pattern">5.3 Example: Identifying class map instances with a URI pattern</h3>
@@ -614,30 +631,30 @@ map:PersonsType a d2rq:PropertyBridge;
 
 <table class="properties">
   <tr>
-    <th>d2rq:belongsToClassMap</th>
+    <th id="d2rq:belongsToClassMap">d2rq:belongsToClassMap</th>
     <td>Specifies that the property bridge belongs to a <code>d2rq:ClassMap</code>.
       Must be specified for every property bridge.</td>
   </tr>
   <tr>
-    <th>d2rq:property</th>
+    <th id="d2rq:property">d2rq:property</th>
     <td>The RDF property that connects the ClassMap
       with the object or literal created by the bridge. Must be specified for
       every property bridge. If multiple <code>d2rq:properties</code> are
       specified, then one triple with each property is generated per resource.</td>
   </tr>
   <tr>
-    <th>d2rq:dynamicProperty</th>
+    <th id="d2rq:dynamicProperty">d2rq:dynamicProperty</th>
     <td>A URI pattern that is used to generate the property URI at runtime. If multiple <code>d2rq:dynamicProperty</code> are specified, then one triple with each property is generated per resource.</td>
   </tr>
   <tr>
-    <th>d2rq:column</th>
+    <th id="d2rq:column">d2rq:column</th>
     <td>For properties with literal values.
       The database column that contains the literal values.
       Column names have to be given in the form <code>&quot;TableName.ColumnName&quot;</code>. 
     </td>
   </tr>
   <tr>
-    <th>d2rq:pattern</th>
+    <th id="d2rq:pattern">d2rq:pattern</th>
     <td>For properties with literal values.
       Can be used to extend and combine column values before
       they are used as a literal property value. If 
@@ -646,51 +663,19 @@ map:PersonsType a d2rq:PropertyBridge;
       in order to allow D2RQ reversing given literals into column values.</td>
   </tr>
   <tr>
-    <th>d2rq:sqlExpression</th>
+    <th id="d2rq:sqlExpression">d2rq:sqlExpression</th>
     <td>For properties with literal values. Generates
       literal values by evaluating a SQL expression. Note that querying
       for such a computed value might put a heavy load on the database.
       See <a href="#example-sqlexpression">example</a> below.</td>
   </tr>
   <tr>
-    <th>d2rq:datatype</th>
+    <th id="d2rq:datatype">d2rq:datatype</th>
     <td>For properties with literal values. Specifies the RDF datatype of the literals.</td>
   </tr>
   <tr>
-    <th>d2rq:lang</th>
+    <th id="d2rq:lang">d2rq:lang</th>
     <td>For properties with literal values. Specifies the language tag of the literals.</td>
-  </tr>
-  <tr> 
-    <th>d2rq:uriColumn</th>
-    <td>For properties with URI values. Database column that contains URIs.
-      Column names 
-      have to be given in the form <code>&quot;TableName.ColumnName&quot;.</code></td>
-  </tr>
-  <tr> 
-    <th>d2rq:uriPattern</th>
-    <td>For properties with URI values.
-      Can be used to extend and combine column values before
-      they are used as a URI property values. If 
-      a pattern contains more than one column, then a separating string, which 
-      cannot occur in the column values, has to be used between the column names, 
-      in order to allow D2RQ reversing given literals into column values.
-      See <a href="#example-mailto">example</a> below.</td>
-  </tr>
-  <tr>
-    <th>d2rq:uriSqlExpression</th>
-    <td>For properties with URI values and similar to <code>d2rq:sqlExpression</code>. Generates
-      URIs by evaluating an SQL expression (the output must be a valid URI). Note that querying
-      for such a computed value might put a heavy load on the database.
-      See <a href="#example-uri-sql-expression">example</a> below.</td>
-  </tr>
-  <tr> 
-    <th>d2rq:refersToClassMap</th>
-    <td>For properties that correspond to a foreign key.
-      References another
-      <code>d2rq:ClassMap</code> that creates the instances which are used
-      as the values of this bridge. One or more <code>d2rq:join</code> properties
-      must be specified to select the correct instances. See
-      <a href="#example-refers">example</a> below.</td>
   </tr>
   <tr>
     <th>d2rq:constantValue</th>
@@ -698,16 +683,32 @@ map:PersonsType a d2rq:PropertyBridge;
       instances of the class map. The value can be a literal, blank node, or
       URI. See <a href="#example-constant">example</a> below.</td>
   </tr>
+  <tr> 
+    <th id="d2rq:refersToClassMap">d2rq:refersToClassMap</th>
+    <td>For properties that correspond to a foreign key.
+      References another
+      <code>d2rq:ClassMap</code> that creates the instances which are used
+      as the values of this bridge. If these instances
+      come from another table, then one or more
+      <code>d2rq:join</code> properties
+      must be specified to select the correct instances. See
+      <a href="#example-refers">example</a> below.</td>
+  </tr>
+  <tr> 
+    <th>d2rq:uriColumn<br />d2rq:uriPattern<br />d2rq:uriSqlExpression</th>
+    <td>For properties where the value is supposed to be a URI instead
+      of a literal. They work the same as on <a href="#classmap">class maps</a>.</td>
+  </tr>
   <tr>
-    <th>d2rq:join</th>
+    <th id="d2rq:join">d2rq:join</th>
     <td>If the columns used to create the literal value or object
       are not from the database table(s) that contains the ClassMap's columns,
-      then the tables have to be joined together using one or more <code>d2rq:join</codE>
+      then the tables have to be joined together using one or more <code>d2rq:join</code>
       properties.
       See <a href="#example-join">example</a> below.</td>
   </tr>
   <tr>
-    <th>d2rq:alias</th>
+    <th id="d2rq:alias">d2rq:alias</th>
     <td>Aliases take the form <code>"Table AS Alias"</code>
       and are used when a table needs to be joined to itself.
       The table can be referred to using the alias within the
@@ -715,33 +716,33 @@ map:PersonsType a d2rq:PropertyBridge;
   </tr>
   <tr> 
     <th>d2rq:condition</th>
-    <td>Specifies an SQL WHERE condition. The bridge will only generate 
+    <td>Specifies an SQL <code>WHERE</code> condition. The bridge will only generate 
       a statement if the condition holds. A common usage is to suppress triples 
       with empty literal values: <code>d2rq:condition &quot;Table.Column &lt;> ''&quot;</code>. 
       See section <a href="#conditional">Conditional Mappings</a> for details. 
     </td>
   </tr>
   <tr> 
-    <th>d2rq:translateWith</th>
+    <th id="d2rq:translateWith">d2rq:translateWith</th>
     <td>Assigns a <code>d2rq:TranslationTable</code> to the property bridge. Values 
       from the <code>d2rq:column</code> or <code>d2rq:pattern</code> will be translated by the table. See 
       section <a href="#translationtable">TranslationTables</a> for details.</td>
   </tr>
   <tr> 
-    <th>d2rq:valueMaxLength</th>
+    <th id="d2rq:valueMaxLength">d2rq:valueMaxLength</th>
     <td>Asserts that all values of this bridge are not longer than 
       a number of characters. This allows D2RQ to speed up queries. See section 
       <a href="#hint">Performance Optimization</a> for details.</td>
   </tr>
   <tr> 
-    <th>d2rq:valueContains</th>
+    <th id="d2rq:valueContains">d2rq:valueContains</th>
     <td>Asserts that all values of this bridge always contain a given 
       string. This allows D2RQ to speed up queries. Most useful in conjunction 
       with <code>d2rq:column.</code> See section <a href="#hint">Performance Optimization</a> 
       for details.</td>
   </tr>
   <tr> 
-    <th>d2rq:valueRegex</th>
+    <th id="d2rq:valueRegex">d2rq:valueRegex</th>
     <td>Asserts that all values of this bridge match a given <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regular 
       expression</a>. This allows D2RQ to speed up queries. Most useful in conjunction 
       with <code>d2rq:column</code> on columns whose values are very different from other columns 
@@ -749,35 +750,35 @@ map:PersonsType a d2rq:PropertyBridge;
       for details.</td>
   </tr>
   <tr> 
-    <th>d2rq:propertyDefinitionLabel</th>
+    <th id="d2rq:propertyDefinitionLabel">d2rq:propertyDefinitionLabel</th>
     <td>Specifies a label that will be served as <code>rdfs:label</code>
      for all associated property definitions. Multiple lables, e.g. in several languages, are supported.</td>
   </tr>
   <tr> 
-    <th>d2rq:propertyDefinitionComment</th>
+    <th id="d2rq:propertyDefinitionComment">d2rq:propertyDefinitionComment</th>
     <td>Specifies a comment that will be served as <code>rdfs:comment</code>
      for all associated property definitions. Multiple comments are supported.</td>
   </tr>
   <tr> 
-    <th>d2rq:additionalPropertyDefinitionProperty</th>
+    <th id="d2rq:additionalPropertyDefinitionProperty">d2rq:additionalPropertyDefinitionProperty</th>
     <td>Adds an <a href="#additionalproperty">AdditionalProperty</a>
       to all associated property definitions.</td>
   </tr>
   <tr> 
-    <th>d2rq:limit</th>
+    <th id="d2rq:limit">d2rq:limit</th>
     <td>The maximum number of results to retrieve from the database for this PropertyBridge. Also see <a href="#database"><code>d2rq:resultSizeLimit</code></a>.</td>
   </tr>
   <tr> 
-    <th>d2rq:limitInverse</th>
+    <th id="d2rq:limitInverse">d2rq:limitInverse</th>
     <td>The maximum number of results to retrieve from the database for the inverse statements for this PropertyBridge.</td>
   </tr>
   <tr> 
-    <th>d2rq:orderAsc</th>
-    <td>The column after which to sort results in ascending order for this PropertyBridge.</td>
+    <th id="d2rq:orderAsc">d2rq:orderAsc</th>
+    <td>The column after which to sort results in ascending order for this PropertyBridge. Useful when results are limited using <a href="#d2rq:limit"><code>d2rq:limit</a></code>.</td>
   </tr>
   <tr> 
-    <th>d2rq:orderDesc</th>
-    <td>The column after which to sort results in descending order for this PropertyBridge.</td>
+    <th id="d2rq:orderDesc">d2rq:orderDesc</th>
+    <td>The column after which to sort results in descending order for this PropertyBridge. Useful when results are limited using <a href="#d2rq:limit"><code>d2rq:limit</a></code>.</td>
   </tr>
 </table>
 
@@ -958,18 +959,18 @@ map:seeAlsoBridge a d2rq:PropertyBridge;
 
 <table class="properties">
   <tr> 
-    <th>d2rq:translation</th>
+    <th id="d2rq:translation">d2rq:translation</th>
     <td>Adds a <a href="#translation"><code>d2rq:Translation</code></a>
       to the table.</td>
   </tr>
   <tr> 
-    <th>d2rq:href</th>
+    <th id="d2rq:href">d2rq:href</th>
     <td>Links to a CSV file containing translations. Each line of
       the file is a translation and contains two strings separated by a comma.
       The first one is the DB value, the second the RDF value.</td>
   </tr>
   <tr> 
-    <th>d2rq:javaClass</th>
+    <th id="d2rq:javaClass">d2rq:javaClass</th>
     <td>The qualified name of a Java class that performs the mapping. 
       The class must implement the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/javadoc/de/fuberlin/wiwiss/d2rq/Translator.html">Translator</a> 
       interface. Custom Translators might be useful for encoding and decoding 
@@ -986,12 +987,12 @@ map:seeAlsoBridge a d2rq:PropertyBridge;
   
 <table class="properties">
   <tr> 
-    <th>d2rq:databaseValue</th>
+    <th id="d2rq:databaseValue">d2rq:databaseValue</th>
     <td>A value that might appear in a database column
       or might be generated by a <code>d2rq:pattern</code>.</td>
   </tr>
   <tr> 
-    <th>d2rq:rdfValue</th>
+    <th id="d2rq:rdfValue">d2rq:rdfValue</th>
     <td>A translation of that value to be used in RDF constructs.</td>
   </tr>
 </table>
@@ -1057,7 +1058,7 @@ from where the content is to be made downloadable. An instance of
     <td>A <a href="#database"><code>d2rq:Database</code></a> instance</td>
   </tr>
   <tr>
-    <th>d2rq:contentColumn</th>
+    <th id="d2rq:contentColumn">d2rq:contentColumn</th>
     <td>The column containing downloadable resources, in
     <code>[SCHEMA.]TABLE.COLUMN</code> notation</td>
   </tr>
@@ -1070,7 +1071,7 @@ from where the content is to be made downloadable. An instance of
     Only one may be used.</td>
   </tr>
   <tr>
-    <th>d2rq:mediaType</th>
+    <th id="d2rq:mediaType">d2rq:mediaType</th>
     <td>The <a href="http://en.wikipedia.org/wiki/Internet_media_type">Internet media type</a>
       of the files served from this download map. This will be sent in the HTTP
       <code>Content-Type</code> header. Examples include <code>application/pdf</code>,
@@ -1104,7 +1105,7 @@ assumed to contain PDF files.</p>
 <pre>
 map:PaperDownload a d2rq:DownloadMap;
     d2rq:dataStorage map:database;
-    d2rq:uriPattern "papers/@@PAPER.ID@@/download";
+    d2rq:uriPattern "downloads/@@PAPER.ID@@.pdf";
     d2rq:contentColumn "PAPER.PDF";
     d2rq:mediaType "application/pdf";
     .
@@ -1127,10 +1128,11 @@ as well as any conditions, aliases and joins.</p>
 <pre>
 map:PaperDownload a d2rq:DownloadMap, d2rq:PropertyBridge;
     d2rq:belongsToClassMap map:Paper;
-    d2rq:uriPattern "papers/@@PAPER.ID@@/download";
+    d2rq:uriPattern "downloads/@@PAPER.ID@@.pdf";
     d2rq:contentColumn "PAPER.PDF";
     d2rq:mediaType "application/pdf";
     d2rq:property ex:download;
+    d2rq:condition "PAPER.PDF IS NOT NULL";
     .
 </pre>
 
@@ -1140,6 +1142,35 @@ and at the same time adds these URIs as values of the
 <code>ex:download</code> properties to the instances generated
 by the <code>map:Paper</code> class map.</p>
 
+<p>Also note the <code>d2rq:condition</code>, which suppresses creation of
+the <code>ex:download</code> triple if the value of <code>PAPER.PDF</code>
+is <code>NULL</code>.</p>
+
+
+<h3 id="example-multiple-download-formats">8.4 Example: Downloads in multiple formats</h3>
+
+<p>Sometimes, the files in a download column are not in a single
+format, but in multiple formats, with the format indicated in 
+an additional column. This can be handled by defining multiple
+download maps with appropriate <code>d2rq:condition</code>s.</p>
+
+<pre>
+map:PaperDownloadPDF a d2rq:DownloadMap;
+    d2rq:dataStorage map:database;
+    d2rq:uriPattern "downloads/@@PAPER.ID@@.pdf";
+    d2rq:contentColumn "PAPER.DOWNLOAD";
+    d2rq:mediaType "application/pdf";
+    d2rq:condition "PAPER.FORMAT = 'PDF'";
+    .
+map:PaperDownloadWord a d2rq:DownloadMap;
+    d2rq:dataStorage map:database;
+    d2rq:uriPattern "downloads/@@PAPER.ID@@.doc";
+    d2rq:contentColumn "PAPER.DOWNLOAD";
+    d2rq:mediaType "application/msword";
+    d2rq:condition "PAPER.FORMAT = 'DOC'";
+    .
+</pre>
+
 
 <h2 id="servingvocabularies">9. Serving Vocabulary Classes and Properties</h2>
 
@@ -1147,12 +1178,22 @@ by the <code>map:Paper</code> class map.</p>
 
 <p>In a mapping file auto-generated by the <a href="#generatemapping"><code>generate-mapping</code> utility</a>, the classes and properties have QNames such as <code>vocab:TableName</code> and <code>vocab:TableName_ColumnName</code>. The <code>vocab:</code> prefix expands to a URI relative to the base URI of the server, yielding URIs such as <code>http://<em>baseURI</em>/vocab/TableName</code>. These URIs can be dereferenced in D2R Server.</p>
 
-<p>By default, the only statement about these URIs is an <code>rdf:type</code> statement that declares the URI as an <code>rdfs:Class</code> or <code>rdf:Property</code>. However, further statements can be added in the mapping file. This is done by adding additional properties, described in this section, to the class map or property map.</p>
+<p>By default, the only statement about these URIs is an <code>rdf:type</code> statement that declares the URI as an <code>rdfs:Class</code> or <code>rdf:Property</code>. However, further statements can be added in the mapping file. This is done by adding additional properties, described in this section, to the class map or property map. The following mapping illustrates the intended usage:</p>
+
+<pre>@prefix vocabClass: &lt;http://localhost:2020/vocab/resource/class/&gt; .
+@prefix vocabProperty: &lt;http://localhost:2020/vocab/resource/property/&gt; .
+
+map:offer a d2rq:ClassMap;
+    d2rq:classDefinitionLabel "Offer"@en;
+    d2rq:classDefinitionComment "This is an offer"@en;
+    d2rq:class vocabClass:Offer;
+    .
+</pre>
+
+<p>When dereferenced, <code>http://localhost:2020/vocab/resource/class/Offer</code> will return the specified label and comment as well as the automatically inferred type <code>rdfs:Class</code>. Note that the prefixes are bound to absolute URIs because relative URIs would be based under <code>http://localhost:2020/resource/</code>.</p>
 
 <p>This feature only works for simple (URI, ANY, ANY) or (ANY, ANY, URI) find patterns that touch on vocabulary resources. In other words, it only works when dereferencing the class or property URI, or when describing the URI using a a SPARQL <code>DESCRIBE</code> query. It currently does <em>not</em> work within other SPARQL queries such as <code>SELECT</code> or <code>CONSTRUCT</code>.</p> 
 
-<p>For further details, please refer to the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/#vocabulary">D2R documentation</a>.</p>
- 
 
 <h3 id="vocab-label-comment">9.1 Labels and Comments for Vocabulary Terms</h3>
 
@@ -1238,7 +1279,7 @@ with the property <code>d2rq:serveVocabulary</code> set to <code>false</code> mu
   you can specify conditions, which must be satisfied by all accessible data.</p>
 
 <p>You can use <code>d2rq:condition</code> on class map and property bridge level. The <code>d2rq:condition</code>
-  value is added as an additional SQL WHERE clause to all queries generated using 
+  value is added as an additional SQL <code>WHERE</code> clause to all queries generated using 
   the class map or property bridge. If the condition evaluates to FALSE for a 
   SQL result set row, then no triples will be generated from that row.</p>
 
