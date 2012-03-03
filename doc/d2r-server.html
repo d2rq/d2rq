@@ -84,6 +84,7 @@ It is part of the <a href="/">D2RQ Platform</a>.
 
 <dt>Publishing metadata</dt>
 <dd>Metadata such as licensing and provenance information can be attached to every RDF document and web page published by D2R Server. <a href="#metadata-template">more…</a></dd>
+</dl>
 
 
 <h2 id="running">3. Running D2R Server</h2>
@@ -210,7 +211,7 @@ configuration properties. An example follows:</p>
   <tr>
     <th>d2r:metadataTemplate</th>
     <td>Specifies a <a href="#metadata-template">metadata template file</a>
-    within the directory <code>WEB-INF/templates</code>.</dt>
+    within the directory <code>WEB-INF/templates</code>.</td>
   </tr>
   <tr>
     <th>d2r:documentMetadata</th>
@@ -245,7 +246,7 @@ instance</a>.</p>
 
 <p>Template placeholders are organized into three groups that represent the available data sources: <code>runtime</code>, <code>config</code>, and <code>metadata</code>. All placeholder URIs follow the scheme <code>about:metadata:<em>groupname</em>:<em>identifier</em></code>.</p>
 
-The following placeholder groups are currently available:
+<p>The following placeholder groups are currently available:</p>
 
 <h4>runtime</h4>
 <p>Placeholders in this group are replaced with D2R Server runtime data. Currently, D2R Server supports the following runtime placeholders:
