@@ -9,12 +9,12 @@
     <style type="text/css">
 html, body { margin: 0; padding: 0; }
 .header { background: #f8f8f8; border-bottom: 1px solid #ccc; height: 120px; margin: 0; }
-.header h1 { float: left; font-size: 540%; margin: 50px 0 0 55px; padding: 0; text-shadow: #666 1px 1px 2px; }
+.header h1 { line-height: 70px; float: left; font-size: 540%; margin: 28px 0 0 55px; padding: 0; text-shadow: #666 1px 1px 2px; }
 .header #subtitle { border: none; font-size: 190%; padding: 23px 0 0 320px; line-height: 1.3em; }
 .nav.home { float: left; margin: 35px 0 0 60px; width: 220px; }
-.nav.home ul { list-style-type: none; margin-top: 0; padding-left: 0; }
+.nav.home ul { list-style-type: none; margin-left: 0; margin-top: 0; padding-left: 0; }
 .nav.home li { margin-bottom: 1em; }
-.nav.home li a { background: #f8f8ff; border: 1px solid #ccc; border-radius: 0.8em; display: block; padding: 0.4em 0.9em 0.3em; }
+.nav.home li a { background: #f8f8ff; border: 1px solid #ccc; border-radius: 0.8em; display: block; padding: 0.4em 0.9em 0.3em; /* IE quirks mode voodoo: */ zoom: 1; }
 .nav.home li span { border: 1px solid #ccc; border-top-left-radius: 0.8em; border-top-right-radius: 0.8em; display: block; padding: 0.2em 0.9em 0; }
 .nav.home li li { margin-bottom: 0; }
 .nav.home li li a { border-radius: 0; border-top: none; padding: 0.2em 0.9em 0.1em; }
