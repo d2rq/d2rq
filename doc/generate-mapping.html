@@ -23,10 +23,10 @@ on the column's name. This mapping file can be used as-is or can be customized.<
 
 <h2 id="usage">Usage</h2>
 
-<pre>generate-mapping [-u username] [-p password] [-d driverclass] [-o outfile.ttl] [-b base uri] jdbcURL</pre>
+<pre>generate-mapping [-u user] [-p password] [-d driver] [-o outfile.ttl] [-b baseURI] [-s schema] [-v] jdbcURL</pre>
 
 <dl>
-<dt><code>jdbcURL</code></dt>
+<dt><code>jdbcURL</code> (required)</dt>
 <dd><p>JDBC connection URL for the database. Refer to your JDBC driver documentation
 for the format for your database engine. Examples:</p>
 <p>MySQL: <code>jdbc:mysql://<em>servername</em>/<em>databasename</em></code><br />
@@ -35,13 +35,13 @@ Oracle: <code>jdbc:oracle:thin:@<em>servername</em>:1521:<em>databasename</em></
 Microsoft SQL Server: <code>jdbc:sqlserver://<em>servername</em>;databaseName=<em>databasename</em></code> (due to the semicolon, the URL must be put in quotes when passed as a command-line argument in Linux/Unix shells)</p>
 </dd>
 
-<dt><code>-u username</code></dt>
+<dt><code>-u user</code></dt>
 <dd>The login name of the database user</dd>
 
 <dt><code>-p password</code></dt>
 <dd>The password of the database user</dd>
 
-<dt><code>-d driverclass</code></dt>
+<dt><code>-d driver</code></dt>
 <dd><p>The fully qualified Java class name of the database driver. The jar file
 containing the JDBC driver has to be in D2RQ's <code>/lib/db-drivers/</code>
 directory. For MySQL and PostgreSQL, this argument can be omitted as drivers
@@ -63,6 +63,12 @@ parameter is omitted, the mapping will be written to standard out.</dd>
 as Linked Data by D2R Server, following the convention <code>http://<em>baseURI</em><strong>/vocab/resource/</strong></code>.  
 This should be the same base URI that is used when invoking the server. Defaults to <code>http://localhost:2020/</code>.
 For more information on vocabulary serving, see the <a href="d2rq-language#servingvocabularies">D2RQ language specification</a>.</dd>
+
+<dt><code>-s schema</dt></code>
+<dd>Only map tables in a specific database schema.</dd>
+
+<dt><code>-v</dt></code>
+<dd>Generate an RDF Schema description of the vocabulary instead of a mapping file.</dd>
 </dl>
 
 <h2 id="example-mysql">Example invocation for a local MySQL database</h2>
