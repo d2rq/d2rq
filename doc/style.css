@@ -27,7 +27,7 @@ ul.toc, ul.toc ul { list-style-type: none; }
 ul.toc li { font-weight: normal; margin-top: 0.5em; padding-left: none; }
 ul.toc.small li { font-weight: 300; margin-top: 0; }
 ul.toc li li { font-weight: 300; margin-top: 0; }
-header { margin-bottom: 2em; }
+.header { margin-bottom: 2em; }
 #doctype { margin-top: 1em; }
 .document-collection { background: #bdf; border: 1px solid #36f; border-radius: 0.6em; box-shadow: 1px 1px 2px #555; font-weight: normal; padding: 0.4em 1.1em 0.3em; }
 .news { padding-left: 1.2em; }
