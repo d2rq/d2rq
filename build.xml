@@ -152,7 +152,7 @@
 	</target>
 
 	<target name="tar" depends="jar,javadoc" description="Generate distribution file in tar.gz format">
-		<tar destfile="${tar}" compression="gzip">
+		<tar destfile="${tar}" compression="gzip" longfile="gnu">
 			<tarfileset prefix="${distname}" dir="." includes="${execfiles}" mode="755"/>
 			<tarfileset prefix="${distname}" dir="." excludes="${execfiles}">
 				<patternset refid="distfiles"/>
