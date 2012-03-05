@@ -4,7 +4,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 
 /**
- * @author Jšrg Hen§
+ * @author J&ouml;rg Hen&szlig;
  */
 public class DynamicProperty extends ResourceMap {
 	

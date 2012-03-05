@@ -44,7 +44,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
  * as a parsed model.
  * 
  * TODO: This does some progress logging to stdout if writing to
- *       a file. This should perhaps be done via log.info(É) with
+ *       a file. This should perhaps be done via log.info(...) with
  *       an appropriately configured log writer.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
