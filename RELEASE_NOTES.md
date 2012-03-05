@@ -3,20 +3,57 @@
 ## D2RQ v0.8 – 2012-03-09
 
 ### Features
+- framework for attaching metadata to D2R Server-genearted RDF and HTML documents (Olaf Hartig and Hannes Mühleisen)
 - D2R Server provides direct HTTP access to BLOB/CLOB contents via d2rq:DownloadMap
+- support for Firebird/Interbase database
+- generate-mapping can output RDFS representation of the DB using -v switch (David Venable)
+- initial SPARQL 1.1 support via ARQ, not yet optimized
 
 ### Enhancements
-- 
+- generate-mapping can be limited to a single schema using -s argument
+- support PostgreSQL UUID type (Kurt Jacobson)
+- ignore sysdiagrams table on SQL Server (Giovanni Mels)
+- better command line help for generate-mapping
+- upgrade core libraries: ARQ 2.9, Jena 2.7, Joseki 3.4.4, Jetty 8.1.1
+- upgrade other libraries: Velocity 1.7, SLF4J 1.6.4, log4j 1.2.16, HSQLDB 2.8.8
+- replace all references to Notation 3 (.n3) with Turtle (.ttl)
+- better handling of Oracle tables with very long names (Jacobus Geluk)
+- better handling of many Oracle datatypes (Jacobus Geluk)
+- Snorql now works on IE (Jacobus Geluk)
+- Clickable links in Snorql XSLT output (Jacobus Geluk)
+- show some progress indication on generate-mapping (Jacobus Geluk)
+- restructured and much improved documentation
 
 ### Bugfixes
-- 
+- better handling of config file location under Windows
+- NPE for Oracle DATE and TIMESTAMP when database contains NULL (Jan-Gregor Fischer)
+- fix issue where Tomcat wouldn't find some of the jars
+- translation table implementations wouldn't work if they inherit from a class that implements the interface (zazi)
+- wrong queries with --fast if property bridge requires joining the same table twice (Giovanni Mels)
+- NPE if tableIndexStatistics are present (Giovanni Mels)
+- UTF-8 encoding issue in Snorql (Giovanni Mels)
+- d2rq:alias on the target of d2rq:refersToClassMap didn't work properly
+- fix issue where Tomcat would complain about missing commons-logging
+- properly shut down webapp if keep-alive thread is used (Giovanni Mels)
+- make d2rq:constantValue work properly on class maps (Giovanni Mels)
+- fixed a bug in DistributiveLawApplyer when using functions (bound(), isIRI()...) (Giovanni Mels)
+- translate all clauses of an (A || B) filter correctly (Giovanni Mels)
+- stop D2R Server forgetting --fast setting on mapping file reload
+- cleaned up the D2RQ namespace RDFS file to reflect the implementation
 
 ### Performance
-- 
+- translate filters on literals to SQL (Giovanni Mels)
+- support for SPARQL built-in functions like datatype(), lang(), isIRI() (Giovanni Mels)
+- combine relations more aggressively when d2rq:containsDuplicates is true
 
 ### Other
+- move main website to http://d2rq.org/
 - D2R Server is no longer a stand-alone download, but bundled directly with D2RQ
-- All-new website at http://d2rq.org/
+- moved source code and issue tracking to GitHub, http://github.com/d2rq/d2rq
+- now officially requires Java 1.5
+- removed outdated Sesame support
+- removed RDQL support as ARQ no longer supports it
+- removed dedicated ODBC-JDBC support (still available via 3rd-party ODBC-JDBC bridges)
 
 
 ## D2RQ v0.7 – 2009-08-12
