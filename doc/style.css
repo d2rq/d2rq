@@ -18,17 +18,18 @@ dt code { color: #444; }
 dd { margin-left: 0; }
 dd p { margin-top: 0; }
 th { text-align: left; vertical-align: top; }
+a img { border: none; }
 table.properties { border-collapse: collapse; text-align: left; }
 table.properties th { font-family: monospace; }
 table.properties th, table.properties td { border-bottom: 1px solid #ccc; border-top: 1px solid #ccc; padding: 0.4em; vertical-align: top; }
-ul.toc { background: #f2f8ff; border: 1px solid #cdf; border-radius: 1em; margin-bottom: 2em; padding: 0.8em 1.2em; }
+ul.toc { background: #f2f8ff; border: 1px solid #cdf; border-radius: 1em; margin: 1em 0 2em; padding: 0.8em 1.2em; }
 ul.toc, ul.toc ul { list-style-type: none; }
 ul.toc li { font-weight: normal; margin-top: 0.5em; padding-left: none; }
 ul.toc.small li { font-weight: 300; margin-top: 0; }
 ul.toc li li { font-weight: 300; margin-top: 0; }
 header { margin-bottom: 2em; }
 #doctype { margin-top: 1em; }
-.document-collection { background: #bdf; border: 1px solid #36f; border-radius: 0.6em; font-weight: normal; padding: 0.4em 1.1em 0.3em; }
+.document-collection { background: #bdf; border: 1px solid #36f; border-radius: 0.6em; box-shadow: 1px 1px 2px #555; font-weight: normal; padding: 0.4em 1.1em 0.3em; }
 .news { padding-left: 1.2em; }
 .news li { margin-bottom: 0.8em; }
 .news small { color: #aaa; font-size: 100%; white-space: nowrap; }
