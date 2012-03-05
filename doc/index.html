@@ -8,32 +8,32 @@
     <script src="script.js"></script>
     <style type="text/css">
 html, body { margin: 0; padding: 0; }
-header { background: #f8f8f8; border-bottom: 1px solid #ccc; height: 120px; margin: 0; }
-header h1 { float: left; font-size: 540%; margin: 50px 0 0 55px; padding: 0; text-shadow: #666 1px 1px 2px; }
-header #subtitle { border: none; font-size: 190%; padding: 23px 0 0 320px; line-height: 1.3em; }
-nav.home { float: left; margin: 35px 0 0 60px; width: 220px; }
-nav.home ul { list-style-type: none; margin-top: 0; padding-left: 0; }
-nav.home li { margin-bottom: 1em; }
-nav.home li a { background: #f8f8ff; border: 1px solid #ccc; border-radius: 0.8em; display: block; padding: 0.4em 0.9em 0.3em; }
-nav.home li span { border: 1px solid #ccc; border-top-left-radius: 0.8em; border-top-right-radius: 0.8em; display: block; padding: 0.2em 0.9em 0; }
-nav.home li li { margin-bottom: 0; }
-nav.home li li a { border-radius: 0; border-top: none; padding: 0.2em 0.9em 0.1em; }
-nav.home li li.last a { border-bottom-left-radius: 0.8em; border-bottom-right-radius: 0.8em; }
-nav.home a { text-decoration: none; font-weight: normal; }
-nav.home a:hover { text-decoration: underline; background: #fcc; }
-nav.home a, nav.home span { box-shadow: 1px 1px 2px #555; }
+.header { background: #f8f8f8; border-bottom: 1px solid #ccc; height: 120px; margin: 0; }
+.header h1 { float: left; font-size: 540%; margin: 50px 0 0 55px; padding: 0; text-shadow: #666 1px 1px 2px; }
+.header #subtitle { border: none; font-size: 190%; padding: 23px 0 0 320px; line-height: 1.3em; }
+.nav.home { float: left; margin: 35px 0 0 60px; width: 220px; }
+.nav.home ul { list-style-type: none; margin-top: 0; padding-left: 0; }
+.nav.home li { margin-bottom: 1em; }
+.nav.home li a { background: #f8f8ff; border: 1px solid #ccc; border-radius: 0.8em; display: block; padding: 0.4em 0.9em 0.3em; }
+.nav.home li span { border: 1px solid #ccc; border-top-left-radius: 0.8em; border-top-right-radius: 0.8em; display: block; padding: 0.2em 0.9em 0; }
+.nav.home li li { margin-bottom: 0; }
+.nav.home li li a { border-radius: 0; border-top: none; padding: 0.2em 0.9em 0.1em; }
+.nav.home li li.last a { border-bottom-left-radius: 0.8em; border-bottom-right-radius: 0.8em; }
+.nav.home a { text-decoration: none; font-weight: normal; }
+.nav.home a:hover { text-decoration: underline; background: #fcc; }
+.nav.home a, .nav.home span { box-shadow: 1px 1px 2px #555; }
 #main { margin: 35px 50px 0 320px; }
 .acknowledgements a { color: #444; text-decoration: none; }
 .logos { float: right; text-align: right; }
     </style>
   </head>
   <body>
-    <header>
+    <div class="header">
       <h1>D2RQ</h1>
       <div id="subtitle">Accessing Relational Databases<br />as Virtual RDF Graphs</div>
-    </header>
+    </div>
 
-<nav class="home">
+<div class="nav home">
   <ul>
     <li><a href="http://sourceforge.net/projects/d2rq-map/files/latest/download">Download</a></li>
     <li><a href="getting-started">Getting Started</a></li>
@@ -56,7 +56,7 @@ nav.home a, nav.home span { box-shadow: 1px 1px 2px #555; }
     <li><a href="resources">Links and Resources</a></li>
     <li><a href="http://www4.wiwiss.fu-berlin.de/is-group/">Live Demo</a></li>
   </ul>
-</nav>
+</div>
 
 <div id="main">
 
