@@ -67,7 +67,9 @@ public class MappingGenerator {
 	private Map linkTables = new HashMap(); // name of n:m link table => name of n table
 	private boolean finished = false;
 	private boolean silent = true;
-	
+	private boolean generateClasses = true;
+	private boolean generateLabelBridges = true;
+
 	public MappingGenerator(String jdbcURL) {
 		this.jdbcURL = jdbcURL;
 		this.mapNamespaceURI = "#";
@@ -123,6 +125,20 @@ public class MappingGenerator {
 		this.driverClass = driverClassName;
 	}
 
+	/**
+	 * @param flag Generate an rdfs:label property bridge based on the PK?
+	 */
+	public void setGenerateLabelBridges(boolean flag) {
+		this.generateLabelBridges = flag;
+	}
+
+	/**
+	 * @param flag Generate a d2rq:class for every class map?
+	 */
+	public void setGenerateClasses(boolean flag) {
+		this.generateClasses = flag;
+	}
+	
 	public void writeMapping(OutputStream out, OutputStream err) {
 		try {
 			Writer w = new OutputStreamWriter(out, "UTF-8");
@@ -236,10 +252,14 @@ public class MappingGenerator {
 		}
 				
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
-		this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
-		this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
+		if (generateClasses) {
+			this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
+			this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
+		}
 		this.out.println("\t.");
-		writeLabelBridge(tableName);
+		if (generateLabelBridges) {
+			writeLabelBridge(tableName);
+		}
 		List foreignKeys = this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		Iterator it = this.schema.listColumns(tableName).iterator();
 		while (it.hasNext()) {
@@ -284,7 +304,7 @@ public class MappingGenerator {
 		this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
 		this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
 		ColumnType colType = this.schema.columnType(column);
-		String xsd = DatabaseSchemaInspector.xsdTypeFor(colType);
+		String xsd = schema.xsdTypeFor(colType);
 		if (xsd != null && !"xsd:string".equals(xsd)) {
 			// We use plain literals instead of xsd:strings, so skip
 			// this if it's an xsd:string

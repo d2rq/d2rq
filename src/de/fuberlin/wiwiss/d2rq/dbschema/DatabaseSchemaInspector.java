@@ -37,7 +37,7 @@ public class DatabaseSchemaInspector {
 		return columnType.typeId() == Types.DATE || columnType.typeId() == Types.TIME || columnType.typeId() == Types.TIMESTAMP;
 	}
 	
-	public static String xsdTypeFor(ColumnType columnType) {
+	public String xsdTypeFor(ColumnType columnType) {
 		switch (columnType.typeId()) {
 		case Types.BIGINT:        return "xsd:long";
 //		case Types.BINARY:        return "xsd:hexBinary";
