@@ -445,6 +445,13 @@ public class ConnectedDB {
 					return TEXT_COLUMN;
 				} else if ("NCLOB".equals(type.typeName())) { // NCLOB not mapped to Type.NCLOB in Java 1.5
 					return TEXT_COLUMN;
+				} else if("BINARY_FLOAT".equals(type.typeName())) {
+					return NUMERIC_COLUMN;
+				} else if("BINARY_DOUBLE".equals(type.typeName())) {
+					return NUMERIC_COLUMN;
+				} else if("BFILE".equals(type.typeName())) {
+					// TODO: We could at least support reading from BFILE, although querying for them seems hard
+					return UNMAPPABLE_COLUMN;
 				} else {
 					throw new D2RQException("Unsupported database type code (" +
 						type.typeId() + ") or type name ('" + type.typeName() +
