@@ -85,6 +85,8 @@ public class D2RQException extends JenaException {
 	public static final int DOWNLOADMAP_DUPLICATE_DATABASE = 71;
 	public static final int DOWNLOADMAP_INVALID_DATABASE = 72;
 	public static final int DOWNLOADMAP_NO_DATASTORAGE = 73;
+	public static final int DATATYPE_UNMAPPABLE = 74;
+	public static final int DATATYPE_UNKNOWN = 75;
 	
 	private int code;
 	

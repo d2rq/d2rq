@@ -7,6 +7,13 @@ package de.fuberlin.wiwiss.d2rq.dbschema;
  * @author Christian Becker <http://beckr.org#chris>
  */
 public class ColumnType {
+	/**
+	 * Constant indicating an unmappable column type. A column type is
+	 * unmappable if no reasonable RDF literal representation of its
+	 * value is known.
+	 */
+	public final static String UNMAPPABLE = "UNMAPPABLE";
+	
 	private int typeId;
 	private String typeName;
 

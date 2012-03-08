@@ -177,6 +177,13 @@ public class MappingGenerator {
 		return this.vocabModel;
 	}
 	
+	/**
+	 * Returns an in-memory Jena model containing the D2RQ mapping.
+	 * 
+	 * @param baseURI Base URI for resolving relative URIs in the mapping, e.g., map namespace
+	 * @param err Stream for warnings generated during the mapping process; may be <code>null</code>
+	 * @return In-memory Jena model containing the D2RQ mapping
+	 */
 	public Model mappingModel(String baseURI, OutputStream err) {
 		StringWriter w = new StringWriter();
 		writeMapping(w, err != null ? new PrintWriter(err) : null);
@@ -237,18 +244,11 @@ public class MappingGenerator {
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
 		if (!hasPrimaryKey(tableName)) {
-			String[] errorMessage = {
-				"Sorry, I don't know which columns to put into the uriPattern",
-				"for \"" + tableName + "\" because the table doesn't have a primary key.", 
-				"Please specify it manually." };
-			
-			for (int i=0; i<errorMessage.length; i++)
-				this.out.println("\t# " + errorMessage[i]);
-			
-			if (this.err != null) {
-				for (int i=0; i<errorMessage.length; i++)
-					this.err.println(errorMessage[i]);
-			}
+			writeWarning(new String[]{
+					"Sorry, I don't know which columns to put into the uriPattern",
+					"    for \"" + tableName + "\" because the table doesn't have a primary key.", 
+					"    Please specify it manually."
+				}, "\t");
 		}
 				
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
@@ -264,9 +264,15 @@ public class MappingGenerator {
 		Iterator it = this.schema.listColumns(tableName).iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			if (!isInForeignKey(column, foreignKeys)) {
-				writeColumn(column);
+			if (isInForeignKey(column, foreignKeys)) continue;
+			if (!isMappableColumnType(column)) {
+				writeWarning(new String[]{
+						"Skipping column: " + column,
+						"    Its datatype " + schema.columnType(column).typeName() + " cannot be mapped to RDF"
+					}, "");
+				continue;
 			}
+			writeColumn(column);
 		}
 		it = foreignKeys.iterator();
 		while (it.hasNext()) {
@@ -389,6 +395,20 @@ public class MappingGenerator {
 		createLinkProperty(linkTableName, table1, table2);
 	}
 
+	private void writeWarning(String warning, String indent) {
+		writeWarning(new String[]{warning}, indent);
+	}
+	
+	private void writeWarning(String[] warning, String indent) {
+		for (int i=0; i<warning.length; i++)
+			this.out.println(indent + "# " + warning[i]);
+		
+		if (this.err != null) {
+			for (int i=0; i<warning.length; i++)
+				this.err.println(warning[i]);
+		}
+	}
+	
 	private String databaseName() {
 		return "map:database";
 	}
@@ -506,6 +526,10 @@ public class MappingGenerator {
 		return false;
 	}
 
+	private boolean isMappableColumnType(Attribute column) {
+		return schema.xsdTypeFor(schema.columnType(column)) != ColumnType.UNMAPPABLE;
+	}
+	
 	private void initVocabularyModel() {
 		this.vocabModel.setNsPrefix("rdf", RDF.getURI());
 		this.vocabModel.setNsPrefix("rdfs", RDFS.getURI());

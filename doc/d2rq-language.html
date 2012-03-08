@@ -283,13 +283,18 @@ map:location a d2rq:PropertyBridge;
     Value: "true" or "false". For example MSAccess cuts fields longer than 256 chars.</td>
   </tr>
   <tr> 
-    <th id="d2rq:textColumn">d2rq:textColumn<br />d2rq:numericColumn<br />d2rq:dateColumn<br />d2rq:timestampColumn</th>
-    <td>These properties are used to declare the column type of database columns.
-      Values are column names in <code>Table_name.column_name</code> notation.
+    <th id="d2rq:textColumn">d2rq:textColumn<br />d2rq:numericColumn<br />d2rq:dateColumn<br />d2rq:timestampColumn<br />d2rq:timeColumn<br />d2rq:binaryColumn</th>
+    <td>These properties are used to declare the column type of database
+      columns. This affects the kind of SQL literal that D2RQ will use to
+      query for values in this column.
+      The objects of the properties are column names in
+      <code>Table_name.column_name</code> notation.
       These properties do not need to be specified <em>unless</em>
       the engine is for some reason unable to determine the correct
       column type by itself. The <code>d2rq:timestampColumn</code>
-      is for column types that combine a date and a time.
+      is for column types that combine a date and a time. The
+      <code>d2rq:binaryColumn</code> is for column types that contain
+      binary data, such as <code>BLOB</code>s.
     </td>
   </tr>
 </table>

@@ -37,42 +37,60 @@ public class DatabaseSchemaInspector {
 		return columnType.typeId() == Types.DATE || columnType.typeId() == Types.TIME || columnType.typeId() == Types.TIMESTAMP;
 	}
 	
+	/**
+	 * Return the appropriate XSD datatype for a SQL column type. <code>null</code>
+	 * indicates an unsupported SQL type. {@link ColumnType#UNMAPPABLE} indicates
+	 * an unmappable SQL type.
+	 * 
+	 * TODO: The MySQL JDBC driver reports TINYINT(1) as BIT, should be handled as xsd:boolean
+ 	 * 
+	 * @param columnType
+	 * @return XSD datatype as prefixed name: <code>xsd:string</code> etc.
+	 */
 	public String xsdTypeFor(ColumnType columnType) {
+		if (columnType.typeId() == Types.OTHER && db.dbTypeIs(ConnectedDB.HSQLDB)) {
+			// OTHER in HSQLDB 2.8.8 is really JAVA_OBJECT
+			return ColumnType.UNMAPPABLE;
+		}
 		switch (columnType.typeId()) {
+		case Types.ARRAY:         return ColumnType.UNMAPPABLE;
 		case Types.BIGINT:        return "xsd:long";
-//		case Types.BINARY:        return "xsd:hexBinary";
-		// TODO: BIT is a bit string, not a single boolean
-		// But the MySQL JDBC driver reports TINYINT(1) as BIT 
-		case Types.BIT:           return "xsd:boolean";
-//		case Types.BLOB:          return "xsd:hexBinary";
+		case Types.BINARY:        return "xsd:hexBinary";
+		case Types.BIT:           return "xsd:string";
+		case Types.BLOB:          return "xsd:hexBinary";
 		case Types.BOOLEAN:       return "xsd:boolean";
 		case Types.CHAR:          return "xsd:string";
-//		case Types.CLOB:          return "xsd:string";
+		case Types.CLOB:          return "xsd:string";
+		case Types.DATALINK:      return null;
 		case Types.DATE:          return "xsd:date";
 		case Types.DECIMAL:       return "xsd:decimal";
+		case Types.DISTINCT:      return null;
 		case Types.DOUBLE:        return "xsd:double";
-		case Types.FLOAT:         return "xsd:decimal";
+		case Types.FLOAT:         return "xsd:double";
 		case Types.INTEGER:       return "xsd:int";
-//		case Types.JAVA_OBJECT:   return "xsd:string";
-//		case Types.LONGVARBINARY: return "xsd:hexBinary";
+		case Types.JAVA_OBJECT:   return ColumnType.UNMAPPABLE;
+		case Types.LONGVARBINARY: return "xsd:hexBinary";
 		case Types.LONGVARCHAR:   return "xsd:string";
+		case Types.NULL:          return null;
 		case Types.NUMERIC:       return "xsd:decimal";
-		case Types.NVARCHAR:      return "xsd:string";
-		case Types.REAL:          return "xsd:float";
-//		case Types.REF:           return "xsd:IDREF";
+		case Types.OTHER:         return null;
+		case Types.REAL:          return "xsd:double";
+		case Types.REF:           return null;
 		case Types.SMALLINT:      return "xsd:short";
-//		case Types.STRUCT:        return "struct";
-//		case Types.TIME:          return "xsd:time";
+		case Types.STRUCT:        return null;
+		case Types.TIME:          return "xsd:time";
 		case Types.TIMESTAMP:     return "xsd:dateTime";
 		case Types.TINYINT:       return "xsd:byte";
-//		case Types.VARBINARY:     return "xsd:hexBinary";
+		case Types.VARBINARY:     return "xsd:hexBinary";
 		case Types.VARCHAR:       return "xsd:string";
-		default:
-			if ("NVARCHAR2".equals(columnType.typeName()))
-				return "xsd:string";
-			else
-				return null;
 		}
+		if ("NVARCHAR2".equals(columnType.typeName())) {
+			return "xsd:string";
+		}
+		if ("NVARCHAR".equals(columnType.typeName())) {
+			return "xsd:string";
+		}
+		return null;
 	}
 	
 	private ConnectedDB db;
@@ -323,8 +341,9 @@ public class DatabaseSchemaInspector {
 		if (schema == null) {
 			// Table without schema
 			return new RelationName(null, table, db.lowerCaseTableNames());
-		} else if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) && "public".equals(schema)) {
-			// Table in PostgreSQL default schema -- call the table "foo", not "public.foo"
+		} else if ((db.dbTypeIs(ConnectedDB.PostgreSQL) || db.dbTypeIs(ConnectedDB.HSQLDB)) 
+				&& "public".equals(schema.toLowerCase())) {
+			// Call the tables in PostgreSQL or HSQLDB default schema "FOO", not "PUBLIC.FOO"
 			return new RelationName(null, table, db.lowerCaseTableNames());
 		}
 		return new RelationName(schema, table, db.lowerCaseTableNames());

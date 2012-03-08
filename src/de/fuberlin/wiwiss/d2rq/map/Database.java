@@ -73,6 +73,8 @@ public class Database extends MapObject {
 	private Set<String> numericColumns = new HashSet<String>();
 	private Set<String> dateColumns = new HashSet<String>();
 	private Set<String> timestampColumns = new HashSet<String>();
+	private Set<String> timeColumns = new HashSet<String>();
+	private Set<String> binaryColumns = new HashSet<String>();
     private int limit = NO_LIMIT;
     private int fetchSize = NO_FETCH_SIZE;
 	private boolean allowDistinct = true;
@@ -135,6 +137,16 @@ public class Database extends MapObject {
 		this.timestampColumns.add(column);
 	}
 	
+	public void addTimeColumn(String column) {
+		checkNotConnected();		
+		this.timeColumns.add(column);
+	}
+	
+	public void addBinaryColumn(String column) {
+		checkNotConnected();
+		this.binaryColumns.add(column);
+	}
+	
 	public void setAllowDistinct(boolean b) {
 		checkNotConnected();		
 		this.allowDistinct = b;
@@ -171,7 +183,8 @@ public class Database extends MapObject {
 			registerJDBCDriver(driver);
 		}
 		this.connection = new ConnectedDB(url, this.username, this.password, this.allowDistinct,
-				this.textColumns, this.numericColumns, this.dateColumns, this.timestampColumns,
+				this.textColumns, this.numericColumns, this.dateColumns, 
+				this.timestampColumns, this.timeColumns, this.binaryColumns,
 				this.limit, this.fetchSize, this.connectionProperties);
 		return this.connection;
 	}

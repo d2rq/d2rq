@@ -69,6 +69,14 @@ d2rq:timestampColumn a rdf:Property;
 	rdfs:label "Timestamp column";
 	rdfs:domain d2rq:Database;
 	.
+d2rq:timeColumn a rdf:Property;
+	rdfs:label "Time column";
+	rdfs:domain d2rq:Database;
+	.
+d2rq:binaryColumn a rdf:Property;
+    rdfs:label "Binary column";
+    rdfs:domain d2rq:Database;
+    .
 d2rq:allowDistinct a rdf:Property;
 	rdfs:label "Allow distinct";
 	rdfs:comment "Value: true/false that describe the databases ability to handle DISTINCT correctly. (e.g. MSAccess cuts fields longer than 256 chars)";

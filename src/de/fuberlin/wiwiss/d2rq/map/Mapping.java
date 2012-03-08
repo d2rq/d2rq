@@ -21,6 +21,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
@@ -185,7 +186,13 @@ public class Mapping {
 			Iterator it = relation.allKnownAttributes().iterator();
 			while (it.hasNext()) {
 				Attribute attribute = (Attribute) it.next();
-				relation.database().columnType(relation.aliases().originalOf(attribute));
+				int type = relation.database().columnType(relation.aliases().originalOf(attribute));
+				if (type == ConnectedDB.UNMAPPABLE_COLUMN) {
+					throw new D2RQException("Column " + 
+							relation.aliases().originalOf(attribute) +
+							" has a datatype that D2RQ cannot express in RDF", 
+							D2RQException.DATATYPE_UNMAPPABLE);
+				}
 			}
 		}
 	}
