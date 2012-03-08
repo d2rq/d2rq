@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import oracle.sql.BFILE;
-
 import org.hsqldb.types.Types;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
@@ -187,20 +185,23 @@ public class ResultRowMap implements ResultRow {
 					}
 					result.put(key, s);
 				}
-			} else if ("oracle.sql.BFILE".equals(classString)) {
-				// TODO Not actually properly tested
-				BFILE bFile = (BFILE) resultSet.getObject(i + 1);
-				if (resultSet.wasNull()) {
-					result.put(key,  null);
-				} else {
-					bFile.openFile();
-					try {
-						InputStream is = bFile.getBinaryStream(i + 1);
-						result.put(key, toHexString(is));
-					} finally {
-						bFile.closeFile();
-					}
-				}
+// Oracle BFILE support -- won't compile without Oracle driver on the classpath
+// TODO: Move into a separate Java file that is excluded from the default build
+				
+//			} else if ("oracle.sql.BFILE".equals(classString)) {
+//				// TODO Not actually properly tested
+//				BFILE bFile = (BFILE) resultSet.getObject(i + 1);
+//				if (resultSet.wasNull()) {
+//					result.put(key,  null);
+//				} else {
+//					bFile.openFile();
+//					try {
+//						InputStream is = bFile.getBinaryStream(i + 1);
+//						result.put(key, toHexString(is));
+//					} finally {
+//						bFile.closeFile();
+//					}
+//				}
 			} else {
 				result.put(key, resultSet.getString(i + 1));
 			}
