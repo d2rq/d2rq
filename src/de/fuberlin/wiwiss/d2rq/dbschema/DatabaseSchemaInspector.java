@@ -90,6 +90,15 @@ public class DatabaseSchemaInspector {
 		if ("NVARCHAR".equals(columnType.typeName())) {
 			return "xsd:string";
 		}
+		if ("BINARY_DOUBLE".equals(columnType.typeName())) {
+			return "xsd:double";
+		}
+		if ("BINARY_FLOAT".equals(columnType.typeName())) {
+			return "xsd:double";
+		}
+		if ("BFILE".equals(columnType.typeName())) {
+			return "xsd:hexBinary";
+		}
 		return null;
 	}
 	

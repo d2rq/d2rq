@@ -1,10 +1,11 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,8 +15,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import oracle.sql.BFILE;
+
 import org.hsqldb.types.Types;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 
 /**
@@ -42,20 +46,7 @@ public class ResultRowMap implements ResultRow {
 			 */
 			String classString = metaData == null ? null : metaData.getColumnClassName(i + 1);
 			int type = metaData == null ? Integer.MIN_VALUE : metaData.getColumnType(i + 1);
-			/*
-			 * Specifically handle Oracle DATEs and TIMESTAMPs because the regular getString()
-			 * returns them in non-standard fashion, e.g. "2008-3-22.0.0. 0. 0".
-			 * This occurs independently of the NLS_DATE_FORMAT / NLS_TIMESTAMP_FORMAT in use.
-			 * 
-			 * Note: getObject(i+1).toString() does not work in this case; the only other options seems to be Oracle's toJdbc()
-			 */
-			if ("oracle.sql.DATE".equals(classString)) {
-				Date oracleDate = resultSet.getDate(i + 1);
-				result.put(key, resultSet.wasNull() ? null : oracleDate.toString());
-			} else if ("oracle.sql.TIMESTAMP".equals(classString)) {
-				Timestamp oracleTimestamp = resultSet.getTimestamp(i + 1);
-				result.put(key, resultSet.wasNull() ? null : oracleTimestamp.toString());
-			} else if (type == Types.DOUBLE || type == Types.REAL || type == Types.FLOAT) {
+			if (type == Types.DOUBLE || type == Types.REAL || type == Types.FLOAT) {
 				double d = resultSet.getDouble(i + 1);
 				if (resultSet.wasNull()) {
 					result.put(projectionSpecs.get(i), null);
@@ -183,6 +174,33 @@ public class ResultRowMap implements ResultRow {
 						result.put(key, resultSet.getTimestamp(i + 1).toString().replace(' ', 'T'));
 					}
 				}
+			} else if (type == Types.DATE) {
+				Date date = resultSet.getDate(i + 1);
+				if (resultSet.wasNull()) {
+					result.put(key,  null);
+				} else {
+					String s = date.toString();
+					// Need at least four digits in year; pad with 0 if necessary
+					int yearDigits = s.indexOf('-');
+					for (int j = 0; j < 4 - yearDigits; j++) {
+						s = '0' + s;
+					}
+					result.put(key, s);
+				}
+			} else if ("oracle.sql.BFILE".equals(classString)) {
+				// TODO Not actually properly tested
+				BFILE bFile = (BFILE) resultSet.getObject(i + 1);
+				if (resultSet.wasNull()) {
+					result.put(key,  null);
+				} else {
+					bFile.openFile();
+					try {
+						InputStream is = bFile.getBinaryStream(i + 1);
+						result.put(key, toHexString(is));
+					} finally {
+						bFile.closeFile();
+					}
+				}
 			} else {
 				result.put(key, resultSet.getString(i + 1));
 			}
@@ -204,6 +222,22 @@ public class ResultRowMap implements ResultRow {
 		return hex.toString();
 	}
 
+	private static String toHexString(InputStream in) {
+		final StringBuilder hex = new StringBuilder();
+		try {
+			while (true) {
+				int b = in.read();
+				if (b == -1) break;
+				hex.append(HEX_DIGITS[(b & 0xF0) >> 4]);
+				hex.append(HEX_DIGITS[b & 0x0F]);
+			}
+			return hex.toString();
+
+		} catch (IOException ex) {
+			throw new D2RQException(ex);
+		}
+	}
+	
 	private Map projectionsToValues;
 	
 	public ResultRowMap(Map projectionsToValues) {
