@@ -63,6 +63,11 @@ d2rq:textColumn a rdf:Property;
 	rdfs:comment "Name of a column of a character type, such as CHAR, VARCHAR, NVARCHAR or CLOB.";
 	rdfs:domain d2rq:Database;
 	.
+d2rq:booleanColumn a rdf:Property;
+	rdfs:label "BOOLEAN column";
+	rdfs:comment "Name of a column of type BOOLEAN.";
+	rdfs:domain d2rq:Database;
+	.
 d2rq:dateColumn a rdf:Property;
 	rdfs:label "DATE column";
 	rdfs:comment "Name of a column of type DATE.";

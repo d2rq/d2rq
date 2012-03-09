@@ -123,6 +123,11 @@ public class Database extends MapObject {
 		columnTypes.put(column, SQLDataType.NUMERIC);
 	}
 	
+	public void addBooleanColumn(String column) {
+		checkNotConnected();		
+		columnTypes.put(column, SQLDataType.BOOLEAN);
+	}
+	
 	public void addDateColumn(String column) {
 		checkNotConnected();		
 		columnTypes.put(column, SQLDataType.DATE);

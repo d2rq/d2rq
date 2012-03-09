@@ -376,10 +376,8 @@ public class ConnectedDB {
 			case Types.DOUBLE:
 				return SQLDataType.NUMERIC;
 
-			// Boolean - use numeric 0/1 representation
-			// TODO: Introduce SQLDataType.BOOLEAN and move logic from BooleanLiteralNodeType.extractValue to quoteValue
 			case Types.BOOLEAN:
-				return SQLDataType.NUMERIC;
+				return SQLDataType.BOOLEAN;
 
 			// TODO: What's this exactly?
 			case Types.ROWID:
@@ -560,6 +558,13 @@ public class ConnectedDB {
 					return "NULL";
 				}
 			}
+		} else if (columnType == SQLDataType.BOOLEAN) {
+			if (value == "true" || value == "1") {
+				return "TRUE";
+			} else if (value == "false" || value == "0") {
+				return "FALSE";
+			}
+			return "NULL";
 		} else if (columnType == SQLDataType.DATE) {
 			if (!DATE_PATTERN.matcher(value).matches()) {
 				return "NULL";

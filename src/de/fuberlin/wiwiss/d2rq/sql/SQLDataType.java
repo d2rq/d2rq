@@ -7,6 +7,7 @@ public enum SQLDataType {
 	CHARACTER,
 	BINARY,
 	NUMERIC,
+	BOOLEAN,
 	DATE,
 	TIME,
 	TIMESTAMP,

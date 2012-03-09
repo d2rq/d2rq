@@ -214,12 +214,6 @@ public class TypedNodeMaker implements NodeMaker {
 		public boolean matches(Node node) {
 			return super.matches(node) && XSDDatatype.XSDboolean.isValid(node.getLiteralLexicalForm());
 		}
-		public String extractValue(Node node) {
-			if ("0".equals(node.getLiteralLexicalForm()) || "false".equals(node.getLiteralLexicalForm())) {
-				return "0";
-			}
-			return "1";
-		}
 		public Node makeNode(String value) {
 			if ("0".equals(value) || "false".equals(value)) return FALSE;
 			if ("1".equals(value) || "true".equals(value)) return TRUE;

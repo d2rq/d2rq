@@ -252,6 +252,10 @@ public class MapParser {
 		while (stmts.hasNext()) {
 			database.addNumericColumn(stmts.nextStatement().getString());
 		}
+		stmts = r.listProperties(D2RQ.booleanColumn);
+		while (stmts.hasNext()) {
+			database.addBooleanColumn(stmts.nextStatement().getString());
+		}
 		stmts = r.listProperties(D2RQ.dateColumn);
 		while (stmts.hasNext()) {
 			database.addDateColumn(stmts.nextStatement().getString());

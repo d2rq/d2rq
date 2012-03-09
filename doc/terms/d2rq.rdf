@@ -241,6 +241,11 @@
     <rdfs:comment>Links a d2rq:PropertyBridge to an RDF property.</rdfs:comment>
     <rdfs:label>Property</rdfs:label>
   </rdf:Property>
+  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#booleanColumn">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
+    <rdfs:comment>Name of a column of type BOOLEAN.</rdfs:comment>
+    <rdfs:label>BOOLEAN column</rdfs:label>
+  </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#additionalPropertyDefinitionProperty">
     <rdfs:range rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#AdditionalProperty"/>
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
