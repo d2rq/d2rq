@@ -22,6 +22,13 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 
+/*
+ * TODO: check that querying for some other valid literals doesn't lead to errors
+ * (e.g., for an xsd:dateTime with time zone on a non-timezoned TIMESTAMP column, 
+ * or 'abcd' on BIT, or five-digit or negative year on xsd:date, or too long VARCHAR,
+ * or generally anything that's a valid XSD literal but not a valid SQL literal of
+ * the equivalent type)
+ */
 public class HSQLDBDatatypeTest extends TestCase {
 	private final static String EX = "http://example.com/";
 	private final static Resource dbURI = ResourceFactory.createResource(EX + "db");
