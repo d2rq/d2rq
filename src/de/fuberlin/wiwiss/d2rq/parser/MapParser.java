@@ -268,6 +268,14 @@ public class MapParser {
 		while (stmts.hasNext()) {
 			database.addBinaryColumn(stmts.nextStatement().getString());
 		}
+		stmts = r.listProperties(D2RQ.bitColumn);
+		while (stmts.hasNext()) {
+			database.addBitColumn(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.intervalColumn);
+		while (stmts.hasNext()) {
+			database.addIntervalColumn(stmts.nextStatement().getString());
+		}
 		stmts = r.listProperties(D2RQ.fetchSize);
 		while (stmts.hasNext()) {
 			try {

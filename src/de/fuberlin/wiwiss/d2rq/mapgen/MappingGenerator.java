@@ -17,6 +17,8 @@ import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import org.hsqldb.types.Types;
+
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -315,6 +317,9 @@ public class MappingGenerator {
 			// We use plain literals instead of xsd:strings, so skip
 			// this if it's an xsd:string
 			this.out.println("\td2rq:datatype " + xsd + ";");
+		}
+		if (colType.typeId() == Types.BIT) {
+			this.out.println("\td2rq:valueRegex \"^[01]*$\";");
 		}
 		writeColumnHacks(column, colType);
 		if (xsd == null) {

@@ -69,12 +69,14 @@ public class Database extends MapObject {
 	private String jdbcDriver;
 	private String username;
 	private String password;
-	private Set<String> textColumns = new HashSet<String>();
-	private Set<String> numericColumns = new HashSet<String>();
-	private Set<String> dateColumns = new HashSet<String>();
-	private Set<String> timestampColumns = new HashSet<String>();
-	private Set<String> timeColumns = new HashSet<String>();
-	private Set<String> binaryColumns = new HashSet<String>();
+	private final Set<String> textColumns = new HashSet<String>();
+	private final Set<String> numericColumns = new HashSet<String>();
+	private final Set<String> dateColumns = new HashSet<String>();
+	private final Set<String> timestampColumns = new HashSet<String>();
+	private final Set<String> timeColumns = new HashSet<String>();
+	private final Set<String> binaryColumns = new HashSet<String>();
+	private final Set<String> bitColumns = new HashSet<String>();
+	private final Set<String> intervalColumns = new HashSet<String>();
     private int limit = NO_LIMIT;
     private int fetchSize = NO_FETCH_SIZE;
 	private boolean allowDistinct = true;
@@ -147,6 +149,16 @@ public class Database extends MapObject {
 		this.binaryColumns.add(column);
 	}
 	
+	public void addBitColumn(String column) {
+		checkNotConnected();
+		this.bitColumns.add(column);
+	}
+	
+	public void addIntervalColumn(String column) {
+		checkNotConnected();
+		this.bitColumns.add(column);
+	}
+	
 	public void setAllowDistinct(boolean b) {
 		checkNotConnected();		
 		this.allowDistinct = b;
@@ -185,6 +197,7 @@ public class Database extends MapObject {
 		this.connection = new ConnectedDB(url, this.username, this.password, this.allowDistinct,
 				this.textColumns, this.numericColumns, this.dateColumns, 
 				this.timestampColumns, this.timeColumns, this.binaryColumns,
+				this.bitColumns, this.intervalColumns,
 				this.limit, this.fetchSize, this.connectionProperties);
 		return this.connection;
 	}

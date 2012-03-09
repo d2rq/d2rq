@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -16,6 +17,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -49,6 +52,8 @@ public class ConnectedDB {
 	public static final int TIMESTAMP_COLUMN = 4;
 	public static final int TIME_COLUMN = 5;
 	public static final int BINARY_COLUMN = 6;
+	public static final int BIT_COLUMN = 7;
+	public static final int INTERVAL_COLUMN = 8;
 	
 	public static final String KEEP_ALIVE_PROPERTY = "keepAlive"; // interval property, value in seconds
 	public static final int DEFAULT_KEEP_ALIVE_INTERVAL = 60*60; // hourly
@@ -63,18 +68,20 @@ public class ConnectedDB {
 	 */
 	private static final String[] POSTGRESQL_IGNORED_SCHEMAS = {"information_schema", "pg_catalog"};
 	private static final String[] ORACLE_IGNORED_SCHEMAS = {"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", "SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
-    private static final List MSSQL_IGNORED_SCHEMAS = Arrays.asList(new String[]{"sys", "INFORMATION_SCHEMA"});
+    private static final List<String> MSSQL_IGNORED_SCHEMAS = Arrays.asList(new String[]{"sys", "INFORMATION_SCHEMA"});
 	
 	private String jdbcURL;
 	private String username;
 	private String password;
 	private boolean allowDistinct;
-	private final Set textColumns;
-	private final Set numericColumns;
-	private final Set dateColumns;
-	private final Set timestampColumns;
-	private final Set timeColumns;
-	private final Set binaryColumns;
+	private final Set<String> textColumns;
+	private final Set<String> numericColumns;
+	private final Set<String> dateColumns;
+	private final Set<String> timestampColumns;
+	private final Set<String> timeColumns;
+	private final Set<String> binaryColumns;
+	private final Set<String> bitColumns;
+	private final Set<String> intervalColumns;
 	private Connection connection = null;
 	private DatabaseSchemaInspector schemaInspector = null;
 	
@@ -138,14 +145,18 @@ public class ConnectedDB {
 	
 	public ConnectedDB(String jdbcURL, String username, String password) {
 		this(jdbcURL, username, password, true,
-				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET, 
-				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET,
+				Collections.<String>emptySet(), Collections.<String>emptySet(), 
+				Collections.<String>emptySet(), Collections.<String>emptySet(), 
+				Collections.<String>emptySet(), Collections.<String>emptySet(), 
+				Collections.<String>emptySet(), Collections.<String>emptySet(),
 				Database.NO_LIMIT, Database.NO_FETCH_SIZE, null);
 	}
 	
-	public ConnectedDB(String jdbcURL, String username, String password,
-			boolean allowDistinct, Set textColumns, Set numericColumns, Set dateColumns,
-			Set timestampColumns, Set timeColumns, Set binaryColumns,
+	public ConnectedDB(String jdbcURL, String username, 
+			String password, boolean allowDistinct, 
+			Set<String> textColumns, Set<String> numericColumns, Set<String> dateColumns,
+			Set<String> timestampColumns, Set<String> timeColumns, Set<String> binaryColumns,
+			Set<String> bitColumns, Set<String> intervalColumns,
 			int limit, int fetchSize, Properties connectionProperties) {
 		// TODO replace column type arguments with a single column => type map
 		this.jdbcURL = jdbcURL;
@@ -158,6 +169,8 @@ public class ConnectedDB {
 		this.timestampColumns = timestampColumns;
 		this.timeColumns = timeColumns;
 		this.binaryColumns = binaryColumns;
+		this.bitColumns = bitColumns;
+		this.intervalColumns = intervalColumns;
 		this.limit = limit;
 		this.fetchSize = fetchSize;
 		this.connectionProperties = connectionProperties;
@@ -228,6 +241,18 @@ public class ConnectedDB {
 					throw new D2RQException("Unable to set date format: " + ex.getMessage(), D2RQException.D2RQ_SQLEXCEPTION);					
 				}
 				finally {
+					stmt.close();
+				}
+			}
+			
+			if (dbTypeIs(HSQLDB)) {
+				// Enable storage of special Double values: NaN, INF, -INF
+				Statement stmt = this.connection.createStatement();
+				try {
+					stmt.execute("SET DATABASE SQL DOUBLE NAN FALSE");
+				} catch (SQLException ex) {
+					throw new D2RQException("Unable to SET DATABASE SQL DOUBLE NAN FALSE: " + ex.getMessage(), D2RQException.D2RQ_SQLEXCEPTION);
+				} finally {
 					stmt.close();
 				}
 			}
@@ -369,10 +394,22 @@ public class ConnectedDB {
     	if (this.binaryColumns.contains(column.qualifiedName())) {
     		return BINARY_COLUMN;
     	}
+    	if (this.bitColumns.contains(column.qualifiedName())) {
+    		return BIT_COLUMN;
+    	}
+    	if (this.intervalColumns.contains(column.qualifiedName())) {
+    		return INTERVAL_COLUMN;
+    	}
 		ColumnType type = schemaInspector().columnType(column);
 		if (type.typeId() == Types.OTHER && dbTypeIs(HSQLDB)) {
-			// OTHER in HSQLDB 2.8.8 is really JAVA_OBJECT
+			// OTHER in HSQLDB 2.2.8 is really JAVA_OBJECT
 			return UNMAPPABLE_COLUMN;
+		}
+		if (type.typeId() == Types.VARCHAR && dbTypeIs(HSQLDB)) {
+			// HSQLDB 2.2.8 reports INTERVAL types as VARCHAR 
+			if (type.typeName().startsWith("INTERVAL")) {
+				return INTERVAL_COLUMN;
+			}
 		}
 		switch (type.typeId()) {
 			// Character types
@@ -393,13 +430,13 @@ public class ConnectedDB {
 			case Types.DOUBLE: return NUMERIC_COLUMN;
 
 			// Boolean - use numeric 0/1 representation
+			// TODO: Introduce BOOLEAN_COLUMN and move logic from BooleanLiteralNodeType.extractValue to quoteValue
 			case Types.BOOLEAN: return NUMERIC_COLUMN;
 
 			// TODO: What's this exactly?
 			case Types.ROWID: return NUMERIC_COLUMN;
 
-			// TODO: Some DBs have special bitstring literals, like B'11011'
-			case Types.BIT: return TEXT_COLUMN;
+			case Types.BIT: return BIT_COLUMN;
 
 			// Binary columns
 			case Types.BINARY: return BINARY_COLUMN;
@@ -511,44 +548,99 @@ public class ConnectedDB {
 				replaceAll("$1$1") + "'";
 	}
 
+	public final static Pattern DATE_PATTERN = 
+		Pattern.compile("^\\d?\\d?\\d?\\d-\\d\\d-\\d\\d$");
+	public final static Pattern TIME_PATTERN = 
+			Pattern.compile("^\\d?\\d:\\d\\d:\\d\\d(.\\d+)?([+-]\\d?\\d:\\d\\d|Z)?$");
+	public final static Pattern TIMESTAMP_PATTERN = 
+			Pattern.compile("^\\d?\\d?\\d?\\d-\\d\\d-\\d\\d \\d?\\d:\\d\\d:\\d\\d(.\\d+)?([+-]\\d?\\d:\\d\\d|Z)?$");
+	public final static Pattern BINARY_PATTERN = 
+		Pattern.compile("^([0-9a-fA-F][0-9a-fA-F])*$");
+	
+	/**
+	 * Creates a SQL literal for the given value, suitable
+	 * for comparison to a column of the indicated type.
+	 * If the value is not suitable for the column type
+	 * (e.g., not a number for a NUMERIC_COLUMN), <code>NULL</code>
+	 * is returned.
+	 * 
+	 * @param value A value
+	 * @param columnType an <code>ConnectedDB.XXX_COLUMN</code> constant
+	 * @return A quoted and escaped SQL literal, suitable for comparison to a column 
+	 */
 	public String quoteValue(String value, int columnType) {
 		if (columnType == UNMAPPABLE_COLUMN) {
 			throw new D2RQException(
 					"Attempted to create SQL literal for unmappable datatype",
 					D2RQException.DATATYPE_UNMAPPABLE);
 		}
+		if (value == null) {
+			return "NULL";
+		}
+		if (columnType == INTERVAL_COLUMN) {
+			// TODO: Generate appropriate INTERVAL literal 
+			return "NULL";
+		}
 		if (columnType == ConnectedDB.NUMERIC_COLUMN) {
+			if (dbTypeIs(HSQLDB)) {
+				if ("NaN".equals(value)) {
+					return "(0E0/0E0)";
+				} else if ("INF".equals(value)) {
+					return "(1E0/0)";
+				} else if ("-INF".equals(value)) {
+					return "(-1E0/0)";
+				}
+			}
 			// Check if it actually is a number to avoid SQL injection
 			try {
-				return Integer.toString(Integer.parseInt(value));
+				return new BigDecimal(value).toString();
 			} catch (NumberFormatException nfex) {
+				// Scientific notation? E.g., 1E-3
 				try {
-					return Double.toString(Double.parseDouble(value));
+					double d = Double.parseDouble(value);
+					if (Double.isNaN(d) || Double.isInfinite(d)) {
+						// Valid in xsd:double, but not supported by vanilla DBs
+						return "NULL";
+					}
+					return Double.toString(d);
 				} catch (NumberFormatException nfex2) {
-					// No number -- return as quoted string
-					// DBs seem to interpret non-number strings as 0
-					return singleQuote(value);
+					// Not a number AFAICT
+					return "NULL";
 				}
 			}
 		} else if (columnType == ConnectedDB.DATE_COLUMN) {
+			if (!DATE_PATTERN.matcher(value).matches()) {
+				return "NULL";
+			}
 			if (dbTypeIs(MSSQL) || dbTypeIs(MSAccess)) {
 				// TODO: Reportedly, MS Access requires "#2006-09-15#" (?)
 				return singleQuote(value);
 			}
 			return "DATE " + singleQuote(value);
 		} else if (columnType == ConnectedDB.TIMESTAMP_COLUMN) {
+			value = value.replace('T', ' ').replace("Z", "+00:00");
+			if (!TIMESTAMP_PATTERN.matcher(value).matches()) {
+				return "NULL";
+			}
 			if (dbTypeIs(MSSQL) || dbTypeIs(MSAccess)) {
 				// TODO: Reportedly, MS Access requires "#2006-09-15 23:59:00#" (?)
 				return singleQuote(value);
 			}
 			return "TIMESTAMP " + singleQuote(value);
 		} else if (columnType == ConnectedDB.TIME_COLUMN) {
+			value = value.replace("Z", "+00:00");
+			if (!TIME_PATTERN.matcher(value).matches()) {
+				return "NULL";
+			}
 			if (dbTypeIs(MSSQL) || dbTypeIs(MSAccess)) {
 				// TODO: Reportedly, MS Access requires "#23:59:00#" (?)
 				return singleQuote(value);
 			}
 			return "TIME " + singleQuote(value);
 		} else if (columnType == ConnectedDB.BINARY_COLUMN) {
+			if (!BINARY_PATTERN.matcher(value).matches()) {
+				return "NULL";
+			}
 			// Value is assumed to be a hex string, as per xsd:hexBinary
 			if (dbTypeIs(Oracle)) {
 				return singleQuote(value);
@@ -558,6 +650,20 @@ public class ConnectedDB {
 				return "E'\\\\x" + value + "'";
 			} else {
 				return "X" + singleQuote(value);
+			}
+		} else if (columnType == ConnectedDB.BIT_COLUMN) {
+			if (dbTypeIs(MSSQL)) {
+				// On SQL Server, BIT is a single-bit numeric type
+				try {
+					return Integer.parseInt(value) == 0 ? "0" : "1";
+				} catch (NumberFormatException nfex) {
+					// Not 0 or 1
+					return "NULL";
+				}
+			} else {
+				// In SQL-92, BIT is a bit string with a special literal form
+				if (!value.matches("^[01]*$")) return "NULL";
+				return "B" + singleQuote(value);
 			}
 		}
 		return singleQuote(value);

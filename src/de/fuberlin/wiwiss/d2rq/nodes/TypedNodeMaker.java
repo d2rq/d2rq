@@ -27,6 +27,7 @@ public class TypedNodeMaker implements NodeMaker {
 		return new LiteralNodeType(language, null);
 	}
 	public static NodeType typedLiteral(RDFDatatype datatype) {
+		// TODO These subclasses can be abolished; just introduce an RDFDatatypeValidator instead
 		if (datatype.equals(XSDDatatype.XSDdate)) {
 			return XSD_DATE;
 		}
@@ -185,9 +186,6 @@ public class TypedNodeMaker implements NodeMaker {
 		public boolean matches(Node node) {
 			return super.matches(node) && XSDDatatype.XSDtime.isValid(node.getLiteralLexicalForm());
 		}
-		public String extractValue(Node node) {
-			return node.getLiteralLexicalForm().replace("Z", "+00:00");
-		}
 		public Node makeNode(String value) {
 			if (!XSDDatatype.XSDtime.isValid(value)) return null;
 			return Node.createLiteral(value, null, XSDDatatype.XSDtime);
@@ -200,9 +198,6 @@ public class TypedNodeMaker implements NodeMaker {
 		}
 		public boolean matches(Node node) {
 			return super.matches(node) && XSDDatatype.XSDdateTime.isValid(node.getLiteralLexicalForm());
-		}
-		public String extractValue(Node node) {
-			return node.getLiteralLexicalForm().replace('T', ' ').replace("Z", "+00:00");
 		}
 		public Node makeNode(String value) {
 			if (!XSDDatatype.XSDdateTime.isValid(value)) return null;

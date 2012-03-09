@@ -63,7 +63,8 @@
   </rdfs:Class>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#timeColumn">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
-    <rdfs:label>Time column</rdfs:label>
+    <rdfs:comment>Name of a column of type TIME.</rdfs:comment>
+    <rdfs:label>TIME column</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#uriPattern">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ResourceMap"/>
@@ -72,6 +73,7 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#numericColumn">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
+    <rdfs:comment>Name of a column of a numeric type, such as INT or DOUBLE or DECIMAL.</rdfs:comment>
     <rdfs:label>Numeric column</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#limit">
@@ -121,7 +123,8 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#dateColumn">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
-    <rdfs:label>Date column</rdfs:label>
+    <rdfs:comment>Name of a column of type DATE.</rdfs:comment>
+    <rdfs:label>DATE column</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#databaseValue">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Translation"/>
@@ -157,7 +160,8 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#timestampColumn">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
-    <rdfs:label>Timestamp column</rdfs:label>
+    <rdfs:comment>Name of a column of type TIMESTAMP.</rdfs:comment>
+    <rdfs:label>TIMESTAMP column</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#translation">
     <rdfs:range rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Translation"/>
@@ -166,6 +170,7 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#textColumn">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
+    <rdfs:comment>Name of a column of a character type, such as CHAR, VARCHAR, NVARCHAR or CLOB.</rdfs:comment>
     <rdfs:label>Text column</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#uriColumn">
@@ -244,7 +249,8 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#binaryColumn">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
-    <rdfs:label>Binary column</rdfs:label>
+    <rdfs:comment>Name of a column of a binary type, such as BINARY, VARBINARY or BLOB.</rdfs:comment>
+    <rdfs:label>BINARY column</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#lang">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
@@ -309,9 +315,19 @@
     <rdfs:comment>Whether to serve inferred and user-supplied vocabulary data</rdfs:comment>
     <rdfs:label>Serve vocabulary</rdfs:label>
   </rdf:Property>
+  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#intervalColumn">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
+    <rdfs:comment>Name of a column of type INTERVAL.</rdfs:comment>
+    <rdfs:label>INTERVAL column</rdfs:label>
+  </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#propertyName">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#AdditionalProperty"/>
     <rdfs:label>Property name</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#bitColumn">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
+    <rdfs:comment>Name of a column of type BIT.</rdfs:comment>
+    <rdfs:label>BIT column</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#valueContains">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ResourceMap"/>

@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.hsqldb.types.Types;
 
@@ -28,11 +27,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
  */
 public class ResultRowMap implements ResultRow {
 	
-	private final static Pattern TIME_PATTERN = 
-			Pattern.compile("^\\d?\\d:\\d\\d:\\d\\d(.\\d+)?([+-]\\d?\\d:\\d\\d|Z)?$");
-	private final static Pattern TIMESTAMP_PATTERN = 
-			Pattern.compile("^\\d+-\\d\\d-\\d\\d \\d?\\d:\\d\\d:\\d\\d(.\\d+)?([+-]\\d?\\d:\\d\\d|Z)?$");
-	
 	public static ResultRowMap fromResultSet(ResultSet resultSet, List<ProjectionSpec> projectionSpecs) throws SQLException {
 		Map<ProjectionSpec,String> result = new HashMap<ProjectionSpec,String>();
 		ResultSetMetaData metaData = resultSet.getMetaData();
@@ -42,17 +36,16 @@ public class ResultRowMap implements ResultRow {
 			/*
 			 * Return string representations of the values using information from the type map
 			 */
-			String classString = metaData == null ? null : metaData.getColumnClassName(i + 1);
 			int type = metaData == null ? Integer.MIN_VALUE : metaData.getColumnType(i + 1);
 			if (type == Types.DOUBLE || type == Types.REAL || type == Types.FLOAT) {
 				double d = resultSet.getDouble(i + 1);
 				if (resultSet.wasNull()) {
 					result.put(projectionSpecs.get(i), null);
 				} else {
-					if (d == Double.NaN) {
+					if (Double.isNaN(d)) {
 						result.put(key, "NaN");
-					} else if (d == Double.POSITIVE_INFINITY) {
-						result.put(key, "INF");
+					} else if (Double.isInfinite(d)) {
+						result.put(key, d > 0 ? "INF" : "-INF");
 					} else if (d == Double.NEGATIVE_INFINITY) {
 						result.put(key, "-INF");
 					} else {
@@ -86,7 +79,7 @@ public class ResultRowMap implements ResultRow {
 				if (time == null) {
 					result.put(key, null);
 				} else {
-					Matcher m = TIME_PATTERN.matcher(time);
+					Matcher m = ConnectedDB.TIME_PATTERN.matcher(time);
 					if (m.matches()) {
 						if (time.substring(1, 2).equals(":")) {
 							// H:MM:SS format, we need to make it HH:MM:SS
@@ -126,7 +119,7 @@ public class ResultRowMap implements ResultRow {
 				if (timestamp == null) {
 					result.put(key, null);
 				} else {
-					Matcher m = TIMESTAMP_PATTERN.matcher(timestamp);
+					Matcher m = ConnectedDB.TIMESTAMP_PATTERN.matcher(timestamp);
 					if (m.matches()) {
 						// Need at least four digits in year; pad with 0 if necessary
 						int yearDigits = timestamp.indexOf('-');
@@ -188,6 +181,7 @@ public class ResultRowMap implements ResultRow {
 // Oracle BFILE support -- won't compile without Oracle driver on the classpath
 // TODO: Move into a separate Java file that is excluded from the default build
 				
+//		String classString = metaData == null ? null : metaData.getColumnClassName(i + 1);
 //			} else if ("oracle.sql.BFILE".equals(classString)) {
 //				// TODO Not actually properly tested
 //				BFILE bFile = (BFILE) resultSet.getObject(i + 1);
