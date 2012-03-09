@@ -37,6 +37,7 @@ import com.hp.hpl.jena.sparql.expr.E_UnaryMinus;
 import com.hp.hpl.jena.sparql.expr.E_UnaryPlus;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprAggregator;
+import com.hp.hpl.jena.sparql.expr.ExprEvalException;
 import com.hp.hpl.jena.sparql.expr.ExprFunction;
 import com.hp.hpl.jena.sparql.expr.ExprFunction0;
 import com.hp.hpl.jena.sparql.expr.ExprFunction1;
@@ -436,7 +437,6 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		convertEquality(expr);
 	}
 	
-	
 	private void convertEquality(ExprFunction2 expr)
 	{
 		expr.getArg1().visit(this);
@@ -475,14 +475,29 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 				ValueMaker vm = ((TypedNodeMaker) nm).valueMaker();
 				Node node = constant.getNode();
 				logger.debug("checking " + node + " with " + nm);
+				
+				if (XSD.isNumeric(node)) {
+					DetermineNodeType filter = new DetermineNodeType();
+					nm.describeSelf(filter);
+					RDFDatatype datatype = filter.getDatatype();
+					if (datatype != null && XSD.isNumeric(datatype)) {
+						RDFDatatype numericType = XSD.getNumericType(datatype, node.getLiteralDatatype());
+						nm = cast(nm, numericType);
+						node = XSD.cast(node, numericType);
+					}
+				}
+				
 				boolean empty = nm.selectNode(node, RelationalOperators.DUMMY).equals(NodeMaker.EMPTY);
 				logger.debug("result " + new Boolean(empty));
 				if (!empty) {
 					if (node.isURI())
 						expression.push(vm.valueExpression(node.getURI()));
-					else if (node.isLiteral())
-						expression.push(vm.valueExpression(constant.value()));
-					else
+					else if (node.isLiteral()) {
+						if (XSD.isSupported(node.getLiteralDatatype()))
+							expression.push(vm.valueExpression(constant.value()));
+						else 
+							conversionFailed("cannot compare values of type " + node.getLiteralDatatypeURI(), expr);
+					} else
 						conversionFailed(expr); // TODO blank nodes?
 					return;
 				} else {
@@ -494,9 +509,23 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			}
 		} else if (e1 instanceof ConstantEx && e2 instanceof ConstantEx) {
 			logger.debug("isEqual(" + e1 + ", " + e2 + ")");
-			ConstantEx constant1 = (ConstantEx) e1;
-			ConstantEx constant2 = (ConstantEx) e2;
-			boolean equals = constant1.getNode().equals(constant2.getNode());
+			Node c1 = ((ConstantEx) e1).getNode();
+			Node c2 = ((ConstantEx) e2).getNode();
+			boolean equals;
+			if (XSD.isNumeric(c1) && XSD.isNumeric(c2)) {
+				RDFDatatype datatype = XSD.getNumericType(c1.getLiteralDatatype(), c2.getLiteralDatatype());
+				equals = XSD.cast(c1, datatype).equals(XSD.cast(c2, datatype));
+			} else if (isSimpleLiteral(c1) && isSimpleLiteral(c2)) {
+				equals = c1.getLiteralValue().equals(c2.getLiteralValue());
+			} else if (XSD.isString(c1) && XSD.isString(c2)) {
+				equals = c1.getLiteralValue().equals(c2.getLiteralValue());
+			} else {
+				try {
+					equals = NodeFunctions.rdfTermEquals(c1, c2);
+				} catch (ExprEvalException e) {
+					equals = false;
+				}
+			}
 			logger.debug("constants equal? " + new Boolean(equals));
 			expression.push(equals ? Expression.TRUE : Expression.FALSE);
 			return;
@@ -508,6 +537,19 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			NodeMaker nm1 = variable1.getNodeMaker();
 			NodeMaker nm2 = variable2.getNodeMaker();
 			
+			DetermineNodeType filter1 = new DetermineNodeType();
+			nm1.describeSelf(filter1);
+			RDFDatatype datatype1 = filter1.getDatatype();
+			
+			DetermineNodeType filter2 = new DetermineNodeType();
+			nm2.describeSelf(filter2);
+			RDFDatatype datatype2 = filter2.getDatatype();
+			
+			if (datatype1 != null && XSD.isNumeric(datatype1) && datatype2 != null && XSD.isNumeric(datatype2)) {
+				RDFDatatype numericType = XSD.getNumericType(filter1.getDatatype(), filter2.getDatatype());
+				nm1 = cast(nm1, numericType);
+				nm2 = cast(nm2, numericType);
+			}
 			NodeSetFilterImpl nodeSet = new NodeSetFilterImpl();
 			nm1.describeSelf(nodeSet);
 			nm2.describeSelf(nodeSet);
@@ -561,14 +603,27 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 				ValueMaker vm = ((TypedNodeMaker) nm).valueMaker();
 				Node node = constant.getNode();
 				logger.debug("checking " + node + " with " + nm);
+				if (XSD.isNumeric(node)) {
+					DetermineNodeType filter = new DetermineNodeType();
+					nm.describeSelf(filter);
+					RDFDatatype datatype = filter.getDatatype();
+					if (datatype != null && XSD.isNumeric(datatype)) {
+						RDFDatatype numericType = XSD.getNumericType(datatype, node.getLiteralDatatype());
+						nm = cast(nm, numericType);
+						node = XSD.cast(node, numericType);
+					}
+				}
 				boolean empty = nm.selectNode(node, RelationalOperators.DUMMY).equals(NodeMaker.EMPTY);
 				logger.debug("result " + new Boolean(empty));
 				if (!empty) {
 					if (node.isURI())
 						expression.push(new Negation(vm.valueExpression(node.getURI())));
-					else if (node.isLiteral())
-						expression.push(new Negation(vm.valueExpression(constant.value())));
-					else
+					else if (node.isLiteral()) {
+						if (XSD.isSupported(node.getLiteralDatatype()))
+							expression.push(new Negation(vm.valueExpression(constant.value())));
+						else // type = boolean or an unknown type
+							conversionFailed("cannot compare values of type " + node.getLiteralDatatypeURI(), expr);
+					} else
 						conversionFailed(expr); // TODO blank nodes?
 					return;
 				} else {
@@ -578,7 +633,23 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			}
 		} else if (e1 instanceof ConstantEx && e2 instanceof ConstantEx) {
 			logger.debug("isNotEqual(" + e1 + ", " + e2 + ")");
-			boolean equals = e1.equals(e2);
+			Node c1 = ((ConstantEx) e1).getNode();
+			Node c2 = ((ConstantEx) e2).getNode();
+			boolean equals;
+			if (XSD.isNumeric(c1) && XSD.isNumeric(c2)) {
+				RDFDatatype datatype = XSD.getNumericType(c1.getLiteralDatatype(), c2.getLiteralDatatype());
+				equals = XSD.cast(c1, datatype).equals(XSD.cast(c2, datatype));
+			} else if (isSimpleLiteral(c1) && isSimpleLiteral(c2)) {
+				equals = c1.getLiteralValue().equals(c2.getLiteralValue());
+			} else if (XSD.isString(c1) && XSD.isString(c2)) {
+				equals = c1.getLiteralValue().equals(c2.getLiteralValue());
+			} else {
+				try {
+					equals = NodeFunctions.rdfTermEquals(c1, c2);
+				} catch (ExprEvalException e) {
+					equals = false;
+				}
+			}
 			logger.debug("constants equal? " + new Boolean(equals));
 			expression.push(equals ? Expression.FALSE : Expression.TRUE);
 			return;
@@ -589,6 +660,20 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			
 			NodeMaker nm1 = variable1.getNodeMaker();
 			NodeMaker nm2 = variable2.getNodeMaker();
+			
+			DetermineNodeType filter1 = new DetermineNodeType();
+			nm1.describeSelf(filter1);
+			RDFDatatype datatype1 = filter1.getDatatype();
+			
+			DetermineNodeType filter2 = new DetermineNodeType();
+			nm2.describeSelf(filter2);
+			RDFDatatype datatype2 = filter2.getDatatype();
+			
+			if (datatype1 != null && XSD.isNumeric(datatype1) && datatype2 != null && XSD.isNumeric(datatype2)) {
+				RDFDatatype numericType = XSD.getNumericType(filter1.getDatatype(), filter2.getDatatype());
+				nm1 = cast(nm1, numericType);
+				nm2 = cast(nm2, numericType);
+			}
 			
 			NodeSetFilterImpl nodeSet = new NodeSetFilterImpl();
 			nm1.describeSelf(nodeSet);
@@ -722,6 +807,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		}
 	}
 	
+	
 	/*
 	 * See http://www.w3.org/TR/rdf-sparql-query paragraph 11.4.4
 	 * 
@@ -791,6 +877,12 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		} else if (arg instanceof ConstantEx) {
 			ConstantEx constant = (ConstantEx) arg;
 			Node node = constant.getNode();
+			if (!node.isLiteral()) {
+				// type error, return false?
+				logger.warn("type error: " + node + " is not a literal, returning FALSE");
+				expression.push(Expression.FALSE);
+				return;
+			}
 			String lang = node.getLiteralLanguage();
 			logger.debug("lang " + lang);
 			if (lang == null)
@@ -873,7 +965,88 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	{
 		logger.debug("convertSameTerm " + expr.toString());
 		
-		convertEquality(expr); // TODO this is probably not correct
+		expr.getArg1().visit(this);
+		expr.getArg2().visit(this);
+		Expression e2 = (Expression) expression.pop();
+		Expression e1 = (Expression) expression.pop();
+		
+		// TODO Expression.FALSE and Expression.TRUE are not constants
+		if (e1.equals(Expression.FALSE))
+			e1 = CONSTANT_FALSE;
+		else if (e1.equals(Expression.TRUE))
+			e1 = CONSTANT_TRUE;
+		if (e2.equals(Expression.FALSE))
+			e2 = CONSTANT_FALSE;
+		else if (e2.equals(Expression.TRUE))
+			e2 = CONSTANT_TRUE;
+		
+		if (e1 instanceof AttributeExprEx && e2 instanceof Constant || e2 instanceof AttributeExprEx && e1 instanceof Constant) {
+			
+			AttributeExprEx variable;
+			ConstantEx      constant;
+			
+			if (e1 instanceof AttributeExprEx) {
+				variable = (AttributeExprEx) e1;
+				constant = (ConstantEx) e2;
+			} else {
+				variable = (AttributeExprEx) e2;
+				constant = (ConstantEx) e1;
+			}
+			
+			logger.debug("isEqual(" + variable + ", " + constant + ")");
+			
+			NodeMaker nm = variable.getNodeMaker();
+			
+			if (nm instanceof TypedNodeMaker) {
+				ValueMaker vm = ((TypedNodeMaker) nm).valueMaker();
+				Node node = constant.getNode();
+				logger.debug("checking " + node + " with " + nm);
+								
+				boolean empty = nm.selectNode(node, RelationalOperators.DUMMY).equals(NodeMaker.EMPTY);
+				logger.debug("result " + new Boolean(empty));
+				if (!empty) {
+					if (node.isURI())
+						expression.push(vm.valueExpression(node.getURI()));
+					else if (node.isLiteral())
+						expression.push(vm.valueExpression(constant.value()));
+					else
+						conversionFailed(expr); // TODO blank nodes?
+					return;
+				} else {
+					expression.push(Expression.FALSE);
+					return;
+				}
+			} else {
+				logger.warn("nm is not a TypedNodemaker");
+			}
+		} else if (e1 instanceof ConstantEx && e2 instanceof ConstantEx) {
+			logger.debug("isEqual(" + e1 + ", " + e2 + ")");
+			ConstantEx constant1 = (ConstantEx) e1;
+			ConstantEx constant2 = (ConstantEx) e2;
+			boolean equals = NodeFunctions.sameTerm(constant1.getNode(), constant2.getNode());
+			logger.debug("constants same? " + new Boolean(equals));
+			expression.push(equals ? Expression.TRUE : Expression.FALSE);
+			return;
+		} else if (e1 instanceof AttributeExprEx && e2 instanceof AttributeExprEx) {
+			logger.debug("isEqual(" + e1 + ", " + e2 + ")");
+			AttributeExprEx variable1 = (AttributeExprEx) e1;
+			AttributeExprEx variable2 = (AttributeExprEx) e2;
+			
+			NodeMaker nm1 = variable1.getNodeMaker();
+			NodeMaker nm2 = variable2.getNodeMaker();
+
+			NodeSetFilterImpl nodeSet = new NodeSetFilterImpl();
+			nm1.describeSelf(nodeSet);
+			nm2.describeSelf(nodeSet);
+			
+			if (nodeSet.isEmpty()) {
+				logger.debug("nodes " + nm1 + " " + nm2 + " incompatible");
+				expression.push(Expression.FALSE);
+				return;
+			}
+		}
+		
+		expression.push(Equality.create(e1, e2)); 
 	}
 	
 	/*
@@ -926,6 +1099,30 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			reason = "cannot convert " + unconvertableExpr.toString() + ": " + message;
 	}
 	
+
+	
+	static NodeMaker cast(NodeMaker nodeMaker, RDFDatatype datatype)
+	{
+		if (nodeMaker instanceof TypedNodeMaker)
+			return new TypedNodeMaker(TypedNodeMaker.typedLiteral(datatype), ((TypedNodeMaker) nodeMaker).valueMaker(), nodeMaker.isUnique());
+		
+		if (nodeMaker instanceof FixedNodeMaker) {
+			Node node = nodeMaker.makeNode(null);
+			
+			return new FixedNodeMaker(XSD.cast(node, datatype), nodeMaker.isUnique());
+		}
+		
+		throw new RuntimeException("unknown nodeMaker type");
+	}
+	
+	static boolean isSimpleLiteral(Node node)
+	{
+		if (!node.isLiteral())
+			return false;
+		
+		return node.getLiteralDatatype() == null && "".equals(node.getLiteralLanguage());
+	}
+	
 	// extension mechanism
 	
 
@@ -937,5 +1134,5 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	protected void extensionConvert(ExprFunction function, List args)
 	{
 	}
-	
+
 }
