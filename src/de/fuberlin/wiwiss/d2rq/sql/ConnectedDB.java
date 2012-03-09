@@ -420,6 +420,13 @@ public class ConnectedDB {
 			// Oracle-specific types
 			return SQLDataType.CHARACTER;
 		}
+    	if ("BINARY_FLOAT".equals(type.typeName()) || "BINARY_DOUBLE".equals(type.typeName())) {
+    		return SQLDataType.NUMERIC;
+    	}
+    	if ("BFILE".equals(type.typeName())) {
+    		// TODO: We could at least support reading from BFILE, although querying for them seems hard
+    		return SQLDataType.UNMAPPABLE;
+    	}
 		if ("uuid".equals(type.typeName())) {
 			// PostgreSQL
 			return SQLDataType.CHARACTER;

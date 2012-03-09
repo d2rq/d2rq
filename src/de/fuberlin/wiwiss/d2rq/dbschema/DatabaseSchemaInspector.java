@@ -97,7 +97,7 @@ public class DatabaseSchemaInspector {
 			return "xsd:double";
 		}
 		if ("BFILE".equals(columnType.typeName())) {
-			return "xsd:hexBinary";
+			return ColumnType.UNMAPPABLE;
 		}
 		return null;
 	}
