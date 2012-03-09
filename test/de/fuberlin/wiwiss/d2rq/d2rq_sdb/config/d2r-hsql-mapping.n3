@@ -16,6 +16,9 @@ map:database a d2rq:Database;
 	d2rq:jdbcDSN "jdbc:hsqldb:mem:hsqldata";
 	d2rq:username "sa";
 	.
+	
+[] a d2rq:Configuration;
+     d2rq:useAllOptimizations true.
 
 # Table offer #########################################################################
 map:offer a d2rq:ClassMap;
