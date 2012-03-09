@@ -52,6 +52,19 @@ public class DatabaseSchemaInspector {
 			// OTHER in HSQLDB 2.8.8 is really JAVA_OBJECT
 			return ColumnType.UNMAPPABLE;
 		}
+		
+		// HACK: MS SQLServer 2008 returns 'date' as VARCHAR type
+		if(columnType.typeName().equals("date") && db.dbTypeIs(ConnectedDB.MSSQL)) {
+			return "xsd:date";
+		}
+		
+// HACK: MS SQLServer 2008 returns 'datetime2(7)' and 'datetimeoffset(7)' as VARCHAR type
+// TODO: Cant make it work. See comment in ResultRowMap.java for additional information on datatype 
+// inconsistency particularly in the case of MS SQLServer.
+//		if((columnType.typeName().equals("datetime2") && db.dbTypeIs(ConnectedDB.MSSQL)) || (columnType.typeName().equals("datetimeoffset") && db.dbTypeIs(ConnectedDB.MSSQL))) {
+//			return "xsd:dateTime";
+//		}
+		
 		switch (columnType.typeId()) {
 		case Types.ARRAY:         return ColumnType.UNMAPPABLE;
 		case Types.BIGINT:        return "xsd:long";

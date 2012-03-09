@@ -358,6 +358,19 @@ public class ConnectedDB {
 				return SQLDataType.INTERVAL;
 			}
 		}
+		
+		// HACK: MS SQLServer 2008 returns 'date' as VARCHAR type
+		if(type.typeName().equals("date") && dbTypeIs(ConnectedDB.MSSQL)) {
+			return SQLDataType.DATE;
+		}
+		
+// HACK: MS SQLServer 2008 returns 'datetime2(7)' and 'datetimeoffset(7)' as VARCHAR type
+// TODO: Cant make it work. See comment in ResultRowMap.java for additional information on datatype 
+// inconsistency particularly in the case of MS SQLServer.
+//		if((type.typeName().equals("datetime2") && dbTypeIs(ConnectedDB.MSSQL)) || (type.typeName().equals("datetimeoffset") && dbTypeIs(ConnectedDB.MSSQL))) {
+//			return SQLDataType.TIMESTAMP;
+//		}
+
 		switch (type.typeId()) {
 			case Types.CHAR:
 			case Types.VARCHAR:

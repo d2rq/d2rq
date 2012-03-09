@@ -37,6 +37,16 @@ public class ResultRowMap implements ResultRow {
 			 * Return string representations of the values using information from the type map
 			 */
 			int type = metaData == null ? Integer.MIN_VALUE : metaData.getColumnType(i + 1);
+
+// Hack for MS SQLSERVER, which maps date, datetime2 and datetimeoffset to VARCHAR
+// TODO: Cant make it work. because the jdbc driver we use (i.e. jTDS) returns datetime2, datetimeoffset
+// as nvarchar type so we cannot handle these two datatypes for MS SQLServer at the moment.
+//			if(metaData.getColumnType(i + 1) == 12 && metaData.getColumnTypeName(i + 1).equals("datetime2"))
+//			{
+//				System.out.println("YUPPP");
+//				type = Types.TIMESTAMP;
+//			}
+			
 			if (type == Types.DOUBLE || type == Types.REAL || type == Types.FLOAT) {
 				double d = resultSet.getDouble(i + 1);
 				if (resultSet.wasNull()) {
