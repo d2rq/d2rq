@@ -4,9 +4,9 @@ import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.DummyDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
+import de.fuberlin.wiwiss.d2rq.sql.SQLDataType;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
@@ -67,7 +67,7 @@ public class ExpressionTest extends TestCase {
 	public void testConstantToSQLWithType() {
 		Attribute attribute = SQL.parseAttribute("table.col1");
 		DummyDB db = new DummyDB();
-		db.setColumnType(attribute, ConnectedDB.NUMERIC_COLUMN);
+		db.setColumnType(attribute, SQLDataType.NUMERIC);
 		assertEquals("42", new Constant("42", attribute).toSQL(db, AliasMap.NO_ALIASES));
 	}
 	
@@ -75,7 +75,7 @@ public class ExpressionTest extends TestCase {
 		Attribute attribute = SQL.parseAttribute("table.col1");
 		Attribute aliasedAttribute = SQL.parseAttribute("alias.col1");
 		DummyDB db = new DummyDB();
-		db.setColumnType(attribute, ConnectedDB.NUMERIC_COLUMN);
+		db.setColumnType(attribute, SQLDataType.NUMERIC);
 		assertEquals("42", new Constant("42", aliasedAttribute).toSQL(db, aliases));
 	}
 	

@@ -240,8 +240,13 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public HashMap uniqueColumns(RelationName tableName) {
-		HashMap result = new HashMap();
+	/**
+	 * Returns unique indexes defined on the table.
+	 * @param tableName Name of a table
+	 * @return Map from index name to list of column names
+	 */
+	public Map<String,List<String>> uniqueColumns(RelationName tableName) {
+		Map<String,List<String>> result = new HashMap<String,List<String>>();
 		try {
 			/*
 			 * When requesting index info from an Oracle database, accept approximate
@@ -260,8 +265,8 @@ public class DatabaseSchemaInspector {
 				String indexKey = rs.getString("INDEX_NAME");
 				if (indexKey != null) { // is null when type = tableIndexStatistic, ignore
 					if (!result.containsKey(indexKey))
-						result.put(indexKey, new ArrayList());
-					((List)result.get(indexKey)).add(rs.getString("COLUMN_NAME"));
+						result.put(indexKey, new ArrayList<String>());
+					result.get(indexKey).add(rs.getString("COLUMN_NAME"));
 				}
 			}
 			rs.close();

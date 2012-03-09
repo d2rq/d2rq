@@ -2,14 +2,15 @@ package de.fuberlin.wiwiss.d2rq.map;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQLDataType;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 
@@ -69,14 +70,7 @@ public class Database extends MapObject {
 	private String jdbcDriver;
 	private String username;
 	private String password;
-	private final Set<String> textColumns = new HashSet<String>();
-	private final Set<String> numericColumns = new HashSet<String>();
-	private final Set<String> dateColumns = new HashSet<String>();
-	private final Set<String> timestampColumns = new HashSet<String>();
-	private final Set<String> timeColumns = new HashSet<String>();
-	private final Set<String> binaryColumns = new HashSet<String>();
-	private final Set<String> bitColumns = new HashSet<String>();
-	private final Set<String> intervalColumns = new HashSet<String>();
+	private final Map<String,SQLDataType> columnTypes = new HashMap<String,SQLDataType>();
     private int limit = NO_LIMIT;
     private int fetchSize = NO_FETCH_SIZE;
 	private boolean allowDistinct = true;
@@ -121,42 +115,42 @@ public class Database extends MapObject {
 
 	public void addTextColumn(String column) {
 		checkNotConnected();		
-		this.textColumns.add(column);
+		columnTypes.put(column, SQLDataType.CHARACTER);
 	}
 	
 	public void addNumericColumn(String column) {
 		checkNotConnected();		
-		this.numericColumns.add(column);
+		columnTypes.put(column, SQLDataType.NUMERIC);
 	}
 	
 	public void addDateColumn(String column) {
 		checkNotConnected();		
-		this.dateColumns.add(column);
+		columnTypes.put(column, SQLDataType.DATE);
 	}
 	
 	public void addTimestampColumn(String column) {
 		checkNotConnected();		
-		this.timestampColumns.add(column);
+		columnTypes.put(column, SQLDataType.TIMESTAMP);
 	}
 	
 	public void addTimeColumn(String column) {
 		checkNotConnected();		
-		this.timeColumns.add(column);
+		columnTypes.put(column, SQLDataType.TIME);
 	}
 	
 	public void addBinaryColumn(String column) {
 		checkNotConnected();
-		this.binaryColumns.add(column);
+		columnTypes.put(column, SQLDataType.BINARY);
 	}
 	
 	public void addBitColumn(String column) {
 		checkNotConnected();
-		this.bitColumns.add(column);
+		columnTypes.put(column, SQLDataType.BIT);
 	}
 	
 	public void addIntervalColumn(String column) {
 		checkNotConnected();
-		this.bitColumns.add(column);
+		columnTypes.put(column, SQLDataType.INTERVAL);
 	}
 	
 	public void setAllowDistinct(boolean b) {
@@ -195,9 +189,7 @@ public class Database extends MapObject {
 			registerJDBCDriver(driver);
 		}
 		this.connection = new ConnectedDB(url, this.username, this.password, this.allowDistinct,
-				this.textColumns, this.numericColumns, this.dateColumns, 
-				this.timestampColumns, this.timeColumns, this.binaryColumns,
-				this.bitColumns, this.intervalColumns,
+				columnTypes,
 				this.limit, this.fetchSize, this.connectionProperties);
 		return this.connection;
 	}
