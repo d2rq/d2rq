@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -38,14 +38,10 @@ public class ConnectedDB {
 	public static final String Oracle = "Oracle";
 	public static final String MSSQL = "Microsoft SQL Server";
 	public static final String MSAccess = "Microsoft Access";
-	public static final String Other = "Other";
+	public static final String HSQLDB = "HSQLDB";
 	public static final String InterbaseOrFirebird = "Interbase/Firebird";
+	public static final String Other = "Other";
 	
-	public static final int TEXT_COLUMN = 1;
-	public static final int NUMERIC_COLUMN = 2;
-	public static final int DATE_COLUMN = 3;
-	public static final int TIMESTAMP_COLUMN = 4;
-
 	public static final String KEEP_ALIVE_PROPERTY = "keepAlive"; // interval property, value in seconds
 	public static final int DEFAULT_KEEP_ALIVE_INTERVAL = 60*60; // hourly
 	public static final String KEEP_ALIVE_QUERY_PROPERTY = "keepAliveQuery"; // override default keep alive query
@@ -59,16 +55,13 @@ public class ConnectedDB {
 	 */
 	private static final String[] POSTGRESQL_IGNORED_SCHEMAS = {"information_schema", "pg_catalog"};
 	private static final String[] ORACLE_IGNORED_SCHEMAS = {"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", "SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
-    private static final List MSSQL_IGNORED_SCHEMAS = Arrays.asList(new String[]{"sys", "INFORMATION_SCHEMA"});
+    private static final List<String> MSSQL_IGNORED_SCHEMAS = Arrays.asList(new String[]{"sys", "INFORMATION_SCHEMA"});
 	
 	private String jdbcURL;
 	private String username;
 	private String password;
 	private boolean allowDistinct;
-	private Set textColumns;
-	private Set numericColumns;
-	private Set dateColumns;
-	private Set timestampColumns;
+	private final Map<String,SQLDataType> columnTypes = new HashMap<String,SQLDataType>();
 	private Connection connection = null;
 	private DatabaseSchemaInspector schemaInspector = null;
 	
@@ -78,8 +71,9 @@ public class ConnectedDB {
 	
 	private int limit;
 	private int fetchSize;
-	private Map zerofillCache = new HashMap(); // Attribute => Boolean
-	private Map uniqueIndexCache = new HashMap(); // RelationName => String => List of Strings
+	private Map<Attribute,Boolean> zerofillCache = new HashMap<Attribute,Boolean>();
+	private Map<RelationName,Map<String,List<String>>> uniqueIndexCache = 
+		new HashMap<RelationName,Map<String,List<String>>>();
 	private final Properties connectionProperties;
 
 	private class KeepAliveAgent extends Thread {
@@ -132,21 +126,20 @@ public class ConnectedDB {
 	
 	public ConnectedDB(String jdbcURL, String username, String password) {
 		this(jdbcURL, username, password, true,
-				Collections.EMPTY_SET, Collections.EMPTY_SET, Collections.EMPTY_SET, 
-				Collections.EMPTY_SET, Database.NO_LIMIT, Database.NO_FETCH_SIZE, null);
+				Collections.<String,SQLDataType>emptyMap(),
+				Database.NO_LIMIT, Database.NO_FETCH_SIZE, null);
 	}
 	
-	public ConnectedDB(String jdbcURL, String username, String password,
-			boolean allowDistinct, Set textColumns, Set numericColumns, Set dateColumns,
-			Set timestampColumns, int limit, int fetchSize, Properties connectionProperties) {
+	public ConnectedDB(String jdbcURL, String username, 
+			String password, boolean allowDistinct, 
+			Map<String,SQLDataType> columnTypes,
+			int limit, int fetchSize, Properties connectionProperties) {
+		// TODO replace column type arguments with a single column => type map
 		this.jdbcURL = jdbcURL;
 		this.allowDistinct = allowDistinct;
 		this.username = username;
 		this.password = password;
-		this.textColumns = textColumns;
-		this.numericColumns = numericColumns;
-		this.dateColumns = dateColumns;
-		this.timestampColumns = timestampColumns;
+		this.columnTypes.putAll(columnTypes);
 		this.limit = limit;
 		this.fetchSize = fetchSize;
 		this.connectionProperties = connectionProperties;
@@ -217,6 +210,18 @@ public class ConnectedDB {
 					throw new D2RQException("Unable to set date format: " + ex.getMessage(), D2RQException.D2RQ_SQLEXCEPTION);					
 				}
 				finally {
+					stmt.close();
+				}
+			}
+			
+			if (dbTypeIs(HSQLDB)) {
+				// Enable storage of special Double values: NaN, INF, -INF
+				Statement stmt = this.connection.createStatement();
+				try {
+					stmt.execute("SET DATABASE SQL DOUBLE NAN FALSE");
+				} catch (SQLException ex) {
+					throw new D2RQException("Unable to SET DATABASE SQL DOUBLE NAN FALSE: " + ex.getMessage(), D2RQException.D2RQ_SQLEXCEPTION);
+				} finally {
 					stmt.close();
 				}
 			}
@@ -323,6 +328,9 @@ public class ConnectedDB {
 			} else if (productName.indexOf("access") >= 0) {
 				this.dbType = ConnectedDB.MSAccess;
 				this.syntax = new MSSQLSyntax();
+			} else if (productName.indexOf("hsql") >= 0) {
+				this.dbType = ConnectedDB.HSQLDB;
+				this.syntax = new SQL92Syntax(true);
 			} else {
 				this.dbType = ConnectedDB.Other;
 				this.syntax = new SQL92Syntax(true);
@@ -333,78 +341,115 @@ public class ConnectedDB {
 	}
 	
     /**
-     * Returns the columnType for a given database column.
-     * @return Node columnType D2RQ.textColumn or D2RQ.numericColumn or D2RQ.dateColumn
+     * Returns the data type for a given database column.
      */
-    public int columnType(Attribute column) {
-    	if (this.textColumns.contains(column.qualifiedName())) {
-    		return TEXT_COLUMN;
-    	}
-    	if (this.numericColumns.contains(column.qualifiedName())) {
-    		return NUMERIC_COLUMN;
-    	}
-    	if (this.dateColumns.contains(column.qualifiedName())) {
-    		return DATE_COLUMN;
-    	}
-    	if (this.timestampColumns.contains(column.qualifiedName())) {
-    		return TIMESTAMP_COLUMN;
+    public SQLDataType columnType(Attribute column) {
+    	if (columnTypes.containsKey(column.qualifiedName())) {
+    		return columnTypes.get(column.qualifiedName());
     	}
 		ColumnType type = schemaInspector().columnType(column);
-		switch (type.typeId()) {
-			// TODO There are a bunch of others, see http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Types.html
-			case Types.CHAR: return TEXT_COLUMN;
-			case Types.NCHAR: return TEXT_COLUMN;
-			case Types.VARCHAR: return TEXT_COLUMN;
-			case Types.NVARCHAR: return TEXT_COLUMN;
-			case Types.LONGVARCHAR: return TEXT_COLUMN;
-			case Types.NUMERIC: return NUMERIC_COLUMN;
-			case Types.DECIMAL: return NUMERIC_COLUMN;
-			case Types.BIT: return NUMERIC_COLUMN;
-			case Types.TINYINT: return NUMERIC_COLUMN;
-			case Types.SMALLINT: return NUMERIC_COLUMN;
-			case Types.INTEGER: return NUMERIC_COLUMN;
-			case Types.BIGINT: return NUMERIC_COLUMN;
-			case Types.REAL: return NUMERIC_COLUMN;
-			case Types.FLOAT: return NUMERIC_COLUMN;
-			case Types.DOUBLE: return NUMERIC_COLUMN;
-			case Types.BOOLEAN: return NUMERIC_COLUMN;
-			case Types.ROWID: return NUMERIC_COLUMN;
-
-			// TODO: What to do with binary columns?
-			case Types.BINARY: return TEXT_COLUMN;
-			case Types.VARBINARY: return TEXT_COLUMN;
-			case Types.LONGVARBINARY: return TEXT_COLUMN;
-			case Types.CLOB: return TEXT_COLUMN;
-			case Types.NCLOB: return TEXT_COLUMN;
-			case Types.BLOB: return TEXT_COLUMN;
-
-			case Types.DATE: return DATE_COLUMN;
-			case Types.TIME: return DATE_COLUMN;
-			case Types.TIMESTAMP: return TIMESTAMP_COLUMN;
-			
-			default:
-				if ("VARCHAR2".equals(type.typeName())) {
-					return TEXT_COLUMN;
-				} else if ("uuid".equals(type.typeName())) {
-					return TEXT_COLUMN;
-				} else if ("NVARCHAR2".equals(type.typeName())) {
-					return TEXT_COLUMN;
-				} else if ("TIMESTAMP(0)".equals(type.typeName())) {
-					return TIMESTAMP_COLUMN;
-				} else if ("TIMESTAMP(6)".equals(type.typeName())) {
-					return TIMESTAMP_COLUMN;
-				} else if ("TIMESTAMP(9)".equals(type.typeName())) {
-					return TIMESTAMP_COLUMN;
-				} else if ("NCHAR".equals(type.typeName())) { // NCHAR somehow not mapped to Type.NCHAR
-					return TEXT_COLUMN;
-				} else if ("NCLOB".equals(type.typeName())) { // NCLOB somehow not mapped to Type.NCLOB
-					return TEXT_COLUMN;
-				} else {
-					throw new D2RQException("Unsupported database type code (" +
-						type.typeId() + ") or type name ('" + type.typeName() +
-						"') for column " + column.qualifiedName());
-				}				
+		if (type.typeId() == Types.OTHER && dbTypeIs(HSQLDB)) {
+			// OTHER in HSQLDB 2.2.8 is really JAVA_OBJECT
+			return SQLDataType.UNMAPPABLE;
 		}
+		if (type.typeId() == Types.VARCHAR && dbTypeIs(HSQLDB)) {
+			// HSQLDB 2.2.8 reports INTERVAL types as VARCHAR 
+			if (type.typeName().startsWith("INTERVAL")) {
+				return SQLDataType.INTERVAL;
+			}
+		}
+		
+		// HACK: MS SQLServer 2008 returns 'date' as VARCHAR type
+		if(type.typeName().equals("date") && dbTypeIs(ConnectedDB.MSSQL)) {
+			return SQLDataType.DATE;
+		}
+		
+// HACK: MS SQLServer 2008 returns 'datetime2(7)' and 'datetimeoffset(7)' as VARCHAR type
+// TODO: Cant make it work. See comment in ResultRowMap.java for additional information on datatype 
+// inconsistency particularly in the case of MS SQLServer.
+//		if((type.typeName().equals("datetime2") && dbTypeIs(ConnectedDB.MSSQL)) || (type.typeName().equals("datetimeoffset") && dbTypeIs(ConnectedDB.MSSQL))) {
+//			return SQLDataType.TIMESTAMP;
+//		}
+
+		switch (type.typeId()) {
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.CLOB:
+				return SQLDataType.CHARACTER;
+			
+			case Types.NUMERIC:
+			case Types.DECIMAL:
+			case Types.TINYINT:
+			case Types.SMALLINT:
+			case Types.INTEGER:
+			case Types.BIGINT:
+			case Types.REAL:
+			case Types.FLOAT:
+			case Types.DOUBLE:
+				return SQLDataType.NUMERIC;
+
+			case Types.BOOLEAN:
+				return SQLDataType.BOOLEAN;
+
+			// TODO: What's this exactly?
+			case Types.ROWID:
+				return SQLDataType.NUMERIC;
+
+			case Types.BIT:
+				return SQLDataType.BIT;
+
+			case Types.BINARY:
+			case Types.VARBINARY:
+			case Types.LONGVARBINARY:
+			case Types.BLOB:
+				return SQLDataType.BINARY;
+
+			case Types.DATE: return SQLDataType.DATE;
+			case Types.TIME: return SQLDataType.TIME;
+			case Types.TIMESTAMP: return SQLDataType.TIMESTAMP;
+
+			case Types.ARRAY:
+			case Types.JAVA_OBJECT:
+				return SQLDataType.UNMAPPABLE;
+			
+			// The rest of the types defined in java.sql.Types,
+			// we have not worked out what to do with them
+			case Types.OTHER:
+			case Types.DATALINK:
+			case Types.DISTINCT:
+			case Types.NULL:
+			case Types.REF:
+			case Types.STRUCT:
+		}
+		if ("NCHAR".equals(type.typeName()) || "NVARCHAR".equals(type.typeName()) ||
+				"NCLOB".equals(type.typeName())) {
+			// These are in java.sql.Types as of Java 6 but not yet in Java 1.5
+			return SQLDataType.CHARACTER;
+		}
+		if ("VARCHAR2".equals(type.typeName()) || "NVARCHAR2".equals(type.typeName())) {
+			// Oracle-specific types
+			return SQLDataType.CHARACTER;
+		}
+    	if ("BINARY_FLOAT".equals(type.typeName()) || "BINARY_DOUBLE".equals(type.typeName())) {
+    		return SQLDataType.NUMERIC;
+    	}
+    	if ("BFILE".equals(type.typeName())) {
+    		// TODO: We could at least support reading from BFILE, although querying for them seems hard
+    		return SQLDataType.UNMAPPABLE;
+    	}
+		if ("uuid".equals(type.typeName())) {
+			// PostgreSQL
+			return SQLDataType.CHARACTER;
+		}
+		if (type.typeName().startsWith("TIMESTAMP")) {
+			// Some driver doesn't handle TIMESTAMP property; Oracle???
+			// Seen TIMESTAMP(0), TIMESTAMP(6), TIMESTAMP(9)
+			return SQLDataType.TIMESTAMP;
+		}
+		throw new D2RQException("Unsupported database type code (" +
+			type.typeId() + ") or type name ('" + type.typeName() +
+			"') for column " + column.qualifiedName(), D2RQException.DATATYPE_UNKNOWN);
 	}
 
 	/**
@@ -438,16 +483,15 @@ public class ConnectedDB {
 	private boolean isZerofillColumn(Attribute column) {
 		if (!dbTypeIs(MySQL)) return false;
 		if (!zerofillCache.containsKey(column)) {
-			zerofillCache.put(column, 
-					new Boolean(schemaInspector().isZerofillColumn(column)));
+			zerofillCache.put(column, schemaInspector().isZerofillColumn(column));
 		}
-		return ((Boolean) zerofillCache.get(column)).booleanValue();
+		return zerofillCache.get(column);
 	}
 	
-	public HashMap getUniqueKeyColumns(RelationName tableName) {
+	public Map<String,List<String>> getUniqueKeyColumns(RelationName tableName) {
 		if (!uniqueIndexCache.containsKey(tableName) && schemaInspector() != null)
 			uniqueIndexCache.put(tableName, schemaInspector().uniqueColumns(tableName));
-		return (HashMap) uniqueIndexCache.get(tableName);
+		return uniqueIndexCache.get(tableName);
 	}
     
 	private final static Pattern singleQuoteEscapePattern = Pattern.compile("([\\\\'])");
@@ -465,27 +509,134 @@ public class ConnectedDB {
 				replaceAll("$1$1") + "'";
 	}
 
-	public String quoteValue(String value, int columnType) {
-		if (columnType == ConnectedDB.NUMERIC_COLUMN) {
-			// Check if it actually is a number to avoid SQL injection
-			try {
-				return Integer.toString(Integer.parseInt(value));
-			} catch (NumberFormatException nfex) {
-				try {
-					return Double.toString(Double.parseDouble(value));
-				} catch (NumberFormatException nfex2) {
-					// No number -- return as quoted string
-					// DBs seem to interpret non-number strings as 0
-					return singleQuote(value);
+	public final static Pattern DATE_PATTERN = 
+		Pattern.compile("^\\d?\\d?\\d?\\d-\\d\\d-\\d\\d$");
+	public final static Pattern TIME_PATTERN = 
+			Pattern.compile("^\\d?\\d:\\d\\d:\\d\\d(.\\d+)?([+-]\\d?\\d:\\d\\d|Z)?$");
+	public final static Pattern TIMESTAMP_PATTERN = 
+			Pattern.compile("^\\d?\\d?\\d?\\d-\\d\\d-\\d\\d \\d?\\d:\\d\\d:\\d\\d(.\\d+)?([+-]\\d?\\d:\\d\\d|Z)?$");
+	public final static Pattern BINARY_PATTERN = 
+		Pattern.compile("^([0-9a-fA-F][0-9a-fA-F])*$");
+	
+	/**
+	 * Creates a SQL literal for the given value, suitable
+	 * for comparison to a column of the indicated type.
+	 * If the value is not suitable for the column type
+	 * (e.g., not a number for a NUMERIC_COLUMN), <code>NULL</code>
+	 * is returned.
+	 * 
+	 * TODO Refactor into {@link SQLDataType}
+	 * 
+	 * @param value A value
+	 * @param columnType Type for which to format the value
+	 * @return A quoted and escaped SQL literal, suitable for comparison to a column 
+	 */
+	public String quoteValue(String value, SQLDataType columnType) {
+		if (columnType == SQLDataType.UNMAPPABLE) {
+			throw new D2RQException(
+					"Attempted to create SQL literal for unmappable datatype",
+					D2RQException.DATATYPE_UNMAPPABLE);
+		}
+		if (value == null) {
+			return "NULL";
+		}
+		if (columnType == SQLDataType.INTERVAL) {
+			// TODO: Generate appropriate INTERVAL literal 
+			return "NULL";
+		}
+		if (columnType == SQLDataType.NUMERIC) {
+			if (dbTypeIs(HSQLDB)) {
+				if ("NaN".equals(value)) {
+					return "(0E0/0E0)";
+				} else if ("INF".equals(value)) {
+					return "(1E0/0)";
+				} else if ("-INF".equals(value)) {
+					return "(-1E0/0)";
 				}
 			}
-		} else if (columnType == ConnectedDB.DATE_COLUMN) {
-			// TODO: MS Access requires "#2006-09-15#"
-			return "DATE '" + value + "'";
-		} else if (columnType == ConnectedDB.TIMESTAMP_COLUMN) {
-			// TODO: MS Access requires "#2006-09-15 23:59:00#" (?)
-			return "TIMESTAMP '" + value + "'";
+			// Check if it actually is a number to avoid SQL injection
+			try {
+				return new BigDecimal(value).toString();
+			} catch (NumberFormatException nfex) {
+				// Scientific notation? E.g., 1E-3
+				try {
+					double d = Double.parseDouble(value);
+					if (Double.isNaN(d) || Double.isInfinite(d)) {
+						// Valid in xsd:double, but not supported by vanilla DBs
+						return "NULL";
+					}
+					return Double.toString(d);
+				} catch (NumberFormatException nfex2) {
+					// Not a number AFAICT
+					return "NULL";
+				}
+			}
+		} else if (columnType == SQLDataType.BOOLEAN) {
+			if (value == "true" || value == "1") {
+				return "TRUE";
+			} else if (value == "false" || value == "0") {
+				return "FALSE";
+			}
+			return "NULL";
+		} else if (columnType == SQLDataType.DATE) {
+			if (!DATE_PATTERN.matcher(value).matches()) {
+				return "NULL";
+			}
+			if (dbTypeIs(MSSQL) || dbTypeIs(MSAccess)) {
+				// TODO: Reportedly, MS Access requires "#2006-09-15#" (?)
+				return singleQuote(value);
+			}
+			return "DATE " + singleQuote(value);
+		} else if (columnType == SQLDataType.TIMESTAMP) {
+			value = value.replace('T', ' ').replace("Z", "+00:00");
+			if (!TIMESTAMP_PATTERN.matcher(value).matches()) {
+				return "NULL";
+			}
+			if (dbTypeIs(MSSQL) || dbTypeIs(MSAccess)) {
+				// TODO: Reportedly, MS Access requires "#2006-09-15 23:59:00#" (?)
+				return singleQuote(value);
+			}
+			return "TIMESTAMP " + singleQuote(value);
+		} else if (columnType == SQLDataType.TIME) {
+			value = value.replace("Z", "+00:00");
+			if (!TIME_PATTERN.matcher(value).matches()) {
+				return "NULL";
+			}
+			if (dbTypeIs(MSSQL) || dbTypeIs(MSAccess)) {
+				// TODO: Reportedly, MS Access requires "#23:59:00#" (?)
+				return singleQuote(value);
+			}
+			return "TIME " + singleQuote(value);
+		} else if (columnType == SQLDataType.BINARY) {
+			if (!BINARY_PATTERN.matcher(value).matches()) {
+				return "NULL";
+			}
+			// Value is assumed to be a hex string, as per xsd:hexBinary
+			if (dbTypeIs(Oracle)) {
+				return singleQuote(value);
+			} else if (dbTypeIs(MSSQL)) {
+				return "0x" + value;
+			} else if (dbTypeIs(PostgreSQL)) {
+				return "E'\\\\x" + value + "'";
+			} else {
+				return "X" + singleQuote(value);
+			}
+		} else if (columnType == SQLDataType.BIT) {
+			if (dbTypeIs(MSSQL)) {
+				// On SQL Server, BIT is a single-bit numeric type
+				try {
+					return Integer.parseInt(value) == 0 ? "0" : "1";
+				} catch (NumberFormatException nfex) {
+					// Not 0 or 1
+					return "NULL";
+				}
+			} else {
+				// In SQL-92, BIT is a bit string with a special literal form
+				if (!value.matches("^[01]*$")) return "NULL";
+				return "B" + singleQuote(value);
+			}
 		}
+		// Default
 		return singleQuote(value);
 	}
 	

@@ -41,10 +41,9 @@ public class HSQLSimpleTest extends TestCase {
 		DatabaseSchemaInspector schema = 
 			new DatabaseSchemaInspector(
 					new ConnectedDB(
-							db.getJdbcURL(), db.getUser(), db.getPassword(), 
-							true, null, null, null, null, -1, 10000, null));
+							db.getJdbcURL(), db.getUser(), db.getPassword()));
 		assertEquals(new ArrayList<RelationName>() {{ 
-					add(new RelationName("PUBLIC", "TEST"));
+					add(new RelationName(null, "TEST"));
 				}}, schema.listTableNames(null));
 	}
 	

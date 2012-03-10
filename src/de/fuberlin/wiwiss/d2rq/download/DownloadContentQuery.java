@@ -97,6 +97,7 @@ public class DownloadContentQuery {
 				return;	// 0 results
 			}
 			int type = resultSet.getMetaData().getColumnType(1);
+			// TODO Handle Oracle BFILE type; there's some code for that already in ResultRowMap
 			if (type == Types.BINARY || type == Types.VARBINARY || type == Types.LONGVARBINARY || type == Types.BLOB) {
 				resultStream = resultSet.getBinaryStream(1);
 				if (resultSet.wasNull()) {

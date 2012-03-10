@@ -7,6 +7,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQLDataType;
 
 /**
  * A constant-valued expression.
@@ -60,7 +61,7 @@ public class Constant extends Expression {
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
 		if (attributeForTrackingType == null) {
 			// TODO: This is an unsafe assumption
-			return database.quoteValue(value, ConnectedDB.TEXT_COLUMN);
+			return database.quoteValue(value, SQLDataType.CHARACTER);
 		}
 		return database.quoteValue(value, aliases.originalOf(attributeForTrackingType));
 	}

@@ -3,10 +3,10 @@ package de.fuberlin.wiwiss.d2rq.engine;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -60,7 +60,7 @@ class TripleRelationJoiner {
 	private static boolean isUnique(ConnectedDB database, RelationName originalName, Set attributeNames)
 	{
 		boolean found = false;
-		HashMap uniqueKeys = database.getUniqueKeyColumns(originalName);
+		Map uniqueKeys = database.getUniqueKeyColumns(originalName);
 		if (uniqueKeys != null) {
 			Iterator keyIterator = uniqueKeys.values().iterator();
 			while (!found && keyIterator.hasNext()) {

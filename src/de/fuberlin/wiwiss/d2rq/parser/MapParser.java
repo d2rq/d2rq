@@ -75,6 +75,7 @@ public class MapParser {
 	 * Constructs a new MapParser from a Jena model containing the RDF statements
 	 * from a D2RQ mapping file.
 	 * @param mapModel a Jena model containing the RDF statements from a D2RQ mapping file
+	 * @param baseURI used for relative URI patterns
 	 */
 	public MapParser(Model mapModel, String baseURI) {
 		this.model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, mapModel);
@@ -251,6 +252,10 @@ public class MapParser {
 		while (stmts.hasNext()) {
 			database.addNumericColumn(stmts.nextStatement().getString());
 		}
+		stmts = r.listProperties(D2RQ.booleanColumn);
+		while (stmts.hasNext()) {
+			database.addBooleanColumn(stmts.nextStatement().getString());
+		}
 		stmts = r.listProperties(D2RQ.dateColumn);
 		while (stmts.hasNext()) {
 			database.addDateColumn(stmts.nextStatement().getString());
@@ -258,6 +263,22 @@ public class MapParser {
 		stmts = r.listProperties(D2RQ.timestampColumn);
 		while (stmts.hasNext()) {
 			database.addTimestampColumn(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.timeColumn);
+		while (stmts.hasNext()) {
+			database.addTimeColumn(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.binaryColumn);
+		while (stmts.hasNext()) {
+			database.addBinaryColumn(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.bitColumn);
+		while (stmts.hasNext()) {
+			database.addBitColumn(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.intervalColumn);
+		while (stmts.hasNext()) {
+			database.addIntervalColumn(stmts.nextStatement().getString());
 		}
 		stmts = r.listProperties(D2RQ.fetchSize);
 		while (stmts.hasNext()) {

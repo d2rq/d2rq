@@ -40,7 +40,7 @@ d2rq:jdbcDSN a rdf:Property;
 	rdfs:domain d2rq:Database;
 	.
 d2rq:odbcDSN a rdf:Property;
-    a owl:DeprecatedProperty;
+	a owl:DeprecatedProperty;
 	rdfs:comment "ODBC DSN";
 	rdfs:label "ODBC data source name. Deprecated, use JDBC instead (with ODBC-JDBC bridge if necessary).";
 	rdfs:domain d2rq:Database;
@@ -55,18 +55,47 @@ d2rq:password a rdf:Property;
 	.
 d2rq:numericColumn a rdf:Property;
 	rdfs:label "Numeric column";
+	rdfs:comment "Name of a column of a numeric type, such as INT or DOUBLE or DECIMAL.";
 	rdfs:domain d2rq:Database;
 	.
 d2rq:textColumn a rdf:Property;
 	rdfs:label "Text column";
+	rdfs:comment "Name of a column of a character type, such as CHAR, VARCHAR, NVARCHAR or CLOB.";
+	rdfs:domain d2rq:Database;
+	.
+d2rq:booleanColumn a rdf:Property;
+	rdfs:label "BOOLEAN column";
+	rdfs:comment "Name of a column of type BOOLEAN.";
 	rdfs:domain d2rq:Database;
 	.
 d2rq:dateColumn a rdf:Property;
-	rdfs:label "Date column";
+	rdfs:label "DATE column";
+	rdfs:comment "Name of a column of type DATE.";
 	rdfs:domain d2rq:Database;
 	.
 d2rq:timestampColumn a rdf:Property;
-	rdfs:label "Timestamp column";
+	rdfs:label "TIMESTAMP column";
+	rdfs:comment "Name of a column of type TIMESTAMP.";
+	rdfs:domain d2rq:Database;
+	.
+d2rq:timeColumn a rdf:Property;
+	rdfs:label "TIME column";
+	rdfs:comment "Name of a column of type TIME.";
+	rdfs:domain d2rq:Database;
+	.
+d2rq:binaryColumn a rdf:Property;
+	rdfs:label "BINARY column";
+	rdfs:comment "Name of a column of a binary type, such as BINARY, VARBINARY or BLOB.";
+	rdfs:domain d2rq:Database;
+	.
+d2rq:bitColumn a rdf:Property;
+	rdfs:label "BIT column";
+	rdfs:comment "Name of a column of type BIT.";
+	rdfs:domain d2rq:Database;
+	.
+d2rq:intervalColumn a rdf:Property;
+	rdfs:label "INTERVAL column";
+	rdfs:comment "Name of a column of type INTERVAL.";
 	rdfs:domain d2rq:Database;
 	.
 d2rq:allowDistinct a rdf:Property;

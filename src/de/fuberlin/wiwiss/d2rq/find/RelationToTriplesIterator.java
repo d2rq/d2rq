@@ -55,7 +55,8 @@ public class RelationToTriplesIterator implements ClosableIterator {
 	private ClosableIterator sqlIterator;
     private LinkedList tripleQueue = new LinkedList();
     private boolean explicitlyClosed = false;
-
+    private String sql;
+    
     private RelationToTriplesIterator(Relation relation, Collection tripleMakers) {
     	SelectStatementBuilder select = new SelectStatementBuilder(relation);
     	this.sqlIterator = new QueryExecutionIterator(
