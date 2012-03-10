@@ -69,6 +69,9 @@ For more information on vocabulary serving, see the <a href="d2rq-language#servi
 
 <dt><code>-v</dt></code>
 <dd>Generate an RDF Schema description of the vocabulary instead of a mapping file.</dd>
+
+<dt><code>-l script.sql</code></dt>
+<dd>Load a SQL script before running the tool. Useful for initializing the connection and testing. The <code>d2rq:startupSQLScript</code> property of the database in the generated mapping will be initialized with the same value.</dd>
 </dl>
 
 <h2 id="example-mysql">Example invocation for a local MySQL database</h2>

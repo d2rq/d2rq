@@ -4,12 +4,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.sql.SQLException;
 
-import com.hp.hpl.jena.rdf.model.Model;
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
-import de.fuberlin.wiwiss.d2rq.map.Database;
+
+import com.hp.hpl.jena.rdf.model.Model;
+
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
 
 /**
  * Command line interface for {@link MappingGenerator}.
@@ -18,14 +22,15 @@ import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
  */
 public class generate_mapping {
 	private final static String[] includedDrivers = {
-			"com.mysql.jdbc.Driver"
+			"com.mysql.jdbc.Driver",
+			"org.hsqldb.jdbcDriver"
 	};
 	
 	private final static String DEFAULT_BASE_URI = "http://localhost:2020/";
 	
 	public static void main(String[] args) {
 		for (int i = 0; i < includedDrivers.length; i++) {
-			Database.registerJDBCDriverIfPresent(includedDrivers[i]);
+			ConnectedDB.registerJDBCDriverIfPresent(includedDrivers[i]);
 		}
 		CommandLine cmd = new CommandLine();
 		ArgDecl userArg = new ArgDecl(true, "u", "user", "username");
@@ -35,6 +40,7 @@ public class generate_mapping {
 		ArgDecl vocabAsOutput = new ArgDecl(false, "v", "vocab");
 		ArgDecl outfileArg = new ArgDecl(true, "o", "out", "outfile");
 		ArgDecl baseUriArg = new ArgDecl(true, "b", "base", "baseuri");
+		ArgDecl sqlFileArg = new ArgDecl(true, "l", "load-sql");
 		cmd.add(userArg);
 		cmd.add(passArg);
 		cmd.add(schemaArg);
@@ -42,6 +48,7 @@ public class generate_mapping {
 		cmd.add(vocabAsOutput);
 		cmd.add(outfileArg);
 		cmd.add(baseUriArg);
+		cmd.add(sqlFileArg);
 		cmd.process(args);
 
 		if (cmd.numItems() == 0) {
@@ -54,18 +61,40 @@ public class generate_mapping {
 			System.exit(1);
 		}
 		String jdbc = cmd.getItem(0);
-		MappingGenerator gen = new MappingGenerator(jdbc);
+		String username = null;
+		String password = null;
+		String driverClass = null;
 		if (cmd.contains(userArg)) {
-			gen.setDatabaseUser(cmd.getArg(userArg).getValue());
+			username = cmd.getArg(userArg).getValue();
 		}
 		if (cmd.contains(passArg)) {
-			gen.setDatabasePassword(cmd.getArg(passArg).getValue());
+			password = cmd.getArg(passArg).getValue();
+		}
+		if (cmd.contains(driverArg)) {
+			driverClass = cmd.getArg(driverArg).getValue();
+			ConnectedDB.registerJDBCDriver(driverClass);
+		}
+		ConnectedDB db = new ConnectedDB(jdbc, username, password);
+		if (cmd.contains(sqlFileArg)) {
+			String sqlScript = cmd.getArg(sqlFileArg).getValue();
+			try {
+				SQLScriptLoader.loadFile(new File(sqlScript), db.connection());
+			} catch (IOException ex) {
+				System.err.println("Error accessing SQL startup script: " + sqlScript);
+				db.close();
+				return;
+			} catch (SQLException ex) {
+				System.err.println("Error importing " + sqlScript + " " + ex.getMessage());
+				db.close();
+				return;
+			}
+		}
+		MappingGenerator gen = new MappingGenerator(db);
+		if (driverClass != null) {
+			gen.setJDBCDriverClass(driverClass);
 		}
 		if (cmd.contains(schemaArg)) {
 			gen.setDatabaseSchema(cmd.getArg(schemaArg).getValue());
-		}
-		if (cmd.contains(driverArg)) {
-			gen.setJDBCDriverClass(cmd.getArg(driverArg).getValue());
 		}
 		File outputFile = null;
 		String mapUriEnding;
@@ -97,6 +126,8 @@ public class generate_mapping {
 		} catch (IOException ex) {
 			System.err.println(ex.getMessage());
 			System.exit(1);
+		} finally {
+			db.close();
 		}
 	}
 	
@@ -114,6 +145,7 @@ public class generate_mapping {
 		System.err.println("    -v              Generate RDFS+OWL vocabulary instead of mapping file");
 		System.err.println("    -b baseURI      Base URI for generated RDF (optional)");
 		System.err.println("    -o outfile.ttl  Output file name (default: stdout)");
+		System.err.println("    -l script.sql   Load a SQL script before generating the mapping");
 		System.err.println();
 	}
 }

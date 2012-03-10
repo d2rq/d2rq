@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -104,17 +105,17 @@ public class MapParser {
 			parseDownloadMaps();
 			this.mapping.buildVocabularyModel();
 		} catch (LiteralRequiredException ex) {
-			throw new D2RQException("Expected URI resource, found literal instead: " + ex.getMessage(),
+			throw new D2RQException("Expected literal, found URI resource instead: " + ex.getMessage(),
 					D2RQException.MAPPING_RESOURCE_INSTEADOF_LITERAL);
 		} catch (ResourceRequiredException ex) {
-			throw new D2RQException("Expected literal, found URI resource instead: " + ex.getMessage(),
+			throw new D2RQException("Expected URI, found literal instead: " + ex.getMessage(),
 					D2RQException.MAPPING_LITERAL_INSTEADOF_RESOURCE);
 		}
 		return this.mapping;
 	}
 	
 	private void ensureAllDistinct(Resource[] distinctClasses, int errorCode) {
-		Collection classes = Arrays.asList(distinctClasses);
+		Collection<Resource> classes = Arrays.asList(distinctClasses);
 		ResIterator it = this.model.listSubjects();
 		while (it.hasNext()) {
 			Resource resource = it.nextResource();
@@ -141,15 +142,16 @@ public class MapParser {
 	 */ 
 	private void copyPrefixes() {
 		mapping.getPrefixMapping().setNsPrefixes(model);
-		Iterator it = mapping.getPrefixMapping().getNsPrefixMap().entrySet().iterator();
+		Iterator<Map.Entry<String, String>> it = 
+			mapping.getPrefixMapping().getNsPrefixMap().entrySet().iterator();
 		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			String namespace = (String) entry.getValue();
+			Entry<String,String> entry = it.next();
+			String namespace = entry.getValue();
 			if (D2RQ.NS.equals(namespace) && "d2rq".equals(entry.getKey())) {
-				mapping.getPrefixMapping().removeNsPrefix((String) entry.getKey());
+				mapping.getPrefixMapping().removeNsPrefix(entry.getKey());
 			}
 			if (JDBC.NS.equals(namespace) && "jdbc".equals(entry.getKey())) {
-				mapping.getPrefixMapping().removeNsPrefix((String) entry.getKey());
+				mapping.getPrefixMapping().removeNsPrefix(entry.getKey());
 			}
 		}
 	}
@@ -177,9 +179,9 @@ public class MapParser {
 	}
 	
 	private void parseDatabases() {
-		Iterator it = this.model.listIndividuals(D2RQ.Database);
+		Iterator<Individual> it = this.model.listIndividuals(D2RQ.Database);
 		while (it.hasNext()) {
-			Resource dbResource = (Resource) it.next();
+			Resource dbResource = it.next();
 			Database database = new Database(dbResource);
 			parseDatabase(database, dbResource);
 			this.mapping.addDatabase(database);
@@ -187,9 +189,9 @@ public class MapParser {
 	}
 	
 	private void parseConfiguration() {
-		Iterator it = this.model.listIndividuals(D2RQ.Configuration);
+		Iterator<Individual> it = this.model.listIndividuals(D2RQ.Configuration);
 		if (it.hasNext()) {
-			Resource configResource = (Resource) it.next();
+			Resource configResource = it.next();
 			Configuration configuration = new Configuration(configResource);
 			StmtIterator stmts = configResource.listProperties(D2RQ.serveVocabulary);
 			while (stmts.hasNext()) {
@@ -289,6 +291,10 @@ public class MapParser {
 				throw new D2RQException("Value of d2rq:fetchSize must be numeric", D2RQException.MUST_BE_NUMERIC);
 			}
 		}
+		stmts = r.listProperties(D2RQ.startupSQLScript);
+		while (stmts.hasNext()) {
+			database.setStartupSQLScript(stmts.next().getResource());
+		}
 		stmts = r.listProperties();
 		while (stmts.hasNext()) {
 			Statement stmt = stmts.nextStatement();
@@ -300,8 +306,8 @@ public class MapParser {
 	}
 
 	private void parseTranslationTables() {
-		Set translationTableResources = new HashSet();
-		Iterator it = this.model.listIndividuals(D2RQ.TranslationTable);
+		Set<Resource> translationTableResources = new HashSet<Resource>();
+		Iterator<? extends Resource> it = this.model.listIndividuals(D2RQ.TranslationTable);
 		while (it.hasNext()) {
 			translationTableResources.add(it.next());
 		}
@@ -324,7 +330,7 @@ public class MapParser {
 		}
 		it = translationTableResources.iterator();
 		while (it.hasNext()) {
-			Resource r = (Resource) it.next();
+			Resource r = it.next();
 			TranslationTable table = new TranslationTable(r);
 			parseTranslationTable(table, r);
 			this.mapping.addTranslationTable(table);
@@ -352,9 +358,9 @@ public class MapParser {
 	}
 	
 	private void parseClassMaps() {
-		Iterator it = this.model.listIndividuals(D2RQ.ClassMap);
+		Iterator<Individual> it = this.model.listIndividuals(D2RQ.ClassMap);
 		while (it.hasNext()) {
-			Resource r = (Resource) it.next();
+			Resource r = it.next();
 			ClassMap classMap = new ClassMap(r);
 			parseClassMap(classMap, r);
 			parseResourceMap(classMap, r);

@@ -117,8 +117,10 @@ public class DatabaseSchemaInspector {
 	
 	private ConnectedDB db;
 	private DatabaseMetaData schema;
-	private Map cachedColumnTypes = new HashMap();
-	private Map cachedColumnNullability = new HashMap();
+	private Map<Attribute,ColumnType> cachedColumnTypes = 
+			new HashMap<Attribute,ColumnType>();
+	private Map<Attribute,Boolean> cachedColumnNullability = 
+			new HashMap<Attribute,Boolean>();
 	
 	public static final int KEYS_IMPORTED = 0;
 	public static final int KEYS_EXPORTED = 1;
@@ -204,8 +206,8 @@ public class DatabaseSchemaInspector {
 	 * @param searchInSchema	Schema to list tables from; <tt>null</tt> to list tables from all schemas
 	 * @return A list of {@link RelationName}s
 	 */
-	public List listTableNames(String searchInSchema) {
-		List result = new ArrayList();
+	public List<RelationName> listTableNames(String searchInSchema) {
+		List<RelationName> result = new ArrayList<RelationName>();
 		try {
 			ResultSet rs = this.schema.getTables(
 					null, searchInSchema, null, new String[] {"TABLE", "VIEW"});
@@ -223,8 +225,8 @@ public class DatabaseSchemaInspector {
 		}
 	}
 
-	public List listColumns(RelationName tableName) {
-		List result = new ArrayList();
+	public List<Attribute> listColumns(RelationName tableName) {
+		List<Attribute> result = new ArrayList<Attribute>();
 		try {
 			ResultSet rs = this.schema.getColumns(
 					null, schemaName(tableName), tableName(tableName), null);
@@ -238,8 +240,8 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public List primaryKeyColumns(RelationName tableName) {
-		List result = new ArrayList();
+	public List<Attribute> primaryKeyColumns(RelationName tableName) {
+		List<Attribute> result = new ArrayList<Attribute>();
 		try {
 			ResultSet rs = this.schema.getPrimaryKeys(
 					null, schemaName(tableName), tableName(tableName));
@@ -296,9 +298,9 @@ public class DatabaseSchemaInspector {
 	 * 					If set to {@link #KEYS_EXPORTED}, the table's primary keys referenced from other tables are returned.
 	 * @return A list of {@link Join}s; the local columns are in attributes1() 
 	 */
-	public List foreignKeys(RelationName tableName, int direction) {
+	public List<Join> foreignKeys(RelationName tableName, int direction) {
 		try {
-			Map fks = new HashMap();
+			Map<String,ForeignKey> fks = new HashMap<String,ForeignKey>();
 			ResultSet rs = (direction == KEYS_IMPORTED ? this.schema.getImportedKeys(null, schemaName(tableName), tableName(tableName))
 													   : this.schema.getExportedKeys(null, schemaName(tableName), tableName(tableName)));
 			while (rs.next()) {
@@ -313,12 +315,11 @@ public class DatabaseSchemaInspector {
 					fks.put(fkName, new ForeignKey());
 				}
 				int keySeq = rs.getInt("KEY_SEQ") - 1;
-				((ForeignKey) fks.get(fkName)).addColumns(
-						keySeq, foreignColumn, primaryColumn);
+				fks.get(fkName).addColumns(keySeq, foreignColumn, primaryColumn);
 			}
 			rs.close();
-			List results = new ArrayList();
-			Iterator it = fks.values().iterator();
+			List<Join> results = new ArrayList<Join>();
+			Iterator<ForeignKey> it = fks.values().iterator();
 			while (it.hasNext()) {
 				ForeignKey fk = (ForeignKey) it.next();
 				results.add(fk.toJoin());
@@ -336,16 +337,16 @@ public class DatabaseSchemaInspector {
 	 * and there are no foreign keys from other tables pointing to this table
 	 */
 	public boolean isLinkTable(RelationName tableName) {
-		List foreignKeys = foreignKeys(tableName, KEYS_IMPORTED);
+		List<Join> foreignKeys = foreignKeys(tableName, KEYS_IMPORTED);
 		if (foreignKeys.size() != 2) return false;
 		
-		List exportedKeys = foreignKeys(tableName, KEYS_EXPORTED);
+		List<Join> exportedKeys = foreignKeys(tableName, KEYS_EXPORTED);
 		if (!exportedKeys.isEmpty()) return false;
 		
-		List columns = listColumns(tableName);
-		Iterator it = foreignKeys.iterator();
+		List<Attribute> columns = listColumns(tableName);
+		Iterator<Join> it = foreignKeys.iterator();
 		while (it.hasNext()) {
-			Join fk = (Join) it.next();
+			Join fk = it.next();
 			if (fk.isSameTable()) return false;
 			columns.removeAll(fk.attributes1());
 		}
@@ -382,16 +383,19 @@ public class DatabaseSchemaInspector {
 	 * columns are added, a {@link Join} object can be created.
 	 */
 	private class ForeignKey {
-		private TreeMap primaryColumns = new TreeMap();
-		private TreeMap foreignColumns = new TreeMap();
+		private TreeMap<Integer,Attribute> primaryColumns = 
+			new TreeMap<Integer,Attribute>();
+		private TreeMap<Integer,Attribute> foreignColumns = 
+			new TreeMap<Integer,Attribute>();
 		private void addColumns(int keySequence, Attribute foreign, Attribute primary) {
 			primaryColumns.put(new Integer(keySequence), primary);
 			foreignColumns.put(new Integer(keySequence), foreign);
 		}
 		private Join toJoin() {
 			return new Join(
-					new ArrayList(foreignColumns.values()),
-					new ArrayList(primaryColumns.values()), Join.DIRECTION_RIGHT);
+					new ArrayList<Attribute>(foreignColumns.values()),
+					new ArrayList<Attribute>(primaryColumns.values()), 
+					Join.DIRECTION_RIGHT);
 		}
 	}
 
@@ -405,10 +409,9 @@ public class DatabaseSchemaInspector {
 		if (!relationName.caseUnspecified() || !db.lowerCaseTableNames())
 			return relationName;
 		
-		List tables = listTableNames(null);
-		Iterator it = tables.iterator();
+		Iterator<RelationName> it = listTableNames(null).iterator();
 		while (it.hasNext()) {
-			RelationName r = (RelationName) it.next();
+			RelationName r = it.next();
 			if (r.equals(relationName))
 				return r;
 		}

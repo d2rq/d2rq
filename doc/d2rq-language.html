@@ -282,6 +282,10 @@ map:location a d2rq:PropertyBridge;
     <td>Specifies the databases ability to handle <code>DISTINCT</code> correctly. 
     Value: "true" or "false". For example MSAccess cuts fields longer than 256 chars.</td>
   </tr>
+  <tr>
+    <th id="d2rq:startupSQLScript">d2rq:startupSQLScript</th>
+    <td>URL of a SQL script to be executed on startup. Useful for initializing the connection and testing. To load from the file system relative to the mapping file's location, use this syntax: <code>d2rq:startupSQLScript &lt;file:script.sql&gt;;</code></td>
+  </tr>
   <tr> 
     <th id="d2rq:textColumn">d2rq:textColumn<br />d2rq:numericColumn<br />
       d2rq:dateColumn<br />d2rq:timestampColumn<br />d2rq:timeColumn<br />

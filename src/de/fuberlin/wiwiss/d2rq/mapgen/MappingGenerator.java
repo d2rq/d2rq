@@ -8,13 +8,14 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.hsqldb.types.Types;
@@ -25,7 +26,6 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -37,8 +37,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
-import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * Generates a D2RQ mapping by introspecting a database schema.
@@ -53,45 +52,33 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
-	private String jdbcURL;
+	private ConnectedDB database;
 	private String mapNamespaceURI;
 	private String instanceNamespaceURI;
 	private String vocabNamespaceURI;
 	private String driverClass = null;
-	private String databaseUser = null;
-	private String databasePassword = null;
 	private String databaseSchema = null;
 	private PrintWriter out = null;
 	private PrintWriter err = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
 	private DatabaseSchemaInspector schema = null;
-	private SQLSyntax databaseSyntax = null;
-	private Map linkTables = new HashMap(); // name of n:m link table => name of n table
+	// name of n:m link table => name of n table
+	private Map<RelationName,RelationName> linkTables = new HashMap<RelationName,RelationName>();
 	private boolean finished = false;
 	private boolean silent = true;
 	private boolean generateClasses = true;
 	private boolean generateLabelBridges = true;
-
-	public MappingGenerator(String jdbcURL) {
-		this.jdbcURL = jdbcURL;
-		this.mapNamespaceURI = "#";
-		this.instanceNamespaceURI = this.jdbcURL + "#";
-		this.vocabNamespaceURI = this.jdbcURL + "/vocab#";
-		this.driverClass = Database.guessJDBCDriverClass(this.jdbcURL);
-	}
-
-	private void connectToDatabase() {
-		if (!silent) System.out.println("Connecting to " + this.jdbcURL);
-		// TODO What URI to use here?
-		Database database = new Database(ResourceFactory.createResource());
-		database.setJDBCDSN(this.jdbcURL);
-		database.setJDBCDriver(this.driverClass);
-		database.setUsername(this.databaseUser);
-		database.setPassword(this.databasePassword);
-		this.schema = database.connectedDB().schemaInspector();
-		this.databaseSyntax = database.connectedDB().getSyntax();
-	}
+	private URI startupSQLScript;
 	
+	public MappingGenerator(ConnectedDB database) {
+		this.database = database;
+		mapNamespaceURI = "#";
+		instanceNamespaceURI = database.getJdbcURL() + "#";
+		vocabNamespaceURI = database.getJdbcURL() + "/vocab#";
+		driverClass = ConnectedDB.guessJDBCDriverClass(database.getJdbcURL());
+		schema = database.schemaInspector();
+	}
+
 	/**
 	 * @param silent If <tt>true</tt> (default), no progress info will be logged.
 	 */
@@ -111,14 +98,6 @@ public class MappingGenerator {
 		this.vocabNamespaceURI = uri;
 	}
 
-	public void setDatabaseUser(String user) {
-		this.databaseUser = user;
-	}
-
-	public void setDatabasePassword(String password) {
-		this.databasePassword = password;
-	}
-
 	public void setDatabaseSchema(String schema) {
 		this.databaseSchema = schema;
 	}
@@ -127,6 +106,10 @@ public class MappingGenerator {
 		this.driverClass = driverClassName;
 	}
 
+	public void setStartupSQLScript(URI uri) {
+		startupSQLScript = uri;
+	}
+	
 	/**
 	 * @param flag Generate an rdfs:label property bridge based on the PK?
 	 */
@@ -162,9 +145,6 @@ public class MappingGenerator {
 		if (err != null)
 			this.err = new PrintWriter(err);
 		
-		if (this.schema == null) {
-			connectToDatabase();
-		}
 		run();
 		this.out.flush();
 		this.out = null;
@@ -221,14 +201,17 @@ public class MappingGenerator {
 		if (!silent) System.out.println("Generating d2rq:Database instance");
 		this.out.println(databaseName() + " a d2rq:Database;");
 		this.out.println("\td2rq:jdbcDriver \"" + this.driverClass + "\";");
-		this.out.println("\td2rq:jdbcDSN \"" + this.jdbcURL + "\";");
-		if (this.databaseUser != null) {
-			this.out.println("\td2rq:username \"" + this.databaseUser + "\";");
+		this.out.println("\td2rq:jdbcDSN \"" + database.getJdbcURL() + "\";");
+		if (database.getUsername() != null) {
+			this.out.println("\td2rq:username \"" + database.getUsername() + "\";");
 		}
-		if (this.databasePassword != null) {
-			this.out.println("\td2rq:password \"" + this.databasePassword + "\";");
+		if (database.getPassword() != null) {
+			this.out.println("\td2rq:password \"" + database.getPassword() + "\";");
 		}
-		Properties props = databaseSyntax.getDefaultConnectionProperties();
+		if (startupSQLScript != null) {
+			out.println("\td2rq:startupSQLScript <" + startupSQLScript + ">;");
+		}
+		Properties props = database.getSyntax().getDefaultConnectionProperties();
 		Iterator it = props.keySet().iterator();
 		while (it.hasNext()) {
 			String property = (String) it.next();

@@ -25,6 +25,10 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  */
 public class HSQLSimpleTest extends TestCase {
 	private final static String EX = "http://example.org/";
+
+	{
+		ConnectedDB.registerJDBCDriver("org.hsqldb.jdbcDriver");
+	}
 	
 	private HSQLDatabase db;
 	
@@ -79,8 +83,8 @@ public class HSQLSimpleTest extends TestCase {
 	}
 	
 	private Model generateDefaultMappingModel() {
-		MappingGenerator generator = new MappingGenerator(db.getJdbcURL());
-		generator.setDatabaseUser(db.getUser());
+		ConnectedDB cdb = new ConnectedDB(db.getJdbcURL(), db.getUser(), null);
+		MappingGenerator generator = new MappingGenerator(cdb);
 		return generator.mappingModel(EX, null);
 	}
 	

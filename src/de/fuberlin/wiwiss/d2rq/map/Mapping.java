@@ -105,7 +105,7 @@ public class Mapping {
 		this.databases.put(database.resource(), database);
 	}
 	
-	public Collection databases() {
+	public Collection<Database> databases() {
 		return this.databases.values();
 	}
 	

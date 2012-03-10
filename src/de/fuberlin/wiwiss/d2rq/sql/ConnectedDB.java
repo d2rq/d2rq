@@ -162,6 +162,18 @@ public class ConnectedDB {
 			this.keepAliveAgent = null;
 	}
 	
+	public String getJdbcURL() {
+		return jdbcURL;
+	}
+	
+	public String getUsername() {
+		return username;
+	}
+	
+	public String getPassword() {
+		return password;
+	}
+	
 	public Connection connection() {
 		if (this.connection == null) {
 			connect();
@@ -712,4 +724,48 @@ public class ConnectedDB {
     public int hashCode() {
     	return this.jdbcURL.hashCode();
     }
+
+	/**
+	 * Pre-registers a JDBC driver if its class can be found on the
+	 * classpath. If the class is not found, nothing will happen.
+	 * @param driverClassName Fully qualified class name of a JDBC driver
+	 */
+	public static void registerJDBCDriverIfPresent(String driverClassName) {
+		if (driverClassName == null) return;
+		try {
+			Class.forName(driverClassName);
+		} catch (ClassNotFoundException ex) {
+			// not present, just ignore this driver
+		}
+	}
+
+	/**
+	 * Tries to guess the class name of a suitable JDBC driver from a JDBC URL.
+	 * This only works in the unlikely case that the driver has been registered
+	 * earlier using Class.forName(classname).
+	 * @param jdbcURL A JDBC URL
+	 * @return The corresponding JDBC driver class name, or <tt>null</tt> if not known
+	 */
+	public static String guessJDBCDriverClass(String jdbcURL) {
+		try {
+			return DriverManager.getDriver(jdbcURL).getClass().getName();
+		} catch (SQLException ex) {
+			return null;
+		}
+	}
+
+	/**
+	 * Registers a JDBC driver class.
+	 * @param driverClassName Fully qualified class name of a JDBC driver
+	 * @throws D2RQException If the class could not be found
+	 */
+	public static void registerJDBCDriver(String driverClassName) {
+		if (driverClassName == null) return;
+		try {
+			Class.forName(driverClassName);
+		} catch (ClassNotFoundException ex) {
+			throw new D2RQException("Database driver class not found: " + driverClassName,
+					D2RQException.DATABASE_JDBCDRIVER_CLASS_NOT_FOUND);
+		}
+	}
 }

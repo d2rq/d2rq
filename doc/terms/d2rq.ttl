@@ -4,6 +4,7 @@
 @prefix owl:	<http://www.w3.org/2002/07/owl#>.
 @prefix dc:		<http://purl.org/dc/elements/1.1/>.
 @prefix xsd:	<http://www.w3.org/2001/XMLSchema#>.
+@prefix foaf:	<http://xmlns.com/foaf/0.1/>.
 @prefix ja:		<http://jena.hpl.hp.com/2005/11/Assembler#>.
 
 # -----------------------------------------------
@@ -113,6 +114,12 @@ d2rq:fetchSize a rdf:Property;
 	rdfs:comment "The number of rows that should be fetched from the database at once";
 	rdfs:domain d2rq:Database;
 	.
+d2rq:startupSQLScript a rdf:Property;
+    rdfs:label "Startup SQL script";
+    rdfs:comment "URL of a SQL script that will be run on startup.";
+    rdfs:domain d2rq:Database;
+    rdfs:range foaf:Document;
+    .
 
 
 # -----------------------------------------------

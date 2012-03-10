@@ -1,16 +1,15 @@
 package de.fuberlin.wiwiss.d2rq.helpers;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
 
 /**
  * A simple wrapper around a HSQL in-memory database for testing purposes
@@ -73,35 +72,11 @@ public class HSQLDatabase {
 	 * @param filename relative to current directory
 	 */
 	public void executeScript(String filename) {
-		int lineNumber = 1;
 		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "utf-8"));
-			String line;
-			StringBuilder sql = new StringBuilder();
-			while ((line = in.readLine()) != null) {
-				if (line.trim().startsWith("#")) {
-					// comment, ignore this line
-				} else {
-					if (line.trim().endsWith(";")) {
-						sql.append(line.substring(0, line.length() -1));
-						executeSQL(sql.toString());
-						sql = new StringBuilder();
-					} else {
-						sql.append(line);
-						sql.append('\n');
-					}
-				}
-				lineNumber++;
-			}
-		} catch (RuntimeException ex) {
-			if (ex.getCause() instanceof SQLException) { 
-				throw new RuntimeException(
-						"in line " + lineNumber + ": " + ex.getMessage(), ex);
-			}
-			throw ex;
-		} catch (UnsupportedEncodingException ex) {
-			// UTF-8 is always supported
-		} catch (IOException ex) {
+			SQLScriptLoader.loadFile(new File(filename), conn);
+		} catch (FileNotFoundException ex) {
+			throw new RuntimeException(ex);
+		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

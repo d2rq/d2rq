@@ -6,11 +6,11 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Iterator;
 
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
 
+import com.hp.hpl.jena.n3.turtle.TurtleParseException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.shared.NotFoundException;
@@ -22,6 +22,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * Command line utility for dumping a database to RDF, using the
@@ -38,7 +39,7 @@ public class dump_rdf {
 	
 	public static void main(String[] args) {
 		for (int i = 0; i < includedDrivers.length; i++) {
-			Database.registerJDBCDriverIfPresent(includedDrivers[i]);
+			ConnectedDB.registerJDBCDriverIfPresent(includedDrivers[i]);
 		}
 		CommandLine cmd = new CommandLine();
 		ArgDecl userArg = new ArgDecl(true, "u", "user", "username");
@@ -99,7 +100,7 @@ public class dump_rdf {
 			System.err.println(ex.getMessage());
 			System.exit(1);
 		} catch (D2RQException ex) {
-			if (ex.getCause() != null) {
+			if (ex.getMessage() == null && ex.getCause() != null) {
 				System.err.println(ex.getCause().getMessage());
 			} else {
 				System.err.println(ex.getMessage());
@@ -185,9 +186,7 @@ public class dump_rdf {
 			
 			// Override the d2rq:resultSizeLimit given in the mapping and set fetchSize
 			Mapping mapping = new MapParser(mapModel, baseURI()).parse();
-			Iterator it = mapping.databases().iterator();
-			while (it.hasNext()) {
-				Database db = (Database) it.next();
+			for (Database db : mapping.databases()) {
 				db.setResultSizeLimit(Database.NO_LIMIT);
 				if (this.fetchSize != null)
 					db.setFetchSize(this.fetchSize.intValue());
@@ -219,25 +218,30 @@ public class dump_rdf {
 		}
 		private Model makeMapModel() throws DumpParameterException {
 			if (hasMappingFile()) {
-				return FileManager.get().loadModel(this.mapURL, baseURI(), null);
+				try {
+					return FileManager.get().loadModel(this.mapURL, baseURI(), null);
+				} catch (TurtleParseException ex) {
+					throw new D2RQException(
+							"Error parsing " + mapURL + ": " + ex.getMessage(), ex, 77);
+				}
 			}
 			if (this.jdbcURL == null) {
 				throw new DumpParameterException("Must specify either -j or -m parameter");
 			}
-			MappingGenerator gen = new MappingGenerator(this.jdbcURL);
-			if (this.user != null) {
-				gen.setDatabaseUser(this.user);
+			ConnectedDB.registerJDBCDriver(this.driverClass);
+			ConnectedDB db = new ConnectedDB(this.jdbcURL, this.user, this.password);			
+			try {
+				MappingGenerator gen = new MappingGenerator(db);
+				if (this.driverClass != null) {
+					gen.setJDBCDriverClass(this.driverClass);
+				}
+				gen.setMapNamespaceURI("file:tmp#");
+				gen.setInstanceNamespaceURI("");
+				gen.setVocabNamespaceURI("http://localhost/vocab/");
+				return gen.mappingModel(baseURI(), System.err);
+			} finally {
+				db.close();
 			}
-			if (this.password != null) {
-				gen.setDatabasePassword(this.password);
-			}
-			if (this.driverClass != null) {
-				gen.setJDBCDriverClass(this.driverClass);
-			}
-			gen.setMapNamespaceURI("file:tmp#");
-			gen.setInstanceNamespaceURI("");
-			gen.setVocabNamespaceURI("http://localhost/vocab/");
-			return gen.mappingModel(baseURI(), System.err);
 		}
 		private boolean hasMappingFile() {
 			return this.mapURL != null;
