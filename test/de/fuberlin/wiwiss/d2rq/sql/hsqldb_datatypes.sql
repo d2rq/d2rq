@@ -1,4 +1,4 @@
-# Enable support for Nan/±Infinity 
+-- Enable support for Nan/±Infinity 
 SET DATABASE SQL DOUBLE NAN FALSE;
 
 CREATE TABLE T_TINYINT (ID INT PRIMARY KEY, VALUE TINYINT NULL);
@@ -57,15 +57,15 @@ INSERT INTO T_DOUBLE VALUES (1, 0E0);
 INSERT INTO T_DOUBLE VALUES (2, 1E0);
 INSERT INTO T_DOUBLE VALUES (3, 100000000E0);
 INSERT INTO T_DOUBLE VALUES (4, 0.0000001E0);
-# -0.0, different from +0.0
+-- -0.0, different from +0.0
 INSERT INTO T_DOUBLE VALUES (5, -0E0);
-# HSQLDB can store NaN, but comparison to NaN seems to be broken as of v2.2.8:
-# https://sourceforge.net/tracker/?func=detail&aid=3500025&group_id=23316&atid=378131
-# NaN
-#INSERT INTO T_DOUBLE VALUES (6, 0E0/0E0);
-# +Infinity
+-- HSQLDB can store NaN, but comparison to NaN seems to be broken as of v2.2.8:
+-- https://sourceforge.net/tracker/?func=detail&aid=3500025&group_id=23316&atid=378131
+-- NaN
+--INSERT INTO T_DOUBLE VALUES (6, 0E0/0E0);
+-- +Infinity
 INSERT INTO T_DOUBLE VALUES (7, 1E0/0);
-# -Infinity
+-- -Infinity
 INSERT INTO T_DOUBLE VALUES (8, -1E0/0);
 
 CREATE TABLE T_FLOAT (ID INT PRIMARY KEY, VALUE FLOAT NULL);
@@ -74,15 +74,15 @@ INSERT INTO T_FLOAT VALUES (1, 0E0);
 INSERT INTO T_FLOAT VALUES (2, 1E0);
 INSERT INTO T_FLOAT VALUES (3, 100000000E0);
 INSERT INTO T_FLOAT VALUES (4, 0.0000001E0);
-# -0.0, different from +0.0
+-- -0.0, different from +0.0
 INSERT INTO T_FLOAT VALUES (5, -0E0);
-# HSQLDB can store NaN, but comparison to NaN seems to be broken as of v2.2.8:
-# https://sourceforge.net/tracker/?func=detail&aid=3500025&group_id=23316&atid=378131
-# NaN
-#INSERT INTO T_FLOAT VALUES (6, 0E0/0E0);
-# +Infinity
+-- HSQLDB can store NaN, but comparison to NaN seems to be broken as of v2.2.8:
+-- https://sourceforge.net/tracker/?func=detail&aid=3500025&group_id=23316&atid=378131
+-- NaN
+--INSERT INTO T_FLOAT VALUES (6, 0E0/0E0);
+-- +Infinity
 INSERT INTO T_FLOAT VALUES (7, 1E0/0);
-# -Infinity
+-- -Infinity
 INSERT INTO T_FLOAT VALUES (8, -1E0/0);
 
 CREATE TABLE T_REAL (ID INT PRIMARY KEY, VALUE REAL NULL);
@@ -91,15 +91,15 @@ INSERT INTO T_REAL VALUES (1, 0E0);
 INSERT INTO T_REAL VALUES (2, 1E0);
 INSERT INTO T_REAL VALUES (3, 100000000E0);
 INSERT INTO T_REAL VALUES (4, 0.0000001E0);
-# -0.0, different from +0.0
+-- -0.0, different from +0.0
 INSERT INTO T_REAL VALUES (5, -0E0);
-# HSQLDB can store NaN, but comparison to NaN seems to be broken as of v2.2.8:
-# https://sourceforge.net/tracker/?func=detail&aid=3500025&group_id=23316&atid=378131
-# NaN
-#INSERT INTO T_REAL VALUES (6, 0E0/0E0);
-# +Infinity
+-- HSQLDB can store NaN, but comparison to NaN seems to be broken as of v2.2.8:
+-- https://sourceforge.net/tracker/?func=detail&aid=3500025&group_id=23316&atid=378131
+-- NaN
+--INSERT INTO T_REAL VALUES (6, 0E0/0E0);
+-- +Infinity
 INSERT INTO T_REAL VALUES (7, 1E0/0);
-# -Infinity
+-- -Infinity
 INSERT INTO T_REAL VALUES (8, -1E0/0);
 
 CREATE TABLE T_BOOLEAN (ID INT PRIMARY KEY, VALUE BOOLEAN NULL);
@@ -133,9 +133,9 @@ INSERT INTO T_LONGVARCHAR VALUES (3, 'ÄÖÜ');
 
 CREATE TABLE T_CLOB (ID INT PRIMARY KEY, VALUE CLOB NULL);
 INSERT INTO T_CLOB VALUES (0, NULL);
-# Empty CLOBs are broken in HSQLDB 2.2.8:
-# https://sourceforge.net/tracker/?func=detail&aid=3500034&group_id=23316&atid=378131
-#INSERT INTO T_CLOB VALUES (1, '');
+-- Empty CLOBs are broken in HSQLDB 2.2.8:
+-- https://sourceforge.net/tracker/?func=detail&aid=3500034&group_id=23316&atid=378131
+--INSERT INTO T_CLOB VALUES (1, '');
 INSERT INTO T_CLOB VALUES (2, 'AOU');
 INSERT INTO T_CLOB VALUES (3, 'ÄÖÜ');
 
@@ -167,9 +167,9 @@ INSERT INTO T_LONGVARBINARY VALUES (4, X'F001F001F001F001');
 
 CREATE TABLE T_BLOB (ID INT PRIMARY KEY, VALUE BLOB NULL);
 INSERT INTO T_BLOB VALUES (0, NULL);
-# Empty BLOBs are broken in HSQLDB 2.2.8:
-# https://sourceforge.net/tracker/?func=detail&aid=3500034&group_id=23316&atid=378131
-#INSERT INTO T_BLOB VALUES (1, X'');
+-- Empty BLOBs are broken in HSQLDB 2.2.8:
+-- https://sourceforge.net/tracker/?func=detail&aid=3500034&group_id=23316&atid=378131
+--INSERT INTO T_BLOB VALUES (1, X'');
 INSERT INTO T_BLOB VALUES (2, X'00');
 INSERT INTO T_BLOB VALUES (3, X'01');
 INSERT INTO T_BLOB VALUES (4, X'F001F001F001F001');
@@ -274,9 +274,9 @@ INSERT INTO T_INTERVAL_HOUR_MINUTE VALUES (3, INTERVAL '1:00' HOUR TO MINUTE);
 INSERT INTO T_INTERVAL_HOUR_MINUTE VALUES (4, INTERVAL '99:00' HOUR TO MINUTE);
 INSERT INTO T_INTERVAL_HOUR_MINUTE VALUES (5, INTERVAL '-99:00' HOUR TO MINUTE);
 
-# For storage of Java objects using PreparedStatement.setObject() and ResultSet.getObject().
-# Considered unmappable.
+-- For storage of Java objects using PreparedStatement.setObject() and ResultSet.getObject().
+-- Considered unmappable.
 CREATE TABLE T_OTHER (ID INT PRIMARY KEY, VALUE OTHER NULL);
 
-# ARRAY types left as future work. For now considered unmappable.
+-- ARRAY types left as future work. For now considered unmappable.
 CREATE TABLE T_ARRAY_INTEGER (ID INT PRIMARY KEY, VALUE INT ARRAY NULL);

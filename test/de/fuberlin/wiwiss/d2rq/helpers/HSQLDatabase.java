@@ -65,9 +65,8 @@ public class HSQLDatabase {
 	}
 	
 	/**
-	 * Reads SQL statements from a file. Statements must end with
-	 * semicolon and must end at the end of a line. Lines starting
-	 * with # are considered comments and are ignored.
+	 * Reads SQL statements from a file, using the
+	 * syntax defined in {@link SQLScriptLoader}.
 	 * 
 	 * @param filename relative to current directory
 	 */

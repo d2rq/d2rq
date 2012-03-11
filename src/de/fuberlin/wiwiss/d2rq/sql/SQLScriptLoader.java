@@ -18,7 +18,7 @@ import java.sql.Statement;
  * 
  * Statements must end with semicolon and must end
  * at the end of a line. Lines starting
- * with # are considered comments and are ignored.
+ * with -- are considered comments and are ignored.
  */
 public class SQLScriptLoader {
 
@@ -62,7 +62,7 @@ public class SQLScriptLoader {
 			String line;
 			StringBuilder sql = new StringBuilder();
 			while ((line = in.readLine()) != null) {
-				if (line.trim().startsWith("#")) {
+				if (line.trim().startsWith("--")) {
 					// comment, ignore this line
 				} else {
 					if (line.trim().endsWith(";")) {
