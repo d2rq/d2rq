@@ -134,24 +134,20 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		return result;
 	}
 
-	@Override
 	public void startVisit()
 	{
 		logger.debug("transform started");
 	}
 	
-	@Override
 	public void finishVisit()
 	{
 		logger.debug("transform finished");
 	}
 	
-	@Override
 	public void visit(ExprFunction0 func) {
 		visitExprFunction(func);		
 	}
 
-	@Override
 	public void visit(ExprFunction1 function) {
 		logger.debug("visit ExprFunction " + function);
 		
@@ -162,7 +158,6 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		convertFunction(function);
 	}
 
-	@Override
 	public void visit(ExprFunction2 function) {
 		logger.debug("visit ExprFunction " + function);
 		
@@ -173,27 +168,22 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		convertFunction(function);
 	}
 
-	@Override
 	public void visit(ExprFunction3 func) {
 		visitExprFunction(func);		
 	}
 
-	@Override
 	public void visit(ExprFunctionN func) {
 		visitExprFunction(func);		
 	}
 
-	@Override
 	public void visit(ExprFunctionOp funcOp) {
 		visitExprFunction(funcOp);		
 	}
 
-	@Override
 	public void visit(ExprAggregator eAgg) {
 		conversionFailed(eAgg);
 	}
 	
-	@Override
 	public void visit(ExprVar var)
 	{
 		logger.debug("visit ExprVar " + var);
@@ -221,7 +211,6 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		}
 	}
 	
-	@Override
 	public void visit(NodeValue value)
 	{
 		logger.debug("visit NodeValue " + value);

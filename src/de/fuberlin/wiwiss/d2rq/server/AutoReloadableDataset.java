@@ -140,53 +140,43 @@ public class AutoReloadableDataset implements Dataset {
 		datasetGraph.close();
 	}
 
-	@Override
 	public void setDefaultModel(Model model) {
 		throw new UnsupportedOperationException("Read-only dataset");
 	}
 
-	@Override
 	public void addNamedModel(String uri, Model model)
 			throws LabelExistsException {
 		throw new UnsupportedOperationException("Read-only dataset");
 	}
 
-	@Override
 	public void removeNamedModel(String uri) {
 		throw new UnsupportedOperationException("Read-only dataset");
 	}
 
-	@Override
 	public void replaceNamedModel(String uri, Model model) {
 		throw new UnsupportedOperationException("Read-only dataset");
 	}
 
-	@Override
 	public boolean supportsTransactions() {
 		return false;
 	}
 
-	@Override
 	public void begin(ReadWrite readWrite) {
 		throw new UnsupportedOperationException("Read-only dataset");
 	}
 
-	@Override
 	public void commit() {
 		throw new UnsupportedOperationException("Read-only dataset");
 	}
 
-	@Override
 	public void abort() {
 		throw new UnsupportedOperationException("Read-only dataset");
 	}
 
-	@Override
 	public boolean isInTransaction() {
 		return false;
 	}
 
-	@Override
 	public void end() {
 		throw new UnsupportedOperationException("Read-only dataset");
 	}

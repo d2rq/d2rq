@@ -478,7 +478,6 @@ public class D2RQTreeOptimizer
             notMoveDownFilterExprAndVisitOp1(opGroup); 
         }        
         
-		@Override
 		public void visit(OpExtend opExtend) {
 			// TODO Might be able to move down filter past the OpExtend
 			notMoveDownFilterExprAndVisitOp1(opExtend);
@@ -489,7 +488,6 @@ public class D2RQTreeOptimizer
 		 * 
 		 * Filter(A-B,e) = Filter(A,e)-B
 		 */
-		@Override
 		public void visit(OpMinus opMinus) {
 			// Walk into A subtree
 			opMinus.getLeft().visit(this);
@@ -507,19 +505,16 @@ public class D2RQTreeOptimizer
 			stack.push(OpMinus.create(leftWithFilter, right));
 		}
 
-		@Override
 		public void visit(OpDisjunction opDisjunction) {
 			// TODO What the heck is an OpDisjunction anyway?
 			notMoveDownFilterExprAndVisitOpN(opDisjunction);
 		}
 
-		@Override
 		public void visit(OpTopN opTop) {
 			// TODO Might be able to move down filter past the OpTopN
 			notMoveDownFilterExprAndVisitOp1(opTop);
 		}
 
-		@Override
 		public void visit(OpQuad opQuad) {
 			// TODO What the heck is an OpQuad anyway?
 			notMoveDownFilterExprAndVisitOp0(opQuad);

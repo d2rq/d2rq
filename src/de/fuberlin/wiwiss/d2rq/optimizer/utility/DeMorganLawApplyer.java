@@ -33,34 +33,28 @@ public final class DeMorganLawApplyer implements ExprVisitor
 	{		
 	}
 
-	@Override
 	public void finishVisit() 
 	{
 	}
 
-	@Override
 	public void startVisit() 
 	{
 	}
 
-	@Override
 	public void visit(NodeValue nv) 
 	{
 		this.resultExpr = nv;
 	}
 
-	@Override
 	public void visit(ExprVar nv) 
 	{
 		this.resultExpr = nv;
 	}
 
-	@Override
 	public void visit(ExprFunction0 func) {
 		this.resultExpr = func;
 	}
 
-	@Override
 	public void visit(ExprFunction1 curExpr) {
 		Expr subExpr, leftExpr, rightExpr;
 		Expr newAndExpr;
@@ -134,7 +128,6 @@ public final class DeMorganLawApplyer implements ExprVisitor
 		}
 	}
 
-	@Override
 	public void visit(ExprFunction2 curExpr) {
 		Expr leftExpr, rightExpr;
 
@@ -165,22 +158,18 @@ public final class DeMorganLawApplyer implements ExprVisitor
 		}
 	}
 
-	@Override
 	public void visit(ExprFunction3 func) {
 		this.resultExpr = func;
 	}
 
-	@Override
 	public void visit(ExprFunctionN func) {
 		this.resultExpr = func;
 	}
 
-	@Override
 	public void visit(ExprFunctionOp funcOp) {
 		this.resultExpr = funcOp;
 	}
 
-	@Override
 	public void visit(ExprAggregator eAgg) {
 		this.resultExpr = eAgg;
 	}

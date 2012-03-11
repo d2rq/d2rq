@@ -505,27 +505,22 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		return addLabelToOp2((Op2)newOpCond);
 	}
 	
-	@Override
 	public Op transform(OpExtend opExtend, Op subOp) {
 		return addLabelToOp1((Op1) opExtend.copy(subOp));
 	}
 
-	@Override
 	public Op transform(OpMinus opMinus, Op left, Op right) {
 		return addLabelToOp2((Op2) opMinus.copy(left, right));
 	}
 
-	@Override
 	public Op transform(OpDisjunction opDisjunction, List<Op> elts) {
 		return addLabelToOpN((OpN) opDisjunction.copy(elts));
 	}
 
-	@Override
 	public Op transform(OpTopN opTop, Op subOp) {
 		return addLabelToOp1((Op1) opTop.copy(subOp));
 	}
 
-	@Override
 	public Op transform(OpQuad opQuad) {
 		return addLabelToOp0((Op0) opQuad.copy());
 	}
