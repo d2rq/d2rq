@@ -1,7 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -38,6 +36,7 @@ public abstract class DatatypeTestBase extends TestCase {
 	private String user;
 	private String password;
 	private String schema;
+	private String script;
 	
 	private String datatype;
 	private GraphD2RQ graph;
@@ -48,15 +47,17 @@ public abstract class DatatypeTestBase extends TestCase {
 	}
 	
 	protected void initDB(String jdbcURL, String driver, 
-			String user, String password, String schema) {
+			String user, String password, String script, String schema) {
 		this.jdbcURL = jdbcURL;
 		this.driver = driver;
 		this.user = user;
 		this.password = password;
+		this.script = script;
 		this.schema = null;
+		dropAllTables();
 	}
 	
-	protected void loadScript(String script) throws FileNotFoundException {
+	private void dropAllTables() {
 		ConnectedDB.registerJDBCDriver(driver);
 		ConnectedDB db = new ConnectedDB(jdbcURL, user, password);
 		try {
@@ -68,7 +69,6 @@ public abstract class DatatypeTestBase extends TestCase {
 			} finally {
 				stmt.close();
 			}
-			SQLScriptLoader.loadFile(new File(script), db.connection());
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		} finally {
@@ -81,18 +81,6 @@ public abstract class DatatypeTestBase extends TestCase {
 		Mapping mapping = generateMapping();
 		graph = getGraph(mapping);
 		inspector = mapping.databases().iterator().next().connectedDB().schemaInspector();
-	}
-	
-	protected void assertIsCompleteDatatypeList(String[] tables) {
-		Set<String> expected = new HashSet<String>(Arrays.asList(tables));
-		Set<String> actual = new HashSet<String>();
-		for (String table: allTables()) {
-			if (!table.startsWith("T_")) {
-				fail("Table name doesn't conform to T_{datatype} convention: " + table);
-			}
-			actual.add(table.substring(2));
-		}
-		assertEquals(expected, actual);
 	}
 	
 	protected void assertMappedType(String rdfType) {
@@ -151,6 +139,7 @@ public abstract class DatatypeTestBase extends TestCase {
 		database.setJDBCDriver(driver);
 		database.setUsername(user);
 		database.setPassword(password);
+		database.setStartupSQLScript(ResourceFactory.createResource("file:" + script));
 		mapping.addDatabase(database);
 		ClassMap classMap = new ClassMap(classMapURI);
 		classMap.setDatabase(database);

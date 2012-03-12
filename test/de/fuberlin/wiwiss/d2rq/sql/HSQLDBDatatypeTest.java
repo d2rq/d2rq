@@ -13,27 +13,10 @@ import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 public class HSQLDBDatatypeTest extends DatatypeTestBase {
 	
 	public void setUp() throws Exception {
-		initDB("jdbc:hsqldb:mem:d2rq_test", "org.hsqldb.jdbcDriver", null, null, null);
-		loadScript(D2RQTestSuite.DIRECTORY + "sql/hsqldb_datatypes.sql");
+		initDB("jdbc:hsqldb:mem:d2rq_test", "org.hsqldb.jdbcDriver", null, null, 
+				D2RQTestSuite.DIRECTORY + "sql/hsqldb_datatypes.sql", null);
 	}
 
-	public void testAllTables() {
-		assertIsCompleteDatatypeList(new String[]{
-			"TINYINT", "SMALLINT", "INTEGER", "BIGINT",
-			"NUMERIC", "DECIMAL", "DECIMAL_4_2",
-			"DOUBLE", "FLOAT", "REAL",
-			"BOOLEAN",
-			"CHAR_3", "CHAR", "VARCHAR", "LONGVARCHAR", "CLOB",
-			"BINARY_4", "BINARY", "VARBINARY", "LONGVARBINARY", "BLOB",
-			"BIT_4", "BIT", "BIT_VARYING",
-			"DATE",
-			"TIME", "TIME_4", "TIME_TZ", "TIME_TZ_4",
-			"TIMESTAMP", "TIMESTAMP_4", "TIMESTAMP_TZ", "TIMESTAMP_TZ_4",
-			"INTERVAL_DAY", "INTERVAL_HOUR_MINUTE",
-			"OTHER", "ARRAY_INTEGER",			
-		});
-	}
-	
 	public void testTinyInt() {
 		createMapping("TINYINT");
 		assertMappedType("xsd:byte");
