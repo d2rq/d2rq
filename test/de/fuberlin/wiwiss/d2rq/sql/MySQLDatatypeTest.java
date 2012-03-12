@@ -138,7 +138,7 @@ public class MySQLDatatypeTest extends DatatypeTestBase {
 	private final static String[] FLOAT_VALUES = 
 			{"0.0E0", "1.0E0", "-1.0E0", 
 			"-3.0E38", "-1.0E-38", 
-			"1.0E-38", "-3.0E38"}; 
+			"1.0E-38", "3.0E38"}; 
 	public void testFloat() {
 		createMapping("FLOAT");
 		assertMappedType("xsd:double");
