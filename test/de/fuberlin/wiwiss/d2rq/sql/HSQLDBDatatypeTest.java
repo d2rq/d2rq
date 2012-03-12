@@ -95,13 +95,13 @@ public class HSQLDBDatatypeTest extends TestCase {
 	}
 	
 	public void testVarchar() {
-		String[] expected = new String[]{"", "AOU", "\u00C4\u00D6\u00DC"};
+		String[] expected = new String[]{"", "   ", "AOU", "\u00C4\u00D6\u00DC"};
 		assertValues("VARCHAR", expected);
 		assertValues("LONGVARCHAR", expected);
 	}
 	
 	public void testCLOB() {
-		assertValues("CLOB", new String[]{"AOU", "\u00C4\u00D6\u00DC"});
+		assertValues("CLOB", new String[]{"   ", "AOU", "\u00C4\u00D6\u00DC"});
 	}
 	
 	public void testBinary_4() {
