@@ -1,6 +1,6 @@
 # D2RQ Release Notes
 
-## D2RQ v0.8 – 2012-03-09
+## D2RQ v0.8 – 2012-03-12
 
 ### Features
 - framework for attaching metadata to D2R Server-genearted RDF and HTML documents (Olaf Hartig and Hannes Mühleisen)
@@ -23,6 +23,12 @@
 - Clickable links in Snorql XSLT output (Jacobus Geluk)
 - show some progress indication on generate-mapping (Jacobus Geluk)
 - restructured and much improved documentation
+- added support for TIME columns (as xsd:time) and BINARY (as xsd:hexBinary)
+- support NaN and INF for DOUBLE columns on HSQLDB
+- added d2rq:intervalColumn, d2rq:bitColumn, d2rq:booleanColumn
+- d2rq:startupSQLScript and -l switch allow specifying a SQL script to execute before startup
+- treat MySQL TINYINT(1) type as xsd:boolean
+- add support for BIT datatype on (hopefully) all DBs that support it
 
 ### Bugfixes
 - better handling of config file location under Windows
@@ -40,6 +46,13 @@
 - translate all clauses of an (A || B) filter correctly (Giovanni Mels)
 - stop D2R Server forgetting --fast setting on mapping file reload
 - cleaned up the D2RQ namespace RDFS file to reflect the implementation
+- Oracle datatype fixes: DATE, TIMESTAMP, BLOB, BINARY_FILE, BINARY_DOUBLE
+- fix several exceptions when querying for typed literals outside of the SQL type's range
+- fix querying for large integer literals
+- added extensive datatype test suites for HSQLDB and MySQL
+- fix for DATE handling on SQL Server
+- fix MySQL issue with dates >=24h and dates <0h
+- fix MySQL issue with all-zero DATEs, DATETIMEs, TIMESTAMPs and YEARs
 
 ### Performance
 - translate filters on literals to SQL (Giovanni Mels)
