@@ -134,7 +134,7 @@ public class ResultRowMap implements ResultRow {
 				} else { 
 					time = resultSet.getString(i + 1);
 				}
-				if (time == null) {
+				if (time == null || resultSet.wasNull()) {
 					result.put(key, null);
 				} else {
 					Matcher m = ConnectedDB.TIME_PATTERN.matcher(time);
@@ -173,8 +173,19 @@ public class ResultRowMap implements ResultRow {
 					}
 				}
 			} else if (type == Types.TIMESTAMP) {
-				String timestamp = resultSet.getString(i + 1);
-				if (timestamp == null) {
+				String timestamp = null;
+				if (database.dbTypeIs(ConnectedDB.MySQL)) {
+					// MySQL JDBC connector 5.1.18 chokes on the zero/error
+					// value 0000-00-00 00:00:00 with a SQLException
+					try {
+						timestamp = resultSet.getString(i + 1);
+					} catch (SQLException ex) {
+						// Treat illegal time value as null
+					}
+				} else { 
+					timestamp = resultSet.getString(i + 1);
+				}
+				if (timestamp == null || resultSet.wasNull()) {
 					result.put(key, null);
 				} else {
 					Matcher m = ConnectedDB.TIMESTAMP_PATTERN.matcher(timestamp);
@@ -224,8 +235,19 @@ public class ResultRowMap implements ResultRow {
 					}
 				}
 			} else if (type == Types.DATE) {
-				Date date = resultSet.getDate(i + 1);
-				if (resultSet.wasNull()) {
+				Date date = null;
+				if (database.dbTypeIs(ConnectedDB.MySQL)) {
+					// MySQL JDBC connector 5.1.18 chokes on the zero/error
+					// value 0000-00-00 with a SQLException
+					try {
+						date = resultSet.getDate(i + 1);
+					} catch (SQLException ex) {
+						// Treat illegal time value as null
+					}
+				} else {
+					date = resultSet.getDate(i + 1);
+				}
+				if (date == null || resultSet.wasNull()) {
 					result.put(key,  null);
 				} else {
 					String s = date.toString();
