@@ -17,12 +17,18 @@ public class ColumnType {
 	 */
 	public final static String UNMAPPABLE = "UNMAPPABLE";
 	
-	private int typeId;
-	private String typeName;
-
-	ColumnType(int typeId, String typeName) {
+	private final int typeId;
+	private final String typeName;
+	private final int size;
+	
+	ColumnType(int typeId, String typeName, int size) {
 		this.typeId = typeId;
 		this.typeName = typeName;
+		this.size = size;
+	}
+	
+	ColumnType(int typeId, String typeName) {
+		this(typeId, typeName, 0);
 	}
 	
 	public int typeId() {
@@ -31,5 +37,17 @@ public class ColumnType {
 
 	public String typeName() {
 		return this.typeName;
+	}
+	
+	/**
+	 * @return Size of the datatype (in characters, bits, etc.), or 0 if not applicable
+	 */
+	public int size() {
+		return this.size;
+	}
+	
+	@Override
+	public String toString() {
+		return "ColumnType(" + typeId + "=" + typeName + (size == 0 ? "" : "(" + size + ")") + ")";
 	}
 }	

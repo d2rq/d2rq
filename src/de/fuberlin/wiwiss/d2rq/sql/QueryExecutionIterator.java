@@ -33,7 +33,7 @@ public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
 	private boolean queryExecuted = false;
 	private boolean explicitlyClosed = false;
 
-	public QueryExecutionIterator(String sql, List columns, ConnectedDB db) {
+	public QueryExecutionIterator(String sql, List<ProjectionSpec> columns, ConnectedDB db) {
 		this.sql = sql;
 		this.columns = columns;
 		this.database = db;
@@ -83,7 +83,7 @@ public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
 			}
 			BeanCounter.totalNumberOfReturnedRows++;
 			BeanCounter.totalNumberOfReturnedFields+=this.numCols;
-			this.prefetchedRow = ResultRowMap.fromResultSet(this.resultSet, this.columns);
+			prefetchedRow = ResultRowMap.fromResultSet(resultSet, columns, database);
 		} catch (SQLException ex) {
 			throw new D2RQException(ex);
 		}

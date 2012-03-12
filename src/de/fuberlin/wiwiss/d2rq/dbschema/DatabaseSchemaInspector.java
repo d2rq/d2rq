@@ -65,6 +65,21 @@ public class DatabaseSchemaInspector {
 //			return "xsd:dateTime";
 //		}
 		
+		if (db.dbTypeIs(ConnectedDB.MySQL) && columnType.typeName().contains("UNSIGNED")) {
+			switch (columnType.typeId()) {
+			case Types.TINYINT: return "xsd:unsignedByte";
+			case Types.SMALLINT: return "xsd:unsignedShort";
+			case Types.INTEGER: return "xsd:unsignedInt";
+			case Types.BIGINT: return "xsd:unsignedLong";
+			}
+		}
+		if (db.dbTypeIs(ConnectedDB.MySQL) && columnType.typeId() == Types.BIT
+				&& columnType.size() == 0) {
+			// MySQL reports TINYINT(1) as BIT, but all other BITs as BIT(M).
+			// This is conventionally treated as BOOLEAN.
+			return "xsd:boolean";
+		}
+
 		switch (columnType.typeId()) {
 		case Types.ARRAY:         return ColumnType.UNMAPPABLE;
 		case Types.BIGINT:        return "xsd:long";
@@ -144,8 +159,8 @@ public class DatabaseSchemaInspector {
 			if (!rs.next()) {
 				throw new D2RQException("Column " + column + " not found in database");
 			}
-			
-			ColumnType type = new ColumnType(rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"));
+			ColumnType type = new ColumnType(rs.getInt("DATA_TYPE"), 
+					rs.getString("TYPE_NAME"), rs.getInt("COLUMN_SIZE"));
 			rs.close();
 			this.cachedColumnTypes.put(column, type);
 			return type;

@@ -2,6 +2,7 @@ package de.fuberlin.wiwiss.d2rq.sql;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hsqldb.types.Types;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
@@ -26,17 +29,22 @@ import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class ResultRowMap implements ResultRow {
+	private final static Log log = LogFactory.getLog(ResultRowMap.class);
 	
-	public static ResultRowMap fromResultSet(ResultSet resultSet, List<ProjectionSpec> projectionSpecs) throws SQLException {
+	public static ResultRowMap fromResultSet(ResultSet resultSet, 
+			List<ProjectionSpec> projectionSpecs, ConnectedDB database) 
+	throws SQLException {
 		Map<ProjectionSpec,String> result = new HashMap<ProjectionSpec,String>();
 		ResultSetMetaData metaData = resultSet.getMetaData();
-		
+
 		for (int i = 0; i < projectionSpecs.size(); i++) {
 			ProjectionSpec key = projectionSpecs.get(i);
+
 			/*
 			 * Return string representations of the values using information from the type map
 			 */
 			int type = metaData == null ? Integer.MIN_VALUE : metaData.getColumnType(i + 1);
+			String typeName = metaData == null ? null : metaData.getColumnTypeName(i + 1);
 
 // Hack for MS SQLSERVER, which maps date, datetime2 and datetimeoffset to VARCHAR
 // TODO: Cant make it work. because the jdbc driver we use (i.e. jTDS) returns datetime2, datetimeoffset
@@ -47,7 +55,36 @@ public class ResultRowMap implements ResultRow {
 //				type = Types.TIMESTAMP;
 //			}
 			
-			if (type == Types.DOUBLE || type == Types.REAL || type == Types.FLOAT) {
+//			System.out.println(type + " " + typeName);
+			if ("BIT".equals(typeName) && database.dbTypeIs(ConnectedDB.MySQL)) {
+				// MySQL reports BIT columns in result sets as VARBINARY, which makes
+				// no sense, and formats the value as a number.
+				
+				// TODO: We would like to request the actual length of the bit type
+				// from the type descriptor, but metaData.getPrecision() doesn't
+				// work on streaming result sets (because it requires opening
+				// a new result set internal to the JDBC driver)
+				String value = resultSet.getString(i + 1);
+				if (resultSet.wasNull()) {
+					result.put(key, null);
+				} else {
+					try {
+						result.put(key, new BigInteger(value).toString(2));
+					} catch (NumberFormatException ex) {
+						log.warn("Expected numeric, got '" + value + "' as value of " + key + "; treating as null");
+						return null;
+					}
+				}
+			} else if (type == Types.BIT && "TINYINT".equals(typeName) && database.dbTypeIs(ConnectedDB.MySQL)) {
+				// MySQL reports TINYINT(1) results as BIT, which makes no sense
+				// really. They are conventionally treated as booleans.
+				boolean b = resultSet.getBoolean(i + 1);
+				if (resultSet.wasNull()) {
+					result.put(key, null);
+				} else {
+					result.put(key, b ? "true" : "false");
+				}
+			} else if (type == Types.DOUBLE || type == Types.REAL || type == Types.FLOAT) {
 				double d = resultSet.getDouble(i + 1);
 				if (resultSet.wasNull()) {
 					result.put(projectionSpecs.get(i), null);
@@ -85,7 +122,18 @@ public class ResultRowMap implements ResultRow {
 				byte[] bytes = resultSet.getBytes(i + 1);
 				result.put(key, resultSet.wasNull() ? null : toHexString(bytes));
 			} else if (type == Types.TIME) {
-				String time = resultSet.getString(i + 1);
+				String time = null;
+				if (database.dbTypeIs(ConnectedDB.MySQL)) {
+					// MySQL JDBC connector 5.1.18 chokes on negative or too
+					// large TIME values with a SQLException
+					try {
+						time = resultSet.getString(i + 1);
+					} catch (SQLException ex) {
+						// Treat illegal time value as null
+					}
+				} else { 
+					time = resultSet.getString(i + 1);
+				}
 				if (time == null) {
 					result.put(key, null);
 				} else {

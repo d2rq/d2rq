@@ -372,7 +372,7 @@ public class ConnectedDB {
 		}
 		
 		// HACK: MS SQLServer 2008 returns 'date' as VARCHAR type
-		if(type.typeName().equals("date") && dbTypeIs(ConnectedDB.MSSQL)) {
+		if (type.typeName().equals("date") && dbTypeIs(ConnectedDB.MSSQL)) {
 			return SQLDataType.DATE;
 		}
 		
@@ -382,6 +382,13 @@ public class ConnectedDB {
 //		if((type.typeName().equals("datetime2") && dbTypeIs(ConnectedDB.MSSQL)) || (type.typeName().equals("datetimeoffset") && dbTypeIs(ConnectedDB.MSSQL))) {
 //			return SQLDataType.TIMESTAMP;
 //		}
+
+		if (dbTypeIs(ConnectedDB.MySQL) && type.typeId() == Types.BIT
+				&& type.size() == 0) {
+			// MySQL reports TINYINT(1) as BIT, but all other BITs as BIT(M).
+			// This is conventionally treated as BOOLEAN.
+			return SQLDataType.BOOLEAN;
+		}
 
 		switch (type.typeId()) {
 			case Types.CHAR:
