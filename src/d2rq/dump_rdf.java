@@ -3,9 +3,11 @@ package d2rq;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
@@ -13,6 +15,7 @@ import jena.cmdline.CommandLine;
 import com.hp.hpl.jena.n3.turtle.TurtleParseException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.shared.NotFoundException;
 import com.hp.hpl.jena.util.FileManager;
 
@@ -23,10 +26,13 @@ import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
 
 /**
  * Command line utility for dumping a database to RDF, using the
  * {@link MappingGenerator} or a mapping file.
+ * 
+ * TODO: Factor out the parts that are shared with {@link generate_mapping}
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
@@ -51,6 +57,7 @@ public class dump_rdf {
 		ArgDecl baseArg = new ArgDecl(true, "b", "base");
 		ArgDecl formatArg = new ArgDecl(true, "f", "format");
 		ArgDecl outfileArg = new ArgDecl(true, "o", "out", "outfile");
+		ArgDecl loadSQLArg = new ArgDecl(true, "l", "load-sql");
 		cmd.add(userArg);
 		cmd.add(passArg);
 		cmd.add(driverArg);
@@ -60,6 +67,7 @@ public class dump_rdf {
 		cmd.add(baseArg);
 		cmd.add(formatArg);
 		cmd.add(outfileArg);
+		cmd.add(loadSQLArg);
 		cmd.process(args);
 
 		RDFDump dump = new RDFDump();
@@ -90,6 +98,9 @@ public class dump_rdf {
 		if (cmd.contains(outfileArg)) {
 			dump.setOutputFile(cmd.getArg(outfileArg).getValue());
 		}
+		if (cmd.contains(loadSQLArg)) {
+			dump.setSQLScript(cmd.getArg(loadSQLArg).getValue());
+		}
 		if (cmd.numItems() > 0 || !dump.hasParameter()) {
 			usage();
 			return;
@@ -115,11 +126,12 @@ public class dump_rdf {
 	private static void usage() {
 		System.out.println("usage: dump-rdf [parameters]");
 		System.out.println();
-		System.out.println("  Database connection parameters (may be omitted if specified in mapping file)");
+		System.out.println("  Database connection parameters (ignored if specified in mapping file)");
+		System.out.println("    -j jdbcURL      JDBC URL for the DB, e.g. jdbc:mysql://localhost/dbname");
+		System.out.println("    -d driverclass  Java class name of the JDBC driver for the DB");
 		System.out.println("    -u username     Database user for connecting to the DB");
 		System.out.println("    -p password     Database password for connecting to the DB");
-		System.out.println("    -d driverclass  Java class name of the JDBC driver for the DB");
-		System.out.println("    -j jdbcURL      JDBC URL for the DB, e.g. jdbc:mysql://localhost/dbname");
+		System.out.println("    -l script.sql   Load a SQL script before startup");
 		System.out.println("    -s fetchSize    JDBC fetch size. Defaults to " + DEFAULT_DUMP_FETCH_SIZE + " or for MySQL, to Integer.MIN_VALUE for streaming mode");
 		System.out.println();
 		System.out.println("  RDF output parameters");
@@ -139,6 +151,7 @@ public class dump_rdf {
 		private String baseURI = null;
 		private String format = "N-TRIPLE";
 		private String outputFile = null;
+		private String sqlScript = null;
 		private Integer fetchSize = null;
 		
 		private boolean hasParameter = false;
@@ -178,6 +191,10 @@ public class dump_rdf {
 			this.outputFile = outputFile;
 			this.hasParameter = true;
 		}
+		void setSQLScript(String sqlScript) {
+			this.sqlScript = sqlScript;
+			hasParameter = true;
+		}
 		boolean hasParameter() {
 			return this.hasParameter;
 		}
@@ -194,6 +211,10 @@ public class dump_rdf {
 					/* Supply useful fetch sizes if none set so far */
 					if (db.getFetchSize() == Database.NO_FETCH_SIZE)
 						db.setFetchSize(db.getJDBCDSN() != null && db.getJDBCDSN().contains(":mysql:") ? Integer.MIN_VALUE : DEFAULT_DUMP_FETCH_SIZE);
+				}
+				if (!hasMappingFile() && sqlScript != null) {
+					db.setStartupSQLScript(ResourceFactory.createResource(
+							new File(sqlScript).toURI().toString()));
 				}
 			}		
 			
@@ -231,6 +252,15 @@ public class dump_rdf {
 			ConnectedDB.registerJDBCDriver(this.driverClass);
 			ConnectedDB db = new ConnectedDB(this.jdbcURL, this.user, this.password);			
 			try {
+				if (sqlScript != null) {
+					try {
+						SQLScriptLoader.loadFile(new File(sqlScript), db.connection());
+					} catch (IOException ex) {
+						throw new D2RQException("Error accessing SQL startup script: " + sqlScript);
+					} catch (SQLException ex) {
+						throw new D2RQException("Error importing " + sqlScript + " " + ex.getMessage());
+					}
+				}
 				MappingGenerator gen = new MappingGenerator(db);
 				if (this.driverClass != null) {
 					gen.setJDBCDriverClass(this.driverClass);

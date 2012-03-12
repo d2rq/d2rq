@@ -31,11 +31,10 @@ and use its default mapping for the translation.</p>
 <h2 id="usage-default">Usage without mapping file (default mapping)</h2>
 
 <p>If no mapping file is provided, then the database connection must be
-specified on the command line. With the exception of <code>fetchSize</code>,
-the meaning of all parameters is the
+specified on the command line. The meaning of all parameters is the
 same as for the <a href="generate-mapping"><code>generate-mapping</code> script</a>.
 
-<pre>dump-rdf -u username [-p password] -d driverclass -j jdbcURL [-f fetchSize] [output parameters]</pre>
+<pre>dump-rdf -j jdbcURL [-d driverclass] [-u username] [-p password] [-l script.sql] [output parameters]</pre>
 
 
 <h2 id="output-params">Output parameters</h2>

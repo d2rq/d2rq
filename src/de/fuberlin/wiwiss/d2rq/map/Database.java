@@ -151,6 +151,7 @@ public class Database extends MapObject {
 	}
 	
 	public void setStartupSQLScript(Resource script) {
+		checkNotConnected();
 		assertNotYetDefined(startupSQLScript, D2RQ.startupSQLScript, 
 				D2RQException.DATABASE_DUPLICATE_STARTUPSCRIPT);
 		startupSQLScript = script.getURI();
