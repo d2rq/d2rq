@@ -1,5 +1,14 @@
 # D2RQ Release Notes
 
+## D2RQ v0.8.1-dev
+
+### Features
+### Enhancements
+### Bugfixes
+### Performance
+### Other
+
+
 ## D2RQ v0.8 – 2012-03-12
 
 New features include preliminary SPARQL 1.1 support, Firebird support, generation of RDFS/OWL schemas for databases, and download maps for making the content of CLOB/BLOB columns accessible via HTTP. Datatype compatibility with Oracle, MySQL, SQL Server and HSQLDB has been greatly improved, and a truckload of bugs has been fixed.
