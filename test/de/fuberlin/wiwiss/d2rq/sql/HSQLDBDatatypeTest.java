@@ -250,6 +250,7 @@ public class HSQLDBDatatypeTest extends DatatypeTestBase {
 		// TODO Should be mapped to xsd:duration?
 		assertMappedType("xsd:string");
 		assertValues(new String[]{"0", "1", "99", "-99"}, false);
+		assertValuesNotFindable(new String[]{"0", "1", "99", "-99"});
 	}
 
 	public void testIntervalHourMinute() {
@@ -258,6 +259,8 @@ public class HSQLDBDatatypeTest extends DatatypeTestBase {
 		assertMappedType("xsd:string");
 		assertValues(new String[]{
 				"0:00", "0:01", "1:00", "99:00", "-99:00"}, false);
+		assertValuesNotFindable(new String[]{
+				"0:00", "0:01", "1:00", "99:00", "-99:00"});
 	}
 
 	public void testOther() {

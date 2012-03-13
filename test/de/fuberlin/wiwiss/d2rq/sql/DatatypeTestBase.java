@@ -92,24 +92,27 @@ public abstract class DatatypeTestBase extends TestCase {
 		assertValues(expectedValues, true);
 	}
 	
-	protected void assertValues(String[] expectedValues, boolean searchable) {
+	protected void assertValues(String[] expectedValues, boolean searchValues) {
 		ExtendedIterator<Triple> it = graph.find(Node.ANY, Node.ANY, Node.ANY);
 		List<String> listedValues = new ArrayList<String>();
 		while (it.hasNext()) {
 			listedValues.add(it.next().getObject().getLiteralLexicalForm());
 		}
 		assertEquals(Arrays.asList(expectedValues), listedValues);
+		if (!searchValues) return;
 		for (String value : expectedValues) {
-			if (searchable) {
-				assertTrue("Expected literal not in graph: '" + value + "'",
-						graph.contains(Node.ANY, Node.ANY, Node.createLiteral(value)));
-			} else {
-				assertFalse("Unexpected literal found in graph: '" + value + "'",
-						graph.contains(Node.ANY, Node.ANY, Node.createLiteral(value)));
-			}
+			assertTrue("Expected literal not in graph: '" + value + "'",
+					graph.contains(Node.ANY, Node.ANY, Node.createLiteral(value)));
 		}
 	}
-	
+
+	protected void assertValuesNotFindable(String[] expectedValues) {
+		for (String value : expectedValues) {
+			assertFalse("Unexpected literal found in graph: '" + value + "'",
+					graph.contains(Node.ANY, Node.ANY, Node.createLiteral(value)));
+		}
+	}
+
 	private Set<String> allTables() {
 		ConnectedDB.registerJDBCDriver(driver);
 		ConnectedDB db = new ConnectedDB(jdbcURL, user, password);
