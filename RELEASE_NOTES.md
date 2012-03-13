@@ -2,6 +2,8 @@
 
 ## D2RQ v0.8 – 2012-03-12
 
+New features include preliminary SPARQL 1.1 support, Firebird support, generation of RDFS/OWL schemas for databases, and download maps for making the content of CLOB/BLOB columns accessible via HTTP. Datatype compatibility with Oracle, MySQL, SQL Server and HSQLDB has been greatly improved, and a truckload of bugs has been fixed.
+
 ### Features
 - framework for attaching metadata to D2R Server-genearted RDF and HTML documents (Olaf Hartig and Hannes Mühleisen)
 - D2R Server provides direct HTTP access to BLOB/CLOB contents via d2rq:DownloadMap
