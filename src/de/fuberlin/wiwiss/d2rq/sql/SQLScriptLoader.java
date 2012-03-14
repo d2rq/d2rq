@@ -79,6 +79,10 @@ public class SQLScriptLoader {
 				}
 				lineNumber++;
 			}
+			String s = sql.toString().trim();
+			if (!"".equals(s)) {
+				stmt.execute(s);
+			}
 		} catch (SQLException ex) {
 			throw new SQLException(
 					"in line " + lineNumber + ": " + ex.getMessage(), ex);
