@@ -11,6 +11,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
 import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
@@ -21,9 +22,11 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  */
 public class BindingMaker {
 	private final Map variableNamesToNodeMakers;
+	private final ProjectionSpec condition;
 	
-	public BindingMaker(Map variableNamesToNodeMakers) {
-		this.variableNamesToNodeMakers = variableNamesToNodeMakers;
+	public BindingMaker(BindingMaker other, ProjectionSpec condition) {
+		this.variableNamesToNodeMakers = other.variableNamesToNodeMakers;
+		this.condition = condition;
 	}
 	
 	public BindingMaker(NodeRelation nodeRelation) {
@@ -34,9 +37,16 @@ public class BindingMaker {
 			variableNamesToNodeMakers.put(variableName, 
 					nodeRelation.nodeMaker(variableName));
 		}
+		condition = null;
 	}
 	
 	public Binding makeBinding(ResultRow row) {
+		if (condition != null) {
+			String value = row.get(condition);
+			if (value == null || "false".equals(value) || "0".equals(value) || "".equals(value)) {
+				return null;
+			}
+		}
 		BindingMap result = new BindingHashMap();
 		Iterator it = variableNamesToNodeMakers.keySet().iterator();
 		while (it.hasNext()) {
@@ -74,6 +84,10 @@ public class BindingMaker {
 			result.append("\n");
 		}
 		result.append(")");
+		if (condition != null) {
+			result.append(" WHERE ");
+			result.append(condition);
+		}
 		return result.toString();
 	}
 }
