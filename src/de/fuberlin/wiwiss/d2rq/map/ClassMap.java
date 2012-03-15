@@ -65,11 +65,6 @@ public class ClassMap extends ResourceMap {
 		assertHasPrimarySpec(new Property[]{
 				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns, D2RQ.constantValue
 		});
-		if (this.classes.isEmpty() && this.propertyBridges.isEmpty()) {
-			throw new D2RQException(toString() + 
-					" has no d2rq:PropertyBridges and no d2rq:class",
-					D2RQException.CLASSMAP_NO_PROPERTYBRIDGES);
-		}
 		if (this.constantValue != null && this.constantValue.isLiteral()) {
 			throw new D2RQException(
 					"d2rq:constantValue for class map " + toString() + " must be a URI or blank node", 
@@ -83,6 +78,10 @@ public class ClassMap extends ResourceMap {
 			bridge.validate();
 		}
 		// TODO
+	}
+	
+	public boolean hasProperties() {
+		return (!this.classes.isEmpty() || !this.propertyBridges.isEmpty());
 	}
 	
 	public Collection<TripleRelation> compiledPropertyBridges() {

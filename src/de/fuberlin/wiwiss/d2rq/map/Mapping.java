@@ -81,8 +81,22 @@ public class Mapping {
 		for (TranslationTable table: translationTables.values()) {
 			table.validate();
 		}
+		Collection<ClassMap> classMapsWithoutProperties = new ArrayList<ClassMap>(classMaps.values());
 		for (ClassMap classMap: classMaps.values()) {
 			classMap.validate();	// Also validates attached bridges
+			if (classMap.hasProperties()) {
+				classMapsWithoutProperties.remove(classMap);
+			}
+			for (PropertyBridge bridge: classMap.propertyBridges()) {
+				if (bridge.refersToClassMap() != null) {
+					classMapsWithoutProperties.remove(bridge.refersToClassMap());
+				}
+			}
+		}
+		if (!classMapsWithoutProperties.isEmpty()) {
+			throw new D2RQException(classMapsWithoutProperties.iterator().next().toString() + 
+					" has no d2rq:PropertyBridges and no d2rq:class",
+					D2RQException.CLASSMAP_NO_PROPERTYBRIDGES);
 		}
 		for (DownloadMap dlm: downloadMaps.values()) {
 			dlm.validate();

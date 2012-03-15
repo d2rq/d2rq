@@ -161,7 +161,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 					inventoryBridges.add(bridge);
 				}
 			}
-			if (inventoryBridges.isEmpty() && !this.mapping.classMap(classMapResource).compiledPropertyBridges().isEmpty()) {
+			if (inventoryBridges.isEmpty()) {
 				Relation relation = (Relation) this.mapping.classMap(classMapResource).relation();
 				NodeMaker typeNodeMaker = new FixedNodeMaker(
 						RDF.type.asNode(), false);

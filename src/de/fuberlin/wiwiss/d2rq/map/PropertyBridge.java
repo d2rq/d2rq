@@ -135,6 +135,10 @@ public class PropertyBridge extends ResourceMap {
 		this.refersToClassMap = classMap;
 	}
 
+	public ClassMap refersToClassMap() {
+		return refersToClassMap;
+	}
+	
 	public void addProperty(Resource property) {
 		this.properties.add(property);
 	}
