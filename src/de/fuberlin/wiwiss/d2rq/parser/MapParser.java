@@ -28,7 +28,6 @@ import de.fuberlin.wiwiss.d2rq.map.ClassMap;
 import de.fuberlin.wiwiss.d2rq.map.Configuration;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.DownloadMap;
-import de.fuberlin.wiwiss.d2rq.map.DynamicProperty;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.map.ResourceMap;
@@ -531,9 +530,7 @@ public class MapParser {
 		}
 		stmts = r.listProperties(D2RQ.dynamicProperty);
 		while (stmts.hasNext()) {
-			String dynamicPropertyPattern = stmts.nextStatement().getString();
-			DynamicProperty dynamicProperty = new DynamicProperty(dynamicPropertyPattern);
-			bridge.addProperty(dynamicProperty);
+			bridge.addDynamicProperty(stmts.next().getString());
 			this.mapping.setHasDynamicProperties(true);
 		}
 		stmts = r.listProperties(D2RQ.property);

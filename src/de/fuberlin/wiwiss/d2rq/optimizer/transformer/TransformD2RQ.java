@@ -30,10 +30,10 @@ import com.hp.hpl.jena.sparql.expr.ExprNode;
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.CompatibleRelationGroup;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.engine.BindingMaker;
 import de.fuberlin.wiwiss.d2rq.engine.GraphPatternTranslator;
-import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.engine.OpD2RQ;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.optimizer.ops.OpFilteredBGP;
@@ -186,7 +186,7 @@ public class TransformD2RQ extends TransformCopy
             nodeRelation = (NodeRelation) nodeRelations.iterator().next();
          
             // create an opD2RQ
-            opD2RQ = new OpD2RQ(opBGP, nodeRelation.baseRelation(), Collections.singleton(new BindingMaker(nodeRelation)));
+            opD2RQ = new OpD2RQ(opBGP, nodeRelation.baseRelation(), Collections.singleton(BindingMaker.createFor(nodeRelation)));
             
             // could all filterexpression be converted to sql ?
             if (opFilter != null && !opFilter.getExprs().isEmpty())

@@ -33,14 +33,14 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  
 /**
- * Iterator that calcualtes the result-bindings of an OpD2RQ.
+ * Iterator that calculates the result-bindings of an OpD2RQ.
  *
  * @author Herwig Leimer
  *
  */
 public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
 {
-	protected final Collection bindingMakers;
+	protected final Collection<BindingMaker> bindingMakers;
 	protected final Relation relation;
 	
 	/**
@@ -51,7 +51,7 @@ public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
 	 * @param context - execution-context
 	 * @return QueryIterator - a QueryIterator
 	 */
-	public static QueryIterator create(Relation relation, Collection bindingMakers, QueryIterator input, ExecutionContext context) 
+	public static QueryIterator create(Relation relation, Collection<BindingMaker> bindingMakers, QueryIterator input, ExecutionContext context) 
 	{
 		if (relation.condition().isFalse() || relation.isTrivial()) 
 		{
@@ -68,7 +68,7 @@ public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
 	 * @param input - Input-Iterator
 	 * @param context - execution-context
 	 */
-	protected RelationToBindingsD2RQIterator(Relation relation, Collection bindingMakers, QueryIterator input, ExecutionContext context)
+	protected RelationToBindingsD2RQIterator(Relation relation, Collection<BindingMaker> bindingMakers, QueryIterator input, ExecutionContext context)
     {
 		super(input, context) ;
     	this.bindingMakers = bindingMakers;
@@ -100,11 +100,11 @@ public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
     {
         Binding parentBinding ;
         QueryExecutionIterator wrapped;
-        LinkedList queue = new LinkedList();
-        Collection bindingMakers;
+        LinkedList<Binding> queue = new LinkedList<Binding>();
+        Collection<BindingMaker> bindingMakers;
         NodeMaker nodeMaker;
         ValueMaker valueMaker;
-        Set vars = new HashSet();
+        Set<String> vars = new HashSet<String>();
               
         /**
          * Construtor
@@ -113,12 +113,11 @@ public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
          * @param bindingMakers - bindingMakers for creating the bindings
          * @param qCxt - execution-context
          */
-        public StagePattern(Binding parentBinding, Relation relation,	Collection bindingMakers, ExecutionContext qCxt)
+        public StagePattern(Binding parentBinding, Relation relation, Collection<BindingMaker> bindingMakers, ExecutionContext qCxt)
         {
             super(qCxt) ;
             this.parentBinding = parentBinding ;
             this.bindingMakers = bindingMakers;
-            BindingMaker bindingMaker;
             Var var;
             MutableRelation mutableRelation = null;
             Expression expression;
@@ -127,26 +126,23 @@ public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
             String valueAsString;
             
             // bindingmakers contain all information for making the bindings of the current relation
-            
-            for(Iterator iterator = bindingMakers.iterator(); iterator.hasNext();)
-            {
-            	bindingMaker = (BindingMaker)iterator.next();
+            for (BindingMaker bindingMaker: bindingMakers) {
             	// collect all vars of all bindingmakers
             	vars.addAll(bindingMaker.variableNames());
             	
             	// now check if every result(var) of the parentbinding is part of the
             	// the current relation and can be put into the current relation
-            	for(Iterator bindingVars = parentBinding.vars(); bindingVars.hasNext();)
+            	for(Iterator<Var> bindingVars = parentBinding.vars(); bindingVars.hasNext();)
             	{
             		// get first binding-var
-            		var = (Var)bindingVars.next();
+            		var = bindingVars.next();
             		
             		// is the binding var also used in this relation ?
             		if (bindingMaker.variableNames().contains(var.getName()))
             		{
             			// put the value of the binding-var to the relation
             			mutableRelation = new MutableRelation(relation);
-            			nodeMaker = bindingMaker.nodeMaker(var);
+            			nodeMaker = bindingMaker.nodeMaker(var.getName());
             			// TODO: type-cast perhaps a problem ??
             			typedNodeMaker = (TypedNodeMaker)nodeMaker;
             			valueMaker = typedNodeMaker.valueMaker();
@@ -212,9 +208,7 @@ public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
     		BindingMap binding = new BindingHashMap(this.parentBinding) ;
     		
     		
-    		for (Iterator iterator = vars.iterator(); iterator.hasNext();)
-            {
-    			String name = (String)iterator.next();
+			for (String name: vars) {
     			Var var = Var.alloc(name);
     			Node n = (Node)b.get(var) ;
                 if ( n == null )
@@ -237,10 +231,7 @@ public class RelationToBindingsD2RQIterator extends QueryIterRepeatApply
     	 */
     	protected void enqueueBindings(ResultRow row) 
     	{
-    		Iterator it = bindingMakers.iterator();
-    		while (it.hasNext()) 
-    		{
-    			BindingMaker bindingMaker = (BindingMaker) it.next();
+			for (BindingMaker bindingMaker: bindingMakers) {
     			Binding binding = bindingMaker.makeBinding(row);
     			if (binding != null) 
     			{

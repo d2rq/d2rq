@@ -3,7 +3,6 @@ package de.fuberlin.wiwiss.d2rq.map;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.hp.hpl.jena.rdf.model.Literal;
@@ -42,13 +41,13 @@ public class Mapping {
 
 	private Resource mappingResource;
 
-	private final Map databases = new HashMap();
+	private final Map<Resource,Database> databases = new HashMap<Resource,Database>();
 	private Configuration configuration = new Configuration();
-	private final Map classMaps = new HashMap();
-	private final Map translationTables = new HashMap();
+	private final Map<Resource,ClassMap> classMaps = new HashMap<Resource,ClassMap>();
+	private final Map<Resource,TranslationTable> translationTables = new HashMap<Resource,TranslationTable>();
 	private final Map<Resource,DownloadMap> downloadMaps = new HashMap<Resource,DownloadMap>();
 	private final PrefixMapping prefixes = new PrefixMappingImpl();
-	private Collection compiledPropertyBridges;
+	private Collection<TripleRelation> compiledPropertyBridges;
 	private boolean hasDynamicProperties = false;
 	
 	public Mapping() {
@@ -76,27 +75,19 @@ public class Mapping {
 			throw new D2RQException("No d2rq:Database defined in the mapping", 
 					D2RQException.MAPPING_NO_DATABASE);
 		}
-		Iterator it = this.databases.values().iterator();
-		while (it.hasNext()) {
-			Database db = (Database) it.next();
+		for (Database db: databases.values()) {
 			db.validate();
 		}
-		it = this.translationTables.values().iterator();
-		while (it.hasNext()) {
-			TranslationTable table = (TranslationTable) it.next();
+		for (TranslationTable table: translationTables.values()) {
 			table.validate();
 		}
-		it = this.classMaps.values().iterator();
-		while (it.hasNext()) {
-			ClassMap classMap = (ClassMap) it.next();
+		for (ClassMap classMap: classMaps.values()) {
 			classMap.validate();	// Also validates attached bridges
 		}
-		for (DownloadMap dlm : downloadMaps.values()) {
+		for (DownloadMap dlm: downloadMaps.values()) {
 			dlm.validate();
 		}
-		it = compiledPropertyBridges().iterator();
-		while (it.hasNext()) {
-			TripleRelation bridge = (TripleRelation) it.next();
+		for (TripleRelation bridge: compiledPropertyBridges()) {
 			new AttributeTypeValidator(bridge).validate();
 		}
 	}
@@ -110,7 +101,7 @@ public class Mapping {
 	}
 	
 	public Database database(Resource name) {
-		return (Database) this.databases.get(name);
+		return databases.get(name);
 	}
 	
 	public Configuration configuration() {
@@ -125,7 +116,7 @@ public class Mapping {
 		this.classMaps.put(classMap.resource(), classMap);
 	}
 	
-	public Collection classMapResources() {
+	public Collection<Resource> classMapResources() {
 		return this.classMaps.keySet();
 	}
 	
@@ -157,7 +148,7 @@ public class Mapping {
 	 * @return A collection of {@link TripleRelation}s corresponding to each
 	 * 		of the property bridges
 	 */
-	public synchronized Collection compiledPropertyBridges() {
+	public synchronized Collection<TripleRelation> compiledPropertyBridges() {
 		if (this.compiledPropertyBridges == null) {
 			compilePropertyBridges();
 		}
@@ -165,10 +156,8 @@ public class Mapping {
 	}
 
 	private void compilePropertyBridges() {
-		this.compiledPropertyBridges = new ArrayList();
-		Iterator it = this.classMaps.values().iterator();
-		while (it.hasNext()) {
-			ClassMap classMap = (ClassMap) it.next();
+		compiledPropertyBridges = new ArrayList<TripleRelation>();
+		for (ClassMap classMap: classMaps.values()) {
 			this.compiledPropertyBridges.addAll(classMap.compiledPropertyBridges());
 		}
 	}
@@ -183,9 +172,7 @@ public class Mapping {
 			this.relation = relation.baseRelation();
 		}
 		void validate() {
-			Iterator it = relation.allKnownAttributes().iterator();
-			while (it.hasNext()) {
-				Attribute attribute = (Attribute) it.next();
+			for (Attribute attribute: relation.allKnownAttributes()) {
 				SQLDataType type = relation.database().columnType(relation.aliases().originalOf(attribute));
 				if (type == SQLDataType.UNMAPPABLE) {
 					throw new D2RQException("Column " + 
@@ -209,27 +196,21 @@ public class Mapping {
 			this.vocabularyModel.add(s);
 		
 		/* Apply labels */
-		Iterator it = map.getDefinitionLabels().iterator();
-		while (it.hasNext()) {
-			Literal propertyLabel = (Literal) it.next();
+		for (Literal propertyLabel: map.getDefinitionLabels()) {
 			s = vocabularyModel.createStatement(targetResource, RDFS.label, propertyLabel);
 			if (!this.vocabularyModel.contains(s))
 				this.vocabularyModel.add(s);
 		}
 
 		/* Apply comments */
-		it = map.getDefinitionComments().iterator();
-		while (it.hasNext()) {
-			Literal propertyComment = (Literal) it.next();
+		for (Literal propertyComment: map.getDefinitionComments()) {
 			s = vocabularyModel.createStatement(targetResource, RDFS.comment, propertyComment);
 			if (!this.vocabularyModel.contains(s))
 				this.vocabularyModel.add(s);
 		}
 		
 		/* Apply additional properties */
-		it = map.getAdditionalDefinitionProperties().iterator();
-		while (it.hasNext()) {
-			Resource additionalProperty = (Resource) it.next();
+		for (Resource additionalProperty: map.getAdditionalDefinitionProperties()) {
 			s = vocabularyModel.createStatement(targetResource, 
 						(Property)(additionalProperty.getProperty(D2RQ.propertyName).getResource().as(Property.class)),
 						additionalProperty.getProperty(D2RQ.propertyValue).getObject());
@@ -243,32 +224,22 @@ public class Mapping {
 	 * Must be called after all classes and property bridges are loaded
 	 */
 	public void buildVocabularyModel() {
-		Iterator itClassMaps = this.classMaps.values().iterator();
-		while (itClassMaps.hasNext()) {
-			ClassMap classMap = (ClassMap) itClassMaps.next();
+		for (ClassMap classMap: classMaps.values()) {
 			
 			/* Loop through referenced classes */
-			Iterator itClasses = classMap.getClasses().iterator();
-			while (itClasses.hasNext()) {
-				Resource class_ = (Resource) itClasses.next();
+			for (Resource class_: classMap.getClasses()) {
 				addDefinitions(classMap, class_);
 			}
 
 			/* Loop through property bridges */
-			Iterator itPropertyBridges = classMap.propertyBridges().iterator();
-			while (itPropertyBridges.hasNext()) {
-				PropertyBridge bridge = (PropertyBridge) itPropertyBridges.next();
+			for (PropertyBridge bridge: classMap.propertyBridges()) {
 				
 				/* Loop through referenced properties */				
-				Iterator itProperties = bridge.properties().iterator();
-				while (itProperties.hasNext()) {
-					Object prop = itProperties.next();
-					if(prop instanceof Property)
-					{
-						Resource property = (Resource) prop;
-						addDefinitions(bridge, property);
-					}
+				for (Resource property: bridge.properties()) {
+					addDefinitions(bridge, property);
 				}
+				
+				// TODO: What to do about dynamic properties?
 			}
 		}
 	}

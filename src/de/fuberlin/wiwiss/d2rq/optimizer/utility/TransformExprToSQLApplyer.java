@@ -53,9 +53,9 @@ import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueBoolean;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ExpressionProjectionSpec;
+import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
-import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.expr.Add;
 import de.fuberlin.wiwiss.d2rq.expr.Constant;
 import de.fuberlin.wiwiss.d2rq.expr.Divide;

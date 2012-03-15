@@ -10,9 +10,9 @@ public class RelationImpl extends Relation {
 	private final ConnectedDB database;
 	private final AliasMap aliases;
 	private final Expression condition;
-	private final Set joinConditions;
-	private final Set leftJoinConditions;
-	private final Set projections;
+	private final Set<Join> joinConditions;
+	private final Set<Join> leftJoinConditions;
+	private final Set<ProjectionSpec> projections;
 	private final boolean isUnique;
 	private Attribute order;
 	private boolean orderDesc;
@@ -20,7 +20,7 @@ public class RelationImpl extends Relation {
 	private int limitInverse;
 	
 	public RelationImpl(ConnectedDB database, AliasMap aliases,
-			Expression condition, Set joinConditions, Set projections,
+			Expression condition, Set<Join> joinConditions, Set<ProjectionSpec> projections,
 			boolean isUnique, Attribute order, boolean orderDesc, int limit, int limitInverse) {
 		this.database = database;
 		this.aliases = aliases;
@@ -28,7 +28,7 @@ public class RelationImpl extends Relation {
 		this.joinConditions = joinConditions;
 		this.projections = projections;
 		this.isUnique = isUnique;
-		this.leftJoinConditions = new HashSet();
+		this.leftJoinConditions = new HashSet<Join>();
 		this.order = order;
 		this.orderDesc = orderDesc;
 		this.limit = limit;
@@ -36,7 +36,7 @@ public class RelationImpl extends Relation {
 	}
 
 	public RelationImpl(ConnectedDB database, AliasMap aliases,
-			Expression condition, Set joinConditions, Set projections, Set leftJoinConditions,
+			Expression condition, Set<Join> joinConditions, Set<ProjectionSpec> projections, Set<Join> leftJoinConditions,
 			boolean isUnique, Attribute order, boolean orderDesc, int limit, int limitInverse) {
 		this.database = database;
 		this.aliases = aliases;
@@ -51,7 +51,7 @@ public class RelationImpl extends Relation {
 		this.limitInverse = limitInverse;
 	}
 	
-	public Set leftJoinConditions() {
+	public Set<Join> leftJoinConditions() {
 		return leftJoinConditions;
 	}
 
@@ -67,11 +67,11 @@ public class RelationImpl extends Relation {
 		return this.condition;
 	}
 
-	public Set joinConditions() {
+	public Set<Join> joinConditions() {
 		return this.joinConditions;
 	}
 
-	public Set projections() {
+	public Set<ProjectionSpec> projections() {
 		return projections;
 	}
 
@@ -112,8 +112,8 @@ public class RelationImpl extends Relation {
 				renames.applyToProjectionSet(projections), isUnique, order != null ? renames.applyTo(order) : null, orderDesc, limit, limitInverse);
 	}
 
-	public Relation project(Set projectionSpecs) {
-		Set newProjections = new HashSet(projectionSpecs);
+	public Relation project(Set<? extends ProjectionSpec> projectionSpecs) {
+		Set<ProjectionSpec> newProjections = new HashSet<ProjectionSpec>(projectionSpecs);
 		newProjections.retainAll(projections);
 		return new RelationImpl(database, aliases, condition, joinConditions, 
 				newProjections, isUnique, order, orderDesc, limit, limitInverse);

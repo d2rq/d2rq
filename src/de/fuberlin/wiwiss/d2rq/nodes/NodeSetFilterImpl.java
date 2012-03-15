@@ -29,10 +29,10 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 	private String constantLanguage = null;
 	private RDFDatatype constantDatatype = null;
 	private Node fixedNode = null;
-	private Collection attributes = new HashSet();
-	private Collection patterns = new HashSet();
-	private Collection expressions = new HashSet();
-	private Collection blankNodeIDs = new HashSet();
+	private Collection<Attribute> attributes = new HashSet<Attribute>();
+	private Collection<Pattern> patterns = new HashSet<Pattern>();
+	private Collection<Expression> expressions = new HashSet<Expression>();
+	private Collection<BlankNodeID> blankNodeIDs = new HashSet<BlankNodeID>();
 	private String valueStart = null;
 	private String valueEnd = null;
 	
@@ -153,9 +153,7 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 			}
 		}
 		if (!patterns.isEmpty()) {
-			Iterator it = patterns.iterator();
-			while (it.hasNext()) {
-				Pattern pattern = (Pattern) it.next();
+			for (Pattern pattern: patterns) {
 				if (constantValue != null 
 						&& Expression.FALSE.equals(pattern.valueExpression(constantValue))) {
 					return true;
@@ -165,12 +163,12 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 		return false;
 	}
 	
-	private List matchPatterns(Pattern p1, Pattern p2) {
-		List results = new ArrayList(p1.attributes().size());
+	private List<Expression> matchPatterns(Pattern p1, Pattern p2) {
+		List<Expression> results = new ArrayList<Expression>(p1.attributes().size());
 		if (p1.isEquivalentTo(p2)) {
 			for (int i = 0; i < p1.attributes().size(); i++) {
-				Attribute col1 = (Attribute) p1.attributes().get(i);
-				Attribute col2 = (Attribute) p2.attributes().get(i);
+				Attribute col1 = p1.attributes().get(i);
+				Attribute col2 = p2.attributes().get(i);
 				results.add(Equality.createAttributeEquality(col1, col2));
 			}
 		} else {
@@ -180,11 +178,11 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 		return results;
 	}
 	
-	private List matchBlankNodeIDs(BlankNodeID id1, BlankNodeID id2) {
-		List results = new ArrayList(id1.attributes().size());
+	private List<Expression> matchBlankNodeIDs(BlankNodeID id1, BlankNodeID id2) {
+		List<Expression> results = new ArrayList<Expression>(id1.attributes().size());
 		for (int i = 0; i < id1.attributes().size(); i++) {
-			Attribute col1 = (Attribute) id1.attributes().get(i);
-			Attribute col2 = (Attribute) id2.attributes().get(i);
+			Attribute col1 = id1.attributes().get(i);
+			Attribute col2 = id2.attributes().get(i);
 			results.add(Equality.createAttributeEquality(col1, col2));
 		}
 		return results;
@@ -194,85 +192,80 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 		if (isEmpty()) {
 			return Expression.FALSE;
 		}
-		List translated = new ArrayList();
+		List<Expression> translated = new ArrayList<Expression>();
 		if (attributes.size() >= 2) {
-			Iterator it = attributes.iterator();
-			Attribute first = (Attribute) it.next();
+			Iterator<Attribute> it = attributes.iterator();
+			Attribute first = it.next();
 			while (it.hasNext()) {
-				Attribute attribute = (Attribute) it.next();
-				translated.add(Equality.createAttributeEquality(first, attribute));
+				translated.add(Equality.createAttributeEquality(first, it.next()));
 			}
 		}
 		if (patterns.size() >= 2) {
-			Iterator it = patterns.iterator();
-			Pattern first = (Pattern) it.next();
+			Iterator<Pattern> it = patterns.iterator();
+			Pattern first = it.next();
 			while (it.hasNext()) {
-				Pattern pattern = (Pattern) it.next();
-				translated.addAll(matchPatterns(first, pattern));
+				translated.addAll(matchPatterns(first, it.next()));
 			}
 		}
 		if (expressions.size() >= 2) {
-			Iterator it = expressions.iterator();
-			Expression first = (Expression) it.next();
+			Iterator<Expression> it = expressions.iterator();
+			Expression first = it.next();
 			while (it.hasNext()) {
-				Expression expression = (Expression) it.next();
-				translated.add(Equality.create(first, expression));
+				translated.add(Equality.create(first, it.next()));
 			}
 		}
 		if (blankNodeIDs.size() >= 2) {
-			Iterator it = blankNodeIDs.iterator();
-			BlankNodeID first = (BlankNodeID) it.next();
+			Iterator<BlankNodeID> it = blankNodeIDs.iterator();
+			BlankNodeID first = it.next();
 			while (it.hasNext()) {
-				BlankNodeID blankNodeID = (BlankNodeID) it.next();
-				translated.addAll(matchBlankNodeIDs(first, blankNodeID));
+				translated.addAll(matchBlankNodeIDs(first, it.next()));
 			}
 		}
 		if (constantValue != null) {
 			if (!attributes.isEmpty()) {
-				Attribute first = (Attribute) attributes.iterator().next();
+				Attribute first = attributes.iterator().next();
 				translated.add(Equality.createAttributeValue(first, constantValue));
 			}
 			if (!blankNodeIDs.isEmpty()) {
-				BlankNodeID first = (BlankNodeID) blankNodeIDs.iterator().next();
+				BlankNodeID first = blankNodeIDs.iterator().next();
 				translated.add(first.valueExpression(constantValue));
 			}
 			if (!patterns.isEmpty()) {
-				Pattern first = (Pattern) patterns.iterator().next();
+				Pattern first = patterns.iterator().next();
 				translated.add(first.valueExpression(constantValue));
 			}
 			if (!expressions.isEmpty()) {
-				Expression first = (Expression) expressions.iterator().next();
+				Expression first = expressions.iterator().next();
 				translated.add(Equality.createExpressionValue(first, constantValue));
 			}
 		} else if (!attributes.isEmpty()) {
-			AttributeExpr attribute = new AttributeExpr(
-					(Attribute) attributes.iterator().next());
+			AttributeExpr attribute = new AttributeExpr(attributes.iterator().next());
 			if (!blankNodeIDs.isEmpty()) {
-				BlankNodeID first = (BlankNodeID) blankNodeIDs.iterator().next();
+				BlankNodeID first = blankNodeIDs.iterator().next();
 				translated.add(Equality.create(attribute, first.toExpression()));
 			}
 			if (!patterns.isEmpty()) {
-				Pattern first = (Pattern) patterns.iterator().next();
+				Pattern first = patterns.iterator().next();
 				translated.add(Equality.create(attribute, first.toExpression()));
 			}
 			if (!expressions.isEmpty()) {
-				Expression first = (Expression) expressions.iterator().next();
+				Expression first = expressions.iterator().next();
 				translated.add(Equality.create(attribute, first));
 			}
 		} else if (!expressions.isEmpty()) {
-			Expression expression = (Expression) expressions.iterator().next();
+			Expression expression = expressions.iterator().next();
 			if (!blankNodeIDs.isEmpty()) {
-				BlankNodeID first = (BlankNodeID) blankNodeIDs.iterator().next();
+				BlankNodeID first = blankNodeIDs.iterator().next();
 				translated.add(Equality.create(expression, first.toExpression()));
 			}
 			if (!patterns.isEmpty()) {
-				Pattern first = (Pattern) patterns.iterator().next();
+				Pattern first = patterns.iterator().next();
 				translated.add(Equality.create(expression, first.toExpression()));
 			}
 		} else if (!patterns.isEmpty()) {
-			Expression pattern = ((Pattern) patterns.iterator().next()).toExpression();
+			Expression pattern = (patterns.iterator().next()).toExpression();
 			if (!blankNodeIDs.isEmpty()) {
-				BlankNodeID first = (BlankNodeID) blankNodeIDs.iterator().next();
+				BlankNodeID first = blankNodeIDs.iterator().next();
 				translated.add(Equality.create(pattern, first.toExpression()));
 			}
 		}

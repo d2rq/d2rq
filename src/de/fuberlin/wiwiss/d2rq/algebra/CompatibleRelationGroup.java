@@ -7,10 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.engine.BindingMaker;
-import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.expr.Disjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
-import de.fuberlin.wiwiss.d2rq.find.TripleMaker;
 
 /**
  * A group of {@link Relation}s that can be combined into a single
@@ -24,42 +22,17 @@ import de.fuberlin.wiwiss.d2rq.find.TripleMaker;
  * can still be combined, but require that the new relation has the disjunction
  * (<code>OR</code>) of all conditions as a <code>WHERE</code> clause, and
  * the individual conditions must be added to the <code>SELECT</code> list
- * (as {@link ProjectionSpec}s) so that triples/bindings are generated only
+ * (as {@link ProjectionSpec}s) so that bindings are generated only
  * if that clause is <code>TRUE</code>
  * 
- * TODO: The BindingRelation and TripleRelation stuff is virtually identical
- * TODO: Should check if the BindingMaker/TripleMaker already has a condition?
+ * TODO: Should check if the BindingMaker already has a condition?
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class CompatibleRelationGroup {
 
-	public static Collection<CompatibleRelationGroup> groupTripleRelations(
-			Collection<TripleRelation> tripleRelations) {
-		Collection<CompatibleRelationGroup> result = new ArrayList<CompatibleRelationGroup>();
-		for (TripleRelation tripleRelation: tripleRelations) {
-			addTripleRelation(tripleRelation, result);
-		}
-		return result;
-	}
-	
-	private static void addTripleRelation(TripleRelation tripleRelation, 
-			Collection<CompatibleRelationGroup> groups) {
-		for (CompatibleRelationGroup group: groups) {
-			if (group.isCompatible(tripleRelation.baseRelation())) {
-				group.addTripleMaker(
-						tripleRelation.baseRelation(), new TripleMaker(tripleRelation));
-				return;
-			}
-		}
-		CompatibleRelationGroup newGroup = new CompatibleRelationGroup();
-		newGroup.addTripleMaker(
-				tripleRelation.baseRelation(), new TripleMaker(tripleRelation));
-		groups.add(newGroup);
-	}
-	
 	public static Collection<CompatibleRelationGroup> groupNodeRelations(
-			Collection<NodeRelation> nodeRelations) {
+			Collection<? extends NodeRelation> nodeRelations) {
 		Collection<CompatibleRelationGroup> result = new ArrayList<CompatibleRelationGroup>();
 		for (NodeRelation nodeRelation: nodeRelations) {
 			addNodeRelation(nodeRelation, result);
@@ -72,13 +45,13 @@ public class CompatibleRelationGroup {
 		for (CompatibleRelationGroup group: groups) {
 			if (group.isCompatible(nodeRelation.baseRelation())) {
 				group.addBindingMaker(
-						nodeRelation.baseRelation(), new BindingMaker(nodeRelation));
+						nodeRelation.baseRelation(), BindingMaker.createFor(nodeRelation));
 				return;
 			}
 		}
 		CompatibleRelationGroup newGroup = new CompatibleRelationGroup();
 		newGroup.addBindingMaker(
-				nodeRelation.baseRelation(), new BindingMaker(nodeRelation));
+				nodeRelation.baseRelation(), BindingMaker.createFor(nodeRelation));
 		groups.add(newGroup);
 	}
 	
@@ -119,7 +92,7 @@ public class CompatibleRelationGroup {
 		return false;
 	}
 
-	private void addRelation(Relation relation) {
+	public void addRelation(Relation relation) {
 		if (firstBaseRelation == null) {
 			firstBaseRelation = relation;
 		}
@@ -131,11 +104,6 @@ public class CompatibleRelationGroup {
 		relationCounter++;
 	}
 
-	public void addTripleMaker(Relation relation, TripleMaker tripleMaker) {
-		addRelation(relation);
-		makers.add(new Maker(tripleMaker, relation.condition()));
-	}
-	
 	public void addBindingMaker(Relation relation, BindingMaker bindingMaker) {
 		addRelation(relation);
 		makers.add(new Maker(bindingMaker, relation.condition()));
@@ -153,9 +121,10 @@ public class CompatibleRelationGroup {
 			Set<Expression> allConditions = new HashSet<Expression>();
 			Set<ProjectionSpec> projectionsAndConditions = new HashSet<ProjectionSpec>(projections);
 			for (Maker maker: makers) {
-				if (maker.condition.isTrue()) continue;
 				allConditions.add(maker.condition);
-				projectionsAndConditions.add(maker.conditionProjection());
+				if (!maker.condition.isTrue()) {
+					projectionsAndConditions.add(maker.conditionProjection());
+				}
 			}
 			if (allConditions.isEmpty()) {
 				allConditions.add(Expression.TRUE);
@@ -178,42 +147,23 @@ public class CompatibleRelationGroup {
 					allUnique, firstBaseRelation.order(), firstBaseRelation.orderDesc(), firstBaseRelation.limit(), firstBaseRelation.limitInverse());
 		}
 	}
-	
-	public Collection<TripleMaker> tripleMakers() {
-		Collection<TripleMaker> results = new ArrayList<TripleMaker>();
-		if (relationCounter == 1 || !differentConditions) {
-			// Return list of unchanged triple makers
-			for (Maker maker: makers) {
-				if (maker.tMaker == null) continue;
-				results.add(maker.tMaker);
-			}
-		} else {
-			// Make triple makers conditional on the added boolean condition
-			for (Maker maker: makers) {
-				if (maker.tMaker == null) continue;
-				if (maker.condition.isTrue()) {
-					results.add(maker.tMaker);
-				} else {
-					results.add(new TripleMaker(maker.tMaker, maker.conditionProjection()));
-				}
-			}
-		}
-		return results;
-	}
-	
+
 	public Collection<BindingMaker> bindingMakers() {
 		Collection<BindingMaker> results = new ArrayList<BindingMaker>();
 		if (relationCounter == 1 || !differentConditions) {
+			// Return list of unchanged triple makers
 			for (Maker maker: makers) {
 				if (maker.bMaker == null) continue;
 				results.add(maker.bMaker);
 			}
 		} else {
+			// Make binding makers conditional on the added boolean condition
 			for (Maker maker: makers) {
 				if (maker.bMaker == null) continue;
 				if (maker.condition.isTrue()) {
 					results.add(maker.bMaker);
-					results.add(new BindingMaker(maker.bMaker, maker.conditionProjection()));
+				} else {
+					results.add(maker.makeConditional());
 				}
 			}
 		}
@@ -222,20 +172,16 @@ public class CompatibleRelationGroup {
 	
 	private class Maker {
 		private final BindingMaker bMaker;
-		private final TripleMaker tMaker;
 		private final Expression condition;
 		Maker(BindingMaker maker, Expression condition) {
 			this.bMaker = maker;
-			this.tMaker = null;
-			this.condition = condition;
-		}
-		Maker(TripleMaker maker, Expression condition) {
-			this.bMaker = null;
-			this.tMaker = maker;
 			this.condition = condition;
 		}
 		ProjectionSpec conditionProjection() {
 			return new ExpressionProjectionSpec(condition);
+		}
+		BindingMaker makeConditional() {
+			return bMaker.makeConditional(conditionProjection());
 		}
 	}
 }

@@ -21,9 +21,9 @@ public class OpD2RQ extends OpExt
 	private static final String tagD2RQ = "d2rq"; 	
 	protected final OpBGP original;
 	protected final Relation relation;
-	protected final Collection bindingMakers;
+	protected final Collection<BindingMaker> bindingMakers;
 	
-	public OpD2RQ(OpBGP original, Relation relation, Collection bindingMakers) 
+	public OpD2RQ(OpBGP original, Relation relation, Collection<BindingMaker> bindingMakers) 
 	{
 		super(tagD2RQ);
 		this.original = original;
@@ -64,7 +64,7 @@ public class OpD2RQ extends OpExt
 	/**
 	 * used for linking 2 OpD2RQs with an left-join
 	 */
-	public Collection getBindingMakers() 
+	public Collection<BindingMaker> getBindingMakers() 
 	{
 		return bindingMakers;
 	}

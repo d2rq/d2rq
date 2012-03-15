@@ -6,6 +6,7 @@ import java.util.Set;
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
@@ -32,8 +33,8 @@ public class FixedNodeMaker implements NodeMaker {
 		c.limitTo(this.node);
 	}
 
-	public Set projectionSpecs() {
-		return Collections.EMPTY_SET;
+	public Set<ProjectionSpec> projectionSpecs() {
+		return Collections.<ProjectionSpec>emptySet();
 	}
 
 	public NodeMaker selectNode(Node n, RelationalOperators sideEffects) {

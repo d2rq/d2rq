@@ -3,14 +3,11 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
-import de.fuberlin.wiwiss.d2rq.engine.NamesToNodeMakersMap;
-import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 
@@ -20,36 +17,35 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * to each result row. This is implemented as a stateless wrapper around a
  * {@link NodeRelation}.
  *
- * TODO Merge with {@link NodeRelation}; only selectTriple and makeTriples are troublesome
- * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class TripleRelation {
+public class TripleRelation extends NodeRelation {
 	public static final String SUBJECT = "subject";
 	public static final String PREDICATE = "predicate";
 	public static final String OBJECT = "object";
 
-	public static final List SUBJ_PRED_OBJ = Arrays.asList(
-			new String[]{SUBJECT, PREDICATE, OBJECT});
+	private static final Set<String> SPO = 
+		new HashSet<String>(Arrays.asList(new String[]{SUBJECT, PREDICATE, OBJECT}));
 	
-	private NodeRelation nodeRelation;
+	private static final TripleRelation EMPTY = fromNodeRelation(NodeRelation.empty(SPO));
+	
+	private static TripleRelation fromNodeRelation(NodeRelation relation) {
+		if (!relation.variableNames().equals(SPO)) {
+			throw new IllegalArgumentException(
+					"Not a TripleRelation header: " + relation.variableNames());
+		}
+		return new TripleRelation(relation.baseRelation(), 
+				relation.nodeMaker(SUBJECT), relation.nodeMaker(PREDICATE), relation.nodeMaker(OBJECT));
+	}
 	
 	public TripleRelation(Relation baseRelation, 
 			final NodeMaker subjectMaker, final NodeMaker predicateMaker, final NodeMaker objectMaker) {
-		this(new NodeRelation(baseRelation, new HashMap() {{
+		super(baseRelation, new HashMap<String,NodeMaker>() {{
 			put(SUBJECT, subjectMaker);
 			put(PREDICATE, predicateMaker);
 			put(OBJECT, objectMaker);
-		}}));
-	}
-	
-	private TripleRelation(NodeRelation nodeRelation) {
-		if (!nodeRelation.variableNames().equals(new HashSet(SUBJ_PRED_OBJ))) {
-			throw new IllegalArgumentException(
-					"Not a TripleRelation header: " + nodeRelation.variableNames());
-		}
-		this.nodeRelation = nodeRelation;
+		}});
 	}
 	
 	public String toString() {
@@ -60,22 +56,6 @@ public class TripleRelation {
 				")";
 	}
 	
-	public Relation baseRelation() {
-		return nodeRelation.baseRelation();
-	}
-	
-	public NodeMaker nodeMaker(String variableName) {
-		return nodeRelation.nodeMaker(variableName);
-	}
-	
-	public TripleRelation withPrefix(int index) {
-		return new TripleRelation(nodeRelation.withPrefix(index));
-	}
-	
-	public TripleRelation renameSingleRelation(RelationName oldName, RelationName newName) {
-		return new TripleRelation(nodeRelation.renameSingleRelation(oldName, newName));
-	}
-	
 	public TripleRelation selectTriple(Triple t) {
 		MutableRelation newBase = new MutableRelation(baseRelation());
 		NodeMaker s = nodeMaker(SUBJECT).selectNode(t.getSubject(), newBase);
@@ -84,7 +64,7 @@ public class TripleRelation {
 		if (p.equals(NodeMaker.EMPTY)) return null;
 		NodeMaker o = nodeMaker(OBJECT).selectNode(t.getObject(), newBase);
 		if (o.equals(NodeMaker.EMPTY)) return null;
-		Set projections = new HashSet();
+		Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
 		projections.addAll(s.projectionSpecs());
 		projections.addAll(p.projectionSpecs());
 		projections.addAll(o.projectionSpecs());
@@ -107,10 +87,12 @@ public class TripleRelation {
 	 * NodeRelation with ?x bound to the subjects and ?name bound to the
 	 * objects of this TripleRelation.
 	 * 
+	 * TODO This is never called at the moment. Why!?
+	 * 
 	 * @param t A triple pattern involving variables
 	 * @return A NodeRelation over the variables occurring in the triple pattern 
 	 */
-	public NodeRelation selectWithVariables(Triple t) {
+	public TripleRelation selectWithVariables(Triple t) {
 		// Select non-variable parts of the triple
 		TripleRelation selected = selectTriple(t);
 		
@@ -121,13 +103,13 @@ public class TripleRelation {
 		
 		// Collect variable names and their bound node makers 
 		NamesToNodeMakersMap nodeMakers = new NamesToNodeMakersMap();
-		nodeMakers.addIfVariable(s, nodeMaker(SUBJECT), nodeRelation.baseRelation().aliases());
-		nodeMakers.addIfVariable(p, nodeMaker(PREDICATE), nodeRelation.baseRelation().aliases());
-		nodeMakers.addIfVariable(o, nodeMaker(OBJECT), nodeRelation.baseRelation().aliases());
+		nodeMakers.addIfVariable(s, nodeMaker(SUBJECT), baseRelation().aliases());
+		nodeMakers.addIfVariable(p, nodeMaker(PREDICATE), baseRelation().aliases());
+		nodeMakers.addIfVariable(o, nodeMaker(OBJECT), baseRelation().aliases());
 
 		// Did the same variable occur more than once in the pattern, rendering it unsatisfiable?
 		if (!nodeMakers.satisfiable()) {
-			return NodeRelation.empty(nodeMakers.allNames());
+			return TripleRelation.EMPTY;
 		}
 		
 		MutableRelation mutator = new MutableRelation(selected.baseRelation());
@@ -139,6 +121,7 @@ public class TripleRelation {
 		}
 		
 		mutator.project(nodeMakers.allProjections());
-		return new NodeRelation(mutator.immutableSnapshot(), nodeMakers.toMap());
+		return fromNodeRelation(new NodeRelation(
+				mutator.immutableSnapshot(), nodeMakers.toMap()));
 	}
 }

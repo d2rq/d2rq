@@ -18,7 +18,7 @@ public class ExpressionProjectionSpec implements ProjectionSpec {
 		return new ExpressionProjectionSpec(renamer.applyTo(expression));
 	}
 
-	public Set requiredAttributes() {
+	public Set<Attribute> requiredAttributes() {
 		return expression.attributes();
 	}
 
@@ -41,5 +41,17 @@ public class ExpressionProjectionSpec implements ProjectionSpec {
 
 	public String toString() {
 		return "ProjectionSpec(" + expression + " AS " + name + ")";
+	}
+
+	/**
+	 * Compares columns alphanumerically by qualified name, case sensitive.
+	 * Attributes with schema are larger than attributes without schema.
+	 */
+	public int compareTo(ProjectionSpec other) {
+		if (!(other instanceof ExpressionProjectionSpec)) {
+			return 1;
+		}
+		ExpressionProjectionSpec otherExpr = (ExpressionProjectionSpec) other;
+		return this.name.compareTo(otherExpr.name);
 	}
 }

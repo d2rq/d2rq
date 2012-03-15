@@ -8,6 +8,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
@@ -53,7 +54,7 @@ public class TypedNodeMaker implements NodeMaker {
 		this.isUnique = isUnique;
 	}
 	
-	public Set projectionSpecs() {
+	public Set<ProjectionSpec> projectionSpecs() {
 		return this.valueMaker.projectionSpecs();
 	}
 	

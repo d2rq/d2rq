@@ -1,7 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.optimizer.utility;
 
-import java.util.Iterator;
-
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprList;
@@ -26,7 +24,6 @@ public class OpFilterUtility
 	public static ExprList translateFilterExpressionsToCNF(final OpFilter opFilter)
 	{
 		ExprList exprList, newExprList;
-		Expr expr;
 		OpFilter copiedOpFilter;
 		
 		newExprList = new ExprList();	// contains the translated expressions
@@ -38,9 +35,7 @@ public class OpFilterUtility
 		exprList = copiedOpFilter.getExprs();
 		
 		// for every expression of the filter, apply first DeMorgan-law and then Distributive-law
-		for (Iterator iterator = exprList.iterator(); iterator.hasNext();)
-        {
-			expr = (Expr) iterator.next();
+		for (Expr expr: exprList) {
 			if (expr instanceof ExprNode) { // only SPARQL expressions are handled (e.g. no RDQL SimpleNode)
 	            expr = applyDeMorganLaw(expr); 			// !(a || b) will become !a && !b
 	            expr = applyDistributivLaw(expr);		// a || (b && c) will become (a || b) && (a || c)

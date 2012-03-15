@@ -4,7 +4,6 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -21,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * @author zazi (http://github.com/zazi)
  */
 public class TranslationTable extends MapObject {
-	private Collection translations = new ArrayList();
+	private Collection<Translation> translations = new ArrayList<Translation>();
 	private String javaClass = null;
 	private String href = null;
 
@@ -99,7 +98,7 @@ public class TranslationTable extends MapObject {
 	
 	private Translator instantiateJavaClass() {
 		try {
-			Class translatorClass = Class.forName(this.javaClass);
+			Class<?> translatorClass = Class.forName(this.javaClass);
 			if (!checkTranslatorClassImplementation(translatorClass)) {
 				throw new D2RQException("d2rq:javaClass " + this.javaClass + " must implement " + Translator.class.getName());
 			}
@@ -124,7 +123,7 @@ public class TranslationTable extends MapObject {
 	 * @return true, if the currently checked translator class implements the
 	 *	 Translator class interface
 	 */
-	private boolean checkTranslatorClassImplementation(Class translatorClass) {
+	private boolean checkTranslatorClassImplementation(Class<?> translatorClass) {
 		if (implementsTranslator(translatorClass)) {
 			return true;
 		}
@@ -135,7 +134,7 @@ public class TranslationTable extends MapObject {
 				.getSuperclass());
 	}
 
-	private boolean implementsTranslator(Class aClass) {
+	private boolean implementsTranslator(Class<?> aClass) {
 		for (int i = 0; i < aClass.getInterfaces().length; i++) {
 			if (aClass.getInterfaces()[i].equals(Translator.class)) {
 				return true;
@@ -144,7 +143,7 @@ public class TranslationTable extends MapObject {
 		return false;
 	}
 
-	private boolean hasConstructorWithArg(Class aClass) {
+	private boolean hasConstructorWithArg(Class<?> aClass) {
 		try {
 			aClass.getConstructor(new Class[]{Resource.class});
 			return true;
@@ -153,16 +152,16 @@ public class TranslationTable extends MapObject {
 		}
 	}
 	
-	private Translator invokeConstructorWithArg(Class aClass, Resource r) {
+	private Translator invokeConstructorWithArg(Class<?> aClass, Resource r) {
 		try {
-			Constructor c = aClass.getConstructor(new Class[]{Resource.class});
+			Constructor<?> c = aClass.getConstructor(new Class[]{Resource.class});
 			return (Translator) c.newInstance(new Object[]{r});
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
-	private boolean hasConstructorWithoutArg(Class aClass) {
+	private boolean hasConstructorWithoutArg(Class<?> aClass) {
 		try {
 			aClass.getConstructor(new Class[]{});
 			return true;
@@ -171,9 +170,9 @@ public class TranslationTable extends MapObject {
 		}
 	}
 	
-	private Translator invokeConstructorWithoutArg(Class aClass) {
+	private Translator invokeConstructorWithoutArg(Class<?> aClass) {
 		try {
-			Constructor c = aClass.getConstructor(new Class[]{});
+			Constructor<?> c = aClass.getConstructor(new Class[]{});
 			return (Translator) c.newInstance(new Object[]{});
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -202,22 +201,20 @@ public class TranslationTable extends MapObject {
 	}
 	
 	private class TableTranslator implements Translator {
-		private Map translationsByDBValue = new HashMap();
-		private Map translationsByRDFValue = new HashMap();
-		TableTranslator(Collection translations) {
-			Iterator it = translations.iterator();
-			while (it.hasNext()) {
-				Translation translation = (Translation) it.next();
-				this.translationsByDBValue.put(translation.dbValue, translation);
-				this.translationsByRDFValue.put(translation.rdfValue, translation);
+		private Map<String,Translation> translationsByDBValue = new HashMap<String,Translation>();
+		private Map<String,Translation> translationsByRDFValue = new HashMap<String,Translation>();
+		TableTranslator(Collection<Translation> translations) {
+			for (Translation translation: translations) {
+				translationsByDBValue.put(translation.dbValue, translation);
+				translationsByRDFValue.put(translation.rdfValue, translation);
 			}
 		}
 		public String toDBValue(String rdfValue) {
-			Translation translation = (Translation) this.translationsByRDFValue.get(rdfValue);
+			Translation translation = translationsByRDFValue.get(rdfValue);
 			return (translation == null) ? null : translation.dbValue();
 		}
 		public String toRDFValue(String dbValue) {
-			Translation translation = (Translation) this.translationsByDBValue.get(dbValue);
+			Translation translation = translationsByDBValue.get(dbValue);
 			return (translation == null) ? null : translation.rdfValue();
 		}
 	}

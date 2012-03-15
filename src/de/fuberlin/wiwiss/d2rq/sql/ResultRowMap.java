@@ -1,7 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -19,7 +17,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hsqldb.types.Types;
 
-import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 
 /**
@@ -297,25 +294,9 @@ public class ResultRowMap implements ResultRow {
 		return hex.toString();
 	}
 
-	private static String toHexString(InputStream in) {
-		final StringBuilder hex = new StringBuilder();
-		try {
-			while (true) {
-				int b = in.read();
-				if (b == -1) break;
-				hex.append(HEX_DIGITS[(b & 0xF0) >> 4]);
-				hex.append(HEX_DIGITS[b & 0x0F]);
-			}
-			return hex.toString();
-
-		} catch (IOException ex) {
-			throw new D2RQException(ex);
-		}
-	}
+	private final Map<ProjectionSpec,String> projectionsToValues;
 	
-	private Map projectionsToValues;
-	
-	public ResultRowMap(Map projectionsToValues) {
+	public ResultRowMap(Map<ProjectionSpec,String> projectionsToValues) {
 		this.projectionsToValues = projectionsToValues;
 	}
 	
@@ -324,10 +305,10 @@ public class ResultRowMap implements ResultRow {
 	}
 
 	public String toString() {
-		List columns = new ArrayList(this.projectionsToValues.keySet());
+		List<ProjectionSpec> columns = new ArrayList<ProjectionSpec>(this.projectionsToValues.keySet());
 		Collections.sort(columns);
 		StringBuffer result = new StringBuffer("{");
-		Iterator it = columns.iterator();
+		Iterator<ProjectionSpec> it = columns.iterator();
 		while (it.hasNext()) {
 			ProjectionSpec projection = (ProjectionSpec) it.next();
 			result.append(projection.toString());

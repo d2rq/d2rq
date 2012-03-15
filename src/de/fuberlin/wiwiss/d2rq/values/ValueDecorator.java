@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -47,14 +48,14 @@ public class ValueDecorator implements ValueMaker {
 	}
 	
 	private ValueMaker base;
-	private List constraints;
+	private List<ValueConstraint> constraints;
 	private Translator translator;
 	
-	public ValueDecorator(ValueMaker base, List constraints) {
+	public ValueDecorator(ValueMaker base, List<ValueConstraint> constraints) {
 		this(base, constraints, Translator.identity);
 	}
 
-	public ValueDecorator(ValueMaker base, List constraints, Translator translator) {
+	public ValueDecorator(ValueMaker base, List<ValueConstraint> constraints, Translator translator) {
 		this.base = base;
 		this.constraints = constraints;
 		this.translator = translator;
@@ -69,9 +70,7 @@ public class ValueDecorator implements ValueMaker {
 	}
 
 	public Expression valueExpression(String value) {
-		Iterator it = this.constraints.iterator();
-		while (it.hasNext()) {
-			ValueConstraint constraint = (ValueConstraint) it.next();
+		for (ValueConstraint constraint: constraints) {
 			if (!constraint.matches(value)) {
 				return Expression.FALSE;
 			}
@@ -83,7 +82,7 @@ public class ValueDecorator implements ValueMaker {
 		return base.valueExpression(dbValue);
 	}
 
-	public Set projectionSpecs() {
+	public Set<ProjectionSpec> projectionSpecs() {
 		return this.base.projectionSpecs();
 	}
 	
@@ -102,7 +101,7 @@ public class ValueDecorator implements ValueMaker {
 			result.append("(");
 		}
 		result.append(this.base.toString());
-		Iterator it = this.constraints.iterator();
+		Iterator<ValueConstraint> it = this.constraints.iterator();
 		if (it.hasNext()) {
 			result.append(":");
 		}

@@ -11,9 +11,9 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public interface ProjectionSpec {
+public interface ProjectionSpec extends Comparable<ProjectionSpec> {
 
-	public Set requiredAttributes();
+	public Set<Attribute> requiredAttributes();
 	
 	public ProjectionSpec renameAttributes(ColumnRenamer renamer);
 	

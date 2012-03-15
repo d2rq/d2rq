@@ -3,7 +3,6 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
@@ -22,19 +21,21 @@ public abstract class Relation implements RelationalOperators {
 	public static Relation createSimpleRelation(
 			ConnectedDB database, Attribute[] attributes) {
 		return new RelationImpl(database, AliasMap.NO_ALIASES, Expression.TRUE,
-				Collections.EMPTY_SET, new HashSet(Arrays.asList(attributes)), false, null, false, -1, -1);
+				Collections.<Join>emptySet(), 
+				new HashSet<ProjectionSpec>(Arrays.asList(attributes)), 
+				false, null, false, -1, -1);
 	}
 	
 	public static Relation EMPTY = new Relation() {
 		public ConnectedDB database() { return null; }
 		public AliasMap aliases() { return AliasMap.NO_ALIASES; }
-		public Set joinConditions() { return Collections.EMPTY_SET; }
-		public Set leftJoinConditions() { return Collections.EMPTY_SET; }
+		public Set<Join> joinConditions() { return Collections.<Join>emptySet(); }
+		public Set<Join> leftJoinConditions() { return Collections.<Join>emptySet(); }
 		public Expression condition() { return Expression.FALSE; }
-		public Set projections() { return Collections.EMPTY_SET; }
+		public Set<ProjectionSpec> projections() { return Collections.<ProjectionSpec>emptySet(); }
 		public Relation select(Expression condition) { return this; }
 		public Relation renameColumns(ColumnRenamer renamer) { return this; }
-		public Relation project(Set projectionSpecs) { return this; }
+		public Relation project(Set<? extends ProjectionSpec>  projectionSpecs) { return this; }
 		public boolean isUnique() { return true; }
 		public String toString() { return "Relation.EMPTY"; }
 		public Attribute order() { return null; }
@@ -45,10 +46,10 @@ public abstract class Relation implements RelationalOperators {
 	public static Relation TRUE = new Relation() {
 		public ConnectedDB database() { return null; }
 		public AliasMap aliases() { return AliasMap.NO_ALIASES; }
-		public Set joinConditions() { return Collections.EMPTY_SET; }
-		public Set leftJoinConditions() { return Collections.EMPTY_SET; }
+		public Set<Join> joinConditions() { return Collections.<Join>emptySet(); }
+		public Set<Join> leftJoinConditions() { return Collections.<Join>emptySet(); }
 		public Expression condition() { return Expression.TRUE; }
-		public Set projections() { return Collections.EMPTY_SET; }
+		public Set<ProjectionSpec> projections() { return Collections.<ProjectionSpec>emptySet(); }
 		public Relation select(Expression condition) {
 			if (condition.isFalse()) return Relation.EMPTY;
 			if (condition.isTrue()) return Relation.TRUE;
@@ -57,7 +58,7 @@ public abstract class Relation implements RelationalOperators {
 			return Relation.TRUE;
 		}
 		public Relation renameColumns(ColumnRenamer renamer) { return this; }
-		public Relation project(Set projectionSpecs) { return this; }
+		public Relation project(Set<? extends ProjectionSpec> projectionSpecs) { return this; }
 		public boolean isUnique() { return true; }
 		public String toString() { return "Relation.TRUE"; }
 		public Attribute order() { return null; }
@@ -81,14 +82,14 @@ public abstract class Relation implements RelationalOperators {
 	 * in the relation.
 	 * @return A set of {@link Join}s 
 	 */
-	public abstract Set joinConditions();
+	public abstract Set<Join> joinConditions();
 
 	/**
 	 * Returns the leftjoin conditions that must hold between the tables
 	 * in the relation.
 	 * @return A set of {@link Join}s 
 	 */
-	public abstract Set leftJoinConditions();
+	public abstract Set<Join> leftJoinConditions();
 	
 	/**
 	 * An expression that must be satisfied for all tuples in the
@@ -101,7 +102,7 @@ public abstract class Relation implements RelationalOperators {
 	 * The attributes or expressions that the relation is projected to.
 	 * @return A set of {@link ProjectionSpec}s
 	 */
-	public abstract Set projections();
+	public abstract Set<ProjectionSpec> projections();
 	
 	public abstract boolean isUnique();
 	
@@ -129,28 +130,22 @@ public abstract class Relation implements RelationalOperators {
 	 */
 	public abstract int limitInverse();
 
-	public Set allKnownAttributes() {
-		Set results = new HashSet();
+	public Set<Attribute> allKnownAttributes() {
+		Set<Attribute> results = new HashSet<Attribute>();
 		results.addAll(condition().attributes());
-		Iterator it = joinConditions().iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
+		for (Join join: joinConditions()) {
 			results.addAll(join.attributes1());
 			results.addAll(join.attributes2());
 		}
-		it = projections().iterator();
-		while (it.hasNext()) {
-			ProjectionSpec projection = (ProjectionSpec) it.next();
+		for (ProjectionSpec projection: projections()) {
 			results.addAll(projection.requiredAttributes());
 		}
 		return results;
 	}
 
-	public Set tables() {
-		Set results = new HashSet();
-		Iterator it = allKnownAttributes().iterator();
-		while (it.hasNext()) {
-			Attribute attribute = (Attribute) it.next();
+	public Set<RelationName> tables() {
+		Set<RelationName> results = new HashSet<RelationName>();
+		for (Attribute attribute: allKnownAttributes()) {
 			results.add(attribute.relationName());
 		}
 		return results;

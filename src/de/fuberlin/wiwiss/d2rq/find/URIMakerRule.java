@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,11 +44,11 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class URIMakerRule implements Comparator {
-	private Map identifierCache = new HashMap();
+public class URIMakerRule implements Comparator<TripleRelation> {
+	private Map<NodeMaker, URIMakerIdentifier> identifierCache = new HashMap<NodeMaker, URIMakerIdentifier>();
 
-	public List sortRDFRelations(Collection tripleRelations) {
-		ArrayList results = new ArrayList(tripleRelations);
+	public List<TripleRelation> sortRDFRelations(Collection<TripleRelation> tripleRelations) {
+		ArrayList<TripleRelation> results = new ArrayList<TripleRelation>(tripleRelations);
 		Collections.sort(results, this);
 		return results;
 	}
@@ -58,12 +57,9 @@ public class URIMakerRule implements Comparator {
 		return new URIMakerRuleChecker(node);
 	}
 	
-	public int compare(Object o1, Object o2) {
-		if (!(o1 instanceof TripleRelation) || !(o2 instanceof TripleRelation)) {
-			return 0;
-		}
-		int priority1 = priority((TripleRelation) o1);
-		int priority2 = priority((TripleRelation) o2);
+	public int compare(TripleRelation o1, TripleRelation o2) {
+		int priority1 = priority(o1);
+		int priority2 = priority(o2);
 		if (priority1 > priority2) {
 			return -1;
 		}
@@ -75,9 +71,7 @@ public class URIMakerRule implements Comparator {
 	
 	private int priority(TripleRelation relation) {
 		int result = 0;
-		Iterator it = TripleRelation.SUBJ_PRED_OBJ.iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
+		for (String name: relation.variableNames()) {
 			URIMakerIdentifier id = uriMakerIdentifier(relation.nodeMaker(name));
 			if (id.isURIPattern()) {
 				result += 3;

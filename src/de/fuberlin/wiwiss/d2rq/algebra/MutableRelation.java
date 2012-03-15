@@ -54,7 +54,7 @@ public class MutableRelation implements RelationalOperators {
 	            relation.limit());
 	}
 	
-	public Relation project(Set projectionSpecs) {
+	public Relation project(Set<? extends ProjectionSpec> projectionSpecs) {
 		return relation = relation.project(projectionSpecs);
 	}
 	

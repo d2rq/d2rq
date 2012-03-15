@@ -1,41 +1,39 @@
-package de.fuberlin.wiwiss.d2rq.engine;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
-import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 
 /**
+ * A {@Relation} associated with a number of named {@link NodeMaker}s.
+ * 
+ * TODO: This is really just a Relation and a BindingMaker wrapped into one. Refactor as such?
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class NodeRelation {
 	
 	public static final NodeRelation TRUE = 
-		new NodeRelation(Relation.TRUE, Collections.EMPTY_MAP);
+		new NodeRelation(Relation.TRUE, Collections.<String,NodeMaker>emptyMap());
 
-	public static NodeRelation empty(Set variables) {
-		Map map = new HashMap();
-		Iterator it = variables.iterator();
-		while (it.hasNext()) {
-			String variableName = (String) it.next();
+	public static NodeRelation empty(Set<String> variables) {
+		Map<String,NodeMaker> map = new HashMap<String,NodeMaker>();
+		for (String variableName: variables) {
 			map.put(variableName, NodeMaker.EMPTY);
 		}
 		return new NodeRelation(Relation.EMPTY, map);
 	}
 	
-	private Relation base;
-	private Map variablesToNodeMakers;
+	private final Relation base;
+	private final Map<String,NodeMaker> variablesToNodeMakers;
 	
-	public NodeRelation(Relation base, Map variablesToNodeMakers) {
+	public NodeRelation(Relation base, Map<String,NodeMaker> variablesToNodeMakers) {
 		this.base = base;
 		this.variablesToNodeMakers = variablesToNodeMakers;
 	}
@@ -44,7 +42,7 @@ public class NodeRelation {
 		return base;
 	}
 	
-	public Set variableNames() {
+	public Set<String> variableNames() {
 		return variablesToNodeMakers.keySet();
 	}
 	
@@ -53,17 +51,13 @@ public class NodeRelation {
 	}
 
 	public NodeRelation withPrefix(int index) {
-		Collection newAliases = new ArrayList();
-		Iterator it = baseRelation().tables().iterator();
-		while (it.hasNext()) {
-			RelationName tableName = (RelationName) it.next();
+		Collection<Alias> newAliases = new ArrayList<Alias>();
+		for (RelationName tableName: baseRelation().tables()) {
 			newAliases.add(new Alias(tableName, tableName.withPrefix(index)));
 		}
 		AliasMap renamer = new AliasMap(newAliases);
-		Map renamedNodeMakers = new HashMap();
-		it = variableNames().iterator();
-		while (it.hasNext()) {
-			String variableName = (String) it.next();
+		Map<String,NodeMaker> renamedNodeMakers = new HashMap<String,NodeMaker>();
+		for (String variableName: variableNames()) {
 			renamedNodeMakers.put(variableName, nodeMaker(variableName).renameAttributes(renamer));
 		}
 		return new NodeRelation(baseRelation().renameColumns(renamer), renamedNodeMakers);
@@ -71,12 +65,10 @@ public class NodeRelation {
 	
 	public NodeRelation renameSingleRelation(RelationName oldName, RelationName newName) {
 		AliasMap renamer = AliasMap.create1(oldName, newName);
-		Map renamedNodeMakers = new HashMap();
+		Map<String,NodeMaker> renamedNodeMakers = new HashMap<String,NodeMaker>();
 		
 		// This is only done for consistency as the NodeMakers won't be used
-		Iterator it = variableNames().iterator();
-		while (it.hasNext()) {
-			String variableName = (String) it.next();
+		for (String variableName: variableNames()) {
 			renamedNodeMakers.put(variableName, nodeMaker(variableName).renameAttributes(renamer));
 		}
 		return new NodeRelation(baseRelation().renameColumns(renamer), renamedNodeMakers);
@@ -86,9 +78,7 @@ public class NodeRelation {
 		StringBuffer result = new StringBuffer("NodeRelation(");
 		result.append(base.toString());
 		result.append("\n");
-		Iterator it = variableNames().iterator();
-		while (it.hasNext()) {
-			String variableName = (String) it.next();
+		for (String variableName: variableNames()) {
 			result.append("    ");
 			result.append(variableName);
 			result.append(" => ");

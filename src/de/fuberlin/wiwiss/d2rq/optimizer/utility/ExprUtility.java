@@ -1,7 +1,8 @@
 package de.fuberlin.wiwiss.d2rq.optimizer.utility;
 
 import com.hp.hpl.jena.sparql.expr.Expr;
-import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
+
+import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
 /**

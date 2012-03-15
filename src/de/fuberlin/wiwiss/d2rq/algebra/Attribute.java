@@ -16,7 +16,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class Attribute implements Comparable, ProjectionSpec {
+public class Attribute implements ProjectionSpec {
 	private String attributeName;
 	private RelationName relationName;
 	private String qualifiedName;
@@ -84,7 +84,7 @@ public class Attribute implements Comparable, ProjectionSpec {
 		return this.relationName.schemaName();
 	}
 
-	public Set requiredAttributes() {
+	public Set<Attribute> requiredAttributes() {
 		return Collections.singleton(this);
 	}
 	
@@ -130,15 +130,15 @@ public class Attribute implements Comparable, ProjectionSpec {
 	 * Compares columns alphanumerically by qualified name, case sensitive.
 	 * Attributes with schema are larger than attributes without schema.
 	 */
-	public int compareTo(Object otherObject) {
-		if (!(otherObject instanceof Attribute)) {
-			return 0;
+	public int compareTo(ProjectionSpec other) {
+		if (!(other instanceof Attribute)) {
+			return -1;
 		}
-		Attribute other = (Attribute) otherObject;
-		int i = this.relationName.compareTo(other.relationName);
+		Attribute otherAttribute = (Attribute) other;
+		int i = this.relationName.compareTo(otherAttribute.relationName);
 		if (i != 0) {
 			return i;
 		}
-		return this.attributeName.compareTo(other.attributeName);
+		return this.attributeName.compareTo(otherAttribute.attributeName);
 	}
 }

@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
@@ -35,7 +36,7 @@ public class SQLExpression extends Expression {
 	}
 	
 	private String expression;
-	private Set columns = new HashSet();
+	private Set<Attribute> columns = new HashSet<Attribute>();
 	
 	private SQLExpression(String expression) {
 		this.expression = expression;
@@ -50,7 +51,7 @@ public class SQLExpression extends Expression {
 		return false;
 	}
 	
-	public Set attributes() {
+	public Set<Attribute> attributes() {
 		return this.columns;
 	}
 	

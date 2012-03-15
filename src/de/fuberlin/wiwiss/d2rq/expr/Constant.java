@@ -39,8 +39,8 @@ public class Constant extends Expression {
 		return value;
 	}
 	
-	public Set attributes() {
-		return Collections.EMPTY_SET;
+	public Set<Attribute> attributes() {
+		return Collections.<Attribute>emptySet();
 	}
 
 	public boolean isFalse() {

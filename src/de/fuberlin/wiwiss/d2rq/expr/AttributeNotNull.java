@@ -20,7 +20,7 @@ public class AttributeNotNull extends Expression {
 		this.attribute = attribute;
 	}
 	
-	public Set attributes() {
+	public Set<Attribute> attributes() {
 		return Collections.singleton(this.attribute);
 	}
 

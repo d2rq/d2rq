@@ -79,7 +79,7 @@ public class Pattern implements ValueMaker {
 		return true;
 	}
 	
-	public List attributes() {
+	public List<Attribute> attributes() {
 		return this.columns;
 	}
 	

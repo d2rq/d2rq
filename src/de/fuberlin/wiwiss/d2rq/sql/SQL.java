@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
-import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 
 /**
  * Parses different types of SQL fragments from Strings, and turns them
@@ -62,8 +61,8 @@ public class SQL {
 		return new Attribute(match.group(1), match.group(2), match.group(3));
 	}
 
-	public static Set findColumnsInExpression(String expression) {
-		Set results = new HashSet();
+	public static Set<Attribute> findColumnsInExpression(String expression) {
+		Set<Attribute> results = new HashSet<Attribute>();
 		Matcher match = attributeRegexConservative.matcher(expression);
 		while (match.find()) {
 			results.add(new Attribute(match.group(1), match.group(2), match.group(3)));
@@ -160,27 +159,24 @@ public class SQL {
 	 * @param joinConditions a collection of strings
 	 * @return a set of {@link Join} instances
 	 */
-	public static Set parseJoins(Collection joinConditions) {
-		List parsedConditions = new ArrayList();
-		Iterator it = joinConditions.iterator();
-		while (it.hasNext()) {
-			parsedConditions.add(AttributeEqualityCondition.parseJoinCondition((String) it.next()));
+	public static Set<Join> parseJoins(Collection<String> joinConditions) {
+		List<AttributeEqualityCondition> parsedConditions = new ArrayList<AttributeEqualityCondition>();
+		for (String joinCondition: joinConditions) {
+			parsedConditions.add(AttributeEqualityCondition.parseJoinCondition(joinCondition));
 		}
 		Collections.sort(parsedConditions);
-		Set results = new HashSet();
-		List attributes1 = new ArrayList();
-		List attributes2 = new ArrayList();
+		Set<Join> results = new HashSet<Join>();
+		List<Attribute> attributes1 = new ArrayList<Attribute>();
+		List<Attribute> attributes2 = new ArrayList<Attribute>();
 		int joinOperator = Join.DIRECTION_UNDIRECTED;
 		AttributeEqualityCondition previousCondition = null;
-		it = parsedConditions.iterator();
-		while (it.hasNext()) {
-			AttributeEqualityCondition condition = (AttributeEqualityCondition) it.next();
+		for (AttributeEqualityCondition condition: parsedConditions) {
 			if (previousCondition == null || !condition.sameRelations(previousCondition)) {
 				if (previousCondition != null) {
 					results.add(new Join(attributes1, attributes2, joinOperator));
 				}
-				attributes1 = new ArrayList();
-				attributes2 = new ArrayList();
+				attributes1 = new ArrayList<Attribute>();
+				attributes2 = new ArrayList<Attribute>();
 				joinOperator = condition.joinOperator(); 
 			}
 			attributes1.add(condition.firstAttribute());
@@ -193,7 +189,8 @@ public class SQL {
 		return results;
 	}
 	
-	private static class AttributeEqualityCondition implements Comparable {
+	private static class AttributeEqualityCondition 
+	implements Comparable<AttributeEqualityCondition> {
 		private Attribute firstAttribute;
 		private Attribute secondAttribute;
 		private int joinOperator;
@@ -210,10 +207,8 @@ public class SQL {
 					&& otherCondition.secondAttribute().relationName().equals(secondAttribute().relationName())
 					&& otherCondition.joinOperator() == joinOperator();
 		}
-		public int compareTo(Object otherObject) {
-			if (!(otherObject instanceof AttributeEqualityCondition)) return 0;
-			AttributeEqualityCondition otherCondition = (AttributeEqualityCondition) otherObject;
-			return this.firstAttribute.compareTo(otherCondition.firstAttribute);
+		public int compareTo(AttributeEqualityCondition other) {
+			return this.firstAttribute.compareTo(other.firstAttribute);
 		}
 		public static AttributeEqualityCondition parseJoinCondition(String joinCondition) {
 			int joinOperator = -1;

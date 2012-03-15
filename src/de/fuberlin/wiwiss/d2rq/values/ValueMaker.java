@@ -41,7 +41,7 @@ public interface ValueMaker {
 	 * for this ValueSource.
 	 * @return a set of {@link ProjectionSpec}s
 	 */
-	Set projectionSpecs();
+	Set<ProjectionSpec> projectionSpecs();
 
 	/**
 	 * Retrieves a value from a database row according to some rule or pattern.

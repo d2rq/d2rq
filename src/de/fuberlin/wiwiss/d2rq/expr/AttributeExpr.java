@@ -15,7 +15,7 @@ public class AttributeExpr extends Expression {
 		this.attribute = attribute;
 	}
 	
-	public Set attributes() {
+	public Set<Attribute> attributes() {
 		return Collections.singleton(attribute);
 	}
 

@@ -31,7 +31,7 @@ public class SQLExpressionValueMaker implements ValueMaker {
 		c.limitValuesToExpression(expression);
 	}
 	
-	public Set projectionSpecs() {
+	public Set<ProjectionSpec> projectionSpecs() {
 		return Collections.singleton(projection);
 	}
 	

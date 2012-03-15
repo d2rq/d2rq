@@ -3,7 +3,6 @@ package de.fuberlin.wiwiss.d2rq.map;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 
 /**

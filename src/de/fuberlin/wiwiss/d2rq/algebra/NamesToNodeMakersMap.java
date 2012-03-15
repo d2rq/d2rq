@@ -1,19 +1,18 @@
-package de.fuberlin.wiwiss.d2rq.engine;
+package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 
-import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilterImpl;
 
 /**
@@ -28,10 +27,10 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilterImpl;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class NamesToNodeMakersMap {
-	private final Map nodeSets = new HashMap();
-	private final Map nodeMakers = new HashMap();
-	private final Map nodeRelationAliases = new HashMap();
-	private final Set projections = new HashSet();
+	private final Map<String,NodeSetFilter> nodeSets = new HashMap<String,NodeSetFilter>();
+	private final Map<String,NodeMaker> nodeMakers = new HashMap<String,NodeMaker>();
+	private final Map<String,AliasMap> nodeRelationAliases = new HashMap<String,AliasMap>();
+	private final Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
 
 	public void add(String name, NodeMaker nodeMaker, AliasMap aliases) {
 		if (!nodeMakers.containsKey(name)) {
@@ -54,9 +53,7 @@ public class NamesToNodeMakersMap {
 	}
 
 	public void addAll(NodeRelation nodeRelation) {
-		Iterator it = nodeRelation.variableNames().iterator();
-		while (it.hasNext()) {
-			String variableName = (String) it.next();
+		for (String variableName: nodeRelation.variableNames()) {
 			add(variableName, nodeRelation.nodeMaker(variableName), nodeRelation.baseRelation().aliases());
 		}
 	}
@@ -73,10 +70,8 @@ public class NamesToNodeMakersMap {
 	 * 		any two identically-named node makers produce the same node
 	 */
 	public Expression constraint() {
-		Collection expressions = new ArrayList();
-		Iterator it = nodeSets.keySet().iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
+		Collection<Expression> expressions = new ArrayList<Expression>();
+		for (String name: nodeSets.keySet()) {
 			NodeSetFilterImpl nodeSet = (NodeSetFilterImpl) nodeSets.get(name);
 			if (nodeSet.isEmpty()) {
 				return Expression.FALSE;
@@ -89,22 +84,22 @@ public class NamesToNodeMakersMap {
 	/**
 	 * @return A regular map from variable names to {@link NodeMaker}s
 	 */
-	public Map toMap() {
+	public Map<String,NodeMaker> toMap() {
 		return nodeMakers;
 	}
 
-	public Set allNames() {
+	public Set<String> allNames() {
 		return nodeMakers.keySet();
 	}
 	
-	public Map relationAliases() {
+	public Map<String,AliasMap> relationAliases() {
 		return nodeRelationAliases;
 	}
 
 	/**
 	 * @return All projections needed by any of the retained node makers 
 	 */
-	public Set allProjections() {
+	public Set<ProjectionSpec> allProjections() {
 		return projections;
 	}
 }

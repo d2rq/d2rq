@@ -26,12 +26,12 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;
-	private List selectSpecs = new ArrayList(10);
-	private List conditions = new ArrayList();		// Expressions
+	private List<ProjectionSpec> selectSpecs = new ArrayList<ProjectionSpec>(10);
+	private List<Expression> conditions = new ArrayList<Expression>();
 	private Expression cachedCondition = null;
 	private boolean eliminateDuplicates = false;
 	private AliasMap aliases = AliasMap.NO_ALIASES;
-	private Collection mentionedTables = new HashSet(5); // Strings in their alias forms	
+	private Collection<RelationName> mentionedTables = new HashSet<RelationName>(5); // in their alias forms	
 	private Attribute order;
 	private boolean orderDesc;
 	private int limit;
@@ -48,20 +48,15 @@ public class SelectStatementBuilder {
 		this.order = relation.order();
 		this.orderDesc = relation.orderDesc();
 		this.aliases = this.aliases.applyTo(relation.aliases());
-		Iterator it = relation.joinConditions().iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
-			Iterator it2 = join.attributes1().iterator();
-			while (it2.hasNext()) {
-				Attribute attribute1 = (Attribute) it2.next();
+		for (Join join: relation.joinConditions()) {
+			for (Attribute attribute1: join.attributes1()) {
 				Attribute attribute2 = join.equalAttribute(attribute1);
 				addCondition(Equality.createAttributeEquality(attribute1, attribute2));
 			}
 		}
 		addCondition(relation.condition());
-		it = relation.projections().iterator();
-		while (it.hasNext()) {
-			addSelectSpec((ProjectionSpec) it.next());
+		for (ProjectionSpec projection: relation.projections()) {
+			addSelectSpec(projection);
 		}
 		eliminateDuplicates = !relation.isUnique();
 		addCondition(database.getSyntax().getRowNumLimitAsExpression(limit));
@@ -77,9 +72,7 @@ public class SelectStatementBuilder {
 	}
 	
 	private void addMentionedTablesFromConditions() {
-		Iterator it = condition().attributes().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		for (Attribute column: condition().attributes()) {
 			this.mentionedTables.add(column.relationName());
 		}
 	}
@@ -98,12 +91,12 @@ public class SelectStatementBuilder {
 			result.append(" ");
 		}
 		
-		Iterator it = this.selectSpecs.iterator();
+		Iterator<ProjectionSpec> it = this.selectSpecs.iterator();
 		if (!it.hasNext()) {
 			result.append("1");
 		}
 		while (it.hasNext()) {
-			ProjectionSpec projection = (ProjectionSpec) it.next();
+			ProjectionSpec projection = it.next();
 			result.append(projection.toSQL(database, aliases));
 			if (it.hasNext()) {
 				result.append(", ");
@@ -112,16 +105,16 @@ public class SelectStatementBuilder {
 		
 		
 		result.append(" FROM ");
-		it = mentionedTables.iterator();
-		while (it.hasNext()) {			
-			RelationName tableName = (RelationName) it.next();
+		Iterator<RelationName> tableIt = mentionedTables.iterator();
+		while (tableIt.hasNext()) {			
+			RelationName tableName = tableIt.next();
 			if (this.aliases.isAlias(tableName)) {
 				result.append(database.getSyntax().getRelationNameAliasExpression(
 						aliases.originalOf(tableName), tableName));
 			} else {
 				result.append(database.getSyntax().quoteRelationName(tableName));
 			}
-			if (it.hasNext()) {
+			if (tableIt.hasNext()) {
 				result.append(", ");
 			}
 		
@@ -154,7 +147,7 @@ public class SelectStatementBuilder {
 	 * 
 	 * @return A list of {@link ProjectionSpec}s
 	 */
-	public List getColumnSpecs() {
+	public List<ProjectionSpec> getColumnSpecs() {
 		return this.selectSpecs;
 	}
 	
@@ -166,9 +159,7 @@ public class SelectStatementBuilder {
 		if (this.selectSpecs.contains(projection)) {
 			return;
 		}
-		Iterator it = projection.requiredAttributes().iterator();
-		while (it.hasNext()) {
-			Attribute attribute = (Attribute) it.next();
+		for (Attribute attribute: projection.requiredAttributes()) {
 			this.mentionedTables.add(attribute.relationName());
 		}
 		this.selectSpecs.add(projection);

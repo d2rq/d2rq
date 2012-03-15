@@ -10,7 +10,7 @@ public interface RelationalOperators {
 	public final static RelationalOperators DUMMY = new RelationalOperators() {
 		public Relation renameColumns(ColumnRenamer renamer) { return null; }
 		public Relation select(Expression condition) { return null; }
-		public Relation project(Set projectionSpecs) { return null; }
+		public Relation project(Set<? extends ProjectionSpec> projectionSpecs) { return null; }
 	};
 
 	/**
@@ -48,5 +48,5 @@ public interface RelationalOperators {
 	 * @param projectionSpecs A set of {@link ProjectionSpec} instances
 	 * @return A relation having the specified attributes
 	 */
-	Relation project(Set projectionSpecs);
+	Relation project(Set<? extends ProjectionSpec> projectionSpecs);
 }

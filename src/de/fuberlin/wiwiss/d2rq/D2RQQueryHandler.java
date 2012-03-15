@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.hp.hpl.jena.graph.Graph;
@@ -32,7 +31,7 @@ import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
 public class D2RQQueryHandler extends SimpleQueryHandler {
 	private D2RQDatasetGraph dataset;
 	private Node[] variables;
-	private Map indexes;
+	private Map<Node,Integer> indexes;
 
 	public D2RQQueryHandler(GraphD2RQ graph, D2RQDatasetGraph dataset) {
 		super(graph);
@@ -45,28 +44,25 @@ public class D2RQQueryHandler extends SimpleQueryHandler {
 
 	public BindingQueryPlan prepareBindings(Query q, Node[] variables) {   
 		this.variables = variables;
-		this.indexes = new HashMap();
+		this.indexes = new HashMap<Node,Integer>();
 		for (int i = 0; i < variables.length; i++) {
 			indexes.put(variables[i], new Integer(i));
 		}
 		BasicPattern pattern = new BasicPattern();
-		Iterator it = q.getPattern().iterator();
-		while (it.hasNext()) {
-			Triple t = (Triple) it.next();
+		for (Triple t: q.getPattern()) {
 			pattern.add(t);
 		}
 		Plan plan = QueryEngineD2RQ.getFactory().create(new OpBGP(pattern), dataset, null, null);
-		final ExtendedIterator queryIterator = new Map1Iterator(new BindingToDomain(), plan.iterator());
+		final ExtendedIterator<Domain> queryIterator = new Map1Iterator<Binding,Domain>(new BindingToDomain(), plan.iterator());
 		return new BindingQueryPlan() {
-			public ExtendedIterator executeBindings() {
+			public ExtendedIterator<Domain> executeBindings() {
 				return queryIterator;
 			}
 		};
 	}
 
-	private class BindingToDomain implements Map1 {
-		public Object map1(Object o) {
-			Binding binding = (Binding) o;
+	private class BindingToDomain implements Map1<Binding,Domain> {
+		public Domain map1(Binding binding) {
 			Domain d = new Domain(variables.length);
 			for (int i = 0; i < variables.length; i++) {
 				Var v = Var.alloc(variables[i]);

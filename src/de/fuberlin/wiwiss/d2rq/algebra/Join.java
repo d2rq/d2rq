@@ -13,11 +13,11 @@ import java.util.Map;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class Join {
-	private List attributes1 = new ArrayList();
-	private List attributes2 = new ArrayList();
+	private List<Attribute> attributes1 = new ArrayList<Attribute>();
+	private List<Attribute> attributes2 = new ArrayList<Attribute>();
 	private RelationName table1 = null;
 	private RelationName table2 = null;
-	private Map otherSide = new HashMap(4);
+	private Map<Attribute,Attribute> otherSide = new HashMap<Attribute,Attribute>(4);
 	
 	private int joinDirection;
 	
@@ -31,7 +31,7 @@ public class Join {
 		this(Collections.singletonList(oneSide), Collections.singletonList(otherSide), joinDirection);
 	}
 	
-	public Join(List oneSideAttributes, List otherSideAttributes, int joinDirection) {
+	public Join(List<Attribute> oneSideAttributes, List<Attribute> otherSideAttributes, int joinDirection) {
 		RelationName oneRelation = ((Attribute) oneSideAttributes.get(0)).relationName();
 		RelationName otherRelation = ((Attribute) otherSideAttributes.get(0)).relationName();
 		this.attributes1 = oneSideAttributes;
@@ -64,11 +64,11 @@ public class Join {
 		return this.table2;
 	}
 
-	public List attributes1() {
+	public List<Attribute> attributes1() {
 		return this.attributes1;
 	}
 
-	public List attributes2() {
+	public List<Attribute> attributes2() {
 		return this.attributes2;
 	}
 	
@@ -82,9 +82,9 @@ public class Join {
 	
 	public String toString() {
 		StringBuffer result = new StringBuffer("Join(");
-		Iterator it = this.attributes1.iterator();
+		Iterator<Attribute> it = this.attributes1.iterator();
 		while (it.hasNext()) {
-			Attribute attribute = (Attribute) it.next();
+			Attribute attribute = it.next();
 			result.append(attribute.qualifiedName());
 			if (it.hasNext()) {
 				result.append(", ");
@@ -93,7 +93,7 @@ public class Join {
 		result.append(joinDirection == DIRECTION_UNDIRECTED ? " <=> " : (joinDirection == DIRECTION_RIGHT ? " => " : " <= "));
 		it = this.attributes2.iterator();
 		while (it.hasNext()) {
-			Attribute attribute = (Attribute) it.next();
+			Attribute attribute = it.next();
 			result.append(attribute.qualifiedName());
 			if (it.hasNext()) {
 				result.append(", ");
@@ -131,11 +131,9 @@ public class Join {
 	}
 	
 	public Join renameColumns(ColumnRenamer columnRenamer) {
-		List oneSide = new ArrayList();
-		List otherSide = new ArrayList();
-		Iterator it = attributes1().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		List<Attribute> oneSide = new ArrayList<Attribute>();
+		List<Attribute> otherSide = new ArrayList<Attribute>();
+		for (Attribute column: attributes1) {
 			oneSide.add(columnRenamer.applyTo(column));
 			otherSide.add(columnRenamer.applyTo(equalAttribute(column)));
 		}

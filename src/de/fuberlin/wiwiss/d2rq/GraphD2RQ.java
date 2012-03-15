@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -109,9 +108,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * @see com.hp.hpl.jena.graph.Graph#close()
 	 */
 	public void close() {
-		Iterator it = this.mapping.databases().iterator();
-		while (it.hasNext()) {
-			Database db = (Database) it.next();
+		for (Database db: mapping.databases()) {
 			db.connectedDB().close();
 		}
 		this.closed = true;
@@ -121,7 +118,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		return this.capabilities;
 	}
 
-	public ExtendedIterator graphBaseFind( TripleMatch m ) {
+	public ExtendedIterator<Triple> graphBaseFind( TripleMatch m ) {
 		checkOpen();
 		Triple t = m.asTriple();
 		if (this.log.isDebugEnabled()) {
@@ -137,9 +134,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * @throws D2RQException on connection failure
 	 */
 	public void connect() {
-		Iterator it = this.mapping.databases().iterator();
-		while (it.hasNext()) {
-			Database db = (Database) it.next();
+		for (Database db: mapping.databases()) {
 			db.connectedDB().connection();
 		}
 	}
@@ -149,20 +144,16 @@ public class GraphD2RQ extends GraphBase implements Graph {
     /**
      * TODO This section was done as a quick hack for D2R Server 0.3 and really shouldn't be here
      */
-    private Map classMapInventoryBridges = new HashMap();
-    private Map classMapNodeMakers = new HashMap();
+    private Map<String,List<TripleRelation>> classMapInventoryBridges = new HashMap<String,List<TripleRelation>>();
+    private Map<String,NodeMaker> classMapNodeMakers = new HashMap<String,NodeMaker>();
     
     public void initInventory(String inventoryBaseURI) {
-		Iterator it = this.mapping.classMapResources().iterator();
-		while (it.hasNext()) {
-			Resource classMapResource = (Resource) it.next();
+		for (Resource classMapResource: mapping.classMapResources()) {
 			NodeMaker resourceMaker = this.mapping.classMap(classMapResource).nodeMaker();
 			Node classMap = classMapResource.asNode();
 			this.classMapNodeMakers.put(toClassMapName(classMap), resourceMaker);
-			List inventoryBridges = new ArrayList();
-			Iterator bridgeIt = this.mapping.classMap(classMapResource).compiledPropertyBridges().iterator();
-			while (bridgeIt.hasNext()) {
-				TripleRelation bridge = (TripleRelation) bridgeIt.next();
+			List<TripleRelation> inventoryBridges = new ArrayList<TripleRelation>();
+			for (TripleRelation bridge: mapping.classMap(classMapResource).compiledPropertyBridges()) {
 				if (bridge.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)) != null) {
 					inventoryBridges.add(bridge);
 				}
@@ -186,12 +177,12 @@ public class GraphD2RQ extends GraphBase implements Graph {
     	return classMap.getLocalName();
     }
     
-    public Collection classMapNames() {
+    public Collection<String> classMapNames() {
     	return this.classMapInventoryBridges.keySet();
     }
     
     public Model classMapInventory(String classMapName) {
-    	List inventoryBridges = (List) this.classMapInventoryBridges.get(classMapName);
+    	List<TripleRelation> inventoryBridges = classMapInventoryBridges.get(classMapName);
     	if (inventoryBridges == null) {
     		return null;
     	}
@@ -202,16 +193,14 @@ public class GraphD2RQ extends GraphBase implements Graph {
     	return result;
     }
 
-    public Collection classMapNamesForResource(Node resource) {
+    public Collection<String> classMapNamesForResource(Node resource) {
     	if (!resource.isURI()) {
-    		return Collections.EMPTY_LIST;
+    		return Collections.<String>emptyList();
     	}
-    	List results = new ArrayList();
-    	Iterator it = this.classMapNodeMakers.entrySet().iterator();
-    	while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			String classMapName = (String) entry.getKey();
-			NodeMaker nodeMaker = (NodeMaker) entry.getValue();
+    	List<String> results = new ArrayList<String>();
+		for (Entry<String,NodeMaker> entry: classMapNodeMakers.entrySet()) {
+			String classMapName = entry.getKey();
+			NodeMaker nodeMaker = entry.getValue();
 			if (!nodeMaker.selectNode(resource, RelationalOperators.DUMMY).equals(NodeMaker.EMPTY)) {
 				results.add(classMapName);
 			}
@@ -219,7 +208,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
     	return results;
     }
     
-    public Collection tripleRelations() {
+    public Collection<TripleRelation> tripleRelations() {
     	return mapping.compiledPropertyBridges();
     }
     

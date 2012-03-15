@@ -2,10 +2,9 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
@@ -24,7 +23,7 @@ public abstract class ColumnRenamer {
 		public Attribute applyTo(Attribute original) { return original; }
 		public Expression applyTo(Expression original) { return original; }
 		public Join applyTo(Join original) { return original; }
-		public Set applyToJoinSet(Set joins) { return joins; }
+		public Set<Join> applyToJoinSet(Set<Join> joins) { return joins; }
 		public String toString() { return "ColumnRenamer.NULL"; }
 	};
 	
@@ -34,11 +33,9 @@ public abstract class ColumnRenamer {
 	 * @param m The original map
 	 * @return An inverse map
 	 */
-	protected final static Map invertMap(Map m) {
-		HashMap result = new HashMap();
-		Iterator it = m.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
+	protected final static <K,V> Map<V,K> invertMap(Map<K,V> m) {
+		HashMap<V,K> result = new HashMap<V,K>();
+		for (Entry<K,V> entry: m.entrySet()) {
 			result.put(entry.getValue(), entry.getKey());
 		}
 		return result;
@@ -67,11 +64,9 @@ public abstract class ColumnRenamer {
 		return original.renameAttributes(this);
 	}
 
-	public Set applyToJoinSet(Set joins) {
-		Set result = new HashSet();
-		Iterator it = joins.iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
+	public Set<Join> applyToJoinSet(Set<Join> joins) {
+		Set<Join> result = new HashSet<Join>();
+		for (Join join: joins) {
 			result.add(applyTo(join));
 		}
 		return result;
@@ -81,11 +76,9 @@ public abstract class ColumnRenamer {
 		return original.renameAttributes(this);
 	}
 	
-	public Set applyToProjectionSet(Set projections) {
-		Set result = new HashSet();
-		Iterator it = projections.iterator();
-		while (it.hasNext()) {
-			ProjectionSpec projection = (ProjectionSpec) it.next();
+	public Set<ProjectionSpec> applyToProjectionSet(Set<ProjectionSpec> projections) {
+		Set<ProjectionSpec> result = new HashSet<ProjectionSpec>();
+		for (ProjectionSpec projection: projections) {
 			result.add(applyTo(projection));
 		}
 		return result;
