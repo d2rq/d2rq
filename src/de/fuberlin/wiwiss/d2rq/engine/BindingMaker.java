@@ -80,6 +80,10 @@ public class BindingMaker {
 		return variableNamesToNodeMakers.get(var);
 	}
 	
+	public ProjectionSpec condition() {
+		return condition;
+	}
+	
 	public String toString() {
 		StringBuffer result = new StringBuffer("BindingMaker(\n");
 		for (String variableName: variableNamesToNodeMakers.keySet()) {
