@@ -40,7 +40,6 @@ It is part of the <a href="/">D2RQ Platform</a>.
     <ul>
       <li>3.1 <a href="#command-line">Running D2R Server from the command line</a></li>
       <li>3.2 <a href="#servlet-container">Running D2R Server in a servlet container</a></li>
-      <li>3.3 <a href="#windows-service">Running D2R Server as a Windows Service</a></li>
     </ul>
   </li>
   <li>4. <a href="#configuration">D2R Server configuration</a>
@@ -107,7 +106,8 @@ It is part of the <a href="/">D2RQ Platform</a>.
 <p>For development and testing, D2R Server can be started from the
 command line. The recommended setup for production is to
 deploy the D2R Server web application into a servlet container
-such as Tomcat or Jetty.</p>
+such as <a href="http://tomcat.apache.org/">Apache Tomcat</a>
+or <a href="http://jetty.codehaus.org/jetty/">Jetty</a>.</p>
 
 <p>See also: <a href="getting-started">Getting started with D2RQ</a></p>
 
@@ -161,17 +161,6 @@ for production use.</p>
   <li>Deploy the war file into your servlet container, e.g. by copying it
     into Tomcat's <code>webapps</code> directory.</li>
 </ol>
-
-
-<h3 id="windows-service">3.3 Running D2R Server as a Windows Service</h3>
-
-<p>To run D2R Server as a service on Windows, use the <code>install-service</code> script:</p>
-
-<pre>install-service <em>servicename mapping.ttl</em></pre>
-
-<p>The service can be started from the Services panel in the management console. The service will log all output including startup errors to the files <code>stdout.log</code> and <code>stderr.log</code>.</p>
-
-<p>To uninstall the service, use <code>uninstall-service</code>. You have to uninstall and re-install the service when upgrading to a later version of D2R Server.</p>
 
 
 <h2 id="configuration">4. D2R Server configuration</h2>
