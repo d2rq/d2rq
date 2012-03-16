@@ -140,6 +140,16 @@ public class MappingGenerator {
 		}
 	}
 	
+	/**
+	 * Since we are not opening the Writer so we will not close it. Because the class/resource 
+	 * which invokes MappingGenerator may like to do further processing using the Writer.
+	 * 
+	 * So the calling class/resource should handle to close the Writer appropriately. This comment 
+	 * is a reference to issue #30 on GitHub.
+	 * 
+	 * @param out Stream for writing data to the file or console
+	 * @param err Stream for warnings generated during the mapping process; may be <code>null</code>
+	 */
 	public void writeMapping(Writer out, Writer err) {
 		this.out = new PrintWriter(out);
 		if (err != null)
