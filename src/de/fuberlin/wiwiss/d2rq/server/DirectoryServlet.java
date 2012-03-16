@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -37,7 +36,7 @@ public class DirectoryServlet extends HttpServlet {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return;
 		}
-		Map resources = new TreeMap();
+		Map<String,String> resources = new TreeMap<String,String>();
 		ResIterator subjects = resourceList.listSubjects();
 		while (subjects.hasNext()) {
 			Resource resource = subjects.nextResource();
@@ -49,10 +48,8 @@ public class DirectoryServlet extends HttpServlet {
 			String label = (labelStmt == null) ? resource.getURI() : labelStmt.getString();
 			resources.put(uri, label);
 		}
-		Map classMapLinks = new TreeMap();
-		Iterator it = graphD2RQ().classMapNames().iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
+		Map<String,String> classMapLinks = new TreeMap<String,String>();
+		for (String name: graphD2RQ().classMapNames()) {
 			classMapLinks.put(name, server.baseURI() + "directory/" + name);
 		}
 		VelocityWrapper velocity = new VelocityWrapper(this, request, response);

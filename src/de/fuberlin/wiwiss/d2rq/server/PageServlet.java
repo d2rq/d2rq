@@ -3,7 +3,6 @@ package de.fuberlin.wiwiss.d2rq.server;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -75,13 +74,13 @@ public class PageServlet extends HttpServlet {
 				context.put("metadata", metadata.getResource(documentURL).listProperties().toList());
 	
 				// add prefixes to context
-				Map nsSet = metadata.getNsPrefixMap();
+				Map<String,String> nsSet = metadata.getNsPrefixMap();
 				nsSet.putAll(description.getNsPrefixMap());
 				
 				context.put("prefixes", nsSet.entrySet());
 				
 				// add a empty map for keeping track of blank nodes aliases
-				context.put("blankNodesMap", new HashMap());
+				context.put("blankNodesMap", new HashMap<Resource,String>());
 			} else {
 				context.put("metadata", Boolean.FALSE);				
 			}
@@ -98,8 +97,8 @@ public class PageServlet extends HttpServlet {
 		velocity.mergeTemplateXHTML("resource_page.vm");
 	}
 
-	private Collection collectProperties(Model m, Resource r) {
-		Collection result = new TreeSet();
+	private Collection<Property> collectProperties(Model m, Resource r) {
+		Collection<Property> result = new TreeSet<Property>();
 		StmtIterator it = r.listProperties();
 		while (it.hasNext()) {
 			result.add(new Property(it.nextStatement(), false));
@@ -111,13 +110,11 @@ public class PageServlet extends HttpServlet {
 		return result;
 	}
 
-	private Map classmapLinks(Resource resource) {
-		Map result = new HashMap();
+	private Map<String,String> classmapLinks(Resource resource) {
+		Map<String,String> result = new HashMap<String,String>();
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		GraphD2RQ g = server.currentGraph();
-		Iterator it = g.classMapNamesForResource(resource.asNode()).iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
+		for (String name: g.classMapNamesForResource(resource.asNode())) {
 			result.put(name, server.baseURI() + "directory/" + name);
 		}
 		return result;
@@ -125,7 +122,7 @@ public class PageServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = 2752377911405801794L;
 	
-	public class Property implements Comparable {
+	public class Property implements Comparable<Property> {
 		private Node property;
 		private Node value;
 		private boolean isInverse;
@@ -181,11 +178,7 @@ public class PageServlet extends HttpServlet {
 			}
 			return qname;
 		}
-		public int compareTo(Object otherObject) {
-			if (!(otherObject instanceof Property)) {
-				return 0;
-			}
-			Property other = (Property) otherObject;
+		public int compareTo(Property other) {
 			String propertyLocalName = this.property.getLocalName();
 			String otherLocalName = other.property.getLocalName();
 			if (propertyLocalName.compareTo(otherLocalName) != 0) {

@@ -132,7 +132,7 @@ public class AutoReloadableDataset implements Dataset {
 		return null;
 	}
 
-	public Iterator listNames() {
+	public Iterator<String> listNames() {
 		return NullIterator.instance();
 	}
 

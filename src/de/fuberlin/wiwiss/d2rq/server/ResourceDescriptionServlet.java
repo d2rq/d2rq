@@ -1,8 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,9 +13,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
-import de.fuberlin.wiwiss.d2rq.download.DownloadContentQuery;
-import de.fuberlin.wiwiss.d2rq.map.DownloadMap;
-import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
 
 public class ResourceDescriptionServlet extends HttpServlet {

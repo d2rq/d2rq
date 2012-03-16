@@ -1,13 +1,10 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
-import java.util.Map;
-
 import org.joseki.DatasetDesc;
 import org.joseki.Request;
 import org.joseki.Response;
 
 import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.rdf.model.Resource;
 
 /**
  * A Joseki dataset description that returns a dataset

@@ -7,7 +7,6 @@ import java.util.Random;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
-import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**

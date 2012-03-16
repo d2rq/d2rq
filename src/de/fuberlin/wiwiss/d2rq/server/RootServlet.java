@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -20,10 +19,8 @@ public class RootServlet extends HttpServlet {
 			HttpServletResponse response) throws IOException, ServletException {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		server.checkMappingFileChanged();
-		Map classMapLinks = new TreeMap();
-		Iterator it = graphD2RQ().classMapNames().iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
+		Map<String,String> classMapLinks = new TreeMap<String,String>();
+		for (String name: graphD2RQ().classMapNames()) {
 			classMapLinks.put(name, server.baseURI() + "directory/" + name);
 		}
 		VelocityWrapper velocity = new VelocityWrapper(this, request, response);

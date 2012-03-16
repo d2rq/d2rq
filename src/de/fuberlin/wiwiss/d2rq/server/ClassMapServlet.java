@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -48,9 +47,7 @@ public class ClassMapServlet extends HttpServlet {
 		Model result = ModelFactory.createDefaultModel();
 		Resource list = result.createResource(server.baseURI() + "all");
 		list.addProperty(RDFS.label, "D2R Server contents");
-		Iterator it = graphD2RQ().classMapNames().iterator();
-		while (it.hasNext()) {
-			String classMapName = (String) it.next();
+		for (String classMapName: graphD2RQ().classMapNames()) {
 			Resource instances = result.createResource(server.baseURI() + "all/" + classMapName);
 			list.addProperty(RDFS.seeAlso, instances);
 			instances.addProperty(RDFS.label, "List of all instances: " + classMapName);
