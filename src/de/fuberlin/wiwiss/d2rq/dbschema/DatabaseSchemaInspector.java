@@ -198,7 +198,8 @@ public class DatabaseSchemaInspector {
 			ResultSet rs = stmt.executeQuery("DESCRIBE " + db.getSyntax().quoteRelationName(column.relationName()));		
 
 			while (rs.next()) {
-				if (column.attributeName().equals(rs.getString("Field"))) {
+				// MySQL names are case insensitive, so we normalize to lower case
+				if (column.attributeName().toLowerCase().equals(rs.getString("Field").toLowerCase())) {
 					isZerofill = (rs.getString("Type").toLowerCase().indexOf("zerofill") != -1);
 					foundColumn = true;
 					break;
