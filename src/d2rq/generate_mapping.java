@@ -10,6 +10,7 @@ import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
+import de.fuberlin.wiwiss.d2rq.mapgen.W3CMappingGenerator;
 
 /**
  * Command line interface for {@link MappingGenerator}.
@@ -35,6 +36,7 @@ public class generate_mapping {
 		ArgDecl vocabAsOutput = new ArgDecl(false, "v", "vocab");
 		ArgDecl outfileArg = new ArgDecl(true, "o", "out", "outfile");
 		ArgDecl baseUriArg = new ArgDecl(true, "b", "base", "baseuri");
+		ArgDecl w3cArg = new ArgDecl(false, "w3c", "w3cDirectMap");
 		cmd.add(userArg);
 		cmd.add(passArg);
 		cmd.add(schemaArg);
@@ -42,6 +44,7 @@ public class generate_mapping {
 		cmd.add(vocabAsOutput);
 		cmd.add(outfileArg);
 		cmd.add(baseUriArg);
+		cmd.add(w3cArg);
 		cmd.process(args);
 
 		if (cmd.numItems() == 0) {
@@ -54,7 +57,13 @@ public class generate_mapping {
 			System.exit(1);
 		}
 		String jdbc = cmd.getItem(0);
-		MappingGenerator gen = new MappingGenerator(jdbc);
+		MappingGenerator gen = null;
+		if (cmd.contains(w3cArg)) {
+			gen = new W3CMappingGenerator(jdbc);
+		} else {
+			gen = new MappingGenerator(jdbc);
+		}
+
 		if (cmd.contains(userArg)) {
 			gen.setDatabaseUser(cmd.getArg(userArg).getValue());
 		}
@@ -114,6 +123,7 @@ public class generate_mapping {
 		System.err.println("    -v              Generate RDFS+OWL vocabulary instead of mapping file");
 		System.err.println("    -b baseURI      Base URI for generated RDF (optional)");
 		System.err.println("    -o outfile.ttl  Output file name (default: stdout)");
+		System.err.println("    -w3c			Produces a mapping file compatible with W3C's Direct Mapping");
 		System.err.println();
 	}
 }

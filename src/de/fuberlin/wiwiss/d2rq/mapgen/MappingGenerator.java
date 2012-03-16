@@ -53,7 +53,7 @@ public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
 	private String jdbcURL;
 	private String mapNamespaceURI;
-	private String instanceNamespaceURI;
+	protected String instanceNamespaceURI;
 	private String vocabNamespaceURI;
 	private String driverClass = null;
 	private String databaseUser = null;
@@ -62,7 +62,7 @@ public class MappingGenerator {
 	private PrintWriter out = null;
 	private PrintWriter err = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
-	private DatabaseSchemaInspector schema = null;
+	protected DatabaseSchemaInspector schema = null;
 	private SQLSyntax databaseSyntax = null;
 	private Map linkTables = new HashMap(); // name of n:m link table => name of n table
 	private boolean finished = false;
@@ -416,7 +416,7 @@ public class MappingGenerator {
 		return !this.schema.primaryKeyColumns(tableName).isEmpty();
 	}
 	
-	private String uriPattern(RelationName tableName) {
+	protected String uriPattern(RelationName tableName) {
 		String result = this.instanceNamespaceURI + tableName.qualifiedName();
 		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
 		while (it.hasNext()) {

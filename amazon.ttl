@@ -1,0 +1,75 @@
+<http://localhost:2020/vocab/resource/book_price> <http://www.w3.org/2000/01/rdf-schema#label> "book price" .
+<http://localhost:2020/vocab/resource/book_price> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/video_currency> <http://www.w3.org/2000/01/rdf-schema#label> "video currency" .
+<http://localhost:2020/vocab/resource/video_currency> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/recorder_recname> <http://www.w3.org/2000/01/rdf-schema#label> "recorder recname" .
+<http://localhost:2020/vocab/resource/recorder_recname> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/video> <http://www.w3.org/2000/01/rdf-schema#label> "video" .
+<http://localhost:2020/vocab/resource/video> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://localhost:2020/vocab/resource/pc_hw_price> <http://www.w3.org/2000/01/rdf-schema#label> "pc_hw price" .
+<http://localhost:2020/vocab/resource/pc_hw_price> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/recorder> <http://www.w3.org/2000/01/rdf-schema#label> "recorder" .
+<http://localhost:2020/vocab/resource/recorder> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://localhost:2020/vocab/resource/book_author> <http://www.w3.org/2000/01/rdf-schema#label> "book author" .
+<http://localhost:2020/vocab/resource/book_author> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/publ_address> <http://www.w3.org/2000/01/rdf-schema#label> "publ address" .
+<http://localhost:2020/vocab/resource/publ_address> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/book> <http://www.w3.org/2000/01/rdf-schema#label> "book" .
+<http://localhost:2020/vocab/resource/book> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://localhost:2020/vocab/resource/video_price> <http://www.w3.org/2000/01/rdf-schema#label> "video price" .
+<http://localhost:2020/vocab/resource/video_price> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/music_title> <http://www.w3.org/2000/01/rdf-schema#label> "music title" .
+<http://localhost:2020/vocab/resource/music_title> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://www.w3.org/2000/01/rdf-schema#label> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/music_price> <http://www.w3.org/2000/01/rdf-schema#label> "music price" .
+<http://localhost:2020/vocab/resource/music_price> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/pc_hw_title> <http://www.w3.org/2000/01/rdf-schema#label> "pc_hw title" .
+<http://localhost:2020/vocab/resource/pc_hw_title> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/pc_hw> <http://www.w3.org/2000/01/rdf-schema#label> "pc_hw" .
+<http://localhost:2020/vocab/resource/pc_hw> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://localhost:2020/vocab/resource/video_title> <http://www.w3.org/2000/01/rdf-schema#label> "video title" .
+<http://localhost:2020/vocab/resource/video_title> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/pc_hw_currency> <http://www.w3.org/2000/01/rdf-schema#label> "pc_hw currency" .
+<http://localhost:2020/vocab/resource/pc_hw_currency> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/publ_name> <http://www.w3.org/2000/01/rdf-schema#label> "publ name" .
+<http://localhost:2020/vocab/resource/publ_name> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/music_rec> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/music_currency> <http://www.w3.org/2000/01/rdf-schema#label> "music currency" .
+<http://localhost:2020/vocab/resource/music_currency> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/book_publisher> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/publ> <http://www.w3.org/2000/01/rdf-schema#label> "publ" .
+<http://localhost:2020/vocab/resource/publ> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://localhost:2020/vocab/resource/book_currency> <http://www.w3.org/2000/01/rdf-schema#label> "book currency" .
+<http://localhost:2020/vocab/resource/book_currency> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/music> <http://www.w3.org/2000/01/rdf-schema#label> "music" .
+<http://localhost:2020/vocab/resource/music> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://localhost:2020/vocab/resource/book_title> <http://www.w3.org/2000/01/rdf-schema#label> "book title" .
+<http://localhost:2020/vocab/resource/book_title> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<http://localhost:2020/vocab/resource/book_isbn> <http://www.w3.org/2000/01/rdf-schema#label> "book isbn" .
+<http://localhost:2020/vocab/resource/book_isbn> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#music/TUDO%20AZUL> <http://localhost:2020/vocab/resource/music_rec> <file:///C:/Users/Luis/d2rq/amazon.ttl#recorder/Universal_Music_Argentina_S.A.> .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#book/VERDADES_FUNDAMENTAIS_SOBRE_A_NATUREZA_DO_LIDER> <http://localhost:2020/vocab/resource/book_publisher> <file:///C:/Users/Luis/d2rq/amazon.ttl#publ/CAMPUS> .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#music/TUDO%20AZUL> <http://www.w3.org/2000/01/rdf-schema#label> "music #TUDO AZUL" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#music/TUDO%20AZUL> <http://localhost:2020/vocab/resource/music_title> "TUDO AZUL" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#music/TUDO%20AZUL> <http://localhost:2020/vocab/resource/music_currency> "REAL" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#music/TUDO%20AZUL> <http://localhost:2020/vocab/resource/music_price> "1.50"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#music/TUDO%20AZUL> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://localhost:2020/vocab/resource/music> .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#pc_hw/Kindle> <http://localhost:2020/vocab/resource/pc_hw_price> "139.00"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#pc_hw/Kindle> <http://localhost:2020/vocab/resource/pc_hw_title> "Kindle" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#pc_hw/Kindle> <http://localhost:2020/vocab/resource/pc_hw_currency> "DOLAR" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#pc_hw/Kindle> <http://www.w3.org/2000/01/rdf-schema#label> "pc_hw #Kindle" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#pc_hw/Kindle> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://localhost:2020/vocab/resource/pc_hw> .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#recorder/Universal_Music_Argentina_S.A.> <http://localhost:2020/vocab/resource/recorder_recname> "Universal Music Argentina S.A." .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#recorder/Universal_Music_Argentina_S.A.> <http://www.w3.org/2000/01/rdf-schema#label> "recorder #Universal Music Argentina S.A." .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#recorder/Universal_Music_Argentina_S.A.> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://localhost:2020/vocab/resource/recorder> .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#publ/CAMPUS> <http://localhost:2020/vocab/resource/publ_address> "Rua 7 Setembro, 111 an 16- Centro - Rio de Janeiro - RJ" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#publ/CAMPUS> <http://www.w3.org/2000/01/rdf-schema#label> "publ #CAMPUS" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#publ/CAMPUS> <http://localhost:2020/vocab/resource/publ_name> "CAMPUS" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#publ/CAMPUS> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://localhost:2020/vocab/resource/publ> .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#book/VERDADES_FUNDAMENTAIS_SOBRE_A_NATUREZA_DO_LIDER> <http://localhost:2020/vocab/resource/book_author> "Barry Posner" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#book/VERDADES_FUNDAMENTAIS_SOBRE_A_NATUREZA_DO_LIDER> <http://localhost:2020/vocab/resource/book_currency> "REAL" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#book/VERDADES_FUNDAMENTAIS_SOBRE_A_NATUREZA_DO_LIDER> <http://www.w3.org/2000/01/rdf-schema#label> "book #VERDADES FUNDAMENTAIS SOBRE A NATUREZA DO LIDER" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#book/VERDADES_FUNDAMENTAIS_SOBRE_A_NATUREZA_DO_LIDER> <http://localhost:2020/vocab/resource/book_price> "59.90"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#book/VERDADES_FUNDAMENTAIS_SOBRE_A_NATUREZA_DO_LIDER> <http://localhost:2020/vocab/resource/book_isbn> "978-85-352-4150-1" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#book/VERDADES_FUNDAMENTAIS_SOBRE_A_NATUREZA_DO_LIDER> <http://localhost:2020/vocab/resource/book_title> "VERDADES FUNDAMENTAIS SOBRE A NATUREZA DO LIDER" .
+<file:///C:/Users/Luis/d2rq/amazon.ttl#book/VERDADES_FUNDAMENTAIS_SOBRE_A_NATUREZA_DO_LIDER> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://localhost:2020/vocab/resource/book> .

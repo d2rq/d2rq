@@ -1,0 +1,214 @@
+@prefix map: <d2r-mappings/mappingW3C.n3#> .
+@prefix db: <> .
+@prefix vocab: <http://localhost:2020/vocab/resource/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix jdbc: <http://d2rq.org/terms/jdbc/> .
+
+map:database a d2rq:Database;
+	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
+	d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/amazon";
+	d2rq:username "root";
+	d2rq:password "admin";
+	jdbc:autoReconnect "true";
+	jdbc:zeroDateTimeBehavior "convertToNull";
+	.
+
+# Table book
+map:book a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "book/title-@@title|encode@@";
+	d2rq:class vocab:book;
+	d2rq:classDefinitionLabel "book";
+	.
+map:book__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:book;
+	d2rq:property rdfs:label;
+	d2rq:pattern "book #@@book.title@@";
+	.
+map:book_title a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:book;
+	d2rq:property vocab:book_title;
+	d2rq:propertyDefinitionLabel "book title";
+	d2rq:column "book.title";
+	.
+map:book_price a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:book;
+	d2rq:property vocab:book_price;
+	d2rq:propertyDefinitionLabel "book price";
+	d2rq:column "book.price";
+	d2rq:datatype xsd:decimal;
+	.
+map:book_currency a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:book;
+	d2rq:property vocab:book_currency;
+	d2rq:propertyDefinitionLabel "book currency";
+	d2rq:column "book.currency";
+	.
+map:book_isbn a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:book;
+	d2rq:property vocab:book_isbn;
+	d2rq:propertyDefinitionLabel "book isbn";
+	d2rq:column "book.isbn";
+	.
+map:book_author a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:book;
+	d2rq:property vocab:book_author;
+	d2rq:propertyDefinitionLabel "book author";
+	d2rq:column "book.author";
+	.
+map:book_publisher a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:book;
+	d2rq:property vocab:book_publisher;
+	d2rq:refersToClassMap map:publ;
+	d2rq:join "book.publisher => publ.name";
+	.
+
+# Table music
+map:music a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "music/title-@@title|encode@@";
+	d2rq:class vocab:music;
+	d2rq:classDefinitionLabel "music";
+	.
+map:music__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:music;
+	d2rq:property rdfs:label;
+	d2rq:pattern "music #@@music.title@@";
+	.
+map:music_title a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:music;
+	d2rq:property vocab:music_title;
+	d2rq:propertyDefinitionLabel "music title";
+	d2rq:column "music.title";
+	.
+map:music_price a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:music;
+	d2rq:property vocab:music_price;
+	d2rq:propertyDefinitionLabel "music price";
+	d2rq:column "music.price";
+	d2rq:datatype xsd:decimal;
+	.
+map:music_currency a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:music;
+	d2rq:property vocab:music_currency;
+	d2rq:propertyDefinitionLabel "music currency";
+	d2rq:column "music.currency";
+	.
+map:music_rec a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:music;
+	d2rq:property vocab:music_rec;
+	d2rq:refersToClassMap map:recorder;
+	d2rq:join "music.rec => recorder.recname";
+	.
+
+# Table pc_hw
+map:pc_hw a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "pc_hw/title-@@title|encode@@";
+	d2rq:class vocab:pc_hw;
+	d2rq:classDefinitionLabel "pc_hw";
+	.
+map:pc_hw__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:pc_hw;
+	d2rq:property rdfs:label;
+	d2rq:pattern "pc_hw #@@pc_hw.title@@";
+	.
+map:pc_hw_title a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:pc_hw;
+	d2rq:property vocab:pc_hw_title;
+	d2rq:propertyDefinitionLabel "pc_hw title";
+	d2rq:column "pc_hw.title";
+	.
+map:pc_hw_price a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:pc_hw;
+	d2rq:property vocab:pc_hw_price;
+	d2rq:propertyDefinitionLabel "pc_hw price";
+	d2rq:column "pc_hw.price";
+	d2rq:datatype xsd:decimal;
+	.
+map:pc_hw_currency a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:pc_hw;
+	d2rq:property vocab:pc_hw_currency;
+	d2rq:propertyDefinitionLabel "pc_hw currency";
+	d2rq:column "pc_hw.currency";
+	.
+
+# Table publ
+map:publ a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "publ/name-@@name|encode@@";
+	d2rq:class vocab:publ;
+	d2rq:classDefinitionLabel "publ";
+	.
+map:publ__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:publ;
+	d2rq:property rdfs:label;
+	d2rq:pattern "publ #@@publ.name@@";
+	.
+map:publ_name a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:publ;
+	d2rq:property vocab:publ_name;
+	d2rq:propertyDefinitionLabel "publ name";
+	d2rq:column "publ.name";
+	.
+map:publ_address a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:publ;
+	d2rq:property vocab:publ_address;
+	d2rq:propertyDefinitionLabel "publ address";
+	d2rq:column "publ.address";
+	.
+
+# Table recorder
+map:recorder a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "recorder/recname-@@recname|encode@@";
+	d2rq:class vocab:recorder;
+	d2rq:classDefinitionLabel "recorder";
+	.
+map:recorder__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:recorder;
+	d2rq:property rdfs:label;
+	d2rq:pattern "recorder #@@recorder.recname@@";
+	.
+map:recorder_recname a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:recorder;
+	d2rq:property vocab:recorder_recname;
+	d2rq:propertyDefinitionLabel "recorder recname";
+	d2rq:column "recorder.recname";
+	.
+
+# Table video
+map:video a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "video/title-@@title|encode@@";
+	d2rq:class vocab:video;
+	d2rq:classDefinitionLabel "video";
+	.
+map:video__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:video;
+	d2rq:property rdfs:label;
+	d2rq:pattern "video #@@video.title@@";
+	.
+map:video_title a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:video;
+	d2rq:property vocab:video_title;
+	d2rq:propertyDefinitionLabel "video title";
+	d2rq:column "video.title";
+	.
+map:video_price a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:video;
+	d2rq:property vocab:video_price;
+	d2rq:propertyDefinitionLabel "video price";
+	d2rq:column "video.price";
+	d2rq:datatype xsd:decimal;
+	.
+map:video_currency a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:video;
+	d2rq:property vocab:video_currency;
+	d2rq:propertyDefinitionLabel "video currency";
+	d2rq:column "video.currency";
+	.
+
