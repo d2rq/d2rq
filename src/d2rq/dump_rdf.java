@@ -18,6 +18,7 @@ import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.shared.NotFoundException;
 import com.hp.hpl.jena.util.FileManager;
+import com.hp.hpl.jena.util.FileUtils;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
@@ -240,7 +241,11 @@ public class dump_rdf {
 		private Model makeMapModel() throws DumpParameterException {
 			if (hasMappingFile()) {
 				try {
-					return FileManager.get().loadModel(this.mapURL, baseURI(), null);
+					// if file extension is not among the known types then assume that the file has TURTLE syntax
+					if(FileUtils.guessLang(this.mapURL,"unknown").equals("unknown"))
+						return FileManager.get().loadModel(this.mapURL, baseURI(), "TURTLE");
+					else
+						return FileManager.get().loadModel(this.mapURL, baseURI(), null);
 				} catch (TurtleParseException ex) {
 					throw new D2RQException(
 							"Error parsing " + mapURL + ": " + ex.getMessage(), ex, 77);
