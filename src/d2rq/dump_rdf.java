@@ -241,10 +241,11 @@ public class dump_rdf {
 		private Model makeMapModel() throws DumpParameterException {
 			if (hasMappingFile()) {
 				try {
-					// if file extension is not among the known types then assume that the file has TURTLE syntax
+					// Guess the language/type of mapping file based on file extension. If it is not among the known types then assume that the file has TURTLE syntax and force to use TURTLE parser
 					if(FileUtils.guessLang(this.mapURL,"unknown").equals("unknown"))
 						return FileManager.get().loadModel(this.mapURL, baseURI(), "TURTLE");
 					else
+						// if the type is known than let jena auto-detect it and load the appropriate parser
 						return FileManager.get().loadModel(this.mapURL, baseURI(), null);
 				} catch (TurtleParseException ex) {
 					throw new D2RQException(
