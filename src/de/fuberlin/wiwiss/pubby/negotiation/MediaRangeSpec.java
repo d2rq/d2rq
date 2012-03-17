@@ -2,7 +2,6 @@ package de.fuberlin.wiwiss.pubby.negotiation;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,8 +60,8 @@ public class MediaRangeSpec {
 		if ("*".equals(type) && !"*".equals(subtype)) {
 			return null;
 		}
-		List parameterNames = new ArrayList();
-		List parameterValues = new ArrayList();
+		List<String> parameterNames = new ArrayList<String>();
+		List<String> parameterValues = new ArrayList<String>();
 		while (m.find()) {
 			String name = m.group(1).toLowerCase();
 			String value = (m.group(3) == null) ? m.group(2) : unescape(m.group(3));
@@ -84,8 +83,8 @@ public class MediaRangeSpec {
 	 * Parses an HTTP Accept header into a List of MediaRangeSpecs
 	 * @return A List of MediaRangeSpecs 
 	 */
-	public static List parseAccept(String s) {
-		List result = new ArrayList();
+	public static List<MediaRangeSpec> parseAccept(String s) {
+		List<MediaRangeSpec> result = new ArrayList<MediaRangeSpec>();
 		Matcher m = mediaRangePattern.matcher(s);
 		while (m.find()) {
 			result.add(parseRange(m.group()));
@@ -103,13 +102,13 @@ public class MediaRangeSpec {
 	
 	private final String type;
 	private final String subtype;
-	private final List parameterNames;
-	private final List parameterValues;
+	private final List<String> parameterNames;
+	private final List<String> parameterValues;
 	private final String mediaType;
 	private final double quality;
 
 	private MediaRangeSpec(String type, String subtype, 
-			List parameterNames, List parameterValues,
+			List<String> parameterNames, List<String> parameterValues,
 			double quality) {
 		this.type = type;
 		this.subtype = subtype;
@@ -128,7 +127,7 @@ public class MediaRangeSpec {
 			result.append(";");
 			result.append(parameterNames.get(i));
 			result.append("=");
-			String value = (String) parameterValues.get(i);
+			String value = parameterValues.get(i);
 			if (tokenPattern.matcher(value).matches()) {
 				result.append(value);
 			} else {
@@ -152,14 +151,14 @@ public class MediaRangeSpec {
 		return mediaType;
 	}
 	
-	public List getParameterNames() {
+	public List<String> getParameterNames() {
 		return parameterNames;
 	}
 	
 	public String getParameter(String parameterName) {
 		for (int i = 0; i < parameterNames.size(); i++) {
 			if (parameterNames.get(i).equals(parameterName.toLowerCase())) {
-				return (String) parameterValues.get(i);
+				return parameterValues.get(i);
 			}
 		}
 		return null;
@@ -185,7 +184,7 @@ public class MediaRangeSpec {
 		if (range.getParameterNames().isEmpty()) return 3;
 		int result = 3;
 		for (int i = 0; i < range.getParameterNames().size(); i++) {
-			String name = (String) range.getParameterNames().get(i);
+			String name = range.getParameterNames().get(i);
 			String value = range.getParameter(name);
 			if (!value.equals(getParameter(name))) return 0;
 			result++;
@@ -193,12 +192,10 @@ public class MediaRangeSpec {
 		return result;
 	}
 	
-	public MediaRangeSpec getBestMatch(List mediaRanges) {
+	public MediaRangeSpec getBestMatch(List<MediaRangeSpec> mediaRanges) {
 		MediaRangeSpec result = null;
 		int bestPrecedence = 0;
-		Iterator it = mediaRanges.iterator();
-		while (it.hasNext()) {
-			MediaRangeSpec range = (MediaRangeSpec) it.next();
+		for (MediaRangeSpec range: mediaRanges) {
 			if (getPrecedence(range) > bestPrecedence) {
 				bestPrecedence = getPrecedence(range);
 				result = range;
