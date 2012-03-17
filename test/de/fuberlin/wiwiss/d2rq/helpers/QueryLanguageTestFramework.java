@@ -21,11 +21,11 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.vocabulary.DC;
 
 import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.sql.BeanCounter;
-import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
 import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
 import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 

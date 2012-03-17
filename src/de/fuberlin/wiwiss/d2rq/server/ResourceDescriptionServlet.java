@@ -11,9 +11,8 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.vocabulary.RDFS;
-
-import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
 
 public class ResourceDescriptionServlet extends HttpServlet {
 	

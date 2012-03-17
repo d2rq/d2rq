@@ -8,6 +8,7 @@ import java.util.Collections;
 import junit.framework.TestCase;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
@@ -23,7 +24,6 @@ import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.values.Column;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
-import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
 
 /**
  * :cm1 a d2rq:ClassMap;

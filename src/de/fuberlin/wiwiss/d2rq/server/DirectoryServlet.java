@@ -15,7 +15,6 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 
@@ -44,7 +43,7 @@ public class DirectoryServlet extends HttpServlet {
 				continue;
 			}
 			String uri = resource.getURI();
-			Statement labelStmt = resource.getProperty(RDFS.label);
+			Statement labelStmt = PageServlet.getBestLabel(resource);
 			String label = (labelStmt == null) ? resource.getURI() : labelStmt.getString();
 			resources.put(uri, label);
 		}

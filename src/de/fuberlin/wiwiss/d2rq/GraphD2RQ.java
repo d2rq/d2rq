@@ -21,7 +21,10 @@ import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.vocabulary.DC;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
@@ -38,6 +41,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 /**
  * A D2RQ virtual read-only graph backed by a non-RDF database.
@@ -157,8 +161,17 @@ public class GraphD2RQ extends GraphBase implements Graph {
 				if (bridge.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)) != null) {
 					inventoryBridges.add(bridge);
 				}
+				// TODO The list of label properties is redundantly specified in PageServlet
 				if (bridge.selectTriple(new Triple(Node.ANY, RDFS.label.asNode(), Node.ANY)) != null) {
 					inventoryBridges.add(bridge);
+				} else if (bridge.selectTriple(new Triple(Node.ANY, SKOS.prefLabel.asNode(), Node.ANY)) != null) {
+					inventoryBridges.add(bridge);
+				} else if (bridge.selectTriple(new Triple(Node.ANY, DC.title.asNode(), Node.ANY)) != null) {
+					inventoryBridges.add(bridge);					
+				} else if (bridge.selectTriple(new Triple(Node.ANY, DCTerms.title.asNode(), Node.ANY)) != null) {
+					inventoryBridges.add(bridge);					
+				} else if (bridge.selectTriple(new Triple(Node.ANY, FOAF.name.asNode(), Node.ANY)) != null) {
+					inventoryBridges.add(bridge);					
 				}
 			}
 			if (inventoryBridges.isEmpty()) {

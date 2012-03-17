@@ -20,9 +20,13 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.PrefixMapping;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
+import com.hp.hpl.jena.vocabulary.DC;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 public class PageServlet extends HttpServlet {
 	private PrefixMapping prefixes;
@@ -91,7 +95,7 @@ public class PageServlet extends HttpServlet {
 		
 		context.put("uri", resourceURI);
 		context.put("rdf_link", server.dataURL(serviceStem, relativeResourceURI));
-		context.put("label", resource.getProperty(RDFS.label));
+		context.put("label", getBestLabel(resource));
 		context.put("properties", collectProperties(description, resource));
 		context.put("classmap_links", classmapLinks(resource));
 		velocity.mergeTemplateXHTML("resource_page.vm");
@@ -208,5 +212,14 @@ public class PageServlet extends HttpServlet {
 			// TODO Typed literals, language literals
 			return this.value.getLiteralLexicalForm().compareTo(other.value.getLiteralLexicalForm());
 		}
+	}
+	
+	public static Statement getBestLabel(Resource resource) {
+		Statement label = resource.getProperty(RDFS.label);
+		if (label == null) label = resource.getProperty(SKOS.prefLabel);
+		if (label == null) label = resource.getProperty(DC.title);
+		if (label == null) label = resource.getProperty(DCTerms.title);
+		if (label == null) label = resource.getProperty(FOAF.name);
+		return label;
 	}
 }
