@@ -416,6 +416,9 @@ mailto:@@<em>Persons.email</em>@@</pre>
       then URL encoding is applied, with an additional rule that spaces are
       converted to underscores (<code>_</code>). Some people find that this
       produces friendlier URIs.</li>
+    <li>If a column is given as <code>@@Table.Column|<strong>encode</strong>@@</code>,
+      then <a href="http://www.ietf.org/rfc/rfc3986.txt">Percent encoding</a> is applied before the string 
+      is inserted.</li>
   </ul>
 </dd>
 

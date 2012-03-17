@@ -1,9 +1,18 @@
 package de.fuberlin.wiwiss.d2rq.mapgen;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Iterator;
+import java.util.List;
 
+import com.hp.hpl.jena.datatypes.TypeMapper;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
+import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 
@@ -12,13 +21,12 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * Result is available as a high-quality Turtle serialization, or
  * as a parsed model.
  *  
- * @author Luís Eufrasio (luis.eufrasio@gmail.com)
+ * @author Lu&iacute;s Eufrasio (luis.eufrasio@gmail.com)
  */
 public class W3CMappingGenerator extends MappingGenerator {
 
 	public W3CMappingGenerator(String jdbcURL) {
 		super(jdbcURL);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -33,7 +41,8 @@ public class W3CMappingGenerator extends MappingGenerator {
 			
 			Attribute column = (Attribute) it.next();
 			String attributeName = function.encode(column.attributeName());
-			result += attributeName + "-@@" + attributeName;
+			String attributeQName = function.encode(column.qualifiedName());
+			result += attributeName + "-@@" + attributeQName;
 			if (DatabaseSchemaInspector.isStringType(this.schema.columnType(column))) {
 				result += "|encode";
 			}

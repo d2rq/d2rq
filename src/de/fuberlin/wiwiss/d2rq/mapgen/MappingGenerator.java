@@ -54,7 +54,7 @@ public class MappingGenerator {
 	private String jdbcURL;
 	private String mapNamespaceURI;
 	protected String instanceNamespaceURI;
-	private String vocabNamespaceURI;
+	protected String vocabNamespaceURI;
 	private String driverClass = null;
 	private String databaseUser = null;
 	private String databasePassword = null;
@@ -239,7 +239,10 @@ public class MappingGenerator {
 		this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
 		this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
 		this.out.println("\t.");
-		writeLabelBridge(tableName);
+		if ((this instanceof W3CMappingGenerator) == false) {
+			writeLabelBridge(tableName);
+		}
+		
 		List foreignKeys = this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		Iterator it = this.schema.listColumns(tableName).iterator();
 		while (it.hasNext()) {
@@ -375,9 +378,9 @@ public class MappingGenerator {
 	
 	// A very conservative pattern for the local part of a QName.
 	// If a URI doesn't match, better don't QName it.
-	private final static Pattern simpleXMLName = 
+	protected final static Pattern simpleXMLName = 
 			Pattern.compile("[a-zA-Z_][a-zA-Z0-9_-]*");
-	private String toPrefixedURI(String namespaceURI, String prefix, String s) {
+	protected String toPrefixedURI(String namespaceURI, String prefix, String s) {
 		if (simpleXMLName.matcher(s).matches()) {
 			return prefix + ":" + s;
 		}
@@ -404,7 +407,7 @@ public class MappingGenerator {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", table.qualifiedName());
 	}
 
-	private String vocabularyTermQName(Attribute attribute) {
+	protected String vocabularyTermQName(Attribute attribute) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attribute));
 	}
 
