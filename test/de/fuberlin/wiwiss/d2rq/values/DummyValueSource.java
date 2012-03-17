@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rq.values;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -14,7 +15,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  */
 public class DummyValueSource implements ValueMaker {
 	private String returnValue = null;
-	private Set projectionSpecs;
+	private Set<ProjectionSpec> projectionSpecs;
 	private Expression selectCondition = Expression.TRUE;
 
 	public DummyValueSource(String value) {
@@ -28,7 +29,7 @@ public class DummyValueSource implements ValueMaker {
 		this.returnValue = value;
 	}
 
-	public void setProjectionSpecs(Set columns) {
+	public void setProjectionSpecs(Set<ProjectionSpec> columns) {
 		this.projectionSpecs = columns;
 	}
 
@@ -36,7 +37,7 @@ public class DummyValueSource implements ValueMaker {
 		this.selectCondition = selectCondition;
 	}
 
-	public Set projectionSpecs() {
+	public Set<ProjectionSpec> projectionSpecs() {
 		return this.projectionSpecs;
 	}
 

@@ -62,13 +62,13 @@ public class AliasMapTest extends TestCase {
 	
 	public void testApplyToJoinSetDoesNotModifyUnaliasedJoin() {
 		Join join = new Join(abc_col1, xyz_col1, Join.DIRECTION_RIGHT);
-		Set joins = Collections.singleton(join);
+		Set<Join> joins = Collections.singleton(join);
 		assertEquals(joins, this.fooAsBarMap.applyToJoinSet(joins));
 	}
 	
 	public void testApplyToJoinSetDoesModifyAliasedJoin() {
 		Join join = new Join(foo_col1, foo_col1, Join.DIRECTION_RIGHT);
-		Set aliasedSet = this.fooAsBarMap.applyToJoinSet(Collections.singleton(join));
+		Set<Join> aliasedSet = this.fooAsBarMap.applyToJoinSet(Collections.singleton(join));
 		assertEquals(1, aliasedSet.size());
 		Join aliased = (Join) aliasedSet.iterator().next();
 		assertEquals(Collections.singletonList(bar_col1), aliased.attributes1());
@@ -81,7 +81,7 @@ public class AliasMapTest extends TestCase {
 	}
 
 	public void testNoAliasesConstantEqualsNewEmptyAliasMap() {
-		AliasMap noAliases = new AliasMap(Collections.EMPTY_LIST);
+		AliasMap noAliases = new AliasMap(Collections.<Alias>emptyList());
 		assertTrue(AliasMap.NO_ALIASES.equals(noAliases));
 		assertTrue(noAliases.equals(AliasMap.NO_ALIASES));
 	}
@@ -111,8 +111,8 @@ public class AliasMapTest extends TestCase {
 	}
 	
 	public void testEqualMapsHaveSameHashCode() {
-		AliasMap m1 = new AliasMap(new ArrayList());
-		AliasMap m2 = new AliasMap(new ArrayList());
+		AliasMap m1 = new AliasMap(new ArrayList<Alias>());
+		AliasMap m2 = new AliasMap(new ArrayList<Alias>());
 		assertEquals(m1.hashCode(), m2.hashCode());
 	}
 	
@@ -161,7 +161,7 @@ public class AliasMapTest extends TestCase {
 	}
 	
 	public void testToStringTwoAliases() {
-		Collection aliases = new ArrayList();
+		Collection<Alias> aliases = new ArrayList<Alias>();
 		aliases.add(fooAsBar);
 		aliases.add(new Alias(new RelationName(null, "abc"), new RelationName(null, "xyz")));
 		// Order is alphabetical by alias

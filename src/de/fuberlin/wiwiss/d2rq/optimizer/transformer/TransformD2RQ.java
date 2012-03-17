@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +35,7 @@ import de.fuberlin.wiwiss.d2rq.engine.BindingMaker;
 import de.fuberlin.wiwiss.d2rq.engine.GraphPatternTranslator;
 import de.fuberlin.wiwiss.d2rq.engine.OpD2RQ;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.optimizer.ops.OpFilteredBGP;
 import de.fuberlin.wiwiss.d2rq.optimizer.utility.ExprUtility;
 
@@ -152,12 +152,10 @@ public class TransformD2RQ extends TransformCopy
      */
     private Op transformOpBGP(OpBGP opBGP, OpFilter opFilter) 
     {
-        List nodeRelations;
+        List<NodeRelation> nodeRelations;
         Op op, tree = null;
         NodeRelation nodeRelation;
-        Collection compatibleGroups;
-        Iterator it;
-        CompatibleRelationGroup group;
+        Collection<CompatibleRelationGroup> compatibleGroups;
         OpD2RQ opD2RQ;
         
         nodeRelations = new GraphPatternTranslator(opBGP.getPattern().getList(), graph.tripleRelations(), graph.getConfiguration().getUseAllOptimizations()).translate();
@@ -199,13 +197,8 @@ public class TransformD2RQ extends TransformCopy
             return opD2RQ;
         }
         
-        
         compatibleGroups = CompatibleRelationGroup.groupNodeRelations(nodeRelations);
-        it = compatibleGroups.iterator();
-        
-        while (it.hasNext()) 
-        {
-            group = (CompatibleRelationGroup) it.next();
+        for (CompatibleRelationGroup group: compatibleGroups) { 
             op = new OpD2RQ(opBGP, group.baseRelation(), group.bindingMakers());
             if (tree == null) {
                 tree = op;
@@ -239,37 +232,31 @@ public class TransformD2RQ extends TransformCopy
      * @return List - list with the noderealtions that include the filterexpressions, which 
      *                could be transformed to SQL 
      */
-    private List integrateFilterExprIntoNodeRelations(List nodeRelations, OpFilter opFilter)
+    private List<NodeRelation> integrateFilterExprIntoNodeRelations(List<NodeRelation> nodeRelations, OpFilter opFilter)
     {
         // all expressions of the filter
-        List exprList = new ArrayList(opFilter.getExprs().getList());
+        List<Expr> exprList = new ArrayList<Expr>(opFilter.getExprs().getList());
         
         int numberOfNodeRelations = nodeRelations.size();
         
         // check every expression
-        for(Iterator exprIterator = exprList.iterator(); exprIterator.hasNext();)
-        {
-            Expr expr = (Expr)exprIterator.next();
+        for (Expr expr: exprList) {
             
-            Set mentionedVars = new HashSet();
+            Set<String> mentionedVars = new HashSet<String>();
             
             // all possible vars of the expression
             // workaround to remove the questionmark from the varname
-            for(Iterator varIterator = expr.getVarsMentioned().iterator(); varIterator.hasNext();)
-            {
-                Var var = (Var)varIterator.next();
+            for (Var var: expr.getVarsMentioned()) {
                 mentionedVars.add(var.getName());
             }           
             
             
             // contains the new nodeRelations
-            List newNodeRelations = new ArrayList();
+            List<NodeRelation> newNodeRelations = new ArrayList<NodeRelation>();
             
             // now check every noderelation for integrating the expression
             boolean filterConversionSuccesfulForEveryNodeRelation = true;
-            for(Iterator nodeRelationIterator = nodeRelations.iterator(); nodeRelationIterator.hasNext(); )
-            {
-                NodeRelation nodeRelation = (NodeRelation)nodeRelationIterator.next();
+            for (NodeRelation nodeRelation: nodeRelations) {
                 
                 if (nodeRelation.variableNames().containsAll(mentionedVars))
                 {
@@ -291,10 +278,8 @@ public class TransformD2RQ extends TransformCopy
                             mutableRelation.select(expression);
                             
                             // workaround - this map is needed to create a noderelation
-                            Map variablesToNodeMakers = new HashMap();
-                            for(Iterator varNamesIterator = nodeRelation.variableNames().iterator(); varNamesIterator.hasNext();)
-                            {
-                                String  varName = (String)varNamesIterator.next();
+                            Map<String,NodeMaker> variablesToNodeMakers = new HashMap<String,NodeMaker>();
+                            for (String varName: nodeRelation.variableNames()) {
                                 variablesToNodeMakers.put(varName, nodeRelation.nodeMaker(varName));
                             }
                             // now create the nodeRelation from the mutablenoderelation

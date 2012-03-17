@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-
-import junit.framework.TestCase;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -20,7 +20,6 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.vocabulary.DC;
 
@@ -36,9 +35,9 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  */
 public abstract class QueryLanguageTestFramework extends TestCase {
 	protected ModelD2RQ model;
-	protected Set results;
+	protected Set<Map<String,RDFNode>> results;
 	protected String queryString;
-	protected Map currentSolution = new HashMap();
+	protected Map<String,RDFNode> currentSolution = new HashMap<String,RDFNode>();
 	
 	// compare fields
 	int nTimes=1;
@@ -46,13 +45,14 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	boolean compareQueryHandlers=false;
     int configs;
 	BeanCounter diffInfo[];
-	Set resultMaps[];
+	Set<Map<String,RDFNode>> resultMaps[];
 	String printed[];
 	String handlerDescription[];
 	boolean usingD2RQ[];
 	boolean verbatim[];
 
 	
+	@SuppressWarnings("unchecked")
 	protected void setUpHandlers() {
 	    configs=2;
 		diffInfo=new BeanCounter[configs];
@@ -188,9 +188,9 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	
 	private String printObject(Object obj) {
         if (obj instanceof Collection) {
-            return printCollection((Collection)obj);
+            return printCollection((Collection<?>) obj);
         } if (obj instanceof Map) {
-            return printMap((Map)obj);
+            return printMap((Map<?,?>) obj);
         } else {
             return obj.toString();
         }
@@ -207,9 +207,9 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	    return b.toString();
 	}
 	
-	private String printCollection(Collection c) {
+	private String printCollection(Collection<?> c) {
 	    String a[]=new String[c.size()];
-	    Iterator it=c.iterator();
+	    Iterator<?> it=c.iterator();
 	    int i=0;
 	    while (it.hasNext()) {
 	        Object obj=it.next();
@@ -220,12 +220,12 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	    return printArray(a);
 	}
 
-	private String printMap(Map m) {
+	private String printMap(Map<?,?> m) {
 	    String a[]=new String[m.size()];
-	    Iterator it=m.entrySet().iterator();
+	    Iterator<?> it=m.entrySet().iterator();
 	    int i=0;
 	    while (it.hasNext()) {
-	        Map.Entry e=(Map.Entry)it.next();
+	        Map.Entry<?,?> e = (Map.Entry<?,?>) it.next();
 	        a[i]=printObject(e.getKey()) + " = " + printObject(e.getValue());
 	        i++;
 	    }
@@ -243,7 +243,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 				sparql;
 		Query query = QueryFactory.create(sparql);
 		QueryExecution qe = QueryExecutionFactory.create(query, this.model);
-		this.results = new HashSet();
+		this.results = new HashSet<Map<String,RDFNode>>();
 		ResultSet resultSet = qe.execSelect();
 		while (resultSet.hasNext()) {
 			QuerySolution solution = resultSet.nextSolution();
@@ -252,10 +252,10 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	}
 	
 	private void addSolution(QuerySolution solution) {
-		Map map = new HashMap();
-		Iterator it = solution.varNames();
+		Map<String,RDFNode> map = new HashMap<String,RDFNode>();
+		Iterator<String> it = solution.varNames();
 		while (it.hasNext()) {
-			String variable = (String) it.next();
+			String variable = it.next();
 			RDFNode value = solution.get(variable);
 			map.put(variable, value);
 		}
@@ -277,11 +277,11 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 		this.currentSolution.clear();
 	}
 	
-	public static Map solutionToMap(QuerySolution solution, List variables) {
-		Map result = new HashMap();
-		Iterator it = solution.varNames();
+	public static Map<String,RDFNode> solutionToMap(QuerySolution solution, List<String> variables) {
+		Map<String,RDFNode> result = new HashMap<String,RDFNode>();
+		Iterator<String> it = solution.varNames();
 		while (it.hasNext()) {
-		    String variableName = (String) it.next();
+		    String variableName = it.next();
 		    if (!variables.contains(variableName)) {
 		    	continue;
 		    }
@@ -297,15 +297,11 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	
 	protected void dump() {
 		System.out.println("\n#Results: " + results.size() + ":");
-		Iterator it = this.results.iterator();
 		int count = 1;
-		while (it.hasNext()) {
-		    System.out.println("Result binding " + count + ":");
-			Map binding = (Map) it.next();
-			Iterator it2 = binding.keySet().iterator();
-			while (it2.hasNext()) {
-			    String varName = (String) it2.next();
-			    Object val = binding.get(varName);
+		for (Map<String,RDFNode> binding: results) {
+			System.out.println("Result binding " + count + ":");
+		    for (String varName: binding.keySet()) {
+			    RDFNode val = binding.get(varName);
 			    System.out.println("    " + varName + " => " + val); 
 			}
 			count++;

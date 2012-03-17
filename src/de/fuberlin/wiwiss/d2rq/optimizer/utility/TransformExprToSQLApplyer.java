@@ -98,7 +98,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	private static final Expression CONSTANT_TRUE  = new ConstantEx("true", NodeValueBoolean.TRUE.asNode());
 	
 	private final NodeRelation nodeRelation;
-	private final Stack expression = new Stack();
+	private final Stack<Expression> expression = new Stack<Expression>();
 	
 	private boolean convertable;     // flag if converting was possible
 	private String  reason = null;   // reason why converting failed
@@ -201,7 +201,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			return;
 		}
 		
-		List expressions = toExpression(var);
+		List<Expression> expressions = toExpression(var);
 		if (expressions.size() == 1) {
 			expression.push((Expression) expressions.get(0));
 		} else {
@@ -247,7 +247,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		for (int i = 0; i < function.numArgs(); i++)
 			function.getArg(i + 1).visit(this);
-		List args = new ArrayList(function.numArgs());
+		List<Expression> args = new ArrayList<Expression>(function.numArgs());
 		
 		for (int i = 0; i < function.numArgs(); i++)
 			args.add(expression.pop());
@@ -260,9 +260,9 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	 * @param exprVar - a sparql-expr-var
 	 * @return List<Expression> - the equivalent sql-expressions
 	 */
-	private List toExpression(ExprVar exprVar)
+	private List<Expression> toExpression(ExprVar exprVar)
 	{
-		ArrayList result = new ArrayList();
+		ArrayList<Expression> result = new ArrayList<Expression>();
 		
 		if (this.nodeRelation != null && exprVar != null)
 		{
@@ -270,17 +270,17 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			NodeMaker nodeMaker = nodeRelation.nodeMaker(exprVar.asVar().getVarName());
 			if (nodeMaker instanceof TypedNodeMaker) {
 				TypedNodeMaker typedNodeMaker = (TypedNodeMaker) nodeMaker;
-				Iterator it = typedNodeMaker.projectionSpecs().iterator();
+				Iterator<ProjectionSpec> it = typedNodeMaker.projectionSpecs().iterator();
 				if (!it.hasNext()) {
 					logger.debug("no projection spec for " + exprVar + ", assuming constant");
 					Node node = typedNodeMaker.makeNode(null);
 					result.add(new ConstantEx(NodeValue.makeNode(node).asString(), node));
 				}
 				while (it.hasNext()) {
-					ProjectionSpec projectionSpec = (ProjectionSpec)it.next();
+					ProjectionSpec projectionSpec = it.next();
 					
 					if (projectionSpec == null)
-						return Collections.EMPTY_LIST;
+						return Collections.<Expression>emptyList();
 					
 					if (projectionSpec instanceof Attribute) {
 						result.add(new AttributeExprEx((Attribute) projectionSpec, nodeMaker));
@@ -291,7 +291,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 						if (expression instanceof SQLExpression)
 							result.add(((SQLExpression)expression));
 						else
-							return Collections.EMPTY_LIST;
+							return Collections.<Expression>emptyList();
 					}
 				}
 			} else if (nodeMaker instanceof FixedNodeMaker) {
@@ -329,7 +329,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		} else if (extensionSupports(expr)) {
 			expr.getArg(1).visit(this) ;
 			Expression e1 = (Expression) expression.pop();
-			List args = Collections.singletonList(e1);
+			List<Expression> args = Collections.singletonList(e1);
 			extensionConvert(expr, args);
 		} else {
 			conversionFailed(expr);
@@ -408,7 +408,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			Expression e2 = (Expression) expression.pop();
 			Expression e1 = (Expression) expression.pop();
 			
-			List args = new ArrayList(2);
+			List<Expression> args = new ArrayList<Expression>(2);
 			
 			args.add(e1);
 			args.add(e2);
@@ -1120,7 +1120,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		return false;
 	}
 	
-	protected void extensionConvert(ExprFunction function, List args)
+	protected void extensionConvert(ExprFunction function, List<Expression> args)
 	{
 	}
 

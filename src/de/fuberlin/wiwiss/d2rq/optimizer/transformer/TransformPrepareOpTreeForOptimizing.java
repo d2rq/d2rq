@@ -48,21 +48,30 @@ import com.hp.hpl.jena.sparql.algebra.op.OpTriple;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.TriplePath;
+import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 
 import de.fuberlin.wiwiss.d2rq.optimizer.utility.OpFilterUtility;
 
 /**
- * Creates a new operator-tree and adds for every operator the an OpLabel, 
- * that contains the threated object-vars of this operator (includes also the 
+ * Creates a new operator-tree and adds for every operator an OpLabel, 
+ * that contains the treated object-vars of this operator (includes also the 
  * object-vars of sub-operators)
- * Additionaly it performs optimizing for filters - checks if tranformation to cnf is better
+ * Additionally it performs optimizing for filters - checks if transformation to cnf is better
  * 
  * @author Herwig Leimer
- *
  */
 public class TransformPrepareOpTreeForOptimizing implements Transform 
 {
+	
+	/**
+	 * Gets the set of object variables from an OpLabel.
+	 * Encapsulates the unsafe cast.
+	 */
+	@SuppressWarnings("unchecked")
+	public static Set<Var> getObjectVarsFrom(OpLabel op) {
+		return (Set<Var>) op.getObject();
+	}
 	
 	/**
 	 * Constructor
@@ -101,26 +110,23 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 	
 	public Op transform(OpBGP opBGP)                                
 	{ 
-    	Set threatedVars;
+    	Set<Var> treatedVars;
     	OpLabel opLabel;
     	BasicPattern basicPattern;
-		Triple triple;
 		OpBGP newOpBGP;
 		
-		// contains the threated object-vars of the BGP
-		threatedVars = new HashSet();
+		// contains the treated object-vars of the BGP
+		treatedVars = new HashSet<Var>();
 		
 		if ((basicPattern = opBGP.getPattern()) != null)
 		{
 			// extract object-vars from triple-pattern
-	        for (Iterator iter = basicPattern.iterator() ; iter.hasNext() ; )
-	        {
-	            triple = (Triple)iter.next();
+			for (Triple triple: basicPattern) {
 	            Node node = triple.getObject();
 	            
 	            if (node != null && node.isVariable())
 	            {
-	            	threatedVars.add(node);
+	            	treatedVars.add((Var) node);
 	            }  
 	
 				// extract subject-vars from triple
@@ -128,7 +134,7 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 				
 				if (node != null && node.isVariable())
 				{
-					threatedVars.add(node);
+					treatedVars.add((Var) node);
 				}	
 	        }
 		}
@@ -137,7 +143,7 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
         newOpBGP = (OpBGP) opBGP.copy();
         
         // add label
-        opLabel = (OpLabel) OpLabel.create(threatedVars, newOpBGP);
+        opLabel = (OpLabel) OpLabel.create(treatedVars, newOpBGP);
    	 	
         return opLabel;
 	}
@@ -202,11 +208,11 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 	{
 		Op newOpTriple;
 		Triple triple;
-		Set threatedVars;
+		Set<Var> treatedVars;
 		OpLabel opLabel;
 		
-		// contains the threated object-vars of the Triple
-		threatedVars = new HashSet();
+		// contains the treated object-vars of the Triple
+		treatedVars = new HashSet<Var>();
 		
 		triple = opTriple.getTriple();
 		
@@ -217,7 +223,7 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
             
             if (node != null && node.isVariable())
             {
-            	threatedVars.add(node);
+            	treatedVars.add((Var) node);
             }
             
 			// extract subject-vars from triple
@@ -225,7 +231,7 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 			
 			if (node != null && node.isVariable())
 			{
-				threatedVars.add(node);
+				treatedVars.add((Var) node);
 			}	
 		}
 		
@@ -233,7 +239,7 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		newOpTriple = opTriple.copy();
 		
 		// add label
-        opLabel = (OpLabel) OpLabel.create(threatedVars, newOpTriple);
+        opLabel = (OpLabel) OpLabel.create(treatedVars, newOpTriple);
 		
 		// add label
 		return opLabel;
@@ -243,11 +249,11 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 	{
 		Op newOpPath;
 		TriplePath triplePath;
-		Set threatedVars;
+		Set<Var> treatedVars;
 		OpLabel opLabel;
 		
-		// contains the threated object-vars of the triplepath
-		threatedVars = new HashSet();
+		// contains the treated object-vars of the triplepath
+		treatedVars = new HashSet<Var>();
 		
 		triplePath = opPath.getTriplePath();
 		
@@ -258,21 +264,21 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 			
 			if (node != null && node.isVariable())
             {
-            	threatedVars.add(node);
+            	treatedVars.add((Var) node);
             }
 			
 			node = triplePath.getSubject();
 			
 			if (node != null && node.isVariable())
 			{
-				threatedVars.add(node);
+				treatedVars.add((Var) node);
 			}	
 		}
 		// copy oppath
 		newOpPath = opPath.copy();
 		
 		// add label
-        opLabel = (OpLabel) OpLabel.create(threatedVars, newOpPath);
+        opLabel = (OpLabel) OpLabel.create(treatedVars, newOpPath);
         
 		return opLabel;
 	}
@@ -291,26 +297,23 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 	public Op transform(OpQuadPattern quadPattern) 
 	{
 		Op newQuadPattern;
-		Set threatedVars;
+		Set<Var> treatedVars;
     	BasicPattern basicPattern;
 		OpLabel opLabel;
-		Triple triple;
 		Node object;
 		
-		// contains the threated object-vars of the BGP
-		threatedVars = new HashSet();
+		// contains the treated object-vars of the BGP
+		treatedVars = new HashSet<Var>();
 		
 		if ((basicPattern = quadPattern.getBasicPattern()) != null)
 		{
-			// extract object-vars from tripple-pattern
-	        for (Iterator iter = basicPattern.iterator() ; iter.hasNext() ; )
-	        {
-	            triple = (Triple)iter.next();
+			// extract object-vars from triple-pattern
+            for (Triple triple: basicPattern) {
 	            object = triple.getObject();
 	            
 	            if (object != null && object.isVariable())
 	            {
-	            	threatedVars.add(object);
+	            	treatedVars.add((Var) object);
 	            }            
 	        }
 		}
@@ -319,7 +322,7 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 		newQuadPattern = quadPattern.copy();
         
         // add label
-        opLabel = (OpLabel) OpLabel.create(threatedVars, newQuadPattern);
+        opLabel = (OpLabel) OpLabel.create(treatedVars, newQuadPattern);
    	 	
         return opLabel;
 	}
@@ -527,127 +530,106 @@ public class TransformPrepareOpTreeForOptimizing implements Transform
 
 	/**
 	 * Method for adding an oplabel to an op0. The oplabel
-	 * contains the threated object-vars of the op0. Only if the 
+	 * contains the treated object-vars of the op0. Only if the 
 	 * op0 is an OpBGP, it will contain the object-vars, otherwise, the set will be empty. 
 	 * @param op0 - operator that should be wrapped by the oplabel
-	 * @return Op - returns an OpLabel with the threated object-vars
+	 * @return Op - returns an OpLabel with the treated object-vars
 	 */
 	private Op addLabelToOp0(Op0 op0)
 	{
-		Set threatedVars;
-		
-		threatedVars = new HashSet();
+		Set<Var> treatedVars = new HashSet<Var>();
 		
 		// add the label
-		return OpLabel.create(threatedVars, op0);
+		return OpLabel.create(treatedVars, op0);
 	}
 	
 	/**
 	 * Adds an oplabel to an op1. The oplabel
-	 * contains the threated object-vars of the op0.
+	 * contains the treated object-vars of the op0.
 	 * @param op1 - operator that should be wrapped by the oplabel
-	 * @return Op - returns an OpLabel with the threated object-vars
+	 * @return Op - returns an OpLabel with the treated object-vars
 	 */
 	private Op addLabelToOp1(Op1 op1)
 	{
-		Set threatedVars;
+		Set<Var> treatedVars;
 		Op opLabel, subOp;
 		
-		// contains all threated object-vars
-		threatedVars = new HashSet();
+		// contains all treated object-vars
+		treatedVars = new HashSet<Var>();
 		
 		subOp = op1.getSubOp();
 		
-		// collect the object-vars, threated from the sub-operator
+		// collect the object-vars, treated from the sub-operator
 		if (subOp != null && subOp instanceof OpLabel)
 		{
-			threatedVars.addAll((Set)((OpLabel)subOp).getObject());			
+			treatedVars.addAll(getObjectVarsFrom((OpLabel) subOp));			
 		}
 		
 		// create the new label for the op1
-		opLabel = OpLabel.create(threatedVars, op1);
+		opLabel = OpLabel.create(treatedVars, op1);
 		
 		return opLabel;
 	}
 	
 	/**
 	 * Method for adding an oplabel to an op2. The oplabel
-	 * contains the threated object-vars of the op2.
+	 * contains the treated object-vars of the op2.
 	 * @param op2 - operator that should be wrapped by the oplabel
-	 * @return Op - returns an OpLabel with the threated object-vars  
-	 * 
+	 * @return Op - returns an OpLabel with the treated object-vars  
 	 */
 	private Op addLabelToOp2(Op2 op2)
 	{
 		Op left, right;
-		Set threatedVars;
+		Set<Var> treatedVars;
 		
-		// contains all threated object-vars
-		threatedVars = new HashSet();
+		// contains all treated object-vars
+		treatedVars = new HashSet<Var>();
 		
 		left = op2.getLeft();
 		right = op2.getRight();
 		
-		// collect the object-vars, threated from the left-operator
+		// collect the object-vars, treated from the left-operator
 		if (left != null && left instanceof OpLabel)
 		{
-			threatedVars.addAll((Set)((OpLabel)left).getObject());
+			treatedVars.addAll(getObjectVarsFrom((OpLabel) left));
 		}
 
-		// collect the object-vars, threated from the right-operator
+		// collect the object-vars, treated from the right-operator
 		if (right != null && right instanceof OpLabel)
 		{
-			threatedVars.addAll((Set)((OpLabel)right).getObject());
+			treatedVars.addAll(getObjectVarsFrom((OpLabel) right));
 		}
 		
 		// create the new label for the op2
-		return OpLabel.create(threatedVars, op2);
+		return OpLabel.create(treatedVars, op2);
 	}
 	
 	/**
 	 * Method for adding an oplabel to an op2. The oplabel
-	 * contains the threated object-vars of the op2.
+	 * contains the treated object-vars of the op2.
 	 * @param opN - operator that should be wrapped by the oplabel
-	 * @return Op - returns an OpLabel with the threated object-vars  
+	 * @return Op - returns an OpLabel with the treated object-vars  
 	 * 
 	 */
 	private Op addLabelToOpN(OpN opN)
 	{
-		Op op;
-		Set threatedVars;
+		Set<Var> treatedVars;
 		
-		// contains all threated object-vars
-		threatedVars = new HashSet();
+		// contains all treated object-vars
+		treatedVars = new HashSet<Var>();
 		
-		// collect the object-vars, threated from all the sub-operators
-		for(Iterator iterator = ((OpN)opN).iterator(); iterator.hasNext();)
-		{
-			op = (Op) iterator.next();
+		// collect the object-vars, treated from all the sub-operators
+		for(Iterator<Op> iterator = opN.iterator(); iterator.hasNext();) {
+			Op op = iterator.next();
 			
 			if (op instanceof OpLabel)
 			{
-				threatedVars.addAll((Set)((OpLabel)op).getObject());	
+				treatedVars.addAll(getObjectVarsFrom((OpLabel) op));	
 			}
 			
 		}
 		
 		// create label
-		return OpLabel.create(threatedVars, opN);
-	}
-		
-	/**
-	 * Method for adding an oplabel to an opext. The oplabel
-	 * contains the threated object-vars of the opext.  
-	 * @param opExt - operator that should be wrapped by the oplabel
-	 * @return Op - returns an OpLabel with the threated object-vars
-	 */
-	private Op addLabelToOpExt(OpExt opExt)
-	{
-		Set threatedVars;
-		
-		threatedVars = new HashSet();
-		
-		// add the label
-		return OpLabel.create(threatedVars, opExt);
+		return OpLabel.create(treatedVars, opN);
 	}
 }

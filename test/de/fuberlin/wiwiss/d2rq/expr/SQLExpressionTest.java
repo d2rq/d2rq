@@ -25,7 +25,7 @@ public class SQLExpressionTest extends TestCase {
 	
 	public void testFindsColumns() {
 		Expression e = SQLExpression.create("papers.publish = 1 AND papers.url1 != 'http://www.example.com\\'http://www.example.com' AND papers.url2 != 'http://www.example.com\\\\\\\\http://www.example.com' AND papers.rating > 4");
-		Set expectedColumns = new HashSet(Arrays.asList(
+		Set<Attribute> expectedColumns = new HashSet<Attribute>(Arrays.asList(
 				new Attribute[]{new Attribute(null, "papers", "publish"), 
 						new Attribute(null, "papers", "url1"),
 						new Attribute(null, "papers", "url2"),
@@ -56,7 +56,7 @@ public class SQLExpressionTest extends TestCase {
 	}
 	
 	public void testRenameColumnsWithColumnReplacer() {
-		Map map = new HashMap();
+		Map<Attribute,Attribute> map = new HashMap<Attribute,Attribute>();
 		map.put(new Attribute(null, "foo", "col1"), new Attribute(null, "foo", "col2"));
 		assertEquals(SQLExpression.create("foo.col2=foo.col3"), 
 				SQLExpression.create("foo.col1=foo.col3").renameAttributes(new ColumnRenamerMap(map)));

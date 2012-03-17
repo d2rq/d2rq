@@ -20,7 +20,7 @@ public class ConjunctionTest extends TestCase {
 		Conjunction.create(Arrays.asList(new Expression[]{expr2, expr1}));
 
 	public void testEmptyConjunctionIsTrue() {
-		assertEquals(Expression.TRUE, Conjunction.create(Collections.EMPTY_SET));
+		assertEquals(Expression.TRUE, Conjunction.create(Collections.<Expression>emptySet()));
 	}
 	
 	public void testSingletonConjunctionIsSelf() {

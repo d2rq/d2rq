@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.expr.Concatenation;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
@@ -37,10 +38,10 @@ public class Pattern implements ValueMaker {
 
 	private String pattern;
 	private String firstLiteralPart;
-	private List columns = new ArrayList(3);
-	private List columnFunctions = new ArrayList(3);
-	private List literalParts = new ArrayList(3);
-	private Set columnsAsSet;
+	private List<Attribute> columns = new ArrayList<Attribute>(3);
+	private List<ColumnFunction> columnFunctions = new ArrayList<ColumnFunction>(3);
+	private List<String> literalParts = new ArrayList<String>(3);
+	private Set<ProjectionSpec> columnsAsSet;
 	private java.util.regex.Pattern regex;
 	
 	/**
@@ -51,7 +52,7 @@ public class Pattern implements ValueMaker {
 	public Pattern(String pattern) {
 		this.pattern = pattern;
 		parsePattern();
-		this.columnsAsSet = new HashSet(this.columns);
+		this.columnsAsSet = new HashSet<ProjectionSpec>(this.columns);
 	}
 
 	public String firstLiteralPart() {
@@ -62,16 +63,14 @@ public class Pattern implements ValueMaker {
 		if (literalParts.isEmpty()) {
 			return firstLiteralPart;
 		}
-		return (String) literalParts.get(literalParts.size() - 1);
+		return literalParts.get(literalParts.size() - 1);
 	}
 	
 	public boolean literalPartsMatchRegex(String regex) {
 		if (!this.firstLiteralPart.matches(regex)) {
 			return false;
 		}
-		Iterator it = this.literalParts.iterator();
-		while (it.hasNext()) {
-			String literalPart = (String) it.next();
+		for (String literalPart: literalParts) {
 			if (!literalPart.matches(regex)) {
 				return false;
 			}
@@ -95,10 +94,10 @@ public class Pattern implements ValueMaker {
 		if (!match.matches()) {
 			return Expression.FALSE;
 		}
-		Collection expressions = new ArrayList(columns.size());
+		Collection<Expression> expressions = new ArrayList<Expression>(columns.size());
 		for (int i = 0; i < this.columns.size(); i++) {
-			Attribute attribute = (Attribute) this.columns.get(i);
-			ColumnFunction function = (ColumnFunction) this.columnFunctions.get(i);
+			Attribute attribute = columns.get(i);
+			ColumnFunction function = columnFunctions.get(i);
 			String attributeValue = function.decode(match.group(i + 1));
 			if (attributeValue == null) {
 				return Expression.FALSE;
@@ -108,7 +107,7 @@ public class Pattern implements ValueMaker {
 		return Conjunction.create(expressions);
 	}
 
-	public Set projectionSpecs() {
+	public Set<ProjectionSpec> projectionSpecs() {
 		return this.columnsAsSet;
 	}
 
@@ -121,8 +120,8 @@ public class Pattern implements ValueMaker {
 		int index = 0;
 		StringBuffer result = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {
-			Attribute column = (Attribute) this.columns.get(index);
-			ColumnFunction function = (ColumnFunction) this.columnFunctions.get(index);
+			Attribute column = columns.get(index);
+			ColumnFunction function = columnFunctions.get(index);
 			String value = row.get(column);
 			if (value == null) {
 				return null;
@@ -163,8 +162,8 @@ public class Pattern implements ValueMaker {
 		int index = 0;
 		StringBuffer newPattern = new StringBuffer(this.firstLiteralPart);
 		while (index < this.columns.size()) {
-			Attribute column = (Attribute) this.columns.get(index);
-			ColumnFunction function = (ColumnFunction) this.columnFunctions.get(index); 
+			Attribute column = columns.get(index);
+			ColumnFunction function = columnFunctions.get(index); 
 			newPattern.append(DELIMITER);
 			newPattern.append(renames.applyTo(column).qualifiedName());
 			if (function.name() != null) {
@@ -197,8 +196,8 @@ public class Pattern implements ValueMaker {
 		this.regex = java.util.regex.Pattern.compile(regexPattern, java.util.regex.Pattern.DOTALL);
 	}
 	
-	public Iterator partsIterator() {
-	    return new Iterator() {
+	public Iterator<Object> partsIterator() {
+	    return new Iterator<Object>() {
 		    private int i = 0;
 	        public boolean hasNext() {
 	            return i < columns.size() + literalParts.size() + 1;
@@ -219,11 +218,11 @@ public class Pattern implements ValueMaker {
 	}
 
 	public Expression toExpression() {
-		List parts = new ArrayList(literalParts.size() * 2 + 1);
+		List<Expression> parts = new ArrayList<Expression>(literalParts.size() * 2 + 1);
 		parts.add(new Constant(firstLiteralPart));
 		for (int i = 0; i < columns.size(); i++) {
-			parts.add(new AttributeExpr((Attribute) columns.get(i)));
-			parts.add(new Constant((String) literalParts.get(i)));
+			parts.add(new AttributeExpr(columns.get(i)));
+			parts.add(new Constant(literalParts.get(i)));
 		}
 		return Concatenation.create(parts);
 	}

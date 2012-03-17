@@ -53,6 +53,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpTable;
 import com.hp.hpl.jena.sparql.algebra.op.OpTopN;
 import com.hp.hpl.jena.sparql.algebra.op.OpTriple;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
+import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.serializer.SerializationContext;
@@ -68,7 +69,7 @@ import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformRemoveEmptyUnion;
 /**
  * Class for optimizing an op-tree especially for D2RQ. 
  * 
- * TODO God what a mess, this can be done in 20% the lines
+ * TODO This can be done in a lot less lines
  * 
  * @author Herwig Leimer
  */
@@ -86,8 +87,8 @@ public class D2RQTreeOptimizer
     
     /**
      * Method for optimizing an operator-tree. 
-     * In the first step for every operator in the tree, its threated object-vars
-     * ale calculated, and put into a labelOp. This means the transformed-object-tree
+     * In the first step for every operator in the tree, its treated object-vars
+     * are calculated, and put into a labelOp. This means the transformed-object-tree
      * looks like (originalop means the original operator): originalop -> OpLabel -> originalop -> OpLabel ....
      * This information is used for applying the rules for optimizing. 
      * In the second step, all the rules of optimizing (see above) will be applied. This is done to
@@ -156,9 +157,11 @@ public class D2RQTreeOptimizer
      */
     private static final class D2RQOpTreeVisitor implements OpVisitor
     {
-        private Transform optimizingTransform, d2rqTransform, addFilterTransform;
-        private Stack stack;
-        private List filterExpr;
+        private final Transform optimizingTransform = new TransformApplyD2RQOpimizingRules();
+        private final Transform addFilterTransform = new TransformAddFilters();
+        private final Transform d2rqTransform;
+        private final Stack<Op> stack = new Stack<Op>();
+        private List<Expr> filterExpr;
         
         /**
          * Constructor
@@ -166,11 +169,8 @@ public class D2RQTreeOptimizer
          */
         public D2RQOpTreeVisitor(GraphD2RQ graph)
         { 
-        	this.filterExpr = new ArrayList();
-        	this.optimizingTransform = new TransformApplyD2RQOpimizingRules();
+        	this.filterExpr = new ArrayList<Expr>();
             this.d2rqTransform = new TransformD2RQ(graph);
-            this.addFilterTransform = new TransformAddFilters();
-            this.stack = new Stack();
         }
         
         /**
@@ -181,7 +181,7 @@ public class D2RQTreeOptimizer
         { 
             if ( stack.size() != 1 )
                 logger.warn("Stack is not aligned") ;
-            return (Op)this.stack.pop() ; 
+            return stack.pop() ; 
         }
                         
         /**
@@ -203,7 +203,7 @@ public class D2RQTreeOptimizer
             if (opFilter.getSubOp() != null )
             {
                 opFilter.getSubOp().visit(this);
-                subOp = (Op)this.stack.pop();
+                subOp = stack.pop();
             }
             
             // remove available filterexpressions
@@ -429,7 +429,7 @@ public class D2RQTreeOptimizer
             if (opLabel.getSubOp() != null )
             {
                 opLabel.getSubOp().visit(this);
-                subOp = (Op)this.stack.pop();
+                subOp = stack.pop();
             }
             
             // remove the label
@@ -491,13 +491,13 @@ public class D2RQTreeOptimizer
 		public void visit(OpMinus opMinus) {
 			// Walk into A subtree
 			opMinus.getLeft().visit(this);
-			Op leftWithFilter = (Op) stack.pop();
+			Op leftWithFilter = stack.pop();
 			
 			// Walk into B subtree with empty expression list
-			List tmp = filterExpr;
-			filterExpr = new ArrayList();
+			List<Expr> tmp = filterExpr;
+			filterExpr = new ArrayList<Expr>();
 			opMinus.getRight().visit(this);
-			Op right = (Op) stack.pop();
+			Op right = stack.pop();
 			
 			// Remove the entire filter expression on the way up
 			filterExpr = tmp;
@@ -523,44 +523,27 @@ public class D2RQTreeOptimizer
 		/**
          * Calculates the set of valid filterexpressions as a subset from the whole set of 
          * possibilities. 
-         * @param possiblities - the whole set
+         * @param candidates - the whole set
          * @param opLabel - contains the threated object-vars, which are used to determine
          *                  the valid filterexpressions 
          * @return List - the subset from the set of possiblities
          */
-        private List calcValidFilterExpr(List possiblities, OpLabel opLabel)
-        {
-            Set threatedObjectVars;
-            Expr expr;
-            Set mentionedVarsInExpr;
-            List result;
-            
-            // get the set of the threated object-vars
-            threatedObjectVars = (Set) opLabel.getObject();
-            
-            result = new ArrayList();
+        private List<Expr> calcValidFilterExpr(List<Expr> candidates, OpLabel opLabel) {
+			Set<Var> treatedObjectVars = TransformPrepareOpTreeForOptimizing.getObjectVarsFrom(opLabel);
+            List<Expr> result = new ArrayList<Expr>();
             
             // now check every var of every filterexpression in the set of all 
             // filterexpression-possibilities to check if the filterexpression is valid
-            for (Iterator iterator = possiblities.iterator(); iterator.hasNext();)
-            {
-                expr = (Expr)iterator.next();
-              
-                // get all in the expression mentioned object-vars
-                mentionedVarsInExpr = expr.getVarsMentioned();
-                
+            for (Expr expr: candidates) {
                 // check if the alle mentioned-vars of the expression are a subset
                 // of the threated-Object-Vars
                 // if yes, the expression is valid, otherwise not
-                if (threatedObjectVars.containsAll(mentionedVarsInExpr))
-                {
+                if (treatedObjectVars.containsAll(expr.getVarsMentioned())) {
                     result.add(expr);
                 }
             }
-            
             return result;
         }
-        
         
         /**
          * Checks first if a filterexpression can be moved down. 
@@ -572,15 +555,15 @@ public class D2RQTreeOptimizer
             Op right = null ;
             Op newOp;
             OpLabel opLeftLabel, opRightLabel;
-            List filterExprBeforeOpUnion, filterExprAfterOpUnion, notMoveableFilterExpr;
+            List<Expr> filterExprBeforeOpUnion, filterExprAfterOpUnion, notMoveableFilterExpr;
             
             // contains the filterexpressions that are valid before this op2
-            filterExprBeforeOpUnion = new ArrayList(this.filterExpr);
+            filterExprBeforeOpUnion = new ArrayList<Expr>(this.filterExpr);
             // contains the filterexpressions that are valid after this op2
             // this is needed because during the bottom-up-stepping all filterexpressions
             // which could not be transformed down, must be inserted by means of an OpFilter
             // above this op2
-            filterExprAfterOpUnion = new ArrayList();
+            filterExprAfterOpUnion = new ArrayList<Expr>();
             
             // check left subtree
             if ((left = opUnion.getLeft()) != null )
@@ -595,7 +578,7 @@ public class D2RQTreeOptimizer
                 }    
                 // step down    
                 opUnion.getLeft().visit(this);
-                left = (Op)this.stack.pop();                                
+                left = stack.pop();                                
             }            
             
             // check the right subtree
@@ -611,13 +594,13 @@ public class D2RQTreeOptimizer
                 }
                 // step down
                 opUnion.getRight().visit(this);
-                right = (Op)this.stack.pop();
+                right = stack.pop();
             }
             
             // note: filterExprAfterOpUnion contains now all filterexpressions which could
             // be moved down
             // now calculate all filterexpressions which were not moveable
-            notMoveableFilterExpr = new ArrayList(filterExprBeforeOpUnion);
+            notMoveableFilterExpr = new ArrayList<Expr>(filterExprBeforeOpUnion);
             notMoveableFilterExpr.removeAll(filterExprAfterOpUnion);
 
             // if there are some filterexpressions which could not be moved down,
@@ -649,15 +632,15 @@ public class D2RQTreeOptimizer
             Op right = null ;
             Op newOp;
             OpLabel opLeftLabel, opRightLabel;
-            List filterExprBeforeOpJoin, filterExprAfterOpJoin, notMoveableFilterExpr;
+            List<Expr> filterExprBeforeOpJoin, filterExprAfterOpJoin, notMoveableFilterExpr;
             
             // contains the filterexpressions that are valid before this op2
-            filterExprBeforeOpJoin = new ArrayList(this.filterExpr);
+            filterExprBeforeOpJoin = new ArrayList<Expr>(this.filterExpr);
             // contains the filterexpressions that are valid after this op2
             // this is needed because during the bottom-up-stepping all filterexpressions
             // which could not be transformed down, must be inserted by means of an OpFilter
             // above this op2
-            filterExprAfterOpJoin = new ArrayList();
+            filterExprAfterOpJoin = new ArrayList<Expr>();
             
             // check left subtree
             if ((left = opJoin.getLeft()) != null )
@@ -672,7 +655,7 @@ public class D2RQTreeOptimizer
                 }    
                 // step down    
                 opJoin.getLeft().visit(this);
-                left = (Op)this.stack.pop();                                
+                left = stack.pop();                                
             }            
             
             // check the right subtree
@@ -688,13 +671,13 @@ public class D2RQTreeOptimizer
                 }
                 // step down
                 opJoin.getRight().visit(this);
-                right = (Op)this.stack.pop();
+                right = stack.pop();
             }
             
             // note: filterExprAfterOpUnion contains now all filterexpressions which could
             // be moved down
             // now calculate all filterexpressions which were not moveable
-            notMoveableFilterExpr = new ArrayList(filterExprBeforeOpJoin);
+            notMoveableFilterExpr = new ArrayList<Expr>(filterExprBeforeOpJoin);
             notMoveableFilterExpr.removeAll(filterExprAfterOpJoin);
 
             // if there are some filterexpressions which could not be moved down,
@@ -727,16 +710,15 @@ public class D2RQTreeOptimizer
             Op right = null ;
             Op newOp;
             OpLabel opLeftLabel, opRightLabel;
-            List filterExprBeforeOpLeftJoin, filterExprAfterOpLeftJoin, notMoveableFilterExpr, filterExprRightSide, validFilterExprRightSide;
-            Expr expr;
+            List<Expr> filterExprBeforeOpLeftJoin, filterExprAfterOpLeftJoin, notMoveableFilterExpr, filterExprRightSide, validFilterExprRightSide;
             
             // contains the filterexpressions that are valid before this op2
-            filterExprBeforeOpLeftJoin = new ArrayList(this.filterExpr);
+            filterExprBeforeOpLeftJoin = new ArrayList<Expr>(this.filterExpr);
             // contains the filterexpressions that are valid after this op2
             // this is needed because during the bottom-up-stepping all filterexpressions
             // which could not be transformed down, must be inserted by means of an OpFilter
             // above this op2
-            filterExprAfterOpLeftJoin = new ArrayList();
+            filterExprAfterOpLeftJoin = new ArrayList<Expr>();
             
             	
             // check left subtree
@@ -752,7 +734,7 @@ public class D2RQTreeOptimizer
                 }    
                 // step down    
                 opLeftJoin.getLeft().visit(this);
-                left = (Op)this.stack.pop();                                
+                left = stack.pop();                                
             }            
             
             // check the right subtree
@@ -765,14 +747,11 @@ public class D2RQTreeOptimizer
                     opRightLabel = (OpLabel)right;
                     
                     filterExprRightSide = calcValidFilterExpr(filterExprBeforeOpLeftJoin, opRightLabel);
-                    validFilterExprRightSide = new ArrayList();
+                    validFilterExprRightSide = new ArrayList<Expr>();
                     
                     // now check for expr that are vaild for left-side and right-side
                     // only when an expr is vaid for left-side, it can be vaild for right-side
-                    for(Iterator iterator = filterExprRightSide.iterator(); iterator.hasNext();)
-                    {
-                    	expr = (Expr)iterator.next();
-                    	
+                    for(Expr expr: filterExprRightSide) {
                     	if (this.filterExpr.contains(expr))
                     	{
                     		// valid
@@ -785,7 +764,7 @@ public class D2RQTreeOptimizer
                 }
                 // step down
                 opLeftJoin.getRight().visit(this);
-                right = (Op)this.stack.pop();
+                right = stack.pop();
             }
             
             
@@ -793,7 +772,7 @@ public class D2RQTreeOptimizer
             // note: filterExprAfterOpLeftJoin contains now all filterexpressions which could
             // be moved down
             // now calculate all filterexpressions which were not moveable
-            notMoveableFilterExpr = new ArrayList(filterExprBeforeOpLeftJoin);
+            notMoveableFilterExpr = new ArrayList<Expr>(filterExprBeforeOpLeftJoin);
             notMoveableFilterExpr.removeAll(filterExprAfterOpLeftJoin);
 
             
@@ -828,15 +807,15 @@ public class D2RQTreeOptimizer
             Op right = null ;
             Op newOp;
             OpLabel opLeftLabel, opRightLabel;
-            List filterExprBeforeOpUnionOpJoin, filterExprAfterOpUnionOpJoin, notMoveableFilterExpr;
+            List<Expr> filterExprBeforeOpUnionOpJoin, filterExprAfterOpUnionOpJoin, notMoveableFilterExpr;
             
             // contains the filterexpressions that are valid before this op2
-            filterExprBeforeOpUnionOpJoin = new ArrayList(this.filterExpr);
+            filterExprBeforeOpUnionOpJoin = new ArrayList<Expr>(this.filterExpr);
             // contains the filterexpressions that are valid after this op2
             // this is needed because during the bottom-up-stepping all filterexpressions
             // which could not be transformed down, must be inserted by means of an OpFilter
             // above this op2
-            filterExprAfterOpUnionOpJoin = new ArrayList();
+            filterExprAfterOpUnionOpJoin = new ArrayList<Expr>();
             
             // check left subtree
             if ((left = opDiff.getLeft()) != null )
@@ -851,7 +830,7 @@ public class D2RQTreeOptimizer
                 }    
                 // step down    
                 opDiff.getLeft().visit(this);
-                left = (Op)this.stack.pop();                                
+                left = stack.pop();                                
             }            
             
             // check the right subtree
@@ -867,13 +846,13 @@ public class D2RQTreeOptimizer
                 }
                 // step down
                 opDiff.getRight().visit(this);
-                right = (Op)this.stack.pop();
+                right = stack.pop();
             }
             
             // note: filterExprAfterOpUnion contains now all filterexpressions which could
             // be moved down
             // now calculate all filterexpressions which were not moveable
-            notMoveableFilterExpr = new ArrayList(filterExprBeforeOpUnionOpJoin);
+            notMoveableFilterExpr = new ArrayList<Expr>(filterExprBeforeOpUnionOpJoin);
             notMoveableFilterExpr.removeAll(filterExprAfterOpUnionOpJoin);
 
             // if there are some filterexpressions which could not be moved down,
@@ -928,11 +907,11 @@ public class D2RQTreeOptimizer
          */
         private void notMoveDownFilterExprAndVisitOp1(Op1 op1)
         {
-            List notMoveableFilterExpr;
+            List<Expr> notMoveableFilterExpr;
             Op newOp, subOp = null ;
 
             // all available FilterExpr could not be moved down
-            notMoveableFilterExpr = new ArrayList(this.filterExpr);
+            notMoveableFilterExpr = new ArrayList<Expr>(this.filterExpr);
             // clear the filterExpr
             filterExpr.clear();
             
@@ -940,7 +919,7 @@ public class D2RQTreeOptimizer
             if (op1.getSubOp() != null )
             {
                 op1.getSubOp().visit(this);
-                subOp = (Op)this.stack.pop();
+                subOp = stack.pop();
             }
             
             // if there are some filterexpressions which could not be moved down,
@@ -967,13 +946,13 @@ public class D2RQTreeOptimizer
          */
         private void notMoveDownFilterExprAndVisitOp2(Op2 op2)
         {
-            List notMoveableFilterExpr;
+            List<Expr> notMoveableFilterExpr;
             Op left = null ;
             Op right = null ;
             Op newOp;
             
             // all available FilterExpr could not be moved down
-            notMoveableFilterExpr = new ArrayList(this.filterExpr);
+            notMoveableFilterExpr = new ArrayList<Expr>(this.filterExpr);
             // clear the filterExpr
             filterExpr.clear();
             
@@ -982,13 +961,13 @@ public class D2RQTreeOptimizer
             {
                 // step down
                 op2.getLeft().visit(this);
-                left = (Op)this.stack.pop();
+                left = stack.pop();
             }
             if (op2.getRight() != null )
             {
                 // step down
                 op2.getRight().visit(this);
-                right = (Op)this.stack.pop();
+                right = stack.pop();
             }
             
             // if there are some filterexpressions which could not be moved down,
@@ -1016,24 +995,24 @@ public class D2RQTreeOptimizer
          */
         private void notMoveDownFilterExprAndVisitOpN(OpN opN)
         {
-            List list;
-            List notMoveableFilterExpr;
+            List<Op> list;
+            List<Expr> notMoveableFilterExpr;
             Op subOp, op, newOp;
             
             // all available FilterExpr could not be moved down
-            notMoveableFilterExpr = new ArrayList(this.filterExpr);
+            notMoveableFilterExpr = new ArrayList<Expr>(this.filterExpr);
             // clear the filterExpr
             filterExpr.clear();
             
-            list = new ArrayList(opN.size()) ;
+            list = new ArrayList<Op>(opN.size()) ;
             
             // check for subtrees
-            for (Iterator iterator = opN.iterator(); iterator.hasNext();)
+            for (Iterator<Op> iterator = opN.iterator(); iterator.hasNext();)
             {
-                subOp = (Op)iterator.next();
+                subOp = iterator.next();
                 subOp.visit(this);
                 
-                op = (Op)this.stack.pop();
+                op = stack.pop();
                 if (op != null)
                 {
                     list.add(op);

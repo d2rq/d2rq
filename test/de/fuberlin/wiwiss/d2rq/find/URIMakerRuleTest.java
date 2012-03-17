@@ -12,6 +12,8 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
@@ -52,7 +54,7 @@ public class URIMakerRuleTest extends TestCase {
 
 	public void setUp() {
 		Relation base = new RelationImpl(null, AliasMap.NO_ALIASES, 
-				Expression.TRUE, Collections.EMPTY_SET, Collections.EMPTY_SET, false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
+				Expression.TRUE, Collections.<Join>emptySet(), Collections.<ProjectionSpec>emptySet(), false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
 		this.withURIPatternSubject = new TripleRelation(base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new Pattern("http://test/person@@employees.ID@@"), true),
@@ -105,13 +107,13 @@ public class URIMakerRuleTest extends TestCase {
 	}
 	
 	public void testSort() {
-		Collection unsorted = new ArrayList(Arrays.asList(new TripleRelation[]{
+		Collection<TripleRelation> unsorted = new ArrayList<TripleRelation>(Arrays.asList(new TripleRelation[]{
 				this.withURIColumnSubject,
 				this.withURIPatternSubject, 
 				this.withURIPatternSubjectAndObject,
 				this.withURIPatternSubjectAndURIColumnObject
 		}));
-		Collection sorted = new ArrayList(Arrays.asList(new TripleRelation[]{
+		Collection<TripleRelation> sorted = new ArrayList<TripleRelation>(Arrays.asList(new TripleRelation[]{
 				this.withURIPatternSubjectAndObject,
 				this.withURIPatternSubject, 
 				this.withURIPatternSubjectAndURIColumnObject,

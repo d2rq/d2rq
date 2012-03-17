@@ -26,7 +26,7 @@ public class TripleRelationTest extends TestCase {
 				new Attribute(alias, "value")}));
 		Relation rel = new RelationImpl(
 				null, aliases, Expression.TRUE, 
-				Collections.EMPTY_SET, projections, false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
+				Collections.<Join>emptySet(), projections, false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
 		TripleRelation t = new TripleRelation(rel, 
 				new TypedNodeMaker(TypedNodeMaker.URI, new Pattern("http://example.org/original/@@original.id@@"), true),
 				new FixedNodeMaker(Node.createURI("http://example.org/property"), false),

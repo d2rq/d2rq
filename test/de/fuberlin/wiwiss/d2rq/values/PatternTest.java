@@ -9,6 +9,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Constant;
@@ -80,7 +81,7 @@ public class PatternTest extends TestCase {
 
 	public void testMatchesTrivialPattern() {
 		Pattern p = new Pattern("foobar");
-		assertPatternValues(p, "foobar", new HashMap());
+		assertPatternValues(p, "foobar", new HashMap<String,String>());
 		assertFalse(matches(p, "fooba"));
 		assertFalse(matches(p, "foobarb"));
 		assertFalse(matches(p, "oobar"));
@@ -90,7 +91,7 @@ public class PatternTest extends TestCase {
 
 	public void testMatchesMiniPattern() {
 		Pattern p = new Pattern("@@table.col1@@");
-		Map map = new HashMap();
+		Map<String,String> map = new HashMap<String,String>();
 		map.put("table.col1", "");
 		assertPatternValues(p, "", map);
 		map.put("table.col1", "a");
@@ -106,7 +107,7 @@ public class PatternTest extends TestCase {
 	 */
 	public void testMatchesPatternContainingNewlines() {
 		Pattern p = new Pattern("foo@@table.col1@@bar");
-		Map map = new HashMap();
+		Map<String,String> map = new HashMap<String,String>();
 		map.put("table.col1", "1\n2");
 		assertPatternValues(p, "foo1\n2bar", map);
 	}
@@ -117,7 +118,7 @@ public class PatternTest extends TestCase {
 	 */
 	public void testMagicRegexCharactersCauseNoProblems() {
 		Pattern p = new Pattern("(foo|bar)@@table.col1@@");
-		Map map = new HashMap();
+		Map<String,String> map = new HashMap<String,String>();
 		map.put("table.col1", "1");
 		assertPatternValues(p, "(foo|bar)1", map);
 		assertFalse(matches(p, "foo1"));
@@ -125,7 +126,7 @@ public class PatternTest extends TestCase {
 
 	public void testMatchesOneColumnPattern() {
 		Pattern p = new Pattern("foo@@table.col1@@bar");
-		Map map = new HashMap();
+		Map<String,String> map = new HashMap<String,String>();
 		map.put("table.col1", "1");
 		assertPatternValues(p, "foo1bar", map);
 		map.put("table.col1", "");
@@ -139,7 +140,7 @@ public class PatternTest extends TestCase {
 
 	public void testMatchesTwoColumnPattern() {
 		Pattern p = new Pattern("foo@@table.col1@@-@@table.col2@@baz");
-		Map map = new HashMap();
+		Map<String,String> map = new HashMap<String,String>();
 		map.put("table.col1", "");
 		map.put("table.col2", "");
 		assertPatternValues(p, "foo-baz", map);
@@ -159,7 +160,7 @@ public class PatternTest extends TestCase {
 
 	public void testMatchesPatternStartingWithColumn() {
 		Pattern p = new Pattern("@@table.col1@@bar@@table.col2@@baz");
-		Map map = new HashMap();
+		Map<String,String> map = new HashMap<String,String>();
 		map.put("table.col1", "");
 		map.put("table.col2", "");
 		assertPatternValues(p, "barbaz", map);
@@ -176,7 +177,7 @@ public class PatternTest extends TestCase {
 
 	public void testMatchesPatternEndingWithColumn() {
 		Pattern p = new Pattern("foo@@table.col1@@bar@@table.col2@@");
-		Map map = new HashMap();
+		Map<String,String> map = new HashMap<String,String>();
 		map.put("table.col1", "");
 		map.put("table.col2", "");
 		assertPatternValues(p, "foobar", map);
@@ -189,14 +190,14 @@ public class PatternTest extends TestCase {
 	}
 
 	public void testPartsIteratorSingleLiteral() {
-		Iterator it = new Pattern("foo").partsIterator();
+		Iterator<Object> it = new Pattern("foo").partsIterator();
 		assertTrue(it.hasNext());
 		assertEquals("foo", it.next());
 		assertFalse(it.hasNext());
 	}
 	
 	public void testPartsIteratorFirstLiteralThenColumn() {
-		Iterator it = new Pattern("foo@@table.col1@@").partsIterator();
+		Iterator<Object> it = new Pattern("foo@@table.col1@@").partsIterator();
 		assertTrue(it.hasNext());
 		assertEquals("foo", it.next());
 		assertTrue(it.hasNext());
@@ -207,7 +208,7 @@ public class PatternTest extends TestCase {
 	}
 	
 	public void testPartsIteratorFirstColumnThenLiteral() {
-		Iterator it = new Pattern("@@table.col1@@foo").partsIterator();
+		Iterator<Object> it = new Pattern("@@table.col1@@foo").partsIterator();
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertTrue(it.hasNext());
@@ -218,7 +219,7 @@ public class PatternTest extends TestCase {
 	}
 	
 	public void testPartsIteratorSeveralColumns() {
-		Iterator it = new Pattern("foo@@table.col1@@bar@@table.col2@@").partsIterator();
+		Iterator<Object> it = new Pattern("foo@@table.col1@@bar@@table.col2@@").partsIterator();
 		assertTrue(it.hasNext());
 		assertEquals("foo", it.next());
 		assertTrue(it.hasNext());
@@ -233,7 +234,7 @@ public class PatternTest extends TestCase {
 	}
 	
 	public void testPartsIteratorAdjacentColumns() {
-		Iterator it = new Pattern("@@table.col1@@@@table.col2@@").partsIterator();
+		Iterator<Object> it = new Pattern("@@table.col1@@@@table.col2@@").partsIterator();
 		assertTrue(it.hasNext());
 		assertEquals("", it.next());
 		assertTrue(it.hasNext());
@@ -372,12 +373,10 @@ public class PatternTest extends TestCase {
 		assertEquals(expected, p.makeValue(this.row));
 	}
 	
-	private void assertPatternValues(Pattern pattern, String value, Map expectedValues) {
+	private void assertPatternValues(Pattern pattern, String value, Map<String,String> expectedValues) {
 		assertTrue(matches(pattern, value));
-		Collection expressions = new HashSet();
-		Iterator it = expectedValues.keySet().iterator();
-		while (it.hasNext()) {
-			String attributeName = (String) it.next();
+		Collection<Expression> expressions = new HashSet<Expression>();
+		for (String attributeName: expectedValues.keySet()) {
 			String attributeValue = (String) expectedValues.get(attributeName);
 			Attribute attribute = SQL.parseAttribute(attributeName);
 			expressions.add(Equality.create(
@@ -395,7 +394,7 @@ public class PatternTest extends TestCase {
 	private ResultRow row(String spec) {
 		String[] parts = spec.split("\\|", -1);
 		Attribute[] columns = {col1, col2, col3, col4, col5};
-		Map result = new HashMap();
+		Map<ProjectionSpec,String> result = new HashMap<ProjectionSpec,String>();
 		for (int i = 0; i < parts.length && i < columns.length; i++) {
 			result.put(columns[i], parts[i]);
 		}

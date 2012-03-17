@@ -188,9 +188,7 @@ public class MappingGenerator {
 		writeDatabase();
 		initVocabularyModel();
 		identifyLinkTables();
-		Iterator it = schema.listTableNames(databaseSchema).iterator();
-		while (it.hasNext()) {
-			RelationName tableName = (RelationName) it.next();
+		for (RelationName tableName: schema.listTableNames(databaseSchema)) {
 			if (!this.schema.isLinkTable(tableName)) {
 				writeTable(tableName);
 			}
@@ -212,10 +210,8 @@ public class MappingGenerator {
 			out.println("\td2rq:startupSQLScript <" + startupSQLScript + ">;");
 		}
 		Properties props = database.getSyntax().getDefaultConnectionProperties();
-		Iterator it = props.keySet().iterator();
-		while (it.hasNext()) {
-			String property = (String) it.next();
-			String value = props.getProperty(property);
+		for (Object property: props.keySet()) {
+			String value = props.getProperty((String) property);
 			this.out.println("\tjdbc:" + property + " \"" + value + "\";");
 		}
 		this.out.println("\t.");
@@ -245,10 +241,8 @@ public class MappingGenerator {
 		if (generateLabelBridges) {
 			writeLabelBridge(tableName);
 		}
-		List foreignKeys = this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
-		Iterator it = this.schema.listColumns(tableName).iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		List<Join> foreignKeys = schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
+		for (Attribute column: schema.listColumns(tableName)) {
 			if (isInForeignKey(column, foreignKeys)) continue;
 			if (!isMappableColumnType(column)) {
 				writeWarning(new String[]{
@@ -259,16 +253,12 @@ public class MappingGenerator {
 			}
 			writeColumn(column);
 		}
-		it = foreignKeys.iterator();
-		while (it.hasNext()) {
-			Join fk = (Join) it.next();
+		for (Join fk: foreignKeys) {
 			writeForeignKey(fk);
 		}
-		it = this.linkTables.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
+		for (Entry<RelationName,RelationName> entry: linkTables.entrySet()) {
 			if (entry.getValue().equals(tableName)) {
-				writeLinkTable((RelationName) entry.getKey());
+				writeLinkTable(entry.getKey());
 			}
 		}
 		this.out.println();
@@ -316,7 +306,7 @@ public class MappingGenerator {
 
 	public void writeForeignKey(Join foreignKey) {
 		RelationName primaryTable = schema.getCorrectCapitalization(foreignKey.table1());
-		List primaryColumns = foreignKey.attributes1();
+		List<Attribute> primaryColumns = foreignKey.attributes1();
 		RelationName foreignTable = schema.getCorrectCapitalization(foreignKey.table2());
 		this.out.println(propertyBridgeName(toRelationName(primaryColumns)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(primaryTable) + ";");
@@ -329,9 +319,7 @@ public class MappingGenerator {
 			this.out.println("\td2rq:alias \"" + foreignTable.qualifiedName() + " AS " + aliasName + "\";");
 			alias = AliasMap.create1(foreignTable, new RelationName(null, aliasName));
 		}
-		Iterator it = primaryColumns.iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		for (Attribute column: primaryColumns) {
 			this.out.println("\td2rq:join \"" + column.qualifiedName() + " " + Join.joinOperators[foreignKey.joinDirection()] + " " +
 					alias.applyTo(foreignKey.equalAttribute(column)).qualifiedName() + "\";");
 		}
@@ -348,7 +336,7 @@ public class MappingGenerator {
 	}
 	
 	private void writeLinkTable(RelationName linkTableName) {
-		List foreignKeys = this.schema.foreignKeys(linkTableName, DatabaseSchemaInspector.KEYS_IMPORTED);
+		List<Join> foreignKeys = schema.foreignKeys(linkTableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		Join join1 = (Join) foreignKeys.get(0);
 		Join join2 = (Join) foreignKeys.get(1);
 		RelationName table1 = this.schema.getCorrectCapitalization(join1.table2());
@@ -359,9 +347,7 @@ public class MappingGenerator {
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(table1) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(linkTableName) + ";");
 		this.out.println("\td2rq:refersToClassMap " + classMapName(table2) + ";");
-		Iterator it = join1.attributes1().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		for (Attribute column: join1.attributes1()) {
 			Attribute otherColumn = join1.equalAttribute(column);
 			this.out.println("\td2rq:join \"" + column.qualifiedName() + " " + Join.joinOperators[join1.joinDirection()] + " " + otherColumn.qualifiedName() + "\";");
 		}
@@ -373,9 +359,7 @@ public class MappingGenerator {
 			this.out.println("\td2rq:alias \"" + table2.qualifiedName() + 
 					" AS " + aliasName.qualifiedName() + "\";");
 		}
-		it = join2.attributes1().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		for (Attribute column: join2.attributes1()) {
 			Attribute otherColumn = join2.equalAttribute(column);
 			this.out.println("\td2rq:join \"" + column.qualifiedName() + " " + Join.joinOperators[join2.joinDirection()] + " " + alias.applyTo(otherColumn).qualifiedName() + "\";");
 		}
@@ -383,10 +367,6 @@ public class MappingGenerator {
 		createLinkProperty(linkTableName, table1, table2);
 	}
 
-	private void writeWarning(String warning, String indent) {
-		writeWarning(new String[]{warning}, indent);
-	}
-	
 	private void writeWarning(String[] warning, String indent) {
 		for (int i=0; i<warning.length; i++)
 			this.out.println(indent + "# " + warning[i]);
@@ -436,7 +416,7 @@ public class MappingGenerator {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attribute));
 	}
 
-	private String vocabularyTermQName(List attributes) {
+	private String vocabularyTermQName(List<Attribute> attributes) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attributes));
 	}
 
@@ -446,9 +426,7 @@ public class MappingGenerator {
 	
 	private String uriPattern(RelationName tableName) {
 		String result = this.instanceNamespaceURI + tableName.qualifiedName();
-		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		for (Attribute column: schema.primaryKeyColumns(tableName)) {
 			result += "/@@" + column.qualifiedName();
 			if (DatabaseSchemaInspector.isStringType(this.schema.columnType(column))) {
 				result += "|urlify";
@@ -460,10 +438,9 @@ public class MappingGenerator {
 	
 	private String labelPattern(RelationName tableName) {
 		String result = tableName + " #";
-		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
+		Iterator<Attribute> it = this.schema.primaryKeyColumns(tableName).iterator();
 		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			result += "@@" + column.qualifiedName() + "@@";
+			result += "@@" + it.next().qualifiedName() + "@@";
 			if (it.hasNext()) {
 				result += "/";
 			}
@@ -476,12 +453,10 @@ public class MappingGenerator {
 		return column.tableName() + "_" + column.attributeName();
 	}
 
-	private String toRelationName(List columns) {
+	private String toRelationName(List<Attribute> columns) {
 		StringBuffer result = new StringBuffer();
-		result.append(((Attribute) columns.get(0)).tableName());
-		Iterator it = columns.iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		result.append((columns.get(0)).tableName());
+		for (Attribute column: columns) {
 			result.append("_" + column.attributeName());
 		}
 		return result.toString();
@@ -493,9 +468,7 @@ public class MappingGenerator {
 	
 	private void identifyLinkTables() {
 		if (!silent) System.out.println("Identifying link tables") ;
-		Iterator it = this.schema.listTableNames(databaseSchema).iterator();
-		while (it.hasNext()) {
-			RelationName tableName = (RelationName) it.next();
+		for (RelationName tableName: schema.listTableNames(databaseSchema)) {
 			if (!this.schema.isLinkTable(tableName)) {
 				continue;
 			}
@@ -505,10 +478,8 @@ public class MappingGenerator {
 		if (!silent) System.out.println("Found " + String.valueOf(this.linkTables.size()) + " link tables") ;
 	}
 
-	private boolean isInForeignKey(Attribute column, List foreignKeys) {
-		Iterator it = foreignKeys.iterator();
-		while (it.hasNext()) {
-			Join fk = (Join) it.next();
+	private boolean isInForeignKey(Attribute column, List<Join> foreignKeys) {
+		for (Join fk: foreignKeys) {
 			if (fk.containsColumn(column)) return true;
 		}
 		return false;
@@ -587,7 +558,7 @@ public class MappingGenerator {
 		return this.vocabModel.createResource(propertyURI);
 	}
 	
-	private Resource propertyResource(List columns) {
+	private Resource propertyResource(List<Attribute> columns) {
 		String propertyURI = this.vocabNamespaceURI + toRelationName(columns);
 		return this.vocabModel.createResource(propertyURI);
 	}
