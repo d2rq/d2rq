@@ -71,7 +71,9 @@
 #end
           </td>
           <td>
-#if ($property.valueQName())
+#if ($property.isImg() && $property.value().isURI())
+            <a href="$property.value().URI"><img src="$property.value().URI" class="depiction" /></a>
+#elseif ($property.valueQName())
             <a class="uri" href="$property.value().URI">$property.valueQName()</a>
 #elseif ($property.value().isURI())
             <small>&lt;</small><a class="uri" href="$property.value().URI">$property.value().URI</a><small>&gt;</small>

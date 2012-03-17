@@ -11,6 +11,7 @@ textarea { width: 100%; }
 ul { margin: 0; padding: 0; }
 li { margin: 0 0 0 1em; padding: 0; }
 img { border: none; }
+img.depiction { border: none; height: auto; max-width: 200px; }
 .section { margin: 0.9em; padding: 0.6em 0.9em; }
 .busy { color: #888; }
 .link { background: url(link.png) center right no-repeat; padding-right: 13px; }

@@ -182,6 +182,11 @@ public class PageServlet extends HttpServlet {
 			}
 			return qname;
 		}
+		public boolean isImg() {
+			return FOAF.img.asNode().equals(property) || 
+					FOAF.depiction.asNode().equals(property) || 
+					FOAF.thumbnail.asNode().equals(property);
+		}
 		public int compareTo(Property other) {
 			String propertyLocalName = this.property.getLocalName();
 			String otherLocalName = other.property.getLocalName();

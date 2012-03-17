@@ -117,7 +117,7 @@ CREATE TABLE `persons` (
   `Homepage` varchar(50) default NULL,
   `Phone` varchar(200) default NULL,
   `URI` varchar(200) default NULL,
-  `Photo` varchar(50) default NULL,
+  `Photo` varchar(200) default NULL,
   PRIMARY KEY  (`PerID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -126,16 +126,16 @@ CREATE TABLE `persons` (
 -- 
 
 INSERT INTO `persons` (`PerID`, `Type`, `FirstName`, `LastName`, `Address`, `Email`, `Homepage`, `Phone`, `URI`, `Photo`) VALUES 
-(1, 'Full_Professor', 'Yolanda', 'Gil', NULL, 'gil@isi.edu', 'http://www.isi.edu/~gil', '310-448-8794', 'http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil', NULL),
+(1, 'Full_Professor', 'Yolanda', 'Gil', NULL, 'gil@isi.edu', 'http://www.isi.edu/~gil', '310-448-8794', 'http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Yolanda Gil', 'http://www.isi.edu/~gil/y.g.v4.tiff'),
 (2, NULL, 'Varun', 'Ratnakar', NULL, 'varunr@isi.edu', 'http://www.isi.edu/~varunr', NULL, 'http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Varun Ratnakar', NULL),
 (3, 'Researcher', 'Jim', 'Blythe', NULL, 'blythe@isi.edu', 'http://www.isi.edu/~varunr', NULL, 'http://trellis.semanticweb.org/expect/web/semanticweb/iswc02_trellis.pdf#Jim Blythe', NULL),
-(4, 'Researcher', 'Andreas', 'Eberhart', 'International University in Germany Campus 2 76646 Bruchsal Germany', 'eberhart@i-u.de', 'http://www.i-u.de/schools/eberhart/', '+49 7251 700 222', 'http://www.i-u.de/schools/eberhart/iswc2002/#Andreas Eberhart', 'http://www.i-u.de/images/andi.jpg'),
+(4, 'Researcher', 'Andreas', 'Eberhart', 'International University in Germany Campus 2 76646 Bruchsal Germany', 'eberhart@i-u.de', 'http://www.i-u.de/schools/eberhart/', '+49 7251 700 222', 'http://www.i-u.de/schools/eberhart/iswc2002/#Andreas Eberhart', NULL),
 (5, 'Researcher', 'Borys', 'Omelayenko', 'Vrije Universiteit, Division of Mathematics and Computer Science, De Boelelaan 1081a,1081hv, Amsterdam, The Netherlands', 'borys@cs.vu.nl', 'http://www.cs.vu.nl/~borys', NULL, 'http://www.cs.vu.nl/~borys#Bomelayenko', NULL),
-(6, 'Researcher', 'Andy', 'Seaborne', 'Hewlett-Packard Laboratories, Bristol, BS34 8QZ, UK', 'andy.seaborne@hpl.hp.com', 'http://www-uk.hpl.hp.com/people/afs/', NULL, 'http://www-uk.hpl.hp.com/people#andy_seaborne', NULL),
+(6, 'Researcher', 'Andy', 'Seaborne', 'Hewlett-Packard Laboratories, Bristol, BS34 8QZ, UK', 'andy.seaborne@hpl.hp.com', 'http://www-uk.hpl.hp.com/people/afs/', NULL, 'http://www-uk.hpl.hp.com/people#andy_seaborne', 'http://semtech2011.semanticweb.com/uploads/images/bios/3205.jpg'),
 (9, NULL, 'Alberto', 'Reggiori', NULL, 'areggiori@webweaving.org', 'http://reggiori.webweaving.org/', NULL, 'http://reggiori.webweaving.org#Alberto Reggiori', NULL),
 (10, 'Full_Professor', 'Sonia', 'Bergamaschi', 'DII- Universita di Modena e Reggio Emilia via Vignolese 905 41100 Modena', 'bergamaschi.sonia@unimo.it', 'http://www.dbgroup.unimo.it/Bergamaschi.html', '+39 059 2056132', 'http://www.dbgroup.unimo.it/iswc/iswc.html#S. Bergamaschi', NULL),
 (11, NULL, 'Francesco', 'Guerra', 'DII- Universita di Modena e Reggio Emilia via Vignolese 905 41100 Modena Italy', 'guerra.francesco@unimo.it', 'http://www.dbgroup.unimo.it/~guerra/', '+39 059 20561543', 'http://www.dbgroup.unimo.it/iswc/iswc.html#F. Guerra', NULL),
-(12, 'Researcher', 'Christian', 'Bizer', 'Freie Universität Berlin', 'chris@bizer.de', 'http://www.bizer.de/', NULL, 'http://www.bizer.de/foaf.rdf#chris', NULL);
+(12, 'Researcher', 'Christian', 'Bizer', 'Freie Universität Berlin', 'chris@bizer.de', 'http://www.bizer.de/', NULL, 'http://www.bizer.de/foaf.rdf#chris', 'http://www.wiwiss.fu-berlin.de/en/institute/pwo/bizer/pics/bizer_christian_200x300.png');
 
 -- --------------------------------------------------------
 

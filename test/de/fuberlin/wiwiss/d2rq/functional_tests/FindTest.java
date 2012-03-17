@@ -163,7 +163,7 @@ public class FindTest extends FindTestFramework {
 	public void testDump() {
 		find(null, null, null);
 //		dump();
-		assertStatementCount(320);
+		assertStatementCount(322);
 	}
 
 	public void testFindPredicate() {
