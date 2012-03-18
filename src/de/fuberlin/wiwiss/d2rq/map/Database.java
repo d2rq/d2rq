@@ -166,6 +166,15 @@ public class Database extends MapObject {
 		this.connectionProperties.setProperty(key, value);
 	}
 	
+	/**
+	 * This is a hack where we can pass a pre-existing ConnectedDB that
+	 * will be used by this Database, so we avoid that the Database
+	 * opens another connection to the same DB.
+	 */
+	public void useConnectedDB(ConnectedDB db) {
+		this.connection = db;
+	}
+	
 	public ConnectedDB connectedDB() {
 		if (this.connection == null) {
 			if (jdbcDriver != null) {

@@ -8,6 +8,7 @@ import com.hp.hpl.jena.n3.turtle.TurtleParseException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.FileManager;
 
+import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
@@ -217,7 +218,6 @@ public class SystemLoader {
 			}
 			if (jdbcURL != null) {
 				mapModel = openMappingGenerator().mappingModel(getResourceBaseURI(), System.err, null);
-				closeMappingGenerator();
 			} else {
 				try {
 					mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), null);
@@ -233,6 +233,18 @@ public class SystemLoader {
 	public Mapping getMapping() {
 		if (mapping == null) {
 			mapping = new MapParser(getMappingModel(), getResourceBaseURI()).parse();
+			if (connectedDB != null) {
+				// Hack! We don't want the Database to open another ConnectedDB,
+				// so we check if it's connected to the same DB, and in that case
+				// make it use the existing ConnectedDB that we already have opened.
+				// Otherwise we get problems where D2RQ is trying to import a SQL
+				// script twice on startup.
+				for (Database db: mapping.databases()) {
+					if (db.getJDBCDSN().equals(connectedDB.getJdbcURL())) {
+						db.useConnectedDB(connectedDB);
+					}
+				}
+			}
 		}
 		return mapping;
 	}
