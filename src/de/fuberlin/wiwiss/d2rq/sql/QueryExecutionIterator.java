@@ -128,7 +128,7 @@ public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
 	    	return;
 	    }
     	this.queryExecuted = true;
-    	LogFactory.getLog(QueryExecutionIterator.class).debug(this.sql);
+    	LogFactory.getLog(QueryExecutionIterator.class).info(this.sql);
     	BeanCounter.totalNumberOfExecutedSQLQueries++;
         try {
 			Connection con = this.database.connection();

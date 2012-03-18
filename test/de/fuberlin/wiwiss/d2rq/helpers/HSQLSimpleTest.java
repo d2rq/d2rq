@@ -85,7 +85,7 @@ public class HSQLSimpleTest extends TestCase {
 	private Model generateDefaultMappingModel() {
 		ConnectedDB cdb = new ConnectedDB(db.getJdbcURL(), db.getUser(), null);
 		MappingGenerator generator = new MappingGenerator(cdb);
-		return generator.mappingModel(EX, null);
+		return generator.mappingModel(EX, null, null);
 	}
 	
 	private Mapping generateDefaultMapping() {

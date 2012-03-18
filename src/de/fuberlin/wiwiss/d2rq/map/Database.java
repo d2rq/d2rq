@@ -141,6 +141,10 @@ public class Database extends MapObject {
 		this.limit = limit;
 	}
 	
+	public int getResultSizeLimit() {
+		return limit;
+	}
+	
 	public int getFetchSize() {
 		return this.fetchSize;
 	}

@@ -5,11 +5,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
@@ -52,21 +52,32 @@ public class ConfigLoader {
 	private boolean vocabularyIncludeInstances = true;
 	private boolean autoReloadMapping = true;
 	
+	/**
+	 * @param configURL Config file URL, or <code>null</code> for an empty config
+	 */
 	public ConfigLoader(String configURL) {
 		this.configURL = configURL;
-		if (configURL.startsWith("file://")) {
-			this.isLocalMappingFile = true;
-			this.mappingFilename = configURL.substring(7);
-		} else if (configURL.startsWith("file:")) {
-			this.isLocalMappingFile = true;
-			this.mappingFilename = configURL.substring(5);
-		} else if (configURL.indexOf(":") == -1) {
-			this.isLocalMappingFile = true;
-			this.mappingFilename = configURL;
+		if (configURL == null) {
+			isLocalMappingFile = false;
+		} else {
+			if (configURL.startsWith("file://")) {
+				isLocalMappingFile = true;
+				mappingFilename = configURL.substring(7);
+			} else if (configURL.startsWith("file:")) {
+				isLocalMappingFile = true;
+				mappingFilename = configURL.substring(5);
+			} else if (configURL.indexOf(":") == -1) {
+				isLocalMappingFile = true;
+				mappingFilename = configURL;
+			}
 		}
 	}
 
-	public void load() throws JenaException {
+	public void load() {
+		if (configURL == null) {
+			model = ModelFactory.createDefaultModel();
+			return;
+		}
 		this.model = FileManager.get().loadModel(this.configURL);
 		Resource server = findServerResource();
 		if (server == null) {
@@ -82,7 +93,7 @@ public class ConfigLoader {
 			try {
 				this.port = Integer.parseInt(value);
 			} catch (NumberFormatException ex) {
-				throw new JenaException(
+				throw new D2RQException(
 						"Illegal integer value '" + value + "' for d2r:port");
 			}
 		}
@@ -102,7 +113,7 @@ public class ConfigLoader {
 		if (s != null) {
 			this.autoReloadMapping = s.getBoolean();
 		}	
-}
+	}
 	
 	public boolean isLocalMappingFile() {
 		return this.isLocalMappingFile;
@@ -113,10 +124,6 @@ public class ConfigLoader {
 			return null;
 		}
 		return this.mappingFilename;
-	}
-	
-	public String getMappingURL() {
-		return this.configURL;
 	}
 	
 	public int port() {

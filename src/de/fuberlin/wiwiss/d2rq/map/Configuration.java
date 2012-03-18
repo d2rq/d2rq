@@ -11,7 +11,6 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * @author Christian Becker <http://beckr.org#chris>
  */
 public class Configuration extends MapObject {
-	
 	private boolean serveVocabulary = true;
 	private boolean useAllOptimizations = false;
 	

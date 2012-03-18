@@ -1,11 +1,11 @@
 package de.fuberlin.wiwiss.d2rq.mapgen;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
@@ -52,7 +52,11 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
-	private ConnectedDB database;
+	private final static OutputStream DUMMY_STREAM = 
+			new OutputStream() { public void write(int b) {}};
+
+	private final ConnectedDB database;
+	private final DatabaseSchemaInspector schema;
 	private String mapNamespaceURI;
 	private String instanceNamespaceURI;
 	private String vocabNamespaceURI;
@@ -60,32 +64,24 @@ public class MappingGenerator {
 	private String databaseSchema = null;
 	private PrintWriter out = null;
 	private PrintWriter err = null;
+	private PrintWriter progress = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
-	private DatabaseSchemaInspector schema = null;
 	// name of n:m link table => name of n table
 	private Map<RelationName,RelationName> linkTables = new HashMap<RelationName,RelationName>();
 	private boolean finished = false;
-	private boolean silent = true;
 	private boolean generateClasses = true;
 	private boolean generateLabelBridges = true;
 	private URI startupSQLScript;
 	
 	public MappingGenerator(ConnectedDB database) {
 		this.database = database;
-		mapNamespaceURI = "#";
-		instanceNamespaceURI = database.getJdbcURL() + "#";
-		vocabNamespaceURI = database.getJdbcURL() + "/vocab#";
-		driverClass = ConnectedDB.guessJDBCDriverClass(database.getJdbcURL());
 		schema = database.schemaInspector();
+		mapNamespaceURI = "#";
+		instanceNamespaceURI = "";
+		vocabNamespaceURI = "vocab/";
+		driverClass = ConnectedDB.guessJDBCDriverClass(database.getJdbcURL());
 	}
 
-	/**
-	 * @param silent If <tt>true</tt> (default), no progress info will be logged.
-	 */
-	public void setSilent(boolean silent) {
-		this.silent = silent;
-	}
-	
 	public void setMapNamespaceURI(String uri) {
 		this.mapNamespaceURI = uri;
 	}
@@ -123,38 +119,40 @@ public class MappingGenerator {
 	public void setGenerateClasses(boolean flag) {
 		this.generateClasses = flag;
 	}
-	
-	public void writeMapping(OutputStream out, OutputStream err) {
+		
+	public void writeMapping(OutputStream out, OutputStream err, OutputStream progress) {
 		try {
 			Writer w = new OutputStreamWriter(out, "UTF-8");
 			Writer e = (err != null) ? new OutputStreamWriter(err, "UTF-8") : null;
-			
-			writeMapping(w, e);
-			w.flush();
-			
-			if (e != null)
-				e.flush();
-			if (!silent) System.out.println("Done!");
+			Writer p = (progress != null) ? new OutputStreamWriter(progress, "UTF-8") : null;
+			writeMapping(w, e, p);
+			w.flush();			
+			if (e != null) e.flush();
+			if (p != null) p.flush();
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 	
-	public void writeMapping(Writer out, Writer err) {
+	public void writeMapping(Writer out, Writer err, Writer progress) {
+		if (this.finished) {
+			throw new IllegalStateException();
+		}
 		this.out = new PrintWriter(out);
-		if (err != null)
-			this.err = new PrintWriter(err);
-		
+		this.err = (err != null) ? new PrintWriter(err) : new PrintWriter(DUMMY_STREAM);
+		this.progress = (progress != null) ? new PrintWriter(progress) : new PrintWriter(DUMMY_STREAM);
 		run();
+		this.progress.println("Done!");
 		this.out.flush();
+		this.err.flush();
+		this.progress.flush();
 		this.out = null;
 		this.finished = true;
 	}
 
-	public Model vocabularyModel(OutputStream err) {
+	public Model vocabularyModel(OutputStream err, OutputStream progress) {
 		if (!this.finished) {
-			StringWriter w = new StringWriter();
-			writeMapping(w, err != null ? new PrintWriter(err) : null);
+			writeMapping(DUMMY_STREAM, err, progress);
 		}
 		return this.vocabModel;
 	}
@@ -166,13 +164,17 @@ public class MappingGenerator {
 	 * @param err Stream for warnings generated during the mapping process; may be <code>null</code>
 	 * @return In-memory Jena model containing the D2RQ mapping
 	 */
-	public Model mappingModel(String baseURI, OutputStream err) {
-		StringWriter w = new StringWriter();
-		writeMapping(w, err != null ? new PrintWriter(err) : null);
-		String mappingAsTurtle = w.toString();
-		Model result = ModelFactory.createDefaultModel();
-		result.read(new StringReader(mappingAsTurtle), baseURI, "TURTLE");
-		return result;
+	public Model mappingModel(String baseURI, OutputStream err, OutputStream progress) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		writeMapping(out, err, progress);
+		try {
+			String mappingAsTurtle = out.toString("UTF-8");
+			Model result = ModelFactory.createDefaultModel();
+			result.read(new StringReader(mappingAsTurtle), baseURI, "TURTLE");
+			return result;
+		} catch (UnsupportedEncodingException ex) {
+			throw new RuntimeException("UTF-8 is always supported");
+		}
 	}
 	
 	private void run() {
@@ -196,7 +198,7 @@ public class MappingGenerator {
 	}
 	
 	private void writeDatabase() {
-		if (!silent) System.out.println("Generating d2rq:Database instance");
+		progress.println("Generating d2rq:Database instance");
 		this.out.println(databaseName() + " a d2rq:Database;");
 		this.out.println("\td2rq:jdbcDriver \"" + this.driverClass + "\";");
 		this.out.println("\td2rq:jdbcDSN \"" + database.getJdbcURL() + "\";");
@@ -220,7 +222,7 @@ public class MappingGenerator {
 	}
 	
 	public void writeTable(RelationName tableName) {
-		if (!silent) System.out.println("Generating d2rq:ClassMap instance for table " + tableName.qualifiedName()) ;
+		progress.println("Generating d2rq:ClassMap instance for table " + tableName.qualifiedName()) ;
 		this.out.println("# Table " + tableName);
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
@@ -467,7 +469,7 @@ public class MappingGenerator {
 	}
 	
 	private void identifyLinkTables() {
-		if (!silent) System.out.println("Identifying link tables") ;
+		progress.println("Identifying link tables") ;
 		for (RelationName tableName: schema.listTableNames(databaseSchema)) {
 			if (!this.schema.isLinkTable(tableName)) {
 				continue;
@@ -475,7 +477,7 @@ public class MappingGenerator {
 			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED).get(0);
 			this.linkTables.put(tableName, firstForeignKey.table2());
 		}
-		if (!silent) System.out.println("Found " + String.valueOf(this.linkTables.size()) + " link tables") ;
+		progress.println("Found " + String.valueOf(this.linkTables.size()) + " link tables") ;
 	}
 
 	private boolean isInForeignKey(Attribute column, List<Join> foreignKeys) {

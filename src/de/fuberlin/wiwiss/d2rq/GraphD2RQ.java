@@ -151,7 +151,8 @@ public class GraphD2RQ extends GraphBase implements Graph {
     private Map<String,List<TripleRelation>> classMapInventoryBridges = new HashMap<String,List<TripleRelation>>();
     private Map<String,NodeMaker> classMapNodeMakers = new HashMap<String,NodeMaker>();
     
-    public void initInventory(String inventoryBaseURI) {
+    public void initInventory() {
+    	if (!classMapInventoryBridges.isEmpty() || !classMapNodeMakers.isEmpty()) return;
 		for (Resource classMapResource: mapping.classMapResources()) {
 			NodeMaker resourceMaker = this.mapping.classMap(classMapResource).nodeMaker();
 			Node classMap = classMapResource.asNode();

@@ -21,6 +21,7 @@ import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerFactory;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.SystemLoader;
 
 /**
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
@@ -36,29 +37,28 @@ public class D2RServer {
 	private final static String PAGE_SERVICE_NAME = "page";
 	private final static String VOCABULARY_STEM = "vocab/";
 	
-	private final static String DEFAULT_BASE_URI = "http://localhost";
 	private final static String DEFAULT_SERVER_NAME = "D2R Server";
 	private final static String SERVER_INSTANCE = "D2RServer.SERVER_INSTANCE";
+	private final static String SYSTEM_LOADER = "D2RServer.SYSTEM_LOADER";
+
 	private static final Log log = LogFactory.getLog(D2RServer.class);
 	
-	/** d2rq mapping file */
-	private String configFile;
+	/** System loader for access to the GraphD2RQ and configuration */
+	private final SystemLoader loader;
 	
 	/** config file parser and Java representation */
-	private ConfigLoader config = null;
-	
-	/** server port from command line, overrides port in config file */
-	private int overridePort = -1;
+	private final ConfigLoader config;
 	
 	/** base URI from command line */
 	private String overrideBaseURI = null;
 	
-	/** base URI from command line */
-	private boolean overrideUseAllOptimizations = false;
-
 	/** the dataset, auto-reloadable in case of local mapping files */
 	private AutoReloadableDataset dataset;
 
+	public D2RServer(SystemLoader loader) {
+		this.loader = loader;
+		this.config = loader.getServerConfig();
+	}
 	
 	public void putIntoServletContext(ServletContext context) {
 		context.setAttribute(SERVER_INSTANCE, this);
@@ -68,13 +68,7 @@ public class D2RServer {
 		return (D2RServer) context.getAttribute(SERVER_INSTANCE);
 	}
 	
-	public void overridePort(int port) {
-		log.info("using port " + port);
-		this.overridePort = port;
-	}
-
 	public void overrideBaseURI(String baseURI) {
-
 		// This is a hack to allow hash URIs to be used at least in the
 		// SPARQL endpoint. It will not work in the Web interface.
 		if (!baseURI.endsWith("/") && !baseURI.endsWith("#")) {
@@ -83,40 +77,14 @@ public class D2RServer {
 		if (baseURI.indexOf('#') != -1) {
 			log.warn("Base URIs containing '#' may not work correctly!");
 		}
-
-		log.info("using custom base URI: " + baseURI);
 		this.overrideBaseURI = baseURI;
-	}
-	
-	public void overrideUseAllOptimizations(boolean overrideAllOptimizations) {
-		this.overrideUseAllOptimizations = overrideAllOptimizations;
-	}	
-	
-	public void setConfigFile(String configFileURL) {
-		configFile = configFileURL;
 	}
 	
 	public String baseURI() {
 		if (this.overrideBaseURI != null) {
 			return this.overrideBaseURI;
 		}
-		if (this.config.baseURI() != null) {
-			return this.config.baseURI();
-		}
-		if (this.port() == 80) {
-			return D2RServer.DEFAULT_BASE_URI + "/";
-		}
-		return D2RServer.DEFAULT_BASE_URI + ":" + this.port() + "/";
-	}
-
-	public int port() {
-		if (this.overridePort != -1) {
-			return this.overridePort;
-		}
-		if (this.config.port() != -1) {
-			return this.config.port();
-		}
-		return JettyLauncher.DEFAULT_PORT;
+		return this.config.baseURI();
 	}
 	
 	public String serverName() {
@@ -213,15 +181,11 @@ public class D2RServer {
 	}
 	
 	public void start() {
-		log.info("using config file: " + configFile);
-		this.config = new ConfigLoader(configFile);
-		this.config.load();
-		
-		if (config.isLocalMappingFile())
-			this.dataset = new AutoReloadableDataset(config.getLocalMappingFilename(), true, overrideUseAllOptimizations, this);
-		else
-			this.dataset = new AutoReloadableDataset(config.getMappingURL(), false, overrideUseAllOptimizations, this);
-		this.dataset.forceReload();
+		if (config.isLocalMappingFile()) {
+			this.dataset = new AutoReloadableDataset(loader, config.getLocalMappingFilename(), config.getAutoReloadMapping());
+		} else {
+			this.dataset = new AutoReloadableDataset(loader, null, false);
+		}
 		
 		if (currentGraph().getConfiguration().getUseAllOptimizations()) {
 			log.info("Fast mode (all optimizations)");
@@ -260,5 +224,13 @@ public class D2RServer {
 	
 	public ConfigLoader getConfig() {
 		return config;
+	}
+	
+	public static void storeInContext(SystemLoader loader, ServletContext context) {
+		context.setAttribute(SYSTEM_LOADER, loader);
+	}
+	
+	public static SystemLoader retrieveFromContext(ServletContext context) {
+		return (SystemLoader) context.getAttribute(SYSTEM_LOADER);
 	}
 }

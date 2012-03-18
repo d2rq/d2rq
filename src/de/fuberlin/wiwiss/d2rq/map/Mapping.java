@@ -265,4 +265,10 @@ public class Mapping {
 	public void setHasDynamicProperties(boolean hasDynamicProperties) {
 		this.hasDynamicProperties = hasDynamicProperties;
 	}
+	
+	public void close() {
+		for (Database db: databases.values()) {
+			db.connectedDB().close();
+		}
+	}
 }

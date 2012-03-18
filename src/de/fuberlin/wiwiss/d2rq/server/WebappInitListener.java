@@ -4,6 +4,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import de.fuberlin.wiwiss.d2rq.SystemLoader;
+
 /**
  * Initialize D2R server on startup of an appserver such as Tomcat. This listener should
  * be included in the web.xml. This is compatible with Servlet 2.3 spec compliant appservers.
@@ -15,24 +17,23 @@ public class WebappInitListener implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent event) {
 		ServletContext context = event.getServletContext();
-		D2RServer server = new D2RServer();
-		String configFile = context.getInitParameter("overrideConfigFile");
-		if (configFile == null) {
+
+		// Is there already a loader in the servlet context, put there
+		// by the JettyLauncher?
+		SystemLoader loader = D2RServer.retrieveFromContext(context);
+		if (loader == null) {
+			// We are running as pure webapp, without JettyLauncher,
+			// so initalize the loader from the configFile context parameter.
+			loader = new SystemLoader();
+			D2RServer.storeInContext(loader, context);
 			if (context.getInitParameter("configFile") == null) {
 				throw new RuntimeException("No configFile configured in web.xml");
 			}
-			configFile = absolutize(context.getInitParameter("configFile"), context);
+			String configFileName = absolutize(context.getInitParameter("configFile"), context);
+			loader.setMappingURL(configFileName);
+			loader.setResourceStem("resource/");
 		}
-		if (context.getInitParameter("port") != null) {
-			server.overridePort(Integer.parseInt(context.getInitParameter("port")));
-		}
-		if (context.getInitParameter("baseURI") != null) {
-			server.overrideBaseURI(context.getInitParameter("baseURI"));
-		}
-		if (context.getInitParameter("useAllOptimizations") != null) {
-			server.overrideUseAllOptimizations(context.getInitParameter("useAllOptimizations").equalsIgnoreCase("true"));
-		}
-		server.setConfigFile(configFile);
+		D2RServer server = loader.getD2RServer();
 		server.start();
 		server.putIntoServletContext(context);
 		VelocityWrapper.initEngine(server, context);

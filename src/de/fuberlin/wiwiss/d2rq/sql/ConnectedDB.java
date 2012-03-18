@@ -56,7 +56,13 @@ public class ConnectedDB {
 	private static final String[] POSTGRESQL_IGNORED_SCHEMAS = {"information_schema", "pg_catalog"};
 	private static final String[] ORACLE_IGNORED_SCHEMAS = {"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", "SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
     private static final List<String> MSSQL_IGNORED_SCHEMAS = Arrays.asList(new String[]{"sys", "INFORMATION_SCHEMA"});
-	
+
+	{
+		ConnectedDB.registerJDBCDriverIfPresent("com.mysql.jdbc.Driver");
+		ConnectedDB.registerJDBCDriverIfPresent("org.postgresql.Driver");
+		ConnectedDB.registerJDBCDriverIfPresent("org.hsqldb.jdbcDriver");
+	}
+
 	private String jdbcURL;
 	private String username;
 	private String password;
@@ -71,6 +77,7 @@ public class ConnectedDB {
 	
 	private int limit;
 	private int fetchSize;
+	private int defaultFetchSize = Database.NO_FETCH_SIZE;
 	private Map<Attribute,Boolean> zerofillCache = new HashMap<Attribute,Boolean>();
 	private Map<RelationName,Map<String,List<String>>> uniqueIndexCache = 
 		new HashMap<RelationName,Map<String,List<String>>>();
@@ -185,8 +192,18 @@ public class ConnectedDB {
 		return this.limit;
 	}
 	
+	public void setDefaultFetchSize(int value) {
+		defaultFetchSize = value;
+	}
+	
 	public int fetchSize() {
-		return this.fetchSize;
+		if (fetchSize == Database.NO_FETCH_SIZE) {
+			if (dbTypeIs(MySQL)) {
+				return Integer.MIN_VALUE;
+			}
+			return defaultFetchSize;
+		}
+		return fetchSize;
 	}
 
 	private void connect() {
