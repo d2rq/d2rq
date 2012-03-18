@@ -33,6 +33,9 @@ public abstract class CommandLineTool {
 	private final ArgDecl verboseArg = new ArgDecl(false, "verbose");
 	private final ArgDecl debugArg = new ArgDecl(false, "debug");
 	private final SystemLoader loader = new SystemLoader();
+	private boolean supportImplicitJdbcURL = true;
+	private int minArguments = 0;
+	private int maxArguments = 1;
 	
 	public abstract void usage();
 
@@ -40,6 +43,15 @@ public abstract class CommandLineTool {
 	
 	public abstract void run(CommandLine cmd, SystemLoader loader)
 	throws D2RQException, IOException;
+	
+	public void setMinMaxArguments(int min, int max) {
+		minArguments = min;
+		maxArguments = max;
+	}
+	
+	public void setSupportImplicitJdbcURL(boolean flag) {
+		supportImplicitJdbcURL = flag;
+	}
 	
 	public void process(String[] args) {
 		cmd.add(userArg);
@@ -59,7 +71,7 @@ public abstract class CommandLineTool {
 		}
 		
 		if (cmd.hasArg(verboseArg)) {
-			// Adjust Log4j log level to show more stuff 
+			// Adjust Log4j log level to show more stuff
 			Logger.getLogger("de.fuberlin.wiwiss.d2rq").setLevel(Level.INFO);
 			Logger.getLogger("org.eclipse.jetty").setLevel(Level.INFO);
 			Logger.getLogger("org.joseki").setLevel(Level.INFO);
@@ -70,15 +82,16 @@ public abstract class CommandLineTool {
 			Logger.getLogger("org.eclipse.jetty").setLevel(Level.INFO);
 			Logger.getLogger("org.joseki").setLevel(Level.INFO);
 		}
-		
-		if (cmd.numItems() == 0) {
-			if (cmd.hasArg(sqlFileArg)) {
-				loader.setJdbcURL(SystemLoader.DEFAULT_JDBC_URL);
-			} else {
-				usage();
-				System.exit(1);
-			}
-		} else if (cmd.numItems() > 1) {
+
+		if (cmd.numItems() == minArguments && supportImplicitJdbcURL && cmd.hasArg(sqlFileArg)) {
+			loader.setJdbcURL(SystemLoader.DEFAULT_JDBC_URL);
+		} else if (cmd.numItems() == 0) {
+			usage();
+			System.exit(1);
+		}
+		if (cmd.numItems() < minArguments) {
+			reportException(new IllegalArgumentException("Not enough arguments"));
+		} else if (cmd.numItems() > maxArguments) {
 			reportException(new IllegalArgumentException("Too many arguments"));
 		}
 		
@@ -119,23 +132,25 @@ public abstract class CommandLineTool {
 		} else {
 			System.err.println(ex.getMessage());
 		}
-		log.debug("Command line tool exception", ex);
+		log.info("Command line tool exception", ex);
 		System.exit(1);
 	}
 	
 	public void reportException(Exception ex) {
 		System.err.println(ex.getMessage());
-		log.debug("Command line tool exception", ex);
+		log.info("Command line tool exception", ex);
 		System.exit(1);
 	}
 
 	public void printStandardArguments(boolean withMappingFile) {
-		System.err.println("  Arguments" + (withMappingFile ? " (choose one)" : "") + ":");
+		System.err.println("  Arguments:");
 		if (withMappingFile) {
 			System.err.println("    mappingFile     Filename or URL of a D2RQ mapping file");
 		}
 		System.err.println("    jdbcURL         JDBC URL for the DB, e.g. jdbc:mysql://localhost/dbname");
-		System.err.println("                    (If omitted with -l, jdbcURL defaults to " + SystemLoader.DEFAULT_JDBC_URL + ")");
+		if (supportImplicitJdbcURL) {
+			System.err.println("                    (If omitted with -l, jdbcURL defaults to " + SystemLoader.DEFAULT_JDBC_URL + ")");
+		}
 	}
 	
 	public void printConnectionOptions() {
@@ -143,6 +158,6 @@ public abstract class CommandLineTool {
 		System.err.println("    -p password     Database password for connecting to the DB");
 		System.err.println("    -d driverclass  Java class name of the JDBC driver for the DB");
 		System.err.println("    -s db_schema    Only map tables in a specific named DB schema");
-		System.err.println("    -l script.sql   Load a SQL script before generating the mapping");
+		System.err.println("    -l script.sql   Load a SQL script before processing");
 	}
 }
