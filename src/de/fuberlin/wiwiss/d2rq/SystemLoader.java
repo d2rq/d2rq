@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import com.hp.hpl.jena.n3.turtle.TurtleParseException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.FileManager;
+import com.hp.hpl.jena.util.FileUtils;
 
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
@@ -220,7 +221,13 @@ public class SystemLoader {
 				mapModel = openMappingGenerator().mappingModel(getResourceBaseURI(), System.err, null);
 			} else {
 				try {
-					mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), null);
+					// Guess the language/type of mapping file based on file extension. If it is not among the known types then assume that the file has TURTLE syntax and force to use TURTLE parser
+					if (FileUtils.guessLang(mappingFile, "unknown").equals("unknown")) {
+						mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), "TURTLE");
+					} else {
+						// if the type is known then let Jena auto-detect it and load the appropriate parser
+						mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), null);
+					}
 				} catch (TurtleParseException ex) {
 					throw new D2RQException(
 							"Error parsing " + mappingFile + ": " + ex.getMessage(), ex, 77);

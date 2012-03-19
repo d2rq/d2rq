@@ -134,10 +134,15 @@ public class MappingGenerator {
 		}
 	}
 	
+	/**
+	 * Writes the D2RQ mapping to a writer. Note that the calling code is
+	 * responsible for closing the writers after use.
+	 * 
+	 * @param out Stream for writing data to the file or console
+	 * @param err Stream for warnings generated during the mapping process; may be <code>null</code>
+	 * @param progress Stream for reporting progress; may be <code>null</code>
+	 */
 	public void writeMapping(Writer out, Writer err, Writer progress) {
-		if (this.finished) {
-			throw new IllegalStateException();
-		}
 		this.out = new PrintWriter(out);
 		this.err = (err != null) ? new PrintWriter(err) : new PrintWriter(DUMMY_STREAM);
 		this.progress = (progress != null) ? new PrintWriter(progress) : new PrintWriter(DUMMY_STREAM);
