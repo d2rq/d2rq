@@ -403,7 +403,7 @@ public class MappingGenerator {
 		return toPrefixedURI(mapNamespaceURI, "map", relationName + suffix);
 	}
 	
-	private String vocabularyTermQName(RelationName table) {
+	protected String vocabularyTermQName(RelationName table) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", table.qualifiedName());
 	}
 
@@ -411,7 +411,7 @@ public class MappingGenerator {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attribute));
 	}
 
-	private String vocabularyTermQName(List attributes) {
+	protected String vocabularyTermQName(List attributes) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attributes));
 	}
 

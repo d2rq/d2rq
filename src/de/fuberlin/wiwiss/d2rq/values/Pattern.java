@@ -321,8 +321,8 @@ public class Pattern implements ValueMaker {
 			for (int i = 0; i < s.length(); i++) {
 				char c = s.charAt(i);
 				int cCode = (int) c;
-				
-				if (cCode > 128 || c == '-' || c == '_' || c == '~' || c == '.'
+
+				if (cCode > 128 || c == '-' || c == '_' || c == '~'
 						|| isDigit(cCode) || isLetter(cCode)) {
 					sbuffer.append(c);
 				} else {
@@ -330,7 +330,7 @@ public class Pattern implements ValueMaker {
 					sbuffer.append(Integer.toHexString(cCode).toUpperCase());
 				}
 			}
-			
+
 			return sbuffer.toString();
 		}
 		public String decode(String s) {
