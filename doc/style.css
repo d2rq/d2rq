@@ -7,11 +7,16 @@ h1 { font-size: 190%; margin-top: 1.3em; }
 h2 { border-bottom: 1px solid #ccc; font-size: 150%; margin-top: 2em; padding-bottom: 0.2em; }
 h3 { font-size: 125%; }
 .section-anchor, .section-anchor:visited { color: #ddd; font-family: Arial; font-size: 75%; text-decoration: none; }
-a, a code { color: #34d; text-decoration: none; }
+dt .section-anchor { padding-left: 0.3em; }
+a, a code, { color: #34d; text-decoration: none; }
 a:hover, a:hover code { text-decoration: underline; }
 a:visited, a:visited code { color: #800080; }
 code, table.properties th { color: #860; font-size: 115%; }
 pre { background: #fff9d3; border: 1px solid #fff3aa; border-radius: 0.8em; line-height: 1.25em; padding: 0.9em 1.3em; }
+pre a, pre a:visited { color: black; text-decoration: none; }
+pre:hover a { color: #34d; }
+pre:hover a:visited { color: #800080; }
+pre a:hover { text-decoration: underline; }
 ol { padding-left: 1.35em; }
 dt { font-weight: bold; margin-top: 1.5em; }
 dt code { color: #444; }

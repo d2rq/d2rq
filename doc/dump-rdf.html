@@ -13,51 +13,51 @@
       <h1><code>dump-rdf</code>: Dumping the database to an RDF file</h1>
     </header>
 
-<p>The <code>dump-rdf</code> script uses <a href="/">D2RQ</a> to
+<p>The <code>dump-rdf</code> tool uses <a href="/">D2RQ</a> to
 <strong>dump the contents of the
 whole database into a single RDF file</strong>. This can be done with or without a
-D2RQ mapping file. If a mapping file is specified, then the script will use it
+D2RQ mapping file. If a mapping file is specified, then the tool will use it
 to translate the database contents to RDF. If no mapping file is specified,
-then the script will internally invoke
+then the tool will use the default mapping of
 <a href="generate-mapping"><code>generate-mapping</code></a>
-and use its default mapping for the translation.</p>
+for the translation.</p>
 
 
-<h2 id="usage-mapping">Usage with mapping file</h2>
+<h2 id="usage-mapping">Usage</h2>
 
-<pre>dump-rdf -m mapping.ttl [output parameters]</pre>
-
-
-<h2 id="usage-default">Usage without mapping file (default mapping)</h2>
-
-<p>If no mapping file is provided, then the database connection must be
-specified on the command line. The meaning of all parameters is the
-same as for the <a href="generate-mapping"><code>generate-mapping</code> script</a>.
-
-<pre>dump-rdf -j jdbcURL [-d driverclass] [-u username] [-p password] [-l script.sql] [output parameters]</pre>
-
-
-<h2 id="output-params">Output parameters</h2>
-
-<p>Several optional parameters control the RDF output:</p>
+<pre>dump-rdf <a href="#arg-f">[-f format]</a> <a href="#arg-b">[-b baseURI]</a> <a href="#arg-o">[-o outfile.ttl]</a>
+        <a href="#arg-verbose">[--verbose]</a> <a href="#arg-debug">[--debug]</a>
+        <a href="#arg-mapping-file">mapping-file.ttl</a></pre>
 
 <dl>
-<dt><code>-f format</code></dt>
-<dd>The RDF syntax to use for output. Supported syntaxes are "RDF/XML" (the default),
-  "RDF/XML-ABBREV", "TURTLE", "N3", "N-TRIPLE". "N-TRIPLE" works best for large 
-  databases.</dd>
+<dt id="arg-mapping-file">mapping-file.ttl</dt>
+<dd><p>The filename of a <a href="d2rq-language">D2RQ mapping file</a> that
+contains a database mapping.</p>
+
+<p>If no mapping file is provided, then the database connection must be
+specified on the command line using the same <a href="generate-mapping#connection">connection
+parameters</a> as for the <code>generate-mapping</code> tool,
+and a default mapping will be used.</p>
+</dd>
+
+<dt id="arg-f"><code>-f format</code></dt>
+<dd>The RDF syntax to use for output. Supported syntaxes are “TURTLE”,
+  “RDF/XML”, “RDF/XML-ABBREV”, “N3”, and “N-TRIPLE” (the default).
+  “N-TRIPLE” works best for large databases.</dd>
   
-<dt><code>-s fetchSize</code></dt>
-<dd>The number of rows to retrieve with every database request. This value is particularily important to control memory resources of both the D2RQ and the database server when performing dumps. <code>dump-rdf</code> sets this value to 500 by default, or to <code>Integer.MIN_VALUE</code> for MySQL in order to enable <a href="http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-implementation-notes.html">streaming mode</a>.
-This value may alternatively be specified in the mapping file using <a href="d2rq-language#d2rq:fetchSize">d2rq:fetchSize</a>.
-</dd>  
+<dt id="arg-b"><code>-b baseURI</code></dt>
+<dd>The base URI for turning relative URIs and URI patterns into absolute URIs.</dd>
 
-<dt><code>-b baseURI</code></dt>
-<dd>A base URI for resolving relative URI patterns.</dd>
-
-<dt><code>-o outfile</code></dt>
+<dt id="arg-o"><code>-o outfile</code></dt>
 <dd>Name of the destination file. Defaults to standard output.</dd>
+
+<dt id="arg-verbose"><code>--verbose</code></dt>
+<dd>Print extra progress log information.</dd>
+
+<dt id="arg-debug"><code>--debug</code></dt>
+<dd>Print all debug log information.</dd>
 </dl>
+
 
 <h2 id="example-mapping">Example invocation using a mapping file</h2>
 
@@ -66,6 +66,10 @@ This value may alternatively be specified in the mapping file using <a href="d2r
 <h2 id="example-default">Example invocation with default mapping</h2>
 
 <pre>dump-rdf -u root -j jdbc:mysql:///iswc -o -f RDF/XML-ABBREV iswc-dump.rdf</pre>
+
+<h2 id="example-inmemory">Example: Converting a SQL dump to RDF using a temporary in-memory database</h2>
+
+<pre>dump-rdf -l db_dump.sql -o output.nt</pre>
 
   </body>
 </html>

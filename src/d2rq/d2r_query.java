@@ -23,17 +23,17 @@ import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class sparql extends CommandLineTool {
+public class d2r_query extends CommandLineTool {
 
 	public static void main(String[] args) {
-		new sparql().process(args);
+		new d2r_query().process(args);
 	}
 	
 	public void usage() {
 		System.err.println("usage:");
-		System.err.println("  sparql [query-options] mappingFile query");
-		System.err.println("  sparql [query-options] [connection-options] jdbcURL query");
-		System.err.println("  sparql [query-options] [connection-options] -l script.sql query");
+		System.err.println("  d2r-query [query-options] mappingFile query");
+		System.err.println("  d2r-query [query-options] [connection-options] jdbcURL query");
+		System.err.println("  d2r-query [query-options] [connection-options] -l script.sql query");
 		System.err.println();
 		printStandardArguments(true);
 		System.err.println("    query           A SPARQL query, e.g., \"SELECT * { ?s rdf:type ?o } LIMIT 10\"");
@@ -41,8 +41,7 @@ public class sparql extends CommandLineTool {
 		System.err.println();
 		System.err.println("  Query options:");
 		System.err.println("    -b baseURI      Base URI for generated RDF (default: " + SystemLoader.DEFAULT_BASE_URI + ")");
-		// TODO What are the supported formats really?
-		System.err.println("    -f format       @@@ One of N-TRIPLE (default), RDF/XML, RDF/XML-ABBREV, TURTLE");
+		System.err.println("    -f format       One of text (default), xml, json, csv, tsv, srb, ttl");
 		System.err.println("    -o outfile      Save output to file (default: stdout)");
 		System.err.println("    --verbose       Print debug information");
 		System.err.println();

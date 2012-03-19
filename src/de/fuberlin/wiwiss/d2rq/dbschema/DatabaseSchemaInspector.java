@@ -28,11 +28,13 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
  */
 public class DatabaseSchemaInspector {
 	
+	// TODO Make this an attribute of ColumnType
 	public static boolean isStringType(ColumnType columnType) {
 		return columnType.typeId() == Types.CHAR || columnType.typeId() == Types.VARCHAR || columnType.typeId() == Types.NVARCHAR
 					|| columnType.typeId() == Types.LONGVARCHAR	|| "NVARCHAR2".equals(columnType.typeName());
 	}
 
+	// TODO Make this an attribute of ColumnType
 	public static boolean isDateType(ColumnType columnType) {
 		return columnType.typeId() == Types.DATE || columnType.typeId() == Types.TIME || columnType.typeId() == Types.TIMESTAMP;
 	}

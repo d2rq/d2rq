@@ -47,9 +47,10 @@
     <code>jdbc:mysql://<em>servername</em>/<em>database</em></code>
     for MySQL) from the driver's documentation. Drivers for MySQL and PostgreSQL are
     already included with D2R Server.</p></li>
-  <li><p><strong>Generate a mapping file</strong> for your database schema.
+  <li><p><strong>Generate a mapping file</strong> for your database schema
+    using the <a href="generate-mapping">generate-mapping</a> tool.
     Change into the D2R Server directory and run:</p>
-    <pre><a href="generate-mapping">generate-mapping</a> -o <em>mapping.ttl</em> -d <em>driver.class.name</em>
+    <pre>generate-mapping -o <em>mapping.ttl</em> -d <em>driver.class.name</em>
     -u <em>db-user</em> -p <em>db-password</em> <em>jdbc:url:...</em></pre>
     <p><code><em>mapping.ttl</em></code> is the name for the new mapping file.
     <code>-d</code> can be skipped for MySQL.</p></li>
@@ -63,8 +64,15 @@
     <p>You can browse the database content or use the SPARQL Explorer to execute
       queries and display results in a number of formats.</p></li>
   <li>
-    <p><strong>Generate an RDF dump:</strong> You can do this by running</p>
-    <pre><a href="dump-rdf">dump-rdf</a> -m <em>mapping.ttl</em> -o <em>dump.nt</em></pre></li>
+    <p><strong>Run a SPARQL query from the command line</strong> using the
+    <a href="d2r-query">d2r-query</a> tool:</p>
+    <pre>d2r-query <em>mapping.ttl</em> "SELECT * { ?s ?p ?o } LIMIT 10"</pre></li>
+    <p>Or load the query from a file, here called <code>query.sparql</code>:</p>
+    <pre>d2r-query <em>mapping.ttl</em> @<em>query.sparql</em></pre></li>
+  <li>
+    <p><strong>Generate an RDF dump</strong> using the
+    <a href="dump-rdf">dump-rdf</a> tool:</p>
+    <pre>dump-rdf <em>mapping.ttl</em> -o <em>dump.nt</em></pre></li>
 </ol>
 
 

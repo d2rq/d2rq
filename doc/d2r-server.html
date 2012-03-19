@@ -104,25 +104,39 @@ such as Tomcat or Jetty.</p>
 <p>D2R Server can be run as a stand-alone server application that includes
 its own web server. This is recommended for testing and development.</p>
 
-<pre>d2r-server [-p <em>port</em>] [-b <em>serverBaseURI</em>] [--fast] <em>mapping-file.ttl</em></pre>
+<pre>d2r-server <a href="#arg-p">[-p <em>port</em>]</a> <a href="#arg-b">[-b <em>serverBaseURI</em>]</a>
+        <a href="#arg-fast">[--fast]</a> <a href="#arg-verbose">[--verbose]</a> <a href="#arg-debug">[--debug]</a>
+        <a href="#arg-mapping-file"><em>mapping-file.ttl</em></a></pre>
 
 <dl>
-<dt><code>mapping-file.ttl</code></dt>
-<dd>The name of the <a href="d2rq-language">D2RQ mapping file</a> to use.</dd>
+<dt id="arg-mapping-file"><code>mapping-file.ttl</code></dt>
+<dd><p>The name of the <a href="d2rq-language">D2RQ mapping file</a> to use.</p>
 
-<dt><code>-p <em>port</em></code></dt>
+<p>If no mapping file is provided, then the database connection must be
+specified on the command line using the same <a href="generate-mapping#connection">connection
+parameters</a> as for the <code>generate-mapping</code> tool,
+and a default mapping will be used.</p>
+</dd>
+
+<dt id="arg-p"><code>-p <em>port</em></code></dt>
 <dd>D2R Server will be started on this port. Defaults to 2020.</dd>
 
-<dt><code>-b <em>serverBaseURI</em></code></dt>
+<dt id="arg-b"><code>-b <em>serverBaseURI</em></code></dt>
 <dd>The base URI where D2R Server is running. Defaults to
 <code>http://localhost:2020/</code>. Must be specified if the D2R Server
 is to be accessible from other machines or if it is supposed to be run
 on a port other than 2020.</dd>
 
-<dt><code>--fast</code></dt>
+<dt id="arg-fast"><code>--fast</code></dt>
 <dd>Enables bleeding-edge optimizations that result in better performance
 but may not be as well-tested. Generally we recommend the use of this
 option unless problems are observed.</dd>
+
+<dt id="arg-verbose"><code>--verbose</code></dt>
+<dd>Output more logging information.</dd>
+
+<dt id="arg-debug"><code>--debug</code></dt>
+<dd>Output much more logging information.</dd>
 </dl>
 
 
@@ -136,13 +150,13 @@ for production use.</p>
 <ol>
   <li>Make sure that your mapping file includes a configuration block, as
     described in the <a href="#configuration">server configuration section</a>.
-    Set the port number to that of the servlet container, and set the base
+    Set the base
     URI to something like <code>http://<em>servername</em>/<em>webappname</em>/</code>.</li>
   <li>Change the <code>configFile</code> param in <code>/webapp/WEB-INF/web.xml</code>
     to the name of your configuration file. For deployment, we recommend placing
     the mapping file into the <code>/webapp/WEB-INF/</code> directory.</li>
   <li>In D2R Server's main directory, Run <code>ant war</code>. This creates the
-    <code>d2rq.war</code> file. You need Apache Ant for this step.</li>
+    <code>d2rq.war</code> file. You need <a href="http://ant.apache.org/">Apache Ant</a> for this step.</li>
   <li>Optionally, if you want a different name for your web application,
     rename the file to <code><em>webappname</em>.war</code></li>
   <li>Deploy the war file into your servlet container, e.g. by copying it
