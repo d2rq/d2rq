@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.n3.IRIResolver;
 
@@ -27,10 +27,9 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
  * from the second.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTableParser.java,v 1.4 2007/10/23 15:17:53 cyganiak Exp $
  */
 public class TranslationTableParser {
-	private Logger log = LoggerFactory.getLogger(TranslationTableParser.class);
+	private Log log = LogFactory.getLog(TranslationTableParser.class);
 	private BufferedReader reader;
 	private CSV csvLineParser = new CSV();
 	private String url;
@@ -60,7 +59,8 @@ public class TranslationTableParser {
 				}
 				String[] fields = this.csvLineParser.parse(line);
 				if (fields.length != 2) {
-					log.warn("Skipping line with {} instead of 2 columns in CSV file {}", Integer.valueOf(fields.length), this.url);
+					this.log.warn("Skipping line with " +
+							fields.length + " instead of 2 columns in CSV file " + this.url);
 					continue;
 				}
 				result.add(new Translation(fields[0], fields[1]));

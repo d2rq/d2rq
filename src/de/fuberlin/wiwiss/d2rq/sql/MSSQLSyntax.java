@@ -7,7 +7,6 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * and MS Access.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MSSQLSyntax.java,v 1.2 2010/11/03 18:48:17 cyganiak Exp $
  */
 public class MSSQLSyntax extends SQL92Syntax {
 

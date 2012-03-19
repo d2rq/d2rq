@@ -13,7 +13,6 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * can override individual methods to implement different syntax.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQL92Syntax.java,v 1.2 2010/11/03 18:48:17 cyganiak Exp $
  */
 public class SQL92Syntax implements SQLSyntax {
 	private boolean useAS;

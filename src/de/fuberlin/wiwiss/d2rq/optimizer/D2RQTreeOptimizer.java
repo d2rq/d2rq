@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openjena.atlas.io.IndentedWriter;
 
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.OpVisitor;
@@ -23,15 +24,18 @@ import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpConditional;
 import com.hp.hpl.jena.sparql.algebra.op.OpDatasetNames;
 import com.hp.hpl.jena.sparql.algebra.op.OpDiff;
+import com.hp.hpl.jena.sparql.algebra.op.OpDisjunction;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
 import com.hp.hpl.jena.sparql.algebra.op.OpExt;
+import com.hp.hpl.jena.sparql.algebra.op.OpExtend;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpGraph;
-import com.hp.hpl.jena.sparql.algebra.op.OpGroupAgg;
+import com.hp.hpl.jena.sparql.algebra.op.OpGroup;
 import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpLabel;
 import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpList;
+import com.hp.hpl.jena.sparql.algebra.op.OpMinus;
 import com.hp.hpl.jena.sparql.algebra.op.OpN;
 import com.hp.hpl.jena.sparql.algebra.op.OpNull;
 import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
@@ -39,18 +43,19 @@ import com.hp.hpl.jena.sparql.algebra.op.OpPath;
 import com.hp.hpl.jena.sparql.algebra.op.OpProcedure;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
 import com.hp.hpl.jena.sparql.algebra.op.OpPropFunc;
+import com.hp.hpl.jena.sparql.algebra.op.OpQuad;
 import com.hp.hpl.jena.sparql.algebra.op.OpQuadPattern;
 import com.hp.hpl.jena.sparql.algebra.op.OpReduced;
 import com.hp.hpl.jena.sparql.algebra.op.OpSequence;
 import com.hp.hpl.jena.sparql.algebra.op.OpService;
 import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.algebra.op.OpTable;
+import com.hp.hpl.jena.sparql.algebra.op.OpTopN;
 import com.hp.hpl.jena.sparql.algebra.op.OpTriple;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.serializer.SerializationContext;
-import com.hp.hpl.jena.sparql.util.IndentedWriter;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformAddFilters;
@@ -62,14 +67,15 @@ import de.fuberlin.wiwiss.d2rq.optimizer.transformer.TransformRemoveEmptyUnion;
 
 /**
  * Class for optimizing an op-tree especially for D2RQ. 
- *  
+ * 
+ * TODO God what a mess, this can be done in 20% the lines
+ * 
  * @author Herwig Leimer
- *
  */
 public class D2RQTreeOptimizer
 {
 	
-	private static Logger logger = LoggerFactory.getLogger(D2RQTreeOptimizer.class);
+	private static Log logger = LogFactory.getLog(D2RQTreeOptimizer.class);
 	
 	/**
 	 * Constructor
@@ -221,6 +227,10 @@ public class D2RQTreeOptimizer
          *    filterexpression is only referenced to M1
          * 2) Filter(Union(M1, M2), F)) will become Union(M1, Filter(M2, F)) when the 
          *    filterexpression is only referenced to M2
+         *    
+         * TODO: Dubious! Shouldn't this be Union(Filter(M1,F), Filter(M2,F))?
+         *       What does the code actually do?
+         *       
          * 3) Filter(Union(M1, M2), F)) will become Join(Union(M1, F), Union(M2, F)) when the 
          *    filterexpression is referenced to M1 and M2
          */
@@ -374,11 +384,17 @@ public class D2RQTreeOptimizer
             notMoveDownFilterExprAndVisitOp1(opGraph); 
         }
 
-        public void visit(OpService opService)
-        { 
-            notMoveDownFilterExprAndVisitOp1(opService); 
+        public void visit(OpService opService) {
+        	// Don't recurse into the OpService, just return it
+        	// (with any filters that were pushed down to us applied)
+        	if (filterExpr.isEmpty()) {
+        		stack.push(opService);
+        	} else {
+        		stack.push(OpFilter.filter(new ExprList(filterExpr), opService));
+        	}
         }
         
+        // This is really an OpD2RQ?
         public void visit(OpExt opExt)
         { 
             Op newOp;
@@ -457,12 +473,54 @@ public class D2RQTreeOptimizer
             notMoveDownFilterExprAndVisitOp1(opSlice); 
         }
         
-        public void visit(OpGroupAgg opGroupAgg)
+        public void visit(OpGroup opGroup)
         { 
-            notMoveDownFilterExprAndVisitOp1(opGroupAgg); 
+            notMoveDownFilterExprAndVisitOp1(opGroup); 
         }        
         
-        /**
+		public void visit(OpExtend opExtend) {
+			// TODO Might be able to move down filter past the OpExtend
+			notMoveDownFilterExprAndVisitOp1(opExtend);
+		}
+
+		/**
+		 * TODO I have no clue if this actually works
+		 * 
+		 * Filter(A-B,e) = Filter(A,e)-B
+		 */
+		public void visit(OpMinus opMinus) {
+			// Walk into A subtree
+			opMinus.getLeft().visit(this);
+			Op leftWithFilter = (Op) stack.pop();
+			
+			// Walk into B subtree with empty expression list
+			List tmp = filterExpr;
+			filterExpr = new ArrayList();
+			opMinus.getRight().visit(this);
+			Op right = (Op) stack.pop();
+			
+			// Remove the entire filter expression on the way up
+			filterExpr = tmp;
+			
+			stack.push(OpMinus.create(leftWithFilter, right));
+		}
+
+		public void visit(OpDisjunction opDisjunction) {
+			// TODO What the heck is an OpDisjunction anyway?
+			notMoveDownFilterExprAndVisitOpN(opDisjunction);
+		}
+
+		public void visit(OpTopN opTop) {
+			// TODO Might be able to move down filter past the OpTopN
+			notMoveDownFilterExprAndVisitOp1(opTop);
+		}
+
+		public void visit(OpQuad opQuad) {
+			// TODO What the heck is an OpQuad anyway?
+			notMoveDownFilterExprAndVisitOp0(opQuad);
+		}
+
+		/**
          * Calculates the set of valid filterexpressions as a subset from the whole set of 
          * possibilities. 
          * @param possiblities - the whole set
@@ -1000,7 +1058,5 @@ public class D2RQTreeOptimizer
             this.filterExpr = notMoveableFilterExpr; 
             this.stack.push(newOp);
         }
-        
     }
-    
 }

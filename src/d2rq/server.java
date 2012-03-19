@@ -3,8 +3,8 @@ package d2rq;
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.shared.JenaException;
 
@@ -14,14 +14,12 @@ import de.fuberlin.wiwiss.d2rq.server.JettyLauncher;
 /**
  * Command line launcher for D2R Server.
  * 
- * @version $Id: server.java,v 1.8 2009/08/02 09:12:05 fatorange Exp $
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class server {
 	private final static String usage = "usage: d2r-server [-p port] [-b serverBaseURI] [--fast] mappingFileName";
 	private static JettyLauncher server;
-	
-	private final static Logger log = LoggerFactory.getLogger(server.class);
+	private final static Log log = LogFactory.getLog(server.class);
 	
 	public static void main(String[] args) {
 		CommandLine cmd = new CommandLine();
@@ -84,7 +82,10 @@ public class server {
 	}
 	
 	public static void startServer() {
-		server.start();
-		log.info("Server started at {}", server.getHomeURI());
+		if (server.start()) {
+			log.info("[[[ Server started at " + server.getHomeURI() + " ]]]");
+		} else {
+			log.warn("[[[ Server startup failed, see messages above ]]]");
+		}
 	}
 }

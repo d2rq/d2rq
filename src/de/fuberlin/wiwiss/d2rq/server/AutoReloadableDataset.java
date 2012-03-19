@@ -3,12 +3,12 @@ package de.fuberlin.wiwiss.d2rq.server;
 import java.io.File;
 import java.util.Iterator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.hp.hpl.jena.graph.Capabilities;
-import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.query.Dataset;
+import com.hp.hpl.jena.query.LabelExistsException;
+import com.hp.hpl.jena.query.ReadWrite;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -23,14 +23,14 @@ import de.fuberlin.wiwiss.d2rq.engine.D2RQDatasetGraph;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class AutoReloadableDataset implements Dataset {
-	private static Logger log = LoggerFactory.getLogger(AutoReloadableDataset.class);
+	private static Log log = LogFactory.getLog(AutoReloadableDataset.class);
 	
-	/** only reload any this milliseconds */
+	/** only reload any this mili seconds */
 	private static long RELOAD_FREQUENCY_MS = 1000;
 
 	private D2RServer server;
 	private D2RQDatasetGraph datasetGraph = null;
-	
+    
 	private String mappingFile;
 	private long lastModified = Long.MAX_VALUE;
 	private long lastReload = Long.MIN_VALUE;
@@ -40,12 +40,16 @@ public class AutoReloadableDataset implements Dataset {
 	
 	/** (localFile) => auto-reloadable */
 	private boolean localFile;
+
+	/** true if --fast setting is overridden in server config */
+	private boolean overrideUseAllOptimizations;
 	
 	private Model defaultModel;
 	
-	public AutoReloadableDataset(String mappingFile, boolean localFile, D2RServer server) {
+	public AutoReloadableDataset(String mappingFile, boolean localFile, boolean overrideUseAllOptimizations, D2RServer server) {
 		this.mappingFile = mappingFile;
-		this.localFile = localFile;	
+		this.localFile = localFile;
+		this.overrideUseAllOptimizations = overrideUseAllOptimizations;
 		this.server = server;
 	}
 
@@ -70,29 +74,28 @@ public class AutoReloadableDataset implements Dataset {
 	}
 	
 	private void initD2RQDatasetGraph() {
-		if (this.datasetGraph != null)
+		if (this.datasetGraph != null) {
 			log.info("Reloading mapping file");
+			datasetGraph.close();
+		}
 		
 		Model mapModel = ModelFactory.createDefaultModel();
-		mapModel.read((this.localFile) ? "file:" + this.mappingFile : this.mappingFile, server.resourceBaseURI(), "N3");
+		mapModel.read((this.localFile) ? "file:" + this.mappingFile : this.mappingFile, server.resourceBaseURI(), "TURTLE");
 		
 		this.hasTruncatedResults = mapModel.contains(null, D2RQ.resultSizeLimit, (RDFNode) null);
 		ModelD2RQ result = new ModelD2RQ(mapModel, server.resourceBaseURI());
 		GraphD2RQ graph = (GraphD2RQ) result.getGraph();
+		if (overrideUseAllOptimizations) {
+			graph.getConfiguration().setUseAllOptimizations(true);
+		}
 		graph.connect();
 		graph.initInventory(server.baseURI() + "all/");
 		this.datasetGraph = new D2RQDatasetGraph(graph);
 		this.defaultModel = ModelFactory.createModelForGraph(datasetGraph.getDefaultGraph());		
-		
 		if (localFile) {
 			this.lastModified = new File(this.mappingFile).lastModified();
 			this.lastReload = System.currentTimeMillis();
 		}
-	}
-
-	public Capabilities getCapabilities() {
-		//checkMappingFileChanged();
-		return this.datasetGraph.getDefaultGraph().getCapabilities();
 	}
 
 	public PrefixMapping getPrefixMapping() {
@@ -105,11 +108,6 @@ public class AutoReloadableDataset implements Dataset {
 		return hasTruncatedResults;
 	}
 
-	public QueryHandler queryHandler() {
-		checkMappingFileChanged();
-		return this.datasetGraph.getDefaultGraph().queryHandler();
-	}
-	
 	public DatasetGraph asDatasetGraph() {
 		// check already done by servlets before getting the graph
 		//checkMappingFileChanged();
@@ -141,5 +139,45 @@ public class AutoReloadableDataset implements Dataset {
 	public void close() {
 		datasetGraph.close();
 	}
-	
+
+	public void setDefaultModel(Model model) {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	public void addNamedModel(String uri, Model model)
+			throws LabelExistsException {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	public void removeNamedModel(String uri) {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	public void replaceNamedModel(String uri, Model model) {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	public boolean supportsTransactions() {
+		return false;
+	}
+
+	public void begin(ReadWrite readWrite) {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	public void commit() {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	public void abort() {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
+
+	public boolean isInTransaction() {
+		return false;
+	}
+
+	public void end() {
+		throw new UnsupportedOperationException("Read-only dataset");
+	}
 }

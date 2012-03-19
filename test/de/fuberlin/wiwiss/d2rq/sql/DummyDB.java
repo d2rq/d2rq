@@ -8,7 +8,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 
 public class DummyDB extends ConnectedDB {
 	private final String type;
-	private final Map columnTypes = new HashMap();
+	private final Map<Attribute,SQLDataType> columnTypes = new HashMap<Attribute,SQLDataType>();
 	private int limit = Database.NO_LIMIT;
 	
 	public DummyDB() {
@@ -20,8 +20,8 @@ public class DummyDB extends ConnectedDB {
 		this.type = type;
 	}
 
-	public void setColumnType(Attribute attribute, int type) {
-		columnTypes.put(attribute, new Integer(type));
+	public void setColumnType(Attribute attribute, SQLDataType type) {
+		columnTypes.put(attribute, type);
 	}
 
 	public void setLimit(int newLimit) {
@@ -32,9 +32,9 @@ public class DummyDB extends ConnectedDB {
 		return type;
 	}
 
-	public int columnType(Attribute attribute) {
+	public SQLDataType columnType(Attribute attribute) {
 		if (columnTypes.containsKey(attribute)) {
-			return ((Integer) columnTypes.get(attribute)).intValue();
+			return columnTypes.get(attribute);
 		}
 		return super.columnType(attribute);
 	}

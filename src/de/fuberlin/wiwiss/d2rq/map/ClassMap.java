@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -23,7 +23,7 @@ public class ClassMap extends ResourceMap {
 	private Collection classes = new ArrayList();
 	private Collection propertyBridges = new ArrayList();
 	private Collection compiledPropertyBridges = null;
-	private static final Logger log = LoggerFactory.getLogger(ClassMap.class);
+	private Log log = LogFactory.getLog(ClassMap.class);
 	
 	public ClassMap(Resource classMapResource) {
 		super(classMapResource, false);
@@ -76,9 +76,8 @@ public class ClassMap extends ResourceMap {
 					D2RQException.CLASSMAP_INVALID_CONSTANTVALUE);
 		}
 		if (this.uriPattern != null && new Pattern(uriPattern).attributes().size() == 0) {
-			if (log.isWarnEnabled())
-				log.warn("{} has an uriPattern without any column specifications. This usually happens when no primary keys are defined for a table. If the configuration is left as is, all table rows will be mapped to a single instance. " +
-				         "If this is not what you want, please define the keys in the database and re-run the mapping generator, or edit the mapping to provide the relevant keys.", this);
+			this.log.warn(toString() + " has an uriPattern without any column specifications. This usually happens when no primary keys are defined for a table. If the configuration is left as is, all table rows will be mapped to a single instance. " +
+					"If this is not what you want, please define the keys in the database and re-run the mapping generator, or edit the mapping to provide the relevant keys.");
 		}
 		Iterator it = this.propertyBridges.iterator();
 		while (it.hasNext()) {

@@ -92,12 +92,9 @@ public class GraphPatternTranslatorTest extends TestCase {
 		NodeRelation nodeRel = translate1("?x rdf:type ?x", "engine/object-uricolumn.n3");
 		Relation r = nodeRel.baseRelation();
 		assertEquals(Collections.singleton(table1), r.tables());
-		assertEquals(Collections.singleton(table1id), r.projections());
 		assertTrue(r.condition() instanceof Equality);	// Too lazy to check both sides
 		assertEquals(AliasMap.NO_ALIASES, r.aliases());
 		assertEquals(Collections.singleton("x"), nodeRel.variableNames());
-		assertEquals("URI(Pattern(http://example.org/res@@table1.id@@))", 
-				nodeRel.nodeMaker("x").toString());
 	}
 
 	public void testReturnMultipleMatchesForSingleTriplePattern() {
@@ -181,79 +178,8 @@ public class GraphPatternTranslatorTest extends TestCase {
 		List results = new ArrayList();
 		String[] parts = pattern.split("\\s+\\.\\s*");
 		for (int i = 0; i < parts.length; i++) {
-
-			// this Triple.create method was removed between Jena 2.6.0 and 2.6.1
-			// the method body looks like the following lines:
-			//
-			// StringTokenizer st = new StringTokenizer( fact );
-			// Node sub = NodeCreateUtils.create( pm, st.nextToken() );
-			// Node pred = NodeCreateUtils.create( pm, st.nextToken() );
-			// Node obj = NodeCreateUtils.create( pm, st.nextToken() );
-			// return Triple.create( sub, pred, obj );
-			//
-			// => so let's apply this code ;)
-			//
-			// zazi (http://github.com/zazi)
-
-			StringTokenizer st = new StringTokenizer( parts[i] );
-			Node sub = NodeCreateUtils.create( MapFixture.prefixes(), st.nextToken() );
-			Node pred = NodeCreateUtils.create( MapFixture.prefixes(), st.nextToken() );
-			Node obj = NodeCreateUtils.create( MapFixture.prefixes(), st.nextToken() );
-
-			results.add(Triple.create(sub, pred, obj));
+			results.add(NodeCreateUtils.createTriple(MapFixture.prefixes(), parts[i]));
 		}
 		return results;
 	}
-	
-
-
-//	public void testSameDomainAndRange()
-//	{
-//		Collection c = MapFixture.loadPropertyBridges("engine/samedomainandrange.n3");
-//		
-//		ConnectedDB db = new ConnectedDB(null, null, null) {
-//			
-//			// pretend there is primary key constraint on person.id
-//			public HashMap getUniqueKeyColumns(RelationName tableName)
-//			{
-//				HashMap result = null;
-//				if (tableName.tableName().equals("person")) {
-//					result = new HashMap();
-//					result.put("primary key", Collections.singletonList("id"));
-//				}
-//				return result;
-//			}
-//		};
-//		
-//		Collection newCollection = new ArrayList();
-//		Iterator i = c.iterator();
-//		while (i.hasNext()) {
-//			TripleRelation r = (TripleRelation) i.next();
-//			Relation base = r.baseRelation();
-//			base = new RelationImpl(db, base.aliases(), base.condition(), base.joinConditions(), base.projections(), base.isUnique(), base.order(), base.orderDesc(), base.limit(), base.limitInverse());
-//			TripleRelation n = new TripleRelation(base, r.nodeMaker(TripleRelation.SUBJECT),  r.nodeMaker(TripleRelation.PREDICATE),  r.nodeMaker(TripleRelation.OBJECT));
-//			newCollection.add(n);
-//		}
-//		
-//		Collection rels = new GraphPatternTranslator(triplesToList("?x foaf:knows ?y . ?y foaf:name \"Giovanni\" . ?x foaf:name ?n"),
-//				newCollection, true).translate();
-//		
-//
-//		assertEquals(1, rels.size());
-//		NodeRelation rel = (NodeRelation) rels.iterator().next();
-//		assertTrue("optimized", rel.baseRelation().condition() instanceof Equality);
-//		Equality eq = (Equality) rel.baseRelation().condition();
-//		assertEquals(eq, Equality.create(new AttributeExpr(new Attribute(null, "T1_p", "name")),
-//		                                 new Constant("Giovanni", new Attribute(null, "T1_p", "name"))));
-//
-//		rels = new GraphPatternTranslator(triplesToList("?x foaf:name \"Giovanni\" . ?x foaf:knows ?y . ?y foaf:name ?n"),
-//				newCollection, true).translate();
-//		
-//		assertEquals(1, rels.size());
-//		rel = (NodeRelation) rels.iterator().next();
-//		assertTrue("optimized", rel.baseRelation().condition() instanceof Equality);
-//		eq = (Equality) rel.baseRelation().condition();
-//		assertEquals(eq, Equality.create(new AttributeExpr(new Attribute(null, "T1_person", "name")),
-//		                                 new Constant("Giovanni", new Attribute(null, "T1_person", "name"))));
-//	}
 }

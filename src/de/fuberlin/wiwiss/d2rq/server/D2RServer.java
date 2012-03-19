@@ -5,13 +5,13 @@ import java.net.URLEncoder;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joseki.RDFServer;
 import org.joseki.Registry;
 import org.joseki.Service;
 import org.joseki.ServiceRegistry;
 import org.joseki.processors.SPARQL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -26,7 +26,6 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RServer.java,v 1.26 2009/08/02 09:12:06 fatorange Exp $
  */
 public class D2RServer {
 	private final static String SPARQL_SERVICE_NAME = "sparql";
@@ -40,7 +39,7 @@ public class D2RServer {
 	private final static String DEFAULT_BASE_URI = "http://localhost";
 	private final static String DEFAULT_SERVER_NAME = "D2R Server";
 	private final static String SERVER_INSTANCE = "D2RServer.SERVER_INSTANCE";
-	private static final Logger log = LoggerFactory.getLogger(D2RServer.class);
+	private static final Log log = LogFactory.getLog(D2RServer.class);
 	
 	/** d2rq mapping file */
 	private String configFile;
@@ -85,7 +84,7 @@ public class D2RServer {
 			log.warn("Base URIs containing '#' may not work correctly!");
 		}
 
-		log.info("using custom base URI: {}", baseURI);
+		log.info("using custom base URI: " + baseURI);
 		this.overrideBaseURI = baseURI;
 	}
 	
@@ -214,18 +213,15 @@ public class D2RServer {
 	}
 	
 	public void start() {
-		log.info("using config file: {}", configFile);
+		log.info("using config file: " + configFile);
 		this.config = new ConfigLoader(configFile);
 		this.config.load();
 		
 		if (config.isLocalMappingFile())
-			this.dataset = new AutoReloadableDataset(config.getLocalMappingFilename(), true, this);
+			this.dataset = new AutoReloadableDataset(config.getLocalMappingFilename(), true, overrideUseAllOptimizations, this);
 		else
-			this.dataset = new AutoReloadableDataset(config.getMappingURL(), false, this);
+			this.dataset = new AutoReloadableDataset(config.getMappingURL(), false, overrideUseAllOptimizations, this);
 		this.dataset.forceReload();
-		
-		if (this.overrideUseAllOptimizations)
-			currentGraph().getConfiguration().setUseAllOptimizations(true);
 		
 		if (currentGraph().getConfiguration().getUseAllOptimizations()) {
 			log.info("Fast mode (all optimizations)");

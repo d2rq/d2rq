@@ -23,7 +23,6 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SelectStatementBuilder.java,v 1.32 2009/09/29 19:56:53 cyganiak Exp $
  */
 public class SelectStatementBuilder {
 	private ConnectedDB database;

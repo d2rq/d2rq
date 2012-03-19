@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.graph.Capabilities;
 import com.hp.hpl.jena.graph.Graph;
@@ -49,7 +49,6 @@ import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: GraphD2RQ.java,v 1.55 2009/08/02 09:15:08 fatorange Exp $
  */
 public class GraphD2RQ extends GraphBase implements Graph {
 	
@@ -57,7 +56,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		QueryEngineD2RQ.register();
 	}
 	
-	private Logger log = LoggerFactory.getLogger(GraphD2RQ.class);
+	private Log log = LogFactory.getLog(GraphD2RQ.class);
 	private final Capabilities capabilities = new D2RQCapabilities();
 	private final Mapping mapping;
 	private final D2RQDatasetGraph dataset = new D2RQDatasetGraph(this);
@@ -86,6 +85,10 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		getPrefixMapping().setNsPrefixes(mapping.getPrefixMapping());
 	}
 
+	public Mapping getMapping() {
+		return mapping;
+	}
+	
 	/**
 	 * Returns a QueryHandler for this graph.
 	 * The query handler class can be set by the mapping.
@@ -125,7 +128,7 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			this.log.debug("Find: " + PrettyPrinter.toString(t, getPrefixMapping()));
 		}
 		return new FindQuery(t, this.mapping.compiledPropertyBridges(), this.mapping.configuration().getServeVocabulary(), this.mapping.getHasDynamicProperties(), this.mapping.getVocabularyModel()).iterator();
-	}
+    }
 
 	/**
 	 * Connects all databases. This is done automatically if
@@ -143,13 +146,13 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	
 	static TripleRelation[] emptyPropertyBridgeArray=new TripleRelation[0];
 	
-	/**
-	 * TODO This section was done as a quick hack for D2R Server 0.3 and really shouldn't be here
-	 */
-	private Map classMapInventoryBridges = new HashMap();
-	private Map classMapNodeMakers = new HashMap();
-
-	public void initInventory(String inventoryBaseURI) {
+    /**
+     * TODO This section was done as a quick hack for D2R Server 0.3 and really shouldn't be here
+     */
+    private Map classMapInventoryBridges = new HashMap();
+    private Map classMapNodeMakers = new HashMap();
+    
+    public void initInventory(String inventoryBaseURI) {
 		Iterator it = this.mapping.classMapResources().iterator();
 		while (it.hasNext()) {
 			Resource classMapResource = (Resource) it.next();
@@ -177,35 +180,35 @@ public class GraphD2RQ extends GraphBase implements Graph {
 			}
 			this.classMapInventoryBridges.put(toClassMapName(classMap), inventoryBridges);
 		}
-	}
+    }
 
-	private String toClassMapName(Node classMap) {
-		return classMap.getLocalName();
-	}
-	
-	public Collection classMapNames() {
-		return this.classMapInventoryBridges.keySet();
-	}
-	
-	public Model classMapInventory(String classMapName) {
-		List inventoryBridges = (List) this.classMapInventoryBridges.get(classMapName);
-		if (inventoryBridges == null) {
-			return null;
-		}
-		Model result = ModelFactory.createDefaultModel();
-		result.setNsPrefixes(this.getPrefixMapping());
-		result.getGraph().getBulkUpdateHandler().add(
-				new FindQuery(Triple.ANY, inventoryBridges).iterator());
-		return result;
-	}
-	
-	public Collection classMapNamesForResource(Node resource) {
-		if (!resource.isURI()) {
-			return Collections.EMPTY_LIST;
-		}
-		List results = new ArrayList();
-		Iterator it = this.classMapNodeMakers.entrySet().iterator();
-		while (it.hasNext()) {
+    private String toClassMapName(Node classMap) {
+    	return classMap.getLocalName();
+    }
+    
+    public Collection classMapNames() {
+    	return this.classMapInventoryBridges.keySet();
+    }
+    
+    public Model classMapInventory(String classMapName) {
+    	List inventoryBridges = (List) this.classMapInventoryBridges.get(classMapName);
+    	if (inventoryBridges == null) {
+    		return null;
+    	}
+    	Model result = ModelFactory.createDefaultModel();
+    	result.setNsPrefixes(this.getPrefixMapping());
+    	result.getGraph().getBulkUpdateHandler().add(
+    			new FindQuery(Triple.ANY, inventoryBridges).iterator());
+    	return result;
+    }
+
+    public Collection classMapNamesForResource(Node resource) {
+    	if (!resource.isURI()) {
+    		return Collections.EMPTY_LIST;
+    	}
+    	List results = new ArrayList();
+    	Iterator it = this.classMapNodeMakers.entrySet().iterator();
+    	while (it.hasNext()) {
 			Entry entry = (Entry) it.next();
 			String classMapName = (String) entry.getKey();
 			NodeMaker nodeMaker = (NodeMaker) entry.getValue();
@@ -213,14 +216,14 @@ public class GraphD2RQ extends GraphBase implements Graph {
 				results.add(classMapName);
 			}
 		}
-		return results;
-	}
-	
-	public Collection tripleRelations() {
-		return mapping.compiledPropertyBridges();
-	}
-	
-	public Configuration getConfiguration() {
-		return this.mapping.configuration();
-	}
+    	return results;
+    }
+    
+    public Collection tripleRelations() {
+    	return mapping.compiledPropertyBridges();
+    }
+    
+    public Configuration getConfiguration() {
+    	return this.mapping.configuration();
+    }
 }

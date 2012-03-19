@@ -35,7 +35,7 @@ public class ConfigLoader {
 			if (fileName.matches("[a-zA-Z0-9]{2,}:.*") && new URI(fileName).isAbsolute()) {
 				return fileName;
 			}
-			return new File(fileName).getAbsoluteFile().toURI().toString();
+			return new File(fileName).getAbsoluteFile().toURI().normalize().toString();
 		} catch (URISyntaxException ex) {
 			throw new D2RQException(ex);
 		}

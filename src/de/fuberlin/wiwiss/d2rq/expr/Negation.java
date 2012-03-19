@@ -10,7 +10,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * An expression that negates an underlying expression
  * 
  * @author Christian Becker <http://beckr.org#chris>
- * @version $Id: Negation.java,v 1.1 2009/08/06 21:50:31 fatorange Exp $
  */
 public class Negation extends Expression {
 	
