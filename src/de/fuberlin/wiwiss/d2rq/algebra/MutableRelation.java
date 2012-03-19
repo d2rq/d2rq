@@ -12,7 +12,6 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  * The MutableRelation solves this problem.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MutableRelation.java,v 1.7 2009/07/29 12:03:53 fatorange Exp $
  */
 public class MutableRelation implements RelationalOperators {
 	private Relation relation;
@@ -57,5 +56,20 @@ public class MutableRelation implements RelationalOperators {
 	
 	public Relation project(Set projectionSpecs) {
 		return relation = relation.project(projectionSpecs);
+	}
+	
+	public Relation limit(int limit) {
+		return relation = new RelationImpl(
+				relation.database(),
+	            relation.aliases(),
+	            relation.condition(),
+	            relation.joinConditions(),
+	            relation.projections(),
+	            relation.leftJoinConditions(),
+	            relation.isUnique(),
+	            relation.order(),
+	            relation.orderDesc(),
+	            Math.min(relation.limit(), limit),
+				relation.limitInverse());
 	}
 }

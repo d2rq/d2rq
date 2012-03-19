@@ -117,15 +117,15 @@ Customization for SPARQler: Andy Seaborne
 
   <xsl:template match="res:uri">
     <xsl:variable name="uri" select="text()"/>
+    <a href="{$uri}" target="_blank">
     <xsl:text>&lt;</xsl:text>
     <xsl:value-of select="$uri"/>
     <xsl:text>&gt;</xsl:text>
+    </a>
   </xsl:template>
 
   <xsl:template match="res:literal">
-    <xsl:text>"</xsl:text>
     <xsl:value-of select="text()"/>
-    <xsl:text>"</xsl:text>
 
     <xsl:choose>
       <xsl:when test="@datatype">
@@ -145,15 +145,21 @@ Customization for SPARQler: Andy Seaborne
 	<title>SPARQL Query Results</title>
 	<style>
 	  <![CDATA[
-	  h1 { font-size: 150% ; }
-	  h2 { font-size: 125% ; }
-	  table { border-collapse: collapse ; border: 1px solid black ; }
-	  td, th
- 	  { border: 1px solid black ;
-	    padding-left:0.5em; padding-right: 0.5em; 
-	    padding-top:0.2ex ; padding-bottom:0.2ex 
-	  }
-	  ]]>
+body {
+  font-family: Helvetica, Arial, sans-serif;
+}
+h1 { font-size: 150% ; }
+h2 { font-size: 125% ; }
+table { 
+  border-collapse: collapse ; 
+  border: 1px solid black ;
+}
+td, th {
+  border: 1px solid black ;
+  padding-left: 0.5em ; padding-right: 0.5em ; 
+  padding-top: 0.2ex ; padding-bottom: 0.2ex ;
+}
+]]>
 	</style>
       </head>
       <body>

@@ -7,6 +7,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQLDataType;
 
 /**
  * A constant-valued expression.
@@ -20,7 +21,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO Should have a SQL type code instead of the stupid column reference
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Constant.java,v 1.3 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class Constant extends Expression {
 	private final String value;
@@ -61,7 +61,7 @@ public class Constant extends Expression {
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
 		if (attributeForTrackingType == null) {
 			// TODO: This is an unsafe assumption
-			return database.quoteValue(value, ConnectedDB.TEXT_COLUMN);
+			return database.quoteValue(value, SQLDataType.CHARACTER);
 		}
 		return database.quoteValue(value, aliases.originalOf(attributeForTrackingType));
 	}

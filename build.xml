@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="D2RQ" default="all" basedir=".">
+<project name="D2RQ" basedir="." default="all">
 
 	<property name="name" value="d2rq"/>
-	<property name="version" value="0.7.1-dev"/>
+	<property name="version" value="0.8.1-dev"/>
 	<property name="project.package" value="de.fuberlin.wiwiss.d2rq"/>
 	<property name="project.path" value="de/fuberlin/wiwiss/d2rq"/>
 	<property name="src" value="src"/>
@@ -18,18 +18,13 @@
 	<property name="tar" value="${distname}.tar.gz"/>
 	<property name="war" value="${name}.war" />
 
-	<property name="vocab.language.dir" value="doc/specification"/>
-	<property name="vocab.language.n3" value="${vocab.language.dir}/d2rq-rdfs.n3"/>
-	<property name="vocab.language.rdf" value="${vocab.language.dir}/d2rq-rdfs.rdf"/>
-	<property name="vocab.language.java" value="${src}/${project.path}/vocab/D2RQ.java"/>
+	<property name="vocab.dir" value="${doc}/terms"/>
+	<property name="vocab.language.ttl" value="${vocab.dir}/d2rq.ttl"/>
+	<property name="vocab.language.rdf" value="${vocab.dir}/d2rq.rdf"/>
 	<property name="vocab.language.namespace" value="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#"/>
-
-	<property name="vocab.config.n3" value="${doc}/config.n3"/>
-	<property name="vocab.config.rdf" value="${doc}/config.rdf"/>
+	<property name="vocab.config.ttl" value="${vocab.dir}/config.ttl"/>
+	<property name="vocab.config.rdf" value="${vocab.dir}/config.rdf"/>
 	<property name="vocab.config.namespace" value="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#"/>
-	<property name="vocab.config.name" value="D2RConfig"/>
-	<property name="vocab.config.package" value="${project.package}.vocab"/>
-	<property name="vocab.config.java" value="${src}/${project.path}/vocab/${vocab.config.name}.java"/>
 	
 	<path id="project.class.path">
 		<fileset dir="${lib}">
@@ -49,14 +44,14 @@
 		<exclude name="${war}"/>
 		<exclude name=".project"/>
 		<exclude name=".classpath"/>
-		<exclude name=".settings"/>
+		<exclude name=".settings/**"/>
 		<exclude name=".gitignore"/>
 		<exclude name="velocity.log"/>
 	</patternset>
 
 	<property name="execfiles" value="dump-rdf generate-mapping d2r-server"/>
 
-	<target name="clean">
+	<target name="clean" description="Deletes all generated artefacts">
 		<delete dir="${build}" failonerror="false"/>
 		<delete dir="${build.tests}" failonerror="false"/>
 		<delete dir="${javadoc}" failonerror="false"/>
@@ -70,12 +65,12 @@
 		<mkdir dir="${build}"/>
 	</target>
 
-	<target name="compile" depends="init">
+	<target name="compile" depends="init" description="Compile project classes">
 		<javac srcdir="${src}"
 				destdir="${build}"
 				debug="on"
-				source="1.4"
-				target="1.4"
+				source="1.5"
+				target="1.5"
 				includeAntRuntime="false">
 			<classpath refid="project.class.path"/>
 		</javac>
@@ -85,12 +80,16 @@
 		<mkdir dir="${build.tests}"/>
 	</target>
 
-	<target name="compile.tests" depends="init.tests,compile">
-		<javac srcdir="${src.tests}" destdir="${build.tests}" debug="on" source="1.4" target="1.4">
+	<target name="compile.tests" depends="init.tests,compile" description="Compile test classes">
+		<javac srcdir="${src.tests}"
+				destdir="${build.tests}"
+				debug="on"
+				source="1.5"
+				target="1.5"
+				includeAntRuntime="false">
 			<classpath>
 				<path refid="project.class.path"/>
 				<pathelement path="${build}"/>
-				<pathelement path="${junit.jar}"/>
 			</classpath>
 		</javac>
 	</target>
@@ -100,21 +99,21 @@
 			<fileset dir="${src.tests}/">
 				<include name="${project.path}/**/*.n3"/>
 			</fileset>
+			<fileset file="etc/log4j.properties"/>
 		</copy>
 	</target>
 
-	<target name="test" depends="compile.tests,copyfiles.tests">
+	<target name="test" depends="compile.tests,copyfiles.tests" description="Run tests">
 		<java classname="${project.package}.D2RQTestSuite" fork="yes" failonerror="true">
 			<classpath>
 				<path refid="project.class.path"/>
 				<pathelement path="${build}"/>
 				<pathelement path="${build.tests}"/>
-				<pathelement path="${junit.jar}"/>
 			</classpath>
 		</java>
 	</target>
 
-	<target name="javadoc">
+	<target name="javadoc" description="Generate Javadoc API documentation">
 		<!-- Creates javadoc documentation for the source
 			 (but not for the tests) -->
 		<delete dir="${javadoc}"/>
@@ -131,20 +130,20 @@
 				breakiterator="yes"
 				windowtitle="D2RQ"
 				doctitle="D2RQ">
-			<link href="http://jena.sourceforge.net/javadoc/"/>
-			<link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
-			<link href="http://jena.sourceforge.net/ARQ/javadoc/"/>
+			<link href="http://incubator.apache.org/jena/documentation/javadoc/jena/"/>
+			<link href="http://docs.oracle.com/javase/1.5.0/docs/api/"/>
+			<link href="http://incubator.apache.org/jena/documentation/javadoc/arq/"/>
 		</javadoc>
 	</target>
 
 <!--
  	<target name="jar" depends="compile,test">
 -->
-	<target name="jar" depends="compile">
+	<target name="jar" depends="compile" description="Generate project jar file">
 		<jar jarfile="${jar}" basedir="${build}"/>
 	</target>
 
-	<target name="zip" depends="jar,javadoc">
+	<target name="zip" depends="jar,javadoc" description="Generate distribution file in zip format">
 		<zip destfile="${zip}">
 			<zipfileset prefix="${distname}" dir=".">
 				<patternset refid="distfiles"/>
@@ -152,8 +151,8 @@
 		</zip>
 	</target>
 
-	<target name="tar" depends="jar,javadoc">
-		<tar destfile="${tar}" compression="gzip">
+	<target name="tar" depends="jar,javadoc" description="Generate distribution file in tar.gz format">
+		<tar destfile="${tar}" compression="gzip" longfile="gnu">
 			<tarfileset prefix="${distname}" dir="." includes="${execfiles}" mode="755"/>
 			<tarfileset prefix="${distname}" dir="." excludes="${execfiles}">
 				<patternset refid="distfiles"/>
@@ -161,15 +160,15 @@
 		</tar>
 	</target>
 
-	<target name="all" depends="zip,tar"/>
+	<target name="all" depends="zip,tar" description="Generate distribution files in zip and tar.gz formats"/>
 	
-	<target name="vocab.language.schemagen">
+	<target name="vocab.d2rq" description="Regenerate D2RQ vocabulary files from Turtle source">
 		<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
 				failonerror="true">
 			<arg value="-i" />
-			<arg value="file:${vocab.language.n3}" />
+			<arg value="file:${vocab.language.ttl}" />
 			<arg value="-o" />
-			<arg value="${vocab.language.java}" />
+			<arg value="${src}" />
 			<arg value="-a" />
 			<arg value="${vocab.language.namespace}" />
 			<arg value="-n" />
@@ -178,68 +177,57 @@
 			<arg value="${project.package}.vocab" />
 			<arg value="--rdfs" />
 		</java>
-		<!-- schemagen generates broken Java code for the "class" property,
-			 we fix it by search&replace -->
-		<replace file="${vocab.language.java}" token="Property class" value="Property class_"/>
-		<!-- schemagen generates a field "class_Map" for d2rq:classMap for some reason,
-			 we fix it by search&replace -->
-		<replace file="${vocab.language.java}" token="class_Map" value="classMap"/>
+		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
+				output="${vocab.language.rdf}" logError="yes" failonerror="true">
+			<arg value="${vocab.language.ttl}"/>
+			<arg value="TURTLE"/>
+			<arg value="RDF/XML-ABBREV"/>
+		</java>
 	</target>
 
-	<target name="vocab.config.schemagen">
+	<target name="vocab.config" description="Regenerate Config vocabulary files from Turtle source">
 		<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
 				failonerror="true">
 			<arg value="-i"/>
-			<arg value="file:${vocab.config.n3}"/>
+			<arg value="file:${vocab.config.ttl}"/>
 			<arg value="-o"/>
-			<arg value="${vocab.config.java}"/>
+			<arg value="${src}"/>
 			<arg value="-a"/>
 			<arg value="${vocab.config.namespace}"/>
 			<arg value="-n"/>
-			<arg value="${vocab.config.name}"/>
+			<arg value="D2RConfig"/>
 			<arg value="--package"/>
-			<arg value="${vocab.config.package}"/>
+			<arg value="${project.package}.vocab"/>
 			<arg value="--rdfs"/>
 		</java>
-	</target>
-	
-	
-	<target name="vocab.language.toXML">
-		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
-				output="${vocab.language.rdf}" logError="yes" failonerror="true">
-			<arg value="${vocab.language.n3}"/>
-			<arg value="N3"/>
-			<arg value="RDF/XML-ABBREV"/>
-		</java>
-	</target>
-	
-	<target name="vocab.config.toXML">
 		<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
 				output="${vocab.config.rdf}" logError="yes" failonerror="true">
-			<arg value="${vocab.config.n3}"/>
-			<arg value="N3"/>
+			<arg value="${vocab.config.ttl}"/>
+			<arg value="TURTLE"/>
 			<arg value="RDF/XML-ABBREV"/>
 		</java>
 	</target>
 	
-	<target name="vocab" depends="vocab.language.toXML,vocab.language.schemagen,vocab.config.toXML,vocab.config.schemagen"/>
-
-	<target name="war" depends="jar">
+	<target name="war" depends="jar" description="Generate war archive for deployment in servlet container">
 		<war destfile="${war}" needxmlfile="false">
 			<fileset dir="webapp/">
 				<include name="**"/>
 				<exclude name="WEB-INF"/>
 			</fileset>
+			<!-- Include subdirectories directly, so that the files are all
+				 in the main lib directory. Otherwise, Tomcat won't pick up the jars.
+				 TODO: Do this by copying the libs to a temp dir with flatten="true" -->
 			<lib dir="${lib}">
-				<exclude name="servlet-api-*.jar"/>
 				<exclude name="*/*"/><!-- Do not recurse into subdirectories -->
 			</lib>
-			<!-- Include subdirectories directly, so that the files are all
-				 in the main lib directory. Otherwise, Tomcat won't pick up the jars -->
-			<lib dir="${lib}/arq"/>
-			<lib dir="${lib}/logging">
-				<exclude name="logging/commons-logging-*.jar"/>
+			<lib dir="${lib}/arq-2.9"/>
+			<lib dir="${lib}/hsqldb-2.2.8"/>
+			<lib dir="${lib}/jetty-8.1.1">
+				<exclude name="servlet-api-*.jar"/>
 			</lib>
+			<lib dir="${lib}/joseki-3.4.4"/>
+			<lib dir="${lib}/logging"/>
+			<lib dir="${lib}/velocity-1.7"/>
 			<lib dir="${lib}/db-drivers"/>
 			<webinf dir="webapp/WEB-INF">
 				<include name="*"/>

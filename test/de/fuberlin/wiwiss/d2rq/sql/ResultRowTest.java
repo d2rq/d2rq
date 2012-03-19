@@ -9,7 +9,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ResultRowTest.java,v 1.4 2008/04/24 17:47:52 cyganiak Exp $
  */
 public class ResultRowTest extends TestCase {
 	private static final Attribute col1 = new Attribute(null, "foo", "col1");

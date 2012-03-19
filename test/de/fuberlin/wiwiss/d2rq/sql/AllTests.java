@@ -11,6 +11,8 @@ public class AllTests {
 		suite.addTestSuite(SQLBuildingTest.class);
 		suite.addTestSuite(ResultRowTest.class);
 		suite.addTestSuite(SQLSyntaxTest.class);
+		suite.addTestSuite(HSQLDBDatatypeTest.class);
+		suite.addTestSuite(MySQLDatatypeTest.class);
 		//$JUnit-END$
 		return suite;
 	}

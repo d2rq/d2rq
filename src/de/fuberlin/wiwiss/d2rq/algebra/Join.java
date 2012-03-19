@@ -11,7 +11,6 @@ import java.util.Map;
  * Represents an SQL join between two tables, spanning one or more columns.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Join.java,v 1.10 2009/08/02 21:57:27 fatorange Exp $
  */
 public class Join {
 	private List attributes1 = new ArrayList();

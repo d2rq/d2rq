@@ -11,7 +11,6 @@ import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
  * the mapping file.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MapObject.java,v 1.2 2006/09/15 20:38:04 cyganiak Exp $
  */
 public abstract class MapObject {
 	private Resource resource;

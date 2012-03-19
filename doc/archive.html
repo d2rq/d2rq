@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>News Archive | The D2RQ Platform</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="script.js"></script>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-30091096-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </head>
+  <body>
+    <header>
+      <div class="document-collection">This document is part of the <a href="/">D2RQ documentation</a>.</div>
+      <h1>News Archive</h1>
+    </header>
+
+<ul class="news">
+
+<li><strong>Version 0.7 released.</strong> This version provides several bugfixes, better dump performance, several new features as well as new optimizations that must be enabled via D2R Server's --fast switch or using d2rq:useAllOptimizations. <small>2009-08-10</small></li>
+
+<li><strong>D2RQ Engine v0.6 and D2R Server v0.6 have been released.</strong> The new releases provide significantly improved performance (up to factor 7 in the <a href="http://www4.wiwiss.fu-berlin.de/bizer/BerlinSPARQLBenchmark/">BSBM benchmark</a>) thanks to improved rewriting of SPARQL statements into SQL, as well as a new ARQ-based QueryEngine. The D2RQ release improves memory usage and fixes various bugs. In addition to MySQL, it has also been sucessfully tested on Oracle. The new D2R Server release features support for dereferencing vocabulary URIs and for publishing mappings between different vocabularies. <small>2009-02-19</small></li>
+
+<li><strong>The W3C RDB2RDF Incubator Group</strong> released its <a href="http://www.w3.org/2005/Incubator/rdb2rdf/XGR-rdb2rdf-20090126/">final report</a> and <a href="http://www.w3.org/2005/Incubator/rdb2rdf/RDB2RDF_SurveyReport.pdf">State of the Art Survey</a>. <small>2009-01-26</small></li>
+
+<li><strong>The D2RQ Engine V0.5.1 and D2R Server V0.4 have been released.</strong> The new releases fix multiple bugs in the D2RQ Engine and allow D2R Server to be deployed within servlet containers. <small>2007-10-25</small></li>
+
+<li><strong>D2R Server Version 0.3.2 released,</strong> featuring more configurability, easy installation as a Windows service, and many small improvements and bugfixes. <small>2007-02-13</small></li>
+
+<li><strong>dbpedia.org uses D2R Server</strong> to <a href="http://dbpedia.org/">publish structured data</a> extracted from Wikipedia. <small>2007-01-22</small></li>
+
+<li><strong>Gene Ontology servers:</strong> Chris Mungall (Berkeley Drosophila Genome Project) has set up D2R Servers for <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-GO">Gene Ontology annotations</a> and <a href="http://www.bioontology.org/wiki/index.php/OBD:SPARQL-InSitu">gene expression in fruitfly embryogenesis</a>. <small>2006-12-20</small></li>
+
+<li><strong>DBLP Bibliography server:</strong> We have published the <a href="http://www4.wiwiss.fu-berlin.de/dblp/">DBLP Bibliography Database on the Semantic Web</a> using D2R Server. <small>2006-11-02</small></li>
+
+<li><strong>D2RQ V0.5 released</strong>. The new release supports SPARQL and includes a automatic mapping generator, a dump-rdf command line script, a Jena Assembler for D2RQ models. It is compatible with Jena 2.4 and ARQ 1.4 and provides improved compatibility with MySQL, Oracle and PostgreSQL. We also updated the D2RQ User Manual to reflect all new features. <small>2006-10-30</small></li>
+
+<li><strong>D2R Server Version 0.3</strong> released. The new release enables database-generated URIs to be dereferenced. This allows the content of relational databases to be browsed with tool like <a href="http://dig.csail.mit.edu/2005/ajar/release/tabulator/0.7/tab.html">Tabulator</a>. <small>2006-09-08</small></li>
+
+<li><strong>D2RQ in TopBraid Composer.</strong> D2RQ has been integrated into the <a href="http://www.topbraidcomposer.org/">TopBraid Composer</a> ontology editor. Using TopBraid Composer you can browse D2RQ-mapped database content in a nice GUI, and use a professional RDF editor to customize D2RQ mapping files. See <a href="http://www.topbraidcomposer.org/documentation/D2RQ.htm">TopBraid Composer documentation</a> for details. <small>2006-08-09</small></li>
+
+<li><strong>D2RQ tutorial:</strong> A <a href="http://www.semantic-web.at/5.69.69.module.10-tool-workshop-triple-stores-und-d2rq-werkzeuge-fuer-die-it-und-daten-integration-im-sem.htm">tutorial about Triple Stores and D2RQ</a> will be held in January 2007 at the Semantic Web School in Vienna. <small>2006-08-02</small></li>
+
+<li><strong>Bob DuCharme gives an interesting talk</strong> about <a href="http://2006.xmlconference.org/programme/presentations/188.html">Relational database integration with RDF/OWL</a> using D2RQ at <a href="http://2006.xmlconference.org/">XML 2006</a>. <small>2006-05-12</small></li>
+
+<li><strong>Introducing D2R Server.</strong> We are currently working on <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/">D2R Server</a>. D2R Server provides SPARQL access to relational databases. The server takes SPARQL queries from the Web and rewrites them via a D2RQ mapping into SQL queries against a relational database. There will be a talk about D2R Server in the <a href="http://www2006.org/programme/item.php?id=d22">Developers Track at WWW 2006</a>. <small>2006-05-09</small></li>
+
+<li><strong>D2RQ in PHP.</strong> D2RQ in PHP. The University Leipzig has released <a href="http://aksw.informatik.uni-leipzig.de/Projects/R2D2">a new D2RQ PHP implementation</a> which can be used together with <a href="http://sites.wiwiss.fu-berlin.de/suhl/bizer/rdfapi/index.html">RAP - RDF API for PHP</a>. See <a href="http://aksw.informatik.uni-leipzig.de/Projects/R2D2">R2D2</a> project page for details. <small>2006-01-20</small></li>
+
+<li><strong><a href="spec/200501025/index.htm">D2RQ 0.4</a> has been published.</strong> The new version contains a wrapper which allows you to use D2RQ together with the <a href="http://www.openrdf.org/">Sesame</a> Semantic Web framework. <small>2005-10-25</small></li>
+
+<li><strong><a href="d2p/index.htm">D2P Database-to-Piggybank Bridge</a> released.</strong> D2P is an extension to the <a href="http://simile.mit.edu/piggy-bank/">Piggybank Semantic Web browser</a> which makes information stored in rational databases accessible to Piggybank using D2RQ mappings. <small>2005-10-15</small></li>
+
+<li><strong>New d2rq-map-devel mailing list.</strong> As the D2RQ user community is growing and we are receiving an increasing number of support requests and interesting new ideas around the toolkit and database to RDF mapping in general, we have opened up a <a href="http://lists.sourceforge.net/lists/listinfo/d2rq-map-devel">D2RQ and D2R mailing list</a>. <small>2005-10-13</small></li>
+
+<li><strong>D2RQ 0.3 has been published.</strong> The new version includes an experimental D2RQQueryHandler which speeds up complex RDQL queries significantly by rewriting groups of RDQL patterns into single SQL statements and by rewriting RDQL AND conditions into SQL WHERE clauses. <small>2005-04-29</small></li>
+
+<li><strong>ISWC2004 presentation.</strong> D2RQ was presented at the <a href="http://iswc2004.semanticweb.org/">3rd International Semantic Web Conference (ISWC2004)</a>, Hiroshima, Japan, November 2004. See Christian Bizer, Andy Seaborne: <a href="../../bizer/pub/Bizer-D2RQ-ISWC2004.pdf">D2RQ - Treating Non-RDF Databases as Virtual RDF Graphs</a>. (<a href="../pub/Bizer-D2RQ-ISWC2004-Poster.pdf">Poster</a>) <small>2004-11-20</small></li>
+
+<li><strong>D2RQ 0.2 has been published.</strong> The new version includes several language extensions and provides a significant <a href="benchmarks/index.html">speed-up</a>. <small>2004-08-12</small></li>
+
+<li><strong>Benchmark results</strong> comparing D2RQ 0.1 and 0.2 to the Jena 2 database backend <a href="benchmarks/index.html">published</a>, together with the <a href="http://www4.wiwiss.fu-berlin.de/bizer/d2rq/benchmarks/index.html#methodology">benchmarking suite</a>. <small>2004-06-29</small></li>
+
+</ul>
+
+  </body>
+</html>

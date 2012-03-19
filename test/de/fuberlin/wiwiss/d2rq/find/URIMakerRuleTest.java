@@ -41,7 +41,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
  *     d2rq:class foaf:Document;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: URIMakerRuleTest.java,v 1.8 2009/07/29 12:03:53 fatorange Exp $
  */
 public class URIMakerRuleTest extends TestCase {
 	private TripleRelation withURIPatternSubject;

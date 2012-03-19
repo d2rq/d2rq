@@ -19,13 +19,12 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelAPITest.java,v 1.11 2009/02/14 22:37:15 fatorange Exp $
  */
 public class ModelAPITest extends TestCase {
 	private ModelD2RQ model;
 
 	protected void setUp() throws Exception {
-		this.model = new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "N3", "http://test/");
+		this.model = new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "TURTLE", "http://test/");
 //		this.model.enableDebug();
 	}
 
@@ -42,7 +41,7 @@ public class ModelAPITest extends TestCase {
 //			dumpStatement(stmt);
 			count++;
 		}
-		assertEquals(334, count);
+		assertEquals(341, count);
 	}
 
 	public void testHasProperty() {

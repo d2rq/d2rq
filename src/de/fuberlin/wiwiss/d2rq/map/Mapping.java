@@ -21,6 +21,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.sql.SQLDataType;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
@@ -30,7 +31,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Mapping.java,v 1.17 2009/06/03 16:28:17 fatorange Exp $
  */
 public class Mapping {
 	private final Model model = ModelFactory.createDefaultModel();
@@ -46,6 +46,7 @@ public class Mapping {
 	private Configuration configuration = new Configuration();
 	private final Map classMaps = new HashMap();
 	private final Map translationTables = new HashMap();
+	private final Map<Resource,DownloadMap> downloadMaps = new HashMap<Resource,DownloadMap>();
 	private final PrefixMapping prefixes = new PrefixMappingImpl();
 	private Collection compiledPropertyBridges;
 	private boolean hasDynamicProperties = false;
@@ -90,6 +91,9 @@ public class Mapping {
 			ClassMap classMap = (ClassMap) it.next();
 			classMap.validate();	// Also validates attached bridges
 		}
+		for (DownloadMap dlm : downloadMaps.values()) {
+			dlm.validate();
+		}
 		it = compiledPropertyBridges().iterator();
 		while (it.hasNext()) {
 			TripleRelation bridge = (TripleRelation) it.next();
@@ -101,7 +105,7 @@ public class Mapping {
 		this.databases.put(database.resource(), database);
 	}
 	
-	public Collection databases() {
+	public Collection<Database> databases() {
 		return this.databases.values();
 	}
 	
@@ -137,6 +141,18 @@ public class Mapping {
 		return (TranslationTable) this.translationTables.get(name);
 	}
 	
+	public void addDownloadMap(DownloadMap downloadMap) {
+		downloadMaps.put(downloadMap.resource(), downloadMap);
+	}
+	
+	public Collection<Resource> downloadMapResources() {
+		return downloadMaps.keySet();
+	}
+	
+	public DownloadMap downloadMap(Resource name) {
+		return downloadMaps.get(name);
+	}
+	
 	/**
 	 * @return A collection of {@link TripleRelation}s corresponding to each
 	 * 		of the property bridges
@@ -170,7 +186,13 @@ public class Mapping {
 			Iterator it = relation.allKnownAttributes().iterator();
 			while (it.hasNext()) {
 				Attribute attribute = (Attribute) it.next();
-				relation.database().columnType(relation.aliases().originalOf(attribute));
+				SQLDataType type = relation.database().columnType(relation.aliases().originalOf(attribute));
+				if (type == SQLDataType.UNMAPPABLE) {
+					throw new D2RQException("Column " + 
+							relation.aliases().originalOf(attribute) +
+							" has a datatype that D2RQ cannot express in RDF", 
+							D2RQException.DATATYPE_UNMAPPABLE);
+				}
 			}
 		}
 	}

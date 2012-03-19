@@ -17,7 +17,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO @@@ Doesn't handle prefixing of the relations yet 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NodeRelationJoiner.java,v 1.2 2009/07/29 12:03:53 fatorange Exp $
  */
 public class NodeRelationJoiner {
 	private final NodeRelation r1;

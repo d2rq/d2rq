@@ -12,7 +12,6 @@ import de.fuberlin.wiwiss.d2rq.values.Translator;
  * Tests the TranslationTable functionality
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTableTest.java,v 1.2 2006/09/12 12:06:17 cyganiak Exp $
  */
 public class TranslationTableTest extends TestCase {
 	Resource table1 = ResourceFactory.createResource("http://test/table1");

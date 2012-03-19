@@ -1,13 +1,9 @@
 package de.fuberlin.wiwiss.d2rq.nodes;
 
-import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.Set;
-import java.util.TimeZone;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
@@ -23,6 +19,7 @@ public class TypedNodeMaker implements NodeMaker {
 	public final static NodeType BLANK = new BlankNodeType();
 	public final static NodeType PLAIN_LITERAL = new LiteralNodeType("", null);
 	public final static NodeType XSD_DATE = new DateLiteralNodeType();
+	public final static NodeType XSD_TIME = new TimeLiteralNodeType();
 	public final static NodeType XSD_DATETIME = new DateTimeLiteralNodeType();
 	public final static NodeType XSD_BOOLEAN = new BooleanLiteralNodeType();
 	
@@ -30,8 +27,12 @@ public class TypedNodeMaker implements NodeMaker {
 		return new LiteralNodeType(language, null);
 	}
 	public static NodeType typedLiteral(RDFDatatype datatype) {
+		// TODO These subclasses can be abolished; just introduce an RDFDatatypeValidator instead
 		if (datatype.equals(XSDDatatype.XSDdate)) {
 			return XSD_DATE;
+		}
+		if (datatype.equals(XSDDatatype.XSDtime)) {
+			return XSD_TIME;
 		}
 		if (datatype.equals(XSDDatatype.XSDdateTime)) {
 			return XSD_DATETIME;
@@ -172,14 +173,22 @@ public class TypedNodeMaker implements NodeMaker {
 		public boolean matches(Node node) {
 			return super.matches(node) && XSDDatatype.XSDdate.isValid(node.getLiteralLexicalForm());
 		}
-		public String extractValue(Node node) {
-			XSDDateTime xsd = (XSDDateTime) node.getLiteralValue();
-			return new java.sql.Date(xsd.asCalendar().getTimeInMillis()).toString();
-		}
 		public Node makeNode(String value) {
-			// Couldn't figure out a safe way to convert java.sql.Date to an XSD date
 			if (!XSDDatatype.XSDdate.isValid(value)) return null;
 			return Node.createLiteral(value, null, XSDDatatype.XSDdate);
+		}
+	}
+	
+	private static class TimeLiteralNodeType extends LiteralNodeType {
+		TimeLiteralNodeType() {
+			super("", XSDDatatype.XSDtime);
+		}
+		public boolean matches(Node node) {
+			return super.matches(node) && XSDDatatype.XSDtime.isValid(node.getLiteralLexicalForm());
+		}
+		public Node makeNode(String value) {
+			if (!XSDDatatype.XSDtime.isValid(value)) return null;
+			return Node.createLiteral(value, null, XSDDatatype.XSDtime);
 		}
 	}
 	
@@ -190,62 +199,25 @@ public class TypedNodeMaker implements NodeMaker {
 		public boolean matches(Node node) {
 			return super.matches(node) && XSDDatatype.XSDdateTime.isValid(node.getLiteralLexicalForm());
 		}
-		public String extractValue(Node node) {
-			XSDDateTime xsd = (XSDDateTime) node.getLiteralValue();
-			return new java.sql.Timestamp(xsd.asCalendar().getTimeInMillis()).toString();
-		}
-
 		public Node makeNode(String value) {
-			try {
-				/* 
-				 * Although timestamps are UTC by definition, Timestamp.valueOf() will use the system's default timezone.
-				 * In order to force UTC, we need to temporarily change the system default
-				 */
-				TimeZone oldDefault = TimeZone.getDefault();
-				TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-				
-				Calendar c = Calendar.getInstance();
-				Timestamp t = Timestamp.valueOf(value);
-				c.setTime(t);
-				
-				TimeZone.setDefault(oldDefault);
-				/* Strip timezone indicator as our input was not timezoned either (at least if it was parsed by the Timestamp class, see below) */
-				return Node.createLiteral(
-						new XSDDateTime(c).toString().replaceAll("Z$", ""), null, XSDDatatype.XSDdateTime);
-			} catch (RuntimeException ex) {
-				// TODO: This is hackish ... Support for PostgreSQL TIMESTAMP WITH TIME ZONE type
-				// PostgreSQL answers a TIMESTAMP with an added [+-]HH(:MM)?,
-				// and the Timestamp class won't parse that
-				value = value.replace(' ', 'T').replaceAll("\\.\\d+", "").replaceAll("[+-]\\d\\d$", "$0:00");
-				return Node.createLiteral(value, null, XSDDatatype.XSDdateTime);
-			}
+			if (!XSDDatatype.XSDdateTime.isValid(value)) return null;
+			return Node.createLiteral(value, null, XSDDatatype.XSDdateTime);
 		}
 	}
 	
 	private static class BooleanLiteralNodeType extends LiteralNodeType {
+		private final static Node TRUE = Node.createLiteral("true", null, XSDDatatype.XSDboolean);
+		private final static Node FALSE = Node.createLiteral("false", null, XSDDatatype.XSDboolean);
 		BooleanLiteralNodeType() {
 			super("", XSDDatatype.XSDboolean);
 		}
 		public boolean matches(Node node) {
 			return super.matches(node) && XSDDatatype.XSDboolean.isValid(node.getLiteralLexicalForm());
 		}
-		public String extractValue(Node node) {
-			if ("0".equals(node.getLiteralLexicalForm()) || "false".equals(node.getLiteralLexicalForm())) {
-				return "0";
-			}
-			return "1";
-		}
 		public Node makeNode(String value) {
-			boolean b = false;
-			try {
-				int intValue = Integer.parseInt(value);
-				b = intValue != 0;
-			} catch (NumberFormatException ex) {
-				if ("true".equals(value.toLowerCase())) {
-					b = true;
-				}
-			}
-			return Node.createLiteral(b ? "true" : "false", null, XSDDatatype.XSDboolean);
+			if ("0".equals(value) || "false".equals(value)) return FALSE;
+			if ("1".equals(value) || "true".equals(value)) return TRUE;
+			return null;
 		}
 	}
 }

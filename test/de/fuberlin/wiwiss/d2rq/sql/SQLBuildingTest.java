@@ -7,7 +7,6 @@ import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLBuildingTest.java,v 1.7 2009/09/29 19:56:54 cyganiak Exp $
  */
 public class SQLBuildingTest extends TestCase {
 	private final static Attribute foo = new Attribute(null, "table", "foo");

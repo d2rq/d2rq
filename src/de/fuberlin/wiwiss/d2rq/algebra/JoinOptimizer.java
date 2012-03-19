@@ -34,7 +34,6 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JoinOptimizer.java,v 1.23 2009/08/05 11:23:52 fatorange Exp $
  */
 public class JoinOptimizer {
 	private TripleRelation relation;

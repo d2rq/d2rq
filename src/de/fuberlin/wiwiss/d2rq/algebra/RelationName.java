@@ -1,6 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
-
 /**
  * A relation name, including an optional schema name.
  *
@@ -8,7 +7,6 @@ package de.fuberlin.wiwiss.d2rq.algebra;
  *       if the databases are not equal. (?)
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RelationName.java,v 1.5 2009/08/05 11:23:52 fatorange Exp $
  */
 public class RelationName implements Comparable {
 	private String schemaName;
@@ -122,9 +120,23 @@ public class RelationName implements Comparable {
 	}
 	
 	public RelationName withPrefix(int index) {
-		return new RelationName(null, 
-				"T" + index + "_" + 
+		
+		String name = "T" + index + "_" + 
 				(schemaName == null ? "" : schemaName + "_") +
-				tableName);		
+				tableName ;
+		
+		/*
+		 * Oracle can't handle identifier names longer than 30 characters.
+		 * To prevent the oracle error "ORA-00972: identifier is too long"
+		 * we need to cut those longer names off but keep them unique.
+		 * 
+		 * TODO: Make this dependent on whether we're dealing with an Oracle
+		 * database or not.
+		 */
+		if (name.length() > 30) {
+			name = "T" + index + "_" + name.hashCode() ;
+		}
+		
+		return new RelationName(null, name);		
 	}
 }

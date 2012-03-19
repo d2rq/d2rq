@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -47,7 +47,7 @@ public class MetadataCreator {
 	// enabling / disabling flag
 	private boolean enable = true;
 	
-	private static final Logger log = LoggerFactory.getLogger(MetadataCreator.class);
+	private static final Log log = LogFactory.getLog(MetadataCreator.class);
 
 	
 	public MetadataCreator(D2RServer newConfig, VelocityWrapper newWrapper) {
@@ -106,7 +106,7 @@ public class MetadataCreator {
 			} catch (Exception e) {
 				// something went wrong, oops - lets better remove the offending statement
 				metadata.remove(stmt);
-				log.info("Failed to parse metadata template statement {}", stmt.toString());
+				log.info("Failed to parse metadata template statement " + stmt.toString());
 				e.printStackTrace();
 			}
 		}

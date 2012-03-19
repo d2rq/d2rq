@@ -18,7 +18,6 @@ import de.fuberlin.wiwiss.d2rq.map.Mapping;
  * 
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: ModelD2RQ.java,v 1.14 2009/03/16 16:45:49 fatorange Exp $
  *
  * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
  */
@@ -37,7 +36,7 @@ public class ModelD2RQ extends ModelCom implements Model {
 
 	/** 
 	 * Create a non-RDF database-based model. The model is created
-	 * from a D2RQ map that may be in "RDF/XML", "N-TRIPLES" or "N3"
+	 * from a D2RQ map that may be in "RDF/XML", "N-TRIPLES" or "TURTLE"
 	 * format.
 	 * @param mapURL URL of the D2RQ map to be used for this model
 	 * @param serializationFormat the format of the map, or <tt>null</tt>

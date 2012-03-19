@@ -29,7 +29,6 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  *
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RelationToTriplesIterator.java,v 1.5 2009/06/26 15:42:15 fatorange Exp $
  */
 public class RelationToTriplesIterator implements ClosableIterator {
 	
@@ -56,7 +55,8 @@ public class RelationToTriplesIterator implements ClosableIterator {
 	private ClosableIterator sqlIterator;
     private LinkedList tripleQueue = new LinkedList();
     private boolean explicitlyClosed = false;
-
+    private String sql;
+    
     private RelationToTriplesIterator(Relation relation, Collection tripleMakers) {
     	SelectStatementBuilder select = new SelectStatementBuilder(relation);
     	this.sqlIterator = new QueryExecutionIterator(

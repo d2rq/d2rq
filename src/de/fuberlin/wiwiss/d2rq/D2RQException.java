@@ -6,7 +6,6 @@ import com.hp.hpl.jena.shared.JenaException;
  * Exception used to signal most D2RQ errors.
  *
  * @author Chris Bizer chris@bizer.de
- * @version $Id: D2RQException.java,v 1.20 2009/08/06 10:34:36 fatorange Exp $
  */
 
 public class D2RQException extends JenaException {
@@ -45,14 +44,14 @@ public class D2RQException extends JenaException {
 	public static final int TRANSLATIONTABLE_DUPLICATE_HREF = 32;
 	public static final int TRANSLATION_MISSING_DBVALUE = 33;
 	public static final int TRANSLATION_MISSING_RDFVALUE = 34;
-	public static final int DATABASE_DUPLICATE_ODBCDSN = 35;
+//	public static final int DATABASE_DUPLICATE_ODBCDSN = 35;
 	public static final int DATABASE_DUPLICATE_JDBCDSN = 35;
 	public static final int DATABASE_DUPLICATE_JDBCDRIVER = 36;
 	public static final int DATABASE_MISSING_JDBCDRIVER = 37;
 	public static final int DATABASE_DUPLICATE_USERNAME = 38;
 	public static final int DATABASE_DUPLICATE_PASSWORD = 39;
-	public static final int DATABASE_ODBC_WITH_JDBC = 40;
-	public static final int DATABASE_ODBC_WITH_JDBCDRIVER = 41;
+//	public static final int DATABASE_ODBC_WITH_JDBC = 40;
+//	public static final int DATABASE_ODBC_WITH_JDBCDRIVER = 41;
 	public static final int DATABASE_JDBCDRIVER_CLASS_NOT_FOUND = 42;
 	public static final int D2RQ_SQLEXCEPTION = 43;
 	public static final int SQL_INVALID_RELATIONNAME = 44;
@@ -77,6 +76,19 @@ public class D2RQException extends JenaException {
 	public static final int PROPERTYBRIDGE_DUPLICATE_ORDER = 62;
 	public static final int PROPERTYBRIDGE_DUPLICATE_ORDERDESC = 63;
 	public static final int DATABASE_ALREADY_CONNECTED = 64;
+	public static final int DOWNLOADMAP_DUPLICATE_BELONGSTOCLASSMAP = 65;
+	public static final int DOWNLOADMAP_INVALID_BELONGSTOCLASSMAP = 66;
+	public static final int DOWNLOADMAP_DUPLICATE_MEDIATYPE = 67;
+	public static final int DOWNLOADMAP_DUPLICATE_CONTENTCOLUMN = 68;
+	public static final int DOWNLOADMAP_INVALID_CONSTANTVALUE = 69;
+	public static final int DOWNLOADMAP_NO_CONTENTCOLUMN = 70;
+	public static final int DOWNLOADMAP_DUPLICATE_DATABASE = 71;
+	public static final int DOWNLOADMAP_INVALID_DATABASE = 72;
+	public static final int DOWNLOADMAP_NO_DATASTORAGE = 73;
+	public static final int DATATYPE_UNMAPPABLE = 74;
+	public static final int DATATYPE_UNKNOWN = 75;
+	public static final int DATABASE_DUPLICATE_STARTUPSCRIPT = 76;
+	public static final int MAPPING_TURTLE_SYNTAX = 77;
 	
 	private int code;
 	

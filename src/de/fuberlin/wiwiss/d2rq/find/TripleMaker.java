@@ -11,7 +11,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * Creates an RDF triple from a query result row.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TripleMaker.java,v 1.1 2008/08/12 17:26:22 cyganiak Exp $
  */
 public class TripleMaker {
 	private final NodeMaker subjects;

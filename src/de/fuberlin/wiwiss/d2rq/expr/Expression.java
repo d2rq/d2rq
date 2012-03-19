@@ -14,7 +14,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * A SQL expression.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Expression.java,v 1.3 2008/04/27 22:42:37 cyganiak Exp $
  */
 public abstract class Expression {
 	public static final Expression TRUE = new Expression() {

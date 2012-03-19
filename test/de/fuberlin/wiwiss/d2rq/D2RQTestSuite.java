@@ -7,12 +7,11 @@ import junit.framework.TestSuite;
  * Test suite for D2RQ
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQTestSuite.java,v 1.17 2009/02/06 13:59:02 fatorange Exp $
  */
 public class D2RQTestSuite {
 	public static final String DIRECTORY = "test/de/fuberlin/wiwiss/d2rq/";
 	public static final String DIRECTORY_URL = "file:" + DIRECTORY;
-	public static final String ISWC_MAP = "file:doc/example/mapping-iswc.n3"; 
+	public static final String ISWC_MAP = "file:doc/example/mapping-iswc.ttl"; 
 
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(D2RQTestSuite.suite());
@@ -24,9 +23,11 @@ public class D2RQTestSuite {
 		suite.addTest(de.fuberlin.wiwiss.d2rq.algebra.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.csv.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.dbschema.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.download.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.expr.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.find.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.functional_tests.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.helpers.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.map.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.nodes.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.parser.AllTests.suite());
@@ -35,6 +36,7 @@ public class D2RQTestSuite {
 		suite.addTest(de.fuberlin.wiwiss.d2rq.values.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.engine.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.d2rq_sdb.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.optimizer.AllTests.suite());
 		return suite;
 	}
 }

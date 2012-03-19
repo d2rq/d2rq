@@ -26,7 +26,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  * To see debug information, uncomment the enableDebug() call in the setUp() method.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTest.java,v 1.15 2009/02/14 22:37:15 fatorange Exp $
  */
 public class FindTest extends FindTestFramework {
     
@@ -38,7 +37,7 @@ public class FindTest extends FindTestFramework {
 		assertNoStatement(resource("papers/6"), RDF.type, ISWC.InProceedings);
 		assertStatement(resource("conferences/23541"), RDF.type, ISWC.Conference);
 		assertStatement(resource("topics/15"), RDF.type, SKOS.Concept);
-		assertStatementCount(94);
+		assertStatementCount(95);
 	}
 
 	public void testListTopicInstances() {
@@ -164,7 +163,7 @@ public class FindTest extends FindTestFramework {
 	public void testDump() {
 		find(null, null, null);
 //		dump();
-		assertStatementCount(334);
+		assertStatementCount(341);
 	}
 
 	public void testFindPredicate() {

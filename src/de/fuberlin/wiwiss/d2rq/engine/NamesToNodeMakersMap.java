@@ -26,7 +26,6 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilterImpl;
  * same node for any result row that matches the expression. 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: NamesToNodeMakersMap.java,v 1.2 2009/08/02 09:15:08 fatorange Exp $
  */
 public class NamesToNodeMakersMap {
 	private final Map nodeSets = new HashMap();

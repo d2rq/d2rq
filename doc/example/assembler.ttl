@@ -1,0 +1,11 @@
+@prefix : <#> .
+@prefix ja: <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+
+<> ja:imports d2rq: .
+
+:myModel
+	a d2rq:D2RQModel;
+	d2rq:mappingFile <file:mapping-iswc.ttl>;
+	d2rq:resourceBaseURI <http://localhost:2020/>;
+	.

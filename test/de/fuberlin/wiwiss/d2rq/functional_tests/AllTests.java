@@ -11,7 +11,6 @@ import junit.framework.TestSuite;
  * beginning of the map file to fit your database server.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: AllTests.java,v 1.6 2006/09/06 21:48:46 cyganiak Exp $
  */
 public class AllTests {
 
@@ -23,7 +22,6 @@ public class AllTests {
 		TestSuite suite = new TestSuite(
 				"Test for de.fuberlin.wiwiss.d2rq.functional_tests");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(RDQLTest.class);
 		suite.addTestSuite(FindTest.class);
 		suite.addTestSuite(SPARQLTest.class);
 		suite.addTestSuite(ModelAPITest.class);

@@ -1,12 +1,12 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
+import junit.framework.TestCase;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-
-import junit.framework.TestCase;
 
 public class ConstantValueClassMapTest extends TestCase {
 	

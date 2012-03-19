@@ -20,7 +20,6 @@ import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindTestFramework.java,v 1.3 2006/09/10 22:18:46 cyganiak Exp $
  */
 public class FindTestFramework extends TestCase {
     protected static final Model m = ModelFactory.createDefaultModel();
@@ -29,7 +28,7 @@ public class FindTestFramework extends TestCase {
 	private Set resultTriples; 
 
 	protected void setUp() throws Exception {
-		this.graph = (GraphD2RQ) new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "N3", "http://test/").getGraph();
+		this.graph = (GraphD2RQ) new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "TURTLE", "http://test/").getGraph();
 	}
 
 	protected void tearDown() throws Exception {

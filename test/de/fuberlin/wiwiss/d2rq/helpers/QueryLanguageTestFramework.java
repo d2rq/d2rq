@@ -33,7 +33,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
- * @version $Id: QueryLanguageTestFramework.java,v 1.7 2008/08/13 11:27:39 cyganiak Exp $
  */
 public abstract class QueryLanguageTestFramework extends TestCase {
 	protected ModelD2RQ model;
@@ -71,7 +70,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	protected Logger usingLogger = Logger.getLogger(pckg + "Using");
 	protected Logger testCaseSeparatorLogger = Logger.getLogger(pckg + "TestCaseSeparator");
 	protected Logger performanceLogger = Logger.getLogger(pckg + "Performance");
-	protected Logger rdqlLogger = Logger.getLogger(pckg + "RDQL");
+	protected Logger queryLogger = Logger.getLogger(pckg + "Query");
 	protected Logger differentLogger = Logger.getLogger(pckg + "Different");
 	protected Logger differenceLogger = Logger.getLogger(pckg + "Difference");
 	protected Logger sqlResultSetLogger = Logger.getLogger(pckg + "SQLResultSet");
@@ -86,8 +85,8 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	protected void setUpShowPerformance() {
 	    nTimes=10;
 	    compareQueryHandlers=true;
-	    rdqlLogger.setLevel(Level.DEBUG);
-		rdqlLogger.setLevel(Level.DEBUG);
+	    queryLogger.setLevel(Level.DEBUG);
+		queryLogger.setLevel(Level.DEBUG);
 		performanceLogger.setLevel(Level.DEBUG);
 	}
 	protected void setUpMixOutputs(boolean v) {
@@ -96,7 +95,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 		testCaseSeparatorLogger.setLevel(v ? Level.DEBUG : Level.INFO);
 	}
 	protected void setUpShowStatements() {
-	    rdqlLogger.setLevel(Level.DEBUG);
+	    queryLogger.setLevel(Level.DEBUG);
 		sqlResultSetLogger.setLevel(Level.DEBUG);	    
 	}
 	protected void setUpShowErrors() {
@@ -118,7 +117,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	protected abstract String mapURL();
 	
 	protected void setUp() throws Exception {
-		this.model = new ModelD2RQ(mapURL(), "N3", "http://test/");
+		this.model = new ModelD2RQ(mapURL(), "TURTLE", "http://test/");
 //		this.model.enableDebug();
 	    setUpShowErrors(); // should be activated all the time
 //	    setUpShowPerformance(); // activate (only) to test performance (only)
@@ -139,17 +138,17 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 			super.runTest();
 			return;
 		}		
-		Level oldRDQLLoggerState=rdqlLogger.getLevel();
+		Level oldQueryLoggerState=queryLogger.getLevel();
 		Level oldSqlResultSetLoggerState=sqlResultSetLogger.getLevel();
 		try {
 			for (int i=0; i<configs; i++) {
-			    rdqlLogger.setLevel(verbatim[i] ? oldRDQLLoggerState : Level.INFO);
+			    queryLogger.setLevel(verbatim[i] ? oldQueryLoggerState : Level.INFO);
 			    sqlResultSetLogger.setLevel(verbatim[i] ? oldSqlResultSetLoggerState: Level.INFO);
 			    usingLogger.debug("using " + handlerDescription[i] + " ...");
 			    startInst=BeanCounter.instance();
 			    for (int j=0; j< nTimes; j++) {
 			        if (j>0) {
-					    rdqlLogger.setLevel(Level.INFO);
+					    queryLogger.setLevel(Level.INFO);
 					    sqlResultSetLogger.setLevel(Level.INFO);
 			        }
 			        super.runTest();
@@ -158,7 +157,6 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 				diffInfo[i].div(nTimes);
 				resultMaps[i]=results;
 			}
-			// performanceLogger.debug("RDQL-Query: " + queryString);
 			performanceLogger.debug(handlerDescription[0] + " vs. " + handlerDescription[1] + " = " + 
 			        diffInfo[0].sqlPerformanceString() + " : " + diffInfo[1].sqlPerformanceString() +
 					" (duration - SQL queries/rows/fields)");
@@ -182,7 +180,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 		} catch (Exception e) {
 			throw e; 
 		} finally {
-			rdqlLogger.setLevel(oldRDQLLoggerState);
+			queryLogger.setLevel(oldQueryLoggerState);
 			sqlResultSetLogger.setLevel(oldSqlResultSetLoggerState);
 		}
 	}
@@ -235,25 +233,7 @@ public abstract class QueryLanguageTestFramework extends TestCase {
 	    return printArray(a);
 	}
 	
-	protected void rdql(String rdql) {
-	    rdqlLogger.debug("RDQL-Query: " + rdql);
-	    queryString=rdql;
-		this.results = new HashSet();
-		rdql += "\nUSING\n";
-		rdql += "dc FOR <" + DC.NS + ">\n";
-		rdql += "foaf FOR <" + FOAF.NS + ">\n";
-		rdql += "skos FOR <" + SKOS.NS + ">\n";
-		rdql += "iswc FOR <" + ISWC.NS + ">\n";
-		Query query = QueryFactory.create(rdql, Syntax.syntaxRDQL);
-		ResultSet qr = QueryExecutionFactory.create(query, this.model).execSelect();
-		while (qr.hasNext()) {
-			QuerySolution binding = (QuerySolution) qr.next();
-			this.results.add(solutionToMap(binding, qr.getResultVars()));
-		}
-	}
-
 	protected void sparql(String sparql) {
-//	    rdqlLogger.debug("RDQL-Query: " + rdql);
 		queryString=sparql;
 		sparql = 
 				"PREFIX dc: <" + DC.NS + ">\n" +

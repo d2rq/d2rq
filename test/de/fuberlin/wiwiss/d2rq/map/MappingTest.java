@@ -17,8 +17,8 @@ public class MappingTest extends TestCase {
 	private final static Resource classMap1 = ResourceFactory.createResource("http://test/classMap1");
 	
 	public void testNewMappingWithResource() {
-		Mapping m = new Mapping("http://test/mapping.n3");
-		assertEquals(ResourceFactory.createResource("http://test/mapping.n3"), m.resource());
+		Mapping m = new Mapping("http://test/mapping.ttl");
+		assertEquals(ResourceFactory.createResource("http://test/mapping.ttl"), m.resource());
 	}
 
 	public void testNewMappingWithoutResource() {

@@ -12,7 +12,6 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
  * Unit tests for {@link TranslationTableParser}
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: TranslationTableParserTest.java,v 1.2 2006/09/16 13:22:29 cyganiak Exp $
  */
 public class TranslationTableParserTest extends TestCase {
 	private Collection simpleTranslations;

@@ -22,7 +22,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO isUnique is not properly handled yet
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: RelationBuilder.java,v 1.11 2009/07/29 12:03:53 fatorange Exp $
  */
 public class RelationBuilder {
 	private Expression condition = Expression.TRUE;
@@ -53,16 +52,26 @@ public class RelationBuilder {
 		this.limitInverse = Relation.combineLimits(limitInverse, other.limitInverse);
 	}
 	
+	/**
+	 * Adds information from another relation builder to this one,
+	 * applying this builder's alias mappings to the other one.
+	 *  
+	 * @param other A relation builder that potentially uses aliases declared in this builder
+	 */
 	public void addAliased(RelationBuilder other) {
 		this.condition = this.condition.and(aliases().applyTo(other.condition));
 		this.joinConditions.addAll(aliases().applyToJoinSet(other.joinConditions));
 		this.projections.addAll(aliases().applyToProjectionSet(other.projections));
-		Collection newAliases = new ArrayList();
-		Iterator it = this.aliases.iterator();
-		while (it.hasNext()) {
-			Alias alias = (Alias) it.next();
-			newAliases.add(other.aliases().originalOf(alias));
+		Collection<Alias> newAliases = new ArrayList<Alias>();
+		Collection<Alias> removedAliases = new ArrayList<Alias>();
+		for (Alias alias : (Collection<Alias>) this.aliases) {
+			Alias newAlias = other.aliases().originalOf(alias);
+			if (!alias.equals(newAlias)) {
+				removedAliases.add(alias);
+			}
+			newAliases.add(newAlias);
 		}
+		this.aliases.removeAll(removedAliases);
 		this.aliases.addAll(newAliases);
 		this.orderDesc = order==null?other.orderDesc:orderDesc;
 		// FIXME should the order clauses be concatenated? however, this would still be not commutative

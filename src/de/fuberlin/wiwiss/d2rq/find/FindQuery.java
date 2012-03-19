@@ -29,7 +29,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * relations into one SQL statement where possible.
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: FindQuery.java,v 1.22 2009/07/29 12:03:53 fatorange Exp $
  */
 public class FindQuery {
 	private final Triple triplePattern;

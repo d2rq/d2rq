@@ -5,12 +5,16 @@
     <title>Snorql: A SPARQL Explorer</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript">
+		$.noConflict(); 
+    </script>
     <script type="text/javascript" src="prototype.js"></script>
     <script type="text/javascript" src="scriptaculous/scriptaculous.js"></script>
     <script type="text/javascript" src="sparql.js"></script>
     <script type="text/javascript" src="namespaces.js"></script>
     <script type="text/javascript" src="snorql.js"></script>
-  </head>
+  </head>  
 
   <body class="snorql" onload="snorql.start()">
     <div id="header">

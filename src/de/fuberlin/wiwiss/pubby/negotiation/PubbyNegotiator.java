@@ -25,24 +25,24 @@ public class PubbyNegotiator {
 		pubbyNegotiator.addVariant("application/rdf+xml")
 				.addAliasMediaType("application/xml;q=0.45")
 				.addAliasMediaType("text/xml;q=0.4");
-		pubbyNegotiator.addVariant("text/rdf+n3;charset=utf-8;q=0.95")
+		pubbyNegotiator.addVariant("text/rdf+n3;charset=utf-8;q=0.9")
 				.addAliasMediaType("text/n3;q=0.5")
 				.addAliasMediaType("application/n3;q=0.5");
-		pubbyNegotiator.addVariant("application/x-turtle;q=0.95")
+		pubbyNegotiator.addVariant("text/turtle;charset=utf-8;q=0.95")
 				.addAliasMediaType("application/turtle;q=0.8")
-				.addAliasMediaType("text/turtle;q=0.5");
+				.addAliasMediaType("application/x-turtle;q=0.8");
 		pubbyNegotiator.addVariant("text/plain;q=0.2");
 
 		dataNegotiator = new ContentTypeNegotiator();
 		dataNegotiator.addVariant("application/rdf+xml;q=0.99")
 				.addAliasMediaType("application/xml;q=0.45")
 				.addAliasMediaType("text/xml;q=0.4");
-		dataNegotiator.addVariant("text/rdf+n3;charset=utf-8")
+		dataNegotiator.addVariant("text/rdf+n3;charset=utf-8;q=0.99")
 				.addAliasMediaType("text/n3;q=0.5")
 				.addAliasMediaType("application/n3;q=0.5");
-		dataNegotiator.addVariant("application/x-turtle;q=0.99")
+		dataNegotiator.addVariant("text/turtle;charset=utf-8")
 				.addAliasMediaType("application/turtle;q=0.8")
-				.addAliasMediaType("text/turtle;q=0.5");
+				.addAliasMediaType("application/x-turtle;q=0.8");
 		dataNegotiator.addVariant("text/plain;q=0.2");
 	}
 	

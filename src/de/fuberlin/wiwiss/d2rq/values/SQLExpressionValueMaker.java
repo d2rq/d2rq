@@ -17,7 +17,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * TODO Write unit tests
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: SQLExpressionValueMaker.java,v 1.4 2008/04/27 22:42:38 cyganiak Exp $
  */
 public class SQLExpressionValueMaker implements ValueMaker {
 	private final Expression expression;

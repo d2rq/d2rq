@@ -5,7 +5,6 @@ import com.hp.hpl.jena.graph.Capabilities;
 /**
  * Description of the capabilities of a GraphD2RQ.
  * @author Chris Bizer chris@bizer.de
- * @version $Id: D2RQCapabilities.java,v 1.5 2006/09/03 00:08:12 cyganiak Exp $
  */
 class D2RQCapabilities implements Capabilities {
     public boolean sizeAccurate() { return true; }

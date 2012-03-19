@@ -10,7 +10,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * Representation of a d2rq:Configuration from the mapping file.
  *
  * @author Christian Becker <http://beckr.org#chris>
- * @version $Id: Configuration.java,v 1.2 2009/08/02 09:15:09 fatorange Exp $
  */
 public class Configuration extends MapObject {
 	

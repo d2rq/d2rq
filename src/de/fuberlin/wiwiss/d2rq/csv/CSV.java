@@ -20,7 +20,6 @@ import java.util.ArrayList;
  * @author Ben Ballard (rewrote advQuoted to handle '""' and for readability)
  * @author Don Brown (wanted to return a String array instead of Iterator)
  * @author Richard Cyganiak (richard@cyganiak.de) (adapted to local coding style)
- * @version $Id: CSV.java,v 1.1 2006/09/02 22:49:17 cyganiak Exp $
  */
 class CSV {      
 

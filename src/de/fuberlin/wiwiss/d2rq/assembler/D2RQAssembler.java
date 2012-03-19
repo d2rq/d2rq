@@ -14,7 +14,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * A Jena assembler that builds ModelD2RQs.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: D2RQAssembler.java,v 1.5 2006/10/24 11:58:06 cyganiak Exp $
  */
 public class D2RQAssembler extends AssemblerBase {
 

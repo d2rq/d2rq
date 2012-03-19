@@ -8,14 +8,17 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.regex.Pattern;
+
+import org.hsqldb.types.Types;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
@@ -23,7 +26,6 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -35,52 +37,53 @@ import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
-import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * Generates a D2RQ mapping by introspecting a database schema.
- * Result is available as a high-quality N3 serialization, or
+ * Result is available as a high-quality Turtle serialization, or
  * as a parsed model.
  * 
+ * TODO: This does some progress logging to stdout if writing to
+ *       a file. This should perhaps be done via log.info(...) with
+ *       an appropriately configured log writer.
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: MappingGenerator.java,v 1.35 2010/01/26 16:15:39 fatorange Exp $
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
-	private String jdbcURL;
+	private ConnectedDB database;
 	private String mapNamespaceURI;
 	private String instanceNamespaceURI;
 	private String vocabNamespaceURI;
 	private String driverClass = null;
-	private String databaseUser = null;
-	private String databasePassword = null;
 	private String databaseSchema = null;
 	private PrintWriter out = null;
 	private PrintWriter err = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
 	private DatabaseSchemaInspector schema = null;
-	private SQLSyntax databaseSyntax = null;
-	private Map linkTables = new HashMap(); // name of n:m link table => name of n table
+	// name of n:m link table => name of n table
+	private Map<RelationName,RelationName> linkTables = new HashMap<RelationName,RelationName>();
 	private boolean finished = false;
-
-	public MappingGenerator(String jdbcURL) {
-		this.jdbcURL = jdbcURL;
-		this.mapNamespaceURI = "#";
-		this.instanceNamespaceURI = this.jdbcURL + "#";
-		this.vocabNamespaceURI = this.jdbcURL + "/vocab#";
-		this.driverClass = Database.guessJDBCDriverClass(this.jdbcURL);
+	private boolean silent = true;
+	private boolean generateClasses = true;
+	private boolean generateLabelBridges = true;
+	private URI startupSQLScript;
+	
+	public MappingGenerator(ConnectedDB database) {
+		this.database = database;
+		mapNamespaceURI = "#";
+		instanceNamespaceURI = database.getJdbcURL() + "#";
+		vocabNamespaceURI = database.getJdbcURL() + "/vocab#";
+		driverClass = ConnectedDB.guessJDBCDriverClass(database.getJdbcURL());
+		schema = database.schemaInspector();
 	}
 
-	private void connectToDatabase() {
-		// TODO What URI to use here?
-		Database database = new Database(ResourceFactory.createResource());
-		database.setJDBCDSN(this.jdbcURL);
-		database.setJDBCDriver(this.driverClass);
-		database.setUsername(this.databaseUser);
-		database.setPassword(this.databasePassword);
-		this.schema = database.connectedDB().schemaInspector();
-		this.databaseSyntax = database.connectedDB().getSyntax();
+	/**
+	 * @param silent If <tt>true</tt> (default), no progress info will be logged.
+	 */
+	public void setSilent(boolean silent) {
+		this.silent = silent;
 	}
 	
 	public void setMapNamespaceURI(String uri) {
@@ -95,14 +98,6 @@ public class MappingGenerator {
 		this.vocabNamespaceURI = uri;
 	}
 
-	public void setDatabaseUser(String user) {
-		this.databaseUser = user;
-	}
-
-	public void setDatabasePassword(String password) {
-		this.databasePassword = password;
-	}
-
 	public void setDatabaseSchema(String schema) {
 		this.databaseSchema = schema;
 	}
@@ -111,6 +106,24 @@ public class MappingGenerator {
 		this.driverClass = driverClassName;
 	}
 
+	public void setStartupSQLScript(URI uri) {
+		startupSQLScript = uri;
+	}
+	
+	/**
+	 * @param flag Generate an rdfs:label property bridge based on the PK?
+	 */
+	public void setGenerateLabelBridges(boolean flag) {
+		this.generateLabelBridges = flag;
+	}
+
+	/**
+	 * @param flag Generate a d2rq:class for every class map?
+	 */
+	public void setGenerateClasses(boolean flag) {
+		this.generateClasses = flag;
+	}
+	
 	public void writeMapping(OutputStream out, OutputStream err) {
 		try {
 			Writer w = new OutputStreamWriter(out, "UTF-8");
@@ -121,19 +134,27 @@ public class MappingGenerator {
 			
 			if (e != null)
 				e.flush();
+			if (!silent) System.out.println("Done!");
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 	
+	/**
+	 * Since we are not opening the Writer so we will not close it. Because the class/resource 
+	 * which invokes MappingGenerator may like to do further processing using the Writer.
+	 * 
+	 * So the calling class/resource should handle to close the Writer appropriately. This comment 
+	 * is a reference to issue #30 on GitHub.
+	 * 
+	 * @param out Stream for writing data to the file or console
+	 * @param err Stream for warnings generated during the mapping process; may be <code>null</code>
+	 */
 	public void writeMapping(Writer out, Writer err) {
 		this.out = new PrintWriter(out);
 		if (err != null)
 			this.err = new PrintWriter(err);
 		
-		if (this.schema == null) {
-			connectToDatabase();
-		}
 		run();
 		this.out.flush();
 		this.out = null;
@@ -148,12 +169,19 @@ public class MappingGenerator {
 		return this.vocabModel;
 	}
 	
+	/**
+	 * Returns an in-memory Jena model containing the D2RQ mapping.
+	 * 
+	 * @param baseURI Base URI for resolving relative URIs in the mapping, e.g., map namespace
+	 * @param err Stream for warnings generated during the mapping process; may be <code>null</code>
+	 * @return In-memory Jena model containing the D2RQ mapping
+	 */
 	public Model mappingModel(String baseURI, OutputStream err) {
 		StringWriter w = new StringWriter();
 		writeMapping(w, err != null ? new PrintWriter(err) : null);
-		String mappingAsN3 = w.toString();
+		String mappingAsTurtle = w.toString();
 		Model result = ModelFactory.createDefaultModel();
-		result.read(new StringReader(mappingAsN3), baseURI, "N3");
+		result.read(new StringReader(mappingAsTurtle), baseURI, "TURTLE");
 		return result;
 	}
 	
@@ -180,16 +208,20 @@ public class MappingGenerator {
 	}
 	
 	private void writeDatabase() {
+		if (!silent) System.out.println("Generating d2rq:Database instance");
 		this.out.println(databaseName() + " a d2rq:Database;");
 		this.out.println("\td2rq:jdbcDriver \"" + this.driverClass + "\";");
-		this.out.println("\td2rq:jdbcDSN \"" + this.jdbcURL + "\";");
-		if (this.databaseUser != null) {
-			this.out.println("\td2rq:username \"" + this.databaseUser + "\";");
+		this.out.println("\td2rq:jdbcDSN \"" + database.getJdbcURL() + "\";");
+		if (database.getUsername() != null) {
+			this.out.println("\td2rq:username \"" + database.getUsername() + "\";");
 		}
-		if (this.databasePassword != null) {
-			this.out.println("\td2rq:password \"" + this.databasePassword + "\";");
+		if (database.getPassword() != null) {
+			this.out.println("\td2rq:password \"" + database.getPassword() + "\";");
 		}
-		Properties props = databaseSyntax.getDefaultConnectionProperties();
+		if (startupSQLScript != null) {
+			out.println("\td2rq:startupSQLScript <" + startupSQLScript + ">;");
+		}
+		Properties props = database.getSyntax().getDefaultConnectionProperties();
 		Iterator it = props.keySet().iterator();
 		while (it.hasNext()) {
 			String property = (String) it.next();
@@ -198,39 +230,44 @@ public class MappingGenerator {
 		}
 		this.out.println("\t.");
 		this.out.println();
+		this.out.flush(); // Let a tail see that we're working
 	}
 	
 	public void writeTable(RelationName tableName) {
+		if (!silent) System.out.println("Generating d2rq:ClassMap instance for table " + tableName.qualifiedName()) ;
 		this.out.println("# Table " + tableName);
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
 		if (!hasPrimaryKey(tableName)) {
-			String[] errorMessage = {
-				"Sorry, I don't know which columns to put into the uriPattern",
-				"for \"" + tableName + "\" because the table doesn't have a primary key.", 
-				"Please specify it manually." };
-			
-			for (int i=0; i<errorMessage.length; i++)
-				this.out.println("\t# " + errorMessage[i]);
-			
-			if (this.err != null) {
-				for (int i=0; i<errorMessage.length; i++)
-					this.err.println(errorMessage[i]);
-			}
+			writeWarning(new String[]{
+					"Sorry, I don't know which columns to put into the uriPattern",
+					"    for \"" + tableName + "\" because the table doesn't have a primary key.", 
+					"    Please specify it manually."
+				}, "\t");
 		}
 				
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
-		this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
-		this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
+		if (generateClasses) {
+			this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
+			this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
+		}
 		this.out.println("\t.");
-		writeLabelBridge(tableName);
+		if (generateLabelBridges) {
+			writeLabelBridge(tableName);
+		}
 		List foreignKeys = this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		Iterator it = this.schema.listColumns(tableName).iterator();
 		while (it.hasNext()) {
 			Attribute column = (Attribute) it.next();
-			if (!isInForeignKey(column, foreignKeys)) {
-				writeColumn(column);
+			if (isInForeignKey(column, foreignKeys)) continue;
+			if (!isMappableColumnType(column)) {
+				writeWarning(new String[]{
+						"Skipping column: " + column,
+						"    Its datatype " + schema.columnType(column).typeName() + " cannot be mapped to RDF"
+					}, "");
+				continue;
 			}
+			writeColumn(column);
 		}
 		it = foreignKeys.iterator();
 		while (it.hasNext()) {
@@ -246,6 +283,11 @@ public class MappingGenerator {
 		}
 		this.out.println();
 		createVocabularyClass(tableName);
+		//
+		// Let a tail see that we're working and ensure that every table that did
+		// NOT generate an exception is actually saved...
+		//
+		this.out.flush();
 	}
 
 	public void writeLabelBridge(RelationName tableName) {
@@ -263,11 +305,14 @@ public class MappingGenerator {
 		this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
 		this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
 		ColumnType colType = this.schema.columnType(column);
-		String xsd = DatabaseSchemaInspector.xsdTypeFor(colType);
+		String xsd = schema.xsdTypeFor(colType);
 		if (xsd != null && !"xsd:string".equals(xsd)) {
 			// We use plain literals instead of xsd:strings, so skip
 			// this if it's an xsd:string
 			this.out.println("\td2rq:datatype " + xsd + ";");
+		}
+		if (colType.typeId() == Types.BIT) {
+			this.out.println("\td2rq:valueRegex \"^[01]*$\";");
 		}
 		writeColumnHacks(column, colType);
 		if (xsd == null) {
@@ -348,6 +393,20 @@ public class MappingGenerator {
 		createLinkProperty(linkTableName, table1, table2);
 	}
 
+	private void writeWarning(String warning, String indent) {
+		writeWarning(new String[]{warning}, indent);
+	}
+	
+	private void writeWarning(String[] warning, String indent) {
+		for (int i=0; i<warning.length; i++)
+			this.out.println(indent + "# " + warning[i]);
+		
+		if (this.err != null) {
+			for (int i=0; i<warning.length; i++)
+				this.err.println(warning[i]);
+		}
+	}
+	
 	private String databaseName() {
 		return "map:database";
 	}
@@ -443,6 +502,7 @@ public class MappingGenerator {
 	}
 	
 	private void identifyLinkTables() {
+		if (!silent) System.out.println("Identifying link tables") ;
 		Iterator it = this.schema.listTableNames(databaseSchema).iterator();
 		while (it.hasNext()) {
 			RelationName tableName = (RelationName) it.next();
@@ -452,6 +512,7 @@ public class MappingGenerator {
 			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED).get(0);
 			this.linkTables.put(tableName, firstForeignKey.table2());
 		}
+		if (!silent) System.out.println("Found " + String.valueOf(this.linkTables.size()) + " link tables") ;
 	}
 
 	private boolean isInForeignKey(Attribute column, List foreignKeys) {
@@ -463,6 +524,10 @@ public class MappingGenerator {
 		return false;
 	}
 
+	private boolean isMappableColumnType(Attribute column) {
+		return schema.xsdTypeFor(schema.columnType(column)) != ColumnType.UNMAPPABLE;
+	}
+	
 	private void initVocabularyModel() {
 		this.vocabModel.setNsPrefix("rdf", RDF.getURI());
 		this.vocabModel.setNsPrefix("rdfs", RDFS.getURI());

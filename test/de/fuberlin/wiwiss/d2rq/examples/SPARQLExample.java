@@ -11,7 +11,7 @@ import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
 public class SPARQLExample {
 
 	public static void main(String[] args) {
-		ModelD2RQ m = new ModelD2RQ("file:doc/example/mapping-iswc.n3");
+		ModelD2RQ m = new ModelD2RQ("file:doc/example/mapping-iswc.ttl");
 		String sparql = 
 			"PREFIX dc: <http://purl.org/dc/elements/1.1/>" +
 			"PREFIX foaf: <http://xmlns.com/foaf/0.1/>" +

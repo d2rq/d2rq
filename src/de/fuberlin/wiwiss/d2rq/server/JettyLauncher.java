@@ -2,11 +2,13 @@ package de.fuberlin.wiwiss.d2rq.server;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.HashSessionIdManager;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.session.HashSessionIdManager;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * Starts a Jetty instance with D2R Server as the
@@ -16,7 +18,6 @@ import org.mortbay.jetty.webapp.WebAppContext;
  * parameters with values taken from the command line.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: JettyLauncher.java,v 1.3 2009/08/02 09:12:06 fatorange Exp $
  */
 public class JettyLauncher {
 	public final static int DEFAULT_PORT = 2020;
@@ -52,20 +53,33 @@ public class JettyLauncher {
 		this.useAllOptimizations = useAllOptimizations;
 	}
 
-	public void start() {
+	/**
+	 * Starts a Jetty server with D2R Server as root webapp.
+	 * 
+	 * @return <code>true</code> on success, <code>false</code> if webapp init failed 
+	 */
+	public boolean start() {
 		Server jetty = new Server(getPort());
 		
 		// use Random (/dev/urandom) instead of SecureRandom to generate session keys - otherwise Jetty may hang during startup waiting for enough entropy
 		// see http://jira.codehaus.org/browse/JETTY-331 and http://docs.codehaus.org/display/JETTY/Connectors+slow+to+startup
 		jetty.setSessionIdManager(new HashSessionIdManager(new Random()));
 		WebAppContext context = new WebAppContext(jetty, "webapp", "");
-		context.setInitParams(getInitParams());
+		for (Entry<String,String> entry : getInitParams().entrySet()) {
+			context.setInitParameter(entry.getKey(), entry.getValue());
+		}
 		try {
 			jetty.start();
+			D2RServer server = D2RServer.fromServletContext(context.getServletContext());
+			if (server == null) {
+				jetty.stop();
+				return false;
+			}
+			homeURI = server.baseURI();
+			return true;
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
-		homeURI = D2RServer.fromServletContext(context.getServletContext()).baseURI();
 	}
 
 	public String getHomeURI() {
@@ -82,8 +96,8 @@ public class JettyLauncher {
 		return DEFAULT_PORT;
 	}
 	
-	private Map getInitParams() {
-		Map result = new HashMap();
+	private Map<String,String> getInitParams() {
+		Map<String,String> result = new HashMap<String,String>();
 		if (cmdLinePort != -1) {
 			result.put("port", Integer.toString(cmdLinePort));
 		}

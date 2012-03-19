@@ -15,10 +15,10 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 /**
  * @author jgarbers
- * @version $Id: DBConnectionTest.java,v 1.25 2009/02/07 14:51:32 fatorange Exp $
  */
 public class DBConnectionTest extends TestCase {
 
@@ -26,14 +26,15 @@ public class DBConnectionTest extends TestCase {
 
 	private Collection databases;
 	private Database firstDatabase;
-
+	private ConnectedDB cdb;
+	
 	private String simplestQuery;
 	private String mediumQuery;
 	private String complexQuery;
 
 	protected void setUp() throws Exception {
 		mapModel = ModelFactory.createDefaultModel();
-		mapModel.read(D2RQTestSuite.ISWC_MAP, "http://test/", "N3");
+		mapModel.read(D2RQTestSuite.ISWC_MAP, "http://test/", "TURTLE");
 		MapParser parser = new MapParser(mapModel, null);
 		databases = parser.parse().databases();
 		firstDatabase = (Database)databases.iterator().next();
@@ -46,13 +47,15 @@ public class DBConnectionTest extends TestCase {
 
 	protected void tearDown() throws Exception {
 		mapModel.close();
+		if (cdb != null) cdb.close();
 	}
 
 	public void testConnections() throws SQLException {
 		Iterator it = databases.iterator();
 		while (it.hasNext()) {
 			Database db = (Database) it.next();
-			Connection c = db.connectedDB().connection();
+			cdb = db.connectedDB();
+			Connection c = cdb.connection();
 			String result = performQuery(c, simplestQuery); // 
 			assertEquals(result, "1");
 		}
@@ -79,35 +82,20 @@ public class DBConnectionTest extends TestCase {
 	}
 
 	public Connection manuallyConfiguredConnection() {
-		final int configure = 1; // TODO change this to your local DB configuration
 		String driverClass;
 		String url;
 		String name;
 		String pass;
 
-		if (configure == 1) { // omit ODBC. (You must install jdbc driver in advance)
-			driverClass = "com.mysql.jdbc.Driver";
-			url = "jdbc:mysql:///iswc";
-			name = "root"; //  "@localhost";
-			pass = ""; // "";
-		} else if (configure == 2) { // use Mysql on ODBC (Windows) (name and passwd may be not necessary)
-			driverClass = "sun.jdbc.odbc.JdbcOdbcDriver";
-			url = "jdbc:odbc:myiswc";
-			name = "jg";
-			pass = "";
-		} else if (configure == 3) { // use MSAccess ODBC (Windows)
-			driverClass = "sun.jdbc.odbc.JdbcOdbcDriver";
-			url = "jdbc:odbc:IswcDB";
-		} else
-			return null;
+		driverClass = "com.mysql.jdbc.Driver";
+		url = "jdbc:mysql:///iswc";
+		name = "root"; //  "@localhost";
+		pass = ""; // "";
 
 		Connection c=null;
 		try {
 			Class.forName(driverClass);
-			if (configure == 1)
-				c = DriverManager.getConnection(url, name, pass);
-			else if (configure == 2 || configure == 3)
-				c = DriverManager.getConnection(url);
+			c = DriverManager.getConnection(url, name, pass);
 			return c;
 		} //end try
 		catch (Exception x) {
@@ -131,7 +119,8 @@ public class DBConnectionTest extends TestCase {
 	public void testDistinct() throws SQLException {
 	    // there seems to be a problem with MSAccess databases
 	    // when using the DISTINCT keyword, Strings are truncated to 256 chars
-	    Connection c = firstDatabase.connectedDB().connection(); 
+		cdb = firstDatabase.connectedDB();
+		Connection c = cdb.connection();
 	    //Connection c=manuallyConfiguredConnection();
 		String nonDistinct = "SELECT T0_Papers.Abstract FROM papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
 		String distinct = "SELECT DISTINCT T0_Papers.Abstract FROM papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
@@ -152,7 +141,8 @@ public class DBConnectionTest extends TestCase {
 	// fails with wrong MSAccess Iswc DB (doc/manual/ISWC.mdb revision < 1.5)
 	// succeeds with revision 1.5
 	public void testMedium() throws SQLException {
-	     Connection c = firstDatabase.connectedDB().connection(); 
+		cdb = firstDatabase.connectedDB();
+		Connection c = cdb.connection();
 	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 		String query = mediumQuery;
 		String query_results = performQuery(c, query);
@@ -162,7 +152,8 @@ public class DBConnectionTest extends TestCase {
 
 	// fails with MSAccess
 	public void testLongComplexSQLQuery() throws SQLException {
-	     Connection c = firstDatabase.connectedDB().connection(); 
+		cdb = firstDatabase.connectedDB();
+		Connection c = cdb.connection();
 	    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 		String query = complexQuery;
 		try {

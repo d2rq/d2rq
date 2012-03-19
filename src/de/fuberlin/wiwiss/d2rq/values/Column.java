@@ -15,7 +15,6 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * column.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: Column.java,v 1.8 2008/04/25 16:27:41 cyganiak Exp $
  */
 public class Column implements ValueMaker {
 	private Attribute attribute;

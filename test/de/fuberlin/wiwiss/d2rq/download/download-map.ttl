@@ -1,0 +1,21 @@
+@prefix : <http://example.org/> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+
+:database a d2rq:Database;
+    d2rq:jdbcDriver "org.hsqldb.jdbcDriver";
+    d2rq:jdbcDSN "jdbc:hsqldb:mem:test";
+    d2rq:username "d2rq";
+    .
+
+:downloadCLOB a d2rq:DownloadMap;
+	d2rq:dataStorage :database;
+	d2rq:uriPattern "downloads/clob/@@PEOPLE.ID@@";
+	d2rq:contentDownloadColumn "PEOPLE.PIC_CLOB";
+	d2rq:mediaType "text/plain";
+	.
+:downloadBLOB a d2rq:DownloadMap;
+	d2rq:dataStorage :database;
+	d2rq:uriPattern "downloads/blob/@@PEOPLE.ID@@";
+	d2rq:contentDownloadColumn "PEOPLE.PIC_BLOB";
+	d2rq:mediaType "image/png";
+	.

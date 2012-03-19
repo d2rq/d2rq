@@ -17,6 +17,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
 
 /**
  * Inspects a database to retrieve schema information. 
@@ -24,12 +25,11 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * TODO: All the dbType checks should be moved to the {@link SQLSyntax} subclasses
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
- * @version $Id: DatabaseSchemaInspector.java,v 1.26 2010/01/26 16:15:46 fatorange Exp $
  */
 public class DatabaseSchemaInspector {
 	
 	public static boolean isStringType(ColumnType columnType) {
-		return columnType.typeId() == Types.CHAR || columnType.typeId() == Types.VARCHAR || columnType.typeId() == ConnectedDB.SQL_TYPE_NVARCHAR
+		return columnType.typeId() == Types.CHAR || columnType.typeId() == Types.VARCHAR || columnType.typeId() == Types.NVARCHAR
 					|| columnType.typeId() == Types.LONGVARCHAR	|| "NVARCHAR2".equals(columnType.typeName());
 	}
 
@@ -37,48 +37,105 @@ public class DatabaseSchemaInspector {
 		return columnType.typeId() == Types.DATE || columnType.typeId() == Types.TIME || columnType.typeId() == Types.TIMESTAMP;
 	}
 	
-	public static String xsdTypeFor(ColumnType columnType) {
+	/**
+	 * Return the appropriate XSD datatype for a SQL column type. <code>null</code>
+	 * indicates an unsupported SQL type. {@link ColumnType#UNMAPPABLE} indicates
+	 * an unmappable SQL type.
+	 * 
+	 * TODO: The MySQL JDBC driver reports TINYINT(1) as BIT, should be handled as xsd:boolean
+ 	 * 
+	 * @param columnType
+	 * @return XSD datatype as prefixed name: <code>xsd:string</code> etc.
+	 */
+	public String xsdTypeFor(ColumnType columnType) {
+		if (columnType.typeId() == Types.OTHER && db.dbTypeIs(ConnectedDB.HSQLDB)) {
+			// OTHER in HSQLDB 2.8.8 is really JAVA_OBJECT
+			return ColumnType.UNMAPPABLE;
+		}
+		
+		// HACK: MS SQLServer 2008 returns 'date' as VARCHAR type
+		if(columnType.typeName().equals("date") && db.dbTypeIs(ConnectedDB.MSSQL)) {
+			return "xsd:date";
+		}
+		
+// HACK: MS SQLServer 2008 returns 'datetime2(7)' and 'datetimeoffset(7)' as VARCHAR type
+// TODO: Cant make it work. See comment in ResultRowMap.java for additional information on datatype 
+// inconsistency particularly in the case of MS SQLServer.
+//		if((columnType.typeName().equals("datetime2") && db.dbTypeIs(ConnectedDB.MSSQL)) || (columnType.typeName().equals("datetimeoffset") && db.dbTypeIs(ConnectedDB.MSSQL))) {
+//			return "xsd:dateTime";
+//		}
+		
+		if (db.dbTypeIs(ConnectedDB.MySQL) && columnType.typeName().contains("UNSIGNED")) {
+			switch (columnType.typeId()) {
+			case Types.TINYINT: return "xsd:unsignedByte";
+			case Types.SMALLINT: return "xsd:unsignedShort";
+			case Types.INTEGER: return "xsd:unsignedInt";
+			case Types.BIGINT: return "xsd:unsignedLong";
+			}
+		}
+		if (db.dbTypeIs(ConnectedDB.MySQL) && columnType.typeId() == Types.BIT
+				&& columnType.size() == 0) {
+			// MySQL reports TINYINT(1) as BIT, but all other BITs as BIT(M).
+			// This is conventionally treated as BOOLEAN.
+			return "xsd:boolean";
+		}
+
 		switch (columnType.typeId()) {
+		case Types.ARRAY:         return ColumnType.UNMAPPABLE;
 		case Types.BIGINT:        return "xsd:long";
-//		case Types.BINARY:        return "xsd:hexBinary";
-		// TODO: BIT is a bit string, not a single boolean
-		// But the MySQL JDBC driver reports TINYINT(1) as BIT 
-		case Types.BIT:           return "xsd:boolean";
-//		case Types.BLOB:          return "xsd:hexBinary";
+		case Types.BINARY:        return "xsd:hexBinary";
+		case Types.BIT:           return "xsd:string";
+		case Types.BLOB:          return "xsd:hexBinary";
 		case Types.BOOLEAN:       return "xsd:boolean";
 		case Types.CHAR:          return "xsd:string";
-//		case Types.CLOB:          return "xsd:string";
+		case Types.CLOB:          return "xsd:string";
+		case Types.DATALINK:      return null;
 		case Types.DATE:          return "xsd:date";
 		case Types.DECIMAL:       return "xsd:decimal";
+		case Types.DISTINCT:      return null;
 		case Types.DOUBLE:        return "xsd:double";
-		case Types.FLOAT:         return "xsd:decimal";
+		case Types.FLOAT:         return "xsd:double";
 		case Types.INTEGER:       return "xsd:int";
-//		case Types.JAVA_OBJECT:   return "xsd:string";
-//		case Types.LONGVARBINARY: return "xsd:hexBinary";
+		case Types.JAVA_OBJECT:   return ColumnType.UNMAPPABLE;
+		case Types.LONGVARBINARY: return "xsd:hexBinary";
 		case Types.LONGVARCHAR:   return "xsd:string";
+		case Types.NULL:          return null;
 		case Types.NUMERIC:       return "xsd:decimal";
-		case ConnectedDB.SQL_TYPE_NVARCHAR:   return "xsd:string";
-		case Types.REAL:          return "xsd:float";
-//		case Types.REF:           return "xsd:IDREF";
+		case Types.OTHER:         return null;
+		case Types.REAL:          return "xsd:double";
+		case Types.REF:           return null;
 		case Types.SMALLINT:      return "xsd:short";
-//		case Types.STRUCT:        return "struct";
-//		case Types.TIME:          return "xsd:time";
+		case Types.STRUCT:        return null;
+		case Types.TIME:          return "xsd:time";
 		case Types.TIMESTAMP:     return "xsd:dateTime";
 		case Types.TINYINT:       return "xsd:byte";
-//		case Types.VARBINARY:     return "xsd:hexBinary";
+		case Types.VARBINARY:     return "xsd:hexBinary";
 		case Types.VARCHAR:       return "xsd:string";
-		default:
-			if ("NVARCHAR2".equals(columnType.typeName()))
-				return "xsd:string";
-			else
-				return null;
 		}
+		if ("NVARCHAR2".equals(columnType.typeName())) {
+			return "xsd:string";
+		}
+		if ("NVARCHAR".equals(columnType.typeName())) {
+			return "xsd:string";
+		}
+		if ("BINARY_DOUBLE".equals(columnType.typeName())) {
+			return "xsd:double";
+		}
+		if ("BINARY_FLOAT".equals(columnType.typeName())) {
+			return "xsd:double";
+		}
+		if ("BFILE".equals(columnType.typeName())) {
+			return ColumnType.UNMAPPABLE;
+		}
+		return null;
 	}
 	
 	private ConnectedDB db;
 	private DatabaseMetaData schema;
-	private Map cachedColumnTypes = new HashMap();
-	private Map cachedColumnNullability = new HashMap();
+	private Map<Attribute,ColumnType> cachedColumnTypes = 
+			new HashMap<Attribute,ColumnType>();
+	private Map<Attribute,Boolean> cachedColumnNullability = 
+			new HashMap<Attribute,Boolean>();
 	
 	public static final int KEYS_IMPORTED = 0;
 	public static final int KEYS_EXPORTED = 1;
@@ -102,8 +159,8 @@ public class DatabaseSchemaInspector {
 			if (!rs.next()) {
 				throw new D2RQException("Column " + column + " not found in database");
 			}
-			
-			ColumnType type = new ColumnType(rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"));
+			ColumnType type = new ColumnType(rs.getInt("DATA_TYPE"), 
+					rs.getString("TYPE_NAME"), rs.getInt("COLUMN_SIZE"));
 			rs.close();
 			this.cachedColumnTypes.put(column, type);
 			return type;
@@ -141,7 +198,8 @@ public class DatabaseSchemaInspector {
 			ResultSet rs = stmt.executeQuery("DESCRIBE " + db.getSyntax().quoteRelationName(column.relationName()));		
 
 			while (rs.next()) {
-				if (column.attributeName().equals(rs.getString("Field"))) {
+				// MySQL names are case insensitive, so we normalize to lower case
+				if (column.attributeName().toLowerCase().equals(rs.getString("Field").toLowerCase())) {
 					isZerofill = (rs.getString("Type").toLowerCase().indexOf("zerofill") != -1);
 					foundColumn = true;
 					break;
@@ -162,10 +220,10 @@ public class DatabaseSchemaInspector {
 	/**
 	 * Lists available table names
 	 * @param searchInSchema	Schema to list tables from; <tt>null</tt> to list tables from all schemas
-	 * @return
+	 * @return A list of {@link RelationName}s
 	 */
-	public List listTableNames(String searchInSchema) {
-		List result = new ArrayList();
+	public List<RelationName> listTableNames(String searchInSchema) {
+		List<RelationName> result = new ArrayList<RelationName>();
 		try {
 			ResultSet rs = this.schema.getTables(
 					null, searchInSchema, null, new String[] {"TABLE", "VIEW"});
@@ -183,8 +241,8 @@ public class DatabaseSchemaInspector {
 		}
 	}
 
-	public List listColumns(RelationName tableName) {
-		List result = new ArrayList();
+	public List<Attribute> listColumns(RelationName tableName) {
+		List<Attribute> result = new ArrayList<Attribute>();
 		try {
 			ResultSet rs = this.schema.getColumns(
 					null, schemaName(tableName), tableName(tableName), null);
@@ -198,8 +256,8 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public List primaryKeyColumns(RelationName tableName) {
-		List result = new ArrayList();
+	public List<Attribute> primaryKeyColumns(RelationName tableName) {
+		List<Attribute> result = new ArrayList<Attribute>();
 		try {
 			ResultSet rs = this.schema.getPrimaryKeys(
 					null, schemaName(tableName), tableName(tableName));
@@ -213,8 +271,13 @@ public class DatabaseSchemaInspector {
 		}
 	}
 	
-	public HashMap uniqueColumns(RelationName tableName) {
-		HashMap result = new HashMap();
+	/**
+	 * Returns unique indexes defined on the table.
+	 * @param tableName Name of a table
+	 * @return Map from index name to list of column names
+	 */
+	public Map<String,List<String>> uniqueColumns(RelationName tableName) {
+		Map<String,List<String>> result = new HashMap<String,List<String>>();
 		try {
 			/*
 			 * When requesting index info from an Oracle database, accept approximate
@@ -233,8 +296,8 @@ public class DatabaseSchemaInspector {
 				String indexKey = rs.getString("INDEX_NAME");
 				if (indexKey != null) { // is null when type = tableIndexStatistic, ignore
 					if (!result.containsKey(indexKey))
-						result.put(indexKey, new ArrayList());
-					((List)result.get(indexKey)).add(rs.getString("COLUMN_NAME"));
+						result.put(indexKey, new ArrayList<String>());
+					result.get(indexKey).add(rs.getString("COLUMN_NAME"));
 				}
 			}
 			rs.close();
@@ -251,9 +314,9 @@ public class DatabaseSchemaInspector {
 	 * 					If set to {@link #KEYS_EXPORTED}, the table's primary keys referenced from other tables are returned.
 	 * @return A list of {@link Join}s; the local columns are in attributes1() 
 	 */
-	public List foreignKeys(RelationName tableName, int direction) {
+	public List<Join> foreignKeys(RelationName tableName, int direction) {
 		try {
-			Map fks = new HashMap();
+			Map<String,ForeignKey> fks = new HashMap<String,ForeignKey>();
 			ResultSet rs = (direction == KEYS_IMPORTED ? this.schema.getImportedKeys(null, schemaName(tableName), tableName(tableName))
 													   : this.schema.getExportedKeys(null, schemaName(tableName), tableName(tableName)));
 			while (rs.next()) {
@@ -268,12 +331,11 @@ public class DatabaseSchemaInspector {
 					fks.put(fkName, new ForeignKey());
 				}
 				int keySeq = rs.getInt("KEY_SEQ") - 1;
-				((ForeignKey) fks.get(fkName)).addColumns(
-						keySeq, foreignColumn, primaryColumn);
+				fks.get(fkName).addColumns(keySeq, foreignColumn, primaryColumn);
 			}
 			rs.close();
-			List results = new ArrayList();
-			Iterator it = fks.values().iterator();
+			List<Join> results = new ArrayList<Join>();
+			Iterator<ForeignKey> it = fks.values().iterator();
 			while (it.hasNext()) {
 				ForeignKey fk = (ForeignKey) it.next();
 				results.add(fk.toJoin());
@@ -291,16 +353,16 @@ public class DatabaseSchemaInspector {
 	 * and there are no foreign keys from other tables pointing to this table
 	 */
 	public boolean isLinkTable(RelationName tableName) {
-		List foreignKeys = foreignKeys(tableName, KEYS_IMPORTED);
+		List<Join> foreignKeys = foreignKeys(tableName, KEYS_IMPORTED);
 		if (foreignKeys.size() != 2) return false;
 		
-		List exportedKeys = foreignKeys(tableName, KEYS_EXPORTED);
+		List<Join> exportedKeys = foreignKeys(tableName, KEYS_EXPORTED);
 		if (!exportedKeys.isEmpty()) return false;
 		
-		List columns = listColumns(tableName);
-		Iterator it = foreignKeys.iterator();
+		List<Attribute> columns = listColumns(tableName);
+		Iterator<Join> it = foreignKeys.iterator();
 		while (it.hasNext()) {
-			Join fk = (Join) it.next();
+			Join fk = it.next();
 			if (fk.isSameTable()) return false;
 			columns.removeAll(fk.attributes1());
 		}
@@ -323,8 +385,9 @@ public class DatabaseSchemaInspector {
 		if (schema == null) {
 			// Table without schema
 			return new RelationName(null, table, db.lowerCaseTableNames());
-		} else if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) && "public".equals(schema)) {
-			// Table in PostgreSQL default schema -- call the table "foo", not "public.foo"
+		} else if ((db.dbTypeIs(ConnectedDB.PostgreSQL) || db.dbTypeIs(ConnectedDB.HSQLDB)) 
+				&& "public".equals(schema.toLowerCase())) {
+			// Call the tables in PostgreSQL or HSQLDB default schema "FOO", not "PUBLIC.FOO"
 			return new RelationName(null, table, db.lowerCaseTableNames());
 		}
 		return new RelationName(schema, table, db.lowerCaseTableNames());
@@ -336,16 +399,19 @@ public class DatabaseSchemaInspector {
 	 * columns are added, a {@link Join} object can be created.
 	 */
 	private class ForeignKey {
-		private TreeMap primaryColumns = new TreeMap();
-		private TreeMap foreignColumns = new TreeMap();
+		private TreeMap<Integer,Attribute> primaryColumns = 
+			new TreeMap<Integer,Attribute>();
+		private TreeMap<Integer,Attribute> foreignColumns = 
+			new TreeMap<Integer,Attribute>();
 		private void addColumns(int keySequence, Attribute foreign, Attribute primary) {
 			primaryColumns.put(new Integer(keySequence), primary);
 			foreignColumns.put(new Integer(keySequence), foreign);
 		}
 		private Join toJoin() {
 			return new Join(
-					new ArrayList(foreignColumns.values()),
-					new ArrayList(primaryColumns.values()), Join.DIRECTION_RIGHT);
+					new ArrayList<Attribute>(foreignColumns.values()),
+					new ArrayList<Attribute>(primaryColumns.values()), 
+					Join.DIRECTION_RIGHT);
 		}
 	}
 
@@ -359,10 +425,9 @@ public class DatabaseSchemaInspector {
 		if (!relationName.caseUnspecified() || !db.lowerCaseTableNames())
 			return relationName;
 		
-		List tables = listTableNames(null);
-		Iterator it = tables.iterator();
+		Iterator<RelationName> it = listTableNames(null).iterator();
 		while (it.hasNext()) {
-			RelationName r = (RelationName) it.next();
+			RelationName r = it.next();
 			if (r.equals(relationName))
 				return r;
 		}

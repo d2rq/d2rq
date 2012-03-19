@@ -1,0 +1,14 @@
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#>.
+@prefix : <http://example.org/>.
+
+:db a d2rq:Database;
+	d2rq:jdbcDSN "jdbc:hsqldb:mem:test";
+	d2rq:jdbcDriver "org.hsqldb.jdbcDriver";
+	d2rq:username "d2rq";
+	.
+
+:classmap a d2rq:ClassMap;
+	d2rq:dataStorage :db;
+	d2rq:uriPattern "test/@@TEST.ID@@";
+	d2rq:class :Test;
+	.
