@@ -42,7 +42,6 @@ public class d2r_query extends CommandLineTool {
 		System.err.println("  Query options:");
 		System.err.println("    -b baseURI      Base URI for generated RDF (default: " + SystemLoader.DEFAULT_BASE_URI + ")");
 		System.err.println("    -f format       One of text (default), xml, json, csv, tsv, srb, ttl");
-		System.err.println("    -o outfile      Save output to file (default: stdout)");
 		System.err.println("    --verbose       Print debug information");
 		System.err.println();
 		System.err.println("  Database connection options (only with jdbcURL):");

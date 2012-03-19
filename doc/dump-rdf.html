@@ -61,11 +61,11 @@ and a default mapping will be used.</p>
 
 <h2 id="example-mapping">Example invocation using a mapping file</h2>
 
-<pre>dump-rdf -m mapping-iswc.ttl -f N-TRIPLE -b http://localhost:2020/ &gt; iswc.nt</pre>
+<pre>dump-rdf -f N-TRIPLE -b http://localhost:2020/ mapping-iswc.ttl &gt; iswc.nt</pre>
 
 <h2 id="example-default">Example invocation with default mapping</h2>
 
-<pre>dump-rdf -u root -j jdbc:mysql:///iswc -o -f RDF/XML-ABBREV iswc-dump.rdf</pre>
+<pre>dump-rdf -u root -f RDF/XML-ABBREV -o iswc-dump.rdf jdbc:mysql:///iswc</pre>
 
 <h2 id="example-inmemory">Example: Converting a SQL dump to RDF using a temporary in-memory database</h2>
 
