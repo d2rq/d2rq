@@ -41,7 +41,7 @@ public class ExprTransformTest2 extends TestCase {
 	{
 		for (int i = 0; i < relation.length; i++) {
 			NodeRelation rel = relation[i];
-			Iterator it = rel.baseRelation().projections().iterator();
+			Iterator<?> it = rel.baseRelation().projections().iterator();
 			while (it.hasNext()) {
 				Attribute attribute = (Attribute) it.next();
 				if (attribute.tableName().equals(tableName) && attribute.attributeName().equals(attributeName))
@@ -55,7 +55,7 @@ public class ExprTransformTest2 extends TestCase {
 	
 	public void testLang()
 	{
-		List pattern = new ArrayList();
+		List<Triple> pattern = new ArrayList<Triple>();
 		pattern.add(Triple.create(Node.createVariable("s"), RDFS.label.asNode(), Node.createVariable("o")));
 		NodeRelation[] rels = translate(pattern, "optimizer/filtertests.n3");
 		
@@ -77,7 +77,7 @@ public class ExprTransformTest2 extends TestCase {
 	
 	public void testLangMatches()
 	{
-		List pattern = new ArrayList();
+		List<Triple> pattern = new ArrayList<Triple>();
 		pattern.add(Triple.create(Node.createVariable("s"), RDFS.label.asNode(), Node.createVariable("o")));
 		NodeRelation[] rels = translate(pattern, "optimizer/filtertests.n3");
 		
@@ -103,7 +103,7 @@ public class ExprTransformTest2 extends TestCase {
 	
 	public void testIsLiteral()
 	{
-		List pattern = new ArrayList();
+		List<Triple> pattern = new ArrayList<Triple>();
 		pattern.add(Triple.create(Node.createVariable("s"), RDFS.label.asNode(), Node.createVariable("o")));
 		NodeRelation[] rels = translate(pattern, "optimizer/filtertests.n3");
 				
@@ -128,7 +128,7 @@ public class ExprTransformTest2 extends TestCase {
 		
 	public void testIsIRI()
 	{
-		List pattern = new ArrayList();
+		List<Triple> pattern = new ArrayList<Triple>();
 		pattern.add(Triple.create(Node.createVariable("s"), RDFS.label.asNode(), Node.createVariable("o")));
 		NodeRelation[] rels = translate(pattern, "optimizer/filtertests.n3");
 				
@@ -154,7 +154,7 @@ public class ExprTransformTest2 extends TestCase {
 	
 	public void testIsBlank()
 	{
-		List pattern = new ArrayList();
+		List<Triple> pattern = new ArrayList<Triple>();
 		pattern.add(Triple.create(Node.createVariable("s"), RDFS.label.asNode(), Node.createVariable("o")));
 		NodeRelation[] rels = translate(pattern, "optimizer/filtertests.n3");
 				
@@ -179,7 +179,7 @@ public class ExprTransformTest2 extends TestCase {
 	
 	public void testDataType()
 	{
-		List pattern = new ArrayList();
+		List<Triple> pattern = new ArrayList<Triple>();
 		pattern.add(Triple.create(Node.createVariable("s"), Node.createURI("http://example.org/value"), Node.createVariable("o")));
 		NodeRelation[] rels = translate(pattern, "optimizer/filtertests.n3");
 		
@@ -202,7 +202,7 @@ public class ExprTransformTest2 extends TestCase {
 	
 	public void testDisjunction()
 	{
-		List pattern = new ArrayList();
+		List<Triple> pattern = new ArrayList<Triple>();
 		pattern.add(Triple.create(Node.createVariable("s"), Node.createURI("http://example.org/value"), Node.createVariable("o")));
 		NodeRelation[] rels = translate(pattern, "optimizer/filtertests.n3");
 		
@@ -221,7 +221,7 @@ public class ExprTransformTest2 extends TestCase {
 	
 	public void testSameTerm()
 	{
-		List pattern = new ArrayList();
+		List<Triple> pattern = new ArrayList<Triple>();
 		pattern.add(Triple.create(Node.createVariable("s"), Node.createURI("http://example.org/value"), Node.createVariable("o")));
 		NodeRelation[] rels = translate(pattern, "optimizer/filtertests.n3");
 		
@@ -242,8 +242,8 @@ public class ExprTransformTest2 extends TestCase {
 		assertEquals("sameTerm(?o, \"1\"^^xsd:decimal)", Expression.FALSE, result);
 	}
 	
-	private NodeRelation[] translate(List pattern, String mappingFile) {
-		Collection rels = new GraphPatternTranslator(pattern,
+	private NodeRelation[] translate(List<Triple> pattern, String mappingFile) {
+		Collection<?> rels = new GraphPatternTranslator(pattern,
 				MapFixture.loadPropertyBridges(mappingFile), true).translate();
 		return (NodeRelation[]) rels.toArray(new NodeRelation[rels.size()]);
 	}
