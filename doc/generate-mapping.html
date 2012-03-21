@@ -36,7 +36,7 @@ on the column's name. This mapping file can be used as-is or can be customized.<
 
 <h2 id="usage">Usage</h2>
 
-<pre>generate-mapping [-u user] [-p password] [-d driver] [-o outfile.ttl] [-b baseURI] [-s schema] [-v] [-l script.sql] jdbcURL</pre>
+<pre>generate-mapping [-u user] [-p password] [-d driver] [-o outfile.ttl] [-b baseURI] [-s schema] [-v] [--w3c] [-l script.sql] jdbcURL</pre>
 
 <dl>
 <dt><code>jdbcURL</code> (required)</dt>
@@ -82,6 +82,9 @@ For more information on vocabulary serving, see the <a href="d2rq-language#servi
 
 <dt><code>-v</dt></code>
 <dd>Generate an RDF Schema description of the vocabulary instead of a mapping file.</dd>
+
+<dt id="arg-w3c"><code>--w3c</code></dt>
+<dd>Generate a mapping file that is compatible with W3C's <a href="http://www.w3.org/TR/rdb-direct-mapping/">Direct Mapping of Relational Data to RDF</a>. <strong>This is an experimental feature and work in progress.</strong></dd>
 
 <dt><code>-l script.sql</code></dt>
 <dd>Load a SQL script before running the tool. Useful for initializing the connection and testing. The <code>d2rq:startupSQLScript</code> property of the database in the generated mapping will be initialized with the same value.</dd>
