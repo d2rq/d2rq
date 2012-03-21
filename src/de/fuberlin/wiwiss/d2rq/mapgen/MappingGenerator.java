@@ -38,6 +38,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
 
 /**
  * Generates a D2RQ mapping by introspecting a database schema.
@@ -54,16 +55,17 @@ public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
 	private ConnectedDB database;
 	private String mapNamespaceURI;
-	private String instanceNamespaceURI;
-	private String vocabNamespaceURI;
+	protected String instanceNamespaceURI;
+	protected String vocabNamespaceURI;
 	private String driverClass = null;
 	private String databaseSchema = null;
 	private PrintWriter out = null;
 	private PrintWriter err = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
-	private DatabaseSchemaInspector schema = null;
 	// name of n:m link table => name of n table
 	private Map<RelationName,RelationName> linkTables = new HashMap<RelationName,RelationName>();
+	protected DatabaseSchemaInspector schema = null;
+	private SQLSyntax databaseSyntax = null;
 	private boolean finished = false;
 	private boolean silent = true;
 	private boolean generateClasses = true;
@@ -255,6 +257,7 @@ public class MappingGenerator {
 		if (generateLabelBridges) {
 			writeLabelBridge(tableName);
 		}
+		
 		List foreignKeys = this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		Iterator it = this.schema.listColumns(tableName).iterator();
 		while (it.hasNext()) {
@@ -413,9 +416,9 @@ public class MappingGenerator {
 	
 	// A very conservative pattern for the local part of a QName.
 	// If a URI doesn't match, better don't QName it.
-	private final static Pattern simpleXMLName = 
+	protected final static Pattern simpleXMLName = 
 			Pattern.compile("[a-zA-Z_][a-zA-Z0-9_-]*");
-	private String toPrefixedURI(String namespaceURI, String prefix, String s) {
+	protected String toPrefixedURI(String namespaceURI, String prefix, String s) {
 		if (simpleXMLName.matcher(s).matches()) {
 			return prefix + ":" + s;
 		}
@@ -438,15 +441,15 @@ public class MappingGenerator {
 		return toPrefixedURI(mapNamespaceURI, "map", relationName + suffix);
 	}
 	
-	private String vocabularyTermQName(RelationName table) {
+	protected String vocabularyTermQName(RelationName table) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", table.qualifiedName());
 	}
 
-	private String vocabularyTermQName(Attribute attribute) {
+	protected String vocabularyTermQName(Attribute attribute) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attribute));
 	}
 
-	private String vocabularyTermQName(List attributes) {
+	protected String vocabularyTermQName(List attributes) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attributes));
 	}
 
@@ -454,7 +457,7 @@ public class MappingGenerator {
 		return !this.schema.primaryKeyColumns(tableName).isEmpty();
 	}
 	
-	private String uriPattern(RelationName tableName) {
+	protected String uriPattern(RelationName tableName) {
 		String result = this.instanceNamespaceURI + tableName.qualifiedName();
 		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
 		while (it.hasNext()) {

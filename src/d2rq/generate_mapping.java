@@ -14,6 +14,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
+import de.fuberlin.wiwiss.d2rq.mapgen.W3CMappingGenerator;
 
 /**
  * Command line interface for {@link MappingGenerator}.
@@ -41,6 +42,7 @@ public class generate_mapping {
 		ArgDecl outfileArg = new ArgDecl(true, "o", "out", "outfile");
 		ArgDecl baseUriArg = new ArgDecl(true, "b", "base", "baseuri");
 		ArgDecl sqlFileArg = new ArgDecl(true, "l", "load-sql");
+		ArgDecl w3cArg = new ArgDecl(false, "w3c", "w3cDirectMap");
 		cmd.add(userArg);
 		cmd.add(passArg);
 		cmd.add(schemaArg);
@@ -49,6 +51,7 @@ public class generate_mapping {
 		cmd.add(outfileArg);
 		cmd.add(baseUriArg);
 		cmd.add(sqlFileArg);
+		cmd.add(w3cArg);
 		cmd.process(args);
 
 		if (cmd.numItems() == 0) {
@@ -89,7 +92,9 @@ public class generate_mapping {
 				return;
 			}
 		}
-		MappingGenerator gen = new MappingGenerator(db);
+		MappingGenerator gen = cmd.contains(w3cArg) ? 
+				new W3CMappingGenerator(db) :
+				new MappingGenerator(db);
 		if (driverClass != null) {
 			gen.setJDBCDriverClass(driverClass);
 		}
@@ -146,6 +151,7 @@ public class generate_mapping {
 		System.err.println("    -b baseURI      Base URI for generated RDF (optional)");
 		System.err.println("    -o outfile.ttl  Output file name (default: stdout)");
 		System.err.println("    -l script.sql   Load a SQL script before generating the mapping");
+		System.err.println("    --w3c           Produce W3C Direct Mapping compatible mapping file");
 		System.err.println();
 	}
 }
