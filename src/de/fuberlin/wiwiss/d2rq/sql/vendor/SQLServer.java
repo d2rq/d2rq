@@ -5,7 +5,9 @@ import org.hsqldb.types.Types;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
+import de.fuberlin.wiwiss.d2rq.sql.types.SQLBinary;
 import de.fuberlin.wiwiss.d2rq.sql.types.SQLBit;
+import de.fuberlin.wiwiss.d2rq.sql.types.SQLCharacterString;
 import de.fuberlin.wiwiss.d2rq.sql.types.SQLDate;
 
 /**
@@ -67,6 +69,14 @@ public class SQLServer extends SQL92 {
 		// On SQL Server, BIT is a single-bit numeric type
 		if (jdbcType == Types.BIT) {
 			return new SQLServerCompatibilityBitDataType(this);
+		}
+
+		// Doesn't support DISTINCT over LOB types
+		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
+			return new SQLCharacterString(this, false);
+		}
+		if (jdbcType == Types.BLOB) {
+			return new SQLBinary(this, false);
 		}
 
 		return super.getDataType(jdbcType, name, size);

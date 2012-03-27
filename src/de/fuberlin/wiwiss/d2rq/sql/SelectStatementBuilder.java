@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
@@ -61,7 +62,20 @@ public class SelectStatementBuilder {
 		eliminateDuplicates = !relation.isUnique();
 		addCondition(database.vendor().getRowNumLimitAsExpression(limit));
 	
-		addMentionedTablesFromConditions();		
+		addMentionedTablesFromConditions();
+		
+		if (eliminateDuplicates) {
+			for (ProjectionSpec projection: selectSpecs) {
+				for (Attribute column: projection.requiredAttributes()) {
+					if (!database.columnType(aliases.originalOf(column)).supportsDistinct()) {
+						throw new D2RQException("Bug in engine logic: DISTINCT used with " +
+								"datatype (" + database.columnType(column) + ") that " +
+								"doesn't support it", 
+								D2RQException.DATATYPE_DOES_NOT_SUPPORT_DISTINCT);
+					}
+				}
+			}
+		}
 	}
 	
 	private Expression condition() {
@@ -81,7 +95,7 @@ public class SelectStatementBuilder {
 		
 		StringBuffer result = new StringBuffer("SELECT ");
 		
-		if (this.eliminateDuplicates && database.allowDistinct()) {
+		if (this.eliminateDuplicates) {
 			result.append("DISTINCT ");
 		}
 

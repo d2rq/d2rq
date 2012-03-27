@@ -33,7 +33,6 @@ public class Database extends MapObject {
 	private final Map<String,GenericType> columnTypes = new HashMap<String,GenericType>();
     private int limit = NO_LIMIT;
     private int fetchSize = NO_FETCH_SIZE;
-	private boolean allowDistinct = true;
 	private String startupSQLScript = null;
 	private ConnectedDB connection = null;
 	private Properties connectionProperties = new Properties();
@@ -131,11 +130,6 @@ public class Database extends MapObject {
 		columnTypes.put(column, GenericType.INTERVAL);
 	}
 	
-	public void setAllowDistinct(boolean b) {
-		checkNotConnected();		
-		this.allowDistinct = b;
-	}
-
 	public void setResultSizeLimit(int limit) {
 		checkNotConnected();		
 		this.limit = limit;
@@ -180,7 +174,7 @@ public class Database extends MapObject {
 			if (jdbcDriver != null) {
 				ConnectedDB.registerJDBCDriver(jdbcDriver);
 			}
-			connection = new ConnectedDB(jdbcDSN, username, password, allowDistinct,
+			connection = new ConnectedDB(jdbcDSN, username, password,
 					columnTypes, limit, fetchSize, connectionProperties);
 			if (startupSQLScript != null) {
 				try {

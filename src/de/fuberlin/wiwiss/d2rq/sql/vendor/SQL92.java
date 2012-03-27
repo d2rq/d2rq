@@ -124,7 +124,7 @@ public class SQL92 implements Vendor {
 	public DataType getDataType(int jdbcType, String name, int size) {
 		// TODO: These are in java.sql.Types as of Java 6 but not yet in Java 1.5
 		if ("NCHAR".equals(name) || "NVARCHAR".equals(name) || "NCLOB".equals(name)) {
-			return new SQLCharacterString(this);
+			return new SQLCharacterString(this, true);
 		}
 
 		switch (jdbcType) {
@@ -132,7 +132,7 @@ public class SQL92 implements Vendor {
 		case Types.VARCHAR:
 		case Types.LONGVARCHAR:
 		case Types.CLOB:
-			return new SQLCharacterString(this);
+			return new SQLCharacterString(this, true);
 			
 		case Types.BOOLEAN:
 			return new SQLBoolean(this);
@@ -141,7 +141,7 @@ public class SQL92 implements Vendor {
 		case Types.VARBINARY:
 		case Types.LONGVARBINARY:
 		case Types.BLOB:
-			return new SQLBinary(this);
+			return new SQLBinary(this, true);
 			
 		case Types.BIT:
 			return new SQLBit(this);

@@ -64,6 +64,13 @@ public abstract class DataType {
 		return false;
 	}
 
+	/**
+	 * @return <code>true</code> if this column can be used in <code>SELECT DISTINCT</code> queries
+	 */
+	public boolean supportsDistinct() {
+		return true;
+	}
+
 	public boolean isUnsupported() {
 		return false;
 	}

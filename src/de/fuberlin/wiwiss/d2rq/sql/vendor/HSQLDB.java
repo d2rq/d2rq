@@ -8,6 +8,8 @@ import org.hsqldb.types.Types;
 
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
 import de.fuberlin.wiwiss.d2rq.sql.types.SQLApproximateNumeric;
+import de.fuberlin.wiwiss.d2rq.sql.types.SQLBinary;
+import de.fuberlin.wiwiss.d2rq.sql.types.SQLCharacterString;
 import de.fuberlin.wiwiss.d2rq.sql.types.SQLInterval;
 import de.fuberlin.wiwiss.d2rq.sql.types.UnsupportedDataType;
 
@@ -19,6 +21,15 @@ public class HSQLDB extends SQL92 {
 	
 	@Override
 	public DataType getDataType(int jdbcType, String name, int size) {
+
+		// Doesn't support DISTINCT over LOB types
+		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
+			return new SQLCharacterString(this, false);
+		}
+		if (jdbcType == Types.BLOB) {
+			return new SQLBinary(this, false);
+		}
+		
 		// HSQLDB 2.2.8 reports INTERVAL types as VARCHAR 
 		if (jdbcType == Types.VARCHAR && name.startsWith("INTERVAL")) {
 			return new SQLInterval(this);

@@ -225,17 +225,6 @@ public class MapParser {
 		while (stmts.hasNext()) {
 			database.setPassword(stmts.nextStatement().getString());
 		}
-		stmts = r.listProperties(D2RQ.allowDistinct);
-		while (stmts.hasNext()) {
-			String allowDistinct = stmts.nextStatement().getString();
-			if (allowDistinct.equals("true")) {
-				database.setAllowDistinct(true);
-			} else if (allowDistinct.equals("false")) {
-				database.setAllowDistinct(false);
-			} else {
-				throw new D2RQException("d2rq:allowDistinct value must be true or false");
-			}
-		}
 		stmts = r.listProperties(D2RQ.resultSizeLimit);
 		while (stmts.hasNext()) {
 			try {

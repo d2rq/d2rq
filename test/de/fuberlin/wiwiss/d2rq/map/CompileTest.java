@@ -14,6 +14,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.sql.DummyDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 public class CompileTest extends TestCase {
@@ -32,6 +33,7 @@ public class CompileTest extends TestCase {
 		this.model = ModelFactory.createDefaultModel();
 		this.mapping = new Mapping();
 		this.database = new Database(this.model.createResource());
+		database.useConnectedDB(new DummyDB());
 		this.mapping.addDatabase(this.database);
 
 		employees = createClassMap("http://test/employee@@e.ID@@");

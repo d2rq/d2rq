@@ -7,13 +7,23 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 public class SQLBinary extends DataType {
-	public SQLBinary(Vendor syntax) {
+	private final boolean supportsDistinct;
+	
+	public SQLBinary(Vendor syntax, boolean supportsDistinct) {
 		super(syntax, "BINARY");
+		this.supportsDistinct = supportsDistinct;
 	}
+
 	@Override
 	public boolean isIRISafe() {
 		return true;
 	}
+	
+	@Override
+	public boolean supportsDistinct() {
+		return supportsDistinct;
+	}
+	
 	@Override
 	public String rdfType() {
 		return "xsd:hexBinary";

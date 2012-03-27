@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -113,6 +114,19 @@ public class RelationBuilder {
 	}
 	
 	public Relation buildRelation(ConnectedDB database) {
+		if (!isUnique) {
+			for (ProjectionSpec projection: projections) {
+				for (Attribute column: projection.requiredAttributes()) {
+					if (!database.columnType(column).supportsDistinct()) {
+						throw new D2RQException("The datatype of " + column + " (" + 
+								database.columnType(column) + ") does not support " +
+								"SELECT DISTINCT and therefore cannot be used in a " +
+								"context where d2rq:containsDuplicates is true.", 
+								D2RQException.DATATYPE_DOES_NOT_SUPPORT_DISTINCT);
+					}
+				}
+			}
+		}
 		return new RelationImpl(
 				database,
 				aliases(), 

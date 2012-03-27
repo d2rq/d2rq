@@ -45,7 +45,6 @@ public class ConnectedDB {
 	private String jdbcURL;
 	private String username;
 	private String password;
-	private boolean allowDistinct;
 	private final Map<Attribute,DataType> cachedColumnTypes = 
 		new HashMap<Attribute,DataType>();
 	private final Map<Attribute,GenericType> overriddenColumnTypes =
@@ -113,18 +112,16 @@ public class ConnectedDB {
 	private final KeepAliveAgent keepAliveAgent;
 	
 	public ConnectedDB(String jdbcURL, String username, String password) {
-		this(jdbcURL, username, password, true,
+		this(jdbcURL, username, password,
 				Collections.<String,GenericType>emptyMap(),
 				Database.NO_LIMIT, Database.NO_FETCH_SIZE, null);
 	}
 	
-	public ConnectedDB(String jdbcURL, String username, 
-			String password, boolean allowDistinct, 
+	public ConnectedDB(String jdbcURL, String username, String password, 
 			Map<String,GenericType> columnTypes,
 			int limit, int fetchSize, Properties connectionProperties) {
 		// TODO replace column type arguments with a single column => type map
 		this.jdbcURL = jdbcURL;
-		this.allowDistinct = allowDistinct;
 		this.username = username;
 		this.password = password;
 		this.limit = limit;
@@ -246,6 +243,8 @@ public class ConnectedDB {
 		if (!cachedColumnTypes.containsKey(column)) {
 			if (overriddenColumnTypes.containsKey(column)) {
 				cachedColumnTypes.put(column, overriddenColumnTypes.get(column).dataTypeFor(vendor()));
+			} else if (schemaInspector() == null) {
+				cachedColumnTypes.put(column, GenericType.CHARACTER.dataTypeFor(vendor()));
 			} else {
 				cachedColumnTypes.put(column, schemaInspector().columnType(column));
 			}
@@ -345,16 +344,6 @@ public class ConnectedDB {
 		return uniqueIndexCache.get(tableName);
 	}
     
-	/** 
-	 * Some Databases do not handle large entries correctly.
-	 * For example MSAccess cuts strings larger than 256 bytes when queried
-	 * with the DISTINCT keyword.
-	 * TODO We would need some assertions about a database or specific columns.
-	 */
-	public boolean allowDistinct() {
-		return this.allowDistinct;
-	}
-	
 	/**
 	 * In some situations, MySQL stores table names using lowercase only, and then performs
 	 * case-insensitive comparison.

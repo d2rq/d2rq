@@ -27,7 +27,7 @@ public class PostgreSQL extends SQL92 {
 		if (standard != null) return standard;
 
 		if ("uuid".equals(name)) {
-			return new SQLCharacterString(this);
+			return new SQLCharacterString(this, true);
 		}
 
 		return null;

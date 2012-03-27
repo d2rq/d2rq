@@ -20,7 +20,7 @@ public class DummyDB extends ConnectedDB {
 	}
 
 	public DummyDB(Map<String,GenericType> overrideColumnTypes) {
-		super(null, null, null, false, overrideColumnTypes, Database.NO_LIMIT, Database.NO_FETCH_SIZE, null);
+		super(null, null, null, overrideColumnTypes, Database.NO_LIMIT, Database.NO_FETCH_SIZE, null);
 		this.vendor = Vendor.SQL92;
 	}
 	

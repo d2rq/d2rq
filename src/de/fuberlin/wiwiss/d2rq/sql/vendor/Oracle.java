@@ -5,11 +5,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 
+import org.hsqldb.types.Types;
+
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
 import de.fuberlin.wiwiss.d2rq.sql.types.SQLApproximateNumeric;
+import de.fuberlin.wiwiss.d2rq.sql.types.SQLBinary;
 import de.fuberlin.wiwiss.d2rq.sql.types.SQLCharacterString;
 import de.fuberlin.wiwiss.d2rq.sql.types.UnsupportedDataType;
 
@@ -42,12 +45,21 @@ public class Oracle extends SQL92 {
 
 	@Override
 	public DataType getDataType(int jdbcType, String name, int size) {
+		
+		// Doesn't support DISTINCT over LOB types
+		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
+			return new SQLCharacterString(this, false);
+		}
+		if (jdbcType == Types.BLOB) {
+			return new SQLBinary(this, false);
+		}
+		
 		DataType standard = super.getDataType(jdbcType, name, size);
 		if (standard != null) return standard;
 
 		// Oracle-specific character string types
 		if ("VARCHAR2".equals(name) || "NVARCHAR2".equals(name)) {
-			return new SQLCharacterString(this);
+			return new SQLCharacterString(this, true);
 		}
 
 		// Oracle-specific floating point types

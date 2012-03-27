@@ -100,8 +100,9 @@ d2rq:intervalColumn a rdf:Property;
 	rdfs:domain d2rq:Database;
 	.
 d2rq:allowDistinct a rdf:Property;
+    a owl:DeprecatedProperty;
 	rdfs:label "Allow distinct";
-	rdfs:comment "Value: true/false that describe the databases ability to handle DISTINCT correctly. (e.g. MSAccess cuts fields longer than 256 chars)";
+	rdfs:comment "Value: true/false that describe the databases ability to handle DISTINCT correctly. Deprecated, the engine now determines this automatically.";
 	rdfs:domain d2rq:Database;
 	.
 d2rq:resultSizeLimit a rdf:Property;
