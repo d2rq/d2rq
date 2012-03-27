@@ -29,6 +29,7 @@ public class D2RQTestSuite {
 		suite.addTest(de.fuberlin.wiwiss.d2rq.functional_tests.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.helpers.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.map.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.mapgen.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.nodes.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.parser.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.pp.AllTests.suite());

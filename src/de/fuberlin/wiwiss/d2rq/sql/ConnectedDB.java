@@ -189,6 +189,9 @@ public class ConnectedDB {
 	}
 
 	private void connect() {
+		if (jdbcURL != null && !jdbcURL.toLowerCase().startsWith("jdbc:")) {
+			throw new D2RQException("Not a JDBC URL: " + jdbcURL, D2RQException.D2RQ_DB_CONNECTION_FAILED);
+		}
 		try {
 			this.connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
 		} catch (SQLException ex) {

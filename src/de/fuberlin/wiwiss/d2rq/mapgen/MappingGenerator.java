@@ -10,11 +10,11 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -59,7 +59,7 @@ public class MappingGenerator {
 	private String instanceNamespaceURI;
 	private String vocabNamespaceURI;
 	private String driverClass = null;
-	private String databaseSchema = null;
+	private Filter filter = Filter.ALL;
 	private PrintWriter out = null;
 	private PrintWriter err = null;
 	private PrintWriter progress = null;
@@ -92,10 +92,10 @@ public class MappingGenerator {
 		this.vocabNamespaceURI = uri;
 	}
 
-	public void setDatabaseSchema(String schema) {
-		this.databaseSchema = schema;
+	public void setFilter(Filter filter) {
+		this.filter = filter;
 	}
-
+	
 	public void setJDBCDriverClass(String driverClassName) {
 		this.driverClass = driverClassName;
 	}
@@ -193,7 +193,11 @@ public class MappingGenerator {
 		writeDatabase();
 		initVocabularyModel();
 		identifyLinkTables();
-		for (RelationName tableName: schema.listTableNames(databaseSchema)) {
+		for (RelationName tableName: schema.listTableNames(filter.getSingleSchema())) {
+			if (!filter.matches(tableName)) {
+				progress.println("Skipping table " + tableName);
+				continue;
+			}
 			if (!this.schema.isLinkTable(tableName)) {
 				writeTable(tableName);
 			}
@@ -243,11 +247,15 @@ public class MappingGenerator {
 			this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
 		}
 		this.out.println("\t.");
-		if (generateLabelBridges) {
+		if (generateLabelBridges && hasPrimaryKey(tableName)) {
 			writeLabelBridge(tableName);
 		}
 		List<Join> foreignKeys = schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		for (Attribute column: schema.listColumns(tableName)) {
+			if (!filter.matches(column)) {
+				progress.println("Skipping column " + column);
+				continue;
+			}
 			if (isInForeignKey(column, foreignKeys)) continue;
 			if (schema.columnType(column) == null) {
 				writeWarning(new String[]{
@@ -267,11 +275,26 @@ public class MappingGenerator {
 			writeColumn(column);
 		}
 		for (Join fk: foreignKeys) {
+			if (!filter.matches(fk.table1()) || !filter.matches(fk.table2()) || 
+					!filter.matchesAll(fk.attributes1()) || !filter.matchesAll(fk.attributes2())) {
+				progress.println("Skipping foreign key: " + fk);
+				continue;
+			}
 			writeForeignKey(fk);
 		}
-		for (Entry<RelationName,RelationName> entry: linkTables.entrySet()) {
-			if (entry.getValue().equals(tableName)) {
-				writeLinkTable(entry.getKey());
+		for (RelationName linkTable: linkTables.keySet()) {
+			if (linkTables.get(linkTable).equals(tableName)) {
+				List<Join> keys = schema.foreignKeys(linkTable, DatabaseSchemaInspector.KEYS_IMPORTED);
+				Join join1 = keys.get(0);
+				Join join2 = keys.get(1);
+				if (!filter.matches(join1.table1()) || !filter.matches(join1.table2()) || 
+						!filter.matchesAll(join1.attributes1()) || !filter.matchesAll(join1.attributes2()) ||
+						!filter.matches(join2.table1()) || !filter.matches(join2.table2()) || 
+						!filter.matchesAll(join2.attributes1()) || !filter.matchesAll(join2.attributes2())) {
+					progress.println("Skipping link table " + linkTable);
+					continue;
+				}
+				writeLinkTable(linkTable, keys);
 			}
 		}
 		this.out.println();
@@ -348,8 +371,7 @@ public class MappingGenerator {
 //		}
 	}
 	
-	private void writeLinkTable(RelationName linkTableName) {
-		List<Join> foreignKeys = schema.foreignKeys(linkTableName, DatabaseSchemaInspector.KEYS_IMPORTED);
+	private void writeLinkTable(RelationName linkTableName, List<Join> foreignKeys) {
 		Join join1 = (Join) foreignKeys.get(0);
 		Join join2 = (Join) foreignKeys.get(1);
 		RelationName table1 = this.schema.getCorrectCapitalization(join1.table2());
@@ -433,13 +455,21 @@ public class MappingGenerator {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attributes));
 	}
 
+	private List<Attribute> filteredPrimaryKeyColumns(RelationName tableName) {
+		List<Attribute> columns = schema.primaryKeyColumns(tableName);
+		if (filter.matchesAll(columns)) {
+			return columns;
+		}
+		return Collections.<Attribute>emptyList();
+	}
+	
 	private boolean hasPrimaryKey(RelationName tableName) {
-		return !this.schema.primaryKeyColumns(tableName).isEmpty();
+		return !filteredPrimaryKeyColumns(tableName).isEmpty();
 	}
 	
 	private String uriPattern(RelationName tableName) {
 		String result = this.instanceNamespaceURI + tableName.qualifiedName();
-		for (Attribute column: schema.primaryKeyColumns(tableName)) {
+		for (Attribute column: filteredPrimaryKeyColumns(tableName)) {
 			result += "/@@" + column.qualifiedName();
 			if (!schema.columnType(column).isIRISafe()) {
 				result += "|urlify";
@@ -451,7 +481,7 @@ public class MappingGenerator {
 	
 	private String labelPattern(RelationName tableName) {
 		String result = tableName + " #";
-		Iterator<Attribute> it = this.schema.primaryKeyColumns(tableName).iterator();
+		Iterator<Attribute> it = filteredPrimaryKeyColumns(tableName).iterator();
 		while (it.hasNext()) {
 			result += "@@" + it.next().qualifiedName() + "@@";
 			if (it.hasNext()) {
@@ -480,8 +510,8 @@ public class MappingGenerator {
 	}
 	
 	private void identifyLinkTables() {
-		progress.println("Identifying link tables") ;
-		for (RelationName tableName: schema.listTableNames(databaseSchema)) {
+		progress.println("Identifying link tables");
+		for (RelationName tableName: schema.listTableNames(filter.getSingleSchema())) {
 			if (!this.schema.isLinkTable(tableName)) {
 				continue;
 			}

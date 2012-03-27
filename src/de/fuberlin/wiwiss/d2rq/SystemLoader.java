@@ -11,6 +11,7 @@ import com.hp.hpl.jena.util.FileUtils;
 
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
+import de.fuberlin.wiwiss.d2rq.mapgen.Filter;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.server.ConfigLoader;
@@ -42,13 +43,13 @@ public class SystemLoader {
 
 	private String username = null;
 	private String password = null;
-	private String schema = null;
 	private String jdbcDriverClass = null;
 	private String sqlScript = null;
 	private String jdbcURL = null;
 	private String mappingFile = null;
 	private String baseURI = null;
 	private String resourceStem = "";
+	private Filter filter = null;
 	private boolean fastMode = false;
 	private int port = -1;
 	private int resultSizeLimit = Database.NO_LIMIT;
@@ -71,8 +72,8 @@ public class SystemLoader {
 		this.password = password;
 	}
 	
-	public void setSchema(String schema) {
-		this.schema = schema;
+	public void setFilter(Filter filter) {
+		this.filter = filter;
 	}
 	
 	public void setJDBCDriverClass(String driver) {
@@ -197,8 +198,8 @@ public class SystemLoader {
 			if (jdbcDriverClass != null) {
 				generator.setJDBCDriverClass(jdbcDriverClass);
 			}
-			if (schema != null) {
-				generator.setDatabaseSchema(schema);
+			if (filter != null) {
+				generator.setFilter(filter);
 			}
 			if (sqlScript != null) {
 				// If there's a startup SQL script, copy its name into the generated mapping

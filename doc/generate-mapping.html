@@ -37,7 +37,7 @@ on the column's name. This mapping file can be used as-is or can be customized.<
 <h2 id="usage">Usage</h2>
 
 <pre>generate-mapping <a href="#arg-u">[-u user]</a> <a href="#arg-p">[-p password]</a> <a href="#arg-d">[-d driver]</a>
-        <a href="#arg-s">[-s schema]</a> <a href="#arg-l">[-l script.sql]</a>
+        <a href="#arg-l">[-l script.sql]</a> <a href="#arg-include-exclude">[--[skip-](schemas|tables|columns) list]</a>
         <a href="#arg-v">[-v]</a> <a href="#arg-b">[-b baseURI]</a> <a href="#arg-o">[-o outfile.ttl]</a>
         <a href="#arg-verbose">[--verbose]</a> <a href="#arg-debug">[--debug]</a>
         <a href="#arg-jdbc-url">jdbcURL</a></pre>
@@ -77,11 +77,32 @@ consult the driver documentation. Examples:</p>
 Microsoft SQL Server: <code>com.microsoft.sqlserver.jdbc.SQLServerDriver</code></p>
 </dd>
 
-<dt id="arg-s"><code>-s schema</dt></code>
-<dd>Only map tables in a specific database schema.</dd>
-
 <dt id="arg-l"><code>-l script.sql</code></dt>
 <dd>Load a SQL script before running the tool. Useful for initializing the connection and testing. The <a href="d2rq-language#d2rq:startupSQLScript"><code>d2rq:startupSQLScript</code></a> property of the database in the generated mapping will be initialized with the same value.</dd>
+
+<dt id="arg-include-exclude"><code>--schemas</code>, <code>--tables</code>, <code>--columns</code>, <code>--skip-schemas</code>, <code>--skip-tables</code>, <code>--skip-columns</code></dt>
+<dd><p>Only map the specified schemas, tables or columns.
+The value of each argument is a comma-separated list of names.
+Schema names are of the form <code>schema</code>,
+table names of the form <code>table</code> or </code>schema.table</code>,
+and column names are <code>table.column</code> or <code>schema.table.column</code>.</p>
+
+<p>Each dot-separated segment can be specified as a regular expression
+encloded between slashes.</p>
+
+<p>If the value starts with “<code>@</code>”, then it is interpreted
+as a file name, and the list of names is loaded from the file.
+The file contains one name per line or comma-separated names. Examples follow:</p>
+
+<ul>
+<li><code>--schema SCOTT</code> (maps only tables in the <code>SCOTT</code> schema)</li>
+<li><code>--tables PERSONS,ORGS</code> (maps only the <code>PERSONS</code> and <code>ORGS</code> tables)</li>
+<li><code>--skip-table TEMP_CACHE</code> (skips the <code>TEMP_CACHE</code> table)</li>
+<li><code>--skip-columns /.*/.CHECKSUM</code> (skips the <code>CHECKSUM</code> column of each table, if present)</li>
+<li><code>--skip-tables /BACKUP.*/i</code> (skips tables <code>backup1</code>, <code>BACKUP_2</code> and so on)</li>
+<li><code>--skip-tables @exclude.txt</code> (reads a list of excluded table names from a file)</li>
+</ul>
+</dd>
 </dl>
 
 
@@ -110,18 +131,22 @@ For more information on vocabulary serving, see the <a href="d2rq-language#servi
 </dl>
 
 
-<h2 id="example-mysql">Example: Local MySQL database</h2>
+<h2 id="examples">Examples</h2>
+
+<h3 id="example-mysql">Local MySQL database</h3>
 
 <pre>generate-mapping -u root jdbc:mysql:///iswc</pre>
 
-<h2 id="example-oracle">Example: Remote Oracle database</h2>
+
+<h3 id="example-oracle">Remote Oracle database</h3>
 
 <pre>generate-mapping -u riccyg -p <em>password</em> -d oracle.jdbc.OracleDriver
     -o staffdb-mapping.ttl jdbc:oracle:thin:@ora.intranet.deri.ie:1521:staffdb</pre>
 
 <p>This will save the mapping file into <code>staffdb-mapping.ttl</code>.</p>
 
-<h2 id="example-inmemory">Example: Initializing a temporary in-memory database form a SQL dump</h2>
+
+<h3 id="example-inmemory">Initializing a temporary in-memory database form a SQL dump</h3>
 
 <pre>generate-mapping -l db_dump.sql -o mapping.ttl</pre>
 
@@ -132,6 +157,15 @@ For more information on vocabulary serving, see the <a href="d2rq-language#servi
   The mapping file will reference the dump as a
   <a href="d2rq-language#d2rq:startupSQLScript"><code>d2rq:startupSQLScript</code></a>.
   This is a useful setup for quickly testing and debugging D2RQ.</p>
+
+
+<h3 id="example-exclude">Read a list of excluded columns from a file</h3>
+
+<pre>generate-mapping -u root --skip-columns @bad-columns.txt jdbc:mysql:///iswc</pre>
+
+<p>The file <code>bad-columns.txt</code> would contain column names in
+<code>schema.table.column</code> or <code>table.column</code> notation,
+one per line.</p>
 
   </body>
 </html>

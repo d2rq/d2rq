@@ -140,6 +140,7 @@ public interface Vendor {
 	DataType getDataType(int jdbcType, String name, int size);
 
 	/**
+	 * TODO Use the Filter interface for this
 	 * @param schema A schema name, or <code>null</code> for the connection's default schema
 	 * @param table A table name
 	 * @return <code>true</code> if this is a system table that doesn't contain user/application data

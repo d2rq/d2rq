@@ -41,7 +41,7 @@ public class dump_rdf extends CommandLineTool {
 		printStandardArguments(true);
 		System.err.println();
 		System.err.println("  RDF output options:");
-		System.err.println("    -b baseURI      Base URI for generated RDF (default: " + SystemLoader.DEFAULT_BASE_URI + ")");
+		System.err.println("    -b baseURI      Base URI for RDF output (default: " + SystemLoader.DEFAULT_BASE_URI + ")");
 		System.err.println("    -f format       One of N-TRIPLE (default), RDF/XML, RDF/XML-ABBREV, TURTLE");
 		System.err.println("    -o outfile      Output file name (default: stdout)");
 		System.err.println("    --verbose       Print debug information");

@@ -36,11 +36,10 @@ public class d2r_query extends CommandLineTool {
 		System.err.println("  d2r-query [query-options] [connection-options] -l script.sql query");
 		System.err.println();
 		printStandardArguments(true);
-		System.err.println("    query           A SPARQL query, e.g., \"SELECT * { ?s rdf:type ?o } LIMIT 10\"");
+		System.err.println("    query           A SPARQL query, e.g., \"SELECT * {?s rdf:type ?o} LIMIT 10\"");
 		System.err.println("                    A value of @file.sparql reads the query from a file.");
-		System.err.println();
 		System.err.println("  Query options:");
-		System.err.println("    -b baseURI      Base URI for generated RDF (default: " + SystemLoader.DEFAULT_BASE_URI + ")");
+		System.err.println("    -b baseURI      Base URI for RDF output (default: " + SystemLoader.DEFAULT_BASE_URI + ")");
 		System.err.println("    -f format       One of text (default), xml, json, csv, tsv, srb, ttl");
 		System.err.println("    --verbose       Print debug information");
 		System.err.println();
