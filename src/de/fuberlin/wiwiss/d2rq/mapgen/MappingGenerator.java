@@ -70,7 +70,9 @@ public class MappingGenerator {
 	private boolean silent = true;
 	private boolean generateClasses = true;
 	private boolean generateLabelBridges = true;
+	private boolean generateDefinitionLabels = true;
 	private boolean handleLinkTables = true;
+	private boolean serveVocabulary = false;
 	private URI startupSQLScript;
 	
 	public MappingGenerator(ConnectedDB database) {
@@ -126,13 +128,26 @@ public class MappingGenerator {
 	public void setGenerateClasses(boolean flag) {
 		this.generateClasses = flag;
 	}
-	
-	public boolean isHandleLinkTables() {
-		return handleLinkTables;
+
+	/**
+	 * @param flag Handle Link Tables as properties (true) or normal tables (false)
+	 */
+	public void setHandleLinkTables(boolean flag) {
+		this.handleLinkTables = flag;
 	}
 
-	public void setHandleLinkTables(boolean handleLinkTables) {
-		this.handleLinkTables = handleLinkTables;
+	/**
+	 * @param flag Generate ClassDefinitionLabels and PropertyDefinitionLabels?
+	 */
+	public void setGenerateDefinitionLabels(boolean flag) {
+		this.generateDefinitionLabels = flag;
+	}
+
+	/**
+	 * @param flag Value for d2rq:serveVocabulary in map:Configuration
+	 */
+	public void setServeVocabulary(boolean flag) {
+		this.serveVocabulary = flag;
 	}
 
 	public void writeMapping(OutputStream out, OutputStream err) {
@@ -206,10 +221,11 @@ public class MappingGenerator {
 		this.out.println("@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .");
 		this.out.println("@prefix jdbc: <http://d2rq.org/terms/jdbc/> .");
 		this.out.println();
+		writeConfiguration();
 		writeDatabase();
 		initVocabularyModel();
 		Iterator it = schema.listTableNames(databaseSchema).iterator();
-		if (isHandleLinkTables()) {
+		if (handleLinkTables) {
 			identifyLinkTables();
 			while (it.hasNext()) {
 				RelationName tableName = (RelationName) it.next();
@@ -225,6 +241,17 @@ public class MappingGenerator {
 		}
 	}
 	
+	private void writeConfiguration() {
+		if (!silent) System.out.println("Generating d2rq:Configuration instance");
+		this.out.println(configName() + " a d2rq:Configuration;");
+		this.out.println("\td2rq:serveVocabulary " + serveVocabulary + ".");
+		this.out.println();
+	}
+
+	private String configName() {
+		return "map:Configuration";
+	}
+
 	private void writeDatabase() {
 		if (!silent) System.out.println("Generating d2rq:Database instance");
 		this.out.println(databaseName() + " a d2rq:Database;");
@@ -267,7 +294,9 @@ public class MappingGenerator {
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
 		if (generateClasses) {
 			this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
-			this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
+			if (generateDefinitionLabels) {
+				this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
+			}
 		}
 		this.out.println("\t.");
 		if (generateLabelBridges) {
@@ -293,7 +322,7 @@ public class MappingGenerator {
 			Join fk = (Join) it.next();
 			writeForeignKey(fk);
 		}
-		if (isHandleLinkTables()) {
+		if (handleLinkTables) {
 			it = this.linkTables.entrySet().iterator();
 			while (it.hasNext()) {
 				Entry entry = (Entry) it.next();
@@ -323,7 +352,9 @@ public class MappingGenerator {
 		this.out.println(propertyBridgeName(toRelationName(column)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(column.relationName()) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(column) + ";");
-		this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
+		if (generateDefinitionLabels) {
+			this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
+		}
 		this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
 		ColumnType colType = this.schema.columnType(column);
 		String xsd = schema.xsdTypeFor(colType);
