@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
+import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
@@ -11,30 +12,30 @@ import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 public class SQLBuildingTest extends TestCase {
 	private final static Attribute foo = new Attribute(null, "table", "foo");
 	
-	public void testSingleQuoteEscape() {
-		ConnectedDB db = new DummyDB();
-		assertEquals("'a'", db.singleQuote("a"));
-		assertEquals("''''", db.singleQuote("'"));
-		assertEquals("'\\\\'", db.singleQuote("\\"));
-		assertEquals("'Joe''s'", db.singleQuote("Joe's"));
-		assertEquals("'\\\\''\\\\''\\\\'", db.singleQuote("\\'\\'\\"));
-		assertEquals("'\"'", db.singleQuote("\""));
-		assertEquals("'`'", db.singleQuote("`"));
+	public void testSingleQuoteEscapeMySQL() {
+		Vendor vendor = Vendor.MySQL;
+		assertEquals("'a'", vendor.quoteStringLiteral("a"));
+		assertEquals("''''", vendor.quoteStringLiteral("'"));
+		assertEquals("'\\\\'", vendor.quoteStringLiteral("\\"));
+		assertEquals("'Joe''s'", vendor.quoteStringLiteral("Joe's"));
+		assertEquals("'\\\\''\\\\''\\\\'", vendor.quoteStringLiteral("\\'\\'\\"));
+		assertEquals("'\"'", vendor.quoteStringLiteral("\""));
+		assertEquals("'`'", vendor.quoteStringLiteral("`"));
 	}
 
-	public void testSingleQuoteEscapeOracle() {
-		ConnectedDB db = new DummyDB(ConnectedDB.Oracle);
-		assertEquals("'a'", db.singleQuote("a"));
-		assertEquals("''''", db.singleQuote("'"));
-		assertEquals("'\\'", db.singleQuote("\\"));
-		assertEquals("'Joe''s'", db.singleQuote("Joe's"));
-		assertEquals("'\\''\\''\\'", db.singleQuote("\\'\\'\\"));
-		assertEquals("'\"'", db.singleQuote("\""));
-		assertEquals("'`'", db.singleQuote("`"));
+	public void testSingleQuoteEscape() {
+		Vendor vendor = Vendor.SQL92;
+		assertEquals("'a'", vendor.quoteStringLiteral("a"));
+		assertEquals("''''", vendor.quoteStringLiteral("'"));
+		assertEquals("'\\'", vendor.quoteStringLiteral("\\"));
+		assertEquals("'Joe''s'", vendor.quoteStringLiteral("Joe's"));
+		assertEquals("'\\''\\''\\'", vendor.quoteStringLiteral("\\'\\'\\"));
+		assertEquals("'\"'", vendor.quoteStringLiteral("\""));
+		assertEquals("'`'", vendor.quoteStringLiteral("`"));
 	}
 
 	public void testQuoteIdentifierEscape() {
-		SQLSyntax db = new DummyDB().getSyntax();
+		Vendor db = Vendor.SQL92;
 		assertEquals("\"a\"", db.quoteIdentifier("a"));
 		assertEquals("\"'\"", db.quoteIdentifier("'"));
 		assertEquals("\"\"\"\"", db.quoteIdentifier("\""));
@@ -44,7 +45,7 @@ public class SQLBuildingTest extends TestCase {
 	}
 
 	public void testQuoteIdentifierEscapeMySQL() {
-		SQLSyntax db = new DummyDB(ConnectedDB.MySQL).getSyntax();
+		Vendor db = Vendor.MySQL;
 		assertEquals("`a`", db.quoteIdentifier("a"));
 		assertEquals("````", db.quoteIdentifier("`"));
 		assertEquals("`\\\\`", db.quoteIdentifier("\\"));
@@ -54,7 +55,7 @@ public class SQLBuildingTest extends TestCase {
 	}
 
 	public void testAttributeQuoting() {
-		SQLSyntax db = new DummyDB().getSyntax();
+		Vendor db = Vendor.SQL92;
 		assertEquals("\"schema\".\"table\".\"column\"",
 				db.quoteAttribute(new Attribute("schema", "table", "column")));
 		assertEquals("\"table\".\"column\"",
@@ -62,19 +63,19 @@ public class SQLBuildingTest extends TestCase {
 	}
 	
 	public void testDoubleQuotesInAttributesAreEscaped() {
-		SQLSyntax db = new DummyDB().getSyntax();
+		Vendor db = Vendor.SQL92;
 		assertEquals("\"sch\"\"ema\".\"ta\"\"ble\".\"col\"\"umn\"",
 				db.quoteAttribute(new Attribute("sch\"ema", "ta\"ble", "col\"umn")));
 	}
 	
 	public void testAttributeQuotingMySQL() {
-		SQLSyntax db = new DummyDB(ConnectedDB.MySQL).getSyntax();
+		Vendor db = Vendor.MySQL;
 		assertEquals("`table`.`column`",
 				db.quoteAttribute(new Attribute(null, "table", "column")));
 	}
 
 	public void testRelationNameQuoting() {
-		SQLSyntax db = new DummyDB().getSyntax();
+		Vendor db = new DummyDB().vendor();
 		assertEquals("\"schema\".\"table\"",
 				db.quoteRelationName(new RelationName("schema", "table")));
 		assertEquals("\"table\"",
@@ -82,13 +83,13 @@ public class SQLBuildingTest extends TestCase {
 	}
 	
 	public void testBackticksInRelationsAreEscapedMySQL() {
-		SQLSyntax db = new DummyDB(ConnectedDB.MySQL).getSyntax();
+		Vendor db = Vendor.MySQL;
 		assertEquals("`ta``ble`",
 				db.quoteRelationName(new RelationName(null, "ta`ble")));
 	}
 	
 	public void testRelationNameQuotingMySQL() {
-		SQLSyntax db = new DummyDB(ConnectedDB.MySQL).getSyntax();
+		Vendor db = Vendor.MySQL;
 		assertEquals("`table`",
 				db.quoteRelationName(new RelationName(null, "table")));
 	}
@@ -109,7 +110,7 @@ public class SQLBuildingTest extends TestCase {
 	}
 	
 	public void testNoLimitMSSQL() {
-		DummyDB db = new DummyDB(ConnectedDB.MSSQL);
+		DummyDB db = new DummyDB(Vendor.SQLServer);
 		db.setLimit(100);
 		Relation r = Relation.createSimpleRelation(db, new Attribute[]{foo});
 		assertEquals("SELECT DISTINCT TOP 100 \"table\".\"foo\" FROM \"table\"",
@@ -117,7 +118,7 @@ public class SQLBuildingTest extends TestCase {
 	}
 	
 	public void testNoLimitOracle() {
-		DummyDB db = new DummyDB(ConnectedDB.Oracle);
+		DummyDB db = new DummyDB(Vendor.Oracle);
 		db.setLimit(100);
 		Relation r = Relation.createSimpleRelation(db, new Attribute[]{foo});
 		assertEquals("SELECT DISTINCT \"table\".\"foo\" FROM \"table\" WHERE (ROWNUM <= 100)",

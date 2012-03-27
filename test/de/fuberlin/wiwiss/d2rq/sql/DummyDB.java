@@ -1,44 +1,39 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.types.DataType.GenericType;
+import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 public class DummyDB extends ConnectedDB {
-	private final String type;
-	private final Map<Attribute,SQLDataType> columnTypes = new HashMap<Attribute,SQLDataType>();
+	private final Vendor vendor;
 	private int limit = Database.NO_LIMIT;
 	
 	public DummyDB() {
-		this(ConnectedDB.Other);
+		this(Vendor.SQL92);
 	}
 	
-	public DummyDB(final String type) {
+	public DummyDB(final Vendor vendor) {
 		super(null, null, null);
-		this.type = type;
+		this.vendor = vendor;
 	}
 
-	public void setColumnType(Attribute attribute, SQLDataType type) {
-		columnTypes.put(attribute, type);
+	public DummyDB(Map<String,GenericType> overrideColumnTypes) {
+		super(null, null, null, false, overrideColumnTypes, Database.NO_LIMIT, Database.NO_FETCH_SIZE, null);
+		this.vendor = Vendor.SQL92;
 	}
-
+	
 	public void setLimit(int newLimit) {
 		limit = newLimit;
 	}
 
-	protected String getDatabaseProductType() {
-		return type;
-	}
-
-	public SQLDataType columnType(Attribute attribute) {
-		if (columnTypes.containsKey(attribute)) {
-			return columnTypes.get(attribute);
-		}
-		return super.columnType(attribute);
+	@Override
+	public Vendor vendor() {
+		return vendor;
 	}
 	
+	@Override
 	public int limit() {
 		return limit;
 	}

@@ -63,7 +63,8 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	private final Capabilities capabilities = new D2RQCapabilities();
 	private final Mapping mapping;
 	private final D2RQDatasetGraph dataset = new D2RQDatasetGraph(this);
-
+	private boolean open = false;
+	
 	/**
 	 * Creates a new D2RQ graph from a Jena model containing a D2RQ
 	 * mapping.
@@ -84,7 +85,6 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 */
 	public GraphD2RQ(Mapping mapping) throws D2RQException {
 		this.mapping = mapping;
-		this.mapping.validate();
 		getPrefixMapping().setNsPrefixes(mapping.getPrefixMapping());
 	}
 
@@ -138,8 +138,16 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * @throws D2RQException on connection failure
 	 */
 	public void connect() {
-		for (Database db: mapping.databases()) {
-			db.connectedDB().connection();
+		checkOpen();
+	}
+
+	protected void checkOpen() {
+		if (!open) {
+			open = true;
+			for (Database db: mapping.databases()) {
+				db.connectedDB().connection();
+			}
+			this.mapping.validate();
 		}
 	}
 	

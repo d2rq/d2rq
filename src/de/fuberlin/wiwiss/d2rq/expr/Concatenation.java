@@ -67,7 +67,7 @@ public class Concatenation extends Expression {
 			Expression part = (Expression) parts.get(i);
 			fragments[i] = part.toSQL(database, aliases);
 		}
-		return database.getSyntax().getConcatenationExpression(fragments);
+		return database.vendor().getConcatenationExpression(fragments);
 	}
 	
 	public boolean equals(Object other) {

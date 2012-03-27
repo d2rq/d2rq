@@ -37,7 +37,7 @@ public class AttributeNotNull extends Expression {
 	}
 
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
-		return database.getSyntax().quoteAttribute(this.attribute) + " IS NOT NULL";
+		return database.vendor().quoteAttribute(this.attribute) + " IS NOT NULL";
 	}
 	
 	public String toString() {

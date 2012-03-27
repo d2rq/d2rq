@@ -51,7 +51,8 @@ public class SystemLoader {
 	private String resourceStem = "";
 	private boolean fastMode = false;
 	private int port = -1;
-
+	private int resultSizeLimit = Database.NO_LIMIT;
+	
 	private ConnectedDB connectedDB = null;
 	private MappingGenerator generator = null;
 	private Model mapModel = null;
@@ -160,6 +161,10 @@ public class SystemLoader {
 		this.mappingFile = mappingURL;
 	}
 
+	public void setResultSizeLimit(int value) {
+		this.resultSizeLimit = value;
+	}
+	
 	private ConnectedDB getConnectedDB() {
 		if (connectedDB == null) {
 			connectedDB = new ConnectedDB(jdbcURL, username, password);
@@ -248,6 +253,9 @@ public class SystemLoader {
 				// script twice on startup.
 				for (Database db: mapping.databases()) {
 					if (db.getJDBCDSN().equals(connectedDB.getJdbcURL())) {
+						if (resultSizeLimit != Database.NO_LIMIT) {
+							db.setResultSizeLimit(resultSizeLimit);
+						}
 						db.useConnectedDB(connectedDB);
 					}
 				}

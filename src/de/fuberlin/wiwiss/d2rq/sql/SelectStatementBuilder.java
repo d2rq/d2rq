@@ -59,7 +59,7 @@ public class SelectStatementBuilder {
 			addSelectSpec(projection);
 		}
 		eliminateDuplicates = !relation.isUnique();
-		addCondition(database.getSyntax().getRowNumLimitAsExpression(limit));
+		addCondition(database.vendor().getRowNumLimitAsExpression(limit));
 	
 		addMentionedTablesFromConditions();		
 	}
@@ -85,7 +85,7 @@ public class SelectStatementBuilder {
 			result.append("DISTINCT ");
 		}
 
-		String s = database.getSyntax().getRowNumLimitAsSelectModifier(limit);
+		String s = database.vendor().getRowNumLimitAsSelectModifier(limit);
 		if (!"".equals(s)) {
 			result.append(s);
 			result.append(" ");
@@ -109,10 +109,10 @@ public class SelectStatementBuilder {
 		while (tableIt.hasNext()) {			
 			RelationName tableName = tableIt.next();
 			if (this.aliases.isAlias(tableName)) {
-				result.append(database.getSyntax().getRelationNameAliasExpression(
+				result.append(database.vendor().getRelationNameAliasExpression(
 						aliases.originalOf(tableName), tableName));
 			} else {
-				result.append(database.getSyntax().quoteRelationName(tableName));
+				result.append(database.vendor().quoteRelationName(tableName));
 			}
 			if (tableIt.hasNext()) {
 				result.append(", ");
@@ -132,7 +132,7 @@ public class SelectStatementBuilder {
 			}
 		}
 		
-		s = database.getSyntax().getRowNumLimitAsQueryAppendage(limit);
+		s = database.vendor().getRowNumLimitAsQueryAppendage(limit);
 		if (!"".equals(s)) {
 			result.append(" ");
 			result.append(s);

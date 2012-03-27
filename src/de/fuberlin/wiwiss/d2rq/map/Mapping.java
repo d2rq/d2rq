@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
-import de.fuberlin.wiwiss.d2rq.sql.SQLDataType;
+import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
@@ -187,11 +187,17 @@ public class Mapping {
 		}
 		void validate() {
 			for (Attribute attribute: relation.allKnownAttributes()) {
-				SQLDataType type = relation.database().columnType(relation.aliases().originalOf(attribute));
-				if (type == SQLDataType.UNMAPPABLE) {
+				DataType dataType = relation.database().columnType(
+						relation.aliases().originalOf(attribute));
+				if (dataType == null) {
+					throw new D2RQException("Column " + relation.aliases().originalOf(attribute) +
+							" has a datatype that is unknown to D2RQ; override it with d2rq:xxxColumn in the mapping file",
+							D2RQException.DATATYPE_UNKNOWN);
+				}
+				if (dataType.isUnsupported()) {
 					throw new D2RQException("Column " + 
 							relation.aliases().originalOf(attribute) +
-							" has a datatype that D2RQ cannot express in RDF", 
+							" has a datatype that D2RQ cannot express in RDF: " + dataType, 
 							D2RQException.DATATYPE_UNMAPPABLE);
 				}
 			}

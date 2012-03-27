@@ -18,8 +18,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import org.hsqldb.types.Types;
-
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -35,9 +33,9 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
-import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
 
 /**
  * Generates a D2RQ mapping by introspecting a database schema.
@@ -216,7 +214,7 @@ public class MappingGenerator {
 		if (startupSQLScript != null) {
 			out.println("\td2rq:startupSQLScript <" + startupSQLScript + ">;");
 		}
-		Properties props = database.getSyntax().getDefaultConnectionProperties();
+		Properties props = database.vendor().getDefaultConnectionProperties();
 		for (Object property: props.keySet()) {
 			String value = props.getProperty((String) property);
 			this.out.println("\tjdbc:" + property + " \"" + value + "\";");
@@ -251,10 +249,18 @@ public class MappingGenerator {
 		List<Join> foreignKeys = schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		for (Attribute column: schema.listColumns(tableName)) {
 			if (isInForeignKey(column, foreignKeys)) continue;
-			if (!isMappableColumnType(column)) {
+			if (schema.columnType(column) == null) {
 				writeWarning(new String[]{
 						"Skipping column: " + column,
-						"    Its datatype " + schema.columnType(column).typeName() + " cannot be mapped to RDF"
+						"    Its datatype " + schema.columnType(column) + " is unknown to D2RQ.",
+						"    You can override the column's datatype using d2rq:xxxColumn and add a property bridge.",
+					}, "");
+				continue;
+			}
+			if (schema.columnType(column).isUnsupported()) {
+				writeWarning(new String[]{
+						"Skipping column: " + column,
+						"    Its datatype " + schema.columnType(column) + " cannot be mapped to RDF"
 					}, "");
 				continue;
 			}
@@ -291,15 +297,15 @@ public class MappingGenerator {
 		this.out.println("\td2rq:property " + vocabularyTermQName(column) + ";");
 		this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
 		this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
-		ColumnType colType = this.schema.columnType(column);
-		String xsd = schema.xsdTypeFor(colType);
+		DataType colType = this.schema.columnType(column);
+		String xsd = colType.rdfType();
 		if (xsd != null && !"xsd:string".equals(xsd)) {
 			// We use plain literals instead of xsd:strings, so skip
 			// this if it's an xsd:string
 			this.out.println("\td2rq:datatype " + xsd + ";");
 		}
-		if (colType.typeId() == Types.BIT) {
-			this.out.println("\td2rq:valueRegex \"^[01]*$\";");
+		if (colType.valueRegex() != null) {
+			this.out.println("\td2rq:valueRegex \"" + colType.valueRegex() + "\";");
 		}
 		writeColumnHacks(column, colType);
 		if (xsd == null) {
@@ -335,7 +341,7 @@ public class MappingGenerator {
 	}
 
 	// TODO Factor out into its own interface & classes for different RDBMS?
-	public void writeColumnHacks(Attribute column, ColumnType colType) {
+	public void writeColumnHacks(Attribute column, DataType colType) {
 //		if (DatabaseSchemaInspector.isStringType(colType)) {
 //			// Suppress empty strings ('')
 //			out.println("\td2rq:condition \"" + column.getQualifiedName() + " != ''\";");			
@@ -435,7 +441,7 @@ public class MappingGenerator {
 		String result = this.instanceNamespaceURI + tableName.qualifiedName();
 		for (Attribute column: schema.primaryKeyColumns(tableName)) {
 			result += "/@@" + column.qualifiedName();
-			if (DatabaseSchemaInspector.isStringType(this.schema.columnType(column))) {
+			if (!schema.columnType(column).isIRISafe()) {
 				result += "|urlify";
 			}
 			result += "@@";
@@ -492,10 +498,6 @@ public class MappingGenerator {
 		return false;
 	}
 
-	private boolean isMappableColumnType(Attribute column) {
-		return schema.xsdTypeFor(schema.columnType(column)) != ColumnType.UNMAPPABLE;
-	}
-	
 	private void initVocabularyModel() {
 		this.vocabModel.setNsPrefix("rdf", RDF.getURI());
 		this.vocabModel.setNsPrefix("rdfs", RDFS.getURI());

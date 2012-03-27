@@ -11,8 +11,8 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 /**
  * A database column.
  * 
- * TODO: Attribute should track its SQL datatype code
- * TODO: Attribute should track wether it is nullable
+ * TODO: Attribute should track its {@link DataType}
+ * TODO: Attribute should track whether it is nullable
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
@@ -47,7 +47,7 @@ public class Attribute implements ProjectionSpec {
 	}
 	
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
-		return database.getSyntax().quoteAttribute(this);
+		return database.vendor().quoteAttribute(this);
 	}
 	
 	/**

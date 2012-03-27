@@ -81,11 +81,11 @@ public class dump_rdf extends CommandLineTool {
 			loader.setSystemBaseURI(cmd.getArg(baseArg).getValue());
 		}
 
+		loader.setResultSizeLimit(Database.NO_LIMIT);
 		Mapping mapping = loader.getMapping();
 		try {
 			// Override the d2rq:resultSizeLimit given in the mapping
 			for (Database db: mapping.databases()) {
-				db.setResultSizeLimit(Database.NO_LIMIT);
 				db.connectedDB().setDefaultFetchSize(DUMP_DEFAULT_FETCH_SIZE);
 			}	
 

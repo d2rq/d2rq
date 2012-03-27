@@ -80,12 +80,13 @@ public abstract class DatatypeTestBase extends TestCase {
 		this.datatype = datatype;
 		Mapping mapping = generateMapping();
 		graph = getGraph(mapping);
+		graph.connect();
 		inspector = mapping.databases().iterator().next().connectedDB().schemaInspector();
 	}
 	
 	protected void assertMappedType(String rdfType) {
-		assertEquals(rdfType, inspector.xsdTypeFor(inspector.columnType(
-				SQL.parseAttribute("T_" + datatype + ".VALUE"))));
+		assertEquals(rdfType, inspector.columnType(
+				SQL.parseAttribute("T_" + datatype + ".VALUE")).rdfType());
 	}
 	
 	protected void assertValues(String[] expectedValues) {
