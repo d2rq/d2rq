@@ -124,15 +124,7 @@ public class DBConnectionTest extends TestCase {
 		String distinctResult = performQuery(c, distinct);
 		String nonDistinctResult = performQuery(c, nonDistinct);
 		c.close();
-		if (!distinctResult.equals(nonDistinctResult)) {
-		    if (firstDatabase.connectedDB().allowDistinct()) {
-		    	fail("testDistinct() has a mismatch." +
-		               " Please use a better Database or " +
-		               "put into your Database specification " +
-		               "d2rq:allowDistinct \"true\".");
-		       assertEquals(distinctResult,nonDistinctResult);
-		    }
-		}
+		assertEquals(distinctResult,nonDistinctResult);
 	}
 	
 	// fails with wrong MSAccess Iswc DB (doc/manual/ISWC.mdb revision < 1.5)
