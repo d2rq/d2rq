@@ -22,6 +22,7 @@ public class W3CMappingGenerator extends MappingGenerator {
 	public W3CMappingGenerator(ConnectedDB database) {
 		super(database);
 		setGenerateLabelBridges(false);
+		setHandleLinkTables(false);
 	}
 
 	@Override

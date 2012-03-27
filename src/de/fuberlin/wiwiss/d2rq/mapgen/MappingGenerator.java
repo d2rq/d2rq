@@ -70,6 +70,7 @@ public class MappingGenerator {
 	private boolean silent = true;
 	private boolean generateClasses = true;
 	private boolean generateLabelBridges = true;
+	private boolean handleLinkTables = true;
 	private URI startupSQLScript;
 	
 	public MappingGenerator(ConnectedDB database) {
@@ -126,6 +127,14 @@ public class MappingGenerator {
 		this.generateClasses = flag;
 	}
 	
+	public boolean isHandleLinkTables() {
+		return handleLinkTables;
+	}
+
+	public void setHandleLinkTables(boolean handleLinkTables) {
+		this.handleLinkTables = handleLinkTables;
+	}
+
 	public void writeMapping(OutputStream out, OutputStream err) {
 		try {
 			Writer w = new OutputStreamWriter(out, "UTF-8");
@@ -199,11 +208,18 @@ public class MappingGenerator {
 		this.out.println();
 		writeDatabase();
 		initVocabularyModel();
-		identifyLinkTables();
 		Iterator it = schema.listTableNames(databaseSchema).iterator();
-		while (it.hasNext()) {
-			RelationName tableName = (RelationName) it.next();
-			if (!this.schema.isLinkTable(tableName)) {
+		if (isHandleLinkTables()) {
+			identifyLinkTables();
+			while (it.hasNext()) {
+				RelationName tableName = (RelationName) it.next();
+				if (!this.schema.isLinkTable(tableName)) {
+					writeTable(tableName);
+				}
+			}
+		} else {
+			while (it.hasNext()) {
+				RelationName tableName = (RelationName) it.next();
 				writeTable(tableName);
 			}
 		}
@@ -277,11 +293,13 @@ public class MappingGenerator {
 			Join fk = (Join) it.next();
 			writeForeignKey(fk);
 		}
-		it = this.linkTables.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			if (entry.getValue().equals(tableName)) {
-				writeLinkTable((RelationName) entry.getKey());
+		if (isHandleLinkTables()) {
+			it = this.linkTables.entrySet().iterator();
+			while (it.hasNext()) {
+				Entry entry = (Entry) it.next();
+				if (entry.getValue().equals(tableName)) {
+					writeLinkTable((RelationName) entry.getKey());
+				}
 			}
 		}
 		this.out.println();
