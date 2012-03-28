@@ -72,7 +72,7 @@ public class MappingGenerator {
 	private boolean generateLabelBridges = true;
 	private boolean generateDefinitionLabels = true;
 	private boolean handleLinkTables = true;
-	private boolean serveVocabulary = false;
+	private boolean serveVocabularyFalse = false;
 	private URI startupSQLScript;
 	
 	public MappingGenerator(ConnectedDB database) {
@@ -146,8 +146,8 @@ public class MappingGenerator {
 	/**
 	 * @param flag Value for d2rq:serveVocabulary in map:Configuration
 	 */
-	public void setServeVocabulary(boolean flag) {
-		this.serveVocabulary = flag;
+	public void setServeVocabularyFalse(boolean flag) {
+		this.serveVocabularyFalse = flag;
 	}
 
 	public void writeMapping(OutputStream out, OutputStream err) {
@@ -221,7 +221,9 @@ public class MappingGenerator {
 		this.out.println("@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .");
 		this.out.println("@prefix jdbc: <http://d2rq.org/terms/jdbc/> .");
 		this.out.println();
-		writeConfiguration();
+		if (serveVocabularyFalse) {
+			writeConfiguration();
+		}
 		writeDatabase();
 		initVocabularyModel();
 		Iterator it = schema.listTableNames(databaseSchema).iterator();
@@ -244,7 +246,7 @@ public class MappingGenerator {
 	private void writeConfiguration() {
 		if (!silent) System.out.println("Generating d2rq:Configuration instance");
 		this.out.println(configName() + " a d2rq:Configuration;");
-		this.out.println("\td2rq:serveVocabulary " + serveVocabulary + ".");
+		this.out.println("\td2rq:serveVocabulary false.");
 		this.out.println();
 	}
 
