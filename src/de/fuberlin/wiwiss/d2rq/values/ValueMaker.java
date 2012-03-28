@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
+import java.util.Collections;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -34,6 +35,25 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  */
 public interface ValueMaker {
     
+	/**
+	 * A value maker that never produces a value.
+	 */
+	public static final ValueMaker NULL = new ValueMaker() {
+		public Expression valueExpression(String value) {return Expression.FALSE;} 
+		public Set<ProjectionSpec> projectionSpecs() {return Collections.emptySet();}
+		public String makeValue(ResultRow row) {return null;}
+		public void describeSelf(NodeSetFilter c) {c.limitToEmptySet();}
+		public ValueMaker renameAttributes(ColumnRenamer renamer) {return this;}
+	};
+	
+	/** 
+	 * A SQL expression that selects only rows where this value maker
+	 * produces the specified value. {@link Expression#FALSE} if this
+	 * value maker is incapable of producing the value.
+	 * 
+	 * @param value A value 
+	 * @return An expression that selects rows that produce this value
+	 */
 	Expression valueExpression(String value);
 
 	/**

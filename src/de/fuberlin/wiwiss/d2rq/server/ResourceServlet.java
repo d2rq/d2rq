@@ -77,7 +77,7 @@ public class ResourceServlet extends HttpServlet {
 			DownloadMap d = m.downloadMap(r);
 			DownloadContentQuery q = new DownloadContentQuery(d, resourceURI);
 			if (q.hasContent()) {
-				response.setContentType(d.getMediaType() != null ? d.getMediaType() : "application/octet-stream");
+				response.setContentType(q.getMediaType() != null ? q.getMediaType() : "application/octet-stream");
 				InputStream is = q.getContentStream();
 				OutputStream os = response.getOutputStream();
 				final byte[] buffer = new byte[0x10000];

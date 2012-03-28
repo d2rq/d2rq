@@ -93,6 +93,8 @@
       <li>8.1 <a href="#download-map-properties">Properties of <code>d2rq:DownloadMap</code></a></li>
       <li>8.2 <a href="#example-download-map">Example: Making PDFs downloadable</a></li>
       <li>8.3 <a href="#example-combined-download-map">Example: Download map combined with a property bridge</a></li>
+      <li>8.4 <a href="#example-multiple-download-formats">Example: Downloads in multiple formats</a></li>
+      <li>8.5 <a href="#example-dynamic-mediatype">Example: Media type from a database column</a></li>
     </ul>
   </li>
   <li>9. <a href="#servingvocabularies">Serving Vocabulary Classes and Properties</a>
@@ -1128,7 +1130,9 @@ from where the content is to be made downloadable. An instance of
       <code>Content-Type</code> header. Examples include <code>application/pdf</code>,
       <code>image/png</code>, <code>text/plain</code> and <code>text/html</code>.
       If absent, <code>application/octet-stream</code> will be sent to indicate
-      a generic binary file.</td>
+      a generic binary file. The value can be obtained from the database using
+      the <a href="#d2rq:pattern"><code>d2rq:pattern</code></a> syntax (see
+      <a href="#example-dynamic-mediatype">example</a>).</td>
   </tr>
   <tr>
     <th>d2rq:condition<br />d2rq:join<br />d2rq:alias</th>
@@ -1219,6 +1223,21 @@ map:PaperDownloadWord a d2rq:DownloadMap;
     d2rq:contentDownloadColumn "PAPER.DOWNLOAD";
     d2rq:mediaType "application/msword";
     d2rq:condition "PAPER.FORMAT = 'DOC'";
+    .
+</pre>
+
+
+<h3 id="example-dynamic-mediatype">8.5 Example: Media type from a database column</h3>
+
+<p>The <code>d2rq:mediaType</code> of a download map can be a
+pattern that is instantiated with column values:</p>
+
+<pre>
+map:PaperDownloadPDF a d2rq:DownloadMap;
+    d2rq:dataStorage map:database;
+    d2rq:uriPattern "downloads/@@PAPER.ID@@";
+    d2rq:contentDownloadColumn "PAPER.DOWNLOAD";
+    d2rq:mediaType "@@PAPER.MIMETYPE@@";
     .
 </pre>
 

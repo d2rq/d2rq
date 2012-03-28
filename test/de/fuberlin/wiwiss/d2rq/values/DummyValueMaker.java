@@ -13,12 +13,12 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  *
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class DummyValueSource implements ValueMaker {
+public class DummyValueMaker implements ValueMaker {
 	private String returnValue = null;
 	private Set<ProjectionSpec> projectionSpecs;
 	private Expression selectCondition = Expression.TRUE;
 
-	public DummyValueSource(String value) {
+	public DummyValueMaker(String value) {
 		this.returnValue = value;
 	}
 
