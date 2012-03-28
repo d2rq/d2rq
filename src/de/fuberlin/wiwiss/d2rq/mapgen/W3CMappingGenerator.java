@@ -24,7 +24,7 @@ public class W3CMappingGenerator extends MappingGenerator {
 		setGenerateLabelBridges(false);
 		setHandleLinkTables(false);
 		setGenerateDefinitionLabels(false);
-		setServeVocabularyFalse(true);
+		setServeVocabulary(false);
 	}
 
 	@Override
