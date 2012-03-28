@@ -18,6 +18,7 @@ import de.fuberlin.wiwiss.d2rq.helpers.MappingHelper;
 import de.fuberlin.wiwiss.d2rq.map.DownloadMap;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.values.Translator;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
@@ -115,7 +116,9 @@ public class ParserTest extends TestCase {
 		assertTrue(m.downloadMapResources().contains(name));
 		DownloadMap d = m.downloadMap(name);
 		assertNotNull(d);
-		assertEquals("image/png", d.getMediaType());
+		assertEquals("image/png", 
+				d.getMediaTypeValueMaker().makeValue(
+						new ResultRow() {public String get(ProjectionSpec column) {return null;}}));
 		assertEquals("People.pic", d.getContentDownloadColumn().qualifiedName());
 		assertEquals("URI(Pattern(http://example.org/downloads/@@People.ID@@))", 
 				d.nodeMaker().toString());
