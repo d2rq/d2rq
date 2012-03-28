@@ -16,23 +16,20 @@ import com.hp.hpl.jena.sparql.util.NodeIsomorphismMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.optimizer.iterators.RelationToBindingsD2RQIterator;
 
-public class OpD2RQ extends OpExt
-{
+public class OpD2RQ extends OpExt {
 	private static final String tagD2RQ = "d2rq"; 	
 	protected final OpBGP original;
 	protected final Relation relation;
 	protected final Collection<BindingMaker> bindingMakers;
 	
-	public OpD2RQ(OpBGP original, Relation relation, Collection<BindingMaker> bindingMakers) 
-	{
+	public OpD2RQ(OpBGP original, Relation relation, Collection<BindingMaker> bindingMakers) {
 		super(tagD2RQ);
 		this.original = original;
 		this.relation = relation;
 		this.bindingMakers = bindingMakers;
 	}
 	
-	public QueryIterator eval(QueryIterator input, ExecutionContext execCxt) 
-	{
+	public QueryIterator eval(QueryIterator input, ExecutionContext execCxt) {
 		return RelationToBindingsD2RQIterator.create(relation, bindingMakers, input, execCxt);
 	}
 
@@ -64,8 +61,7 @@ public class OpD2RQ extends OpExt
 	/**
 	 * used for linking 2 OpD2RQs with an left-join
 	 */
-	public Collection<BindingMaker> getBindingMakers() 
-	{
+	public Collection<BindingMaker> getBindingMakers() {
 		return bindingMakers;
 	}
 

@@ -151,6 +151,9 @@ public abstract class Relation implements RelationalOperators {
 		return results;
 	}
 	
+	/**
+	 * @return <code>true</code> if this is the trivial table (one row, no columns)
+	 */
 	public boolean isTrivial() {
 		return projections().isEmpty() && condition().isTrue() && joinConditions().isEmpty();
 	}

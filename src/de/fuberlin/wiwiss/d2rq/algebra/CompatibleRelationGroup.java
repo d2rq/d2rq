@@ -55,7 +55,7 @@ public class CompatibleRelationGroup {
 		groups.add(newGroup);
 	}
 	
-	private final List<Maker> makers = new ArrayList<Maker>();
+	private final List<BiningMakerAndCondition> makers = new ArrayList<BiningMakerAndCondition>();
 	private Relation firstBaseRelation = null;
 	private boolean differentConditions = false;
 	private boolean allUnique = true;
@@ -106,7 +106,7 @@ public class CompatibleRelationGroup {
 
 	public void addBindingMaker(Relation relation, BindingMaker bindingMaker) {
 		addRelation(relation);
-		makers.add(new Maker(bindingMaker, relation.condition()));
+		makers.add(new BiningMakerAndCondition(bindingMaker, relation.condition()));
 	}
 	
 	public Relation baseRelation() {
@@ -120,7 +120,7 @@ public class CompatibleRelationGroup {
 			// consisting of the disjunction (OR) of all conditions
 			Set<Expression> allConditions = new HashSet<Expression>();
 			Set<ProjectionSpec> projectionsAndConditions = new HashSet<ProjectionSpec>(projections);
-			for (Maker maker: makers) {
+			for (BiningMakerAndCondition maker: makers) {
 				allConditions.add(maker.condition);
 				if (!maker.condition.isTrue()) {
 					projectionsAndConditions.add(maker.conditionProjection());
@@ -152,13 +152,13 @@ public class CompatibleRelationGroup {
 		Collection<BindingMaker> results = new ArrayList<BindingMaker>();
 		if (relationCounter == 1 || !differentConditions) {
 			// Return list of unchanged triple makers
-			for (Maker maker: makers) {
+			for (BiningMakerAndCondition maker: makers) {
 				if (maker.bMaker == null) continue;
 				results.add(maker.bMaker);
 			}
 		} else {
 			// Make binding makers conditional on the added boolean condition
-			for (Maker maker: makers) {
+			for (BiningMakerAndCondition maker: makers) {
 				if (maker.bMaker == null) continue;
 				if (maker.condition.isTrue()) {
 					results.add(maker.bMaker);
@@ -170,10 +170,10 @@ public class CompatibleRelationGroup {
 		return results;
 	}
 	
-	private class Maker {
+	private class BiningMakerAndCondition {
 		private final BindingMaker bMaker;
 		private final Expression condition;
-		Maker(BindingMaker maker, Expression condition) {
+		BiningMakerAndCondition(BindingMaker maker, Expression condition) {
 			this.bMaker = maker;
 			this.condition = condition;
 		}
