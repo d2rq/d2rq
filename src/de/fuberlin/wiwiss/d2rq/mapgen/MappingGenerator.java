@@ -53,11 +53,11 @@ public class MappingGenerator {
 	private final static OutputStream DUMMY_STREAM = 
 			new OutputStream() { public void write(int b) {}};
 
-	private final ConnectedDB database;
+	protected final ConnectedDB database;
 	private final DatabaseSchemaInspector schema;
 	private String mapNamespaceURI;
-	private String instanceNamespaceURI;
-	private String vocabNamespaceURI;
+	protected String instanceNamespaceURI;
+	protected String vocabNamespaceURI;
 	private String driverClass = null;
 	private Filter filter = Filter.ALL;
 	private PrintWriter out = null;
@@ -69,6 +69,9 @@ public class MappingGenerator {
 	private boolean finished = false;
 	private boolean generateClasses = true;
 	private boolean generateLabelBridges = true;
+	private boolean generateDefinitionLabels = true;
+	private boolean handleLinkTables = true;
+	private boolean serveVocabulary = true;
 	private URI startupSQLScript;
 	
 	public MappingGenerator(ConnectedDB database) {
@@ -118,6 +121,28 @@ public class MappingGenerator {
 		this.generateClasses = flag;
 	}
 		
+
+	/**
+	 * @param flag Handle Link Tables as properties (true) or normal tables (false)
+	 */
+	public void setHandleLinkTables(boolean flag) {
+		this.handleLinkTables = flag;
+	}
+
+	/**
+	 * @param flag Generate ClassDefinitionLabels and PropertyDefinitionLabels?
+	 */
+	public void setGenerateDefinitionLabels(boolean flag) {
+		this.generateDefinitionLabels = flag;
+	}
+
+	/**
+	 * @param flag Value for d2rq:serveVocabulary in map:Configuration
+	 */
+	public void setServeVocabulary(boolean flag) {
+		this.serveVocabulary = flag;
+	}
+
 	public void writeMapping(OutputStream out, OutputStream err, OutputStream progress) {
 		try {
 			Writer w = new OutputStreamWriter(out, "UTF-8");
@@ -190,20 +215,36 @@ public class MappingGenerator {
 		this.out.println("@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .");
 		this.out.println("@prefix jdbc: <http://d2rq.org/terms/jdbc/> .");
 		this.out.println();
+		if (!serveVocabulary) {
+			writeConfiguration();
+		}
 		writeDatabase();
 		initVocabularyModel();
-		identifyLinkTables();
+		if (handleLinkTables) {
+			identifyLinkTables();
+		}
 		for (RelationName tableName: schema.listTableNames(filter.getSingleSchema())) {
 			if (!filter.matches(tableName)) {
 				progress.println("Skipping table " + tableName);
 				continue;
 			}
-			if (!this.schema.isLinkTable(tableName)) {
+			if (!handleLinkTables || !schema.isLinkTable(tableName)) {
 				writeTable(tableName);
 			}
 		}
 	}
 	
+	private void writeConfiguration() {
+		progress.println("Generating d2rq:Configuration instance");
+		this.out.println(configName() + " a d2rq:Configuration;");
+		this.out.println("\td2rq:serveVocabulary false.");
+		this.out.println();
+	}
+
+	private String configName() {
+		return "map:Configuration";
+	}
+
 	private void writeDatabase() {
 		progress.println("Generating d2rq:Database instance");
 		this.out.println(databaseName() + " a d2rq:Database;");
@@ -244,7 +285,9 @@ public class MappingGenerator {
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
 		if (generateClasses) {
 			this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
-			this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
+			if (generateDefinitionLabels) {
+				this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
+			}
 		}
 		this.out.println("\t.");
 		if (generateLabelBridges && hasPrimaryKey(tableName)) {
@@ -282,19 +325,21 @@ public class MappingGenerator {
 			}
 			writeForeignKey(fk);
 		}
-		for (RelationName linkTable: linkTables.keySet()) {
-			if (linkTables.get(linkTable).equals(tableName)) {
-				List<Join> keys = schema.foreignKeys(linkTable, DatabaseSchemaInspector.KEYS_IMPORTED);
-				Join join1 = keys.get(0);
-				Join join2 = keys.get(1);
-				if (!filter.matches(join1.table1()) || !filter.matches(join1.table2()) || 
-						!filter.matchesAll(join1.attributes1()) || !filter.matchesAll(join1.attributes2()) ||
-						!filter.matches(join2.table1()) || !filter.matches(join2.table2()) || 
-						!filter.matchesAll(join2.attributes1()) || !filter.matchesAll(join2.attributes2())) {
-					progress.println("Skipping link table " + linkTable);
-					continue;
+		if (handleLinkTables) {
+			for (RelationName linkTable: linkTables.keySet()) {
+				if (linkTables.get(linkTable).equals(tableName)) {
+					List<Join> keys = schema.foreignKeys(linkTable, DatabaseSchemaInspector.KEYS_IMPORTED);
+					Join join1 = keys.get(0);
+					Join join2 = keys.get(1);
+					if (!filter.matches(join1.table1()) || !filter.matches(join1.table2()) || 
+							!filter.matchesAll(join1.attributes1()) || !filter.matchesAll(join1.attributes2()) ||
+							!filter.matches(join2.table1()) || !filter.matches(join2.table2()) || 
+							!filter.matchesAll(join2.attributes1()) || !filter.matchesAll(join2.attributes2())) {
+						progress.println("Skipping link table " + linkTable);
+						continue;
+					}
+					writeLinkTable(linkTable, keys);
 				}
-				writeLinkTable(linkTable, keys);
 			}
 		}
 		this.out.println();
@@ -318,7 +363,9 @@ public class MappingGenerator {
 		this.out.println(propertyBridgeName(toRelationName(column)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(column.relationName()) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(column) + ";");
-		this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
+		if (generateDefinitionLabels) {
+			this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
+		}
 		this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
 		DataType colType = this.schema.columnType(column);
 		String xsd = colType.rdfType();
@@ -418,9 +465,9 @@ public class MappingGenerator {
 	
 	// A very conservative pattern for the local part of a QName.
 	// If a URI doesn't match, better don't QName it.
-	private final static Pattern simpleXMLName = 
+	protected final static Pattern simpleXMLName = 
 			Pattern.compile("[a-zA-Z_][a-zA-Z0-9_-]*");
-	private String toPrefixedURI(String namespaceURI, String prefix, String s) {
+	protected String toPrefixedURI(String namespaceURI, String prefix, String s) {
 		if (simpleXMLName.matcher(s).matches()) {
 			return prefix + ":" + s;
 		}
@@ -443,19 +490,19 @@ public class MappingGenerator {
 		return toPrefixedURI(mapNamespaceURI, "map", relationName + suffix);
 	}
 	
-	private String vocabularyTermQName(RelationName table) {
+	protected String vocabularyTermQName(RelationName table) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", table.qualifiedName());
 	}
 
-	private String vocabularyTermQName(Attribute attribute) {
+	protected String vocabularyTermQName(Attribute attribute) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attribute));
 	}
 
-	private String vocabularyTermQName(List<Attribute> attributes) {
+	protected String vocabularyTermQName(List<Attribute> attributes) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attributes));
 	}
 
-	private List<Attribute> filteredPrimaryKeyColumns(RelationName tableName) {
+	protected List<Attribute> filteredPrimaryKeyColumns(RelationName tableName) {
 		List<Attribute> columns = schema.primaryKeyColumns(tableName);
 		if (filter.matchesAll(columns)) {
 			return columns;
@@ -467,7 +514,7 @@ public class MappingGenerator {
 		return !filteredPrimaryKeyColumns(tableName).isEmpty();
 	}
 	
-	private String uriPattern(RelationName tableName) {
+	protected String uriPattern(RelationName tableName) {
 		String result = this.instanceNamespaceURI + tableName.qualifiedName();
 		for (Attribute column: filteredPrimaryKeyColumns(tableName)) {
 			result += "/@@" + column.qualifiedName();

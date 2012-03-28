@@ -38,7 +38,7 @@ on the column's name. This mapping file can be used as-is or can be customized.<
 
 <pre>generate-mapping <a href="#arg-u">[-u user]</a> <a href="#arg-p">[-p password]</a> <a href="#arg-d">[-d driver]</a>
         <a href="#arg-l">[-l script.sql]</a> <a href="#arg-include-exclude">[--[skip-](schemas|tables|columns) list]</a>
-        <a href="#arg-v">[-v]</a> <a href="#arg-b">[-b baseURI]</a> <a href="#arg-o">[-o outfile.ttl]</a>
+        <a href="#arg-w3c">[--w3c]</a> <a href="#arg-v">[-v]</a> <a href="#arg-b">[-b baseURI]</a> <a href="#arg-o">[-o outfile.ttl]</a>
         <a href="#arg-verbose">[--verbose]</a> <a href="#arg-debug">[--debug]</a>
         <a href="#arg-jdbc-url">jdbcURL</a></pre>
 
@@ -109,6 +109,9 @@ The file contains one name per line or comma-separated names. Examples follow:</
 <h3 id="output">Output parameters</h3>
 
 <dl>
+<dt id="arg-w3c"><code>--w3c</code></dt>
+<dd>Generate a mapping file that is compatible with W3C's <a href="http://www.w3.org/TR/rdb-direct-mapping/">Direct Mapping of Relational Data to RDF</a>. <strong>This is an experimental feature and work in progress.</strong></dd>
+
 <dt id="arg-v"><code>-v</dt></code>
 <dd>Generate an RDF Schema description of the vocabulary instead of a mapping file.</dd>
 

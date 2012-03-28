@@ -38,6 +38,7 @@ public abstract class CommandLineTool {
 	private final ArgDecl passArg = new ArgDecl(true, "p", "pass", "password");
 	private final ArgDecl driverArg = new ArgDecl(true, "d", "driver");
 	private final ArgDecl sqlFileArg = new ArgDecl(true, "l", "load-sql");
+	private final ArgDecl w3cArg = new ArgDecl(false, "w3c", "direct-mapping");
 	private final ArgDecl verboseArg = new ArgDecl(false, "verbose");
 	private final ArgDecl debugArg = new ArgDecl(false, "debug");
 	private final ArgDecl schemasArg = new ArgDecl(true, "schema", "schemas");
@@ -72,6 +73,7 @@ public abstract class CommandLineTool {
 		cmd.add(passArg);
 		cmd.add(driverArg);
 		cmd.add(sqlFileArg);
+		cmd.add(w3cArg);
 		cmd.add(verboseArg);
 		cmd.add(debugArg);
 		cmd.add(schemasArg);
@@ -125,6 +127,9 @@ public abstract class CommandLineTool {
 		}
 		if (cmd.contains(sqlFileArg)) {
 			loader.setStartupSQLScript(cmd.getArg(sqlFileArg).getValue());
+		}
+		if (cmd.contains(w3cArg)) {
+			loader.setGenerateDirectMapping(true);
 		}
 		try {
 			Collection<Filter> includes = new ArrayList<Filter>();
@@ -208,6 +213,7 @@ public abstract class CommandLineTool {
 		System.err.println("    -p password     Database password for connecting to the DB");
 		System.err.println("    -d driverclass  Java class name of the JDBC driver for the DB");
 		System.err.println("    -l script.sql   Load a SQL script before processing");
+		System.err.println("    --w3c           Produce W3C Direct Mapping compatible mapping file");
 		System.err.println("    --[skip-](schemas|tables|columns) [schema.]table[.column]");
 		System.err.println("                    Include or exclude specific database objects");
 	}

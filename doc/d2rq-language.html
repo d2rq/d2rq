@@ -437,6 +437,10 @@ mailto:@@<em>Persons.email</em>@@</pre>
       then URL encoding is applied, with an additional rule that spaces are
       converted to underscores (<code>_</code>). Some people find that this
       produces friendlier URIs.</li>
+    <li>If a column is given as <code>@@Table.Column|<strong>encode</strong>@@</code>,
+      then <a href="http://www.w3.org/TR/rdb-direct-mapping/#defn-percent-encode">percent encoding</a>
+      (as defined in W3C's <a href="http://www.w3.org/TR/rdb-direct-mapping/">Direct Mapping</a>) is applied before the string 
+      is inserted.</li>
   </ul>
 </dd>
 

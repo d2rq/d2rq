@@ -330,6 +330,16 @@ public class PatternTest extends TestCase {
 		assertPatternValues(p, "aaax+ybbb", Collections.singletonMap("table.col1", "x y"));
 	}
 	
+	public void testPatternEncode() {
+		Pattern p = new Pattern("aaa@@table.col1|encode@@bbb");
+		assertPattern("aaahello%20world%21bbb", p.makeValue(row("hello world!")));
+		
+		assertPattern("aaa%3A%3B%3C%3D%3E%3F%40bbb", p.makeValue(row(":;<=>?@")));
+		assertPattern("aaa%5B%5C%5D%5E%60bbb", p.makeValue(row("[\\]^`")));
+		
+		assertPatternValues(p, "aaa%7B%7C%7Dbbb", Collections.singletonMap("table.col1", "{|}"));
+	}
+	
 	public void testPatternURLEncodeIllegal() {
 		Pattern p = new Pattern("@@table.col1|urlencode@@");
 		assertFalse(matches(p, "%"));

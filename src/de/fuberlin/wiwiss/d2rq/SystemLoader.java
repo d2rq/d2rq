@@ -13,6 +13,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.Filter;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
+import de.fuberlin.wiwiss.d2rq.mapgen.W3CMappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.server.ConfigLoader;
 import de.fuberlin.wiwiss.d2rq.server.D2RServer;
@@ -45,6 +46,7 @@ public class SystemLoader {
 	private String password = null;
 	private String jdbcDriverClass = null;
 	private String sqlScript = null;
+	private boolean generateDirectMapping = false;
 	private String jdbcURL = null;
 	private String mappingFile = null;
 	private String baseURI = null;
@@ -85,6 +87,10 @@ public class SystemLoader {
 		this.sqlScript = sqlFile;
 	}
 
+	public void setGenerateDirectMapping(boolean flag) {
+		this.generateDirectMapping = flag;
+	}
+	
 	public void setJdbcURL(String jdbcURL) {
 		this.jdbcURL = jdbcURL;
 	}
@@ -194,7 +200,9 @@ public class SystemLoader {
 	 */
 	public MappingGenerator openMappingGenerator() {
 		if (generator == null) {
-			generator = new MappingGenerator(getConnectedDB());
+			generator = generateDirectMapping ?
+					new W3CMappingGenerator(getConnectedDB()) :
+					new MappingGenerator(getConnectedDB());
 			if (jdbcDriverClass != null) {
 				generator.setJDBCDriverClass(jdbcDriverClass);
 			}

@@ -34,7 +34,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQL;
 public class Pattern implements ValueMaker {
 	public final static String DELIMITER = "@@";
 	private final static java.util.regex.Pattern embeddedColumnRegex = 
-		java.util.regex.Pattern.compile("@@([^@]+?)(?:\\|(urlencode|urlify))?@@");
+		java.util.regex.Pattern.compile("@@([^@]+?)(?:\\|(urlencode|urlify|encode))?@@");
 
 	private String pattern;
 	private String firstLiteralPart;
@@ -229,6 +229,7 @@ public class Pattern implements ValueMaker {
 	
 	private final static ColumnFunction IDENTITY = new IdentityFunction();
 	private final static ColumnFunction URLENCODE = new URLEncodeFunction();
+	private final static ColumnFunction ENCODE = new EncodeFunction();
 	private final static ColumnFunction URLIFY = new URLifyFunction();
 	
 	private ColumnFunction getColumnFunction(String functionName) {
@@ -237,6 +238,9 @@ public class Pattern implements ValueMaker {
 		}
 		if ("urlify".equals(functionName)) {
 			return URLIFY;
+		}
+		if ("encode".equals(functionName)) {
+			return ENCODE;
 		}
 		if ("".equals(functionName) || functionName == null) {
 			return IDENTITY;
@@ -301,5 +305,44 @@ public class Pattern implements ValueMaker {
 			}
 		}
 		public String name() { return "urlify"; }
+	}
+	public static class EncodeFunction implements ColumnFunction {
+		private boolean isDigit(int c) {
+			return (c >= 48 && c <=57);
+		}
+		
+		private boolean isLetter(int c) {
+			return (c >= 65 && c <= 90) || (c >= 97 && c <= 122); 
+		}
+		
+		public String encode(String s) {
+			StringBuffer sbuffer = new StringBuffer();
+			for (int i = 0; i < s.length(); i++) {
+				char c = s.charAt(i);
+				int cCode = (int) c;
+
+				if (cCode > 128 || c == '-' || c == '_' || c == '~'
+						|| isDigit(cCode) || isLetter(cCode)) {
+					sbuffer.append(c);
+				} else {
+					sbuffer.append("%");
+					sbuffer.append(Integer.toHexString(cCode).toUpperCase());
+				}
+			}
+
+			return sbuffer.toString();
+		}
+		public String decode(String s) {
+			try {
+				return URLDecoder.decode(s.replaceAll("%20", "+"), "utf-8");
+			} catch (UnsupportedEncodingException ex) {
+				// Can't happen, UTF-8 is always supported
+				throw new RuntimeException(ex);
+			} catch (IllegalArgumentException ex) {
+				// Broken encoding
+				return null;
+			}
+		}
+		public String name() { return "encode"; }
 	}
 }
