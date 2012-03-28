@@ -129,7 +129,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		if (expression.size() != 1)
 			throw new IllegalStateException("something is seriously wrong");
 		
-		Expression result = (Expression) expression.pop();
+		Expression result = expression.pop();
 		logger.debug("Resulting filter = " + result);
 		return result;
 	}
@@ -203,7 +203,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		List<Expression> expressions = toExpression(var);
 		if (expressions.size() == 1) {
-			expression.push((Expression) expressions.get(0));
+			expression.push(expressions.get(0));
 		} else {
 			// no single sql-column for sparql-var does exist break up conversion
 			// (the case for Pattern ValueMakers)
@@ -280,7 +280,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 					ProjectionSpec projectionSpec = it.next();
 					
 					if (projectionSpec == null)
-						return Collections.<Expression>emptyList();
+						return Collections.emptyList();
 					
 					if (projectionSpec instanceof Attribute) {
 						result.add(new AttributeExprEx((Attribute) projectionSpec, nodeMaker));
@@ -291,7 +291,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 						if (expression instanceof SQLExpression)
 							result.add(((SQLExpression)expression));
 						else
-							return Collections.<Expression>emptyList();
+							return Collections.emptyList();
 					}
 				}
 			} else if (nodeMaker instanceof FixedNodeMaker) {
@@ -328,7 +328,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			convert((E_UnaryMinus) expr);
 		} else if (extensionSupports(expr)) {
 			expr.getArg(1).visit(this) ;
-			Expression e1 = (Expression) expression.pop();
+			Expression e1 = expression.pop();
 			List<Expression> args = Collections.singletonList(e1);
 			extensionConvert(expr, args);
 		} else {
@@ -343,56 +343,56 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		if (expr instanceof E_LogicalOr) {
 			expr.getArg1().visit(this) ;
 			expr.getArg2().visit(this) ;
-			Expression e2 = (Expression) expression.pop();
-			Expression e1 = (Expression) expression.pop();
+			Expression e2 = expression.pop();
+			Expression e1 = expression.pop();
 			expression.push(e1.or(e2));
 		} else if (expr instanceof E_LessThan) {
 			expr.getArg1().visit(this) ;
 			expr.getArg2().visit(this) ;
-			Expression e2 = (Expression) expression.pop();
-			Expression e1 = (Expression) expression.pop();
+			Expression e2 = expression.pop();
+			Expression e1 = expression.pop();
 			expression.push(new LessThan(e1, e2));
 		} else if (expr instanceof E_LessThanOrEqual) {
 			expr.getArg1().visit(this) ;
 			expr.getArg2().visit(this) ;
-			Expression e2 = (Expression) expression.pop();
-			Expression e1 = (Expression) expression.pop();
+			Expression e2 = expression.pop();
+			Expression e1 = expression.pop();
 			expression.push(new LessThanOrEqual(e1, e2));
 		} else if (expr instanceof E_GreaterThan) {
 			expr.getArg1().visit(this) ;
 			expr.getArg2().visit(this) ;
-			Expression e2 = (Expression) expression.pop();
-			Expression e1 = (Expression) expression.pop();
+			Expression e2 = expression.pop();
+			Expression e1 = expression.pop();
 			expression.push(new GreaterThan(e1, e2));
 		} else if (expr instanceof E_GreaterThanOrEqual) {
 			expr.getArg1().visit(this) ;
 			expr.getArg2().visit(this) ;
-			Expression e2 = (Expression) expression.pop();
-			Expression e1 = (Expression) expression.pop();
+			Expression e2 = expression.pop();
+			Expression e1 = expression.pop();
 			expression.push(new GreaterThanOrEqual(e1, e2));
 		} else if (expr instanceof E_Add) {
 			expr.getArg1().visit(this) ;
 			expr.getArg2().visit(this) ;
-			Expression e2 = (Expression) expression.pop();
-			Expression e1 = (Expression) expression.pop();
+			Expression e2 = expression.pop();
+			Expression e1 = expression.pop();
 			expression.push(new Add(e1, e2));
 		} else if (expr instanceof E_Subtract) {
 			expr.getArg1().visit(this) ;
 			expr.getArg2().visit(this) ;
-			Expression e2 = (Expression) expression.pop();
-			Expression e1 = (Expression) expression.pop();
+			Expression e2 = expression.pop();
+			Expression e1 = expression.pop();
 			expression.push(new Subtract(e1, e2));
 		} else if (expr instanceof E_Multiply) {
 			expr.getArg1().visit(this) ;
 			expr.getArg2().visit(this) ;
-			Expression e2 = (Expression) expression.pop();
-			Expression e1 = (Expression) expression.pop();
+			Expression e2 = expression.pop();
+			Expression e1 = expression.pop();
 			expression.push(new Multiply(e1, e2));
 		} else if (expr instanceof E_Divide) {
 			expr.getArg1().visit(this) ;
 			expr.getArg2().visit(this) ;
-			Expression e2 = (Expression) expression.pop();
-			Expression e1 = (Expression) expression.pop();
+			Expression e2 = expression.pop();
+			Expression e1 = expression.pop();
 			expression.push(new Divide(e1, e2));
 		} else if (expr instanceof E_Equals) {
 			convertEquals((E_Equals) expr);
@@ -405,8 +405,8 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		} else if (extensionSupports(expr)) {
 			expr.getArg(1).visit(this);
 			expr.getArg(2).visit(this);
-			Expression e2 = (Expression) expression.pop();
-			Expression e1 = (Expression) expression.pop();
+			Expression e2 = expression.pop();
+			Expression e1 = expression.pop();
 			
 			List<Expression> args = new ArrayList<Expression>(2);
 			
@@ -430,8 +430,8 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	{
 		expr.getArg1().visit(this);
 		expr.getArg2().visit(this);
-		Expression e2 = (Expression) expression.pop();
-		Expression e1 = (Expression) expression.pop();
+		Expression e2 = expression.pop();
+		Expression e1 = expression.pop();
 		
 		// TODO Expression.FALSE and Expression.TRUE are not constants
 		if (e1.equals(Expression.FALSE))
@@ -559,8 +559,8 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		expr.getArg1().visit(this);
 		expr.getArg2().visit(this);
-		Expression e2 = (Expression) expression.pop();
-		Expression e1 = (Expression) expression.pop();
+		Expression e2 = expression.pop();
+		Expression e1 = expression.pop();
 		
 		// TODO Expression.FALSE and Expression.TRUE are not constants
 		if (e1.equals(Expression.FALSE))
@@ -681,7 +681,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	private void convertLogicalNot(E_LogicalNot expr)
 	{
 		expr.getArg().visit(this);
-		Expression e1 = (Expression) expression.pop();
+		Expression e1 = expression.pop();
 		if (e1 instanceof Negation)
 			expression.push(((Negation) e1).getBase());
 		else
@@ -696,7 +696,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	private void convert(E_UnaryMinus expr)
 	{
 		expr.getArg().visit(this);
-		Expression e1 = (Expression) expression.pop();
+		Expression e1 = expression.pop();
 		if (e1 instanceof UnaryMinus)
 			expression.push(((UnaryMinus) e1).getBase());
 		else
@@ -716,7 +716,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		expr.getArg().visit(this);
 		
-		Expression arg = (Expression) expression.pop();
+		Expression arg = expression.pop();
 		
 		if (arg instanceof AttributeExprEx) {
 			AttributeExprEx variable = (AttributeExprEx) arg;
@@ -727,7 +727,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		} else if (arg instanceof ConstantEx) {
 			ConstantEx constant = (ConstantEx) arg;
 			Node node = constant.getNode();
-			expression.push(node.isLiteral() ? Expression.TRUE : Expression.FALSE);
+			expression.push(node.isURI() ? Expression.TRUE : Expression.FALSE);
 		} else {
 			conversionFailed(expr);
 		}
@@ -746,7 +746,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		expr.getArg().visit(this);
 		
-		Expression arg = (Expression) expression.pop();
+		Expression arg = expression.pop();
 		
 		if (arg instanceof AttributeExprEx) {
 			AttributeExprEx variable = (AttributeExprEx) arg;
@@ -776,7 +776,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		expr.getArg().visit(this);
 		
-		Expression arg = (Expression) expression.pop();
+		Expression arg = expression.pop();
 		
 		logger.debug("arg " + arg);
 		
@@ -810,7 +810,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		expr.getArg().visit(this);
 		
-		Expression arg = (Expression) expression.pop();
+		Expression arg = expression.pop();
 		
 		if (arg instanceof AttributeExprEx) {
 			// make a new AttributeExprEx with changed NodeMaker, which returns plain literal
@@ -845,7 +845,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		expr.getArg().visit(this);
 		
-		Expression arg = (Expression) expression.pop();
+		Expression arg = expression.pop();
 		
 		if (arg instanceof AttributeExprEx) {
 			AttributeExprEx variable = (AttributeExprEx) arg;
@@ -900,7 +900,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		expr.getArg().visit(this);
 		
-		Expression arg = (Expression) expression.pop();
+		Expression arg = expression.pop();
 		
 		if (arg instanceof AttributeExprEx) {
 			AttributeExprEx variable = (AttributeExprEx) arg;
@@ -956,8 +956,8 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		expr.getArg1().visit(this);
 		expr.getArg2().visit(this);
-		Expression e2 = (Expression) expression.pop();
-		Expression e1 = (Expression) expression.pop();
+		Expression e2 = expression.pop();
+		Expression e1 = expression.pop();
 		
 		// TODO Expression.FALSE and Expression.TRUE are not constants
 		if (e1.equals(Expression.FALSE))
@@ -1054,8 +1054,8 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		
 		expr.getArg1().visit(this);
 		expr.getArg2().visit(this);
-		Expression e2 = (Expression) expression.pop();
-		Expression e1 = (Expression) expression.pop();
+		Expression e2 = expression.pop();
+		Expression e1 = expression.pop();
 		
 		if (e1 instanceof ConstantEx && e2 instanceof ConstantEx) {
 			ConstantEx lang1 = (ConstantEx) e1;
