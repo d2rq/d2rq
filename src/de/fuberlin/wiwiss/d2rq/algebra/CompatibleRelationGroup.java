@@ -62,6 +62,7 @@ public class CompatibleRelationGroup {
 	private boolean allUnique = true;
 	private int relationCounter = 0;
 	private Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
+	private List<OrderSpec> longestOrderSpecs = new ArrayList<OrderSpec>();
 	
 	public boolean isCompatible(Relation otherRelation) {
 		if (firstBaseRelation == null) {
@@ -84,18 +85,26 @@ public class CompatibleRelationGroup {
 				return false;
 			}
 		}
-		if (firstBaseRelation.projections().equals(otherRelation.projections())) {
-			return true;
+		if (!firstBaseRelation.projections().equals(otherRelation.projections())) {
+			// Uniqueness doesn't matter if we project the same columns
+			if (!firstBaseRelation.isUnique() || !otherRelation.isUnique()) {
+				return false;
+			}
 		}
-		if (firstBaseRelation.isUnique() && otherRelation.isUnique()) {
-			return true;
+		// Compatible ordering?
+		for (int i = 0; i < Math.min(longestOrderSpecs.size(), otherRelation.orderSpecs().size()); i++) {
+			if (!longestOrderSpecs.get(i).equals(otherRelation.orderSpecs().get(i))) return false;
 		}
-		return false;
+		for (int i = longestOrderSpecs.size(); i < otherRelation.orderSpecs().size(); i++) {
+			longestOrderSpecs.add(otherRelation.orderSpecs().get(i));
+		}
+		return true;
 	}
 
 	public void addRelation(Relation relation) {
 		if (firstBaseRelation == null) {
 			firstBaseRelation = relation;
+			longestOrderSpecs.addAll(firstBaseRelation.orderSpecs());
 		}
 		if (!relation.condition().equals(firstBaseRelation.condition())) {
 			differentConditions = true;
@@ -146,7 +155,7 @@ public class CompatibleRelationGroup {
 					Expression.TRUE,
 					firstBaseRelation.joinConditions(), 
 					projectionsAndConditions, 
-					allUnique, firstBaseRelation.order(), firstBaseRelation.orderDesc(), firstBaseRelation.limit(), firstBaseRelation.limitInverse());
+					allUnique, longestOrderSpecs, firstBaseRelation.limit(), firstBaseRelation.limitInverse());
 		} else {
 			// Multiple relations with same condition
 			Expression softCondition = firstBaseRelation.softCondition();
@@ -167,7 +176,7 @@ public class CompatibleRelationGroup {
 					softCondition,
 					firstBaseRelation.joinConditions(), 
 					projections, 
-					allUnique, firstBaseRelation.order(), firstBaseRelation.orderDesc(), firstBaseRelation.limit(), firstBaseRelation.limitInverse());
+					allUnique, longestOrderSpecs, firstBaseRelation.limit(), firstBaseRelation.limitInverse());
 		}
 	}
 

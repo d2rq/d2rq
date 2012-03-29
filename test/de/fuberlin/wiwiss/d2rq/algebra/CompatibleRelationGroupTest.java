@@ -29,11 +29,11 @@ public class CompatibleRelationGroupTest extends TestCase {
 		unique = new RelationImpl(
 				db, AliasMap.NO_ALIASES, Expression.TRUE, Expression.TRUE, 
 				Collections.<Join>emptySet(), 
-				projections1, true, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
+				projections1, true, OrderSpec.NONE, Relation.NO_LIMIT, Relation.NO_LIMIT);
 		notUnique = new RelationImpl(
 				db, AliasMap.NO_ALIASES, Expression.TRUE, Expression.TRUE, 
 				Collections.<Join>emptySet(), 
-				projections2, false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
+				projections2, false, OrderSpec.NONE, Relation.NO_LIMIT, Relation.NO_LIMIT);
 	}
 	
 	public void testNotUniqueIsNotCompatible() {

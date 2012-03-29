@@ -2,14 +2,17 @@ package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
@@ -196,7 +199,8 @@ public class PropertyBridge extends ResourceMap {
 			builder.setLimitInverse(this.limitInverse.intValue());
 		}
 		if (this.order!=null) {
-			builder.setOrder(SQL.parseAttribute(this.order), this.orderDesc.booleanValue());
+			builder.setOrderSpecs(Collections.singletonList(
+					new OrderSpec(new AttributeExpr(SQL.parseAttribute(this.order)), this.orderDesc.booleanValue())));
 		}
 		return builder.buildRelation(); 
 	}

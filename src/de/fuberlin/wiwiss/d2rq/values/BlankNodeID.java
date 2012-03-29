@@ -9,6 +9,7 @@ import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.expr.Concatenation;
@@ -106,6 +107,14 @@ public class BlankNodeID implements ValueMaker {
 			replacedAttributes.add(renamer.applyTo(attribute));
 		}
 		return new BlankNodeID(this.classMapID, replacedAttributes);
+	}
+	
+	public List<OrderSpec> orderSpecs(boolean ascending) {
+		List<OrderSpec> result = new ArrayList<OrderSpec>(attributes.size());
+		for (Attribute column: attributes) {
+			result.add(new OrderSpec(new AttributeExpr(column), ascending));
+		}
+		return result;
 	}
 	
 	public String toString() {

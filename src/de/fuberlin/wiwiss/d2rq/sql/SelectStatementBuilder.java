@@ -10,6 +10,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
@@ -33,8 +34,7 @@ public class SelectStatementBuilder {
 	private boolean eliminateDuplicates = false;
 	private AliasMap aliases = AliasMap.NO_ALIASES;
 	private Collection<RelationName> mentionedTables = new HashSet<RelationName>(5); // in their alias forms	
-	private Attribute order;
-	private boolean orderDesc;
+	private List<OrderSpec> orderSpecs;
 	private int limit;
 	
 	public SelectStatementBuilder(Relation relation) {
@@ -46,8 +46,7 @@ public class SelectStatementBuilder {
 		}
 		database = relation.database();
 		this.limit = Relation.combineLimits(relation.limit(), database.limit());
-		this.order = relation.order();
-		this.orderDesc = relation.orderDesc();
+		this.orderSpecs = relation.orderSpecs();
 		this.aliases = this.aliases.applyTo(relation.aliases());
 		for (Join join: relation.joinConditions()) {
 			for (Attribute attribute1: join.attributes1()) {
@@ -140,10 +139,14 @@ public class SelectStatementBuilder {
 			result.append(condition().toSQL(this.database, this.aliases));
 		}
 
-		if (order!=null) {
-			result.append(" ORDER BY " + order.toSQL(database, aliases) + " ");
-			if(orderDesc) {
-				result.append("DESC ");
+		Iterator<OrderSpec> orderIt = orderSpecs.iterator();
+		if (orderIt.hasNext()) {
+			result.append(" ORDER BY ");
+		}
+		while (orderIt.hasNext()) {
+			result.append(orderIt.next().toSQL(database, aliases));
+			if (orderIt.hasNext()) {
+				result.append(", ");
 			}
 		}
 		

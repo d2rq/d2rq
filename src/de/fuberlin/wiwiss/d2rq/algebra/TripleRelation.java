@@ -31,6 +31,7 @@ public class TripleRelation extends NodeRelation {
 	private static final TripleRelation EMPTY = fromNodeRelation(NodeRelation.empty(SPO));
 	
 	private static TripleRelation fromNodeRelation(NodeRelation relation) {
+		if (relation instanceof TripleRelation) return (TripleRelation) relation;
 		if (!relation.variableNames().equals(SPO)) {
 			throw new IllegalArgumentException(
 					"Not a TripleRelation header: " + relation.variableNames());
@@ -48,6 +49,16 @@ public class TripleRelation extends NodeRelation {
 		}});
 	}
 	
+	@Override
+	public TripleRelation orderBy(String variable, boolean ascending) {
+		return fromNodeRelation(super.orderBy(variable, ascending));
+	}
+
+	@Override
+	public TripleRelation limit(int limit) {
+		return fromNodeRelation(super.limit(limit));
+	}
+
 	public TripleRelation selectTriple(Triple t) {
 		MutableRelation newBase = new MutableRelation(baseRelation());
 		NodeMaker s = nodeMaker(SUBJECT).selectNode(t.getSubject(), newBase);

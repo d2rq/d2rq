@@ -18,6 +18,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.NamesToNodeMakersMap;
 import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
@@ -292,8 +293,7 @@ class TripleRelationJoiner {
 		Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
 		int limit = Relation.NO_LIMIT;
 		int limitInverse = Relation.NO_LIMIT;
-		Attribute order = null;
-		boolean orderDesc = false;
+		List<OrderSpec> orderSpecs = null;
 		
 		for (Relation relation: relations) {
 			joinedAliases = joinedAliases.applyTo(relation.aliases());
@@ -301,8 +301,7 @@ class TripleRelationJoiner {
 			softConditions.add(relation.softCondition());
 			joins.addAll(relation.joinConditions());
 			projections.addAll(relation.projections());
-			orderDesc = order==null?relation.orderDesc():orderDesc;
-			order = order==null?relation.order():order;
+			orderSpecs = orderSpecs == null ? relation.orderSpecs() : orderSpecs;
 			limit = Relation.combineLimits(limit, relation.limit());
 			limitInverse = Relation.combineLimits(limitInverse, relation.limitInverse());
 		}
@@ -314,6 +313,6 @@ class TripleRelationJoiner {
 		boolean isUnique = useAllOptimizations && relations.size()==1 && (relations.iterator().next()).isUnique();
 		return new RelationImpl(connectedDB, joinedAliases, Conjunction.create(expressions), 
 				Conjunction.create(softConditions),
-				joins, projections, isUnique, order, orderDesc, limit, limitInverse);
+				joins, projections, isUnique, orderSpecs, limit, limitInverse);
 	}
 }

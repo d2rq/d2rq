@@ -1,11 +1,14 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
@@ -49,6 +52,11 @@ public class Column implements ValueMaker {
 		return new Column(renamer.applyTo(this.attribute));
 	}
 	
+	public List<OrderSpec> orderSpecs(boolean ascending) {
+		return Collections.singletonList(
+				new OrderSpec(new AttributeExpr(attribute), ascending));
+	}
+
 	public String toString() {
 		return "Column(" + this.attribute.qualifiedName() + ")";
 	}

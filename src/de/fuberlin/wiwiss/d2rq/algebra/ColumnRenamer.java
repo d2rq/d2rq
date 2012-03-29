@@ -1,7 +1,9 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -80,6 +82,14 @@ public abstract class ColumnRenamer {
 		Set<ProjectionSpec> result = new HashSet<ProjectionSpec>();
 		for (ProjectionSpec projection: projections) {
 			result.add(applyTo(projection));
+		}
+		return result;
+	}
+	
+	public List<OrderSpec> applyTo(List<OrderSpec> orderSpecs) {
+		List<OrderSpec> result = new ArrayList<OrderSpec>(orderSpecs.size());
+		for (OrderSpec spec: orderSpecs) {
+			result.add(new OrderSpec(applyTo(spec.expression()), spec.isAscending()));
 		}
 		return result;
 	}

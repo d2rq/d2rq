@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
@@ -88,6 +89,10 @@ public class ValueDecorator implements ValueMaker {
 	
 	public ValueMaker renameAttributes(ColumnRenamer renamer) {
 		return new ValueDecorator(this.base.renameAttributes(renamer), this.constraints, this.translator);
+	}
+	
+	public List<OrderSpec> orderSpecs(boolean ascending) {
+		return base.orderSpecs(ascending);
 	}
 	
 	public interface ValueConstraint {

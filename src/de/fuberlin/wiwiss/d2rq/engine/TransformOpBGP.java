@@ -84,6 +84,7 @@ public class TransformOpBGP extends TransformCopy {
         List<NodeRelation> result = new ArrayList<NodeRelation>();
         boolean convertable = true;
         for (NodeRelation nodeRelation: nodeRelations) {
+        	// TODO: The transformation from Expr to Expression should happen in NodeRelation.select()
             Expression expression = TransformExprToSQLApplyer.convert(filter, nodeRelation);
             if (expression == null) {
             	// the expression cannot be transformed to SQL

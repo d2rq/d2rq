@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,7 +22,8 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * A {@Relation} associated with a number of named {@link NodeMaker}s.
  * 
  * TODO: This is really just a Relation and a BindingMaker wrapped into one. Refactor as such?
- * 
+ * TODO: Should use Vars instead of Strings as variable names 
+ *  
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class NodeRelation {
@@ -109,9 +111,25 @@ public class NodeRelation {
 		return new NodeRelation(mutator.immutableSnapshot(), columns);
 	}
 	
+	// TODO: This should take an ARQ Expr as argument and transform it to an Expression
 	public NodeRelation select(Expression expression) {
         MutableRelation mutator = new MutableRelation(baseRelation());
         mutator.select(expression);
+        return new NodeRelation(mutator.immutableSnapshot(), variablesToNodeMakers);
+	}
+	
+	public NodeRelation orderBy(String variable, boolean ascending) {
+		if (!variableNames().contains(variable)) return this;
+		List<OrderSpec> orderSpecs = nodeMaker(variable).orderSpecs(ascending);
+		if (orderSpecs.isEmpty()) return this;
+        MutableRelation mutator = new MutableRelation(baseRelation());
+        mutator.orderBy(orderSpecs);
+        return new NodeRelation(mutator.immutableSnapshot(), variablesToNodeMakers);
+	}
+	
+	public NodeRelation limit(int limit) {
+        MutableRelation mutator = new MutableRelation(baseRelation());
+        mutator.limit(limit);
         return new NodeRelation(mutator.immutableSnapshot(), variablesToNodeMakers);
 	}
 	

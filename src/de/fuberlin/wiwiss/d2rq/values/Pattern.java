@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.expr.Concatenation;
@@ -135,6 +136,14 @@ public class Pattern implements ValueMaker {
 			index++;
 		}
 		return result.toString();
+	}
+	
+	public List<OrderSpec> orderSpecs(boolean ascending) {
+		List<OrderSpec> result = new ArrayList<OrderSpec>(columns.size());
+		for (Attribute column: columns) {
+			result.add(new OrderSpec(new AttributeExpr(column), ascending));
+		}
+		return result;
 	}
 	
 	public String toString() {

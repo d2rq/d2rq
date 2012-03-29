@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rq.parser;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
@@ -10,6 +11,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
@@ -31,8 +33,7 @@ public class RelationBuilder {
 	private Set<Alias> aliases = new HashSet<Alias>();
 	private final Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
 	private boolean isUnique = false;
-	private Attribute order = null;
-	private boolean orderDesc = false;
+	private List<OrderSpec> orderSpecs = new ArrayList<OrderSpec>();
 	private int limit = Relation.NO_LIMIT;
 	private int limitInverse = Relation.NO_LIMIT;
 		
@@ -50,8 +51,10 @@ public class RelationBuilder {
 		this.aliases.addAll(other.aliases);
 		this.projections.addAll(other.projections);
 		this.isUnique = this.isUnique || other.isUnique;
-		this.orderDesc = order==null?other.orderDesc:orderDesc;
-		this.order = order==null?other.order:order;
+		if (!other.orderSpecs.isEmpty()) {
+			// Overwrite our ordering if the other builder is ordered 
+			this.orderSpecs = other.orderSpecs;
+		}
 		this.limit = Relation.combineLimits(limit, other.limit);
 		this.limitInverse = Relation.combineLimits(limitInverse, other.limitInverse);
 	}
@@ -77,9 +80,10 @@ public class RelationBuilder {
 		}
 		this.aliases.removeAll(removedAliases);
 		this.aliases.addAll(newAliases);
-		this.orderDesc = order==null?other.orderDesc:orderDesc;
-		// FIXME should the order clauses be concatenated? however, this would still be not commutative
-		this.order = order==null?other.order:order;
+		if (!other.orderSpecs.isEmpty()) {
+			// Overwrite our ordering if the other builder is ordered 
+			this.orderSpecs = aliases().applyTo(other.orderSpecs);
+		}
 		this.limit = Relation.combineLimits(limit, other.limit);
 		this.limitInverse = Relation.combineLimits(limitInverse, other.limitInverse);
 	}
@@ -108,9 +112,8 @@ public class RelationBuilder {
 		this.projections.add(projection);
 	}
 	
-	public void setOrder(Attribute attribute, boolean orderDesc) {
-	    this.order = attribute;
-	    this.orderDesc = orderDesc;
+	public void setOrderSpecs(List<OrderSpec> orderSpecs) {
+	    this.orderSpecs = orderSpecs;
 	}
 	
 	public void setLimit(int limit) {
@@ -153,8 +156,7 @@ public class RelationBuilder {
 				this.joinConditions,
 				this.projections,
 				this.isUnique,
-				this.order,
-				this.orderDesc,
+				this.orderSpecs,
 				this.limit,
 				this.limitInverse);
 	}
