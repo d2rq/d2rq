@@ -72,7 +72,7 @@ public class ResourceServlet extends HttpServlet {
 	}
 
 	private boolean handleDownload(String resourceURI, HttpServletResponse response, D2RServer server) throws IOException {
-		Mapping m = server.currentGraph().getMapping();
+		Mapping m = D2RServer.retrieveSystemLoader(getServletContext()).getMapping();
 		for (Resource r: m.downloadMapResources()) {
 			DownloadMap d = m.downloadMap(r);
 			DownloadContentQuery q = new DownloadContentQuery(d, resourceURI);

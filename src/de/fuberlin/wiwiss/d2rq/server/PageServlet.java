@@ -25,7 +25,7 @@ import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.ClassMapLister;
 import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 public class PageServlet extends HttpServlet {
@@ -117,11 +117,14 @@ public class PageServlet extends HttpServlet {
 	private Map<String,String> classmapLinks(Resource resource) {
 		Map<String,String> result = new HashMap<String,String>();
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
-		GraphD2RQ g = server.currentGraph();
-		for (String name: g.classMapNamesForResource(resource.asNode())) {
+		for (String name: getClassMapLister().classMapNamesForResource(resource.asNode())) {
 			result.put(name, server.baseURI() + "directory/" + name);
 		}
 		return result;
+	}
+	
+	private ClassMapLister getClassMapLister() {
+		return D2RServer.retrieveSystemLoader(getServletContext()).getClassMapLister();
 	}
 	
 	private static final long serialVersionUID = 2752377911405801794L;

@@ -13,9 +13,9 @@ import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.optimizer.expr.TransformExprToSQLApplyer;
 
 /**
@@ -30,14 +30,14 @@ import de.fuberlin.wiwiss.d2rq.optimizer.expr.TransformExprToSQLApplyer;
 public class TransformOpBGP extends TransformCopy {
 	private final static Log log = LogFactory.getLog(TransformOpBGP.class);
 
-	private final GraphD2RQ graph;
+	private final Mapping mapping;
 	private final boolean useAllOptimizations;
 	private final boolean transformFilters;
 	
-	public TransformOpBGP(GraphD2RQ graph, boolean transformFilters) {
-		this.graph = graph;
+	public TransformOpBGP(Mapping mapping, boolean transformFilters) {
+		this.mapping = mapping;
 		this.transformFilters = transformFilters;
-		this.useAllOptimizations = graph.getConfiguration().getUseAllOptimizations();
+		this.useAllOptimizations = mapping.configuration().getUseAllOptimizations();
 	}
 	
 	@Override
@@ -58,7 +58,7 @@ public class TransformOpBGP extends TransformCopy {
 
 	public Op createOpD2RQ(OpBGP opBGP, ExprList filters) {
         List<NodeRelation> tables = new GraphPatternTranslator(
-        		opBGP.getPattern().getList(), graph.tripleRelations(), 
+        		opBGP.getPattern().getList(), mapping.compiledPropertyBridges(), 
         		useAllOptimizations).translate();
         
         if (useAllOptimizations) {

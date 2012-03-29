@@ -129,7 +129,7 @@ public abstract class CommandLineTool {
 			loader.setStartupSQLScript(cmd.getArg(sqlFileArg).getValue());
 		}
 		if (cmd.contains(w3cArg)) {
-			loader.setGenerateDirectMapping(true);
+			loader.setGenerateW3CDirectMapping(true);
 		}
 		try {
 			Collection<Filter> includes = new ArrayList<Filter>();

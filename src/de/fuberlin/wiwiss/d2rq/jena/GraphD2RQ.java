@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.jena;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,6 +11,7 @@ import com.hp.hpl.jena.graph.impl.GraphBase;
 import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;

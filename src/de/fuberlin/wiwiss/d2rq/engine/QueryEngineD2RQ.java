@@ -9,6 +9,7 @@ import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.Transformer;
 import com.hp.hpl.jena.sparql.algebra.optimize.TransformScopeRename;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
+import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import com.hp.hpl.jena.sparql.engine.Plan;
 import com.hp.hpl.jena.sparql.engine.QueryEngineFactory;
 import com.hp.hpl.jena.sparql.engine.QueryEngineRegistry;
@@ -17,7 +18,8 @@ import com.hp.hpl.jena.sparql.engine.binding.BindingRoot;
 import com.hp.hpl.jena.sparql.engine.main.QueryEngineMain;
 import com.hp.hpl.jena.sparql.util.Context;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.map.Mapping;
 
 /**
  * An ARQ query engine for D2RQ-mapped graphs. Allows evaluation of SPARQL
@@ -30,20 +32,20 @@ import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 public class QueryEngineD2RQ extends QueryEngineMain {
 	private static final Log log = LogFactory.getLog(QueryEngineD2RQ.class);
 
-	private GraphD2RQ graph;
+	private final Mapping mapping;
 
 	public QueryEngineD2RQ(GraphD2RQ graph, Query query) {
 		this(graph, query, null);
 	}
 
 	public QueryEngineD2RQ(GraphD2RQ graph, Query query, Context context) {
-		super(query, new D2RQDatasetGraph(graph), BindingRoot.create(), context);
-		this.graph = graph;
+		super(query, DatasetGraphFactory.createOneGraph(graph), BindingRoot.create(), context);
+		this.mapping = graph.getMapping();
 	}
 
 	public QueryEngineD2RQ(GraphD2RQ graph, Op op, Context context) {
-		super(op, new D2RQDatasetGraph(graph), BindingRoot.create(), context);
-		this.graph = graph;
+		super(op, DatasetGraphFactory.createOneGraph(graph), BindingRoot.create(), context);
+		this.mapping = graph.getMapping();
 	}
 
 	@Override
@@ -73,9 +75,9 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 		// Try to move any filters as far down as possible
 		op = PushDownOpFilterVisitor.transform(op);
 		// Translate BGPs that have a filter immediately above them
-		op = Transformer.transform(new TransformOpBGP(graph, true), op);
+		op = Transformer.transform(new TransformOpBGP(mapping, true), op);
 		// Translate BGPs that don't have a filter
-		op = Transformer.transform(new TransformOpBGP(graph, false), op);
+		op = Transformer.transform(new TransformOpBGP(mapping, false), op);
 
 		if (log.isDebugEnabled()) {
 			log.debug("After translation:\n" + PrintUtils.toString(op));
@@ -100,8 +102,7 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 
 	private static class QueryEngineFactoryD2RQ implements QueryEngineFactory {
 		public boolean accept(Query query, DatasetGraph dataset, Context context) {
-			return dataset instanceof D2RQDatasetGraph
-					|| dataset.getDefaultGraph() instanceof GraphD2RQ;
+			return dataset.getDefaultGraph() instanceof GraphD2RQ;
 		}
 
 		public Plan create(Query query, DatasetGraph dataset,
@@ -111,8 +112,7 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 		}
 
 		public boolean accept(Op op, DatasetGraph dataset, Context context) {
-			return dataset instanceof D2RQDatasetGraph
-					|| dataset.getDefaultGraph() instanceof GraphD2RQ;
+			return dataset.getDefaultGraph() instanceof GraphD2RQ;
 		}
 
 		public Plan create(Op op, DatasetGraph dataset, Binding inputBinding,

@@ -14,11 +14,11 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.shared.Lock;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
+import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import com.hp.hpl.jena.util.iterator.NullIterator;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.SystemLoader;
-import de.fuberlin.wiwiss.d2rq.engine.D2RQDatasetGraph;
+import de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 
 public class AutoReloadableDataset implements Dataset {
@@ -31,7 +31,7 @@ public class AutoReloadableDataset implements Dataset {
 	private final File watchedFile;
 	private final boolean autoReload;
 	
-	private D2RQDatasetGraph datasetGraph = null;
+	private DatasetGraph datasetGraph = null;
     
 	private long lastModified = Long.MAX_VALUE;
 	private long lastReload = Long.MIN_VALUE;
@@ -65,11 +65,10 @@ public class AutoReloadableDataset implements Dataset {
 	}
 	
 	private void reload() {
+		loader.getMapping().connect();
 		GraphD2RQ graph = loader.getGraphD2RQ();
-		graph.connect();
-		graph.initInventory();
 		
-		datasetGraph = new D2RQDatasetGraph(graph);
+		datasetGraph = DatasetGraphFactory.createOneGraph(graph);
 		defaultModel = ModelFactory.createModelForGraph(datasetGraph.getDefaultGraph());		
 
 		hasTruncatedResults = false;

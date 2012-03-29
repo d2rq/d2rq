@@ -9,6 +9,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.FileUtils;
 
+import de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.Filter;
@@ -65,6 +67,7 @@ public class SystemLoader {
 	private JettyLauncher jettyLauncher = null;
 	private ConfigLoader serverConfig = null;
 	private D2RServer d2rServer = null;
+	private ClassMapLister classMapLister = null;
 	
 	public void setUsername(String username) {
 		this.username = username;
@@ -87,7 +90,7 @@ public class SystemLoader {
 		this.sqlScript = sqlFile;
 	}
 
-	public void setGenerateDirectMapping(boolean flag) {
+	public void setGenerateW3CDirectMapping(boolean flag) {
 		this.generateDirectMapping = flag;
 	}
 	
@@ -254,6 +257,7 @@ public class SystemLoader {
 	public Mapping getMapping() {
 		if (mapping == null) {
 			mapping = new MapParser(getMappingModel(), getResourceBaseURI()).parse();
+			mapping.configuration().setUseAllOptimizations(fastMode);
 			if (connectedDB != null) {
 				// Hack! We don't want the Database to open another ConnectedDB,
 				// so we check if it's connected to the same DB, and in that case
@@ -276,8 +280,6 @@ public class SystemLoader {
 	public ModelD2RQ getModelD2RQ() {
 		if (dataModel == null) {
 			dataModel = new ModelD2RQ(getMapping());
-			GraphD2RQ g = (GraphD2RQ) dataModel.getGraph();
-			g.getConfiguration().setUseAllOptimizations(fastMode);
 		}
 		return dataModel;
 	}
@@ -287,6 +289,13 @@ public class SystemLoader {
 			dataGraph = (GraphD2RQ) getModelD2RQ().getGraph();
 		}
 		return dataGraph;
+	}
+	
+	public ClassMapLister getClassMapLister() {
+		if (classMapLister == null) {
+			classMapLister = new ClassMapLister(getMapping());
+		}
+		return classMapLister;
 	}
 	
 	public JettyLauncher getJettyLauncher() {
@@ -323,5 +332,6 @@ public class SystemLoader {
 		dataModel = null;
 		if (dataGraph != null) dataGraph.close();
 		dataGraph = null;
+		classMapLister = null;
 	}
 }

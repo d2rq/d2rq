@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.velocity.context.Context;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.ClassMapLister;
 
 public class RootServlet extends HttpServlet {
 	
@@ -20,7 +20,8 @@ public class RootServlet extends HttpServlet {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		server.checkMappingFileChanged();
 		Map<String,String> classMapLinks = new TreeMap<String,String>();
-		for (String name: graphD2RQ().classMapNames()) {
+		ClassMapLister lister = D2RServer.retrieveSystemLoader(getServletContext()).getClassMapLister();
+		for (String name: lister.classMapNames()) {
 			classMapLinks.put(name, server.baseURI() + "directory/" + name);
 		}
 		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
@@ -28,10 +29,6 @@ public class RootServlet extends HttpServlet {
 		context.put("rdf_link", server.baseURI() + "all");
 		context.put("classmap_links", classMapLinks);
 		velocity.mergeTemplateXHTML("root_page.vm");
-	}
-
-	private GraphD2RQ graphD2RQ() {
-		return (GraphD2RQ) D2RServer.fromServletContext(getServletContext()).currentGraph();
 	}
 
 	private static final long serialVersionUID = 8398973058486421941L;

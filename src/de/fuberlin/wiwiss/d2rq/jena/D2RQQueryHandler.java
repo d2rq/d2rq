@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.jena;
 
 import java.util.HashMap;
 import java.util.Map;

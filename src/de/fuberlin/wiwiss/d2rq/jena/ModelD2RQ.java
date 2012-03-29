@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.jena;
 
 import com.hp.hpl.jena.enhanced.BuiltinPersonalities;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -20,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
  *
- * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
+ * @see de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ
  */
 public class ModelD2RQ extends ModelCom implements Model {
 

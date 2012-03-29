@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.jena;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,6 +9,7 @@ import com.hp.hpl.jena.graph.TripleMatch;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.WrappedIterator;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 
 

@@ -6,7 +6,7 @@ import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
 
 public class JenaModelExample {

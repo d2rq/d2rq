@@ -13,8 +13,8 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 
 /**
