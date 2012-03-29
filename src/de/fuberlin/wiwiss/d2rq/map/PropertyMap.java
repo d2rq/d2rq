@@ -18,7 +18,7 @@ public class PropertyMap extends ResourceMap {
 
 	@Override
 	protected Relation buildRelation() {
-		return relationBuilder().buildRelation(database.connectedDB());
+		return relationBuilder(database.connectedDB()).buildRelation();
 	}
 
 	@Override

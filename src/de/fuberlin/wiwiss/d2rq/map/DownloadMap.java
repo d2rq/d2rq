@@ -93,16 +93,16 @@ public class DownloadMap extends ResourceMap {
 
 	@Override
 	protected Relation buildRelation() {
-		RelationBuilder builder = relationBuilder();
+		Database db = belongsToClassMap == null ? database : belongsToClassMap.database();
+		RelationBuilder builder = relationBuilder(db.connectedDB());
 		builder.addProjection(contentDownloadColumn);
 		for (ProjectionSpec projection: getMediaTypeValueMaker().projectionSpecs()) {
 			builder.addProjection(projection);
 		}
 		if (belongsToClassMap != null) {
-			builder.addOther(belongsToClassMap.relationBuilder());
+			builder.addOther(belongsToClassMap.relationBuilder(db.connectedDB()));
 		}
-		Database db = belongsToClassMap == null ? database : belongsToClassMap.database();
-		return builder.buildRelation(db.connectedDB()); 
+		return builder.buildRelation(); 
 	}
 	
 	public Relation getRelation() {

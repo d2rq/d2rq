@@ -48,14 +48,6 @@ public class TripleRelation extends NodeRelation {
 		}});
 	}
 	
-	public String toString() {
-		return "TripleRelation(\n" +
-				"    " + nodeMaker(SUBJECT) + "\n" +
-				"    " + nodeMaker(PREDICATE) + "\n" +
-				"    " + nodeMaker(OBJECT) + "\n" +
-				")";
-	}
-	
 	public TripleRelation selectTriple(Triple t) {
 		MutableRelation newBase = new MutableRelation(baseRelation());
 		NodeMaker s = nodeMaker(SUBJECT).selectNode(t.getSubject(), newBase);

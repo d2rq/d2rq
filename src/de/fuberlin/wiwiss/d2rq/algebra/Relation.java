@@ -20,7 +20,7 @@ public abstract class Relation implements RelationalOperators {
 	
 	public static Relation createSimpleRelation(
 			ConnectedDB database, Attribute[] attributes) {
-		return new RelationImpl(database, AliasMap.NO_ALIASES, Expression.TRUE,
+		return new RelationImpl(database, AliasMap.NO_ALIASES, Expression.TRUE, Expression.TRUE,
 				Collections.<Join>emptySet(), 
 				new HashSet<ProjectionSpec>(Arrays.asList(attributes)), 
 				false, null, false, -1, -1);
@@ -32,6 +32,7 @@ public abstract class Relation implements RelationalOperators {
 		public Set<Join> joinConditions() { return Collections.<Join>emptySet(); }
 		public Set<Join> leftJoinConditions() { return Collections.<Join>emptySet(); }
 		public Expression condition() { return Expression.FALSE; }
+		public Expression softCondition() { return Expression.FALSE; }
 		public Set<ProjectionSpec> projections() { return Collections.<ProjectionSpec>emptySet(); }
 		public Relation select(Expression condition) { return this; }
 		public Relation renameColumns(ColumnRenamer renamer) { return this; }
@@ -49,6 +50,7 @@ public abstract class Relation implements RelationalOperators {
 		public Set<Join> joinConditions() { return Collections.<Join>emptySet(); }
 		public Set<Join> leftJoinConditions() { return Collections.<Join>emptySet(); }
 		public Expression condition() { return Expression.TRUE; }
+		public Expression softCondition() { return Expression.TRUE; }
 		public Set<ProjectionSpec> projections() { return Collections.<ProjectionSpec>emptySet(); }
 		public Relation select(Expression condition) {
 			if (condition.isFalse()) return Relation.EMPTY;
@@ -97,6 +99,24 @@ public abstract class Relation implements RelationalOperators {
 	 * @return An expression; {@link Expression#TRUE} indicates no condition
 	 */
 	public abstract Expression condition();
+	
+	/**
+	 * An expression satisfied by all tuples in the relation. This
+	 * is a necessary but not sufficient condition; it is
+	 * descriptive and not prescriptive. Replacing the condition
+	 * with {@link Expression#TRUE} does not change the contents of
+	 * the relation. It is thus just an optional condition that can
+	 * be used for optimization, but can be dropped or ignored if
+	 * convenient. Typically, there is other Java code that ensures the
+	 * condition regardless of whether it is present here or not.
+	 * 
+	 * We use this in particular for adding IS NOT NULL constraints
+	 * on all nullable columns that need to have a non-NULL value to form a
+	 * triple or binding.
+	 * 
+	 * @return An expression; {@link Expression#TRUE} indicates no soft condition
+	 */
+	public abstract Expression softCondition();
 	
 	/**
 	 * The attributes or expressions that the relation is projected to.

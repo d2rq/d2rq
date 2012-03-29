@@ -11,7 +11,6 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.DummyDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.values.Column;
@@ -21,17 +20,19 @@ public class CompatibleRelationGroupTest extends TestCase {
 	Set<ProjectionSpec> projections2;
 	RelationImpl unique;
 	RelationImpl notUnique;
-	ConnectedDB db;
+	DummyDB db;
 	
 	public void setUp() {
 		db = new DummyDB();
 		projections1 = Collections.<ProjectionSpec>singleton(new Attribute(null, "table", "unique"));
 		projections2 = Collections.<ProjectionSpec>singleton(new Attribute(null, "table", "not_unique"));
 		unique = new RelationImpl(
-				db, AliasMap.NO_ALIASES, Expression.TRUE, Collections.<Join>emptySet(), 
+				db, AliasMap.NO_ALIASES, Expression.TRUE, Expression.TRUE, 
+				Collections.<Join>emptySet(), 
 				projections1, true, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
 		notUnique = new RelationImpl(
-				db, AliasMap.NO_ALIASES, Expression.TRUE, Collections.<Join>emptySet(), 
+				db, AliasMap.NO_ALIASES, Expression.TRUE, Expression.TRUE, 
+				Collections.<Join>emptySet(), 
 				projections2, false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
 	}
 	
@@ -54,19 +55,20 @@ public class CompatibleRelationGroupTest extends TestCase {
 	
 	public void testCombineDifferentConditions() {
 		Attribute id = SQL.parseAttribute("TABLE.ID");
+		db.setNullable(id, false);
 		NodeMaker x = new TypedNodeMaker(TypedNodeMaker.PLAIN_LITERAL, new Column(id), true);
 		Map<String,NodeMaker> map = Collections.singletonMap("x", x);
 		BindingMaker bm = new BindingMaker(map, null);
-		RelationBuilder b1 = new RelationBuilder();
-		RelationBuilder b2 = new RelationBuilder();
+		RelationBuilder b1 = new RelationBuilder(db);
+		RelationBuilder b2 = new RelationBuilder(db);
 		b1.addProjection(id);
 		b2.addProjection(id);
 		b1.addCondition("TABLE.VALUE=1");
 		b2.addCondition("TABLE.VALUE=2");
 		
 		CompatibleRelationGroup group = new CompatibleRelationGroup();
-		Relation r1 = b1.buildRelation(db);
-		Relation r2 = b2.buildRelation(db);
+		Relation r1 = b1.buildRelation();
+		Relation r2 = b2.buildRelation();
 		group.addBindingMaker(r1, bm);
 		assertTrue(group.isCompatible(r2));
 		group.addBindingMaker(r2, bm);
@@ -82,18 +84,19 @@ public class CompatibleRelationGroupTest extends TestCase {
 	
 	public void testCombineConditionAndNoCondition() {
 		Attribute id = SQL.parseAttribute("TABLE.ID");
+		db.setNullable(id, false);
 		NodeMaker x = new TypedNodeMaker(TypedNodeMaker.PLAIN_LITERAL, new Column(id), true);
 		Map<String,NodeMaker> map = Collections.singletonMap("x", x);
 		BindingMaker bm = new BindingMaker(map, null);
-		RelationBuilder b1 = new RelationBuilder();
-		RelationBuilder b2 = new RelationBuilder();
+		RelationBuilder b1 = new RelationBuilder(db);
+		RelationBuilder b2 = new RelationBuilder(db);
 		b1.addProjection(id);
 		b2.addProjection(id);
 		b1.addCondition("TABLE.VALUE=1");
 		
 		CompatibleRelationGroup group = new CompatibleRelationGroup();
-		Relation r1 = b1.buildRelation(db);
-		Relation r2 = b2.buildRelation(db);
+		Relation r1 = b1.buildRelation();
+		Relation r2 = b2.buildRelation();
 		group.addBindingMaker(r1, bm);
 		assertTrue(group.isCompatible(r2));
 		group.addBindingMaker(r2, bm);

@@ -56,6 +56,7 @@ public class SelectStatementBuilder {
 			}
 		}
 		addCondition(relation.condition());
+		addCondition(relation.softCondition());
 		for (ProjectionSpec projection: relation.projections()) {
 			addSelectSpec(projection);
 		}

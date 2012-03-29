@@ -13,6 +13,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
+import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
@@ -24,6 +25,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class RelationBuilder {
+	private final ConnectedDB database;
 	private Expression condition = Expression.TRUE;
 	private Set<Join> joinConditions = new HashSet<Join>();
 	private Set<Alias> aliases = new HashSet<Alias>();
@@ -34,7 +36,9 @@ public class RelationBuilder {
 	private int limit = Relation.NO_LIMIT;
 	private int limitInverse = Relation.NO_LIMIT;
 		
-	public RelationBuilder() {}
+	public RelationBuilder(ConnectedDB database) {
+		this.database = database;
+	}
 	
 	public void setIsUnique(boolean isUnique) {
 		this.isUnique = isUnique;
@@ -84,6 +88,10 @@ public class RelationBuilder {
 		this.condition = this.condition.and(SQLExpression.create(condition));
 	}
 	
+	public void addCondition(Expression condition) {
+		this.condition = this.condition.and(condition);
+	}
+	
 	public void addAlias(Alias alias) {
 		this.aliases.add(alias);
 	}
@@ -113,7 +121,7 @@ public class RelationBuilder {
 	    this.limitInverse = limitInverse;
 	}
 	
-	public Relation buildRelation(ConnectedDB database) {
+	public Relation buildRelation() {
 		if (!isUnique) {
 			for (ProjectionSpec projection: projections) {
 				for (Attribute column: projection.requiredAttributes()) {
@@ -127,10 +135,21 @@ public class RelationBuilder {
 				}
 			}
 		}
+		AliasMap aliases = aliases();
+		
+		// The contract is that all projections are required (must not be NULL).
+		// So let's add them all as soft conditions. The soft condition for
+		// a non-nullable column is TRUE.
+		Collection<Expression> softConditions = new HashSet<Expression>(projections.size());
+		for (ProjectionSpec projection: projections) {
+			softConditions.add(projection.notNullExpression(database, aliases));
+		}
+		
 		return new RelationImpl(
 				database,
-				aliases(), 
+				aliases, 
 				this.condition, 
+				Conjunction.create(softConditions),
 				this.joinConditions,
 				this.projections,
 				this.isUnique,

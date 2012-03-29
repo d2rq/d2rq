@@ -14,6 +14,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
@@ -179,13 +180,14 @@ public class PropertyBridge extends ResourceMap {
 	}
 
 	protected Relation buildRelation() {
-		RelationBuilder builder = belongsToClassMap.relationBuilder();
-		builder.addOther(relationBuilder());
+		ConnectedDB database = belongsToClassMap.database().connectedDB();
+		RelationBuilder builder = belongsToClassMap.relationBuilder(database);
+		builder.addOther(relationBuilder(database));
 		if (this.refersToClassMap != null) {
-			builder.addAliased(this.refersToClassMap.relationBuilder());
+			builder.addAliased(this.refersToClassMap.relationBuilder(database));
 		}
 		for (String pattern: dynamicPropertyPatterns) {
-			builder.addOther(new PropertyMap(pattern, belongsToClassMap.database()).relationBuilder());
+			builder.addOther(new PropertyMap(pattern, belongsToClassMap.database()).relationBuilder(database));
 		}
 		if (this.limit!=null) {
 			builder.setLimit(this.limit.intValue());
@@ -196,8 +198,7 @@ public class PropertyBridge extends ResourceMap {
 		if (this.order!=null) {
 			builder.setOrder(SQL.parseAttribute(this.order), this.orderDesc.booleanValue());
 		}
-
-		return builder.buildRelation(this.belongsToClassMap.database().connectedDB()); 
+		return builder.buildRelation(); 
 	}
 
 	public Collection<TripleRelation> toTripleRelations() {

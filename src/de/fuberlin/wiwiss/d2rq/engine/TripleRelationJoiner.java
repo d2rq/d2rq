@@ -287,6 +287,7 @@ class TripleRelationJoiner {
 		AliasMap joinedAliases = AliasMap.NO_ALIASES;
 		Collection<Expression> expressions = new HashSet<Expression>();
 		expressions.add(additionalCondition);
+		Collection<Expression> softConditions = new HashSet<Expression>();
 		Set<Join> joins = new HashSet<Join>();
 		Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
 		int limit = Relation.NO_LIMIT;
@@ -297,6 +298,7 @@ class TripleRelationJoiner {
 		for (Relation relation: relations) {
 			joinedAliases = joinedAliases.applyTo(relation.aliases());
 			expressions.add(relation.condition());
+			softConditions.add(relation.softCondition());
 			joins.addAll(relation.joinConditions());
 			projections.addAll(relation.projections());
 			orderDesc = order==null?relation.orderDesc():orderDesc;
@@ -304,13 +306,14 @@ class TripleRelationJoiner {
 			limit = Relation.combineLimits(limit, relation.limit());
 			limitInverse = Relation.combineLimits(limitInverse, relation.limitInverse());
 		}
-		// TODO: @@@ Figure out uniqueness instead of just false
-		// I think the new relation is unique if it is joined only on unique node sets.
+		// TODO: Determine correct uniqueness instead of just false.
+		// The new relation is unique if it is joined only on unique node sets.
 		// A node set is unique if it is constrained by only unique node makers.
 		
 		// In the meantime, copy the uniqueness from the relation if there's just one
 		boolean isUnique = useAllOptimizations && relations.size()==1 && (relations.iterator().next()).isUnique();
 		return new RelationImpl(connectedDB, joinedAliases, Conjunction.create(expressions), 
+				Conjunction.create(softConditions),
 				joins, projections, isUnique, order, orderDesc, limit, limitInverse);
 	}
 }

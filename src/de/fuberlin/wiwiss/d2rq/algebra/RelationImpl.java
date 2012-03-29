@@ -10,6 +10,7 @@ public class RelationImpl extends Relation {
 	private final ConnectedDB database;
 	private final AliasMap aliases;
 	private final Expression condition;
+	private final Expression softCondition;
 	private final Set<Join> joinConditions;
 	private final Set<Join> leftJoinConditions;
 	private final Set<ProjectionSpec> projections;
@@ -20,11 +21,13 @@ public class RelationImpl extends Relation {
 	private int limitInverse;
 	
 	public RelationImpl(ConnectedDB database, AliasMap aliases,
-			Expression condition, Set<Join> joinConditions, Set<ProjectionSpec> projections,
+			Expression condition, Expression softCondition,
+			Set<Join> joinConditions, Set<ProjectionSpec> projections,
 			boolean isUnique, Attribute order, boolean orderDesc, int limit, int limitInverse) {
 		this.database = database;
 		this.aliases = aliases;
 		this.condition = condition;
+		this.softCondition = softCondition;
 		this.joinConditions = joinConditions;
 		this.projections = projections;
 		this.isUnique = isUnique;
@@ -36,11 +39,13 @@ public class RelationImpl extends Relation {
 	}
 
 	public RelationImpl(ConnectedDB database, AliasMap aliases,
-			Expression condition, Set<Join> joinConditions, Set<ProjectionSpec> projections, Set<Join> leftJoinConditions,
+			Expression condition, Expression softCondition,
+			Set<Join> joinConditions, Set<ProjectionSpec> projections, Set<Join> leftJoinConditions,
 			boolean isUnique, Attribute order, boolean orderDesc, int limit, int limitInverse) {
 		this.database = database;
 		this.aliases = aliases;
 		this.condition = condition;
+		this.softCondition = softCondition;
 		this.joinConditions = joinConditions;
 		this.projections = projections;
 		this.isUnique = isUnique;
@@ -65,6 +70,10 @@ public class RelationImpl extends Relation {
 
 	public Expression condition() {
 		return this.condition;
+	}
+
+	public Expression softCondition() {
+		return softCondition;
 	}
 
 	public Set<Join> joinConditions() {
@@ -102,20 +111,22 @@ public class RelationImpl extends Relation {
 		if (selectCondition.isFalse()) {
 			return Relation.EMPTY;
 		}
-		return new RelationImpl(database, aliases, condition.and(selectCondition),
-				joinConditions, projections, isUnique, order, orderDesc, limit, limitInverse);
+		return new RelationImpl(database, aliases, 
+				condition.and(selectCondition), softCondition, joinConditions, 
+				projections, isUnique, order, orderDesc, limit, limitInverse);
 	}
 	
 	public Relation renameColumns(ColumnRenamer renames) {
 		return new RelationImpl(database, renames.applyTo(aliases),
-				renames.applyTo(condition), renames.applyToJoinSet(joinConditions),
+				renames.applyTo(condition), renames.applyTo(softCondition),
+				renames.applyToJoinSet(joinConditions),
 				renames.applyToProjectionSet(projections), isUnique, order != null ? renames.applyTo(order) : null, orderDesc, limit, limitInverse);
 	}
 
 	public Relation project(Set<? extends ProjectionSpec> projectionSpecs) {
 		Set<ProjectionSpec> newProjections = new HashSet<ProjectionSpec>(projectionSpecs);
 		newProjections.retainAll(projections);
-		return new RelationImpl(database, aliases, condition, joinConditions, 
+		return new RelationImpl(database, aliases, condition, softCondition, joinConditions, 
 				newProjections, isUnique, order, orderDesc, limit, limitInverse);
 	}
 	
@@ -136,6 +147,11 @@ public class RelationImpl extends Relation {
 		if (!condition.isTrue()) {
 			result.append("    condition: ");
 			result.append(condition);
+			result.append("\n");
+		}
+		if (!softCondition.isTrue()) {
+			result.append("    softCondition: ");
+			result.append(softCondition);
 			result.append("\n");
 		}
 		if (!aliases.equals(AliasMap.NO_ALIASES)) {

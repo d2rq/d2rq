@@ -54,7 +54,8 @@ public class URIMakerRuleTest extends TestCase {
 
 	public void setUp() {
 		Relation base = new RelationImpl(null, AliasMap.NO_ALIASES, 
-				Expression.TRUE, Collections.<Join>emptySet(), Collections.<ProjectionSpec>emptySet(), false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
+				Expression.TRUE, Expression.TRUE, 
+				Collections.<Join>emptySet(), Collections.<ProjectionSpec>emptySet(), false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
 		this.withURIPatternSubject = new TripleRelation(base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new Pattern("http://test/person@@employees.ID@@"), true),

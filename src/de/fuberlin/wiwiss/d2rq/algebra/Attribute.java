@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeNotNull;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
@@ -98,6 +99,13 @@ public class Attribute implements ProjectionSpec {
 	
 	public Expression toExpression() {
 		return new AttributeExpr(this);
+	}
+	
+	public Expression notNullExpression(ConnectedDB db, AliasMap aliases) {
+		if (db.isNullable(aliases.originalOf(this))) {
+			return AttributeNotNull.create(this);
+		}
+		return Expression.TRUE;
 	}
 	
 	public String toString() {

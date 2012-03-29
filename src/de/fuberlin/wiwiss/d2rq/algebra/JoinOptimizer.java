@@ -79,6 +79,7 @@ public class JoinOptimizer {
 				new RelationImpl(this.relation.baseRelation().database(),
 					this.relation.baseRelation().aliases(),
 					this.relation.baseRelation().condition(),
+					this.relation.baseRelation().softCondition(),
 					requiredJoins, projections,
 					this.relation.baseRelation().isUnique(),
 					this.relation.baseRelation().order(),

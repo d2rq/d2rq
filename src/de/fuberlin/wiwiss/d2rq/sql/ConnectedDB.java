@@ -45,6 +45,8 @@ public class ConnectedDB {
 	private String jdbcURL;
 	private String username;
 	private String password;
+	private final Map<Attribute,Boolean> cachedColumnNullability = 
+		new HashMap<Attribute,Boolean>();
 	private final Map<Attribute,DataType> cachedColumnTypes = 
 		new HashMap<Attribute,DataType>();
 	private final Map<Attribute,GenericType> overriddenColumnTypes =
@@ -253,6 +255,14 @@ public class ConnectedDB {
 			}
 		}
 		return cachedColumnTypes.get(column);
+	}
+	
+	public boolean isNullable(Attribute column) {
+		if (!cachedColumnNullability.containsKey(column)) {
+			cachedColumnNullability.put(column, 
+					schemaInspector() == null ? true : schemaInspector().isNullable(column));
+		}
+		return cachedColumnNullability.get(column);
 	}
 	
 	/**

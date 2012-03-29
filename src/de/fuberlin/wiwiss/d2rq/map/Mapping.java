@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -32,6 +35,8 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class Mapping {
+	private static final Log log = LogFactory.getLog(Mapping.class);
+	
 	private final Model model = ModelFactory.createDefaultModel();
 	
 	/**
@@ -173,6 +178,12 @@ public class Mapping {
 		compiledPropertyBridges = new ArrayList<TripleRelation>();
 		for (ClassMap classMap: classMaps.values()) {
 			this.compiledPropertyBridges.addAll(classMap.compiledPropertyBridges());
+		}
+		if (log.isDebugEnabled()) {
+			log.debug("Compiled property bridges:");
+			for (TripleRelation rel: compiledPropertyBridges) {
+				log.debug(rel);
+			}
 		}
 	}
 	
