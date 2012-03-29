@@ -65,7 +65,7 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 	 */
 	private Op translate(Op op) {
 		if (log.isDebugEnabled()) {
-			log.debug("Before translation: " + PrintUtils.toString(op));
+			log.debug("Before translation:\n" + PrintUtils.toString(op));
 		}
 		// Shape filter expressions to maximize opportunities for pushing them
 		// down
@@ -78,7 +78,7 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 		op = Transformer.transform(new TransformOpBGP(graph, false), op);
 
 		if (log.isDebugEnabled()) {
-			log.debug("After translation: " + PrintUtils.toString(op));
+			log.debug("After translation:\n" + PrintUtils.toString(op));
 		}
 		return op;
 	}
