@@ -280,7 +280,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		if (this.nodeRelation != null && exprVar != null)
 		{
 			// get the nodemaker for the expr-var
-			NodeMaker nodeMaker = nodeRelation.nodeMaker(exprVar.asVar().getVarName());
+			NodeMaker nodeMaker = nodeRelation.nodeMaker(exprVar.asVar());
 			if (nodeMaker instanceof TypedNodeMaker) {
 				TypedNodeMaker typedNodeMaker = (TypedNodeMaker) nodeMaker;
 				Iterator<ProjectionSpec> it = typedNodeMaker.projectionSpecs().iterator();

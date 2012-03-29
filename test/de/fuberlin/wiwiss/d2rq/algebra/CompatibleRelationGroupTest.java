@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
+
+import com.hp.hpl.jena.sparql.core.Var;
+
 import de.fuberlin.wiwiss.d2rq.engine.BindingMaker;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
@@ -57,7 +60,7 @@ public class CompatibleRelationGroupTest extends TestCase {
 		Attribute id = SQL.parseAttribute("TABLE.ID");
 		db.setNullable(id, false);
 		NodeMaker x = new TypedNodeMaker(TypedNodeMaker.PLAIN_LITERAL, new Column(id), true);
-		Map<String,NodeMaker> map = Collections.singletonMap("x", x);
+		Map<Var,NodeMaker> map = Collections.singletonMap(Var.alloc("x"), x);
 		BindingMaker bm = new BindingMaker(map, null);
 		RelationBuilder b1 = new RelationBuilder(db);
 		RelationBuilder b2 = new RelationBuilder(db);
@@ -78,7 +81,7 @@ public class CompatibleRelationGroupTest extends TestCase {
 		assertTrue(group.baseRelation().projections().contains(new ExpressionProjectionSpec(r2.condition())));
 		assertEquals(3, group.baseRelation().projections().size());
 		assertEquals(r1.condition().or(r2.condition()), group.baseRelation().condition());
-		assertEquals(group.bindingMakers().iterator().next().nodeMaker("x"), x);
+		assertEquals(group.bindingMakers().iterator().next().nodeMaker(Var.alloc("x")), x);
 		assertNotNull(group.bindingMakers().iterator().next().condition());
 	}
 	
@@ -86,7 +89,7 @@ public class CompatibleRelationGroupTest extends TestCase {
 		Attribute id = SQL.parseAttribute("TABLE.ID");
 		db.setNullable(id, false);
 		NodeMaker x = new TypedNodeMaker(TypedNodeMaker.PLAIN_LITERAL, new Column(id), true);
-		Map<String,NodeMaker> map = Collections.singletonMap("x", x);
+		Map<Var,NodeMaker> map = Collections.singletonMap(Var.alloc("x"), x);
 		BindingMaker bm = new BindingMaker(map, null);
 		RelationBuilder b1 = new RelationBuilder(db);
 		RelationBuilder b2 = new RelationBuilder(db);

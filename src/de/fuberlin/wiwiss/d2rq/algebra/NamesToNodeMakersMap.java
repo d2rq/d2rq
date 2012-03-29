@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
@@ -27,34 +28,34 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilterImpl;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class NamesToNodeMakersMap {
-	private final Map<String,NodeSetFilter> nodeSets = new HashMap<String,NodeSetFilter>();
-	private final Map<String,NodeMaker> nodeMakers = new HashMap<String,NodeMaker>();
-	private final Map<String,AliasMap> nodeRelationAliases = new HashMap<String,AliasMap>();
+	private final Map<Var,NodeSetFilter> nodeSets = new HashMap<Var,NodeSetFilter>();
+	private final Map<Var,NodeMaker> nodeMakers = new HashMap<Var,NodeMaker>();
+	private final Map<Var,AliasMap> nodeRelationAliases = new HashMap<Var,AliasMap>();
 	private final Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
 
-	public void add(String name, NodeMaker nodeMaker, AliasMap aliases) {
-		if (!nodeMakers.containsKey(name)) {
-			nodeMakers.put(name, nodeMaker);
+	public void add(Var var, NodeMaker nodeMaker, AliasMap aliases) {
+		if (!nodeMakers.containsKey(var)) {
+			nodeMakers.put(var, nodeMaker);
 			projections.addAll(nodeMaker.projectionSpecs());
 		}
-		if (!nodeSets.containsKey(name)) {
-			nodeSets.put(name, new NodeSetFilterImpl());
+		if (!nodeSets.containsKey(var)) {
+			nodeSets.put(var, new NodeSetFilterImpl());
 		}
-		NodeSetFilterImpl nodeSet = (NodeSetFilterImpl) nodeSets.get(name);
+		NodeSetFilterImpl nodeSet = (NodeSetFilterImpl) nodeSets.get(var);
 		nodeMaker.describeSelf(nodeSet);
-		if (!nodeRelationAliases.containsKey(name)) {
-			nodeRelationAliases.put(name, aliases);
+		if (!nodeRelationAliases.containsKey(var)) {
+			nodeRelationAliases.put(var, aliases);
 		}
 	}
 	
 	public void addIfVariable(Node possibleVariable, NodeMaker nodeMaker, AliasMap aliases) {
 		if (!possibleVariable.isVariable()) return;
-		add(possibleVariable.getName(), nodeMaker, aliases);
+		add((Var) possibleVariable, nodeMaker, aliases);
 	}
 
 	public void addAll(NodeRelation nodeRelation) {
-		for (String variableName: nodeRelation.variableNames()) {
-			add(variableName, nodeRelation.nodeMaker(variableName), nodeRelation.baseRelation().aliases());
+		for (Var variable: nodeRelation.variables()) {
+			add(variable, nodeRelation.nodeMaker(variable), nodeRelation.baseRelation().aliases());
 		}
 	}
 	
@@ -71,8 +72,8 @@ public class NamesToNodeMakersMap {
 	 */
 	public Expression constraint() {
 		Collection<Expression> expressions = new ArrayList<Expression>();
-		for (String name: nodeSets.keySet()) {
-			NodeSetFilterImpl nodeSet = (NodeSetFilterImpl) nodeSets.get(name);
+		for (Var var: nodeSets.keySet()) {
+			NodeSetFilterImpl nodeSet = (NodeSetFilterImpl) nodeSets.get(var);
 			if (nodeSet.isEmpty()) {
 				return Expression.FALSE;
 			}
@@ -84,15 +85,15 @@ public class NamesToNodeMakersMap {
 	/**
 	 * @return A regular map from variable names to {@link NodeMaker}s
 	 */
-	public Map<String,NodeMaker> toMap() {
+	public Map<Var,NodeMaker> toMap() {
 		return nodeMakers;
 	}
 
-	public Set<String> allNames() {
+	public Set<Var> allNames() {
 		return nodeMakers.keySet();
 	}
 	
-	public Map<String,AliasMap> relationAliases() {
+	public Map<Var,AliasMap> relationAliases() {
 		return nodeRelationAliases;
 	}
 

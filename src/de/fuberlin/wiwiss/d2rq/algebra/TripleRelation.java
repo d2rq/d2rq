@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
@@ -21,20 +22,20 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class TripleRelation extends NodeRelation {
-	public static final String SUBJECT = "subject";
-	public static final String PREDICATE = "predicate";
-	public static final String OBJECT = "object";
+	public static final Var SUBJECT = Var.alloc("subject");
+	public static final Var PREDICATE = Var.alloc("predicate");
+	public static final Var OBJECT = Var.alloc("object");
 
-	private static final Set<String> SPO = 
-		new HashSet<String>(Arrays.asList(new String[]{SUBJECT, PREDICATE, OBJECT}));
+	private static final Set<Var> SPO = 
+		new HashSet<Var>(Arrays.asList(new Var[]{SUBJECT, PREDICATE, OBJECT}));
 	
 	private static final TripleRelation EMPTY = fromNodeRelation(NodeRelation.empty(SPO));
 	
 	private static TripleRelation fromNodeRelation(NodeRelation relation) {
 		if (relation instanceof TripleRelation) return (TripleRelation) relation;
-		if (!relation.variableNames().equals(SPO)) {
+		if (!relation.variables().equals(SPO)) {
 			throw new IllegalArgumentException(
-					"Not a TripleRelation header: " + relation.variableNames());
+					"Not a TripleRelation header: " + relation.variables());
 		}
 		return new TripleRelation(relation.baseRelation(), 
 				relation.nodeMaker(SUBJECT), relation.nodeMaker(PREDICATE), relation.nodeMaker(OBJECT));
@@ -42,7 +43,7 @@ public class TripleRelation extends NodeRelation {
 	
 	public TripleRelation(Relation baseRelation, 
 			final NodeMaker subjectMaker, final NodeMaker predicateMaker, final NodeMaker objectMaker) {
-		super(baseRelation, new HashMap<String,NodeMaker>() {{
+		super(baseRelation, new HashMap<Var,NodeMaker>() {{
 			put(SUBJECT, subjectMaker);
 			put(PREDICATE, predicateMaker);
 			put(OBJECT, objectMaker);
@@ -50,7 +51,7 @@ public class TripleRelation extends NodeRelation {
 	}
 	
 	@Override
-	public TripleRelation orderBy(String variable, boolean ascending) {
+	public TripleRelation orderBy(Var variable, boolean ascending) {
 		return fromNodeRelation(super.orderBy(variable, ascending));
 	}
 
@@ -100,9 +101,9 @@ public class TripleRelation extends NodeRelation {
 		TripleRelation selected = selectTriple(t);
 		
 		// Replace Node.ANY with "subject", "predicate", "object"
-		Node s = t.getSubject() == Node.ANY ? Node.createVariable(SUBJECT) : t.getSubject();
-		Node p = t.getPredicate() == Node.ANY ? Node.createVariable(PREDICATE) : t.getPredicate();
-		Node o = t.getObject() == Node.ANY ? Node.createVariable(OBJECT) : t.getObject();
+		Node s = t.getSubject() == Node.ANY ? SUBJECT : t.getSubject();
+		Node p = t.getPredicate() == Node.ANY ? PREDICATE : t.getPredicate();
+		Node o = t.getObject() == Node.ANY ? OBJECT : t.getObject();
 		
 		// Collect variable names and their bound node makers 
 		NamesToNodeMakersMap nodeMakers = new NamesToNodeMakersMap();

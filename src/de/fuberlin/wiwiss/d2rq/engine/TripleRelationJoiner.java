@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
@@ -223,7 +224,7 @@ class TripleRelationJoiner {
 					if (r.baseRelation().aliases().isAlias(rname))
 						aliases.add(new AliasMap.Alias(r.baseRelation().aliases().originalOf(rname), rname));
 				}
-				nodeSets.add(t.getObject().getName(), r.nodeMaker(TripleRelation.OBJECT), new AliasMap(aliases));
+				nodeSets.add(Var.alloc(t.getObject()), r.nodeMaker(TripleRelation.OBJECT), new AliasMap(aliases));
 			}
 			
 			if (t.getPredicate().isVariable()) {
@@ -235,7 +236,7 @@ class TripleRelationJoiner {
 					if (r.baseRelation().aliases().isAlias(rname))
 						aliases.add(new AliasMap.Alias(r.baseRelation().aliases().originalOf(rname), rname));
 				}
-				nodeSets.add(t.getPredicate().getName(), r.nodeMaker(TripleRelation.PREDICATE), new AliasMap(aliases));
+				nodeSets.add(Var.alloc(t.getPredicate()), r.nodeMaker(TripleRelation.PREDICATE), new AliasMap(aliases));
 			}
 			
 			if (t.getSubject().isVariable()) {
@@ -247,7 +248,7 @@ class TripleRelationJoiner {
 					if (r.baseRelation().aliases().isAlias(rname))
 						aliases.add(new AliasMap.Alias(r.baseRelation().aliases().originalOf(rname), rname));
 				}
-				nodeSets.add(t.getSubject().getName(), r.nodeMaker(TripleRelation.SUBJECT), new AliasMap(aliases));
+				nodeSets.add(Var.alloc(t.getSubject()), r.nodeMaker(TripleRelation.SUBJECT), new AliasMap(aliases));
 			}
 
 		}

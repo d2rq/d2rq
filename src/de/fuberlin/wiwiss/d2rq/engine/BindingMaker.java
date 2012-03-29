@@ -32,18 +32,18 @@ public class BindingMaker {
 	private final static Var OBJECT = Var.alloc(TripleRelation.OBJECT);
 
 	public static BindingMaker createFor(NodeRelation relation) {
-		Map<String, NodeMaker> vars = new HashMap<String,NodeMaker>();
-		for (String variableName: relation.variableNames()) {
-			vars.put(variableName, relation.nodeMaker(variableName));
+		Map<Var, NodeMaker> vars = new HashMap<Var,NodeMaker>();
+		for (Var variable: relation.variables()) {
+			vars.put(variable, relation.nodeMaker(variable));
 		}
 		return new BindingMaker(vars, null);
 	}
 
-	private final Map<String,NodeMaker> variableNamesToNodeMakers;
+	private final Map<Var,NodeMaker> nodeMakers;
 	private final ProjectionSpec condition;
 
-	public BindingMaker(Map<String,NodeMaker> variableNamesToNodeMakers, ProjectionSpec condition) {
-		this.variableNamesToNodeMakers = variableNamesToNodeMakers;
+	public BindingMaker(Map<Var,NodeMaker> nodeMakers, ProjectionSpec condition) {
+		this.nodeMakers = nodeMakers;
 		this.condition = condition;
 	}
 
@@ -55,8 +55,8 @@ public class BindingMaker {
 			}
 		}
 		BindingMap result = new BindingHashMap();
-		for (String variableName: variableNamesToNodeMakers.keySet()) {
-			Node node = variableNamesToNodeMakers.get(variableName).makeNode(row);
+		for (Var variableName: nodeMakers.keySet()) {
+			Node node = nodeMakers.get(variableName).makeNode(row);
 			if (node == null) {
 				return null;
 			}
@@ -71,13 +71,13 @@ public class BindingMaker {
 		return new Triple(b.get(SUBJECT), b.get(PREDICATE), b.get(OBJECT));
 	}
 	
-	public Set<String> variableNames() {
-		return variableNamesToNodeMakers.keySet();
+	public Set<Var> variableNames() {
+		return nodeMakers.keySet();
 	}
 	
 	
-	public NodeMaker nodeMaker(String var) {
-		return variableNamesToNodeMakers.get(var);
+	public NodeMaker nodeMaker(Var var) {
+		return nodeMakers.get(var);
 	}
 	
 	public ProjectionSpec condition() {
@@ -86,11 +86,11 @@ public class BindingMaker {
 	
 	public String toString() {
 		StringBuffer result = new StringBuffer("BindingMaker(\n");
-		for (String variableName: variableNamesToNodeMakers.keySet()) {
+		for (Var variable: nodeMakers.keySet()) {
 			result.append("    ");
-			result.append(variableName);
+			result.append(variable);
 			result.append(" => ");
-			result.append(variableNamesToNodeMakers.get(variableName));
+			result.append(nodeMakers.get(variable));
 			result.append("\n");
 		}
 		result.append(")");
@@ -102,6 +102,6 @@ public class BindingMaker {
 	}
 	
 	public BindingMaker makeConditional(ProjectionSpec condition) {
-		return new BindingMaker(variableNamesToNodeMakers, condition);
+		return new BindingMaker(nodeMakers, condition);
 	}
 }

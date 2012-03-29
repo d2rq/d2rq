@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
@@ -71,8 +72,8 @@ public class URIMakerRule implements Comparator<TripleRelation> {
 	
 	private int priority(TripleRelation relation) {
 		int result = 0;
-		for (String name: relation.variableNames()) {
-			URIMakerIdentifier id = uriMakerIdentifier(relation.nodeMaker(name));
+		for (Var var: relation.variables()) {
+			URIMakerIdentifier id = uriMakerIdentifier(relation.nodeMaker(var));
 			if (id.isURIPattern()) {
 				result += 3;
 			}

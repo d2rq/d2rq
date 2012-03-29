@@ -22,41 +22,40 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * A {@Relation} associated with a number of named {@link NodeMaker}s.
  * 
  * TODO: This is really just a Relation and a BindingMaker wrapped into one. Refactor as such?
- * TODO: Should use Vars instead of Strings as variable names 
  *  
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class NodeRelation {
 	
 	public static final NodeRelation TRUE = 
-		new NodeRelation(Relation.TRUE, Collections.<String,NodeMaker>emptyMap());
+		new NodeRelation(Relation.TRUE, Collections.<Var,NodeMaker>emptyMap());
 
-	public static NodeRelation empty(Set<String> variables) {
-		Map<String,NodeMaker> map = new HashMap<String,NodeMaker>();
-		for (String variableName: variables) {
-			map.put(variableName, NodeMaker.EMPTY);
+	public static NodeRelation empty(Set<Var> variables) {
+		Map<Var,NodeMaker> map = new HashMap<Var,NodeMaker>();
+		for (Var variable: variables) {
+			map.put(variable, NodeMaker.EMPTY);
 		}
 		return new NodeRelation(Relation.EMPTY, map);
 	}
 	
 	private final Relation base;
-	private final Map<String,NodeMaker> variablesToNodeMakers;
+	private final Map<Var,NodeMaker> nodeMakers;
 	
-	public NodeRelation(Relation base, Map<String,NodeMaker> variablesToNodeMakers) {
+	public NodeRelation(Relation base, Map<Var,NodeMaker> nodeMakers) {
 		this.base = base;
-		this.variablesToNodeMakers = variablesToNodeMakers;
+		this.nodeMakers = nodeMakers;
 	}
 	
 	public Relation baseRelation() {
 		return base;
 	}
 	
-	public Set<String> variableNames() {
-		return variablesToNodeMakers.keySet();
+	public Set<Var> variables() {
+		return nodeMakers.keySet();
 	}
 	
-	public NodeMaker nodeMaker(String variableName) {
-		return (NodeMaker) variablesToNodeMakers.get(variableName);
+	public NodeMaker nodeMaker(Var variables) {
+		return (NodeMaker) nodeMakers.get(variables);
 	}
 
 	public NodeRelation withPrefix(int index) {
@@ -65,20 +64,20 @@ public class NodeRelation {
 			newAliases.add(new Alias(tableName, tableName.withPrefix(index)));
 		}
 		AliasMap renamer = new AliasMap(newAliases);
-		Map<String,NodeMaker> renamedNodeMakers = new HashMap<String,NodeMaker>();
-		for (String variableName: variableNames()) {
-			renamedNodeMakers.put(variableName, nodeMaker(variableName).renameAttributes(renamer));
+		Map<Var,NodeMaker> renamedNodeMakers = new HashMap<Var,NodeMaker>();
+		for (Var variable: variables()) {
+			renamedNodeMakers.put(variable, nodeMaker(variable).renameAttributes(renamer));
 		}
 		return new NodeRelation(baseRelation().renameColumns(renamer), renamedNodeMakers);
 	}
 	
 	public NodeRelation renameSingleRelation(RelationName oldName, RelationName newName) {
 		AliasMap renamer = AliasMap.create1(oldName, newName);
-		Map<String,NodeMaker> renamedNodeMakers = new HashMap<String,NodeMaker>();
+		Map<Var,NodeMaker> renamedNodeMakers = new HashMap<Var,NodeMaker>();
 		
 		// This is only done for consistency as the NodeMakers won't be used
-		for (String variableName: variableNames()) {
-			renamedNodeMakers.put(variableName, nodeMaker(variableName).renameAttributes(renamer));
+		for (Var variable: variables()) {
+			renamedNodeMakers.put(variable, nodeMaker(variable).renameAttributes(renamer));
 		}
 		return new NodeRelation(baseRelation().renameColumns(renamer), renamedNodeMakers);
 	}
@@ -95,17 +94,17 @@ public class NodeRelation {
 	public NodeRelation extendWith(Binding binding) {
 		if (binding.isEmpty()) return this;
 		MutableRelation mutator = new MutableRelation(baseRelation());
-		Map<String,NodeMaker> columns = new HashMap<String,NodeMaker>();
-		for (String varName: variableNames()) {
-			columns.put(varName, nodeMaker(varName));
+		Map<Var,NodeMaker> columns = new HashMap<Var,NodeMaker>();
+		for (Var variable: variables()) {
+			columns.put(variable, nodeMaker(variable));
 		}
 		for (Iterator<Var> it = binding.vars(); it.hasNext();) {
 			Var var = it.next();
 			Node value = binding.get(var);
-			if (columns.containsKey(var.getName())) {
-				columns.put(var.getName(), columns.get(var.getName()).selectNode(value, mutator));
+			if (columns.containsKey(var)) {
+				columns.put(var, columns.get(var).selectNode(value, mutator));
 			} else {
-				columns.put(var.getName(), new FixedNodeMaker(value, false));
+				columns.put(var, new FixedNodeMaker(value, false));
 			}
 		}
 		return new NodeRelation(mutator.immutableSnapshot(), columns);
@@ -115,33 +114,33 @@ public class NodeRelation {
 	public NodeRelation select(Expression expression) {
         MutableRelation mutator = new MutableRelation(baseRelation());
         mutator.select(expression);
-        return new NodeRelation(mutator.immutableSnapshot(), variablesToNodeMakers);
+        return new NodeRelation(mutator.immutableSnapshot(), nodeMakers);
 	}
 	
-	public NodeRelation orderBy(String variable, boolean ascending) {
-		if (!variableNames().contains(variable)) return this;
+	public NodeRelation orderBy(Var variable, boolean ascending) {
+		if (!variables().contains(variable)) return this;
 		List<OrderSpec> orderSpecs = nodeMaker(variable).orderSpecs(ascending);
 		if (orderSpecs.isEmpty()) return this;
         MutableRelation mutator = new MutableRelation(baseRelation());
         mutator.orderBy(orderSpecs);
-        return new NodeRelation(mutator.immutableSnapshot(), variablesToNodeMakers);
+        return new NodeRelation(mutator.immutableSnapshot(), nodeMakers);
 	}
 	
 	public NodeRelation limit(int limit) {
         MutableRelation mutator = new MutableRelation(baseRelation());
         mutator.limit(limit);
-        return new NodeRelation(mutator.immutableSnapshot(), variablesToNodeMakers);
+        return new NodeRelation(mutator.immutableSnapshot(), nodeMakers);
 	}
 	
 	public String toString() {
 		StringBuffer result = new StringBuffer("NodeRelation(");
 		result.append(base.toString());
 		result.append("\n");
-		for (String variableName: variableNames()) {
+		for (Var variable: variables()) {
 			result.append("    ");
-			result.append(variableName);
+			result.append(variable);
 			result.append(" => ");
-			result.append(nodeMaker(variableName).toString());
+			result.append(nodeMaker(variable).toString());
 			result.append("\n");
 		}
 		result.append(")");

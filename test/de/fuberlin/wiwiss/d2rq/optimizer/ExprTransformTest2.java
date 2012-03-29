@@ -9,6 +9,7 @@ import junit.framework.TestCase;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.E_Datatype;
 import com.hp.hpl.jena.sparql.expr.E_Equals;
 import com.hp.hpl.jena.sparql.expr.E_IsBlank;
@@ -210,7 +211,7 @@ public class ExprTransformTest2 extends TestCase {
 		Expr disjunction = new E_LogicalOr(new E_Equals(new ExprVar("o"),  NodeValue.makeNode("1", XSDDatatype.XSDint)), new E_Equals(new ExprVar("o"), NodeValue.makeNode("2", XSDDatatype.XSDint)));
 		
 		Expression result = TransformExprToSQLApplyer.convert(disjunction, intvalue);
-		TypedNodeMaker nm = (TypedNodeMaker) intvalue.nodeMaker("o");
+		TypedNodeMaker nm = (TypedNodeMaker) intvalue.nodeMaker(Var.alloc("o"));
 		Expression e1 = nm.valueMaker().valueExpression("1");
 		Expression e2 = nm.valueMaker().valueExpression("2");
 		Expression expected = e1.or(e2);
@@ -229,7 +230,7 @@ public class ExprTransformTest2 extends TestCase {
 		Expr sameTerm = new E_SameTerm(new ExprVar("o"),  NodeValue.makeNode("1", XSDDatatype.XSDint));
 		
 		Expression result = TransformExprToSQLApplyer.convert(sameTerm, intvalue);
-		TypedNodeMaker nm = (TypedNodeMaker) intvalue.nodeMaker("o");
+		TypedNodeMaker nm = (TypedNodeMaker) intvalue.nodeMaker(Var.alloc("o"));
 		Expression expected = nm.valueMaker().valueExpression("1");
 		
 		assertEquals("sameTerm(?o, \"1\"^^xsd:int)", expected, result);
