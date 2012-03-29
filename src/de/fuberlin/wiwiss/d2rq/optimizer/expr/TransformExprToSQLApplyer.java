@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.optimizer.utility;
+package de.fuberlin.wiwiss.d2rq.optimizer.expr;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,6 +92,19 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 public final class TransformExprToSQLApplyer implements ExprVisitor {
 	
 	private static final Log logger = LogFactory.getLog(TransformExprToSQLApplyer.class);
+
+	/**
+	 * Converts a SPARQL filter expression to an SQL expression
+	 * 
+	 * @param expr The root node of an {@link Expr Expr} tree, contains the SPARQL filter.
+	 * @param nodeRelation The relation supplying the values to apply the filter on.
+	 * @return The root node of an {@link Expression Expression} tree, if conversion was successful, <code>null</code> otherwise.
+	 */
+	public static Expression convert(final Expr expr, final NodeRelation nodeRelation) {
+		TransformExprToSQLApplyer transformer = new TransformExprToSQLApplyer(nodeRelation);
+		expr.visit(transformer);
+		return transformer.result(); 
+	}
 	
 	// TODO Expression.FALSE and Expression.TRUE are not constants
 	private static final Expression CONSTANT_FALSE = new ConstantEx("false", NodeValueBoolean.FALSE.asNode());

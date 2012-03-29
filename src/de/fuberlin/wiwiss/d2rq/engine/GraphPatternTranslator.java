@@ -12,6 +12,16 @@ import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 
+/**
+ * Matches a BGP against a collection of {@link TripleRelation}s
+ * and returns a collection of {@link NodeRelation}s.
+ * 
+ * The node relations produce the same bindings that one would
+ * get from matching the BGP against the materialized triples
+ * produced by the triple relations.
+ * 
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ */
 public class GraphPatternTranslator {
 	private final List<Triple> triplePatterns;
 	private final Collection<TripleRelation> tripleRelations;

@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.optimizer.utility;
+package de.fuberlin.wiwiss.d2rq.optimizer.expr;
 
 import org.apache.xerces.impl.dv.XSSimpleType;
 import org.apache.xerces.xs.XSConstants;

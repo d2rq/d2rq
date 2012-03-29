@@ -4,10 +4,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 
 /**
@@ -72,6 +79,40 @@ public class NodeRelation {
 			renamedNodeMakers.put(variableName, nodeMaker(variableName).renameAttributes(renamer));
 		}
 		return new NodeRelation(baseRelation().renameColumns(renamer), renamedNodeMakers);
+	}
+	
+	/**
+	 * Joins this NodeRelation with a Binding. Any row in this
+	 * NodeRelation that is incompatible with the binding will be
+	 * dropped, and any compatible row will be extended with
+	 * FixedNodeMakers whose node is taken from the binding.
+	 * 
+	 * @param binding A binding to join with this NodeRelation
+	 * @return The joined NodeRelation
+	 */
+	public NodeRelation extendWith(Binding binding) {
+		if (binding.isEmpty()) return this;
+		MutableRelation mutator = new MutableRelation(baseRelation());
+		Map<String,NodeMaker> columns = new HashMap<String,NodeMaker>();
+		for (String varName: variableNames()) {
+			columns.put(varName, nodeMaker(varName));
+		}
+		for (Iterator<Var> it = binding.vars(); it.hasNext();) {
+			Var var = it.next();
+			Node value = binding.get(var);
+			if (columns.containsKey(var.getName())) {
+				columns.put(var.getName(), columns.get(var.getName()).selectNode(value, mutator));
+			} else {
+				columns.put(var.getName(), new FixedNodeMaker(value, false));
+			}
+		}
+		return new NodeRelation(mutator.immutableSnapshot(), columns);
+	}
+	
+	public NodeRelation select(Expression expression) {
+        MutableRelation mutator = new MutableRelation(baseRelation());
+        mutator.select(expression);
+        return new NodeRelation(mutator.immutableSnapshot(), variablesToNodeMakers);
 	}
 	
 	public String toString() {
