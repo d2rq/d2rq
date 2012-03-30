@@ -149,7 +149,7 @@ public class PageServlet extends HttpServlet {
 			return this.property.getURI();
 		}
 		public String propertyQName() {
-			String qname = prefixes.qnameFor(this.property.getURI());
+			String qname = prefixes.shortForm(this.property.getURI());
 			if (qname == null) {
 				return "<" + this.property.getURI() + ">";
 			}
