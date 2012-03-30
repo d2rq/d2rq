@@ -195,6 +195,7 @@ public class ConnectedDB {
 			throw new D2RQException("Not a JDBC URL: " + jdbcURL, D2RQException.D2RQ_DB_CONNECTION_FAILED);
 		}
 		try {
+			log.info("Establishing JDBC connection to " + jdbcURL);
 			this.connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
 		} catch (SQLException ex) {
 			throw new D2RQException(
@@ -292,7 +293,9 @@ public class ConnectedDB {
 	private void ensureVendorInitialized() {
 		if (vendor != null) return;
 		try {
-			String productName = getDatabaseProductType().toLowerCase();
+			String productName = getDatabaseProductType();
+			log.info("JDBC database product type: " + productName);
+			productName = productName.toLowerCase();
 			if (productName.indexOf("mysql") >= 0) {
 				vendor = Vendor.MySQL;
 			} else if (productName.indexOf("postgresql") >= 0) {
@@ -310,6 +313,7 @@ public class ConnectedDB {
 			} else {
 				this.vendor = Vendor.SQL92;
 			}
+			log.info("Using vendor class: " + vendor.getClass().getName());
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
 		}
@@ -380,6 +384,7 @@ public class ConnectedDB {
 			keepAliveAgent.shutdown();
 		
 		if (connection != null) try {
+			log.info("Closing connection to " + jdbcURL);
 			this.connection.close();
 		} catch (SQLException ex) {
 			throw new D2RQException(ex);

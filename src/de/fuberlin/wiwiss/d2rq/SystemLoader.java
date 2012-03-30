@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.n3.turtle.TurtleParseException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.FileManager;
@@ -37,6 +40,8 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class SystemLoader {
+	private final static Log log = LogFactory.getLog(SystemLoader.class);
+	
 	private static final String DEFAULT_PROTOCOL = "http";
 	private static final String DEFAULT_HOST = "localhost";
 	private static final int DEFAULT_PORT = 2020;
@@ -235,9 +240,10 @@ public class SystemLoader {
 				throw new D2RQException("no mapping file or JDBC URL specified");
 			}
 			if (jdbcURL != null) {
-				mapModel = openMappingGenerator().mappingModel(getResourceBaseURI(), System.err, null);
+				mapModel = openMappingGenerator().mappingModel(getResourceBaseURI());
 			} else {
 				try {
+					log.info("Reading mapping file from " + mappingFile);
 					// Guess the language/type of mapping file based on file extension. If it is not among the known types then assume that the file has TURTLE syntax and force to use TURTLE parser
 					if (FileUtils.guessLang(mappingFile, "unknown").equals("unknown")) {
 						mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), "TURTLE");

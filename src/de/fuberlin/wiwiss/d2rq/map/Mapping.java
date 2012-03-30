@@ -203,8 +203,8 @@ public class Mapping {
 		for (ClassMap classMap: classMaps.values()) {
 			this.compiledPropertyBridges.addAll(classMap.compiledPropertyBridges());
 		}
+		log.info("Compiled " + compiledPropertyBridges.size() + " property bridges");
 		if (log.isDebugEnabled()) {
-			log.debug("Compiled property bridges:");
 			for (TripleRelation rel: compiledPropertyBridges) {
 				log.debug(rel);
 			}

@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
+import org.apache.log4j.Logger;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
@@ -20,6 +22,8 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class FindDescribeHandler implements DescribeHandler {
+	private Logger log = Logger.getLogger(DescribeHandler.class);
+	
 	private Model resultModel;
 	private final D2RServer server;
 	
@@ -56,7 +60,7 @@ public class FindDescribeHandler implements DescribeHandler {
 		resultModel.add(description);
 		resultModel.add(seeAlsos);
 		} catch (RuntimeException ex) {
-			ex.printStackTrace(System.out);
+			log.debug("Caught and re-threw RuntimeException", ex);
 			throw ex;
 		}
 	}

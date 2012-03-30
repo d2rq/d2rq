@@ -22,7 +22,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.map.DownloadMap;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
+import de.fuberlin.wiwiss.d2rq.sql.SQLIterator;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
@@ -35,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
  * 
  * This directly runs its own SQL query because the handling of
  * BLOBs here requires returning an InputStream, and that's not
- * easily supported by {@link QueryExecutionIterator}.
+ * easily supported by {@link SQLIterator}.
  *   
  * @author RichardCyganiak
  */

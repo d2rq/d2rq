@@ -11,8 +11,6 @@ import jena.cmdline.CommandLine;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.shared.JenaException;
 
@@ -92,16 +90,10 @@ public abstract class CommandLineTool {
 		}
 		
 		if (cmd.hasArg(verboseArg)) {
-			// Adjust Log4j log level to show more stuff
-			Logger.getLogger("de.fuberlin.wiwiss.d2rq").setLevel(Level.INFO);
-			Logger.getLogger("org.eclipse.jetty").setLevel(Level.INFO);
-			Logger.getLogger("org.joseki").setLevel(Level.INFO);
+			Log4jHelper.setVerboseLogging();
 		}
 		if (cmd.hasArg(debugArg)) {
-			// Adjust Log4j log level to show MUCH more stuff 
-			Logger.getLogger("de.fuberlin.wiwiss.d2rq").setLevel(Level.ALL);
-			Logger.getLogger("org.eclipse.jetty").setLevel(Level.INFO);
-			Logger.getLogger("org.joseki").setLevel(Level.INFO);
+			Log4jHelper.setDebugLogging();
 		}
 
 		if (cmd.numItems() == minArguments && supportImplicitJdbcURL && cmd.hasArg(sqlFileArg)) {

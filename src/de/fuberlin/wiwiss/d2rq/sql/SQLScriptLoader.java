@@ -13,6 +13,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Reads SQL statements from a file or other source.
  * 
@@ -21,13 +24,15 @@ import java.sql.Statement;
  * with -- are considered comments and are ignored.
  */
 public class SQLScriptLoader {
-
+	private final static Log log = LogFactory.getLog(SQLScriptLoader.class);
+	
 	/**
 	 * Loads a SQL script from a file and executes it.
 	 */
 	public static void loadFile(File file, Connection conn) 
 	throws FileNotFoundException, SQLException {
 		try {
+			log.info("Reading SQL script from " + file);
 			new SQLScriptLoader(new InputStreamReader(
 					new FileInputStream(file), "utf-8"), conn).execute();
 		} catch (UnsupportedEncodingException ex) {
@@ -41,6 +46,7 @@ public class SQLScriptLoader {
 	public static void loadURI(URI url, Connection conn) 
 	throws IOException, SQLException {
 		try {
+			log.info("Reading SQL script from <" + url + ">");
 			new SQLScriptLoader(new InputStreamReader(
 					url.toURL().openStream(), "utf-8"), conn).execute();
 		} catch (UnsupportedEncodingException ex) {
@@ -57,6 +63,7 @@ public class SQLScriptLoader {
 	
 	public void execute() throws SQLException {
 		int lineNumber = 1;
+		int statements = 0;
 		Statement stmt = conn.createStatement();
 		try {
 			String line;
@@ -70,6 +77,7 @@ public class SQLScriptLoader {
 						String s = sql.toString().trim();
 						if (!"".equals(s)) {
 							stmt.execute(s);
+							statements++;
 						}
 						sql = new StringBuilder();
 					} else {
@@ -83,6 +91,7 @@ public class SQLScriptLoader {
 			if (!"".equals(s)) {
 				stmt.execute(s);
 			}
+			log.info("Done, " + (lineNumber - 1) + " lines, " + statements + " statements");
 		} catch (SQLException ex) {
 			throw new SQLException(
 					"in line " + lineNumber + ": " + ex.getMessage(), ex);

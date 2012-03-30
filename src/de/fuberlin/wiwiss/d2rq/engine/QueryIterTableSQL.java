@@ -13,14 +13,14 @@ import com.hp.hpl.jena.sparql.engine.iterator.QueryIterSingleton;
 
 import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
+import de.fuberlin.wiwiss.d2rq.sql.SQLIterator;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
  * A {@link QueryIterator} over the bindings produced by a
  * {@link Relation}. Works by running the underlying SQL
- * query using a {@link QueryExecutionIterator}.
+ * query using a {@link SQLIterator}.
  *  
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
@@ -57,7 +57,7 @@ public class QueryIterTableSQL extends QueryIter {
 				Collections.singleton(BindingMaker.createFor(table)), execCxt);
 	}
 	
-	private final QueryExecutionIterator wrapped;
+	private final SQLIterator wrapped;
 	private final Collection<BindingMaker> bindingMakers;
 	private final LinkedList<Binding> queue = new LinkedList<Binding>();
 
@@ -66,7 +66,7 @@ public class QueryIterTableSQL extends QueryIter {
 		super(execCxt);
 		this.bindingMakers = bindingMakers;
 		SelectStatementBuilder builder = new SelectStatementBuilder(relation);
-		wrapped = new QueryExecutionIterator(
+		wrapped = new SQLIterator(
 				builder.getSQLStatement(), builder.getColumnSpecs(), relation.database());
 	}
 	

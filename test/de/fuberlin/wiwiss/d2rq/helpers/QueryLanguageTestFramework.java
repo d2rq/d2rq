@@ -30,6 +30,8 @@ import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
 import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 /**
+ * TODO: What's all the logger stuff doing? Needs to be more obvious or better documented
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
  */
