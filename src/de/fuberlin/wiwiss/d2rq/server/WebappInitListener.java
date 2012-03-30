@@ -4,6 +4,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import de.fuberlin.wiwiss.d2rq.SystemLoader;
 
 /**
@@ -14,7 +17,8 @@ import de.fuberlin.wiwiss.d2rq.SystemLoader;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class WebappInitListener implements ServletContextListener {
-
+	private final static Log log = LogFactory.getLog(WebappInitListener.class);
+	
 	public void contextInitialized(ServletContextEvent event) {
 		ServletContext context = event.getServletContext();
 
@@ -22,6 +26,7 @@ public class WebappInitListener implements ServletContextListener {
 		// by the JettyLauncher?
 		SystemLoader loader = D2RServer.retrieveSystemLoader(context);
 		if (loader == null) {
+			log.info("Fresh ServletContext; initializing a new SystemLoader");
 			// We are running as pure webapp, without JettyLauncher,
 			// so initalize the loader from the configFile context parameter.
 			loader = new SystemLoader();
@@ -35,7 +40,6 @@ public class WebappInitListener implements ServletContextListener {
 		}
 		D2RServer server = loader.getD2RServer();
 		server.start();
-		server.putIntoServletContext(context);
 		VelocityWrapper.initEngine(server, context);
 	}
 

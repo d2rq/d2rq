@@ -34,7 +34,7 @@ public class JettyLauncher {
 	 */
 	public boolean start() {
 		Server jetty = new Server(port);
-		
+
 		// use Random (/dev/urandom) instead of SecureRandom to generate session keys - otherwise Jetty may hang during startup waiting for enough entropy
 		// see http://jira.codehaus.org/browse/JETTY-331 and http://docs.codehaus.org/display/JETTY/Connectors+slow+to+startup
 		jetty.setSessionIdManager(new HashSessionIdManager(new Random()));

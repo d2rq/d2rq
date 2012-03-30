@@ -37,7 +37,6 @@ public class D2RServer {
 	private final static String VOCABULARY_STEM = "vocab/";
 	
 	private final static String DEFAULT_SERVER_NAME = "D2R Server";
-	private final static String SERVER_INSTANCE = "D2RServer.SERVER_INSTANCE";
 	private final static String SYSTEM_LOADER = "D2RServer.SYSTEM_LOADER";
 
 	private static final Log log = LogFactory.getLog(D2RServer.class);
@@ -59,12 +58,8 @@ public class D2RServer {
 		this.config = loader.getServerConfig();
 	}
 	
-	public void putIntoServletContext(ServletContext context) {
-		context.setAttribute(SERVER_INSTANCE, this);
-	}
-	
 	public static D2RServer fromServletContext(ServletContext context) {
-		return (D2RServer) context.getAttribute(SERVER_INSTANCE);
+		return retrieveSystemLoader(context).getD2RServer();
 	}
 	
 	public void overrideBaseURI(String baseURI) {

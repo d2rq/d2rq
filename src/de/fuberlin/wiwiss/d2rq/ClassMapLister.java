@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -35,6 +38,8 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class ClassMapLister {
+	private static final Log log = LogFactory.getLog(ClassMapLister.class);
+	
 	private final Mapping mapping;
 	
     private Map<String,List<TripleRelation>> classMapInventoryBridges = new HashMap<String,List<TripleRelation>>();
@@ -90,6 +95,7 @@ public class ClassMapLister {
     }
     
     public Model classMapInventory(String classMapName) {
+    	log.info("Listing class map: " + classMapName);
     	List<TripleRelation> inventoryBridges = classMapInventoryBridges.get(classMapName);
     	if (inventoryBridges == null) {
     		return null;

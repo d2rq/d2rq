@@ -1,6 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -17,12 +18,12 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * A custom {@link DescribeHandler} that returns the results of a two-way
  * find.
  * 
- * TODO Is this thread-safe? ARQ uses just a single instance of this class.
+ * TODO Is this thread-safe? Does ARQ create new instances for each execution?
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class FindDescribeHandler implements DescribeHandler {
-	private Logger log = Logger.getLogger(DescribeHandler.class);
+	private Log log = LogFactory.getLog(FindDescribeHandler.class);
 	
 	private Model resultModel;
 	private final D2RServer server;
@@ -37,6 +38,7 @@ public class FindDescribeHandler implements DescribeHandler {
 	}
 	
 	public void describe(Resource resource) {
+		log.info("DESCRIBE <" + resource + ">");
 		try {
 		Model description = ModelFactory.createDefaultModel();
 		Model seeAlsos = ModelFactory.createDefaultModel();
