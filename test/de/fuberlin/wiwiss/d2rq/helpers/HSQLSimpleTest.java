@@ -8,9 +8,9 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
+import de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
@@ -68,15 +68,17 @@ public class HSQLSimpleTest extends TestCase {
 	}
 	
 	public void testGenerateEmptyGraphFromSimpleD2RQMapping() {
-		GraphD2RQ g = new GraphD2RQ(MappingHelper.readFromTestFile("helpers/simple.ttl"));
-		g.getConfiguration().setServeVocabulary(false);
+		Mapping m = MappingHelper.readFromTestFile("helpers/simple.ttl");
+		m.configuration().setServeVocabulary(false);
+		GraphD2RQ g = new GraphD2RQ(m);
 		assertTrue(g.isEmpty());
 	}
 	
 	public void testGenerateTripleFromSimpleD2RQMapping() {
+		Mapping m = MappingHelper.readFromTestFile("helpers/simple.ttl");
+		m.configuration().setServeVocabulary(false);
 		db.executeSQL("INSERT INTO TEST VALUES (1, 'Hello World!')");
-		GraphD2RQ g = new GraphD2RQ(MappingHelper.readFromTestFile("helpers/simple.ttl"));
-		g.getConfiguration().setServeVocabulary(false);
+		GraphD2RQ g = new GraphD2RQ(m);
 		assertTrue(g.contains(
 				Node.createURI(EX + "test/1"), RDF.Nodes.type, Node.createURI(EX + "Test")));
 		assertEquals(1, g.size());
@@ -85,7 +87,7 @@ public class HSQLSimpleTest extends TestCase {
 	private Model generateDefaultMappingModel() {
 		ConnectedDB cdb = new ConnectedDB(db.getJdbcURL(), db.getUser(), null);
 		MappingGenerator generator = new MappingGenerator(cdb);
-		return generator.mappingModel(EX, null, null);
+		return generator.mappingModel(EX);
 	}
 	
 	private Mapping generateDefaultMapping() {

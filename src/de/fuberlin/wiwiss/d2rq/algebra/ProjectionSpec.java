@@ -20,4 +20,6 @@ public interface ProjectionSpec extends Comparable<ProjectionSpec> {
 	public Expression toExpression();
 	
 	public String toSQL(ConnectedDB database, AliasMap aliases);
+	
+	public Expression notNullExpression(ConnectedDB database, AliasMap aliases);
 }

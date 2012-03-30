@@ -58,9 +58,11 @@ public class CompatibleRelationGroup {
 	private final List<BiningMakerAndCondition> makers = new ArrayList<BiningMakerAndCondition>();
 	private Relation firstBaseRelation = null;
 	private boolean differentConditions = false;
+	private boolean differentSoftConditions = false;
 	private boolean allUnique = true;
 	private int relationCounter = 0;
 	private Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
+	private List<OrderSpec> longestOrderSpecs = new ArrayList<OrderSpec>();
 	
 	public boolean isCompatible(Relation otherRelation) {
 		if (firstBaseRelation == null) {
@@ -83,21 +85,32 @@ public class CompatibleRelationGroup {
 				return false;
 			}
 		}
-		if (firstBaseRelation.projections().equals(otherRelation.projections())) {
-			return true;
+		if (!firstBaseRelation.projections().equals(otherRelation.projections())) {
+			// Uniqueness doesn't matter if we project the same columns
+			if (!firstBaseRelation.isUnique() || !otherRelation.isUnique()) {
+				return false;
+			}
 		}
-		if (firstBaseRelation.isUnique() && otherRelation.isUnique()) {
-			return true;
+		// Compatible ordering?
+		for (int i = 0; i < Math.min(longestOrderSpecs.size(), otherRelation.orderSpecs().size()); i++) {
+			if (!longestOrderSpecs.get(i).equals(otherRelation.orderSpecs().get(i))) return false;
 		}
-		return false;
+		for (int i = longestOrderSpecs.size(); i < otherRelation.orderSpecs().size(); i++) {
+			longestOrderSpecs.add(otherRelation.orderSpecs().get(i));
+		}
+		return true;
 	}
 
 	public void addRelation(Relation relation) {
 		if (firstBaseRelation == null) {
 			firstBaseRelation = relation;
+			longestOrderSpecs.addAll(firstBaseRelation.orderSpecs());
 		}
 		if (!relation.condition().equals(firstBaseRelation.condition())) {
 			differentConditions = true;
+		}
+		if (!relation.softCondition().equals(firstBaseRelation.softCondition())) {
+			differentSoftConditions = true;
 		}
 		projections.addAll(relation.projections());
 		allUnique = allUnique && relation.isUnique();
@@ -106,7 +119,8 @@ public class CompatibleRelationGroup {
 
 	public void addBindingMaker(Relation relation, BindingMaker bindingMaker) {
 		addRelation(relation);
-		makers.add(new BiningMakerAndCondition(bindingMaker, relation.condition()));
+		makers.add(new BiningMakerAndCondition(bindingMaker, 
+				relation.condition(), relation.softCondition()));
 	}
 	
 	public Relation baseRelation() {
@@ -121,7 +135,12 @@ public class CompatibleRelationGroup {
 			Set<Expression> allConditions = new HashSet<Expression>();
 			Set<ProjectionSpec> projectionsAndConditions = new HashSet<ProjectionSpec>(projections);
 			for (BiningMakerAndCondition maker: makers) {
-				allConditions.add(maker.condition);
+				// If relations A and B have different soft conditions, we want to end up
+				// with: (A.cond && A.soft) || (B.cond && B.soft)
+				// This is more restrictive than the simpler alternative
+				// (A.cond || B.cond) && (A.soft || B.soft), but requires turning
+				// the soft conditions into hard conditions.
+				allConditions.add(maker.conditionWithSoft());
 				if (!maker.condition.isTrue()) {
 					projectionsAndConditions.add(maker.conditionProjection());
 				}
@@ -132,19 +151,32 @@ public class CompatibleRelationGroup {
 			Disjunction.create(allConditions);
 			return new RelationImpl(firstBaseRelation.database(),
 					firstBaseRelation.aliases(),
-					Disjunction.create(allConditions), 
+					Disjunction.create(allConditions),
+					Expression.TRUE,
 					firstBaseRelation.joinConditions(), 
 					projectionsAndConditions, 
-					allUnique, firstBaseRelation.order(), firstBaseRelation.orderDesc(), firstBaseRelation.limit(), firstBaseRelation.limitInverse());
+					allUnique, longestOrderSpecs, firstBaseRelation.limit(), firstBaseRelation.limitInverse());
 		} else {
-			// Multiple relations with same condition, return a
-			// new relation with all the projections
+			// Multiple relations with same condition
+			Expression softCondition = firstBaseRelation.softCondition();
+			if (differentSoftConditions) {
+				Set<Expression> allSoftConditions = new HashSet<Expression>();
+				for (BiningMakerAndCondition maker: makers) {
+					allSoftConditions.add(maker.softCondition);
+				}
+				if (allSoftConditions.isEmpty()) {
+					allSoftConditions.add(Expression.TRUE);
+				}
+				softCondition = Disjunction.create(allSoftConditions);
+			}
+			// return a new relation with all the projections
 			return new RelationImpl(firstBaseRelation.database(), 
 					firstBaseRelation.aliases(),
-					firstBaseRelation.condition(), 
+					firstBaseRelation.condition(),
+					softCondition,
 					firstBaseRelation.joinConditions(), 
 					projections, 
-					allUnique, firstBaseRelation.order(), firstBaseRelation.orderDesc(), firstBaseRelation.limit(), firstBaseRelation.limitInverse());
+					allUnique, longestOrderSpecs, firstBaseRelation.limit(), firstBaseRelation.limitInverse());
 		}
 	}
 
@@ -173,15 +205,21 @@ public class CompatibleRelationGroup {
 	private class BiningMakerAndCondition {
 		private final BindingMaker bMaker;
 		private final Expression condition;
-		BiningMakerAndCondition(BindingMaker maker, Expression condition) {
+		private final Expression softCondition;
+		BiningMakerAndCondition(BindingMaker maker, Expression condition,
+				Expression softCondition) {
 			this.bMaker = maker;
 			this.condition = condition;
+			this.softCondition = softCondition;
 		}
-		ProjectionSpec conditionProjection() {
+		private ProjectionSpec conditionProjection() {
 			return new ExpressionProjectionSpec(condition);
 		}
-		BindingMaker makeConditional() {
+		private BindingMaker makeConditional() {
 			return bMaker.makeConditional(conditionProjection());
+		}
+		private Expression conditionWithSoft() {
+			return condition.and(softCondition);
 		}
 	}
 }

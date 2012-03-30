@@ -23,14 +23,14 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
  * Inspects a database to retrieve schema information. 
  * 
  * TODO: All the dbType checks should be moved to the {@link Vendor} subclasses
+ * TODO: This usually shouldn't be used directly, but through the ConnectedDB.
+ *       Except in the MappingGenerator. ConnectedDB is easier mockable for unit tests! 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class DatabaseSchemaInspector {
 	private final ConnectedDB db;
 	private final DatabaseMetaData schema;
-	private final Map<Attribute,Boolean> cachedColumnNullability = 
-			new HashMap<Attribute,Boolean>();
  
 	public static final int KEYS_IMPORTED = 0;
 	public static final int KEYS_EXPORTED = 1;
@@ -65,9 +65,6 @@ public class DatabaseSchemaInspector {
 	}
 	
 	public boolean isNullable(Attribute column) {
-		if (this.cachedColumnNullability.containsKey(column)) {
-			return ((Boolean) this.cachedColumnNullability.get(column)).booleanValue();
-		}
 		try {
 			ResultSet rs = this.schema.getColumns(null, column.schemaName(), 
 					column.tableName(), column.attributeName());
@@ -76,7 +73,6 @@ public class DatabaseSchemaInspector {
 			}
 			boolean nullable = (rs.getInt("NULLABLE") == DatabaseMetaData.columnNullable);
 			rs.close();
-			this.cachedColumnNullability.put(column, new Boolean(nullable));
 			return nullable;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);

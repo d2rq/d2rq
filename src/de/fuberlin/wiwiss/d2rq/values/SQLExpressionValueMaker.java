@@ -1,10 +1,12 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.algebra.ExpressionProjectionSpec;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
@@ -47,6 +49,10 @@ public class SQLExpressionValueMaker implements ValueMaker {
 		return new SQLExpressionValueMaker(renamer.applyTo(expression));
 	}
 	
+	public List<OrderSpec> orderSpecs(boolean ascending) {
+		return Collections.singletonList(new OrderSpec(expression, ascending));
+	}
+
 	public int hashCode() {
 		return expression.hashCode() ^ 5835034;
 	}

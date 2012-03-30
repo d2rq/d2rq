@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
@@ -52,7 +53,7 @@ public class ValueDecorator implements ValueMaker {
 	private Translator translator;
 	
 	public ValueDecorator(ValueMaker base, List<ValueConstraint> constraints) {
-		this(base, constraints, Translator.identity);
+		this(base, constraints, Translator.IDENTITY);
 	}
 
 	public ValueDecorator(ValueMaker base, List<ValueConstraint> constraints, Translator translator) {
@@ -66,6 +67,7 @@ public class ValueDecorator implements ValueMaker {
 	}
 
 	public void describeSelf(NodeSetFilter c) {
+		c.setUsesTranslator(translator);
 		this.base.describeSelf(c);
 	}
 
@@ -90,13 +92,17 @@ public class ValueDecorator implements ValueMaker {
 		return new ValueDecorator(this.base.renameAttributes(renamer), this.constraints, this.translator);
 	}
 	
+	public List<OrderSpec> orderSpecs(boolean ascending) {
+		return base.orderSpecs(ascending);
+	}
+	
 	public interface ValueConstraint {
 		boolean matches(String value);
 	}
 	
 	public String toString() {
 		StringBuffer result = new StringBuffer();
-		if (!this.translator.equals(Translator.identity)) {
+		if (!this.translator.equals(Translator.IDENTITY)) {
 			result.append(this.translator);
 			result.append("(");
 		}
@@ -111,7 +117,7 @@ public class ValueDecorator implements ValueMaker {
 				result.append("&&");
 			}
 		}
-		if (!this.translator.equals(Translator.identity)) {
+		if (!this.translator.equals(Translator.IDENTITY)) {
 			result.append(")");
 		}
 		return result.toString();

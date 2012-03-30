@@ -2,18 +2,22 @@ package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
@@ -179,13 +183,14 @@ public class PropertyBridge extends ResourceMap {
 	}
 
 	protected Relation buildRelation() {
-		RelationBuilder builder = belongsToClassMap.relationBuilder();
-		builder.addOther(relationBuilder());
+		ConnectedDB database = belongsToClassMap.database().connectedDB();
+		RelationBuilder builder = belongsToClassMap.relationBuilder(database);
+		builder.addOther(relationBuilder(database));
 		if (this.refersToClassMap != null) {
-			builder.addAliased(this.refersToClassMap.relationBuilder());
+			builder.addAliased(this.refersToClassMap.relationBuilder(database));
 		}
 		for (String pattern: dynamicPropertyPatterns) {
-			builder.addOther(new PropertyMap(pattern, belongsToClassMap.database()).relationBuilder());
+			builder.addOther(new PropertyMap(pattern, belongsToClassMap.database()).relationBuilder(database));
 		}
 		if (this.limit!=null) {
 			builder.setLimit(this.limit.intValue());
@@ -194,10 +199,10 @@ public class PropertyBridge extends ResourceMap {
 			builder.setLimitInverse(this.limitInverse.intValue());
 		}
 		if (this.order!=null) {
-			builder.setOrder(SQL.parseAttribute(this.order), this.orderDesc.booleanValue());
+			builder.setOrderSpecs(Collections.singletonList(
+					new OrderSpec(new AttributeExpr(SQL.parseAttribute(this.order)), this.orderDesc.booleanValue())));
 		}
-
-		return builder.buildRelation(this.belongsToClassMap.database().connectedDB()); 
+		return builder.buildRelation(); 
 	}
 
 	public Collection<TripleRelation> toTripleRelations() {

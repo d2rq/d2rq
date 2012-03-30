@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -27,11 +30,14 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * A D2RQ mapping. Consists of {@link ClassMap}s,
  * {@link PropertyBridge}s, and several other classes.
  * 
- * TODO: Add getters to everything and move Relation/NodeMaker building to a separate class
+ * TODO: Add getters to everything
+ * TODO: Move TripleRelation/NodeMaker building and ConnectedDB to a separate class (MappingRunner?)
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class Mapping {
+	private static final Log log = LogFactory.getLog(Mapping.class);
+	
 	private final Model model = ModelFactory.createDefaultModel();
 	
 	/**
@@ -106,6 +112,29 @@ public class Mapping {
 		}
 	}
 
+	/**
+	 * Connects all databases. This is done automatically if
+	 * needed. The method can be used to test the connections
+	 * earlier.
+	 * 
+	 * @throws D2RQException on connection failure
+	 */
+	public void connect() {
+		if (connected) return;
+		connected = true;
+		for (Database db: databases()) {
+			db.connectedDB().connection();
+		}
+		validate();
+	}
+	private boolean connected = false;
+
+	public void close() {
+		for (Database db: databases()) {
+			db.connectedDB().close();
+		}
+	}
+	
 	public void addDatabase(Database database) {
 		this.databases.put(database.resource(), database);
 	}
@@ -173,6 +202,12 @@ public class Mapping {
 		compiledPropertyBridges = new ArrayList<TripleRelation>();
 		for (ClassMap classMap: classMaps.values()) {
 			this.compiledPropertyBridges.addAll(classMap.compiledPropertyBridges());
+		}
+		log.info("Compiled " + compiledPropertyBridges.size() + " property bridges");
+		if (log.isDebugEnabled()) {
+			for (TripleRelation rel: compiledPropertyBridges) {
+				log.debug(rel);
+			}
 		}
 	}
 	
@@ -270,11 +305,5 @@ public class Mapping {
 
 	public void setHasDynamicProperties(boolean hasDynamicProperties) {
 		this.hasDynamicProperties = hasDynamicProperties;
-	}
-	
-	public void close() {
-		for (Database db: databases.values()) {
-			db.connectedDB().close();
-		}
 	}
 }

@@ -4,11 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.n3.turtle.TurtleParseException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.FileUtils;
 
+import de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.Filter;
@@ -35,6 +40,8 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class SystemLoader {
+	private final static Log log = LogFactory.getLog(SystemLoader.class);
+	
 	private static final String DEFAULT_PROTOCOL = "http";
 	private static final String DEFAULT_HOST = "localhost";
 	private static final int DEFAULT_PORT = 2020;
@@ -65,6 +72,7 @@ public class SystemLoader {
 	private JettyLauncher jettyLauncher = null;
 	private ConfigLoader serverConfig = null;
 	private D2RServer d2rServer = null;
+	private ClassMapLister classMapLister = null;
 	
 	public void setUsername(String username) {
 		this.username = username;
@@ -87,7 +95,7 @@ public class SystemLoader {
 		this.sqlScript = sqlFile;
 	}
 
-	public void setGenerateDirectMapping(boolean flag) {
+	public void setGenerateW3CDirectMapping(boolean flag) {
 		this.generateDirectMapping = flag;
 	}
 	
@@ -232,9 +240,10 @@ public class SystemLoader {
 				throw new D2RQException("no mapping file or JDBC URL specified");
 			}
 			if (jdbcURL != null) {
-				mapModel = openMappingGenerator().mappingModel(getResourceBaseURI(), System.err, null);
+				mapModel = openMappingGenerator().mappingModel(getResourceBaseURI());
 			} else {
 				try {
+					log.info("Reading mapping file from " + mappingFile);
 					// Guess the language/type of mapping file based on file extension. If it is not among the known types then assume that the file has TURTLE syntax and force to use TURTLE parser
 					if (FileUtils.guessLang(mappingFile, "unknown").equals("unknown")) {
 						mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), "TURTLE");
@@ -254,6 +263,7 @@ public class SystemLoader {
 	public Mapping getMapping() {
 		if (mapping == null) {
 			mapping = new MapParser(getMappingModel(), getResourceBaseURI()).parse();
+			mapping.configuration().setUseAllOptimizations(fastMode);
 			if (connectedDB != null) {
 				// Hack! We don't want the Database to open another ConnectedDB,
 				// so we check if it's connected to the same DB, and in that case
@@ -276,8 +286,6 @@ public class SystemLoader {
 	public ModelD2RQ getModelD2RQ() {
 		if (dataModel == null) {
 			dataModel = new ModelD2RQ(getMapping());
-			GraphD2RQ g = (GraphD2RQ) dataModel.getGraph();
-			g.getConfiguration().setUseAllOptimizations(fastMode);
 		}
 		return dataModel;
 	}
@@ -287,6 +295,13 @@ public class SystemLoader {
 			dataGraph = (GraphD2RQ) getModelD2RQ().getGraph();
 		}
 		return dataGraph;
+	}
+	
+	public ClassMapLister getClassMapLister() {
+		if (classMapLister == null) {
+			classMapLister = new ClassMapLister(getMapping());
+		}
+		return classMapLister;
 	}
 	
 	public JettyLauncher getJettyLauncher() {
@@ -323,5 +338,6 @@ public class SystemLoader {
 		dataModel = null;
 		if (dataGraph != null) dataGraph.close();
 		dataGraph = null;
+		classMapLister = null;
 	}
 }

@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.optimizer.utility;
+package de.fuberlin.wiwiss.d2rq.optimizer.expr;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;

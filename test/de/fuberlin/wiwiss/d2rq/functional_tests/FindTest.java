@@ -13,7 +13,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
 import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 /**
- * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.GraphD2RQ}.
+ * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ}.
  * For notes on running the tests, see {@link AllTests}.
  * 
  * Each test method runs one or more find queries and automatically compares the actual

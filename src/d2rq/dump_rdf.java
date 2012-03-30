@@ -10,6 +10,9 @@ import java.io.UnsupportedEncodingException;
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
 
@@ -26,6 +29,8 @@ import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class dump_rdf extends CommandLineTool {
+	private final static Log log = LogFactory.getLog(dump_rdf.class);
+	
 	private final static int DUMP_DEFAULT_FETCH_SIZE = 500;
 
 	public static void main(String[] args) {
@@ -71,11 +76,15 @@ public class dump_rdf extends CommandLineTool {
 		if (cmd.hasArg(formatArg)) {
 			format = cmd.getArg(formatArg).getValue();
 		}
-		PrintStream out = System.out;
+		PrintStream out;
 		if (cmd.hasArg(outfileArg)) {
 			File f = new File(cmd.getArg(outfileArg).getValue());
+			log.info("Writing to " + f);
 			out = new PrintStream(new FileOutputStream(f));
 			loader.setSystemBaseURI(f.toURI().toString() + "#");
+		} else {
+			log.info("Writing to stdout");
+			out = System.out;
 		}
 		if (cmd.hasArg(baseArg)) {
 			loader.setSystemBaseURI(cmd.getArg(baseArg).getValue());
@@ -93,23 +102,20 @@ public class dump_rdf extends CommandLineTool {
 
 			Model d2rqModel = loader.getModelD2RQ();
 
+			RDFWriter writer = d2rqModel.getWriter(format);
+			if (format.equals("RDF/XML") || format.equals("RDF/XML-ABBREV")) {
+				writer.setProperty("showXmlDeclaration", "true");
+				if (loader.getResourceBaseURI() != null) {
+					writer.setProperty("xmlbase", loader.getResourceBaseURI());
+				}
+			}
 			try {
-				RDFWriter writer = d2rqModel.getWriter(format);
-				if (format.equals("RDF/XML") || format.equals("RDF/XML-ABBREV")) {
-					writer.setProperty("showXmlDeclaration", "true");
-					if (loader.getResourceBaseURI() != null) {
-						writer.setProperty("xmlbase", loader.getResourceBaseURI());
-					}
-				}
-				try {
-					writer.write(d2rqModel, new OutputStreamWriter(out, "utf-8"), loader.getResourceBaseURI());
-				} catch (UnsupportedEncodingException ex) {
-					throw new RuntimeException("Can't happen -- utf-8 is always supported");
-				}
-			} finally {
-				d2rqModel.close();
+				writer.write(d2rqModel, new OutputStreamWriter(out, "utf-8"), loader.getResourceBaseURI());
+			} catch (UnsupportedEncodingException ex) {
+				throw new RuntimeException("Can't happen -- utf-8 is always supported");
 			}
 		} finally {
+			out.close();
 			mapping.close();
 		}
 	}

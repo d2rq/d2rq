@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -14,9 +15,11 @@ import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
+import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.Translator;
 
 /**
  * TODO: Improve matching of datatypes, languages etc:
@@ -50,12 +53,12 @@ public class NodeSetTest extends TestCase {
 		SQLExpression.create("SHA1(table1.foo)");
 	private final static Expression expression2 = 
 		SQLExpression.create("LOWER(table1.bar)");
-	private NodeSetFilterImpl nodes;
-	
+	private NodeSetConstraintBuilder nodes;
+
 	public void setUp() {
-		nodes = new NodeSetFilterImpl();
+		nodes = new NodeSetConstraintBuilder();		
 	}
-	
+
 	public void testInitiallyNotEmpty() {
 		assertFalse(nodes.isEmpty());
 	}
@@ -406,5 +409,27 @@ public class NodeSetTest extends TestCase {
 		nodes.limitTo(Node.createVariable("foo"));
 		nodes.limitTo(RDF.Nodes.type);
 		assertFalse(nodes.isEmpty());
+	}
+	
+	public void testPatternDifferentColumnFunctionsUnsupported() {
+		nodes.limitValuesToPattern(new Pattern("test/@@table1.foo|urlify@@"));
+		nodes.limitValuesToPattern(new Pattern("test/@@table1.bar|urlencode@@"));
+		assertFalse(nodes.isEmpty());
+		assertTrue(nodes.isUnsupported());
+	}
+	
+	public void testTranslatorUnsupported() {
+		nodes.setUsesTranslator(Translator.IDENTITY);
+		nodes.setUsesTranslator(new TranslationTable(ResourceFactory.createResource()).translator());
+		assertFalse(nodes.isEmpty());
+		assertTrue(nodes.isUnsupported());
+	}
+	
+	public void testPatternWithColumnFunctionAndColumnUnsupported() {
+		nodes.limitValuesToAttribute(table1foo);
+		nodes.limitValuesToPattern(new Pattern("@@table2.bar|urlify@@"));
+		assertEquals("Equality(AttributeExpr(@@table1.foo@@), AttributeExpr(@@table2.bar@@))", 
+				nodes.constraint().toString());
+		assertTrue(nodes.isUnsupported());
 	}
 }

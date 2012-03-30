@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq.optimizer.utility;
+package de.fuberlin.wiwiss.d2rq.optimizer.expr;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,7 +73,7 @@ import de.fuberlin.wiwiss.d2rq.expr.UnaryMinus;
 import de.fuberlin.wiwiss.d2rq.nodes.DetermineNodeType;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
-import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilterImpl;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeSetConstraintBuilder;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
@@ -92,6 +92,19 @@ import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 public final class TransformExprToSQLApplyer implements ExprVisitor {
 	
 	private static final Log logger = LogFactory.getLog(TransformExprToSQLApplyer.class);
+
+	/**
+	 * Converts a SPARQL filter expression to an SQL expression
+	 * 
+	 * @param expr The root node of an {@link Expr Expr} tree, contains the SPARQL filter.
+	 * @param nodeRelation The relation supplying the values to apply the filter on.
+	 * @return The root node of an {@link Expression Expression} tree, if conversion was successful, <code>null</code> otherwise.
+	 */
+	public static Expression convert(final Expr expr, final NodeRelation nodeRelation) {
+		TransformExprToSQLApplyer transformer = new TransformExprToSQLApplyer(nodeRelation);
+		expr.visit(transformer);
+		return transformer.result(); 
+	}
 	
 	// TODO Expression.FALSE and Expression.TRUE are not constants
 	private static final Expression CONSTANT_FALSE = new ConstantEx("false", NodeValueBoolean.FALSE.asNode());
@@ -267,7 +280,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		if (this.nodeRelation != null && exprVar != null)
 		{
 			// get the nodemaker for the expr-var
-			NodeMaker nodeMaker = nodeRelation.nodeMaker(exprVar.asVar().getVarName());
+			NodeMaker nodeMaker = nodeRelation.nodeMaker(exprVar.asVar());
 			if (nodeMaker instanceof TypedNodeMaker) {
 				TypedNodeMaker typedNodeMaker = (TypedNodeMaker) nodeMaker;
 				Iterator<ProjectionSpec> it = typedNodeMaker.projectionSpecs().iterator();
@@ -539,7 +552,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 				nm1 = cast(nm1, numericType);
 				nm2 = cast(nm2, numericType);
 			}
-			NodeSetFilterImpl nodeSet = new NodeSetFilterImpl();
+			NodeSetConstraintBuilder nodeSet = new NodeSetConstraintBuilder();
 			nm1.describeSelf(nodeSet);
 			nm2.describeSelf(nodeSet);
 			
@@ -664,7 +677,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 				nm2 = cast(nm2, numericType);
 			}
 			
-			NodeSetFilterImpl nodeSet = new NodeSetFilterImpl();
+			NodeSetConstraintBuilder nodeSet = new NodeSetConstraintBuilder();
 			nm1.describeSelf(nodeSet);
 			nm2.describeSelf(nodeSet);
 			
@@ -1024,7 +1037,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			NodeMaker nm1 = variable1.getNodeMaker();
 			NodeMaker nm2 = variable2.getNodeMaker();
 
-			NodeSetFilterImpl nodeSet = new NodeSetFilterImpl();
+			NodeSetConstraintBuilder nodeSet = new NodeSetConstraintBuilder();
 			nm1.describeSelf(nodeSet);
 			nm2.describeSelf(nodeSet);
 			

@@ -16,7 +16,7 @@ import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.ClassMapLister;
 
 public class DirectoryServlet extends HttpServlet {
 
@@ -30,7 +30,7 @@ public class DirectoryServlet extends HttpServlet {
 			return;
 		}
 		String classMapName = request.getPathInfo().substring(1);
-		Model resourceList = graphD2RQ().classMapInventory(classMapName);
+		Model resourceList = getClassMapLister().classMapInventory(classMapName);
 		if (resourceList == null) {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return;
@@ -48,7 +48,7 @@ public class DirectoryServlet extends HttpServlet {
 			resources.put(uri, label);
 		}
 		Map<String,String> classMapLinks = new TreeMap<String,String>();
-		for (String name: graphD2RQ().classMapNames()) {
+		for (String name: getClassMapLister().classMapNames()) {
 			classMapLinks.put(name, server.baseURI() + "directory/" + name);
 		}
 		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
@@ -60,8 +60,8 @@ public class DirectoryServlet extends HttpServlet {
 		velocity.mergeTemplateXHTML("directory_page.vm");
 	}
 
-	private GraphD2RQ graphD2RQ() {
-		return (GraphD2RQ) D2RServer.fromServletContext(getServletContext()).currentGraph();
+	private ClassMapLister getClassMapLister() {
+		return D2RServer.retrieveSystemLoader(getServletContext()).getClassMapLister();
 	}
 
 	private static final long serialVersionUID = 8398973058486421941L;

@@ -14,6 +14,8 @@ public class D2RQTestSuite {
 	public static final String ISWC_MAP = "file:doc/example/mapping-iswc.ttl"; 
 
 	public static void main(String[] args) {
+		// Be quiet and leave error reporting to JUnit
+		Log4jHelper.turnLoggingOff();
 		junit.textui.TestRunner.run(D2RQTestSuite.suite());
 	}
 

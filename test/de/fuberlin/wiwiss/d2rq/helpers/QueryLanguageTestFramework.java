@@ -24,12 +24,14 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.vocabulary.DC;
 
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.sql.BeanCounter;
 import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
 import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 /**
+ * TODO: What's all the logger stuff doing? Needs to be more obvious or better documented
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author jgarbers
  */

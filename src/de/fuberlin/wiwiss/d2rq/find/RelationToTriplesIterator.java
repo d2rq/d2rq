@@ -12,7 +12,7 @@ import com.hp.hpl.jena.util.iterator.WrappedIterator;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.engine.BindingMaker;
-import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
+import de.fuberlin.wiwiss.d2rq.sql.SQLIterator;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
@@ -51,7 +51,7 @@ public class RelationToTriplesIterator implements ClosableIterator<Triple> {
     
     private RelationToTriplesIterator(Relation relation, Collection<BindingMaker> tripleMakers) {
     	SelectStatementBuilder select = new SelectStatementBuilder(relation);
-    	this.sqlIterator = new QueryExecutionIterator(
+    	this.sqlIterator = new SQLIterator(
     			select.getSQLStatement(), select.getColumnSpecs(), relation.database());
 		this.tripleMakers = tripleMakers;
     }

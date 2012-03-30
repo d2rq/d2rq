@@ -29,6 +29,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker.NodeType;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Column;
@@ -155,8 +156,8 @@ public abstract class ResourceMap extends MapObject {
 		return parsedAliases;
 	}
 	
-	public RelationBuilder relationBuilder() {
-		RelationBuilder result = new RelationBuilder();
+	public RelationBuilder relationBuilder(ConnectedDB database) {
+		RelationBuilder result = new RelationBuilder(database);
 		for (Join join: SQL.parseJoins(joins)) {
 			result.addJoinCondition(join);
 		}

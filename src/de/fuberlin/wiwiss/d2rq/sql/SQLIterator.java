@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
@@ -22,7 +23,8 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
+public class SQLIterator implements ClosableIterator<ResultRow> {
+	private final static Log log = LogFactory.getLog(SQLIterator.class);
 	private String sql;
 	private List<ProjectionSpec> columns;
 	private ConnectedDB database;
@@ -33,7 +35,7 @@ public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
 	private boolean queryExecuted = false;
 	private boolean explicitlyClosed = false;
 
-	public QueryExecutionIterator(String sql, List<ProjectionSpec> columns, ConnectedDB db) {
+	public SQLIterator(String sql, List<ProjectionSpec> columns, ConnectedDB db) {
 		this.sql = sql;
 		this.columns = columns;
 		this.database = db;
@@ -128,7 +130,7 @@ public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
 	    	return;
 	    }
     	this.queryExecuted = true;
-    	LogFactory.getLog(QueryExecutionIterator.class).info("Executing SQL: " + this.sql);
+    	log.info(sql);
     	BeanCounter.totalNumberOfExecutedSQLQueries++;
         try {
 			Connection con = this.database.connection();

@@ -8,6 +8,9 @@ import java.io.PrintStream;
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.rdf.model.Model;
 
 import de.fuberlin.wiwiss.d2rq.CommandLineTool;
@@ -20,7 +23,8 @@ import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class generate_mapping extends CommandLineTool {
-
+	private final static Log log = LogFactory.getLog(generate_mapping.class);
+	
 	public static void main(String[] args) {
 		new generate_mapping().process(args);
 	}
@@ -52,23 +56,22 @@ public class generate_mapping extends CommandLineTool {
 		}
 		
 		PrintStream out;
-		PrintStream progress = null;
 		if (cmd.contains(outfileArg)) {
-			out = new PrintStream(new FileOutputStream(
-					new File(cmd.getArg(outfileArg).getValue())));
-			// We can print progress info if writing to file
-			progress = System.out;
+			File f = new File(cmd.getArg(outfileArg).getValue());
+			log.info("Writing to " + f);
+			out = new PrintStream(new FileOutputStream(f));
 		} else {
+			log.info("Writing to stdout");
 			out = System.out;
 		}
 
 		MappingGenerator generator = loader.openMappingGenerator();
 		try {
 			if (cmd.contains(vocabAsOutput)) {
-				Model model = generator.vocabularyModel(System.err, progress);
+				Model model = generator.vocabularyModel();
 				model.write(out, "TURTLE");
 			} else {
-				generator.writeMapping(out, System.err, progress);
+				generator.writeMapping(out);
 			}
 		} finally {
 			loader.closeMappingGenerator();

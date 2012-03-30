@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -42,13 +44,11 @@ import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
  * Result is available as a high-quality Turtle serialization, or
  * as a parsed model.
  * 
- * TODO: This does some progress logging to stdout if writing to
- *       a file. This should perhaps be done via log.info(...) with
- *       an appropriately configured log writer.
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class MappingGenerator {
+	private final static Logger log = Logger.getLogger(MappingGenerator.class);
+	
 	private final static String CREATOR = "D2RQ Mapping Generator";
 	private final static OutputStream DUMMY_STREAM = 
 			new OutputStream() { public void write(int b) {}};
@@ -61,8 +61,6 @@ public class MappingGenerator {
 	private String driverClass = null;
 	private Filter filter = Filter.ALL;
 	private PrintWriter out = null;
-	private PrintWriter err = null;
-	private PrintWriter progress = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
 	// name of n:m link table => name of n table
 	private Map<RelationName,RelationName> linkTables = new HashMap<RelationName,RelationName>();
@@ -143,15 +141,11 @@ public class MappingGenerator {
 		this.serveVocabulary = flag;
 	}
 
-	public void writeMapping(OutputStream out, OutputStream err, OutputStream progress) {
+	public void writeMapping(OutputStream out) {
 		try {
 			Writer w = new OutputStreamWriter(out, "UTF-8");
-			Writer e = (err != null) ? new OutputStreamWriter(err, "UTF-8") : null;
-			Writer p = (progress != null) ? new OutputStreamWriter(progress, "UTF-8") : null;
-			writeMapping(w, e, p);
+			writeMapping(w);
 			w.flush();			
-			if (e != null) e.flush();
-			if (p != null) p.flush();
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -162,25 +156,19 @@ public class MappingGenerator {
 	 * responsible for closing the writers after use.
 	 * 
 	 * @param out Stream for writing data to the file or console
-	 * @param err Stream for warnings generated during the mapping process; may be <code>null</code>
-	 * @param progress Stream for reporting progress; may be <code>null</code>
 	 */
-	public void writeMapping(Writer out, Writer err, Writer progress) {
+	public void writeMapping(Writer out) {
 		this.out = new PrintWriter(out);
-		this.err = (err != null) ? new PrintWriter(err) : new PrintWriter(DUMMY_STREAM);
-		this.progress = (progress != null) ? new PrintWriter(progress) : new PrintWriter(DUMMY_STREAM);
 		run();
-		this.progress.println("Done!");
+		log.info("Done!");
 		this.out.flush();
-		this.err.flush();
-		this.progress.flush();
 		this.out = null;
 		this.finished = true;
 	}
 
-	public Model vocabularyModel(OutputStream err, OutputStream progress) {
+	public Model vocabularyModel() {
 		if (!this.finished) {
-			writeMapping(DUMMY_STREAM, err, progress);
+			writeMapping(DUMMY_STREAM);
 		}
 		return this.vocabModel;
 	}
@@ -189,12 +177,11 @@ public class MappingGenerator {
 	 * Returns an in-memory Jena model containing the D2RQ mapping.
 	 * 
 	 * @param baseURI Base URI for resolving relative URIs in the mapping, e.g., map namespace
-	 * @param err Stream for warnings generated during the mapping process; may be <code>null</code>
 	 * @return In-memory Jena model containing the D2RQ mapping
 	 */
-	public Model mappingModel(String baseURI, OutputStream err, OutputStream progress) {
+	public Model mappingModel(String baseURI) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		writeMapping(out, err, progress);
+		writeMapping(out);
 		try {
 			String mappingAsTurtle = out.toString("UTF-8");
 			Model result = ModelFactory.createDefaultModel();
@@ -225,7 +212,7 @@ public class MappingGenerator {
 		}
 		for (RelationName tableName: schema.listTableNames(filter.getSingleSchema())) {
 			if (!filter.matches(tableName)) {
-				progress.println("Skipping table " + tableName);
+				log.info("Skipping table " + tableName);
 				continue;
 			}
 			if (!handleLinkTables || !schema.isLinkTable(tableName)) {
@@ -235,7 +222,7 @@ public class MappingGenerator {
 	}
 	
 	private void writeConfiguration() {
-		progress.println("Generating d2rq:Configuration instance");
+		log.info("Generating d2rq:Configuration instance");
 		this.out.println(configName() + " a d2rq:Configuration;");
 		this.out.println("\td2rq:serveVocabulary false.");
 		this.out.println();
@@ -246,7 +233,7 @@ public class MappingGenerator {
 	}
 
 	private void writeDatabase() {
-		progress.println("Generating d2rq:Database instance");
+		log.info("Generating d2rq:Database instance");
 		this.out.println(databaseName() + " a d2rq:Database;");
 		this.out.println("\td2rq:jdbcDriver \"" + this.driverClass + "\";");
 		this.out.println("\td2rq:jdbcDSN \"" + database.getJdbcURL() + "\";");
@@ -270,7 +257,7 @@ public class MappingGenerator {
 	}
 	
 	public void writeTable(RelationName tableName) {
-		progress.println("Generating d2rq:ClassMap instance for table " + tableName.qualifiedName()) ;
+		log.info("Generating d2rq:ClassMap instance for table " + tableName.qualifiedName()) ;
 		this.out.println("# Table " + tableName);
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
@@ -296,7 +283,7 @@ public class MappingGenerator {
 		List<Join> foreignKeys = schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
 		for (Attribute column: schema.listColumns(tableName)) {
 			if (!filter.matches(column)) {
-				progress.println("Skipping column " + column);
+				log.info("Skipping column " + column);
 				continue;
 			}
 			if (isInForeignKey(column, foreignKeys)) continue;
@@ -320,7 +307,7 @@ public class MappingGenerator {
 		for (Join fk: foreignKeys) {
 			if (!filter.matches(fk.table1()) || !filter.matches(fk.table2()) || 
 					!filter.matchesAll(fk.attributes1()) || !filter.matchesAll(fk.attributes2())) {
-				progress.println("Skipping foreign key: " + fk);
+				log.info("Skipping foreign key: " + fk);
 				continue;
 			}
 			writeForeignKey(fk);
@@ -335,7 +322,7 @@ public class MappingGenerator {
 							!filter.matchesAll(join1.attributes1()) || !filter.matchesAll(join1.attributes2()) ||
 							!filter.matches(join2.table1()) || !filter.matches(join2.table2()) || 
 							!filter.matchesAll(join2.attributes1()) || !filter.matchesAll(join2.attributes2())) {
-						progress.println("Skipping link table " + linkTable);
+						log.info("Skipping link table " + linkTable);
 						continue;
 					}
 					writeLinkTable(linkTable, keys);
@@ -449,13 +436,10 @@ public class MappingGenerator {
 		createLinkProperty(linkTableName, table1, table2);
 	}
 
-	private void writeWarning(String[] warning, String indent) {
-		for (int i=0; i<warning.length; i++)
-			this.out.println(indent + "# " + warning[i]);
-		
-		if (this.err != null) {
-			for (int i=0; i<warning.length; i++)
-				this.err.println(warning[i]);
+	private void writeWarning(String[] warnings, String indent) {
+		for (String warning: warnings) {
+			this.out.println(indent + "# " + warning);
+			log.warn(warning);
 		}
 	}
 	
@@ -557,7 +541,7 @@ public class MappingGenerator {
 	}
 	
 	private void identifyLinkTables() {
-		progress.println("Identifying link tables");
+		log.info("Identifying link tables");
 		for (RelationName tableName: schema.listTableNames(filter.getSingleSchema())) {
 			if (!this.schema.isLinkTable(tableName)) {
 				continue;
@@ -565,7 +549,7 @@ public class MappingGenerator {
 			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED).get(0);
 			this.linkTables.put(tableName, firstForeignKey.table2());
 		}
-		progress.println("Found " + String.valueOf(this.linkTables.size()) + " link tables") ;
+		log.info("Found " + String.valueOf(this.linkTables.size()) + " link tables") ;
 	}
 
 	private boolean isInForeignKey(Attribute column, List<Join> foreignKeys) {

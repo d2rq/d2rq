@@ -141,10 +141,14 @@ of the Graph interface, the <code>GraphD2RQ</code>.</p>
 that have been published in 2003.</p>
 
 <pre>// Load mapping file
-Model mapping = FileManager.get().loadModel("doc/example/mapping-iswc.ttl");
+Model mapModel = FileManager.get().loadModel("doc/example/mapping-iswc.ttl");
+
+// Parse mapping file
+MapParser parser = new MapParser(mapModel, "http://localhost:2020/");
+Mapping mapping = parser.parse();
 
 // Set up the GraphD2RQ
-GraphD2RQ g = new GraphD2RQ(mapping, "http://localhost:2020/");
+GraphD2RQ g = new GraphD2RQ(mapping);
 
 // Create a find(spo) pattern 
 Node subject = Node.ANY;

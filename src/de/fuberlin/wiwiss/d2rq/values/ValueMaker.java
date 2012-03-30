@@ -1,10 +1,12 @@
 package de.fuberlin.wiwiss.d2rq.values;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
@@ -44,6 +46,7 @@ public interface ValueMaker {
 		public String makeValue(ResultRow row) {return null;}
 		public void describeSelf(NodeSetFilter c) {c.limitToEmptySet();}
 		public ValueMaker renameAttributes(ColumnRenamer renamer) {return this;}
+		public List<OrderSpec> orderSpecs(boolean ascending) {return Collections.emptyList();}
 	};
 	
 	/** 
@@ -73,4 +76,6 @@ public interface ValueMaker {
 	void describeSelf(NodeSetFilter c);
 
 	ValueMaker renameAttributes(ColumnRenamer renamer);
+	
+	List<OrderSpec> orderSpecs(boolean ascending);
 }

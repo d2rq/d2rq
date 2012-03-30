@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.jena;
 
 import com.hp.hpl.jena.enhanced.BuiltinPersonalities;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -6,6 +6,7 @@ import com.hp.hpl.jena.rdf.model.impl.ModelCom;
 import com.hp.hpl.jena.util.FileManager;
 
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
+import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
 /**
  * <p>A D2RQ read-only Jena model backed by a D2RQ-mapped non-RDF database.</p>
@@ -19,7 +20,7 @@ import de.fuberlin.wiwiss.d2rq.map.Mapping;
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
  *
- * @see de.fuberlin.wiwiss.d2rq.GraphD2RQ
+ * @see de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ
  */
 public class ModelD2RQ extends ModelCom implements Model {
 
@@ -57,7 +58,8 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 * 		absolute URIs; if <tt>null</tt>, then D2RQ will pick a base URI
 	 */
 	public ModelD2RQ(Model mapModel, String baseURIForData) {
-		super(new GraphD2RQ(mapModel, baseURIForData), BuiltinPersonalities.model); // BuiltinPersonalities.model really required?
+		super(new GraphD2RQ(new MapParser(mapModel, 
+				(baseURIForData == null) ? "http://localhost/resource/" : baseURIForData).parse()), BuiltinPersonalities.model); // BuiltinPersonalities.model really required?
 	}
 	
 	/**
@@ -66,5 +68,13 @@ public class ModelD2RQ extends ModelCom implements Model {
 	 */
 	public ModelD2RQ(Mapping mapping) {
 		super(new GraphD2RQ(mapping), BuiltinPersonalities.model);
+	}
+	
+	/**
+	 * @return The underlying {@link GraphD2RQ}
+	 */
+	@Override
+	public GraphD2RQ getGraph() {
+		return (GraphD2RQ) super.getGraph();
 	}
 }

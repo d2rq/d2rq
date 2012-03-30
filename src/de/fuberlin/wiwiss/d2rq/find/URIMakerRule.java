@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
@@ -19,6 +20,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.Translator;
 
 /**
  * <p>The URI maker rule states that any URI that matches a URI pattern is not contained
@@ -71,8 +73,8 @@ public class URIMakerRule implements Comparator<TripleRelation> {
 	
 	private int priority(TripleRelation relation) {
 		int result = 0;
-		for (String name: relation.variableNames()) {
-			URIMakerIdentifier id = uriMakerIdentifier(relation.nodeMaker(name));
+		for (Var var: relation.variables()) {
+			URIMakerIdentifier id = uriMakerIdentifier(relation.nodeMaker(var));
 			if (id.isURIPattern()) {
 				result += 3;
 			}
@@ -111,6 +113,7 @@ public class URIMakerRule implements Comparator<TripleRelation> {
 		public void limitValuesToBlankNodeID(BlankNodeID id) { }
 		public void limitValuesToPattern(Pattern pattern) { this.isPattern = true; }
 		public void limitValuesToExpression(Expression expression) { }
+		public void setUsesTranslator(Translator translator) { }
 	}
 	
 	public class URIMakerRuleChecker {

@@ -1,7 +1,9 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType.GenericType;
 import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
@@ -9,6 +11,7 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 public class DummyDB extends ConnectedDB {
 	private final Vendor vendor;
 	private int limit = Database.NO_LIMIT;
+	private Map<Attribute,Boolean> nullability = new HashMap<Attribute,Boolean>();
 	
 	public DummyDB() {
 		this(Vendor.SQL92);
@@ -28,6 +31,10 @@ public class DummyDB extends ConnectedDB {
 		limit = newLimit;
 	}
 
+	public void setNullable(Attribute column, boolean flag) {
+		nullability.put(column, flag);
+	}
+	
 	@Override
 	public Vendor vendor() {
 		return vendor;
@@ -36,6 +43,12 @@ public class DummyDB extends ConnectedDB {
 	@Override
 	public int limit() {
 		return limit;
+	}
+	
+	@Override
+	public boolean isNullable(Attribute column) {
+		if (!nullability.containsKey(column)) return true;
+		return nullability.get(column);
 	}
 	
 	public boolean equals(Object other) {

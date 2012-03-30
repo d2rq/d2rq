@@ -34,14 +34,14 @@ public class JettyLauncher {
 	 */
 	public boolean start() {
 		Server jetty = new Server(port);
-		
+
 		// use Random (/dev/urandom) instead of SecureRandom to generate session keys - otherwise Jetty may hang during startup waiting for enough entropy
 		// see http://jira.codehaus.org/browse/JETTY-331 and http://docs.codehaus.org/display/JETTY/Connectors+slow+to+startup
 		jetty.setSessionIdManager(new HashSessionIdManager(new Random()));
 		WebAppContext context = new WebAppContext(jetty, "webapp", "");
 		// Place the system loader into the servlet context. The webapp init
 		// listener will find it there and create the D2RServer instance.
-		D2RServer.storeInContext(loader, context.getServletContext());
+		D2RServer.storeSystemLoader(loader, context.getServletContext());
 		try {
 			jetty.start();
 			D2RServer server = D2RServer.fromServletContext(context.getServletContext());

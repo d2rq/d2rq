@@ -5,6 +5,9 @@ import java.io.IOException;
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -24,7 +27,8 @@ import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class d2r_query extends CommandLineTool {
-
+	private static final Log log = LogFactory.getLog(d2r_query.class);
+	
 	public static void main(String[] args) {
 		new d2r_query().process(args);
 	}
@@ -84,6 +88,7 @@ public class d2r_query extends CommandLineTool {
 			prefixes += "PREFIX " + prefix + ": <" + d2rqModel.getNsPrefixURI(prefix) + ">\n";
 		}
 		query = prefixes + query;
+		log.info("Query:\n" + query);
 		
 		try {
 			QueryEngineD2RQ.register();

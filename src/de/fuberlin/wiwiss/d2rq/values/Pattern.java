@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.expr.Concatenation;
@@ -86,6 +87,10 @@ public class Pattern implements ValueMaker {
 		c.limitValuesToPattern(this);
 	}
 
+	public boolean matches(String value) {
+		return !valueExpression(value).isFalse();
+	}
+	
 	public Expression valueExpression(String value) {
 		if (value == null) {
 			return Expression.FALSE;
@@ -137,6 +142,14 @@ public class Pattern implements ValueMaker {
 		return result.toString();
 	}
 	
+	public List<OrderSpec> orderSpecs(boolean ascending) {
+		List<OrderSpec> result = new ArrayList<OrderSpec>(columns.size());
+		for (Attribute column: columns) {
+			result.add(new OrderSpec(new AttributeExpr(column), ascending));
+		}
+		return result;
+	}
+	
 	public String toString() {
 		return "Pattern(" + this.pattern + ")";
 	}
@@ -153,9 +166,14 @@ public class Pattern implements ValueMaker {
 		return this.pattern.hashCode();
 	}
 	
+	/**
+	 * @return <code>true</code> if the pattern is identical or differs only in 
+	 * the column names
+	 */
 	public boolean isEquivalentTo(Pattern p) {
 		return this.firstLiteralPart.equals(p.firstLiteralPart)
-				&& this.literalParts.equals(p.literalParts);
+				&& this.literalParts.equals(p.literalParts)
+				&& this.columnFunctions.equals(p.columnFunctions);
 	}
 	
 	public ValueMaker renameAttributes(ColumnRenamer renames) {
@@ -217,6 +235,8 @@ public class Pattern implements ValueMaker {
 	    };
 	}
 
+	// FIXME: This doesn't take column functions other than IDENTITY into account
+	// The usesColumnFunctions() method is here to allow detection of this case. 
 	public Expression toExpression() {
 		List<Expression> parts = new ArrayList<Expression>(literalParts.size() * 2 + 1);
 		parts.add(new Constant(firstLiteralPart));
@@ -225,6 +245,16 @@ public class Pattern implements ValueMaker {
 			parts.add(new Constant(literalParts.get(i)));
 		}
 		return Concatenation.create(parts);
+	}
+	
+	/**
+	 * @return TRUE if this pattern uses any column function (encode, urlify, etc.)
+	 */
+	public boolean usesColumnFunctions() {
+		for (ColumnFunction f: columnFunctions) {
+			if (f != IDENTITY) return true;
+		}
+		return false;
 	}
 	
 	private final static ColumnFunction IDENTITY = new IdentityFunction();

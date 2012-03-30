@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.jena;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -6,9 +6,11 @@ import java.util.Map;
 
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.TripleMatch;
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.WrappedIterator;
+
+import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.map.Mapping;
 
 
 /**
@@ -32,8 +34,8 @@ public class CachingGraphD2RQ extends GraphD2RQ {
 	    }
 	};
 	
-	public CachingGraphD2RQ(Model mapModel, String baseURIForData) throws D2RQException {
-		super(mapModel, baseURIForData);
+	public CachingGraphD2RQ(Mapping mapping) throws D2RQException {
+		super(mapping);
 	}
 	
 	/**

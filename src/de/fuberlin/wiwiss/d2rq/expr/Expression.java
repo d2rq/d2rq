@@ -33,7 +33,7 @@ public abstract class Expression {
 		public String toSQL(ConnectedDB database, AliasMap aliases) { return "0"; }
 		public String toString() { return "FALSE"; }
 	};
-
+	
 	public abstract boolean isTrue();
 	
 	public abstract boolean isFalse();

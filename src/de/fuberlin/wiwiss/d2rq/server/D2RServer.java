@@ -20,7 +20,6 @@ import com.hp.hpl.jena.sparql.core.describe.DescribeHandler;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerFactory;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.SystemLoader;
 
 /**
@@ -38,7 +37,6 @@ public class D2RServer {
 	private final static String VOCABULARY_STEM = "vocab/";
 	
 	private final static String DEFAULT_SERVER_NAME = "D2R Server";
-	private final static String SERVER_INSTANCE = "D2RServer.SERVER_INSTANCE";
 	private final static String SYSTEM_LOADER = "D2RServer.SYSTEM_LOADER";
 
 	private static final Log log = LogFactory.getLog(D2RServer.class);
@@ -60,12 +58,8 @@ public class D2RServer {
 		this.config = loader.getServerConfig();
 	}
 	
-	public void putIntoServletContext(ServletContext context) {
-		context.setAttribute(SERVER_INSTANCE, this);
-	}
-	
 	public static D2RServer fromServletContext(ServletContext context) {
-		return (D2RServer) context.getAttribute(SERVER_INSTANCE);
+		return retrieveSystemLoader(context).getD2RServer();
 	}
 	
 	public void overrideBaseURI(String baseURI) {
@@ -159,13 +153,6 @@ public class D2RServer {
 	}
 
 	/**
-	 * @return The graph currently in use; will change to a new instance on auto-reload
-	 */
-	public GraphD2RQ currentGraph() {
-		return (GraphD2RQ) this.dataset.asDatasetGraph().getDefaultGraph();
-	}
-	
-	/**
 	 * delegate to auto-reloadable dataset, will reload if necessary
 	 */
 	public void checkMappingFileChanged() {
@@ -187,7 +174,7 @@ public class D2RServer {
 			this.dataset = new AutoReloadableDataset(loader, null, false);
 		}
 		
-		if (currentGraph().getConfiguration().getUseAllOptimizations()) {
+		if (loader.getMapping().configuration().getUseAllOptimizations()) {
 			log.info("Fast mode (all optimizations)");
 		} else {
 			log.info("Safe mode (launch using --fast to use all optimizations)");
@@ -202,8 +189,7 @@ public class D2RServer {
 	public void shutdown()
 	{
 		log.info("shutting down");
-		
-		currentGraph().close();
+		loader.getMapping().close();
 	}
 	
 	protected ServiceRegistry createJosekiServiceRegistry() {
@@ -226,11 +212,11 @@ public class D2RServer {
 		return config;
 	}
 	
-	public static void storeInContext(SystemLoader loader, ServletContext context) {
+	public static void storeSystemLoader(SystemLoader loader, ServletContext context) {
 		context.setAttribute(SYSTEM_LOADER, loader);
 	}
 	
-	public static SystemLoader retrieveFromContext(ServletContext context) {
+	public static SystemLoader retrieveSystemLoader(ServletContext context) {
 		return (SystemLoader) context.getAttribute(SYSTEM_LOADER);
 	}
 }

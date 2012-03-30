@@ -11,13 +11,15 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
-import de.fuberlin.wiwiss.d2rq.algebra.NamesToNodeMakersMap;
+import de.fuberlin.wiwiss.d2rq.algebra.VariableConstraints;
 import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationImpl;
@@ -31,17 +33,17 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 class TripleRelationJoiner {
 	
 	public static TripleRelationJoiner create(boolean allOptimizations) {
-		return new TripleRelationJoiner(new NamesToNodeMakersMap(), 
+		return new TripleRelationJoiner(new VariableConstraints(), 
 				Collections.<Triple>emptyList(), Collections.<NodeRelation>emptyList(), 
 				allOptimizations);
 	}
 
-	private final NamesToNodeMakersMap nodeSets;
+	private final VariableConstraints nodeSets;
 	private final List<Triple> joinedTriplePatterns;
 	private final List<NodeRelation> joinedTripleRelations;
 	private final boolean useAllOptimizations;
 	
-	private TripleRelationJoiner(NamesToNodeMakersMap nodeSets, 
+	private TripleRelationJoiner(VariableConstraints nodeSets, 
 			List<Triple> patterns, List<NodeRelation> relations, boolean useAllOptimizations) {
 		this.nodeSets = nodeSets;
 		this.joinedTriplePatterns = patterns;
@@ -140,7 +142,7 @@ class TripleRelationJoiner {
 		List<NodeRelation> newRelations = new ArrayList<NodeRelation>(joinedTripleRelations);
 		newRelations.add(relation);
 
-		NamesToNodeMakersMap nodeSets = new NamesToNodeMakersMap();
+		VariableConstraints nodeSets = new VariableConstraints();
 		for (int i = 0; i < newPatterns.size(); i++) {
 			Triple t = (Triple) newPatterns.get(i);
 			NodeRelation r = newRelations.get(i);
@@ -222,7 +224,7 @@ class TripleRelationJoiner {
 					if (r.baseRelation().aliases().isAlias(rname))
 						aliases.add(new AliasMap.Alias(r.baseRelation().aliases().originalOf(rname), rname));
 				}
-				nodeSets.add(t.getObject().getName(), r.nodeMaker(TripleRelation.OBJECT), new AliasMap(aliases));
+				nodeSets.add(Var.alloc(t.getObject()), r.nodeMaker(TripleRelation.OBJECT), new AliasMap(aliases));
 			}
 			
 			if (t.getPredicate().isVariable()) {
@@ -234,7 +236,7 @@ class TripleRelationJoiner {
 					if (r.baseRelation().aliases().isAlias(rname))
 						aliases.add(new AliasMap.Alias(r.baseRelation().aliases().originalOf(rname), rname));
 				}
-				nodeSets.add(t.getPredicate().getName(), r.nodeMaker(TripleRelation.PREDICATE), new AliasMap(aliases));
+				nodeSets.add(Var.alloc(t.getPredicate()), r.nodeMaker(TripleRelation.PREDICATE), new AliasMap(aliases));
 			}
 			
 			if (t.getSubject().isVariable()) {
@@ -246,7 +248,7 @@ class TripleRelationJoiner {
 					if (r.baseRelation().aliases().isAlias(rname))
 						aliases.add(new AliasMap.Alias(r.baseRelation().aliases().originalOf(rname), rname));
 				}
-				nodeSets.add(t.getSubject().getName(), r.nodeMaker(TripleRelation.SUBJECT), new AliasMap(aliases));
+				nodeSets.add(Var.alloc(t.getSubject()), r.nodeMaker(TripleRelation.SUBJECT), new AliasMap(aliases));
 			}
 
 		}
@@ -287,30 +289,31 @@ class TripleRelationJoiner {
 		AliasMap joinedAliases = AliasMap.NO_ALIASES;
 		Collection<Expression> expressions = new HashSet<Expression>();
 		expressions.add(additionalCondition);
+		Collection<Expression> softConditions = new HashSet<Expression>();
 		Set<Join> joins = new HashSet<Join>();
 		Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
 		int limit = Relation.NO_LIMIT;
 		int limitInverse = Relation.NO_LIMIT;
-		Attribute order = null;
-		boolean orderDesc = false;
+		List<OrderSpec> orderSpecs = null;
 		
 		for (Relation relation: relations) {
 			joinedAliases = joinedAliases.applyTo(relation.aliases());
 			expressions.add(relation.condition());
+			softConditions.add(relation.softCondition());
 			joins.addAll(relation.joinConditions());
 			projections.addAll(relation.projections());
-			orderDesc = order==null?relation.orderDesc():orderDesc;
-			order = order==null?relation.order():order;
+			orderSpecs = orderSpecs == null ? relation.orderSpecs() : orderSpecs;
 			limit = Relation.combineLimits(limit, relation.limit());
 			limitInverse = Relation.combineLimits(limitInverse, relation.limitInverse());
 		}
-		// TODO: @@@ Figure out uniqueness instead of just false
-		// I think the new relation is unique if it is joined only on unique node sets.
+		// TODO: Determine correct uniqueness instead of just false.
+		// The new relation is unique if it is joined only on unique node sets.
 		// A node set is unique if it is constrained by only unique node makers.
 		
 		// In the meantime, copy the uniqueness from the relation if there's just one
 		boolean isUnique = useAllOptimizations && relations.size()==1 && (relations.iterator().next()).isUnique();
 		return new RelationImpl(connectedDB, joinedAliases, Conjunction.create(expressions), 
-				joins, projections, isUnique, order, orderDesc, limit, limitInverse);
+				Conjunction.create(softConditions),
+				joins, projections, isUnique, orderSpecs, limit, limitInverse);
 	}
 }

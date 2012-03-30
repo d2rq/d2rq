@@ -1,4 +1,4 @@
-package de.fuberlin.wiwiss.d2rq;
+package de.fuberlin.wiwiss.d2rq.jena;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,10 +9,13 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.query.BindingQueryPlan;
 import com.hp.hpl.jena.graph.query.Domain;
 import com.hp.hpl.jena.graph.query.Query;
+import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.graph.query.SimpleQueryHandler;
 import com.hp.hpl.jena.graph.query.TreeQueryPlan;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
+import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.Plan;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -20,22 +23,26 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.util.iterator.Map1;
 import com.hp.hpl.jena.util.iterator.Map1Iterator;
 
-import de.fuberlin.wiwiss.d2rq.engine.D2RQDatasetGraph;
 import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
 
 /**
- * A D2RQQueryHandler handles queries on behalf of a {@link GraphD2RQ}.
+ * An implementation of Jena's {@link QueryHandler} interface
+ * that answers BGP queries on behalf of a {@link GraphD2RQ}.
+ * This is here for Jena compatibility, and is not involved
+ * in answering SPARQL queries through ARQ. It uses the
+ * {@link QueryEngineD2RQ} to answer BGP queries and wraps 
+ * it into the expected interface.
  * 
  * @author Richard Cyganiak
  */
 public class D2RQQueryHandler extends SimpleQueryHandler {
-	private D2RQDatasetGraph dataset;
+	private final DatasetGraph dataset;
 	private Node[] variables;
 	private Map<Node,Integer> indexes;
 
-	public D2RQQueryHandler(GraphD2RQ graph, D2RQDatasetGraph dataset) {
+	public D2RQQueryHandler(GraphD2RQ graph) {
 		super(graph);
-		this.dataset = dataset;
+		dataset = DatasetGraphFactory.createOneGraph(graph);
 	}     
 
 	public TreeQueryPlan prepareTree(Graph pattern) {

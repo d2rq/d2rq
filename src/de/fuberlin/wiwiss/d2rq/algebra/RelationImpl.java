@@ -1,6 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
@@ -10,49 +11,28 @@ public class RelationImpl extends Relation {
 	private final ConnectedDB database;
 	private final AliasMap aliases;
 	private final Expression condition;
+	private final Expression softCondition;
 	private final Set<Join> joinConditions;
-	private final Set<Join> leftJoinConditions;
 	private final Set<ProjectionSpec> projections;
 	private final boolean isUnique;
-	private Attribute order;
-	private boolean orderDesc;
+	private final List<OrderSpec> orderSpecs;
 	private int limit;
 	private int limitInverse;
 	
 	public RelationImpl(ConnectedDB database, AliasMap aliases,
-			Expression condition, Set<Join> joinConditions, Set<ProjectionSpec> projections,
-			boolean isUnique, Attribute order, boolean orderDesc, int limit, int limitInverse) {
+			Expression condition, Expression softCondition,
+			Set<Join> joinConditions, Set<ProjectionSpec> projections,
+			boolean isUnique, List<OrderSpec> orderSpecs, int limit, int limitInverse) {
 		this.database = database;
 		this.aliases = aliases;
 		this.condition = condition;
+		this.softCondition = softCondition;
 		this.joinConditions = joinConditions;
 		this.projections = projections;
 		this.isUnique = isUnique;
-		this.leftJoinConditions = new HashSet<Join>();
-		this.order = order;
-		this.orderDesc = orderDesc;
+		this.orderSpecs = orderSpecs;
 		this.limit = limit;
 		this.limitInverse = limitInverse;
-	}
-
-	public RelationImpl(ConnectedDB database, AliasMap aliases,
-			Expression condition, Set<Join> joinConditions, Set<ProjectionSpec> projections, Set<Join> leftJoinConditions,
-			boolean isUnique, Attribute order, boolean orderDesc, int limit, int limitInverse) {
-		this.database = database;
-		this.aliases = aliases;
-		this.condition = condition;
-		this.joinConditions = joinConditions;
-		this.projections = projections;
-		this.isUnique = isUnique;
-		this.leftJoinConditions = leftJoinConditions;
-		this.order = order;
-		this.orderDesc = orderDesc;
-		this.limit = limit;
-		this.limitInverse = limitInverse;
-	}
-	
-	public Set<Join> leftJoinConditions() {
-		return leftJoinConditions;
 	}
 
 	public ConnectedDB database() {
@@ -65,6 +45,10 @@ public class RelationImpl extends Relation {
 
 	public Expression condition() {
 		return this.condition;
+	}
+
+	public Expression softCondition() {
+		return softCondition;
 	}
 
 	public Set<Join> joinConditions() {
@@ -87,12 +71,8 @@ public class RelationImpl extends Relation {
 	    return limitInverse;
 	}
 
-	public Attribute order() {
-	    return order;
-	}
-
-	public boolean orderDesc() {
-	    return orderDesc;
+	public List<OrderSpec> orderSpecs() {
+		return orderSpecs;
 	}
 
 	public Relation select(Expression selectCondition) {
@@ -102,21 +82,23 @@ public class RelationImpl extends Relation {
 		if (selectCondition.isFalse()) {
 			return Relation.EMPTY;
 		}
-		return new RelationImpl(database, aliases, condition.and(selectCondition),
-				joinConditions, projections, isUnique, order, orderDesc, limit, limitInverse);
+		return new RelationImpl(database, aliases, 
+				condition.and(selectCondition), softCondition, joinConditions, 
+				projections, isUnique, orderSpecs, limit, limitInverse);
 	}
 	
 	public Relation renameColumns(ColumnRenamer renames) {
 		return new RelationImpl(database, renames.applyTo(aliases),
-				renames.applyTo(condition), renames.applyToJoinSet(joinConditions),
-				renames.applyToProjectionSet(projections), isUnique, order != null ? renames.applyTo(order) : null, orderDesc, limit, limitInverse);
+				renames.applyTo(condition), renames.applyTo(softCondition),
+				renames.applyToJoinSet(joinConditions),
+				renames.applyToProjectionSet(projections), isUnique, renames.applyTo(orderSpecs), limit, limitInverse);
 	}
 
 	public Relation project(Set<? extends ProjectionSpec> projectionSpecs) {
 		Set<ProjectionSpec> newProjections = new HashSet<ProjectionSpec>(projectionSpecs);
 		newProjections.retainAll(projections);
-		return new RelationImpl(database, aliases, condition, joinConditions, 
-				newProjections, isUnique, order, orderDesc, limit, limitInverse);
+		return new RelationImpl(database, aliases, condition, softCondition, joinConditions, 
+				newProjections, isUnique, orderSpecs, limit, limitInverse);
 	}
 	
 	public String toString() {
@@ -138,15 +120,19 @@ public class RelationImpl extends Relation {
 			result.append(condition);
 			result.append("\n");
 		}
+		if (!softCondition.isTrue()) {
+			result.append("    softCondition: ");
+			result.append(softCondition);
+			result.append("\n");
+		}
 		if (!aliases.equals(AliasMap.NO_ALIASES)) {
 			result.append("    aliases: ");
 			result.append(aliases);
 			result.append("\n");
 		}
-		if (order!=null) {
+		if (!orderSpecs.isEmpty()) {
     	    result.append("    order: ");
-    	    result.append(order);
-    	    result.append(orderDesc?"-":"+");
+    	    result.append(orderSpecs);
     	    result.append("\n");
     	}
     	if (limit!=-1) {
