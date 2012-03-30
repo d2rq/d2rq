@@ -444,9 +444,17 @@ mailto:@@<em>Persons.email</em>@@</pre>
       (as defined in W3C's <a href="http://www.w3.org/TR/rdb-direct-mapping/">Direct Mapping</a>) is applied before the string 
       is inserted.</li>
   </ul>
+  <p class="warning" id="warning-column-functions"><strong>Warning:</strong> If the URIs produced by
+    a URI pattern with encoding are also produced elsewhere
+    in the D2RQ mapping without the use of the same encoding
+    (e.g., from a
+    <a href="#d2rq:uriColumn"><code>d2rq:uriColumn</code></a> or
+    <a href="#d2rq:constantValue"><code>d2rq:constantValue</code></a>),
+    then SPARQL queries that “join” over those URIs may not work
+    as expected.</p>
 </dd>
 
-<dt>Relative URI patterns</dt>
+<dt id="relative-uri-patterns">Relative URI patterns</dt>
 <dd><p>A relative URI pattern is a URI pattern that generates
   <em>relative URIs</em>:</p>
   <pre>persons/@@<em>Persons.ID</em>@@</pre>
@@ -458,19 +466,19 @@ mailto:@@<em>Persons.email</em>@@</pre>
   with the <code>d2rq:uriPattern</code> property.</p>
 </dd>
 
-<dt>URI columns</dt>
+<dt id="uri-columns">URI columns</dt>
 <dd><p>In some cases, the database may already contain URIs that
   can be used as resource identifiers, such as web page and
   document URLs. URI are generated from columns
   with the <code>d2rq:uriColumn</code> property.</p>
 </dd>
 
-<dt>URI expressions</dt>
+<dt id="uri-expressions">URI expressions</dt>
 <dd><p>URIs can be generated with a SQL expression, specified
    via <code>d2rq:uriSqlExpression</code>. The expression
   must yield a valid URI.</p></dd>
 
-<dt>Blank nodes</dt>
+<dt id="blank-nodes">Blank nodes</dt>
 <dd><p>RDF also has the concept of blank nodes, existential qualifiers
   that denote some resource that exists and has certain properties,
   but is not named. In D2RQ, blank nodes can be generated from one or
@@ -479,11 +487,12 @@ mailto:@@<em>Persons.email</em>@@</pre>
   with the <code>d2rq:bNodeIdColumns</code> property.</p>
 </dd>
 
-<dt>Singleton classmaps</dt>
+<dt id="singleton-class-maps">Singleton class maps</dt>
 <dd><p>A <code>d2rq:ClassMap</code> usually produces many resources. Sometimes
   it is desirable to have a class map that only produces a single resource
   with fixed, static identity. In that case, one can use the
-  <code>d2rq:constantValue</code> property to name the single instance.</p></dd>
+  <code>d2rq:constantValue</code> property to provide the URI for the
+  single instance.</p></dd>
 </dl>
 
 
@@ -1004,9 +1013,16 @@ map:seeAlsoBridge a d2rq:PropertyBridge;
 <p>A <strong><code>d2rq:TranslationTable</code></strong> is an additional layer between the 
   database and the RDF world. It translates back and forth between values taken 
   from the database and RDF URIs or literals. A translation table can be attached 
-  to a class map or a property bridge using the <code>d2rq:translateWith</code> property. TranslationTables 
+  to a class map or a property bridge using the <code>d2rq:translateWith</code> property. Translation tables 
   can be used only for mappings that are unique in both directions (1:1).</p>
 
+<p class="warning" id="warning-translation-table"><strong>Warning:</strong>
+  If URIs produced using a translation table are also produced elsewhere
+  in the D2RQ mapping without the same translation table (e.g., from a
+  <a href="#d2rq:uriColumn"><code>d2rq:uriColumn</code></a> or
+  <a href="#d2rq:constantValue"><code>d2rq:constantValue</code></a>),
+  then SPARQL queries that “join” over those URIs may not work
+  as expected.</p>
 
 <h3 id="translation-table-properties">7.1 Properties of <code>d2rq:TranslationTable</code></h3>
 
