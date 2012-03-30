@@ -83,10 +83,12 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		if (log.isDebugEnabled()) {
 			log.debug("Find: " + PrettyPrinter.toString(t, getPrefixMapping()));
 		}
-		return new FindQuery(t, mapping.compiledPropertyBridges(), 
-				mapping.configuration().getServeVocabulary(), 
-				mapping.getHasDynamicProperties(), 
-				mapping.getVocabularyModel()).iterator();
+		FindQuery query = new FindQuery(t, mapping.compiledPropertyBridges());
+		ExtendedIterator<Triple> result = query.iterator();
+		if (mapping.configuration().getServeVocabulary()) {
+			result = result.andThen(mapping.getVocabularyModel().getGraph().find(t));
+		}
+		return result;
     }
 
 	@Override

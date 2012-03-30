@@ -54,7 +54,6 @@ public class Mapping {
 	private final Map<Resource,DownloadMap> downloadMaps = new HashMap<Resource,DownloadMap>();
 	private final PrefixMapping prefixes = new PrefixMappingImpl();
 	private Collection<TripleRelation> compiledPropertyBridges;
-	private boolean hasDynamicProperties = false;
 	
 	public Mapping() {
 		this(null);
@@ -271,7 +270,8 @@ public class Mapping {
 						additionalProperty.getProperty(D2RQ.propertyValue).getObject());
 			if (!this.vocabularyModel.contains(s))
 				this.vocabularyModel.add(s);				
-		}	}
+		}
+	}
 	
 	/**
 	 * Loads labels, comments and additional properties for referenced
@@ -297,13 +297,5 @@ public class Mapping {
 				// TODO: What to do about dynamic properties?
 			}
 		}
-	}
-
-	public boolean getHasDynamicProperties() {
-		return hasDynamicProperties;
-	}
-
-	public void setHasDynamicProperties(boolean hasDynamicProperties) {
-		this.hasDynamicProperties = hasDynamicProperties;
 	}
 }

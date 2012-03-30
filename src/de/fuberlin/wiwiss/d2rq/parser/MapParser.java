@@ -527,7 +527,6 @@ public class MapParser {
 		stmts = r.listProperties(D2RQ.dynamicProperty);
 		while (stmts.hasNext()) {
 			bridge.addDynamicProperty(stmts.next().getString());
-			this.mapping.setHasDynamicProperties(true);
 		}
 		stmts = r.listProperties(D2RQ.property);
 		while (stmts.hasNext()) {
