@@ -53,7 +53,7 @@ public class ValueDecorator implements ValueMaker {
 	private Translator translator;
 	
 	public ValueDecorator(ValueMaker base, List<ValueConstraint> constraints) {
-		this(base, constraints, Translator.identity);
+		this(base, constraints, Translator.IDENTITY);
 	}
 
 	public ValueDecorator(ValueMaker base, List<ValueConstraint> constraints, Translator translator) {
@@ -67,6 +67,7 @@ public class ValueDecorator implements ValueMaker {
 	}
 
 	public void describeSelf(NodeSetFilter c) {
+		c.setUsesTranslator(translator);
 		this.base.describeSelf(c);
 	}
 
@@ -101,7 +102,7 @@ public class ValueDecorator implements ValueMaker {
 	
 	public String toString() {
 		StringBuffer result = new StringBuffer();
-		if (!this.translator.equals(Translator.identity)) {
+		if (!this.translator.equals(Translator.IDENTITY)) {
 			result.append(this.translator);
 			result.append("(");
 		}
@@ -116,7 +117,7 @@ public class ValueDecorator implements ValueMaker {
 				result.append("&&");
 			}
 		}
-		if (!this.translator.equals(Translator.identity)) {
+		if (!this.translator.equals(Translator.IDENTITY)) {
 			result.append(")");
 		}
 		return result.toString();

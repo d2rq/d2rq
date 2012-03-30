@@ -20,6 +20,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.Translator;
 
 /**
  * <p>The URI maker rule states that any URI that matches a URI pattern is not contained
@@ -112,6 +113,7 @@ public class URIMakerRule implements Comparator<TripleRelation> {
 		public void limitValuesToBlankNodeID(BlankNodeID id) { }
 		public void limitValuesToPattern(Pattern pattern) { this.isPattern = true; }
 		public void limitValuesToExpression(Expression expression) { }
+		public void setUsesTranslator(Translator translator) { }
 	}
 	
 	public class URIMakerRuleChecker {

@@ -60,6 +60,10 @@ public class BlankNodeID implements ValueMaker {
 		c.limitValuesToBlankNodeID(this);
 	}
 
+	public boolean matches(String value) {
+		return !valueExpression(value).isFalse();
+	}
+	
 	public Expression valueExpression(String value) {
 		if (value == null) {
 			return Expression.FALSE;

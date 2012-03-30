@@ -1,5 +1,8 @@
 package de.fuberlin.wiwiss.d2rq;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -14,6 +17,9 @@ public class D2RQTestSuite {
 	public static final String ISWC_MAP = "file:doc/example/mapping-iswc.ttl"; 
 
 	public static void main(String[] args) {
+		System.out.println("Logging is turned off!");
+		Logger.getLogger("de.fuberlin.wiwiss.d2rq").setLevel(Level.OFF);
+
 		junit.textui.TestRunner.run(D2RQTestSuite.suite());
 	}
 

@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
-import de.fuberlin.wiwiss.d2rq.algebra.NamesToNodeMakersMap;
+import de.fuberlin.wiwiss.d2rq.algebra.VariableConstraints;
 import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
@@ -33,17 +33,17 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 class TripleRelationJoiner {
 	
 	public static TripleRelationJoiner create(boolean allOptimizations) {
-		return new TripleRelationJoiner(new NamesToNodeMakersMap(), 
+		return new TripleRelationJoiner(new VariableConstraints(), 
 				Collections.<Triple>emptyList(), Collections.<NodeRelation>emptyList(), 
 				allOptimizations);
 	}
 
-	private final NamesToNodeMakersMap nodeSets;
+	private final VariableConstraints nodeSets;
 	private final List<Triple> joinedTriplePatterns;
 	private final List<NodeRelation> joinedTripleRelations;
 	private final boolean useAllOptimizations;
 	
-	private TripleRelationJoiner(NamesToNodeMakersMap nodeSets, 
+	private TripleRelationJoiner(VariableConstraints nodeSets, 
 			List<Triple> patterns, List<NodeRelation> relations, boolean useAllOptimizations) {
 		this.nodeSets = nodeSets;
 		this.joinedTriplePatterns = patterns;
@@ -142,7 +142,7 @@ class TripleRelationJoiner {
 		List<NodeRelation> newRelations = new ArrayList<NodeRelation>(joinedTripleRelations);
 		newRelations.add(relation);
 
-		NamesToNodeMakersMap nodeSets = new NamesToNodeMakersMap();
+		VariableConstraints nodeSets = new VariableConstraints();
 		for (int i = 0; i < newPatterns.size(); i++) {
 			Triple t = (Triple) newPatterns.get(i);
 			NodeRelation r = newRelations.get(i);

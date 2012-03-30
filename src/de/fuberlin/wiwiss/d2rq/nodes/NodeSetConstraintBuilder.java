@@ -5,6 +5,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
@@ -16,14 +20,27 @@ import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.Translator;
 
-public class NodeSetFilterImpl implements NodeSetFilter {
+/**
+ * Builds up an {@link Expression} that expresses restrictions
+ * on a set of nodes.
+ * 
+ * Used for expressing the constraints on a variable that is
+ * shared between node relations.
+ * 
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ */
+public class NodeSetConstraintBuilder implements NodeSetFilter {
+	private final static Log log = LogFactory.getLog(NodeSetConstraintBuilder.class);
+	
 	private final static int NODE_TYPE_UNKNOWN = 0;
 	private final static int NODE_TYPE_URI = 1;
 	private final static int NODE_TYPE_LITERAL = 2;
 	private final static int NODE_TYPE_BLANK = 3;
 	
 	private boolean isEmpty = false;
+	private boolean unsupported = false;
 	private int type = NODE_TYPE_UNKNOWN;
 	private String constantValue = null;
 	private String constantLanguage = null;
@@ -33,8 +50,9 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 	private Collection<Pattern> patterns = new HashSet<Pattern>();
 	private Collection<Expression> expressions = new HashSet<Expression>();
 	private Collection<BlankNodeID> blankNodeIDs = new HashSet<BlankNodeID>();
-	private String valueStart = null;
-	private String valueEnd = null;
+	private Set<Translator> translators = new HashSet<Translator>();
+	private String valueStart = "";
+	private String valueEnd = "";
 	
 	public void limitToEmptySet() {
 		isEmpty = true;
@@ -49,6 +67,7 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 	}
 
 	public void limitToLiterals(String language, RDFDatatype datatype) {
+		if (isEmpty) return;
 		limitToNodeType(NODE_TYPE_LITERAL);
 		if (constantLanguage == null) {
 			constantLanguage = language;
@@ -67,6 +86,7 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 	}
 
 	private void limitToNodeType(int limitType) {
+		if (isEmpty) return;
 		if (type == NODE_TYPE_UNKNOWN) {
 			type = limitType;
 			return;
@@ -78,6 +98,7 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 	}
 	
 	public void limitTo(Node node) {
+		if (isEmpty) return;
 		if (Node.ANY.equals(node) || node.isVariable()) {
 			return;
 		}
@@ -101,66 +122,87 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 	}
 	
 	public void limitValues(String constant) {
+		if (isEmpty) return;
 		if (constantValue == null) {
 			constantValue = constant;
+		} else if (!constantValue.equals(constant)) {
+			limitToEmptySet();
 			return;
 		}
-		if (!constantValue.equals(constant)) {
+		if (valueStart != null && !constant.startsWith(valueStart)) {
 			limitToEmptySet();
+			return;
+		}
+		valueStart = constant;
+		if (valueEnd != null && !constant.endsWith(valueEnd)) {
+			limitToEmptySet();
+			return;
+		}
+		valueEnd = constant;
+		for (Pattern pattern: patterns) {
+			if (!pattern.matches(constant)) {
+				limitToEmptySet();
+				return;
+			}
+		}
+		for (BlankNodeID id: blankNodeIDs) {
+			if (!id.matches(constant)) {
+				limitToEmptySet();
+				return;
+			}
 		}
 	}
 
 	public void limitValuesToAttribute(Attribute attribute) {
+		if (isEmpty) return;
 		attributes.add(attribute);
 	}
 
 	public void limitValuesToBlankNodeID(BlankNodeID id) {
+		if (isEmpty) return;
 		if (!blankNodeIDs.isEmpty()) {
 			BlankNodeID first = (BlankNodeID) blankNodeIDs.iterator().next();
 			if (!first.classMapID().equals(id.classMapID())) {
 				limitToEmptySet();
-				return;
 			}
 		}
 		blankNodeIDs.add(id);
 	}
 
 	public void limitValuesToPattern(Pattern pattern) {
+		if (isEmpty) return;
 		patterns.add(pattern);
-		if (valueStart == null || pattern.firstLiteralPart().startsWith(valueStart)) {
+		if (pattern.firstLiteralPart().startsWith(valueStart)) {
 			valueStart = pattern.firstLiteralPart();
 		} else if (!valueStart.startsWith(pattern.firstLiteralPart())) {
 			limitToEmptySet();
 		}
-		if (valueEnd == null || pattern.lastLiteralPart().endsWith(valueEnd)) {
+		if (pattern.lastLiteralPart().endsWith(valueEnd)) {
 			valueEnd = pattern.lastLiteralPart();
 		} else if (!valueEnd.endsWith(pattern.lastLiteralPart())) {
 			limitToEmptySet();
 		}
+		if (constantValue != null) {
+			if (!pattern.matches(constantValue)) {
+				limitToEmptySet();
+			}
+		}
 	}
 
 	public void limitValuesToExpression(Expression expression) {
+		if (isEmpty) return;
 		expressions.add(expression);
 	}
 
+	public void setUsesTranslator(Translator translator) {
+		translators.add(translator);
+		if (translators.size() > 1) {
+			unsupported = true;
+		}
+	}
+
 	public boolean isEmpty() {
-		if (isEmpty) return true;
-		if (!blankNodeIDs.isEmpty() && fixedNode != null) {
-			BlankNodeID first = (BlankNodeID) blankNodeIDs.iterator().next();
-			if (Expression.FALSE.equals(
-					first.valueExpression(fixedNode.getBlankNodeLabel()))) {
-				return true;
-			}
-		}
-		if (!patterns.isEmpty()) {
-			for (Pattern pattern: patterns) {
-				if (constantValue != null 
-						&& Expression.FALSE.equals(pattern.valueExpression(constantValue))) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return isEmpty;
 	}
 	
 	private List<Expression> matchPatterns(Pattern p1, Pattern p2) {
@@ -173,7 +215,11 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 			}
 		} else {
 			results.add(Equality.create(p1.toExpression(), p2.toExpression()));
-			limitToEmptySet();
+			// FIXME: Actually support it
+			if (p1.usesColumnFunctions() || p2.usesColumnFunctions()) {
+				log.warn("Joining multiple d2rq:[uri]Patterns with different @@|encoding@@ is not supported");
+				unsupported = true;
+			}
 		}
 		return results;
 	}
@@ -247,6 +293,7 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 			if (!patterns.isEmpty()) {
 				Pattern first = patterns.iterator().next();
 				translated.add(Equality.create(attribute, first.toExpression()));
+				checkUsesColumnFunctions(first);
 			}
 			if (!expressions.isEmpty()) {
 				Expression first = expressions.iterator().next();
@@ -261,14 +308,31 @@ public class NodeSetFilterImpl implements NodeSetFilter {
 			if (!patterns.isEmpty()) {
 				Pattern first = patterns.iterator().next();
 				translated.add(Equality.create(expression, first.toExpression()));
+				checkUsesColumnFunctions(first);
 			}
-		} else if (!patterns.isEmpty()) {
-			Expression pattern = (patterns.iterator().next()).toExpression();
-			if (!blankNodeIDs.isEmpty()) {
-				BlankNodeID first = blankNodeIDs.iterator().next();
-				translated.add(Equality.create(pattern, first.toExpression()));
-			}
+		} else if (!patterns.isEmpty() && !blankNodeIDs.isEmpty()) {
+			Pattern firstPattern = patterns.iterator().next();
+			BlankNodeID firstBNodeID = blankNodeIDs.iterator().next();
+			translated.add(Equality.create(firstPattern.toExpression(), firstBNodeID.toExpression()));
+			checkUsesColumnFunctions(firstPattern);
+		}
+		// FIXME: Actually handle this properly, see https://github.com/d2rq/d2rq/issues/22
+		if (translators.size() > 1) {
+			log.warn("Join involving multiple translators (d2rq:translateWith) is not supported");
 		}
 		return Conjunction.create(translated);
+	}
+	
+	private void checkUsesColumnFunctions(Pattern pattern) {
+		if (!pattern.usesColumnFunctions()) return;
+		// FIXME: Actually handle this properly, see https://github.com/d2rq/d2rq/issues/22
+		unsupported = true;
+		log.warn("Joining a d2rq:[uri]Pattern with any @@|encoding@@ to a " +
+		"d2rq:[uri]Column or d2rq:[uri]Expression etc. is not supported");
+	}
+	
+	public boolean isUnsupported() {
+		constraint();	// unsupported is only set correctly after this call
+		return unsupported;
 	}
 }

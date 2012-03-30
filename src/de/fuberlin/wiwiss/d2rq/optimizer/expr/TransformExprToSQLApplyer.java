@@ -73,7 +73,7 @@ import de.fuberlin.wiwiss.d2rq.expr.UnaryMinus;
 import de.fuberlin.wiwiss.d2rq.nodes.DetermineNodeType;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
-import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilterImpl;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeSetConstraintBuilder;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
@@ -552,7 +552,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 				nm1 = cast(nm1, numericType);
 				nm2 = cast(nm2, numericType);
 			}
-			NodeSetFilterImpl nodeSet = new NodeSetFilterImpl();
+			NodeSetConstraintBuilder nodeSet = new NodeSetConstraintBuilder();
 			nm1.describeSelf(nodeSet);
 			nm2.describeSelf(nodeSet);
 			
@@ -677,7 +677,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 				nm2 = cast(nm2, numericType);
 			}
 			
-			NodeSetFilterImpl nodeSet = new NodeSetFilterImpl();
+			NodeSetConstraintBuilder nodeSet = new NodeSetConstraintBuilder();
 			nm1.describeSelf(nodeSet);
 			nm2.describeSelf(nodeSet);
 			
@@ -1037,7 +1037,7 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			NodeMaker nm1 = variable1.getNodeMaker();
 			NodeMaker nm2 = variable2.getNodeMaker();
 
-			NodeSetFilterImpl nodeSet = new NodeSetFilterImpl();
+			NodeSetConstraintBuilder nodeSet = new NodeSetConstraintBuilder();
 			nm1.describeSelf(nodeSet);
 			nm2.describeSelf(nodeSet);
 			

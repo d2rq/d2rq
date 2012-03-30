@@ -14,10 +14,10 @@ import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
-import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilterImpl;
+import de.fuberlin.wiwiss.d2rq.nodes.NodeSetConstraintBuilder;
 
 /**
- * A map from variable names to {@link NodeMaker}s that helps to build up
+ * A map from variables to {@link NodeMaker}s that helps to build up
  * constraints in cases where a variable is bound multiple times.
  * 
  * If several node makers are added for the same variable name, then only
@@ -27,7 +27,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilterImpl;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class NamesToNodeMakersMap {
+public class VariableConstraints {
 	private final Map<Var,NodeSetFilter> nodeSets = new HashMap<Var,NodeSetFilter>();
 	private final Map<Var,NodeMaker> nodeMakers = new HashMap<Var,NodeMaker>();
 	private final Map<Var,AliasMap> nodeRelationAliases = new HashMap<Var,AliasMap>();
@@ -39,9 +39,9 @@ public class NamesToNodeMakersMap {
 			projections.addAll(nodeMaker.projectionSpecs());
 		}
 		if (!nodeSets.containsKey(var)) {
-			nodeSets.put(var, new NodeSetFilterImpl());
+			nodeSets.put(var, new NodeSetConstraintBuilder());
 		}
-		NodeSetFilterImpl nodeSet = (NodeSetFilterImpl) nodeSets.get(var);
+		NodeSetFilter nodeSet = nodeSets.get(var);
 		nodeMaker.describeSelf(nodeSet);
 		if (!nodeRelationAliases.containsKey(var)) {
 			nodeRelationAliases.put(var, aliases);
@@ -73,7 +73,7 @@ public class NamesToNodeMakersMap {
 	public Expression constraint() {
 		Collection<Expression> expressions = new ArrayList<Expression>();
 		for (Var var: nodeSets.keySet()) {
-			NodeSetFilterImpl nodeSet = (NodeSetFilterImpl) nodeSets.get(var);
+			NodeSetConstraintBuilder nodeSet = (NodeSetConstraintBuilder) nodeSets.get(var);
 			if (nodeSet.isEmpty()) {
 				return Expression.FALSE;
 			}

@@ -106,7 +106,7 @@ public class TripleRelation extends NodeRelation {
 		Node o = t.getObject() == Node.ANY ? OBJECT : t.getObject();
 		
 		// Collect variable names and their bound node makers 
-		NamesToNodeMakersMap nodeMakers = new NamesToNodeMakersMap();
+		VariableConstraints nodeMakers = new VariableConstraints();
 		nodeMakers.addIfVariable(s, nodeMaker(SUBJECT), baseRelation().aliases());
 		nodeMakers.addIfVariable(p, nodeMaker(PREDICATE), baseRelation().aliases());
 		nodeMakers.addIfVariable(o, nodeMaker(OBJECT), baseRelation().aliases());
