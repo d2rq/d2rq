@@ -1,8 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -103,18 +100,6 @@ public class D2RServer {
 	
 	public String resourceBaseURI() {
 		return resourceBaseURI("");
-	}
-	
-	public String graphURLDescribingResource(String resourceURI) {
-		if (resourceURI.indexOf(":") == -1) {
-			resourceURI = resourceBaseURI() + resourceURI;
-		}
-		String query = "DESCRIBE <" + resourceURI + ">";
-		try {
-			return this.baseURI() + D2RServer.SPARQL_SERVICE_NAME + "?query=" + URLEncoder.encode(query, "utf-8");
-		} catch (UnsupportedEncodingException ex) {
-			throw new RuntimeException(ex);
-		}
 	}
 	
 	public static String getResourceServiceName() {
