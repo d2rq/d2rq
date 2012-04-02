@@ -3,9 +3,8 @@ package de.fuberlin.wiwiss.d2rq.sql.vendor;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Arrays;
-
-import org.hsqldb.types.Types;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;

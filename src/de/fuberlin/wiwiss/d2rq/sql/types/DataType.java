@@ -2,10 +2,10 @@ package de.fuberlin.wiwiss.d2rq.sql.types;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hsqldb.types.Types;
 
 import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 

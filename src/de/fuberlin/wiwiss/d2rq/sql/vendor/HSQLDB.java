@@ -3,8 +3,7 @@ package de.fuberlin.wiwiss.d2rq.sql.vendor;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import org.hsqldb.types.Types;
+import java.sql.Types;
 
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
 import de.fuberlin.wiwiss.d2rq.sql.types.SQLApproximateNumeric;
