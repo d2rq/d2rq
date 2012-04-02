@@ -39,25 +39,26 @@ import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
  */
 public class ClassMapLister {
 	private static final Log log = LogFactory.getLog(ClassMapLister.class);
-	
-	private final Mapping mapping;
-	
-    private Map<String,List<TripleRelation>> classMapInventoryBridges = new HashMap<String,List<TripleRelation>>();
-    private Map<String,NodeMaker> classMapNodeMakers = new HashMap<String,NodeMaker>();
 
-    public ClassMapLister(Mapping mapping) {
-    	this.mapping = mapping;
-    	groupTripleRelationsByClassMap();
-    }
-    
-    private void groupTripleRelationsByClassMap() {
-    	if (!classMapInventoryBridges.isEmpty() || !classMapNodeMakers.isEmpty()) return;
+	private final Mapping mapping;
+
+	private Map<String,List<TripleRelation>> classMapInventoryBridges = new HashMap<String,List<TripleRelation>>();
+	private Map<String,NodeMaker> classMapNodeMakers = new HashMap<String,NodeMaker>();
+
+	public ClassMapLister(Mapping mapping) {
+		this.mapping = mapping;
+		groupTripleRelationsByClassMap();
+	}
+
+	private void groupTripleRelationsByClassMap() {
+		if (!classMapInventoryBridges.isEmpty() || !classMapNodeMakers.isEmpty()) return;
 		for (Resource classMapResource: mapping.classMapResources()) {
 			NodeMaker resourceMaker = this.mapping.classMap(classMapResource).nodeMaker();
 			Node classMap = classMapResource.asNode();
 			this.classMapNodeMakers.put(toClassMapName(classMap), resourceMaker);
 			List<TripleRelation> inventoryBridges = new ArrayList<TripleRelation>();
 			for (TripleRelation bridge: mapping.classMap(classMapResource).compiledPropertyBridges()) {
+				bridge = bridge.orderBy(TripleRelation.SUBJECT, true);
 				if (bridge.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)) != null) {
 					inventoryBridges.add(bridge);
 				}
@@ -84,34 +85,38 @@ public class ClassMapLister {
 			}
 			this.classMapInventoryBridges.put(toClassMapName(classMap), inventoryBridges);
 		}
-    }
+	}
 
-    private String toClassMapName(Node classMap) {
-    	return classMap.getLocalName();
-    }
-    
-    public Collection<String> classMapNames() {
-    	return this.classMapInventoryBridges.keySet();
-    }
-    
-    public Model classMapInventory(String classMapName) {
-    	log.info("Listing class map: " + classMapName);
-    	List<TripleRelation> inventoryBridges = classMapInventoryBridges.get(classMapName);
-    	if (inventoryBridges == null) {
-    		return null;
-    	}
-    	Model result = ModelFactory.createDefaultModel();
-    	result.setNsPrefixes(mapping.getPrefixMapping());
-    	result.getGraph().getBulkUpdateHandler().add(
-    			new FindQuery(Triple.ANY, inventoryBridges).iterator());
-    	return result;
-    }
+	private String toClassMapName(Node classMap) {
+		return classMap.getLocalName();
+	}
 
-    public Collection<String> classMapNamesForResource(Node resource) {
-    	if (!resource.isURI()) {
-    		return Collections.<String>emptyList();
-    	}
-    	List<String> results = new ArrayList<String>();
+	public Collection<String> classMapNames() {
+		return this.classMapInventoryBridges.keySet();
+	}
+
+	public Model classMapInventory(String classMapName) {
+		return classMapInventory(classMapName, Relation.NO_LIMIT);
+	}
+	
+	public Model classMapInventory(String classMapName, int limitPerClassMap) {
+		log.info("Listing class map: " + classMapName);
+		List<TripleRelation> inventoryBridges = classMapInventoryBridges.get(classMapName);
+		if (inventoryBridges == null) {
+			return null;
+		}
+		Model result = ModelFactory.createDefaultModel();
+		result.setNsPrefixes(mapping.getPrefixMapping());
+		FindQuery query = new FindQuery(Triple.ANY, inventoryBridges, limitPerClassMap);
+		result.getGraph().getBulkUpdateHandler().add(query.iterator());
+		return result;
+	}
+
+	public Collection<String> classMapNamesForResource(Node resource) {
+		if (!resource.isURI()) {
+			return Collections.<String>emptyList();
+		}
+		List<String> results = new ArrayList<String>();
 		for (Entry<String,NodeMaker> entry: classMapNodeMakers.entrySet()) {
 			String classMapName = entry.getKey();
 			NodeMaker nodeMaker = entry.getValue();
@@ -119,6 +124,6 @@ public class ClassMapLister {
 				results.add(classMapName);
 			}
 		}
-    	return results;
-    }
+		return results;
+	}
 }

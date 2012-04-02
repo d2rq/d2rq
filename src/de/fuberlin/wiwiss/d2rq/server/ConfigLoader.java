@@ -21,6 +21,7 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RConfig;
 
 public class ConfigLoader {
 
+	public static final int DEFAULT_LIMIT_PER_CLASS_MAP = 50;
 	public static final int DEFAULT_LIMIT_PER_PROPERTY_BRIDGE = 50;
 	
 	/**
@@ -55,6 +56,7 @@ public class ConfigLoader {
 	private Resource documentMetadata = null;
 	private boolean vocabularyIncludeInstances = true;
 	private boolean autoReloadMapping = true;
+	private int limitPerClassMap = DEFAULT_LIMIT_PER_CLASS_MAP;
 	private int limitPerPropertyBridge = DEFAULT_LIMIT_PER_PROPERTY_BRIDGE;
 	
 	/**
@@ -118,6 +120,16 @@ public class ConfigLoader {
 		if (s != null) {
 			this.autoReloadMapping = s.getBoolean();
 		}
+		s = server.getProperty(D2RConfig.limitPerClassMap);
+		if (s != null) {
+			try {
+				limitPerClassMap = s.getInt();
+			} catch (JenaException ex) {
+				if (!s.getBoolean()) {
+					limitPerClassMap = Relation.NO_LIMIT;
+				}
+			}
+		}
 		s = server.getProperty(D2RConfig.limitPerPropertyBridge);
 		if (s != null) {
 			try {
@@ -164,6 +176,10 @@ public class ConfigLoader {
 	
 	public boolean getVocabularyIncludeInstances() {
 		return this.vocabularyIncludeInstances;
+	}
+	
+	public int getLimitPerClassMap() {
+		return limitPerClassMap;
 	}
 	
 	public int getLimitPerPropertyBridge() {
