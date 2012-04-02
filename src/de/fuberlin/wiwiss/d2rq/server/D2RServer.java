@@ -10,14 +10,19 @@ import org.joseki.Service;
 import org.joseki.ServiceRegistry;
 import org.joseki.processors.SPARQL;
 
+import com.hp.hpl.jena.graph.BulkUpdateHandler;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandler;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerFactory;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
+import com.hp.hpl.jena.sparql.util.Context;
 
+import de.fuberlin.wiwiss.d2rq.ResourceDescriber;
 import de.fuberlin.wiwiss.d2rq.SystemLoader;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.map.Mapping;
 
 /**
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
@@ -137,6 +142,10 @@ public class D2RServer {
 		return this.dataset;
 	}
 
+	public Mapping getMapping() {
+		return loader.getMapping();
+	}
+	
 	/**
 	 * delegate to auto-reloadable dataset, will reload if necessary
 	 */
@@ -165,8 +174,29 @@ public class D2RServer {
 			log.info("Safe mode (launch using --fast to use all optimizations)");
 		}
 		
+		// Set up a custom DescribeHandler that calls out to
+		// {@link ResourceDescriber}
 		DescribeHandlerRegistry.get().clear();
-		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory());
+		DescribeHandlerRegistry.get().add(new DescribeHandlerFactory() {
+			public DescribeHandler create() {
+				return new DescribeHandler() {
+					private BulkUpdateHandler adder;
+					public void start(Model accumulateResultModel, Context qContext) {
+						adder = accumulateResultModel.getGraph().getBulkUpdateHandler();
+					}
+					public void describe(Resource resource) {
+						log.info("DESCRIBE <" + resource + ">");
+						boolean outgoingTriplesOnly =
+							isVocabularyResource(resource) && !getConfig().getVocabularyIncludeInstances();
+						adder.add(new ResourceDescriber(
+								getMapping(), resource.asNode(), 
+								outgoingTriplesOnly, 
+								Relation.NO_LIMIT).description());
+					}
+					public void finish() {}
+				};
+			}
+		});
 
 		Registry.add(RDFServer.ServiceRegistryName, createJosekiServiceRegistry());
 	}
@@ -184,13 +214,6 @@ public class D2RServer {
 				new D2RQDatasetDesc(this.dataset));
 		services.add(D2RServer.SPARQL_SERVICE_NAME, service);
 		return services;
-	}
-	
-	private class FindDescribeHandlerFactory implements DescribeHandlerFactory {
-		
-		public DescribeHandler create() {
-			return new FindDescribeHandler(D2RServer.this);
-		}
 	}
 	
 	public ConfigLoader getConfig() {

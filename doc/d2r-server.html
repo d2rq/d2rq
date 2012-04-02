@@ -227,6 +227,15 @@ configuration properties. An example follows:</p>
     so this value should be set to <code>false</code> for production systems.</td>
   </tr>
   <tr>
+    <th id="d2r:limitPerPropertyBridge">d2r:limitPerPropertyBridge</th>
+    <td>Specifies a maximum for the number of values from each property bridge
+      that will be displayed in the web interface. This stops pages from getting
+      too large, but prevents users from exploring the full data through the
+      web interface. This setting does not affect RDF representations or SPARQL
+      queries. The default is <code>50</code>. Use <code>false</code> to disable
+      the limit.</td>
+  </tr>
+  <tr>
     <th>d2r:metadataTemplate</th>
     <td>Specifies a <a href="#metadata-template">metadata template file</a>
     within the directory <code>WEB-INF/templates</code>.</td>
@@ -355,11 +364,15 @@ instance</a>.</p>
 	<li>Provide <a href="d2rq-language#hint">hint properties</a>.</li>
 	<li>Indicate directions in <a href="d2rq-language#d2rq:join"><code>d2rq:join</code>s</a> to enable join optimizations.</li>
 	<li>Give D2R Server more heap space by means of Java's <code>-Xmx</code> parameter in <code>d2r-server</code> or <code>d2r-server.bat</code> (default: <code>-Xmx1G</code>).</li>
-	<li>Set <a href="#configuration"><code>d2rq:autoReloadMapping</code></a> to <code>false</code> where it is not required.</li>
+  <li>To prevent excessively large pages in the web interface,
+    consider changing the value of
+    <a href="#d2r:limitPerPropertyBridge"><code>d2r:limitPerPropertyBridge</code></a>.
+  </li>
     <li>To speed up the generation of large pages, consider setting
       <a href="d2rq-language#d2rq:resultSizeLimit"><code>d2rq:resultSizeLimit</code></a>,
       <a href="d2rq-language#d2rq:limit"><code>d2rq:limit</code></a>, and
       <a href="#d2r:vocabularyIncludeInstances"><code>d2r:vocabularyIncludeInstances</code></a>.</li>
+	<li>Set <a href="#configuration"><code>d2rq:autoReloadMapping</code></a> to <code>false</code> where it is not required.</li>
 	<li>Databases often ship with development configurations that are designed for a small footprint rather than performance. For instance, some good pointers for optimizing MySQL can be found <a href="http://www.mysqlperformanceblog.com/2006/09/29/what-to-tune-in-mysql-server-after-installation/">here</a>.</li>
 </ul> 
 

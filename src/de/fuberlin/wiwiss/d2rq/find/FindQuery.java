@@ -19,16 +19,24 @@ import de.fuberlin.wiwiss.d2rq.find.URIMakerRule.URIMakerRuleChecker;
  * A find query on a collection of {@link TripleRelation}s. Results are 
  * delivered as an iterator of triples. Will combine queries on multiple
  * relations into one SQL statement where possible.
- *
+ * An option for limiting the number of triples returned from each
+ * {@link TripleRelation} is available.
+ * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class FindQuery {
 	private final Triple triplePattern;
 	private final Collection<TripleRelation> tripleRelations;
+	private final int limitPerRelation;
 	
 	public FindQuery(Triple triplePattern, Collection<TripleRelation> tripleRelations) {
+		this(triplePattern, tripleRelations, Relation.NO_LIMIT);
+	}	
+
+	public FindQuery(Triple triplePattern, Collection<TripleRelation> tripleRelations, int limit) {
 		this.triplePattern = triplePattern;
 		this.tripleRelations = tripleRelations;
+		this.limitPerRelation = limit;
 	}	
 
 	private List<TripleRelation> selectedTripleRelations() {
@@ -47,7 +55,11 @@ public class FindQuery {
 				subjectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.SUBJECT));
 				predicateChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.PREDICATE));
 				objectChecker.addPotentialMatch(tripleRelation.nodeMaker(TripleRelation.OBJECT));
-				result.add(new JoinOptimizer(selectedTripleRelation).optimize());
+				TripleRelation r = new JoinOptimizer(selectedTripleRelation).optimize();
+				if (limitPerRelation != Relation.NO_LIMIT) {
+					r = r.limit(limitPerRelation);
+				}
+				result.add(r);
 			}
 		}
 		return result;
@@ -58,9 +70,8 @@ public class FindQuery {
 		for (CompatibleRelationGroup group: 
 				CompatibleRelationGroup.groupNodeRelations(selectedTripleRelations())) {
 			if (!group.baseRelation().equals(Relation.EMPTY) && group.baseRelation().limit()!=0) {
-				result = result.andThen(
-						RelationToTriplesIterator.create(
-								group.baseRelation(), group.bindingMakers()));
+				result = result.andThen(RelationToTriplesIterator.create(
+						group.baseRelation(), group.bindingMakers()));
 			}
 		}
 		return result;

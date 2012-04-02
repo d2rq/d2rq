@@ -26,6 +26,7 @@ img.depiction { border: none; height: auto; max-width: 200px; }
 #rdficon { float: right; margin: 0.6em 1em; }
 .directory li { margin-bottom: 0.5em; }
 .directory small { font-size: 80%; color: #666; }
+.footnote { font-style: italic; color: #666; }
 
 .snorql h1, .snorql h2 { color: #400; }
 .snorql #header, .snorql .section { background: #ccf; }
