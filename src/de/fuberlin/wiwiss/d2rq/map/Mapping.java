@@ -193,6 +193,7 @@ public class Mapping {
 	public synchronized Collection<TripleRelation> compiledPropertyBridges() {
 		if (this.compiledPropertyBridges == null) {
 			compilePropertyBridges();
+			validate();
 		}
 		return this.compiledPropertyBridges;
 	}
