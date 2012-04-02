@@ -30,6 +30,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * <p>In this case, J can be dropped, and all mentions of <em>T2.c_n</em>
  * can be replaced with <em>T1.c_n</em>.</p>
  * 
+ * TODO: Currently this only is used for TripleRelations in FindQuery but it could be used for NodeRelations in SPARQL queries too
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
