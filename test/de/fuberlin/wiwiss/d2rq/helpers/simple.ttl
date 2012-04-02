@@ -2,7 +2,7 @@
 @prefix : <http://example.org/>.
 
 :db a d2rq:Database;
-	d2rq:jdbcDSN "jdbc:hsqldb:mem:test";
+	d2rq:jdbcURL "jdbc:hsqldb:mem:test";
 	d2rq:jdbcDriver "org.hsqldb.jdbcDriver";
 	d2rq:username "d2rq";
 	.

@@ -4,7 +4,7 @@
 
 :database a d2rq:Database;
     d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-    d2rq:jdbcDSN "jdbc:mysql:///db";
+    d2rq:jdbcURL "jdbc:mysql:///db";
     d2rq:numericColumn "People.ID";
     .
 :classmap a d2rq:ClassMap;

@@ -138,7 +138,7 @@ public abstract class DatatypeTestBase extends TestCase {
 	private Mapping generateMapping() {
 		Mapping mapping = new Mapping();
 		Database database = new Database(dbURI);
-		database.setJDBCDSN(jdbcURL);
+		database.setJdbcURL(jdbcURL);
 		database.setJDBCDriver(driver);
 		database.setUsername(user);
 		database.setPassword(password);

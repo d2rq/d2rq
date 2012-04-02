@@ -3,7 +3,7 @@
 
 :database a d2rq:Database;
     d2rq:jdbcDriver "org.hsqldb.jdbcDriver";
-    d2rq:jdbcDSN "jdbc:hsqldb:mem:test";
+    d2rq:jdbcURL "jdbc:hsqldb:mem:test";
     .
 
 :dm a d2rq:DownloadMap;

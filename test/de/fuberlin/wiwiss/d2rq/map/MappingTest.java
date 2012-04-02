@@ -86,7 +86,7 @@ public class MappingTest extends TestCase {
 		ClassMap c = new ClassMap(classMap1);
 		try {
 			Database db1 = new Database(database1);
-			db1.setJDBCDSN("jdbc:mysql:///db");
+			db1.setJdbcURL("jdbc:mysql:///db");
 			db1.setJDBCDriver("org.example.Driver");
 			m.addDatabase(db1);
 			m.addClassMap(c);

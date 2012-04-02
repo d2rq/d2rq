@@ -104,6 +104,7 @@ public class MapParser {
 			parseConfiguration();
 			parseTranslationTables();
 			parseClassMaps();
+			assignDefaultDatabase();
 			parsePropertyBridges();
 			parseDownloadMaps();
 			this.mapping.buildVocabularyModel();
@@ -112,11 +113,25 @@ public class MapParser {
 					mapping.classMapResources().size() + " class maps");
 			return this.mapping;
 		} catch (LiteralRequiredException ex) {
-			throw new D2RQException("Expected literal, found URI resource instead: " + ex.getMessage(),
+			throw new D2RQException("Expected literal (\"...\"), found URI (<...>) resource instead: " + ex.getMessage(),
 					D2RQException.MAPPING_RESOURCE_INSTEADOF_LITERAL);
 		} catch (ResourceRequiredException ex) {
-			throw new D2RQException("Expected URI, found literal instead: " + ex.getMessage(),
+			throw new D2RQException("Expected URI (<...>), found literal (\"...\") instead: " + ex.getMessage(),
 					D2RQException.MAPPING_LITERAL_INSTEADOF_RESOURCE);
+		}
+	}
+
+	/**
+	 * If the mapping contains exactly one Database, then use it for any
+	 * class maps that don't have their d2rq:dataStorage set
+	 */
+	private void assignDefaultDatabase() {
+		if (mapping.databases().size() != 1) return;
+		Database defaultDB = mapping.databases().iterator().next();
+		for (Resource r: mapping.classMapResources()) {
+			ClassMap cm = mapping.classMap(r);
+			if (cm.database() != null) continue;
+			cm.setDatabase(defaultDB);
 		}
 	}
 	
@@ -218,7 +233,11 @@ public class MapParser {
 		StmtIterator stmts;
 		stmts = r.listProperties(D2RQ.jdbcDSN);
 		while (stmts.hasNext()) {
-			database.setJDBCDSN(stmts.nextStatement().getString());
+			database.setJdbcURL(stmts.nextStatement().getString());
+		}
+		stmts = r.listProperties(D2RQ.jdbcURL);
+		while (stmts.hasNext()) {
+			database.setJdbcURL(stmts.nextStatement().getString());
 		}
 		stmts = r.listProperties(D2RQ.jdbcDriver);
 		while (stmts.hasNext()) {

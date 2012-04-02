@@ -45,7 +45,7 @@ public class D2RQException extends JenaException {
 	public static final int TRANSLATION_MISSING_DBVALUE = 33;
 	public static final int TRANSLATION_MISSING_RDFVALUE = 34;
 //	public static final int DATABASE_DUPLICATE_ODBCDSN = 35;
-	public static final int DATABASE_DUPLICATE_JDBCDSN = 35;
+	public static final int DATABASE_DUPLICATE_JDBC_URL = 35;
 	public static final int DATABASE_DUPLICATE_JDBCDRIVER = 36;
 	public static final int DATABASE_MISSING_JDBCDRIVER = 37;
 	public static final int DATABASE_DUPLICATE_USERNAME = 38;
@@ -61,7 +61,7 @@ public class D2RQException extends JenaException {
 	public static final int MAPPING_RESOURCE_INSTEADOF_LITERAL = 48;
 	public static final int MAPPING_LITERAL_INSTEADOF_RESOURCE = 49;
 	public static final int RESOURCEMAP_ILLEGAL_URIPATTERN = 50;
-	public static final int DATABASE_MISSING_DSN = 51;
+	public static final int DATABASE_MISSING_JDBC_URL = 51;
 	public static final int MUST_BE_NUMERIC = 52;
 	public static final int RESOURCEMAP_DUPLICATE_CONSTANTVALUE = 53;
 	public static final int CLASSMAP_INVALID_CONSTANTVALUE = 53;

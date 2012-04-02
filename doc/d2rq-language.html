@@ -124,7 +124,7 @@
       <li>12.1 <a href="#datatype-object"><code>d2rq:DatatypePropertyBridge</code> and <code>d2rq:ObjectPropertyBridge</code></a></li>
       <li>12.2 <a href="#additionalproperty_deprecated"><code>d2rq:additionalProperty</code></a></li>
       <li>12.3 <a href="#deprecated-class-map-property-bridge"><code>d2rq:classMap</code> and <code>d2rq:propertyBridge</code> properties</a></li>
-      <li>12.4 <a href="#deprecated-odbc-dsn"><code>d2rq:odbcDSN</code> and <code>d2rq:allowDistinct</code></a></li>
+      <li>12.4 <a href="#deprecated-odbc-dsn"><code>d2rq:jdbcDSN</code>, <code>d2rq:odbcDSN</code> and <code>d2rq:allowDistinct</code></a></li>
     </ul>
   </li>
 </ul>
@@ -213,7 +213,7 @@ maps.</p>
 @prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; . 
 
 map:Database1 a d2rq:Database;
-    d2rq:jdbcDSN &quot;jdbc:mysql://localhost/iswc&quot;;
+    d2rq:jdbcURL &lt;jdbc:mysql://localhost/iswc&gt;
     d2rq:jdbcDriver &quot;com.mysql.jdbc.Driver&quot;;
     d2rq:username &quot;user&quot;;
     d2rq:password &quot;password&quot;;
@@ -222,7 +222,6 @@ map:Database1 a d2rq:Database;
 # CREATE TABLE Conferences (ConfID int, Name text, Location text);
 
 map:Conference a d2rq:ClassMap;
-    d2rq:dataStorage map:Database1.
     d2rq:class :Conference;
     d2rq:uriPattern &quot;http://conferences.org/comp/confno@@Conferences.ConfID@@&quot;;
     .
@@ -245,7 +244,7 @@ map:location a d2rq:PropertyBridge;
 
 <h2 id="database">3. Database connection (<code>d2rq:Database</code>)</h2>
 
-<p>A <strong><code>d2rq:Database</code></strong> defines a JDBC connection to a local or
+<p>A <strong id="d2rq:Database"><code>d2rq:Database</code></strong> defines a JDBC connection to a local or
   remote relational database.
  A D2RQ map can 
   contain several <code>d2rq:Database</code>s for accessing different databases.</p>
@@ -255,7 +254,7 @@ map:location a d2rq:PropertyBridge;
 
 <table class="properties">
   <tr> 
-    <th id="d2rq:jdbcDSN">d2rq:jdbcDSN</th>
+    <th id="d2rq:jdbcURL">d2rq:jdbcURL</th>
     <td>The JDBC database URL. This is a string of the form
       <code>jdbc:<em>subprotocol</em>:<em>subname</em></code>. For a MySQL database,
       this is something like <code>jdbc:mysql://hostname:port/dbname</code>.
@@ -263,8 +262,9 @@ map:location a d2rq:PropertyBridge;
   </tr>
   <tr> 
     <th id="d2rq:jdbcDriver">d2rq:jdbcDriver</th>
-    <td>The JDBC driver class name for the database. Used together with <code>d2rq:jdbcDSN</code>.
-      Example: <code>com.mysql.jdbc.Driver</code> for MySQL.</td>
+    <td>The JDBC driver class name for the database. Used together with <code>d2rq:jdbcURL</code>.
+      Example: <code>com.mysql.jdbc.Driver</code> for MySQL. This is optional for
+      the drivers that already ship with D2RQ.</td>
   </tr>
   <tr> 
     <th id="d2rq:username">d2rq:username</th>
@@ -322,7 +322,7 @@ map:location a d2rq:PropertyBridge;
 
 <pre>
 map:Database1 a d2rq:Database;
-    d2rq:jdbcDSN &quot;jdbc:mysql://localhost/iswc&quot;;
+    d2rq:jdbcURL &quot;jdbc:mysql://localhost/iswc&quot;;
     d2rq:jdbcDriver &quot;com.mysql.jdbc.Driver&quot;;
     d2rq:username &quot;user&quot;;
     d2rq:password &quot;password&quot;;
@@ -503,7 +503,9 @@ mailto:@@<em>Persons.email</em>@@</pre>
 <table class="properties">
   <tr> 
     <th id="d2rq:dataStorage">d2rq:dataStorage</th>
-    <td>Reference to a <code>d2rq:Database</code> where the instance data is stored.</td>
+    <td>Reference to a <a href="#d2rq:Database"><code>d2rq:Database</code></a>
+    where the instance data is stored. Only needed if more than
+    one <code>d2rq:Database</code> instance is involved in the mapping.</td>
   </tr>
   <tr> 
     <th id="d2rq:class">d2rq:class</th>
@@ -1559,11 +1561,16 @@ and <code>d2rq:additionalPropertyDefinitionProperty</code>.</p>
 </table>
 
 
-<h3 id="deprecated-odbc-dsn">12.4 <code>d2rq:odbcDSN</code> and <code>d2rq:allowDistinct</code></h3>
+<h3 id="deprecated-odbc-dsn">12.4 <code>d2rq:jdbcDSN</code>, <code>d2rq:odbcDSN</code> and <code>d2rq:allowDistinct</code></h3>
 
 <p>These are deprecated properties of <code>d2rq:Database</code>:</p>
 
 <table class="properties">
+  <tr> 
+    <th id="d2rq:jdbcDSN">d2rq:jdbcDSN</th>
+    <td>This is a deprecated alternative for
+      <a href="#d2rq:jdbcURL"><code>d2rq:jdbcURL</code></a>.</td>
+  </tr>
   <tr>
     <th id="d2rq:odbcDSN">d2rq:odbcDSN</th>
     <td>Up to D2RQ 0.7, the <code>d2rq:odbcDSN</code> property could be

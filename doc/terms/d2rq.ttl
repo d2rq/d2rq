@@ -36,9 +36,17 @@ d2rq:jdbcDriver a rdf:Property;
 	rdfs:domain d2rq:Database;
 	.
 d2rq:jdbcDSN a rdf:Property;
+    a owl:DeprecatedProperty;
 	rdfs:label "JDBC DSN";
-	rdfs:comment "JDBC data source name.";
+	rdfs:comment "JDBC data source name. Deprecated, use d2rq:jdbcURL instead.";
 	rdfs:domain d2rq:Database;
+    rdfs:range rdfs:Literal;
+	.
+d2rq:jdbcURL a rdf:Property;
+	rdfs:label "JDBC URL";
+	rdfs:comment "JDBC connection URL.";
+	rdfs:domain d2rq:Database;
+    rdfs:range rdfs:Literal;
 	.
 d2rq:odbcDSN a rdf:Property;
 	a owl:DeprecatedProperty;

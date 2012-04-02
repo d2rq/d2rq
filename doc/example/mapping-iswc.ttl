@@ -15,7 +15,7 @@
 
 map:database a d2rq:Database;
 	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-	d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/iswc?autoReconnect=true";
+	d2rq:jdbcURL "jdbc:mysql://127.0.0.1/iswc?autoReconnect=true";
 	d2rq:username "root";
 	jdbc:keepAlive "3600";				# sends noop-query every 3600 seconds
 #	jdbc:keepAliveQuery "SELECT 1";		# optional custom noop-query

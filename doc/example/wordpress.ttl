@@ -12,7 +12,7 @@
 
 :database a d2rq:Database;
 	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-	d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/wordpress";
+	d2rq:jdbcURL "jdbc:mysql://127.0.0.1/wordpress";
 	d2rq:username "root";
 	.
 

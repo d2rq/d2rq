@@ -236,7 +236,7 @@ public class MappingGenerator {
 		log.info("Generating d2rq:Database instance");
 		this.out.println(databaseName() + " a d2rq:Database;");
 		this.out.println("\td2rq:jdbcDriver \"" + this.driverClass + "\";");
-		this.out.println("\td2rq:jdbcDSN \"" + database.getJdbcURL() + "\";");
+		this.out.println("\td2rq:jdbcURL \"" + database.getJdbcURL() + "\";");
 		if (database.getUsername() != null) {
 			this.out.println("\td2rq:username \"" + database.getUsername() + "\";");
 		}

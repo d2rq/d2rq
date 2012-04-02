@@ -4,7 +4,7 @@
 
 map:database a :Database;
   :jdbcDriver "com.mysql.jdbc.Driver";
-  :jdbcDSN "jdbc:mysql:///db";
+  :jdbcURL "jdbc:mysql:///db";
   :numericColumn "People.ID";
   :textColumn "People.name";
   :textColumn "People.email";

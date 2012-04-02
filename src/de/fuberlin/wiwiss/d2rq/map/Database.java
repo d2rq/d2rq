@@ -26,7 +26,7 @@ public class Database extends MapObject {
 	public static final int NO_LIMIT = -1;
 	public static final int NO_FETCH_SIZE = -1;	
 	
-	private String jdbcDSN;
+	private String jdbcURL;
 	private String jdbcDriver;
 	private String username;
 	private String password;
@@ -41,15 +41,15 @@ public class Database extends MapObject {
 		super(resource);
 	}
 
-	public void setJDBCDSN(String jdbcDSN) {
-		assertNotYetDefined(this.jdbcDSN, D2RQ.jdbcDSN,
-				D2RQException.DATABASE_DUPLICATE_JDBCDSN);
+	public void setJdbcURL(String jdbcURL) {
+		assertNotYetDefined(this.jdbcURL, D2RQ.jdbcURL,
+				D2RQException.DATABASE_DUPLICATE_JDBC_URL);
 		checkNotConnected();		
-		this.jdbcDSN = jdbcDSN;
+		this.jdbcURL = jdbcURL;
 	}
 	
 	public String getJDBCDSN() {
-		return this.jdbcDSN;
+		return this.jdbcURL;
 	}
 
 	public void setJDBCDriver(String jdbcDriver) {
@@ -174,7 +174,7 @@ public class Database extends MapObject {
 			if (jdbcDriver != null) {
 				ConnectedDB.registerJDBCDriver(jdbcDriver);
 			}
-			connection = new ConnectedDB(jdbcDSN, username, password,
+			connection = new ConnectedDB(jdbcURL, username, password,
 					columnTypes, limit, fetchSize, connectionProperties);
 			if (startupSQLScript != null) {
 				try {
@@ -197,13 +197,9 @@ public class Database extends MapObject {
 	}
 
 	public void validate() throws D2RQException {
-		if (this.jdbcDSN == null) {
-			throw new D2RQException("d2rq:Database must have d2rq:jdbcDSN",
-					D2RQException.DATABASE_MISSING_DSN);
-		}
-		if (this.jdbcDSN != null && this.jdbcDriver == null) {
-			throw new D2RQException("Missing d2rq:jdbcDriver",
-					D2RQException.DATABASE_MISSING_JDBCDRIVER);
+		if (this.jdbcURL == null) {
+			throw new D2RQException("d2rq:Database must have d2rq:jdbcURL",
+					D2RQException.DATABASE_MISSING_JDBC_URL);
 		}
 		// TODO
 	}
