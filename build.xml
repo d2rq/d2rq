@@ -25,9 +25,6 @@
 	<property name="vocab.config.ttl" value="${vocab.dir}/config.ttl"/>
 	<property name="vocab.config.rdf" value="${vocab.dir}/config.rdf"/>
 	<property name="vocab.config.namespace" value="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#"/>
-	<property name="vocab.r2rml.ttl" value="${vocab.dir}/r2rml.ttl"/>
-	<property name="vocab.r2rml.rdf" value="${vocab.dir}/r2rml.rdf"/>
-	<property name="vocab.r2rml.namespace" value="http://www.w3.org/ns/r2rml#"/>
 	
 	<path id="project.class.path">
 		<fileset dir="${lib}">
@@ -192,22 +189,16 @@
 			<java classname="jena.schemagen" classpathref="project.class.path" fork="yes"
 					failonerror="true">
 				<arg value="-i" />
-				<arg value="file:${vocab.r2rml.ttl}" />
+				<arg value="http://www.w3.org/ns/r2rml.ttl" />
+				<arg value="-e" />
+				<arg value="TURTLE" />
 				<arg value="-o" />
 				<arg value="${src}" />
-				<arg value="-a" />
-				<arg value="${vocab.r2rml.namespace}" />
 				<arg value="-n" />
 				<arg value="RR" />
 				<arg value="--package" />
 				<arg value="${project.package}.vocab" />
 				<arg value="--owl" />
-			</java>
-			<java classname="jena.rdfcopy" classpathref="project.class.path" fork="yes"
-					output="${vocab.r2rml.rdf}" logError="yes" failonerror="true">
-				<arg value="${vocab.r2rml.ttl}"/>
-				<arg value="TURTLE"/>
-				<arg value="RDF/XML-ABBREV"/>
 			</java>
 	</target>
 
