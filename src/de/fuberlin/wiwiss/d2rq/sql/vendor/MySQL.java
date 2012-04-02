@@ -3,10 +3,9 @@ package de.fuberlin.wiwiss.d2rq.sql.vendor;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Properties;
 import java.util.regex.Pattern;
-
-import org.hsqldb.types.Types;
 
 import de.fuberlin.wiwiss.d2rq.sql.Quoter;
 import de.fuberlin.wiwiss.d2rq.sql.Quoter.PatternDoublingQuoter;

@@ -93,6 +93,9 @@
         </tr>
 #end
       </table>
+#if ($limit_per_property_bridge)
+      <p class="footnote">The server is configured to display only a limited number of values (limit per property bridge: $limit_per_property_bridge).</p>
+#end
 #else
       <p>No textual description available.</p>
 #end

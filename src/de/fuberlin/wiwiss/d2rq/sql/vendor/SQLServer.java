@@ -1,6 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.sql.vendor;
 
-import org.hsqldb.types.Types;
+import java.sql.Types;
 
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;

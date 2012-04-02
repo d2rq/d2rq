@@ -2,10 +2,9 @@ package de.fuberlin.wiwiss.d2rq.sql.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Properties;
 import java.util.regex.Pattern;
-
-import org.hsqldb.types.Types;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;

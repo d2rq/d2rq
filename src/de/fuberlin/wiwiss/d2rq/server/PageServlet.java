@@ -14,9 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.velocity.context.Context;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.PrefixMapping;
@@ -26,6 +27,7 @@ import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.ClassMapLister;
+import de.fuberlin.wiwiss.d2rq.ResourceDescriber;
 import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 public class PageServlet extends HttpServlet {
@@ -54,15 +56,22 @@ public class PageServlet extends HttpServlet {
 		String resourceURI = server.resourceBaseURI(serviceStem) + relativeResourceURI;
 		String documentURL = server.dataURL(serviceStem, relativeResourceURI);
 
-		String sparqlQuery = "DESCRIBE <" + resourceURI + ">";
-		Model description = QueryExecutionFactory.create(sparqlQuery, server.dataset()).execDescribe();			
+		// Build resource description
+		Resource resource = ResourceFactory.createResource(resourceURI);
+		boolean outgoingTriplesOnly =
+			server.isVocabularyResource(resource) && !server.getConfig().getVocabularyIncludeInstances();
+		int limit = server.getConfig().getLimitPerPropertyBridge();
+		ResourceDescriber describer = new ResourceDescriber(server.getMapping(),
+				resource.asNode(), outgoingTriplesOnly, limit);
+		Model description = ModelFactory.createModelForGraph(describer.description());			
 		if (description.size() == 0) {
 			response.sendError(404);
 			return;
 		}
+		// Get a Resource that is attached to the description model
+		resource = description.getResource(resourceURI);
 		
 		this.prefixes = server.getPrefixes(); // model();
-		Resource resource = description.getResource(resourceURI);
 		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
 		Context context = velocity.getContext();
 		
@@ -71,7 +80,8 @@ public class PageServlet extends HttpServlet {
 			MetadataCreator mc = new MetadataCreator(server, velocity);
 			mc.setResourceURI(resourceURI);
 			mc.setDocumentURL(documentURL);
-			mc.setSparqlQuery(sparqlQuery);
+			// TODO: This isn't necessarily exactly accurate any more
+			mc.setSparqlQuery("DESCRIBE <" + resourceURI + ">");
 			
 			Model metadata = mc.addMetadataFromTemplate(description.createResource(resourceURI), getServletContext());
 			if (!metadata.isEmpty()) {
@@ -98,6 +108,7 @@ public class PageServlet extends HttpServlet {
 		context.put("label", getBestLabel(resource));
 		context.put("properties", collectProperties(description, resource));
 		context.put("classmap_links", classmapLinks(resource));
+		context.put("limit_per_property_bridge", limit > 0 ? limit : null);
 		velocity.mergeTemplateXHTML("resource_page.vm");
 	}
 

@@ -10,15 +10,20 @@ import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RConfig;
 
 public class ConfigLoader {
 
+	public static final int DEFAULT_LIMIT_PER_CLASS_MAP = 50;
+	public static final int DEFAULT_LIMIT_PER_PROPERTY_BRIDGE = 50;
+	
 	/**
 	 * Accepts an absolute URI, relative file: URI, or plain
 	 * file name (including names with spaces, Windows backslashes
@@ -51,6 +56,8 @@ public class ConfigLoader {
 	private Resource documentMetadata = null;
 	private boolean vocabularyIncludeInstances = true;
 	private boolean autoReloadMapping = true;
+	private int limitPerClassMap = DEFAULT_LIMIT_PER_CLASS_MAP;
+	private int limitPerPropertyBridge = DEFAULT_LIMIT_PER_PROPERTY_BRIDGE;
 	
 	/**
 	 * @param configURL Config file URL, or <code>null</code> for an empty config
@@ -112,7 +119,27 @@ public class ConfigLoader {
 		s = server.getProperty(D2RConfig.autoReloadMapping);
 		if (s != null) {
 			this.autoReloadMapping = s.getBoolean();
-		}	
+		}
+		s = server.getProperty(D2RConfig.limitPerClassMap);
+		if (s != null) {
+			try {
+				limitPerClassMap = s.getInt();
+			} catch (JenaException ex) {
+				if (!s.getBoolean()) {
+					limitPerClassMap = Relation.NO_LIMIT;
+				}
+			}
+		}
+		s = server.getProperty(D2RConfig.limitPerPropertyBridge);
+		if (s != null) {
+			try {
+				limitPerPropertyBridge = s.getInt();
+			} catch (JenaException ex) {
+				if (!s.getBoolean()) {
+					limitPerPropertyBridge = Relation.NO_LIMIT;
+				}
+			}
+		}
 	}
 	
 	public boolean isLocalMappingFile() {
@@ -149,6 +176,14 @@ public class ConfigLoader {
 	
 	public boolean getVocabularyIncludeInstances() {
 		return this.vocabularyIncludeInstances;
+	}
+	
+	public int getLimitPerClassMap() {
+		return limitPerClassMap;
+	}
+	
+	public int getLimitPerPropertyBridge() {
+		return limitPerPropertyBridge;
 	}
 	
 	public boolean getAutoReloadMapping() {
