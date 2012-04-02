@@ -9,15 +9,20 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 public class SQLExactNumeric extends DataType {
 	private final String rdfType;
+	
+	/**
+	 * @param jdbcType Constant from {@link java.sql.Types}
+	 * @param unsigned This is now being ignored because R2RML just maps everything to xsd:integer
+	 */
 	public SQLExactNumeric(Vendor syntax, int jdbcType, boolean unsigned) {
 		super(syntax, "NUMERIC");
 		switch (jdbcType) {
 		case Types.NUMERIC:  rdfType = "xsd:decimal"; break;
 		case Types.DECIMAL:  rdfType = "xsd:decimal"; break;
-		case Types.TINYINT:  rdfType = unsigned ? "xsd:unsignedByte" : "xsd:byte"; break;
-		case Types.SMALLINT: rdfType = unsigned ? "xsd:unsignedShort" : "xsd:short"; break;
-		case Types.INTEGER:  rdfType = unsigned ? "xsd:unsignedInt" : "xsd:int"; break;
-		case Types.BIGINT:   rdfType = unsigned ? "xsd:unsignedLong" : "xsd:long"; break;
+		case Types.TINYINT:  rdfType = "xsd:integer"; break;
+		case Types.SMALLINT: rdfType = "xsd:integer"; break;
+		case Types.INTEGER:  rdfType = "xsd:integer"; break;
+		case Types.BIGINT:   rdfType = "xsd:integer"; break;
 		default: rdfType = "xsd:decimal";
 		}
 	}
