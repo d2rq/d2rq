@@ -126,6 +126,7 @@ public class SQL92 implements Vendor {
 			return new SQLCharacterString(this, true);
 		}
 
+		
 		switch (jdbcType) {
 		case Types.CHAR:
 		case Types.VARCHAR:
