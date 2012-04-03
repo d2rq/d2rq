@@ -8,9 +8,9 @@ import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class MySQLDatatypeTest extends DatatypeTestBase {
-	
+
 	public void setUp() throws Exception {
-		initDB("jdbc:mysql:///d2rq_test", "com.mysql.jdbc.Driver", "root", null, 
+		initDB("jdbc:mysql://127.0.0.1/d2rq_test", "com.mysql.jdbc.Driver", "root", "root", 
 				D2RQTestSuite.DIRECTORY + "sql/mysql_datatypes.sql", null);
 	}
 

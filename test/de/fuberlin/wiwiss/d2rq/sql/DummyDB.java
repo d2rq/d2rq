@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
+import java.sql.Connection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,8 +18,31 @@ public class DummyDB extends ConnectedDB {
 	}
 	
 	public DummyDB(final String type) {
-		super(null, null, null);
+		super(true, Collections.<String,SQLDataType>emptyMap(), Database.NO_LIMIT, Database.NO_FETCH_SIZE);
 		this.type = type;
+	}
+	
+	
+
+	@Override
+	public void init() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public Connection connection() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void close(Connection c) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
 	}
 
 	public void setColumnType(Attribute attribute, SQLDataType type) {

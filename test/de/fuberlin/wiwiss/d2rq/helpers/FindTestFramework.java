@@ -29,6 +29,7 @@ public class FindTestFramework extends TestCase {
 
 	protected void setUp() throws Exception {
 		this.graph = (GraphD2RQ) new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "TURTLE", "http://test/").getGraph();
+		graph.connect();
 	}
 
 	protected void tearDown() throws Exception {

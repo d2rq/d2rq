@@ -29,6 +29,7 @@ public class DownloadContentQueryTest extends TestCase  {
 		Mapping m = MappingHelper.readFromTestFile("download/download-map.ttl");
 		downloadCLOB = m.downloadMap(ResourceFactory.createResource("http://example.org/downloadCLOB"));
 		downloadBLOB = m.downloadMap(ResourceFactory.createResource("http://example.org/downloadBLOB"));
+		m.databases().iterator().next().connectedDB().init();
 	}
 
 	public void tearDown() {

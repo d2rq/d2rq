@@ -109,11 +109,8 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * @see com.hp.hpl.jena.graph.Graph#close()
 	 */
 	public void close() {
-		Iterator it = this.mapping.databases().iterator();
-		while (it.hasNext()) {
-			Database db = (Database) it.next();
+		for (Database db : this.mapping.databases())
 			db.connectedDB().close();
-		}
 		this.closed = true;
 	}
 
@@ -137,11 +134,10 @@ public class GraphD2RQ extends GraphBase implements Graph {
 	 * @throws D2RQException on connection failure
 	 */
 	public void connect() {
-		Iterator it = this.mapping.databases().iterator();
-		while (it.hasNext()) {
-			Database db = (Database) it.next();
-			db.connectedDB().connection();
-		}
+		for (Database db : this.mapping.databases())
+			db.connectedDB().init();
+	
+		this.mapping.validateConnected();
 	}
 	
 	static TripleRelation[] emptyPropertyBridgeArray=new TripleRelation[0];

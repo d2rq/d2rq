@@ -37,7 +37,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.DriverConnectedDB;
 
 /**
  * Generates a D2RQ mapping by introspecting a database schema.
@@ -52,7 +52,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
  */
 public class MappingGenerator {
 	private final static String CREATOR = "D2RQ Mapping Generator";
-	private ConnectedDB database;
+	private DriverConnectedDB database;
 	private String mapNamespaceURI;
 	private String instanceNamespaceURI;
 	private String vocabNamespaceURI;
@@ -70,12 +70,12 @@ public class MappingGenerator {
 	private boolean generateLabelBridges = true;
 	private URI startupSQLScript;
 	
-	public MappingGenerator(ConnectedDB database) {
+	public MappingGenerator(DriverConnectedDB database) {
 		this.database = database;
 		mapNamespaceURI = "#";
 		instanceNamespaceURI = database.getJdbcURL() + "#";
 		vocabNamespaceURI = database.getJdbcURL() + "/vocab#";
-		driverClass = ConnectedDB.guessJDBCDriverClass(database.getJdbcURL());
+		driverClass = DriverConnectedDB.guessJDBCDriverClass(database.getJdbcURL());
 		schema = database.schemaInspector();
 	}
 

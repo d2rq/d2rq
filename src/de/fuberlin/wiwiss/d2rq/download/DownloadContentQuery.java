@@ -111,6 +111,9 @@ public class DownloadContentQuery {
 			}
 		} catch (SQLException ex) {
 			throw new D2RQException(ex);
+		} finally {
+			if (conn != null)
+				db.close(conn);
 		}
 	}
 }

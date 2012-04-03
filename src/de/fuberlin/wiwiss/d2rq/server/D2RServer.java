@@ -214,25 +214,33 @@ public class D2RServer {
 	
 	public void start() {
 		log.info("using config file: " + configFile);
-		this.config = new ConfigLoader(configFile);
-		this.config.load();
-		
-		if (config.isLocalMappingFile())
-			this.dataset = new AutoReloadableDataset(config.getLocalMappingFilename(), true, overrideUseAllOptimizations, this);
-		else
-			this.dataset = new AutoReloadableDataset(config.getMappingURL(), false, overrideUseAllOptimizations, this);
-		this.dataset.forceReload();
-		
-		if (currentGraph().getConfiguration().getUseAllOptimizations()) {
-			log.info("Fast mode (all optimizations)");
-		} else {
-			log.info("Safe mode (launch using --fast to use all optimizations)");
-		}
-		
-		DescribeHandlerRegistry.get().clear();
-		DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory());
+		try {
+			this.config = new ConfigLoader(configFile);
+			this.config.load();
 
-		Registry.add(RDFServer.ServiceRegistryName, createJosekiServiceRegistry());
+
+			if (config.isLocalMappingFile())
+				this.dataset = new AutoReloadableDataset(config.getLocalMappingFilename(), true, overrideUseAllOptimizations, this);
+			else
+				this.dataset = new AutoReloadableDataset(config.getMappingURL(), false, overrideUseAllOptimizations, this);
+			this.dataset.forceReload();
+
+			if (currentGraph().getConfiguration().getUseAllOptimizations()) {
+				log.info("Fast mode (all optimizations)");
+			} else {
+				log.info("Safe mode (launch using --fast to use all optimizations)");
+			}
+
+			DescribeHandlerRegistry.get().clear();
+			DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory());
+
+			Registry.add(RDFServer.ServiceRegistryName, createJosekiServiceRegistry());
+			log.info("success");
+		} catch (RuntimeException e) {
+			log.fatal("Error starting D2RServer ", e);
+			e.printStackTrace();
+			throw e;
+		}
 	}
 	
 	public void shutdown()

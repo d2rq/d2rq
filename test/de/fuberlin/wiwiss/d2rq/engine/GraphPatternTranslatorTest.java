@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.test.NodeCreateUtils;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
@@ -18,6 +15,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 public class GraphPatternTranslatorTest extends TestCase {
@@ -27,13 +25,13 @@ public class GraphPatternTranslatorTest extends TestCase {
 	private final static Attribute t2table1id = SQL.parseAttribute("T2_table1.id");
 	
 	public void testEmptyGraphAndBGP() {
-		NodeRelation nodeRel = translate1(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+		NodeRelation nodeRel = translate1(Collections.EMPTY_LIST, Collections.EMPTY_LIST, true);
 		assertEquals(Relation.TRUE, nodeRel.baseRelation());
 		assertEquals(Collections.EMPTY_SET, nodeRel.variableNames());
 	}
 	
 	public void testEmptyGraph() {
-		assertNull(translate1("?subject ?predicate ?object", Collections.EMPTY_LIST));
+		assertNull(translate1("?subject ?predicate ?object", Collections.EMPTY_LIST, true));
 	}
 	
 	public void testEmptyBGP() {
@@ -153,16 +151,16 @@ public class GraphPatternTranslatorTest extends TestCase {
 	}
 	
 	private NodeRelation translate1(List triplePatterns, String mappingFile) {
-		return translate1(triplePatterns,
-				MapFixture.loadPropertyBridges(mappingFile));
+		Mapping mapping = MapFixture.loadMapping(mappingFile);
+		return translate1(triplePatterns, mapping.compiledPropertyBridges(), mapping.configuration().getUseAllOptimizations());
 	}
 
-	private NodeRelation translate1(String pattern, Collection tripleRelations) {
-		return translate1(triplesToList(pattern), tripleRelations);
+	private NodeRelation translate1(String pattern, Collection tripleRelations, boolean useOptimizations) {
+		return translate1(triplesToList(pattern), tripleRelations, useOptimizations);
 	}
 	
-	private NodeRelation translate1(List triplePatterns, Collection tripleRelations) {
-		Collection rels = new GraphPatternTranslator(triplePatterns, tripleRelations, true).translate();
+	private NodeRelation translate1(List triplePatterns, Collection tripleRelations, boolean useOptimizations) {
+		Collection rels = new GraphPatternTranslator(triplePatterns, tripleRelations, useOptimizations).translate();
 		if (rels.isEmpty()) return null;
 		assertEquals(1, rels.size());
 		return (NodeRelation) rels.iterator().next();

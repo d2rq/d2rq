@@ -51,7 +51,7 @@ public class D2RQException extends JenaException {
 	public static final int DATABASE_DUPLICATE_USERNAME = 38;
 	public static final int DATABASE_DUPLICATE_PASSWORD = 39;
 //	public static final int DATABASE_ODBC_WITH_JDBC = 40;
-//	public static final int DATABASE_ODBC_WITH_JDBCDRIVER = 41;
+	public static final int DATABASE_DATASOURCE_WITH_JDBCDRIVER = 41;
 	public static final int DATABASE_JDBCDRIVER_CLASS_NOT_FOUND = 42;
 	public static final int D2RQ_SQLEXCEPTION = 43;
 	public static final int SQL_INVALID_RELATIONNAME = 44;

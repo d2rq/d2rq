@@ -94,7 +94,12 @@ public class Mapping {
 		for (DownloadMap dlm : downloadMaps.values()) {
 			dlm.validate();
 		}
-		it = compiledPropertyBridges().iterator();
+
+	}
+	
+	public void validateConnected()
+	{
+		Iterator<?> it = compiledPropertyBridges().iterator();
 		while (it.hasNext()) {
 			TripleRelation bridge = (TripleRelation) it.next();
 			new AttributeTypeValidator(bridge).validate();

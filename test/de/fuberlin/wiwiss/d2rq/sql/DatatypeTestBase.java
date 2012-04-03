@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.sql;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -58,12 +59,15 @@ public abstract class DatatypeTestBase extends TestCase {
 	}
 	
 	private void dropAllTables() {
-		ConnectedDB.registerJDBCDriver(driver);
-		ConnectedDB db = new ConnectedDB(jdbcURL, user, password);
+		DriverConnectedDB.registerJDBCDriver(driver);
+		ConnectedDB db = new DriverConnectedDB(jdbcURL, user, password);
+		db.init();
+		Connection c = null;
 		try {
-			Statement stmt = db.connection().createStatement();
+			c = db.connection();
+			Statement stmt = c.createStatement();
 			try {
-				for (String table: allTables()) {
+				for (String table: allTables(db)) {
 					stmt.execute("DROP TABLE " + table);
 				}
 			} finally {
@@ -72,6 +76,8 @@ public abstract class DatatypeTestBase extends TestCase {
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		} finally {
+			if (c != null)
+				db.close(c);
 			db.close();
 		}
 	}
@@ -80,6 +86,7 @@ public abstract class DatatypeTestBase extends TestCase {
 		this.datatype = datatype;
 		Mapping mapping = generateMapping();
 		graph = getGraph(mapping);
+		graph.connect();
 		inspector = mapping.databases().iterator().next().connectedDB().schemaInspector();
 	}
 	
@@ -113,19 +120,13 @@ public abstract class DatatypeTestBase extends TestCase {
 		}
 	}
 
-	private Set<String> allTables() {
-		ConnectedDB.registerJDBCDriver(driver);
-		ConnectedDB db = new ConnectedDB(jdbcURL, user, password);
-		try {
-			Set<String> result = new HashSet<String>();
-			inspector = db.schemaInspector();
-			for (RelationName name: inspector.listTableNames(schema)) {
-				result.add(name.toString());
-			}
-			return result;
-		} finally {
-			db.close();
+	private Set<String> allTables(ConnectedDB db) {
+		Set<String> result = new HashSet<String>();
+		inspector = db.schemaInspector();
+		for (RelationName name: inspector.listTableNames(schema)) {
+			result.add(name.toString());
 		}
+		return result;
 	}
 	
 	private GraphD2RQ getGraph(Mapping mapping) {

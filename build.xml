@@ -235,6 +235,7 @@
 			</webinf>
 			<classes dir="etc"/>
 			<classes dir="webapp/WEB-INF/templates"/>
+			<metainf dir="META-INF"/>
 		</war>
 	</target>
 </project>

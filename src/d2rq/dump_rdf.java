@@ -3,11 +3,9 @@ package d2rq;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
@@ -26,8 +24,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
+import de.fuberlin.wiwiss.d2rq.sql.DriverConnectedDB;
 
 /**
  * Command line utility for dumping a database to RDF, using the
@@ -46,7 +43,7 @@ public class dump_rdf {
 	
 	public static void main(String[] args) {
 		for (int i = 0; i < includedDrivers.length; i++) {
-			ConnectedDB.registerJDBCDriverIfPresent(includedDrivers[i]);
+			DriverConnectedDB.registerJDBCDriverIfPresent(includedDrivers[i]);
 		}
 		CommandLine cmd = new CommandLine();
 		ArgDecl userArg = new ArgDecl(true, "u", "user", "username");
@@ -255,18 +252,10 @@ public class dump_rdf {
 			if (this.jdbcURL == null) {
 				throw new DumpParameterException("Must specify either -j or -m parameter");
 			}
-			ConnectedDB.registerJDBCDriver(this.driverClass);
-			ConnectedDB db = new ConnectedDB(this.jdbcURL, this.user, this.password);			
+			DriverConnectedDB.registerJDBCDriver(this.driverClass);
+			DriverConnectedDB db = new DriverConnectedDB(this.jdbcURL, this.user, this.password, sqlScript);		
 			try {
-				if (sqlScript != null) {
-					try {
-						SQLScriptLoader.loadFile(new File(sqlScript), db.connection());
-					} catch (IOException ex) {
-						throw new D2RQException("Error accessing SQL startup script: " + sqlScript);
-					} catch (SQLException ex) {
-						throw new D2RQException("Error importing " + sqlScript + " " + ex.getMessage());
-					}
-				}
+				db.init();
 				MappingGenerator gen = new MappingGenerator(db);
 				if (this.driverClass != null) {
 					gen.setJDBCDriverClass(this.driverClass);

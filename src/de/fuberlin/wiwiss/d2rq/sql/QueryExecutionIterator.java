@@ -6,7 +6,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
@@ -23,9 +25,13 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
+	
+	private static Log logger =LogFactory.getLog(QueryExecutionIterator.class);
+			
 	private String sql;
 	private List<ProjectionSpec> columns;
 	private ConnectedDB database;
+	private Connection con;
 	private Statement statement = null;
 	private ResultSet resultSet = null;
 	private ResultRow prefetchedRow = null;
@@ -102,7 +108,7 @@ public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
 				this.resultSet.close();
 				this.resultSet = null;
 			} catch (SQLException ex) {
-				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
+				//ignore  throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
 			}
 	    }
 	    
@@ -111,9 +117,13 @@ public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
 				this.statement.close();
 				this.statement = null;
 			} catch (SQLException ex) {
-				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
+				//ignore throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
 			}
 	    }
+	    
+		if (this.con != null) {
+			this.database.close(con);
+		}
 
 	    this.prefetchedRow = null;
 
@@ -128,18 +138,23 @@ public class QueryExecutionIterator implements ClosableIterator<ResultRow> {
 	    	return;
 	    }
     	this.queryExecuted = true;
-    	LogFactory.getLog(QueryExecutionIterator.class).debug(this.sql);
+    	logger.debug(this.sql);
     	BeanCounter.totalNumberOfExecutedSQLQueries++;
         try {
-			Connection con = this.database.connection();
+			con = this.database.connection();
 			this.statement = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			if (database.fetchSize() != Database.NO_FETCH_SIZE) {
 				try {
 					this.statement.setFetchSize(database.fetchSize());
 				}
-				catch (SQLException e) {} /* Some drivers don't support fetch sizes, e.g. JDBC-ODBC */
+				catch (SQLException e) {
+					logger.warn("could not set fetch size: " + e.getMessage());
+				} /* Some drivers don't support fetch sizes, e.g. JDBC-ODBC */
 			}
+			long start = System.nanoTime();
 			this.resultSet = this.statement.executeQuery(this.sql);
+			long stop = System.nanoTime();
+			logger.debug("SQL query took " + TimeUnit.NANOSECONDS.toMillis(stop - start) + " ms");
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {
         	throw new D2RQException(ex.getMessage() + ": " + this.sql);

@@ -35,11 +35,16 @@ public class MapFixture {
 	}
 	
 	public static Collection loadPropertyBridges(String mappingFileName) {
+		Mapping mapping = loadMapping(mappingFileName);
+		return mapping.compiledPropertyBridges();
+	}
+	
+	public static Mapping loadMapping(String mappingFileName) {
 		Model m = ModelFactory.createDefaultModel();
 		Resource dummyDB = m.getResource(Test.DummyDatabase.getURI());
 		dummyDB.addProperty(RDF.type, D2RQ.Database);
 		m.read(D2RQTestSuite.class.getResourceAsStream(mappingFileName), null, "TURTLE");
 		Mapping mapping = new MapParser(m, null).parse();
-		return mapping.compiledPropertyBridges();
+		return mapping;
 	}
 }

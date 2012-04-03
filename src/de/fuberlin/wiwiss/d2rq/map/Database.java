@@ -1,18 +1,22 @@
 package de.fuberlin.wiwiss.d2rq.map;
 
-import java.io.IOException;
-import java.net.URI;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.DataSourceConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.DriverConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQLDataType;
-import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 
@@ -26,10 +30,13 @@ public class Database extends MapObject {
 	public static final int NO_LIMIT = -1;
 	public static final int NO_FETCH_SIZE = -1;	
 	
+	public static final Property dataSourceName = ResourceFactory.createProperty("http://www.agfa.com/w3c/2009/d2rqx#dataSourceName");
+	
 	private String jdbcDSN;
 	private String jdbcDriver;
 	private String username;
 	private String password;
+	private String dataSource;
 	private final Map<String,SQLDataType> columnTypes = new HashMap<String,SQLDataType>();
     private int limit = NO_LIMIT;
     private int fetchSize = NO_FETCH_SIZE;
@@ -40,6 +47,13 @@ public class Database extends MapObject {
 	
 	public Database(Resource resource) {
 		super(resource);
+	}
+	
+	public void setDataSourceName(String dataSource) {
+		assertNotYetDefined(this.dataSource, dataSourceName, 
+				D2RQException.CLASSMAP_INVALID_DATABASE); // TODO
+		checkNotConnected();
+		this.dataSource = dataSource;
 	}
 
 	public void setJDBCDSN(String jdbcDSN) {
@@ -165,21 +179,22 @@ public class Database extends MapObject {
 	public ConnectedDB connectedDB() {
 		if (this.connection == null) {
 			if (jdbcDriver != null) {
-				ConnectedDB.registerJDBCDriver(jdbcDriver);
+				DriverConnectedDB.registerJDBCDriver(jdbcDriver);
 			}
-			connection = new ConnectedDB(jdbcDSN, username, password, allowDistinct,
-					columnTypes, limit, fetchSize, connectionProperties);
-			if (startupSQLScript != null) {
+			
+			if (dataSource != null) {
 				try {
-					URI url = URI.create(startupSQLScript);
-					SQLScriptLoader.loadURI(url, connection.connection());
-				} catch (IOException ex) {
-					connection.close();
-					throw new D2RQException(ex);
-				} catch (SQLException ex) {
-					connection.close();
-					throw new D2RQException(ex);
+					Context envContext  = (Context) new InitialContext().lookup("java:/comp/env");
+					DataSource dataSource = (DataSource) envContext.lookup(this.dataSource);
+					this.connection = new DataSourceConnectedDB(dataSource, allowDistinct,
+							columnTypes, limit, fetchSize);
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new D2RQException(e);
 				}
+			} else {
+				connection = new DriverConnectedDB(jdbcDSN, username, password, allowDistinct,
+						columnTypes, limit, fetchSize, connectionProperties, startupSQLScript);
 			}
 		}
 		return connection;
@@ -190,13 +205,17 @@ public class Database extends MapObject {
 	}
 
 	public void validate() throws D2RQException {
-		if (this.jdbcDSN == null) {
-			throw new D2RQException("d2rq:Database must have d2rq:jdbcDSN",
-					D2RQException.DATABASE_MISSING_DSN);
+		if (this.jdbcDSN == null && this.dataSource == null) {
+			throw new D2RQException("d2rq:Database must have d2rq:jdbcDSN or d2rqx:dataSourceName",
+					D2RQException.DATABASE_MISSING_DSN); //TODO ?
 		}
 		if (this.jdbcDSN != null && this.jdbcDriver == null) {
 			throw new D2RQException("Missing d2rq:jdbcDriver",
 					D2RQException.DATABASE_MISSING_JDBCDRIVER);
+		}
+		if (this.dataSource != null && this.jdbcDriver != null) {
+			throw new D2RQException("Can't use d2rq:jdbcDriver with d2rqx:dataSourceName",
+					D2RQException.DATABASE_DATASOURCE_WITH_JDBCDRIVER);
 		}
 		// TODO
 	}

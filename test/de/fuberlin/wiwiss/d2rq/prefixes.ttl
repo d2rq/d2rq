@@ -4,7 +4,9 @@
 
 :database a d2rq:Database;
     d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-    d2rq:jdbcDSN "jdbc:mysql:///db";
+    d2rq:jdbcDSN "jdbc:mysql://127.0.0.1/iswc";
+    d2rq:username "root";
+    d2rq:password "root";
     d2rq:numericColumn "People.ID";
     .
 :classmap a d2rq:ClassMap;

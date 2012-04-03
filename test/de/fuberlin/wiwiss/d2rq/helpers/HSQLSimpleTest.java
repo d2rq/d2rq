@@ -14,7 +14,7 @@ import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
-import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.DriverConnectedDB;
 
 /**
  * A set of simple tests that apply various parts of D2RQ to
@@ -27,7 +27,7 @@ public class HSQLSimpleTest extends TestCase {
 	private final static String EX = "http://example.org/";
 
 	{
-		ConnectedDB.registerJDBCDriver("org.hsqldb.jdbcDriver");
+		DriverConnectedDB.registerJDBCDriver("org.hsqldb.jdbcDriver");
 	}
 	
 	private HSQLDatabase db;
@@ -42,13 +42,13 @@ public class HSQLSimpleTest extends TestCase {
 	}
 	
 	public void testFindTableWithSchemaInspector() {
-		DatabaseSchemaInspector schema = 
-			new DatabaseSchemaInspector(
-					new ConnectedDB(
-							db.getJdbcURL(), db.getUser(), db.getPassword()));
+		DriverConnectedDB database = new DriverConnectedDB(db.getJdbcURL(), db.getUser(), db.getPassword());
+		database.init();
+		DatabaseSchemaInspector schema = new DatabaseSchemaInspector(database);
 		assertEquals(new ArrayList<RelationName>() {{ 
 					add(new RelationName(null, "TEST"));
 				}}, schema.listTableNames(null));
+		database.close();
 	}
 	
 	public void testGenerateDefaultMappingModel() {
@@ -64,28 +64,39 @@ public class HSQLSimpleTest extends TestCase {
 	public void testDefaultMappingWithHelloWorld() {
 		db.executeSQL("INSERT INTO TEST VALUES (1, 'Hello World!')");
 		GraphD2RQ g = generateDefaultGraphD2RQ();
+		g.connect();
 		assertTrue(g.contains(Node.ANY, Node.ANY, Node.createLiteral("Hello World!")));
+		g.close();
 	}
 	
 	public void testGenerateEmptyGraphFromSimpleD2RQMapping() {
 		GraphD2RQ g = new GraphD2RQ(MappingHelper.readFromTestFile("helpers/simple.ttl"));
+		g.connect();
 		g.getConfiguration().setServeVocabulary(false);
 		assertTrue(g.isEmpty());
+		g.close();
 	}
 	
 	public void testGenerateTripleFromSimpleD2RQMapping() {
 		db.executeSQL("INSERT INTO TEST VALUES (1, 'Hello World!')");
 		GraphD2RQ g = new GraphD2RQ(MappingHelper.readFromTestFile("helpers/simple.ttl"));
 		g.getConfiguration().setServeVocabulary(false);
+		g.connect();
 		assertTrue(g.contains(
 				Node.createURI(EX + "test/1"), RDF.Nodes.type, Node.createURI(EX + "Test")));
 		assertEquals(1, g.size());
+		g.close();
 	}
 	
 	private Model generateDefaultMappingModel() {
-		ConnectedDB cdb = new ConnectedDB(db.getJdbcURL(), db.getUser(), null);
-		MappingGenerator generator = new MappingGenerator(cdb);
-		return generator.mappingModel(EX, null);
+		DriverConnectedDB cdb = new DriverConnectedDB(db.getJdbcURL(), db.getUser(), null);
+		cdb.init();
+		try {
+			MappingGenerator generator = new MappingGenerator(cdb);
+			return generator.mappingModel(EX, null);
+		} finally {
+			cdb.close();
+		}
 	}
 	
 	private Mapping generateDefaultMapping() {

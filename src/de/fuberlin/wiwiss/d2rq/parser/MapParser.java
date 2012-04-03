@@ -214,6 +214,10 @@ public class MapParser {
 		while (stmts.hasNext()) {
 			database.setJDBCDSN(stmts.nextStatement().getString());
 		}
+		stmts = r.listProperties(Database.dataSourceName);
+		while (stmts.hasNext()) {
+			database.setDataSourceName(stmts.nextStatement().getString());
+		}
 		stmts = r.listProperties(D2RQ.jdbcDriver);
 		while (stmts.hasNext()) {
 			database.setJDBCDriver(stmts.nextStatement().getString());

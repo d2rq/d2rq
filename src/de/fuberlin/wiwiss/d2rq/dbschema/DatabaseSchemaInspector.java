@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.dbschema;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -131,7 +132,9 @@ public class DatabaseSchemaInspector {
 	}
 	
 	private ConnectedDB db;
-	private DatabaseMetaData schema;
+	// We can no longer cache the DatabaseMetaData object. If we use connection pooling, the
+	// underlying connection should be closed, so the DatabaseMetaData becomes unusable.
+	//private DatabaseMetaData schema;
 	private Map<Attribute,ColumnType> cachedColumnTypes = 
 			new HashMap<Attribute,ColumnType>();
 	private Map<Attribute,Boolean> cachedColumnNullability = 
@@ -141,21 +144,24 @@ public class DatabaseSchemaInspector {
 	public static final int KEYS_EXPORTED = 1;
 	
 	public DatabaseSchemaInspector(ConnectedDB db) {
-		try {
+//		try {
 			this.db = db;
-			this.schema = db.connection().getMetaData();
-		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
-		}
+//			this.schema = db.connection().getMetaData();
+//		} catch (SQLException ex) {
+//			throw new D2RQException("Database exception", ex);
+//		}
 	}
 	
 	public ColumnType columnType(Attribute column) {
 		if (this.cachedColumnTypes.containsKey(column)) {
 			return (ColumnType) this.cachedColumnTypes.get(column);
 		}
+		Connection connection = null;
+		ResultSet rs = null;
 		try {
-			ResultSet rs = this.schema.getColumns(null, column.schemaName(), 
-					column.tableName(), column.attributeName());
+			connection = db.connection();
+			DatabaseMetaData schema = connection.getMetaData();
+			rs = schema.getColumns(null, column.schemaName(), column.tableName(), column.attributeName());
 			if (!rs.next()) {
 				throw new D2RQException("Column " + column + " not found in database");
 			}
@@ -166,6 +172,11 @@ public class DatabaseSchemaInspector {
 			return type;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
+		} finally {
+			if (rs != null)
+				try { rs.close(); } catch (SQLException e) { /* ignore */ }
+			if (connection != null)
+				db.close(connection);
 		}
 	}
 	
@@ -173,9 +184,13 @@ public class DatabaseSchemaInspector {
 		if (this.cachedColumnNullability.containsKey(column)) {
 			return ((Boolean) this.cachedColumnNullability.get(column)).booleanValue();
 		}
+		
+		Connection connection = null;
+		ResultSet rs = null;
 		try {
-			ResultSet rs = this.schema.getColumns(null, column.schemaName(), 
-					column.tableName(), column.attributeName());
+			connection = db.connection();
+			DatabaseMetaData schema = connection.getMetaData();
+			rs = schema.getColumns(null, column.schemaName(), column.tableName(), column.attributeName());
 			if (!rs.next()) {
 				throw new D2RQException("Column " + column + " not found in database");
 			}
@@ -185,18 +200,30 @@ public class DatabaseSchemaInspector {
 			return nullable;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
+		} finally {
+			if (rs != null)
+				try { rs.close(); } catch (SQLException e) { /* ignore */ }
+			if (connection != null)
+				db.close(connection);
 		}
 	}
 	
 	public boolean isZerofillColumn(Attribute column) {
-		boolean isZerofill = false;
-		boolean foundColumn = false;
+		
+		if (!db.dbTypeIs(ConnectedDB.MySQL)) return false;
+		
+		Connection connection = null;
+		Statement stmt = null;
+		ResultSet rs = null;
 		
 		try {
-			if (!db.dbTypeIs(ConnectedDB.MySQL)) return false;
-			Statement stmt = db.connection().createStatement();
-			ResultSet rs = stmt.executeQuery("DESCRIBE " + db.getSyntax().quoteRelationName(column.relationName()));		
+			connection = db.connection();
+			stmt = connection.createStatement();
+			rs = stmt.executeQuery("DESCRIBE " + db.getSyntax().quoteRelationName(column.relationName()));	
 
+			boolean isZerofill = false;
+			boolean foundColumn = false;
+			
 			while (rs.next()) {
 				// MySQL names are case insensitive, so we normalize to lower case
 				if (column.attributeName().toLowerCase().equals(rs.getString("Field").toLowerCase())) {
@@ -213,6 +240,10 @@ public class DatabaseSchemaInspector {
 				return isZerofill;	
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
+		} finally {
+			try { if (rs != null) rs.close(); } catch (SQLException e) { /* ignore */ };
+			try { if (stmt != null) stmt.close(); } catch (SQLException e) { /* ignore */ };
+			db.close(connection);
 		}
 		throw new D2RQException("Column not found in DESCRIBE result: " + column);
 	}
@@ -224,50 +255,74 @@ public class DatabaseSchemaInspector {
 	 */
 	public List<RelationName> listTableNames(String searchInSchema) {
 		List<RelationName> result = new ArrayList<RelationName>();
+		
+		Connection connection = null;
+		ResultSet rs = null;
 		try {
-			ResultSet rs = this.schema.getTables(
-					null, searchInSchema, null, new String[] {"TABLE", "VIEW"});
+			connection = db.connection();
+			DatabaseMetaData schema = connection.getMetaData();
+			rs = schema.getTables(null, searchInSchema, null, new String[] {"TABLE", "VIEW"});
 			while (rs.next()) {
-				String schema = rs.getString("TABLE_SCHEM");
+				String s     = rs.getString("TABLE_SCHEM");
 				String table = rs.getString("TABLE_NAME");
-				if (!this.db.isIgnoredTable(schema, table)) {
-					result.add(toRelationName(schema, table));
+				if (!this.db.isIgnoredTable(s, table)) {
+					result.add(toRelationName(s, table));
 				}
 			}
-			rs.close();
 			return result;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
+		} finally {
+			if (rs != null)
+				try { rs.close(); } catch (SQLException e) { /* ignore */ }
+			if (connection != null)
+				db.close(connection);
 		}
 	}
 
 	public List<Attribute> listColumns(RelationName tableName) {
 		List<Attribute> result = new ArrayList<Attribute>();
+		
+		Connection connection = null;
+		ResultSet rs = null;
 		try {
-			ResultSet rs = this.schema.getColumns(
-					null, schemaName(tableName), tableName(tableName), null);
+			connection = db.connection();
+			DatabaseMetaData schema = connection.getMetaData();
+			rs = schema.getColumns(null, schemaName(tableName), tableName(tableName), null);
 			while (rs.next()) {
 				result.add(new Attribute(tableName, rs.getString("COLUMN_NAME")));
 			}
-			rs.close();
 			return result;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
+		} finally {
+			if (rs != null)
+				try { rs.close(); } catch (SQLException e) { /* ignore */ }
+			if (connection != null)
+				db.close(connection);
 		}
 	}
 	
 	public List<Attribute> primaryKeyColumns(RelationName tableName) {
 		List<Attribute> result = new ArrayList<Attribute>();
+		
+		Connection connection = null;
+		ResultSet rs = null;
 		try {
-			ResultSet rs = this.schema.getPrimaryKeys(
-					null, schemaName(tableName), tableName(tableName));
+			connection = db.connection();
+			DatabaseMetaData schema = connection.getMetaData();
+			rs = schema.getPrimaryKeys(null, schemaName(tableName), tableName(tableName));
 			while (rs.next()) {
 				result.add(new Attribute(tableName, rs.getString("COLUMN_NAME")));
 			}
-			rs.close();
 			return result;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
+		} finally {
+			if (rs != null)
+				try { rs.close(); } catch (SQLException e) { /* ignore */ }
+			if (connection != null)
+				db.close(connection);
 		}
 	}
 	
@@ -278,6 +333,9 @@ public class DatabaseSchemaInspector {
 	 */
 	public Map<String,List<String>> uniqueColumns(RelationName tableName) {
 		Map<String,List<String>> result = new HashMap<String,List<String>>();
+		
+		Connection connection = null;
+		ResultSet rs = null;
 		try {
 			/*
 			 * When requesting index info from an Oracle database, accept approximate
@@ -290,8 +348,9 @@ public class DatabaseSchemaInspector {
 			 * @see http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/htdocs/readme_jdbc_10204.html
 			 */
 			boolean approximate = this.db.dbTypeIs(ConnectedDB.Oracle);
-			ResultSet rs = this.schema.getIndexInfo(
-					null, schemaName(tableName), tableName(tableName), true, approximate);
+			connection = db.connection();
+			DatabaseMetaData schema = connection.getMetaData();
+			rs = schema.getIndexInfo(null, schemaName(tableName), tableName(tableName), true, approximate);
 			while (rs.next()) {
 				String indexKey = rs.getString("INDEX_NAME");
 				if (indexKey != null) { // is null when type = tableIndexStatistic, ignore
@@ -300,10 +359,14 @@ public class DatabaseSchemaInspector {
 					result.get(indexKey).add(rs.getString("COLUMN_NAME"));
 				}
 			}
-			rs.close();
 			return result;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception (unable to determine unique columns)", ex);
+		} finally {
+			if (rs != null)
+				try { rs.close(); } catch (SQLException e) { /* ignore */ }
+			if (connection != null)
+				db.close(connection);
 		}
 	}	
 	
@@ -315,10 +378,14 @@ public class DatabaseSchemaInspector {
 	 * @return A list of {@link Join}s; the local columns are in attributes1() 
 	 */
 	public List<Join> foreignKeys(RelationName tableName, int direction) {
+		Connection connection = null;
+		ResultSet rs = null;
 		try {
+			connection = db.connection();
+			DatabaseMetaData schema = connection.getMetaData();
 			Map<String,ForeignKey> fks = new HashMap<String,ForeignKey>();
-			ResultSet rs = (direction == KEYS_IMPORTED ? this.schema.getImportedKeys(null, schemaName(tableName), tableName(tableName))
-													   : this.schema.getExportedKeys(null, schemaName(tableName), tableName(tableName)));
+			rs = (direction == KEYS_IMPORTED ? schema.getImportedKeys(null, schemaName(tableName), tableName(tableName))
+			                                 : schema.getExportedKeys(null, schemaName(tableName), tableName(tableName)));
 			while (rs.next()) {
 				RelationName pkTable = toRelationName(
 						rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
@@ -334,6 +401,7 @@ public class DatabaseSchemaInspector {
 				fks.get(fkName).addColumns(keySeq, foreignColumn, primaryColumn);
 			}
 			rs.close();
+			rs = null;
 			List<Join> results = new ArrayList<Join>();
 			Iterator<ForeignKey> it = fks.values().iterator();
 			while (it.hasNext()) {
@@ -343,6 +411,11 @@ public class DatabaseSchemaInspector {
 			return results;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
+		} finally {
+			if (rs != null)
+				try { rs.close(); } catch (SQLException e) { /* ignore */ }
+			if (connection != null)
+				db.close(connection);
 		}
 	}	
 

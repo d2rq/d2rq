@@ -2,27 +2,19 @@ package de.fuberlin.wiwiss.d2rq.sql;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Pattern;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
-import de.fuberlin.wiwiss.d2rq.map.Database;
  
 /**
  * TODO Move all engine-specific code from ConnectedDB to this interface and its implementing classes
@@ -30,8 +22,7 @@ import de.fuberlin.wiwiss.d2rq.map.Database;
  * @author Richard Cyganiak (richard@cyganiak.de)
  * @author kurtjx (http://github.com/kurtjx)
  */
-public class ConnectedDB {
-	private static final Log log = LogFactory.getLog(ConnectedDB.class);
+public abstract class ConnectedDB {
 	
 	public static final String MySQL = "MySQL";
 	public static final String PostgreSQL = "PostgreSQL";
@@ -41,15 +32,7 @@ public class ConnectedDB {
 	public static final String HSQLDB = "HSQLDB";
 	public static final String InterbaseOrFirebird = "Interbase/Firebird";
 	public static final String Other = "Other";
-	
-	public static final String KEEP_ALIVE_PROPERTY = "keepAlive"; // interval property, value in seconds
-	public static final int DEFAULT_KEEP_ALIVE_INTERVAL = 60*60; // hourly
-	public static final String KEEP_ALIVE_QUERY_PROPERTY = "keepAliveQuery"; // override default keep alive query
-	public static final String DEFAULT_KEEP_ALIVE_QUERY = "SELECT 1"; // may not work for some DBMS
-	
-	private static final String ORACLE_SET_DATE_FORMAT = "ALTER SESSION SET NLS_DATE_FORMAT = 'SYYYY-MM-DD'";
-	private static final String ORACLE_SET_TIMESTAMP_FORMAT = "ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'SYYYY-MM-DD HH24:MI:SS'";
-	
+
 	/*
 	 * Definitions of ignored schemas
 	 */
@@ -57,129 +40,61 @@ public class ConnectedDB {
 	private static final String[] ORACLE_IGNORED_SCHEMAS = {"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", "SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
     private static final List<String> MSSQL_IGNORED_SCHEMAS = Arrays.asList(new String[]{"sys", "INFORMATION_SCHEMA"});
 	
-	private String jdbcURL;
-	private String username;
-	private String password;
+
 	private boolean allowDistinct;
 	private final Map<String,SQLDataType> columnTypes = new HashMap<String,SQLDataType>();
-	private Connection connection = null;
+
 	private DatabaseSchemaInspector schemaInspector = null;
 	
 	// Lazy initialization for these two -- use the getSyntax() and dbType() for access!
 	private String dbType = null;
 	private SQLSyntax syntax = null;
+	private int dbMajorVersion = -1;
+	private int dbMinorVersion = -1;
 	
 	private int limit;
 	private int fetchSize;
 	private Map<Attribute,Boolean> zerofillCache = new HashMap<Attribute,Boolean>();
 	private Map<RelationName,Map<String,List<String>>> uniqueIndexCache = 
 		new HashMap<RelationName,Map<String,List<String>>>();
-	private final Properties connectionProperties;
 
-	private class KeepAliveAgent extends Thread {
-		private final int interval;
-		private final String query;
-		volatile boolean shutdown = false;
-		
-		/**
-		 * @param interval in seconds
-		 * @param query the noop query to execute
-		 */
-		public KeepAliveAgent(int interval, String query) {
-			super("keepalive");
-			this.interval = interval;
-			this.query = query;
-		}
-		
-		public void run() {
-			Connection c;
-			Statement s = null;
-			while (!shutdown) {
-				try { Thread.sleep(interval*1000); }
-				catch (InterruptedException e) { if (shutdown) break; }
-				
-				try {
-					if (log.isDebugEnabled())
-						log.debug("Keep alive agent is executing noop query '" + query + "'...");
-					c = connection();
-					s = c.createStatement();
-					s.execute(query);
-					s.close();
-				} catch (Throwable e) { // may throw D2RQException at runtime
-					log.error("Keep alive connection test failed: " + e.getMessage());
-				} finally {
-					if (s != null) try { s.close(); } catch (Exception ignore) {}
-				}
-			}
-			
-			log.debug("Keep alive agent terminated.");
-		}
-		
-		public void shutdown() {
-			log.debug("shutting down");
-			shutdown = true;
-			this.interrupt();
-		}
-	};
-	
-	private final KeepAliveAgent keepAliveAgent;
-	
-	public ConnectedDB(String jdbcURL, String username, String password) {
-		this(jdbcURL, username, password, true,
-				Collections.<String,SQLDataType>emptyMap(),
-				Database.NO_LIMIT, Database.NO_FETCH_SIZE, null);
-	}
-	
-	public ConnectedDB(String jdbcURL, String username, 
-			String password, boolean allowDistinct, 
+
+	public ConnectedDB(boolean allowDistinct, 
 			Map<String,SQLDataType> columnTypes,
-			int limit, int fetchSize, Properties connectionProperties) {
+			int limit, int fetchSize) {
 		// TODO replace column type arguments with a single column => type map
-		this.jdbcURL = jdbcURL;
 		this.allowDistinct = allowDistinct;
-		this.username = username;
-		this.password = password;
 		this.columnTypes.putAll(columnTypes);
 		this.limit = limit;
 		this.fetchSize = fetchSize;
-		this.connectionProperties = connectionProperties;
-		
-		// create keep alive agent if enabled
-		if (connectionProperties != null && connectionProperties.containsKey(KEEP_ALIVE_PROPERTY)) {
-			int interval = DEFAULT_KEEP_ALIVE_INTERVAL;
-			String query = DEFAULT_KEEP_ALIVE_QUERY;
-			try {
-				interval = new Integer((String) connectionProperties.get(KEEP_ALIVE_PROPERTY)).intValue();
-				if (interval <= 0) interval = DEFAULT_KEEP_ALIVE_INTERVAL;
-			} catch (NumberFormatException ignore) {	} // use default
-			if (connectionProperties.containsKey(KEEP_ALIVE_QUERY_PROPERTY))
-				query = connectionProperties.getProperty(KEEP_ALIVE_QUERY_PROPERTY);
-			
-			this.keepAliveAgent = new KeepAliveAgent(interval, query);
-			this.keepAliveAgent.start();
-			log.debug("Keep alive agent is enabled (interval: " + interval + " seconds, noop query: '" + query + "').");
-		} else
-			this.keepAliveAgent = null;
 	}
 	
-	public String getJdbcURL() {
-		return jdbcURL;
-	}
 	
-	public String getUsername() {
-		return username;
-	}
+	/**
+	 * Call during initialization to establish the database connection(s).
+	 */
+	public abstract void init();
 	
-	public String getPassword() {
-		return password;
-	}
+	/**
+	 * Returns a connection to the database.
+	 * 
+	 * @return a connection to the database.
+	 */
+	public abstract Connection connection();
 	
-	public Connection connection() {
-		if (this.connection == null) {
-			connect();
-		}
-		return this.connection;
-	}
+	/**
+	 * When no longer needed, a connection obtained by {@link #connection()} should be closed by calling this function.
+	 * 
+	 * @param c The connection that needs to be closed
+	 */
+	public abstract void close(Connection c);
+	
+	/**
+	 * Call during shutdown, to close all connections to the database.
+	 */
+	public abstract void close();
+
+
 	
 	public int limit() {
 		return this.limit;
@@ -188,89 +103,9 @@ public class ConnectedDB {
 	public int fetchSize() {
 		return this.fetchSize;
 	}
-
-	private void connect() {
-		try {
-			this.connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
-		} catch (SQLException ex) {
-			throw new D2RQException(
-					"Database connection to " + jdbcURL + " failed " +
-					"(user: " + username + "): " + ex.getMessage(), 
-					D2RQException.D2RQ_DB_CONNECTION_FAILED);
-		}
-		
-		/* Database-dependent initialization */
-		try {
-			/* 
-			 * Disable auto-commit in PostgreSQL to support cursors
-			 * @see http://jdbc.postgresql.org/documentation/83/query.html
-			 */
-			if (dbTypeIs(PostgreSQL))
-				this.connection.setAutoCommit(false);
-						
-			/*
-			 * Set Oracle date formats 
-			 */
-			if (dbTypeIs(Oracle)) {
-				Statement stmt = this.connection.createStatement();
-				try
-				{
-					stmt.execute(ORACLE_SET_DATE_FORMAT);
-					stmt.execute(ORACLE_SET_TIMESTAMP_FORMAT);
-				}
-				catch (SQLException ex) {
-					throw new D2RQException("Unable to set date format: " + ex.getMessage(), D2RQException.D2RQ_SQLEXCEPTION);					
-				}
-				finally {
-					stmt.close();
-				}
-			}
-			
-			if (dbTypeIs(HSQLDB)) {
-				// Enable storage of special Double values: NaN, INF, -INF
-				Statement stmt = this.connection.createStatement();
-				try {
-					stmt.execute("SET DATABASE SQL DOUBLE NAN FALSE");
-				} catch (SQLException ex) {
-					throw new D2RQException("Unable to SET DATABASE SQL DOUBLE NAN FALSE: " + ex.getMessage(), D2RQException.D2RQ_SQLEXCEPTION);
-				} finally {
-					stmt.close();
-				}
-			}
-		} catch (SQLException ex) {
-			throw new D2RQException(
-					"Database initialization failed: " + ex.getMessage(), 
-					D2RQException.D2RQ_DB_CONNECTION_FAILED);
-		}
-	}
-	
-	private Properties getConnectionProperties() {
-		Properties result = (connectionProperties == null)
-				? new Properties()
-				: (Properties) connectionProperties.clone();
-		if (username != null) {
-			result.setProperty("user", username);
-		}
-		if (password != null) {
-			result.setProperty("password", password);
-		}
-		
-		/* 
-		 * Enable cursor support in MySQL
-		 * Note that the implementation is buggy in early MySQL 5.0 releases such
-		 * as 5.0.27, which may lead to incorrect results.
-		 * This is placed here as a later change requires a call to setClientInfo, which is only available from Java 6 on
-		 */
-		if (this.jdbcURL.contains(":mysql:")) {
-			result.setProperty("useCursorFetch", "true");
-			result.setProperty("useServerPrepStmts", "true"); /* prerequisite */
-		}
-		
-		return result;
-	}
 	
 	public DatabaseSchemaInspector schemaInspector() {
-		if (this.schemaInspector == null && this.jdbcURL != null) {
+		if (this.schemaInspector == null /*&& this.jdbcURL != null */ ) {
 			this.schemaInspector = new DatabaseSchemaInspector(this);
 		}
 		return this.schemaInspector;
@@ -305,6 +140,35 @@ public class ConnectedDB {
 		return candidateType.equals(dbType());
 	}
 	
+	public int dbMajorVersion()
+	{
+		if (this.dbMajorVersion == -1) {
+			try {
+				Connection connection = connection();
+				this.dbMajorVersion = connection.getMetaData().getDatabaseMajorVersion();
+				close(connection);
+			} catch (SQLException ex) {
+				throw new D2RQException("Database exception", ex);
+			}
+		}
+		return this.dbMajorVersion;
+	}
+	
+	public int dbMinorVersion()
+	{
+		if (this.dbMinorVersion == -1) {
+			try {
+				Connection connection = connection();
+				this.dbMinorVersion = connection.getMetaData().getDatabaseMinorVersion();
+				close(connection);
+			} catch (SQLException ex) {
+				throw new D2RQException("Database exception", ex);
+			}
+		}
+		return this.dbMinorVersion;
+	}
+	
+	
 	/**
 	 * @return A helper for generating SQL statements conforming to the syntax
 	 * of the database engine used in this connection
@@ -315,7 +179,14 @@ public class ConnectedDB {
 	}
 
 	protected String getDatabaseProductType() throws SQLException {
-		return connection().getMetaData().getDatabaseProductName();
+		Connection connection = null;
+		try {
+			connection = connection();
+			String type = connection.getMetaData().getDatabaseProductName();
+			return type;
+		} finally {
+			close(connection);
+		}
 	}
 	
 	private void ensureDatabaseTypeInitialized() {
@@ -512,7 +383,7 @@ public class ConnectedDB {
 			uniqueIndexCache.put(tableName, schemaInspector().uniqueColumns(tableName));
 		return uniqueIndexCache.get(tableName);
 	}
-    
+	
 	private final static Pattern singleQuoteEscapePattern = Pattern.compile("([\\\\'])");
 	private final static Pattern singleQuoteEscapePatternOracle = Pattern.compile("(')");
 	
@@ -706,73 +577,5 @@ public class ConnectedDB {
 		return false;
 	}
 
-	/**
-	 * Closes the database connection and shuts down the keep alive agent.
-	 */
-	public void close() {
-		if (keepAliveAgent != null)
-			keepAliveAgent.shutdown();
-		
-		if (connection != null) try {
-			this.connection.close();
-		} catch (SQLException ex) {
-			throw new D2RQException(ex);
-		}
-	}
-	
-    public boolean equals(Object otherObject) {
-    	if (!(otherObject instanceof ConnectedDB)) {
-    		return false;
-    	}
-    	ConnectedDB other = (ConnectedDB) otherObject;
-    	return this.jdbcURL.equals(other.jdbcURL);
-    }
-    
-    public int hashCode() {
-    	return this.jdbcURL.hashCode();
-    }
 
-	/**
-	 * Pre-registers a JDBC driver if its class can be found on the
-	 * classpath. If the class is not found, nothing will happen.
-	 * @param driverClassName Fully qualified class name of a JDBC driver
-	 */
-	public static void registerJDBCDriverIfPresent(String driverClassName) {
-		if (driverClassName == null) return;
-		try {
-			Class.forName(driverClassName);
-		} catch (ClassNotFoundException ex) {
-			// not present, just ignore this driver
-		}
-	}
-
-	/**
-	 * Tries to guess the class name of a suitable JDBC driver from a JDBC URL.
-	 * This only works in the unlikely case that the driver has been registered
-	 * earlier using Class.forName(classname).
-	 * @param jdbcURL A JDBC URL
-	 * @return The corresponding JDBC driver class name, or <tt>null</tt> if not known
-	 */
-	public static String guessJDBCDriverClass(String jdbcURL) {
-		try {
-			return DriverManager.getDriver(jdbcURL).getClass().getName();
-		} catch (SQLException ex) {
-			return null;
-		}
-	}
-
-	/**
-	 * Registers a JDBC driver class.
-	 * @param driverClassName Fully qualified class name of a JDBC driver
-	 * @throws D2RQException If the class could not be found
-	 */
-	public static void registerJDBCDriver(String driverClassName) {
-		if (driverClassName == null) return;
-		try {
-			Class.forName(driverClassName);
-		} catch (ClassNotFoundException ex) {
-			throw new D2RQException("Database driver class not found: " + driverClassName,
-					D2RQException.DATABASE_JDBCDRIVER_CLASS_NOT_FOUND);
-		}
-	}
 }
