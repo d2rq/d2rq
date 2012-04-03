@@ -17,7 +17,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
  * regardless of the underlying relation.
  * 
  * Note that {@link FixedNodeMaker} doesn't use an instance
- * of this class, but handles the “constantness” of its
+ * of this class, but handles the constantness of its
  * underlying values directly.
  * 
  * This class is only used where we need to produce constant
