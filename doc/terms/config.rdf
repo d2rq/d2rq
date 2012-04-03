@@ -48,8 +48,9 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#limitPerPropertyBridge">
     <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
     <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
-    <rdfs:comment xml:lang="en">Maximum number of values for each property bridge that will be displayed in the web interface when browsing resources.</rdfs:comment>
+    <rdfs:comment xml:lang="en">Maximum number of values for each property bridge that will be displayed in the web interface when browsing resources. A value of false means no limit.</rdfs:comment>
     <rdfs:label xml:lang="en">Limit per property bridge</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#autoReloadMapping">
@@ -69,5 +70,12 @@
     <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
     <rdfs:comment xml:lang="en">A template resource whose properties will be attached as metadata to all RDF documents published by a D2R Server installation.</rdfs:comment>
     <rdfs:label xml:lang="en">document metadata</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#limitPerClassMap">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">Maximum number of values for each class map that will be displayed in the web interface when browsing resources. A value of false means no limit.</rdfs:comment>
+    <rdfs:label xml:lang="en">Limit per class map</rdfs:label>
   </rdf:Property>
 </rdf:RDF>

@@ -1,15 +1,52 @@
 # D2RQ Release Notes
 
-## D2RQ v0.8.1-dev
+## D2RQ v0.8.1 - 2012-04-03
+
+This release adds preliminary support for W3C's [Direct Mapping of Relational Data to RDF](http://www.w3.org/TR/rdb-direct-mapping/). The new d2r-query script allows SPARQL queries against D2RQ-mapped databases from the command line. There is a comprehensive set of options for including or excluding specific schemas, tables, and columns. The default settings of D2R Server's web interface work better for large databases. And, as usual, many bugfixes and smaller enhancements.
 
 ### Features
+- preliminary support for W3C Direct Mapping (generate-mapping --w3c) (Luis Eufrasio)
+- add command line options to include or exclude specific schemas, tables or columns (Jacobus Geluk)
+- added d2r-query script to run SPARQL queries against DB from the command line
+
 ### Enhancements
+- D2R Server web interface no longer blows up by default because of pages with too much data (#88)
+- configurable d2r:limitPerClassMap and d2r:limitPerPropertyBridge to control size of pages in D2R Server web interface (#88)
+- made command line tools more consistent (shared parameter lists, error reporting)
+- allow running of D2R Server just with just a JDBC connection instead of a mapping file
+- allow running of all tools just with -l dump.sql
+- dropped -m/-j switches on dump_rdf, just provide naked file/URL
+- add --verbose and --debug switches to all command line tools
+- use dc:title, dct:title, skos:prefLabel, foaf:name as resource labels if present
+- display foaf:img and foaf:depiction as image in resource pages
+- allow reading of media type for d2rq:DownloadMap from DB column
+- allow class maps without any property bridges nor d2rq:class if they appear in some property bridge's d2rq:refersToClassMap
+- use local versions of jQuery and Prototype so that Snorql still works without internet connection
+- output warnings when SPARQL joins over different d2rq:translateWith or over d2rq:[uri]Pattern with different column encodings (#22)
+- refactoring: made all use of containers type-safe
+- refactoring: command line tools, datatype handling, ARQ op-tree rewriting, Jena integration
+
 ### Bugfixes
+- fix bug where any command line arguments after the 10th are ignored on Windows
+- fix bug in SQLScriptLoader where last statement would be ignored if not semicolon-terminated
+- bugfix: mapping file cannot be parsed if file extension other than .n3 and .ttl
+- fix MySQL bug where column names were treated in a case sensitive way in rare cases
+- avoid problem where the d2rq:startupSQLScript is executed twice
+- fixed issue #4: DISTINCT with CLOB and BLOB doesn't work on some DBs
+- fixed logic bug in isIRI() (Giovanni Mels)
+- update links to old web page in D2R Server web interface
+
 ### Performance
+- combine SELECT queries that just differ in their WHERE clauses into a single query
+- generate IS NOT NULL constraints in SQL queries (#128)
+
 ### Other
+- remove Windows service installer; preferred way to run as a service under Windows is to install into Tomcat or Jetty
+- deprecated d2rq:allowDistinct as it's no longer needed
+- RDF representations of resource descriptions no longer include rdfs:seeAlso links to SPARQL DESCRIBE results for neighbouring resources; it's doubtful whether this ever was useful to anyone
 
 
-## D2RQ v0.8 – 2012-03-12
+## D2RQ v0.8 - 2012-03-12
 
 New features include preliminary SPARQL 1.1 support, Firebird support, generation of RDFS/OWL schemas for databases, and download maps for making the content of CLOB/BLOB columns accessible via HTTP. Datatype compatibility with Oracle, MySQL, SQL Server and HSQLDB has been greatly improved, and a truckload of bugs has been fixed.
 
@@ -80,7 +117,7 @@ New features include preliminary SPARQL 1.1 support, Firebird support, generatio
 - removed dedicated ODBC-JDBC support (still available via 3rd-party ODBC-JDBC bridges)
 
 
-## D2RQ v0.7 – 2009-08-12
+## D2RQ v0.7 - 2009-08-12
 
 Version 0.7 provides several bugfixes, better dump performance, several new features as well as new optimizations that must be enabled using d2rq:useAllOptimizations, or via D2R Server's --fast switch.
 
@@ -126,7 +163,7 @@ Version 0.7 provides several bugfixes, better dump performance, several new feat
 - Translate filter expressions involving constant nodes to SQL
 
 
-## D2RQ v0.6 – 2009-02-19
+## D2RQ v0.6 - 2009-02-19
 
 ### Features
 - d2rq:sqlExpression
@@ -157,7 +194,7 @@ Version 0.7 provides several bugfixes, better dump performance, several new feat
 - Replaced custom Logger with Log4j one
 - Give more memory to VM in dump-rdf and generate-mapping scripts
 
-## D2RQ v0.5.1 – 2007-10-24
+## D2RQ v0.5.1 - 2007-10-24
 
 ### Enhancements
 - added d2rq:resultSizeLimit option
@@ -168,7 +205,7 @@ Version 0.7 provides several bugfixes, better dump performance, several new feat
 - many bugfixes
 
 
-## D2RQ v0.5 – 2006-10-26
+## D2RQ v0.5 - 2006-10-26
 
 ### Features
 - supports the SPARQL query language.
@@ -185,13 +222,13 @@ Version 0.7 provides several bugfixes, better dump performance, several new feat
 - many bugfixes.
 
 
-## D2RQ v0.4 – 2005-10-25
+## D2RQ v0.4 - 2005-10-25
 
 ### Features
 - Wrapper for Sesame added.
 
 
-## D2RQ v0.3 – 2005-04-29
+## D2RQ v0.3 - 2005-04-29
 
 ### Features
 - d2rq:queryHandler added.
@@ -202,7 +239,7 @@ Version 0.7 provides several bugfixes, better dump performance, several new feat
 - New experimental D2RQQueryHandler for speeding up complex RDQL queries.
 
 
-## D2RQ v0.2 – 2004-08-12
+## D2RQ v0.2 - 2004-08-12
 
 ### Features
 - d2rq:TranslationTable between DB and RDF values added.
@@ -231,6 +268,6 @@ Version 0.7 provides several bugfixes, better dump performance, several new feat
 - many small fixes, improvements, speedups and refactorings.
 
 
-## D2RQ v0.1 – 2004-06-22
+## D2RQ v0.1 - 2004-06-22
 
 - Initial D2RQ Release.
