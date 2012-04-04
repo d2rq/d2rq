@@ -20,6 +20,7 @@ import de.fuberlin.wiwiss.d2rq.mapgen.Filter;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 import de.fuberlin.wiwiss.d2rq.mapgen.W3CMappingGenerator;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
+import de.fuberlin.wiwiss.d2rq.parser.R2RMLMapParser;
 import de.fuberlin.wiwiss.d2rq.server.ConfigLoader;
 import de.fuberlin.wiwiss.d2rq.server.D2RServer;
 import de.fuberlin.wiwiss.d2rq.server.JettyLauncher;
@@ -73,6 +74,8 @@ public class SystemLoader {
 	private ConfigLoader serverConfig = null;
 	private D2RServer d2rServer = null;
 	private ClassMapLister classMapLister = null;
+
+	private boolean r2rmlMapping;
 	
 	public void setUsername(String username) {
 		this.username = username;
@@ -233,13 +236,13 @@ public class SystemLoader {
 
 	public Model getMappingModel() {
 		if (mapModel == null) {
-			if (jdbcURL != null && mappingFile != null) {
+			if (jdbcURL != null && mappingFile != null && !isR2rmlMapping()) {
 				throw new D2RQException("conflicting mapping locations " + mappingFile + " and " + jdbcURL + "; specify at most one");
 			}
 			if (jdbcURL == null && mappingFile == null) {
 				throw new D2RQException("no mapping file or JDBC URL specified");
 			}
-			if (jdbcURL != null) {
+			if (jdbcURL != null && !isR2rmlMapping()) {
 				mapModel = openMappingGenerator().mappingModel(getResourceBaseURI());
 			} else {
 				try {
@@ -262,7 +265,11 @@ public class SystemLoader {
 
 	public Mapping getMapping() {
 		if (mapping == null) {
-			mapping = new MapParser(getMappingModel(), getResourceBaseURI()).parse();
+			if (isR2rmlMapping()) {
+				mapping = new R2RMLMapParser(getMappingModel(), getResourceBaseURI()).parse();
+			} else {
+				mapping = new MapParser(getMappingModel(), getResourceBaseURI()).parse();
+			}
 			mapping.configuration().setUseAllOptimizations(fastMode);
 			if (connectedDB != null) {
 				// Hack! We don't want the Database to open another ConnectedDB,
@@ -339,5 +346,13 @@ public class SystemLoader {
 		if (dataGraph != null) dataGraph.close();
 		dataGraph = null;
 		classMapLister = null;
+	}
+
+	public void setR2rmlMapping(boolean flag) {
+		r2rmlMapping = flag;
+	}
+
+	public boolean isR2rmlMapping() {
+		return r2rmlMapping;
 	}
 }
