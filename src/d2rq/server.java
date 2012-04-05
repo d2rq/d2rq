@@ -20,6 +20,7 @@ public class server extends CommandLineTool {
 	public void usage() {
 		System.err.println("usage:");
 		System.err.println("  d2r-server [server-options] mappingFile");
+		System.err.println("  d2r-server [server-options] [database-options] r2rmlMappingFile");
 		System.err.println("  d2r-server [server-options] [connection-options] jdbcURL");
 		System.err.println("  d2r-server [server-options] [connection-options] -l script.sql");
 		System.err.println();
@@ -30,6 +31,9 @@ public class server extends CommandLineTool {
 		System.err.println("    -b baseURI      Server's base URI (default: " + SystemLoader.DEFAULT_BASE_URI + ")");
 		System.err.println("    --fast          Use all engine optimizations (recommended)");
 		System.err.println("    --verbose       Print debug information");
+		System.err.println();
+		System.err.println("  Database connection options (only with r2rml mappingFile):");
+		printDatabaseOptions();
 		System.err.println();
 		System.err.println("  Database connection options (only with jdbcURL):");
 		printConnectionOptions();

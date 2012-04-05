@@ -45,6 +45,7 @@ public abstract class CommandLineTool {
 	private final ArgDecl skipSchemasArg = new ArgDecl(true, "skip-schema", "skip-schemas");
 	private final ArgDecl skipTablesArg = new ArgDecl(true, "skip-table", "skip-tables");
 	private final ArgDecl skipColumnsArg = new ArgDecl(true, "skip-column", "skip-columns");
+	private final ArgDecl jdbcURLArg = new ArgDecl(true, "j", "jdbcURL");
 	private final SystemLoader loader = new SystemLoader();
 	private boolean supportImplicitJdbcURL = true;
 	private int minArguments = 0;
@@ -80,6 +81,7 @@ public abstract class CommandLineTool {
 		cmd.add(skipSchemasArg);
 		cmd.add(skipTablesArg);
 		cmd.add(skipColumnsArg);
+		cmd.add(jdbcURLArg);
 		
 		initArgs(cmd);
 		
@@ -122,6 +124,10 @@ public abstract class CommandLineTool {
 		}
 		if (cmd.contains(w3cArg)) {
 			loader.setGenerateW3CDirectMapping(true);
+		}
+		if (cmd.contains(jdbcURLArg)) {
+			loader.setR2rmlMapping(true);
+			loader.setJdbcURL(cmd.getArg(jdbcURLArg).getValue());
 		}
 		try {
 			Collection<Filter> includes = new ArrayList<Filter>();
@@ -208,6 +214,13 @@ public abstract class CommandLineTool {
 		System.err.println("    --w3c           Produce W3C Direct Mapping compatible mapping file");
 		System.err.println("    --[skip-](schemas|tables|columns) [schema.]table[.column]");
 		System.err.println("                    Include or exclude specific database objects");
+	}
+	
+	public void printDatabaseOptions() {
+		System.err.println("    -u username     Database user for connecting to the DB");
+		System.err.println("    -p password     Database password for connecting to the DB");
+		System.err.println("    -d driverclass  Java class name of the JDBC driver for the DB");
+		System.err.println("    -j jdbcURL		JDBC URL for the DB");
 	}
 	
 	private static String withIndirection(String value) {
