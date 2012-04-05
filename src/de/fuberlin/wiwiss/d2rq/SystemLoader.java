@@ -266,7 +266,13 @@ public class SystemLoader {
 	public Mapping getMapping() {
 		if (mapping == null) {
 			if (isR2rmlMapping()) {
-				mapping = new R2RMLMapParser(getMappingModel(), getResourceBaseURI()).parse();
+				Database database = new Database(null);
+				database.setUsername(username);
+				database.setPassword(password);
+				database.setJDBCDriver(jdbcDriverClass);
+				database.setJDBCDSN(jdbcURL);
+				
+				mapping = new R2RMLMapParser(getMappingModel(), getResourceBaseURI(), database).parse();
 			} else {
 				mapping = new MapParser(getMappingModel(), getResourceBaseURI()).parse();
 			}
