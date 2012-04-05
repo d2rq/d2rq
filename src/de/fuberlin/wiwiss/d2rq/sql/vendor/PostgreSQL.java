@@ -2,6 +2,7 @@ package de.fuberlin.wiwiss.d2rq.sql.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
@@ -27,6 +28,14 @@ public class PostgreSQL extends SQL92 {
 		if (standard != null) return standard;
 
 		if ("uuid".equals(name)) {
+			return new SQLCharacterString(this, true);
+		}
+		
+		// As postGis jdbc is only a wrapper of the org.postgresql.Driver,
+		// the JDBC database product type is the one of Postgresql : PostgreSQL
+		// Thus Postgis field as geometry are handled here
+		if ((jdbcType == Types.OTHER) && ("geometry".equals(name))) {
+			// let try the simpliest version
 			return new SQLCharacterString(this, true);
 		}
 
