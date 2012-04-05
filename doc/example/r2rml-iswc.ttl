@@ -1,0 +1,40 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix map: <file:/Users/richard/D2RQ/workspace/D2RQ/doc/example/mapping-iswc.ttl#> .
+@prefix vocab: <vocab/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix iswc: <http://annotation.semanticweb.org/iswc/iswc.daml#> .
+@prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+@prefix jdbc: <http://d2rq.org/terms/jdbc/> .
+
+# Table conferences
+map:Subjects_conferences a rr:SubjectMap;
+    rr:class iswc:Conference;
+    rr:template "conferences/@@conferences.ConfID@@".
+#    rr:template "conferences/{ConfID}".
+
+map:Triples_conferences a rr:TriplesMap;
+    rr:logicalTable [rr:tableName "conferences"];
+    rr:subjectMap map:Subjects_conferences;
+    rr:predicateObjectMap [
+        rr:predicate rdfs:label;
+        rr:objectMap [rr:column "Name"];
+    ];
+    rr:predicateObjectMap [
+        rr:predicate dc:date;
+        rr:objectMap [rr:column "Date"];
+    ];
+    rr:predicateObjectMap [
+        rr:predicate iswc:location;
+        rr:objectMap [rr:column "Location"];
+    ];
+    rr:predicateObjectMap [
+        rr:predicate vocab:startDate;
+        rr:objectMap [rr:column "Datum"];
+    ].
