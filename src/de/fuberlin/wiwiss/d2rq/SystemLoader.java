@@ -270,7 +270,7 @@ public class SystemLoader {
 				database.setUsername(username);
 				database.setPassword(password);
 				database.setJDBCDriver(jdbcDriverClass);
-				database.setJDBCDSN(jdbcURL);
+				database.setJdbcURL(jdbcURL);
 				
 				mapping = new R2RMLMapParser(getMappingModel(), getResourceBaseURI(), database).parse();
 			} else {
@@ -284,7 +284,7 @@ public class SystemLoader {
 				// Otherwise we get problems where D2RQ is trying to import a SQL
 				// script twice on startup.
 				for (Database db: mapping.databases()) {
-					if (db.getJDBCDSN().equals(connectedDB.getJdbcURL())) {
+					if (db.getJdbcURL().equals(connectedDB.getJdbcURL())) {
 						if (resultSizeLimit != Database.NO_LIMIT) {
 							db.setResultSizeLimit(resultSizeLimit);
 						}

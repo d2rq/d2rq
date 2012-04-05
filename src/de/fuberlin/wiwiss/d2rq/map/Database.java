@@ -48,7 +48,7 @@ public class Database extends MapObject {
 		this.jdbcURL = jdbcURL;
 	}
 	
-	public String getJDBCDSN() {
+	public String getJdbcURL() {
 		return this.jdbcURL;
 	}
 
