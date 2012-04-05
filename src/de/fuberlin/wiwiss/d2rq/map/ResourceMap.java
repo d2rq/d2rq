@@ -49,6 +49,7 @@ public abstract class ResourceMap extends MapObject {
 	protected String bNodeIdColumns = null;	// comma-separated list
 	protected String uriColumn = null;
 	protected String uriPattern = null;
+	protected String logicalTable = null;
 	protected RDFNode constantValue = null;
 	protected Collection<String> valueRegexes = new ArrayList<String>();
 	protected Collection<String> valueContainses = new ArrayList<String>();
@@ -103,6 +104,14 @@ public abstract class ResourceMap extends MapObject {
 		this.uriPattern = pattern;
 	}
 	
+	public String getLogicalTable() {
+		return logicalTable;
+	}
+
+	public void setLogicalTable(String logicalTable) {
+		this.logicalTable = logicalTable;
+	}
+
 	public void setConstantValue(RDFNode constantValue) {
 		assertNotYetDefined(this.constantValue, D2RQ.constantValue, D2RQException.RESOURCEMAP_DUPLICATE_CONSTANTVALUE);
 		this.constantValue = constantValue;
