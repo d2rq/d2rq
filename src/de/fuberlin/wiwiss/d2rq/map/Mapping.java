@@ -199,6 +199,7 @@ public class Mapping {
 	}
 
 	private void compilePropertyBridges() {
+		validate();
 		compiledPropertyBridges = new ArrayList<TripleRelation>();
 		for (ClassMap classMap: classMaps.values()) {
 			this.compiledPropertyBridges.addAll(classMap.compiledPropertyBridges());
