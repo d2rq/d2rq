@@ -214,7 +214,7 @@ public class MapParser {
 		while (stmts.hasNext()) {
 			database.setJDBCDSN(stmts.nextStatement().getString());
 		}
-		stmts = r.listProperties(Database.dataSourceName);
+		stmts = r.listProperties(D2RQ.jndiDataSource);
 		while (stmts.hasNext()) {
 			database.setDataSourceName(stmts.nextStatement().getString());
 		}

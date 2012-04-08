@@ -23,7 +23,7 @@
 	.
 
 map:database a d2rq:Database;
-	<http://www.agfa.com/w3c/2009/d2rqx#dataSourceName> "jdbc/iswc"
+	d2rq:jndiDataSource "jdbc/iswc"
 	.
 
 # Table conferences

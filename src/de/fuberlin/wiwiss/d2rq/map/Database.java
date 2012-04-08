@@ -8,9 +8,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
@@ -30,7 +28,6 @@ public class Database extends MapObject {
 	public static final int NO_LIMIT = -1;
 	public static final int NO_FETCH_SIZE = -1;	
 	
-	public static final Property dataSourceName = ResourceFactory.createProperty("http://www.agfa.com/w3c/2009/d2rqx#dataSourceName");
 	
 	private String jdbcDSN;
 	private String jdbcDriver;
@@ -50,7 +47,7 @@ public class Database extends MapObject {
 	}
 	
 	public void setDataSourceName(String dataSource) {
-		assertNotYetDefined(this.dataSource, dataSourceName, 
+		assertNotYetDefined(this.dataSource, D2RQ.jndiDataSource, 
 				D2RQException.CLASSMAP_INVALID_DATABASE); // TODO
 		checkNotConnected();
 		this.dataSource = dataSource;
@@ -206,7 +203,7 @@ public class Database extends MapObject {
 
 	public void validate() throws D2RQException {
 		if (this.jdbcDSN == null && this.dataSource == null) {
-			throw new D2RQException("d2rq:Database must have d2rq:jdbcDSN or d2rqx:dataSourceName",
+			throw new D2RQException("d2rq:Database must have d2rq:jdbcDSN or d2rq:jndiDataSource ",
 					D2RQException.DATABASE_MISSING_DSN); //TODO ?
 		}
 		if (this.jdbcDSN != null && this.jdbcDriver == null) {
@@ -214,7 +211,7 @@ public class Database extends MapObject {
 					D2RQException.DATABASE_MISSING_JDBCDRIVER);
 		}
 		if (this.dataSource != null && this.jdbcDriver != null) {
-			throw new D2RQException("Can't use d2rq:jdbcDriver with d2rqx:dataSourceName",
+			throw new D2RQException("Can't use d2rq:jdbcDriver with d2rq:jndiDataSource ",
 					D2RQException.DATABASE_DATASOURCE_WITH_JDBCDRIVER);
 		}
 		// TODO
