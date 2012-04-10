@@ -272,7 +272,7 @@ public class SystemLoader {
 				database.setJDBCDriver(jdbcDriverClass);
 				database.setJdbcURL(jdbcURL);
 				
-				mapping = new R2RMLMapParser(getMappingModel(), getResourceBaseURI(), database).parse();
+				mapping = new R2RMLMapParser(getMappingModel(), getResourceBaseURI(), database, filter).parse();
 			} else {
 				mapping = new MapParser(getMappingModel(), getResourceBaseURI()).parse();
 			}

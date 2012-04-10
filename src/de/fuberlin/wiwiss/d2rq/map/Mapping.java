@@ -37,9 +37,9 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  */
 public class Mapping {
 	private static final Log log = LogFactory.getLog(Mapping.class);
-	
+
 	private final Model model = ModelFactory.createDefaultModel();
-	
+
 	/**
 	 * Holds descriptions of the used classes and properties
 	 */
@@ -54,11 +54,11 @@ public class Mapping {
 	private final Map<Resource,DownloadMap> downloadMaps = new HashMap<Resource,DownloadMap>();
 	private final PrefixMapping prefixes = new PrefixMappingImpl();
 	private Collection<TripleRelation> compiledPropertyBridges;
-	
+
 	public Mapping() {
 		this(null);
 	}
-	
+
 	public Mapping(String mappingURI) {
 		if (mappingURI == null) {
 			this.mappingResource = this.model.createResource();
@@ -66,7 +66,7 @@ public class Mapping {
 			this.mappingResource = this.model.createResource(mappingURI);
 		}
 	}
-	
+
 	public Resource resource() {
 		return this.mappingResource;
 	}
@@ -74,7 +74,7 @@ public class Mapping {
 	public Model getVocabularyModel() {
 		return vocabularyModel;
 	}
-	
+
 	public void validate() throws D2RQException {
 		if (this.databases.isEmpty()) {
 			throw new D2RQException("No d2rq:Database defined in the mapping", 
@@ -133,19 +133,19 @@ public class Mapping {
 			db.connectedDB().close();
 		}
 	}
-	
+
 	public void addDatabase(Database database) {
 		this.databases.put(database.resource(), database);
 	}
-	
+
 	public Collection<Database> databases() {
 		return this.databases.values();
 	}
-	
+
 	public Database database(Resource name) {
 		return databases.get(name);
 	}
-	
+
 	public Configuration configuration() {
 		return this.configuration;
 	}
@@ -157,35 +157,35 @@ public class Mapping {
 	public void addClassMap(ClassMap classMap) {
 		this.classMaps.put(classMap.resource(), classMap);
 	}
-	
+
 	public Collection<Resource> classMapResources() {
 		return this.classMaps.keySet();
 	}
-	
+
 	public ClassMap classMap(Resource name) {
 		return (ClassMap) this.classMaps.get(name);
 	}
-	
+
 	public void addTranslationTable(TranslationTable table) {
 		this.translationTables.put(table.resource(), table);
 	}
-	
+
 	public TranslationTable translationTable(Resource name) {
 		return (TranslationTable) this.translationTables.get(name);
 	}
-	
+
 	public void addDownloadMap(DownloadMap downloadMap) {
 		downloadMaps.put(downloadMap.resource(), downloadMap);
 	}
-	
+
 	public Collection<Resource> downloadMapResources() {
 		return downloadMaps.keySet();
 	}
-	
+
 	public DownloadMap downloadMap(Resource name) {
 		return downloadMaps.get(name);
 	}
-	
+
 	/**
 	 * @return A collection of {@link TripleRelation}s corresponding to each
 	 * 		of the property bridges
@@ -193,13 +193,11 @@ public class Mapping {
 	public synchronized Collection<TripleRelation> compiledPropertyBridges() {
 		if (this.compiledPropertyBridges == null) {
 			compilePropertyBridges();
-			validate();
 		}
 		return this.compiledPropertyBridges;
 	}
 
 	private void compilePropertyBridges() {
-		validate();
 		compiledPropertyBridges = new ArrayList<TripleRelation>();
 		for (ClassMap classMap: classMaps.values()) {
 			this.compiledPropertyBridges.addAll(classMap.compiledPropertyBridges());
@@ -211,7 +209,7 @@ public class Mapping {
 			}
 		}
 	}
-	
+
 	public PrefixMapping getPrefixMapping() {
 		return prefixes;
 	}
@@ -239,7 +237,7 @@ public class Mapping {
 			}
 		}
 	}
-	
+
 	/**
 	 * Helper method to add definitions from a ResourceMap to its underlying resource
 	 * @param map
@@ -250,7 +248,7 @@ public class Mapping {
 		Statement s = vocabularyModel.createStatement(targetResource, RDF.type, map instanceof ClassMap ? RDFS.Class : RDF.Property);
 		if (!this.vocabularyModel.contains(s))
 			this.vocabularyModel.add(s);
-		
+
 		/* Apply labels */
 		for (Literal propertyLabel: map.getDefinitionLabels()) {
 			s = vocabularyModel.createStatement(targetResource, RDFS.label, propertyLabel);
@@ -264,7 +262,7 @@ public class Mapping {
 			if (!this.vocabularyModel.contains(s))
 				this.vocabularyModel.add(s);
 		}
-		
+
 		/* Apply additional properties */
 		for (Resource additionalProperty: map.getAdditionalDefinitionProperties()) {
 			s = vocabularyModel.createStatement(targetResource, 
@@ -274,7 +272,7 @@ public class Mapping {
 				this.vocabularyModel.add(s);				
 		}
 	}
-	
+
 	/**
 	 * Loads labels, comments and additional properties for referenced
 	 * classes and properties and infers types
@@ -282,7 +280,7 @@ public class Mapping {
 	 */
 	public void buildVocabularyModel() {
 		for (ClassMap classMap: classMaps.values()) {
-			
+
 			/* Loop through referenced classes */
 			for (Resource class_: classMap.getClasses()) {
 				addDefinitions(classMap, class_);
@@ -290,12 +288,12 @@ public class Mapping {
 
 			/* Loop through property bridges */
 			for (PropertyBridge bridge: classMap.propertyBridges()) {
-				
+
 				/* Loop through referenced properties */				
 				for (Resource property: bridge.properties()) {
 					addDefinitions(bridge, property);
 				}
-				
+
 				// TODO: What to do about dynamic properties?
 			}
 		}
