@@ -1,0 +1,57 @@
+@prefix map: <#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix s: <http://example.com/Sales#> .
+
+# Table book
+<#BookTriplesMap>
+    rr:logicalTable [ rr:tableName "book" ];
+    rr:subjectMap [
+        rr:template "book/{title}";
+        rr:class s:Book;
+    ];
+    rr:predicateObjectMap [
+        rr:predicate s:title;
+        rr:objectMap [ rr:column "title" ];
+    ];
+    rr:predicateObjectMap [
+        rr:predicate s:pub;
+        rr:objectMap [ 
+            rr:parentTriplesMap <#PublTriplesMap>;
+            rr:joinCondition [
+                rr:child "publisher";
+                rr:parent "name";
+            ];
+        ];
+    ].
+
+# Table music
+<#MusicTriplesMap>
+    rr:logicalTable [ rr:tableName "music"];
+    rr:subjectMap [
+        rr:template "music/{title}";
+        rr:class s:Music;
+    ];
+    rr:predicateObjectMap [
+        rr:predicate s:title;
+        rr:objectMap [ rr:column "title" ];
+    ];
+    rr:predicateObjectMap [
+        rr:predicate s:recorder;
+        rr:objectMap [ rr:column "rec" ];
+    ].
+    
+# Table publ
+<#PublTriplesMap>
+    rr:logicalTable [ rr:tableName "publ" ];
+    rr:subjectMap [
+        rr:template "publisher/{name}";
+        rr:class s:Publ;
+    ];
+    rr:predicateObjectMap [
+        rr:predicate s:name;
+        rr:objectMap [ rr:column "name" ];
+    ];
+    rr:predicateObjectMap [
+        rr:predicate s:address;
+        rr:objectMap [ rr:column "address" ];
+    ].
