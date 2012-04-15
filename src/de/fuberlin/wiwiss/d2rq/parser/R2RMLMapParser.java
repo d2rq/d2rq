@@ -256,6 +256,11 @@ public class R2RMLMapParser {
 		if (stmt != null) {
 			String column = stmt.getString();
 			bridge.setColumn(classMap.getLogicalTable() + "." + column);
+			
+			stmt = objectMap.getProperty(RR.datatype);
+			if (stmt != null) {
+				bridge.setDatatype(stmt.getResource().getURI());
+			}
 		} else {
 			stmt = objectMap.getProperty(RR.parentTriplesMap);
 
