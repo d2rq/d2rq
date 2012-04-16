@@ -40,6 +40,11 @@ d2rq:jdbcDSN a rdf:Property;
 	rdfs:comment "JDBC data source name.";
 	rdfs:domain d2rq:Database;
 	.
+d2rq:jndiDataSource a rdf:Property;
+	rdfs:label "JNDI DSN";
+	rdfs:comment "JNDI data source name.";
+	rdfs:domain d2rq:Database;
+	.
 d2rq:odbcDSN a rdf:Property;
 	a owl:DeprecatedProperty;
 	rdfs:comment "ODBC DSN";
