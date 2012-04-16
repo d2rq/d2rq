@@ -2,27 +2,30 @@ package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class PropertyBridge extends ResourceMap {
 	private Resource resource;
 	private ClassMap belongsToClassMap = null;
-	private Collection properties = new HashSet();
+	private Collection<Resource> properties = new HashSet<Resource>();
+	private Collection<String> dynamicPropertyPatterns = new HashSet<String>();
 	
 	public PropertyBridge(Resource resource) {
 		super(resource, true);
@@ -33,7 +36,7 @@ public class PropertyBridge extends ResourceMap {
 		return this.resource;
 	}
 
-	public Collection properties() {
+	public Collection<Resource> properties() {
 		return this.properties;
 	}
 	
@@ -136,12 +139,16 @@ public class PropertyBridge extends ResourceMap {
 		this.refersToClassMap = classMap;
 	}
 
-	public void addProperty(Resource property) {
-		this.properties.add(property.as(Property.class));
+	public ClassMap refersToClassMap() {
+		return refersToClassMap;
 	}
 	
-	public void addProperty(DynamicProperty propertyMap) {
-		this.properties.add(propertyMap);
+	public void addProperty(Resource property) {
+		this.properties.add(property);
+	}
+	
+	public void addDynamicProperty(String dynamicPropertyPattern) {
+		this.dynamicPropertyPatterns.add(dynamicPropertyPattern);
 	}
 
 	public void validate() throws D2RQException {
@@ -176,23 +183,15 @@ public class PropertyBridge extends ResourceMap {
 	}
 
 	protected Relation buildRelation() {
-		RelationBuilder builder = belongsToClassMap.relationBuilder();
-		builder.addOther(relationBuilder());
+		ConnectedDB database = belongsToClassMap.database().connectedDB();
+		RelationBuilder builder = belongsToClassMap.relationBuilder(database);
+		builder.addOther(relationBuilder(database));
 		if (this.refersToClassMap != null) {
-			builder.addAliased(this.refersToClassMap.relationBuilder());
+			builder.addAliased(this.refersToClassMap.relationBuilder(database));
 		}
-		
-		Iterator it = this.properties.iterator();
-		while (it.hasNext()) 
-		{
-			Object prop = it.next();
-			if(prop instanceof DynamicProperty)
-			{
-				DynamicProperty dynamicProperty = (DynamicProperty) prop;
-				builder.addOther(dynamicProperty.relationBuilder());
-			}
+		for (String pattern: dynamicPropertyPatterns) {
+			builder.addOther(new PropertyMap(pattern, belongsToClassMap.database()).relationBuilder(database));
 		}
-		
 		if (this.limit!=null) {
 			builder.setLimit(this.limit.intValue());
 		}
@@ -200,35 +199,26 @@ public class PropertyBridge extends ResourceMap {
 			builder.setLimitInverse(this.limitInverse.intValue());
 		}
 		if (this.order!=null) {
-			builder.setOrder(SQL.parseAttribute(this.order), this.orderDesc.booleanValue());
+			builder.setOrderSpecs(Collections.singletonList(
+					new OrderSpec(new AttributeExpr(SQL.parseAttribute(this.order)), this.orderDesc.booleanValue())));
 		}
-
-		return builder.buildRelation(this.belongsToClassMap.database().connectedDB()); 
+		return builder.buildRelation(); 
 	}
 
-	public Collection toTripleRelations() {
+	public Collection<TripleRelation> toTripleRelations() {
 		this.validate();
-		Collection results = new ArrayList();
-		Iterator it = this.properties.iterator();
-		while (it.hasNext()) 
-		{
-			Object prop = it.next();
+		Collection<TripleRelation> results = new ArrayList<TripleRelation>();
+		for (Resource property: properties) {
 			NodeMaker s = this.belongsToClassMap.nodeMaker();
+			NodeMaker p = new FixedNodeMaker(property.asNode(), false);
 			NodeMaker o = nodeMaker();
-			if(prop instanceof Property)
-			{
-				Property property = (Property) prop;
-				NodeMaker p = new FixedNodeMaker(property.asNode(), false);
-				results.add(new TripleRelation(buildRelation(), s, p, o));
-			}
-			else if(prop instanceof DynamicProperty)
-			{
-				DynamicProperty dynamicProperty = (DynamicProperty) prop;
-				NodeMaker p = dynamicProperty.nodeMaker();
-				results.add(new TripleRelation(buildRelation(), s, p, o));
-			}
-			
-			
+			results.add(new TripleRelation(buildRelation(), s, p, o));
+		}
+		for (String pattern: dynamicPropertyPatterns) {
+			NodeMaker s = this.belongsToClassMap.nodeMaker();
+			NodeMaker p = new PropertyMap(pattern, belongsToClassMap.database()).nodeMaker();
+			NodeMaker o = nodeMaker();
+			results.add(new TripleRelation(buildRelation(), s, p, o));
 		}
 		return results;
 	}

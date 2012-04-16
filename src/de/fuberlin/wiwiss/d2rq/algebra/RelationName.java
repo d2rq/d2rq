@@ -8,7 +8,7 @@ package de.fuberlin.wiwiss.d2rq.algebra;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class RelationName implements Comparable {
+public class RelationName implements Comparable<RelationName> {
 	private String schemaName;
 	private String tableName;
 	private String qualifiedName;
@@ -97,11 +97,7 @@ public class RelationName implements Comparable {
 	 * Relations without schema are ordered by table name, those with
 	 * schema are ordered by schema name.
 	 */
-	public int compareTo(Object otherObject) {
-		if (!(otherObject instanceof RelationName)) {
-			return 0;
-		}
-		RelationName other = (RelationName) otherObject;
+	public int compareTo(RelationName other) {
 		if (this.schemaName == null && other.schemaName == null) {
 			return this.tableName.compareTo(other.tableName);
 		}

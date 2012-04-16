@@ -7,24 +7,23 @@ import de.fuberlin.wiwiss.d2rq.sql.DriverConnectedDB;
 
 public class ISWCSchemaTest extends TestCase {
 	private final static String driverClass = "com.mysql.jdbc.Driver";
-	private final static String jdbcURL = "jdbc:mysql://127.0.0.1/iswc?user=root&password=root";
+	private final static String jdbcURL = "jdbc:mysql://127.0.0.1/iswc?user=root";
 	
-	private DatabaseSchemaInspector schema;
+	private ConnectedDB db;
 	
 	public void setUp() throws Exception {
 		Class.forName(driverClass);
-		ConnectedDB db = new DriverConnectedDB(jdbcURL, null, null);
+		db = new DriverConnectedDB(jdbcURL, null, null);
 		db.init();
-		this.schema = db.schemaInspector();
 	}
 	
 	public void testRecognizeNullableColumn() {
 		Attribute personEmail = new Attribute(null, "persons", "Email");
-		assertTrue(this.schema.isNullable(personEmail));
+		assertTrue(db.isNullable(personEmail));
 	}
 	
 	public void testRecognizeNonNullableColumn() {
 		Attribute personID = new Attribute(null, "persons", "PerID");
-		assertFalse(this.schema.isNullable(personID));
+		assertFalse(db.isNullable(personID));
 	}
 }

@@ -3,7 +3,6 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +30,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
  * <p>In this case, J can be dropped, and all mentions of <em>T2.c_n</em>
  * can be replaced with <em>T1.c_n</em>.</p>
  * 
+ * TODO: Currently this only is used for TripleRelations in FindQuery but it could be used for NodeRelations in SPARQL queries too
  * TODO: Prune unnecessary aliases after removing joins
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
@@ -47,12 +47,10 @@ public class JoinOptimizer {
 	}
 	
 	public TripleRelation optimize() {
-		Map replacedColumns = new HashMap();
-		Set allRequiredColumns = relation.baseRelation().allKnownAttributes();
-		Set requiredJoins = new HashSet(this.relation.baseRelation().joinConditions());
-		Iterator it = this.relation.baseRelation().joinConditions().iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
+		Map<Attribute,Attribute> replacedColumns = new HashMap<Attribute,Attribute>();
+		Set<Attribute> allRequiredColumns = relation.baseRelation().allKnownAttributes();
+		Set<Join> requiredJoins = new HashSet<Join>(this.relation.baseRelation().joinConditions());
+		for (Join join: relation.baseRelation().joinConditions()) {
 			if (!isRemovableJoin(join)) continue;
 						
 			boolean isRemovable1 = join.joinDirection() == Join.DIRECTION_RIGHT && isRemovableJoinSide(join.table1(), join, allRequiredColumns);
@@ -74,7 +72,7 @@ public class JoinOptimizer {
 		NodeMaker s = this.relation.nodeMaker(TripleRelation.SUBJECT);
 		NodeMaker p = this.relation.nodeMaker(TripleRelation.PREDICATE);
 		NodeMaker o = this.relation.nodeMaker(TripleRelation.OBJECT);
-		Set projections = new HashSet();
+		Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
 		projections.addAll(s.projectionSpecs());
 		projections.addAll(p.projectionSpecs());
 		projections.addAll(o.projectionSpecs());
@@ -82,10 +80,10 @@ public class JoinOptimizer {
 				new RelationImpl(this.relation.baseRelation().database(),
 					this.relation.baseRelation().aliases(),
 					this.relation.baseRelation().condition(),
+					this.relation.baseRelation().softCondition(),
 					requiredJoins, projections,
 					this.relation.baseRelation().isUnique(),
-					this.relation.baseRelation().order(),
-					this.relation.baseRelation().orderDesc(),
+					this.relation.baseRelation().orderSpecs(),
 					this.relation.baseRelation().limit(),
 					this.relation.baseRelation().limitInverse()).renameColumns(renamer),
 				s.renameAttributes(renamer),
@@ -94,9 +92,7 @@ public class JoinOptimizer {
 	}
 
 	private boolean isRemovableJoin(Join join) {
-		Iterator it = join.attributes1().iterator();
-		while (it.hasNext()) {
-			Attribute side1 = (Attribute) it.next();
+		for (Attribute side1: join.attributes1()) {
 			Attribute side2 = join.equalAttribute(side1);
 			if (!relation.baseRelation().database().areCompatibleFormats(
 					relation.baseRelation().aliases().originalOf(side1), 
@@ -115,10 +111,8 @@ public class JoinOptimizer {
 	 * @return <tt>true</tt> iff all columns from that table are covered by
 	 * 		the join's condition
 	 */
-	private boolean isRemovableJoinSide(RelationName tableName, Join join, Set allRequiredColumns) {
-		Iterator it = allRequiredColumns.iterator();
-		while (it.hasNext()) {
-			Attribute requiredColumn = (Attribute) it.next();
+	private boolean isRemovableJoinSide(RelationName tableName, Join join, Set<Attribute> allRequiredColumns) {
+		for (Attribute requiredColumn: allRequiredColumns) {
 			if (!requiredColumn.relationName().equals(tableName)) {
 				continue;		// requiredColumn is in another table
 			}
@@ -129,11 +123,9 @@ public class JoinOptimizer {
 		return true;	// all columns from our table are in the join condition
 	}
 	
-	private Map replacementColumns(Collection originalColumns, Join removableJoin) {
-		Map result = new HashMap();
-		Iterator it = originalColumns.iterator();
-		while (it.hasNext()) {
-			Attribute originalColumn = (Attribute) it.next();
+	private Map<Attribute,Attribute> replacementColumns(Collection<Attribute> originalColumns, Join removableJoin) {
+		Map<Attribute,Attribute> result = new HashMap<Attribute,Attribute>();
+		for (Attribute originalColumn: originalColumns) {
 			result.put(originalColumn, removableJoin.equalAttribute(originalColumn));
 		}
 		return result;

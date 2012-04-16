@@ -8,10 +8,13 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
+import de.fuberlin.wiwiss.d2rq.values.ConstantValueMaker;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**
@@ -90,13 +93,16 @@ public class DownloadMap extends ResourceMap {
 
 	@Override
 	protected Relation buildRelation() {
-		RelationBuilder builder = relationBuilder();
-		builder.addProjection(contentDownloadColumn);
-		if (belongsToClassMap != null) {
-			builder.addOther(belongsToClassMap.relationBuilder());
-		}
 		Database db = belongsToClassMap == null ? database : belongsToClassMap.database();
-		return builder.buildRelation(db.connectedDB()); 
+		RelationBuilder builder = relationBuilder(db.connectedDB());
+		builder.addProjection(contentDownloadColumn);
+		for (ProjectionSpec projection: getMediaTypeValueMaker().projectionSpecs()) {
+			builder.addProjection(projection);
+		}
+		if (belongsToClassMap != null) {
+			builder.addOther(belongsToClassMap.relationBuilder(db.connectedDB()));
+		}
+		return builder.buildRelation(); 
 	}
 	
 	public Relation getRelation() {
@@ -104,8 +110,13 @@ public class DownloadMap extends ResourceMap {
 		return buildRelation();
 	}
 	
-	public String getMediaType() {
-		return mediaType;
+	public ValueMaker getMediaTypeValueMaker() {
+		if (mediaType == null) return ValueMaker.NULL;
+		Pattern pattern = new Pattern(mediaType);
+		if (pattern.attributes().isEmpty()) {
+			return new ConstantValueMaker(mediaType);
+		}
+		return pattern;
 	}
 	
 	public Attribute getContentDownloadColumn() {

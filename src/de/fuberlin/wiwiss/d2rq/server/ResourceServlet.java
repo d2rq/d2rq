@@ -72,12 +72,12 @@ public class ResourceServlet extends HttpServlet {
 	}
 
 	private boolean handleDownload(String resourceURI, HttpServletResponse response, D2RServer server) throws IOException {
-		Mapping m = server.currentGraph().getMapping();
+		Mapping m = D2RServer.retrieveSystemLoader(getServletContext()).getMapping();
 		for (Resource r: m.downloadMapResources()) {
 			DownloadMap d = m.downloadMap(r);
 			DownloadContentQuery q = new DownloadContentQuery(d, resourceURI);
 			if (q.hasContent()) {
-				response.setContentType(d.getMediaType() != null ? d.getMediaType() : "application/octet-stream");
+				response.setContentType(q.getMediaType() != null ? q.getMediaType() : "application/octet-stream");
 				InputStream is = q.getContentStream();
 				OutputStream os = response.getOutputStream();
 				final byte[] buffer = new byte[0x10000];

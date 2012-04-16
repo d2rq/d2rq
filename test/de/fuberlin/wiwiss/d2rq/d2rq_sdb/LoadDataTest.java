@@ -21,7 +21,8 @@ import com.hp.hpl.jena.sdb.sql.JDBC;
 import com.hp.hpl.jena.sdb.sql.SDBConnection;
 import com.hp.hpl.jena.sdb.store.DatabaseType;
 import com.hp.hpl.jena.sdb.store.LayoutType;
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+
+import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 import junit.framework.TestCase;
 
 /**

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeNotNull;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
@@ -11,12 +12,12 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 /**
  * A database column.
  * 
- * TODO: Attribute should track its SQL datatype code
- * TODO: Attribute should track wether it is nullable
+ * TODO: Attribute should track its {@link DataType}
+ * TODO: Attribute should track whether it is nullable
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class Attribute implements Comparable, ProjectionSpec {
+public class Attribute implements ProjectionSpec {
 	private String attributeName;
 	private RelationName relationName;
 	private String qualifiedName;
@@ -47,7 +48,7 @@ public class Attribute implements Comparable, ProjectionSpec {
 	}
 	
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
-		return database.getSyntax().quoteAttribute(this);
+		return database.vendor().quoteAttribute(this);
 	}
 	
 	/**
@@ -84,7 +85,7 @@ public class Attribute implements Comparable, ProjectionSpec {
 		return this.relationName.schemaName();
 	}
 
-	public Set requiredAttributes() {
+	public Set<Attribute> requiredAttributes() {
 		return Collections.singleton(this);
 	}
 	
@@ -98,6 +99,13 @@ public class Attribute implements Comparable, ProjectionSpec {
 	
 	public Expression toExpression() {
 		return new AttributeExpr(this);
+	}
+	
+	public Expression notNullExpression(ConnectedDB db, AliasMap aliases) {
+		if (db.isNullable(aliases.originalOf(this))) {
+			return AttributeNotNull.create(this);
+		}
+		return Expression.TRUE;
 	}
 	
 	public String toString() {
@@ -130,15 +138,15 @@ public class Attribute implements Comparable, ProjectionSpec {
 	 * Compares columns alphanumerically by qualified name, case sensitive.
 	 * Attributes with schema are larger than attributes without schema.
 	 */
-	public int compareTo(Object otherObject) {
-		if (!(otherObject instanceof Attribute)) {
-			return 0;
+	public int compareTo(ProjectionSpec other) {
+		if (!(other instanceof Attribute)) {
+			return -1;
 		}
-		Attribute other = (Attribute) otherObject;
-		int i = this.relationName.compareTo(other.relationName);
+		Attribute otherAttribute = (Attribute) other;
+		int i = this.relationName.compareTo(otherAttribute.relationName);
 		if (i != 0) {
 			return i;
 		}
-		return this.attributeName.compareTo(other.attributeName);
+		return this.attributeName.compareTo(otherAttribute.attributeName);
 	}
 }

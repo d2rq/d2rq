@@ -3,7 +3,6 @@ package de.fuberlin.wiwiss.d2rq.server;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -15,15 +14,21 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.velocity.context.Context;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.PrefixMapping;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
+import com.hp.hpl.jena.vocabulary.DC;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.ClassMapLister;
+import de.fuberlin.wiwiss.d2rq.ResourceDescriber;
+import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 public class PageServlet extends HttpServlet {
 	private PrefixMapping prefixes;
@@ -51,15 +56,22 @@ public class PageServlet extends HttpServlet {
 		String resourceURI = server.resourceBaseURI(serviceStem) + relativeResourceURI;
 		String documentURL = server.dataURL(serviceStem, relativeResourceURI);
 
-		String sparqlQuery = "DESCRIBE <" + resourceURI + ">";
-		Model description = QueryExecutionFactory.create(sparqlQuery, server.dataset()).execDescribe();			
+		// Build resource description
+		Resource resource = ResourceFactory.createResource(resourceURI);
+		boolean outgoingTriplesOnly =
+			server.isVocabularyResource(resource) && !server.getConfig().getVocabularyIncludeInstances();
+		int limit = server.getConfig().getLimitPerPropertyBridge();
+		ResourceDescriber describer = new ResourceDescriber(server.getMapping(),
+				resource.asNode(), outgoingTriplesOnly, limit);
+		Model description = ModelFactory.createModelForGraph(describer.description());			
 		if (description.size() == 0) {
 			response.sendError(404);
 			return;
 		}
+		// Get a Resource that is attached to the description model
+		resource = description.getResource(resourceURI);
 		
 		this.prefixes = server.getPrefixes(); // model();
-		Resource resource = description.getResource(resourceURI);
 		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
 		Context context = velocity.getContext();
 		
@@ -68,20 +80,21 @@ public class PageServlet extends HttpServlet {
 			MetadataCreator mc = new MetadataCreator(server, velocity);
 			mc.setResourceURI(resourceURI);
 			mc.setDocumentURL(documentURL);
-			mc.setSparqlQuery(sparqlQuery);
+			// TODO: This isn't necessarily exactly accurate any more
+			mc.setSparqlQuery("DESCRIBE <" + resourceURI + ">");
 			
 			Model metadata = mc.addMetadataFromTemplate(description.createResource(resourceURI), getServletContext());
 			if (!metadata.isEmpty()) {
 				context.put("metadata", metadata.getResource(documentURL).listProperties().toList());
 	
 				// add prefixes to context
-				Map nsSet = metadata.getNsPrefixMap();
+				Map<String,String> nsSet = metadata.getNsPrefixMap();
 				nsSet.putAll(description.getNsPrefixMap());
 				
 				context.put("prefixes", nsSet.entrySet());
 				
 				// add a empty map for keeping track of blank nodes aliases
-				context.put("blankNodesMap", new HashMap());
+				context.put("blankNodesMap", new HashMap<Resource,String>());
 			} else {
 				context.put("metadata", Boolean.FALSE);				
 			}
@@ -92,14 +105,15 @@ public class PageServlet extends HttpServlet {
 		
 		context.put("uri", resourceURI);
 		context.put("rdf_link", server.dataURL(serviceStem, relativeResourceURI));
-		context.put("label", resource.getProperty(RDFS.label));
+		context.put("label", getBestLabel(resource));
 		context.put("properties", collectProperties(description, resource));
 		context.put("classmap_links", classmapLinks(resource));
+		context.put("limit_per_property_bridge", limit > 0 ? limit : null);
 		velocity.mergeTemplateXHTML("resource_page.vm");
 	}
 
-	private Collection collectProperties(Model m, Resource r) {
-		Collection result = new TreeSet();
+	private Collection<Property> collectProperties(Model m, Resource r) {
+		Collection<Property> result = new TreeSet<Property>();
 		StmtIterator it = r.listProperties();
 		while (it.hasNext()) {
 			result.add(new Property(it.nextStatement(), false));
@@ -111,21 +125,22 @@ public class PageServlet extends HttpServlet {
 		return result;
 	}
 
-	private Map classmapLinks(Resource resource) {
-		Map result = new HashMap();
+	private Map<String,String> classmapLinks(Resource resource) {
+		Map<String,String> result = new HashMap<String,String>();
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
-		GraphD2RQ g = server.currentGraph();
-		Iterator it = g.classMapNamesForResource(resource.asNode()).iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
+		for (String name: getClassMapLister().classMapNamesForResource(resource.asNode())) {
 			result.put(name, server.baseURI() + "directory/" + name);
 		}
 		return result;
 	}
 	
+	private ClassMapLister getClassMapLister() {
+		return D2RServer.retrieveSystemLoader(getServletContext()).getClassMapLister();
+	}
+	
 	private static final long serialVersionUID = 2752377911405801794L;
 	
-	public class Property implements Comparable {
+	public class Property implements Comparable<Property> {
 		private Node property;
 		private Node value;
 		private boolean isInverse;
@@ -145,7 +160,7 @@ public class PageServlet extends HttpServlet {
 			return this.property.getURI();
 		}
 		public String propertyQName() {
-			String qname = prefixes.qnameFor(this.property.getURI());
+			String qname = prefixes.shortForm(this.property.getURI());
 			if (qname == null) {
 				return "<" + this.property.getURI() + ">";
 			}
@@ -181,11 +196,12 @@ public class PageServlet extends HttpServlet {
 			}
 			return qname;
 		}
-		public int compareTo(Object otherObject) {
-			if (!(otherObject instanceof Property)) {
-				return 0;
-			}
-			Property other = (Property) otherObject;
+		public boolean isImg() {
+			return FOAF.img.asNode().equals(property) || 
+					FOAF.depiction.asNode().equals(property) || 
+					FOAF.thumbnail.asNode().equals(property);
+		}
+		public int compareTo(Property other) {
 			String propertyLocalName = this.property.getLocalName();
 			String otherLocalName = other.property.getLocalName();
 			if (propertyLocalName.compareTo(otherLocalName) != 0) {
@@ -215,5 +231,14 @@ public class PageServlet extends HttpServlet {
 			// TODO Typed literals, language literals
 			return this.value.getLiteralLexicalForm().compareTo(other.value.getLiteralLexicalForm());
 		}
+	}
+	
+	public static Statement getBestLabel(Resource resource) {
+		Statement label = resource.getProperty(RDFS.label);
+		if (label == null) label = resource.getProperty(SKOS.prefLabel);
+		if (label == null) label = resource.getProperty(DC.title);
+		if (label == null) label = resource.getProperty(DCTerms.title);
+		if (label == null) label = resource.getProperty(FOAF.name);
+		return label;
 	}
 }

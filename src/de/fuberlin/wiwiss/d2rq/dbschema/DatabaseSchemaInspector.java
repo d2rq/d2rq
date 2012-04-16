@@ -5,7 +5,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,158 +17,55 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-import de.fuberlin.wiwiss.d2rq.sql.SQLSyntax;
+import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
+import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 /**
  * Inspects a database to retrieve schema information. 
  * 
- * TODO: All the dbType checks should be moved to the {@link SQLSyntax} subclasses
+ * TODO: All the dbType checks should be moved to the {@link Vendor} subclasses
+ * TODO: This usually shouldn't be used directly, but through the ConnectedDB.
+ *       Except in the MappingGenerator. ConnectedDB is easier mockable for unit tests! 
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class DatabaseSchemaInspector {
 	
-	public static boolean isStringType(ColumnType columnType) {
-		return columnType.typeId() == Types.CHAR || columnType.typeId() == Types.VARCHAR || columnType.typeId() == Types.NVARCHAR
-					|| columnType.typeId() == Types.LONGVARCHAR	|| "NVARCHAR2".equals(columnType.typeName());
-	}
-
-	public static boolean isDateType(ColumnType columnType) {
-		return columnType.typeId() == Types.DATE || columnType.typeId() == Types.TIME || columnType.typeId() == Types.TIMESTAMP;
-	}
-	
-	/**
-	 * Return the appropriate XSD datatype for a SQL column type. <code>null</code>
-	 * indicates an unsupported SQL type. {@link ColumnType#UNMAPPABLE} indicates
-	 * an unmappable SQL type.
-	 * 
-	 * TODO: The MySQL JDBC driver reports TINYINT(1) as BIT, should be handled as xsd:boolean
- 	 * 
-	 * @param columnType
-	 * @return XSD datatype as prefixed name: <code>xsd:string</code> etc.
-	 */
-	public String xsdTypeFor(ColumnType columnType) {
-		if (columnType.typeId() == Types.OTHER && db.dbTypeIs(ConnectedDB.HSQLDB)) {
-			// OTHER in HSQLDB 2.8.8 is really JAVA_OBJECT
-			return ColumnType.UNMAPPABLE;
-		}
-		
-		// HACK: MS SQLServer 2008 returns 'date' as VARCHAR type
-		if(columnType.typeName().equals("date") && db.dbTypeIs(ConnectedDB.MSSQL)) {
-			return "xsd:date";
-		}
-		
-// HACK: MS SQLServer 2008 returns 'datetime2(7)' and 'datetimeoffset(7)' as VARCHAR type
-// TODO: Cant make it work. See comment in ResultRowMap.java for additional information on datatype 
-// inconsistency particularly in the case of MS SQLServer.
-//		if((columnType.typeName().equals("datetime2") && db.dbTypeIs(ConnectedDB.MSSQL)) || (columnType.typeName().equals("datetimeoffset") && db.dbTypeIs(ConnectedDB.MSSQL))) {
-//			return "xsd:dateTime";
-//		}
-		
-		if (db.dbTypeIs(ConnectedDB.MySQL) && columnType.typeName().contains("UNSIGNED")) {
-			switch (columnType.typeId()) {
-			case Types.TINYINT: return "xsd:unsignedByte";
-			case Types.SMALLINT: return "xsd:unsignedShort";
-			case Types.INTEGER: return "xsd:unsignedInt";
-			case Types.BIGINT: return "xsd:unsignedLong";
-			}
-		}
-		if (db.dbTypeIs(ConnectedDB.MySQL) && columnType.typeId() == Types.BIT
-				&& columnType.size() == 0) {
-			// MySQL reports TINYINT(1) as BIT, but all other BITs as BIT(M).
-			// This is conventionally treated as BOOLEAN.
-			return "xsd:boolean";
-		}
-
-		switch (columnType.typeId()) {
-		case Types.ARRAY:         return ColumnType.UNMAPPABLE;
-		case Types.BIGINT:        return "xsd:long";
-		case Types.BINARY:        return "xsd:hexBinary";
-		case Types.BIT:           return "xsd:string";
-		case Types.BLOB:          return "xsd:hexBinary";
-		case Types.BOOLEAN:       return "xsd:boolean";
-		case Types.CHAR:          return "xsd:string";
-		case Types.CLOB:          return "xsd:string";
-		case Types.DATALINK:      return null;
-		case Types.DATE:          return "xsd:date";
-		case Types.DECIMAL:       return "xsd:decimal";
-		case Types.DISTINCT:      return null;
-		case Types.DOUBLE:        return "xsd:double";
-		case Types.FLOAT:         return "xsd:double";
-		case Types.INTEGER:       return "xsd:int";
-		case Types.JAVA_OBJECT:   return ColumnType.UNMAPPABLE;
-		case Types.LONGVARBINARY: return "xsd:hexBinary";
-		case Types.LONGVARCHAR:   return "xsd:string";
-		case Types.NULL:          return null;
-		case Types.NUMERIC:       return "xsd:decimal";
-		case Types.OTHER:         return null;
-		case Types.REAL:          return "xsd:double";
-		case Types.REF:           return null;
-		case Types.SMALLINT:      return "xsd:short";
-		case Types.STRUCT:        return null;
-		case Types.TIME:          return "xsd:time";
-		case Types.TIMESTAMP:     return "xsd:dateTime";
-		case Types.TINYINT:       return "xsd:byte";
-		case Types.VARBINARY:     return "xsd:hexBinary";
-		case Types.VARCHAR:       return "xsd:string";
-		}
-		if ("NVARCHAR2".equals(columnType.typeName())) {
-			return "xsd:string";
-		}
-		if ("NVARCHAR".equals(columnType.typeName())) {
-			return "xsd:string";
-		}
-		if ("BINARY_DOUBLE".equals(columnType.typeName())) {
-			return "xsd:double";
-		}
-		if ("BINARY_FLOAT".equals(columnType.typeName())) {
-			return "xsd:double";
-		}
-		if ("BFILE".equals(columnType.typeName())) {
-			return ColumnType.UNMAPPABLE;
-		}
-		return null;
-	}
-	
-	private ConnectedDB db;
+	private final ConnectedDB db;
 	// We can no longer cache the DatabaseMetaData object. If we use connection pooling, the
 	// underlying connection should be closed, so the DatabaseMetaData becomes unusable.
 	//private DatabaseMetaData schema;
-	private Map<Attribute,ColumnType> cachedColumnTypes = 
-			new HashMap<Attribute,ColumnType>();
-	private Map<Attribute,Boolean> cachedColumnNullability = 
-			new HashMap<Attribute,Boolean>();
 	
 	public static final int KEYS_IMPORTED = 0;
 	public static final int KEYS_EXPORTED = 1;
 	
 	public DatabaseSchemaInspector(ConnectedDB db) {
+		this.db = db;
 //		try {
-			this.db = db;
 //			this.schema = db.connection().getMetaData();
 //		} catch (SQLException ex) {
 //			throw new D2RQException("Database exception", ex);
 //		}
 	}
-	
-	public ColumnType columnType(Attribute column) {
-		if (this.cachedColumnTypes.containsKey(column)) {
-			return (ColumnType) this.cachedColumnTypes.get(column);
-		}
+
+	public DataType columnType(Attribute column) {
 		Connection connection = null;
 		ResultSet rs = null;
 		try {
 			connection = db.connection();
 			DatabaseMetaData schema = connection.getMetaData();
 			rs = schema.getColumns(null, column.schemaName(), column.tableName(), column.attributeName());
-			if (!rs.next()) {
-				throw new D2RQException("Column " + column + " not found in database");
+			try {
+				if (!rs.next()) {
+					throw new D2RQException("Column " + column + " not found in database");
+				}
+				int type = rs.getInt("DATA_TYPE");
+				String name = rs.getString("TYPE_NAME");
+				int size = rs.getInt("COLUMN_SIZE");
+				return db.vendor().getDataType(type, name, size);
+			} finally {
+				rs.close();
 			}
-			ColumnType type = new ColumnType(rs.getInt("DATA_TYPE"), 
-					rs.getString("TYPE_NAME"), rs.getInt("COLUMN_SIZE"));
-			rs.close();
-			this.cachedColumnTypes.put(column, type);
-			return type;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
 		} finally {
@@ -181,9 +77,6 @@ public class DatabaseSchemaInspector {
 	}
 	
 	public boolean isNullable(Attribute column) {
-		if (this.cachedColumnNullability.containsKey(column)) {
-			return ((Boolean) this.cachedColumnNullability.get(column)).booleanValue();
-		}
 		
 		Connection connection = null;
 		ResultSet rs = null;
@@ -196,7 +89,6 @@ public class DatabaseSchemaInspector {
 			}
 			boolean nullable = (rs.getInt("NULLABLE") == DatabaseMetaData.columnNullable);
 			rs.close();
-			this.cachedColumnNullability.put(column, new Boolean(nullable));
 			return nullable;
 		} catch (SQLException ex) {
 			throw new D2RQException("Database exception", ex);
@@ -210,7 +102,7 @@ public class DatabaseSchemaInspector {
 	
 	public boolean isZerofillColumn(Attribute column) {
 		
-		if (!db.dbTypeIs(ConnectedDB.MySQL)) return false;
+		if (db.vendor() != Vendor.MySQL) return false;
 		
 		Connection connection = null;
 		Statement stmt = null;
@@ -219,7 +111,7 @@ public class DatabaseSchemaInspector {
 		try {
 			connection = db.connection();
 			stmt = connection.createStatement();
-			rs = stmt.executeQuery("DESCRIBE " + db.getSyntax().quoteRelationName(column.relationName()));	
+			rs = stmt.executeQuery("DESCRIBE " + db.vendor().quoteRelationName(column.relationName()));	
 
 			boolean isZerofill = false;
 			boolean foundColumn = false;
@@ -265,7 +157,7 @@ public class DatabaseSchemaInspector {
 			while (rs.next()) {
 				String s     = rs.getString("TABLE_SCHEM");
 				String table = rs.getString("TABLE_NAME");
-				if (!this.db.isIgnoredTable(s, table)) {
+				if (!this.db.vendor().isIgnoredTable(s, table)) {
 					result.add(toRelationName(s, table));
 				}
 			}
@@ -347,7 +239,7 @@ public class DatabaseSchemaInspector {
 			 * @see http://forums.oracle.com/forums/thread.jspa?threadID=210782
 			 * @see http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/htdocs/readme_jdbc_10204.html
 			 */
-			boolean approximate = this.db.dbTypeIs(ConnectedDB.Oracle);
+			boolean approximate = (db.vendor() == Vendor.Oracle);
 			connection = db.connection();
 			DatabaseMetaData schema = connection.getMetaData();
 			rs = schema.getIndexInfo(null, schemaName(tableName), tableName(tableName), true, approximate);
@@ -443,7 +335,7 @@ public class DatabaseSchemaInspector {
 	}
 	
 	private String schemaName(RelationName tableName) {
-		if (this.db.dbTypeIs(ConnectedDB.PostgreSQL) && tableName.schemaName() == null) {
+		if (this.db.vendor() == Vendor.PostgreSQL && tableName.schemaName() == null) {
 			// The default schema is known as "public" in PostgreSQL 
 			return "public";
 		}
@@ -458,7 +350,7 @@ public class DatabaseSchemaInspector {
 		if (schema == null) {
 			// Table without schema
 			return new RelationName(null, table, db.lowerCaseTableNames());
-		} else if ((db.dbTypeIs(ConnectedDB.PostgreSQL) || db.dbTypeIs(ConnectedDB.HSQLDB)) 
+		} else if ((db.vendor() == Vendor.PostgreSQL || db.vendor() == Vendor.HSQLDB) 
 				&& "public".equals(schema.toLowerCase())) {
 			// Call the tables in PostgreSQL or HSQLDB default schema "FOO", not "PUBLIC.FOO"
 			return new RelationName(null, table, db.lowerCaseTableNames());

@@ -2,11 +2,11 @@ package de.fuberlin.wiwiss.d2rq.examples;
 
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
-import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
+import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
 
 public class JenaModelExample {

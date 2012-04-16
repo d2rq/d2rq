@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 public class RequestParamHandler {
 	private static final String ATTRIBUTE_NAME_IS_HANDLED =
 		"OutputRequestParamHandler.isHandled";
-	private final static HashMap mimeTypes = new HashMap();
+	private final static HashMap<String,String> mimeTypes = new HashMap<String,String>();
 	static {
 		mimeTypes.put("rdfxml", "application/rdf+xml");
 		mimeTypes.put("xml", "application/rdf+xml");
@@ -87,27 +87,27 @@ public class RequestParamHandler {
 			}
 			return super.getHeader(name);
 		}
-		public Enumeration getHeaderNames() {
-			final Enumeration realHeaders = super.getHeaderNames();
-			return new Enumeration() {
+		public Enumeration<String> getHeaderNames() {
+			final Enumeration<String> realHeaders = super.getHeaderNames();
+			return new Enumeration<String>() {
 				private String prefetched = null;
 				public boolean hasMoreElements() {
 					while (prefetched == null && realHeaders.hasMoreElements()) {
-						String next = (String) realHeaders.nextElement();
+						String next = realHeaders.nextElement();
 						if (!"accept".equals(next.toLowerCase())) {
 							prefetched = next;
 						}
 					}
 					return (prefetched != null);
 				}
-				public Object nextElement() {
+				public String nextElement() {
 					return prefetched;
 				}
 			};
 		}
-		public Enumeration getHeaders(String name) {
+		public Enumeration<String> getHeaders(String name) {
 			if ("accept".equals(name.toLowerCase())) {
-				Vector v = new Vector();
+				Vector<String> v = new Vector<String>();
 				v.add(getHeader(name));
 				return v.elements();
 			}

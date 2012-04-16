@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.sql.types.DataType.GenericType;
 
 
 /**
@@ -27,10 +28,10 @@ public class DataSourceConnectedDB extends ConnectedDB {
 	
 	private static final Log logger = LogFactory.getLog(DataSourceConnectedDB.class);
 	
-	public DataSourceConnectedDB(DataSource dataSource, boolean allowDistinct,
-	                             Map<String,SQLDataType> columnTypes,
+	public DataSourceConnectedDB(DataSource dataSource,
+	                             Map<String,GenericType> columnTypes,
 	                             int limit, int fetchSize) {
-		super(allowDistinct, columnTypes, limit, fetchSize);
+		super(columnTypes, limit, fetchSize);
 		
 		this.dataSource = dataSource;
 	}

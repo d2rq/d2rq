@@ -32,7 +32,7 @@
 	<classpathentry kind="lib" path="lib/arq-2.9/httpcore-4.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/arq-2.9/jena-arq-2.9.0-incubating.jar" sourcepath="/arq/src/main/java"/>
 	<classpathentry kind="lib" path="lib/arq-2.9/jena-core-2.7.0-incubating-tests.jar"/>
-	<classpathentry kind="lib" path="lib/arq-2.9/jena-core-2.7.0-incubating.jar"/>
+	<classpathentry kind="lib" path="lib/arq-2.9/jena-core-2.7.0-incubating.jar" sourcepath="/jena/src/main/java"/>
 	<classpathentry kind="lib" path="lib/arq-2.9/jena-iri-0.9.0-incubating.jar"/>
 	<classpathentry kind="lib" path="lib/arq-2.9/junit-4.9.jar"/>
 	<classpathentry kind="lib" path="lib/arq-2.9/xercesImpl.jar"/>

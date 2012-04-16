@@ -14,6 +14,8 @@ public class D2RQTestSuite {
 	public static final String ISWC_MAP = "file:doc/example/mapping-iswc.ttl"; 
 
 	public static void main(String[] args) {
+		// Be quiet and leave error reporting to JUnit
+		Log4jHelper.turnLoggingOff();
 		junit.textui.TestRunner.run(D2RQTestSuite.suite());
 	}
 
@@ -29,6 +31,7 @@ public class D2RQTestSuite {
 		suite.addTest(de.fuberlin.wiwiss.d2rq.functional_tests.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.helpers.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.map.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.mapgen.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.nodes.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.parser.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.pp.AllTests.suite());

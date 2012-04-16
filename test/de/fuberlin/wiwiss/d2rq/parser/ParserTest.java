@@ -18,6 +18,7 @@ import de.fuberlin.wiwiss.d2rq.helpers.MappingHelper;
 import de.fuberlin.wiwiss.d2rq.map.DownloadMap;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.values.Translator;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
@@ -65,6 +66,7 @@ public class ParserTest extends TestCase {
 
 	public void testParseAlias() {
 		Mapping mapping = MappingHelper.readFromTestFile("parser/alias.ttl");
+		MappingHelper.connectToDummyDBs(mapping);
 		assertEquals(1, mapping.compiledPropertyBridges().size());
 		TripleRelation bridge = (TripleRelation) mapping.compiledPropertyBridges().iterator().next();
 		assertTrue(bridge.baseRelation().condition().isTrue());
@@ -111,11 +113,14 @@ public class ParserTest extends TestCase {
 	
 	public void testGenerateDownloadMap() {
 		Mapping m = MappingHelper.readFromTestFile("parser/download-map.ttl");
+		MappingHelper.connectToDummyDBs(m);
 		Resource name = ResourceFactory.createResource("http://example.org/dm");
 		assertTrue(m.downloadMapResources().contains(name));
 		DownloadMap d = m.downloadMap(name);
 		assertNotNull(d);
-		assertEquals("image/png", d.getMediaType());
+		assertEquals("image/png", 
+				d.getMediaTypeValueMaker().makeValue(
+						new ResultRow() {public String get(ProjectionSpec column) {return null;}}));
 		assertEquals("People.pic", d.getContentDownloadColumn().qualifiedName());
 		assertEquals("URI(Pattern(http://example.org/downloads/@@People.ID@@))", 
 				d.nodeMaker().toString());

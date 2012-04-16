@@ -3,153 +3,223 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.engine.BindingMaker;
-import de.fuberlin.wiwiss.d2rq.engine.NodeRelation;
-import de.fuberlin.wiwiss.d2rq.find.TripleMaker;
+import de.fuberlin.wiwiss.d2rq.expr.Disjunction;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 
 /**
  * A group of {@link Relation}s that can be combined into a single
  * relation without changing the semantics of {@link de.fuberlin.wiwiss.d2rq.nodes.NodeMaker}s.
  * 
- * Relations can be combined iff they access the same database and 
- * they contain exactly the same joins and WHERE clauses. If they
- * both contain no joins, they must contain only columns from the same 
- * table.
+ * Relations can be combined if they access the same database and 
+ * they contain exactly the same joins. If they both contain no joins,
+ * they must contain only columns from the same table.
  * 
- * TODO: groupNodeRelations and groupTripleRelations are virtually identical
+ * Relations that just differ in their <code>WHERE</code> clause (condition)
+ * can still be combined, but require that the new relation has the disjunction
+ * (<code>OR</code>) of all conditions as a <code>WHERE</code> clause, and
+ * the individual conditions must be added to the <code>SELECT</code> list
+ * (as {@link ProjectionSpec}s) so that bindings are generated only
+ * if that clause is <code>TRUE</code>
+ * 
+ * TODO: Should check if the BindingMaker already has a condition?
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class CompatibleRelationGroup {
 
-	public static Collection groupTripleRelations(Collection tripleRelations) {
-		Collection result = new ArrayList();
-		Iterator it = tripleRelations.iterator();
-		while (it.hasNext()) {
-			TripleRelation tripleRelation = (TripleRelation) it.next();
-			addTripleRelation(tripleRelation, result);
-		}
-		return result;
-	}
-	
-	private static void addTripleRelation(TripleRelation tripleRelation, Collection groups) {
-		Iterator it = groups.iterator();
-		while (it.hasNext()) {
-			CompatibleRelationGroup group = (CompatibleRelationGroup) it.next();
-			if (group.isCompatible(tripleRelation.baseRelation())) {
-				group.addRelation(tripleRelation.baseRelation());
-				group.addTripleMaker(new TripleMaker(tripleRelation));
-				return;
-			}
-		}
-		CompatibleRelationGroup newGroup = new CompatibleRelationGroup(
-				tripleRelation.baseRelation());
-		newGroup.addTripleMaker(new TripleMaker(tripleRelation));
-		groups.add(newGroup);
-	}
-	
-	public static Collection groupNodeRelations(Collection nodeRelations) {
-		Collection result = new ArrayList();
-		Iterator it = nodeRelations.iterator();
-		while (it.hasNext()) {
-			NodeRelation nodeRelation = (NodeRelation) it.next();
+	public static Collection<CompatibleRelationGroup> groupNodeRelations(
+			Collection<? extends NodeRelation> nodeRelations) {
+		Collection<CompatibleRelationGroup> result = new ArrayList<CompatibleRelationGroup>();
+		for (NodeRelation nodeRelation: nodeRelations) {
 			addNodeRelation(nodeRelation, result);
 		}
 		return result;
 	}
 	
-	private static void addNodeRelation(NodeRelation nodeRelation, Collection groups) {
-		Iterator it = groups.iterator();
-		while (it.hasNext()) {
-			CompatibleRelationGroup group = (CompatibleRelationGroup) it.next();
+	private static void addNodeRelation(NodeRelation nodeRelation, 
+			Collection<CompatibleRelationGroup> groups) {
+		for (CompatibleRelationGroup group: groups) {
 			if (group.isCompatible(nodeRelation.baseRelation())) {
-				group.addRelation(nodeRelation.baseRelation());
-				group.addBindingMaker(new BindingMaker(nodeRelation));
+				group.addBindingMaker(
+						nodeRelation.baseRelation(), BindingMaker.createFor(nodeRelation));
 				return;
 			}
 		}
-		CompatibleRelationGroup newGroup = new CompatibleRelationGroup(
-				nodeRelation.baseRelation());
-		newGroup.addBindingMaker(new BindingMaker(nodeRelation));
+		CompatibleRelationGroup newGroup = new CompatibleRelationGroup();
+		newGroup.addBindingMaker(
+				nodeRelation.baseRelation(), BindingMaker.createFor(nodeRelation));
 		groups.add(newGroup);
 	}
 	
-	private final List tripleMakers = new ArrayList();
-	private final List bindingMakers = new ArrayList();
-	private final Relation firstBaseRelation;
+	private final List<BiningMakerAndCondition> makers = new ArrayList<BiningMakerAndCondition>();
+	private Relation firstBaseRelation = null;
+	private boolean differentConditions = false;
+	private boolean differentSoftConditions = false;
 	private boolean allUnique = true;
 	private int relationCounter = 0;
-	private Set projections = new HashSet();
+	private Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
+	private List<OrderSpec> longestOrderSpecs = new ArrayList<OrderSpec>();
 	
-	public CompatibleRelationGroup(Relation first) {
-		firstBaseRelation = first;
-		addRelation(first);
-	}
-
 	public boolean isCompatible(Relation otherRelation) {
+		if (firstBaseRelation == null) {
+			throw new IllegalStateException();
+		}
 		if (firstBaseRelation.database()==null || !firstBaseRelation.database().equals(otherRelation.database())) {
 			return false;
 		}
 		if (!firstBaseRelation.joinConditions().equals(otherRelation.joinConditions())) {
 			return false;
 		}
-		if (!firstBaseRelation.condition().equals(otherRelation.condition())) {
-			return false;
-		}
-		Set firstTables = firstBaseRelation.tables();
-		Set secondTables = otherRelation.tables();
+		Set<RelationName> firstTables = firstBaseRelation.tables();
+		Set<RelationName> secondTables = otherRelation.tables();
 		if (!firstTables.equals(secondTables)) {
 			return false;
 		}
-		Iterator it = firstTables.iterator();
-		while (it.hasNext()) {
-			RelationName tableName = (RelationName) it.next();
+		for (RelationName tableName: firstTables) {
 			if (!firstBaseRelation.aliases().originalOf(tableName).equals(
 					otherRelation.aliases().originalOf(tableName))) {
 				return false;
 			}
 		}
-		if (firstBaseRelation.projections().equals(otherRelation.projections())) {
-			return true;
+		if (!firstBaseRelation.projections().equals(otherRelation.projections())) {
+			// Uniqueness doesn't matter if we project the same columns
+			if (!firstBaseRelation.isUnique() || !otherRelation.isUnique()) {
+				return false;
+			}
 		}
-		if (firstBaseRelation.isUnique() && otherRelation.isUnique()) {
-			return true;
+		// Compatible ordering?
+		for (int i = 0; i < Math.min(longestOrderSpecs.size(), otherRelation.orderSpecs().size()); i++) {
+			if (!longestOrderSpecs.get(i).equals(otherRelation.orderSpecs().get(i))) return false;
 		}
-		return false;
+		for (int i = longestOrderSpecs.size(); i < otherRelation.orderSpecs().size(); i++) {
+			longestOrderSpecs.add(otherRelation.orderSpecs().get(i));
+		}
+		return true;
 	}
 
 	public void addRelation(Relation relation) {
+		if (firstBaseRelation == null) {
+			firstBaseRelation = relation;
+			longestOrderSpecs.addAll(firstBaseRelation.orderSpecs());
+		}
+		if (!relation.condition().equals(firstBaseRelation.condition())) {
+			differentConditions = true;
+		}
+		if (!relation.softCondition().equals(firstBaseRelation.softCondition())) {
+			differentSoftConditions = true;
+		}
 		projections.addAll(relation.projections());
 		allUnique = allUnique && relation.isUnique();
 		relationCounter++;
 	}
 
-	public void addTripleMaker(TripleMaker tripleMaker) {
-		tripleMakers.add(tripleMaker);
-	}
-	
-	public void addBindingMaker(BindingMaker bindingMaker) {
-		bindingMakers.add(bindingMaker);
+	public void addBindingMaker(Relation relation, BindingMaker bindingMaker) {
+		addRelation(relation);
+		makers.add(new BiningMakerAndCondition(bindingMaker, 
+				relation.condition(), relation.softCondition()));
 	}
 	
 	public Relation baseRelation() {
 		if (relationCounter == 1) {
+			// Just one relation, return it unchanged
 			return firstBaseRelation;
 		}
-		return new RelationImpl(firstBaseRelation.database(), firstBaseRelation.aliases(),
-				firstBaseRelation.condition(), firstBaseRelation.joinConditions(), 
-				projections, allUnique, firstBaseRelation.order(), firstBaseRelation.orderDesc(), firstBaseRelation.limit(), firstBaseRelation.limitInverse());
+		if (differentConditions) {
+			// Multiple relations and different conditions, add the conditions
+			// as boolean clauses to the SELECT list, and add a new condition
+			// consisting of the disjunction (OR) of all conditions
+			Set<Expression> allConditions = new HashSet<Expression>();
+			Set<ProjectionSpec> projectionsAndConditions = new HashSet<ProjectionSpec>(projections);
+			for (BiningMakerAndCondition maker: makers) {
+				// If relations A and B have different soft conditions, we want to end up
+				// with: (A.cond && A.soft) || (B.cond && B.soft)
+				// This is more restrictive than the simpler alternative
+				// (A.cond || B.cond) && (A.soft || B.soft), but requires turning
+				// the soft conditions into hard conditions.
+				allConditions.add(maker.conditionWithSoft());
+				if (!maker.condition.isTrue()) {
+					projectionsAndConditions.add(maker.conditionProjection());
+				}
+			}
+			if (allConditions.isEmpty()) {
+				allConditions.add(Expression.TRUE);
+			}
+			Disjunction.create(allConditions);
+			return new RelationImpl(firstBaseRelation.database(),
+					firstBaseRelation.aliases(),
+					Disjunction.create(allConditions),
+					Expression.TRUE,
+					firstBaseRelation.joinConditions(), 
+					projectionsAndConditions, 
+					allUnique, longestOrderSpecs, firstBaseRelation.limit(), firstBaseRelation.limitInverse());
+		} else {
+			// Multiple relations with same condition
+			Expression softCondition = firstBaseRelation.softCondition();
+			if (differentSoftConditions) {
+				Set<Expression> allSoftConditions = new HashSet<Expression>();
+				for (BiningMakerAndCondition maker: makers) {
+					allSoftConditions.add(maker.softCondition);
+				}
+				if (allSoftConditions.isEmpty()) {
+					allSoftConditions.add(Expression.TRUE);
+				}
+				softCondition = Disjunction.create(allSoftConditions);
+			}
+			// return a new relation with all the projections
+			return new RelationImpl(firstBaseRelation.database(), 
+					firstBaseRelation.aliases(),
+					firstBaseRelation.condition(),
+					softCondition,
+					firstBaseRelation.joinConditions(), 
+					projections, 
+					allUnique, longestOrderSpecs, firstBaseRelation.limit(), firstBaseRelation.limitInverse());
+		}
+	}
+
+	public Collection<BindingMaker> bindingMakers() {
+		Collection<BindingMaker> results = new ArrayList<BindingMaker>();
+		if (relationCounter == 1 || !differentConditions) {
+			// Return list of unchanged triple makers
+			for (BiningMakerAndCondition maker: makers) {
+				if (maker.bMaker == null) continue;
+				results.add(maker.bMaker);
+			}
+		} else {
+			// Make binding makers conditional on the added boolean condition
+			for (BiningMakerAndCondition maker: makers) {
+				if (maker.bMaker == null) continue;
+				if (maker.condition.isTrue()) {
+					results.add(maker.bMaker);
+				} else {
+					results.add(maker.makeConditional());
+				}
+			}
+		}
+		return results;
 	}
 	
-	public Collection tripleMakers() {
-		return tripleMakers;
-	}
-	
-	public Collection bindingMakers() {
-		return bindingMakers;
+	private class BiningMakerAndCondition {
+		private final BindingMaker bMaker;
+		private final Expression condition;
+		private final Expression softCondition;
+		BiningMakerAndCondition(BindingMaker maker, Expression condition,
+				Expression softCondition) {
+			this.bMaker = maker;
+			this.condition = condition;
+			this.softCondition = softCondition;
+		}
+		private ProjectionSpec conditionProjection() {
+			return new ExpressionProjectionSpec(condition);
+		}
+		private BindingMaker makeConditional() {
+			return bMaker.makeConditional(conditionProjection());
+		}
+		private Expression conditionWithSoft() {
+			return condition.and(softCondition);
+		}
 	}
 }

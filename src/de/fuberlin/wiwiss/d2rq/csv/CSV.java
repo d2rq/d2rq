@@ -39,7 +39,7 @@ class CSV {
 	}
 
 	/** The fields in the current String */
-	private ArrayList list = new ArrayList();
+	private ArrayList<String> list = new ArrayList<String>();
 
 	/** the separator char for this parser */
 	private char fieldSep;

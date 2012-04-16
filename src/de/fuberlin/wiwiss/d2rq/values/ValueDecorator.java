@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
@@ -47,14 +49,14 @@ public class ValueDecorator implements ValueMaker {
 	}
 	
 	private ValueMaker base;
-	private List constraints;
+	private List<ValueConstraint> constraints;
 	private Translator translator;
 	
-	public ValueDecorator(ValueMaker base, List constraints) {
-		this(base, constraints, Translator.identity);
+	public ValueDecorator(ValueMaker base, List<ValueConstraint> constraints) {
+		this(base, constraints, Translator.IDENTITY);
 	}
 
-	public ValueDecorator(ValueMaker base, List constraints, Translator translator) {
+	public ValueDecorator(ValueMaker base, List<ValueConstraint> constraints, Translator translator) {
 		this.base = base;
 		this.constraints = constraints;
 		this.translator = translator;
@@ -65,13 +67,12 @@ public class ValueDecorator implements ValueMaker {
 	}
 
 	public void describeSelf(NodeSetFilter c) {
+		c.setUsesTranslator(translator);
 		this.base.describeSelf(c);
 	}
 
 	public Expression valueExpression(String value) {
-		Iterator it = this.constraints.iterator();
-		while (it.hasNext()) {
-			ValueConstraint constraint = (ValueConstraint) it.next();
+		for (ValueConstraint constraint: constraints) {
 			if (!constraint.matches(value)) {
 				return Expression.FALSE;
 			}
@@ -83,12 +84,16 @@ public class ValueDecorator implements ValueMaker {
 		return base.valueExpression(dbValue);
 	}
 
-	public Set projectionSpecs() {
+	public Set<ProjectionSpec> projectionSpecs() {
 		return this.base.projectionSpecs();
 	}
 	
 	public ValueMaker renameAttributes(ColumnRenamer renamer) {
 		return new ValueDecorator(this.base.renameAttributes(renamer), this.constraints, this.translator);
+	}
+	
+	public List<OrderSpec> orderSpecs(boolean ascending) {
+		return base.orderSpecs(ascending);
 	}
 	
 	public interface ValueConstraint {
@@ -97,12 +102,12 @@ public class ValueDecorator implements ValueMaker {
 	
 	public String toString() {
 		StringBuffer result = new StringBuffer();
-		if (!this.translator.equals(Translator.identity)) {
+		if (!this.translator.equals(Translator.IDENTITY)) {
 			result.append(this.translator);
 			result.append("(");
 		}
 		result.append(this.base.toString());
-		Iterator it = this.constraints.iterator();
+		Iterator<ValueConstraint> it = this.constraints.iterator();
 		if (it.hasNext()) {
 			result.append(":");
 		}
@@ -112,7 +117,7 @@ public class ValueDecorator implements ValueMaker {
 				result.append("&&");
 			}
 		}
-		if (!this.translator.equals(Translator.identity)) {
+		if (!this.translator.equals(Translator.IDENTITY)) {
 			result.append(")");
 		}
 		return result.toString();

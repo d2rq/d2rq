@@ -39,7 +39,7 @@ public class Equality extends Expression {
 	
 	private final Expression expr1;
 	private final Expression expr2;
-	private final Set columns = new HashSet();
+	private final Set<Attribute> columns = new HashSet<Attribute>();
 	
 	private Equality(Expression expr1, Expression expr2) {
 		this.expr1 = expr1;
@@ -48,7 +48,7 @@ public class Equality extends Expression {
 		columns.addAll(expr2.attributes());
 	}
 	
-	public Set attributes() {
+	public Set<Attribute> attributes() {
 		return columns;
 	}
 

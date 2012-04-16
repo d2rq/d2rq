@@ -9,7 +9,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 public class ConcatenationTest extends TestCase {
 
 	public void testCreateEmpty() {
-		assertEquals(new Constant(""), Concatenation.create(Collections.EMPTY_LIST));
+		assertEquals(new Constant(""), Concatenation.create(Collections.<Expression>emptyList()));
 	}
 	
 	public void testCreateOnePart() {

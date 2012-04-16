@@ -15,7 +15,7 @@ public class AttributeExpr extends Expression {
 		this.attribute = attribute;
 	}
 	
-	public Set attributes() {
+	public Set<Attribute> attributes() {
 		return Collections.singleton(attribute);
 	}
 
@@ -32,7 +32,7 @@ public class AttributeExpr extends Expression {
 	}
 
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
-		return database.getSyntax().quoteAttribute(attribute);
+		return database.vendor().quoteAttribute(attribute);
 	}
 
 	public String toString() {

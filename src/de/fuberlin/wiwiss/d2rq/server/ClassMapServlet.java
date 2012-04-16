@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -13,7 +12,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.ClassMapLister;
 
 public class ClassMapServlet extends HttpServlet {
 
@@ -25,7 +24,7 @@ public class ClassMapServlet extends HttpServlet {
 			return;
 		}
 		String classMapName = request.getPathInfo().substring(1);
-		Model resourceList = graphD2RQ().classMapInventory(classMapName);
+		Model resourceList = getClassMapLister().classMapInventory(classMapName);
 		if (resourceList == null) {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return;
@@ -39,8 +38,8 @@ public class ClassMapServlet extends HttpServlet {
 		new ModelResponse(resourceList, request, response).serve();
 	}
 
-	private GraphD2RQ graphD2RQ() {
-		return (GraphD2RQ) D2RServer.fromServletContext(getServletContext()).currentGraph();
+	private ClassMapLister getClassMapLister() {
+		return D2RServer.retrieveSystemLoader(getServletContext()).getClassMapLister();
 	}
 	
 	private Model classMapListModel() {
@@ -48,9 +47,7 @@ public class ClassMapServlet extends HttpServlet {
 		Model result = ModelFactory.createDefaultModel();
 		Resource list = result.createResource(server.baseURI() + "all");
 		list.addProperty(RDFS.label, "D2R Server contents");
-		Iterator it = graphD2RQ().classMapNames().iterator();
-		while (it.hasNext()) {
-			String classMapName = (String) it.next();
+		for (String classMapName: getClassMapLister().classMapNames()) {
 			Resource instances = result.createResource(server.baseURI() + "all/" + classMapName);
 			list.addProperty(RDFS.seeAlso, instances);
 			instances.addProperty(RDFS.label, "List of all instances: " + classMapName);

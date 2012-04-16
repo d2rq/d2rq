@@ -14,9 +14,9 @@ import java.util.Map;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class ColumnRenamerMap extends ColumnRenamer {
-	private Map originalsToReplacements;
+	private Map<Attribute,Attribute> originalsToReplacements;
 	
-	public ColumnRenamerMap(Map originalsToReplacements) {
+	public ColumnRenamerMap(Map<Attribute,Attribute> originalsToReplacements) {
 		this.originalsToReplacements = originalsToReplacements;
 	}
 	
@@ -34,11 +34,11 @@ public class ColumnRenamerMap extends ColumnRenamer {
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		result.append("ColumnRenamerMap(");
-		List columns = new ArrayList(this.originalsToReplacements.keySet());
+		List<Attribute> columns = new ArrayList<Attribute>(this.originalsToReplacements.keySet());
 		Collections.sort(columns);
-		Iterator it = columns.iterator();
+		Iterator<Attribute> it = columns.iterator();
 		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+			Attribute column = it.next();
 			result.append(column.qualifiedName());
 			result.append(" => ");
 			result.append(((Attribute) this.originalsToReplacements.get(column)).qualifiedName());

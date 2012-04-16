@@ -21,9 +21,9 @@ public class NamespaceServlet extends HttpServlet {
 		d2r.getPrefixes().getNsPrefixMap();
 		out.println("// Generated dynamically from the mapping file");
 		out.println("var D2R_namespacePrefixes = {");
-		Iterator it = d2r.getPrefixes().getNsPrefixMap().entrySet().iterator();
+		Iterator<Entry<String,String>> it = d2r.getPrefixes().getNsPrefixMap().entrySet().iterator();
 		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
+			Entry<String,String> entry = it.next();
 			out.print("\t\"" + entry.getKey() + "\": \"" + entry.getValue() + "\"");
 			if (it.hasNext()) {
 				out.print(",");

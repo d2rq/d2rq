@@ -9,6 +9,8 @@ import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.expr.Concatenation;
 import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
@@ -32,7 +34,7 @@ public class BlankNodeID implements ValueMaker {
 	private final static String DELIMITER = "@@";
 
 	private String classMapID;
-	private List attributes;
+	private List<Attribute> attributes;
 	
 	/**
 	 * Constructs a new blank node identifier.
@@ -41,12 +43,12 @@ public class BlankNodeID implements ValueMaker {
 	 * @param attributes A set of {@link Attribute}s that uniquely
 	 * 		identify the nodes
 	 */
-	public BlankNodeID(String classMapID, List attributes) {
+	public BlankNodeID(String classMapID, List<Attribute> attributes) {
 		this.classMapID = classMapID;
 		this.attributes = attributes;
 	}
 
-	public List attributes() {
+	public List<Attribute> attributes() {
 		return this.attributes;
 	}
 	
@@ -58,6 +60,10 @@ public class BlankNodeID implements ValueMaker {
 		c.limitValuesToBlankNodeID(this);
 	}
 
+	public boolean matches(String value) {
+		return !valueExpression(value).isFalse();
+	}
+	
 	public Expression valueExpression(String value) {
 		if (value == null) {
 			return Expression.FALSE;
@@ -68,19 +74,17 @@ public class BlankNodeID implements ValueMaker {
 				|| !this.classMapID.equals(parts[0])) {
 			return Expression.FALSE;		
 		}
-		Iterator it = this.attributes.iterator();
 		int i = 1;	// parts[0] is classMap identifier
-		Collection expressions = new ArrayList(attributes.size());
-		while (it.hasNext()) {
-			Attribute attribute = (Attribute) it.next();
+		Collection<Expression> expressions = new ArrayList<Expression>(attributes.size());
+		for (Attribute attribute: attributes) {
 			expressions.add(Equality.createAttributeValue(attribute, parts[i]));
 			i++;
 		}
 		return Conjunction.create(expressions);
 	}
 
-	public Set projectionSpecs() {
-		return new HashSet(this.attributes);
+	public Set<ProjectionSpec> projectionSpecs() {
+		return new HashSet<ProjectionSpec>(this.attributes);
 	}
 
 	/**
@@ -90,9 +94,7 @@ public class BlankNodeID implements ValueMaker {
 	 */
 	public String makeValue(ResultRow row) {
 		StringBuffer result = new StringBuffer(this.classMapID);
-		Iterator it = this.attributes.iterator();
-		while (it.hasNext()) {
-			Attribute attribute = (Attribute) it.next();
+		for (Attribute attribute: attributes) {
 			String value = row.get(attribute);
 			if (value == null) {
 				return null;
@@ -104,18 +106,24 @@ public class BlankNodeID implements ValueMaker {
 	}
 	
 	public ValueMaker renameAttributes(ColumnRenamer renamer) {
-		List replacedAttributes = new ArrayList();
-		Iterator it = this.attributes.iterator();
-		while (it.hasNext()) {
-			Attribute attribute = (Attribute) it.next();
+		List<Attribute> replacedAttributes = new ArrayList<Attribute>();
+		for (Attribute attribute: attributes) {
 			replacedAttributes.add(renamer.applyTo(attribute));
 		}
 		return new BlankNodeID(this.classMapID, replacedAttributes);
 	}
 	
+	public List<OrderSpec> orderSpecs(boolean ascending) {
+		List<OrderSpec> result = new ArrayList<OrderSpec>(attributes.size());
+		for (Attribute column: attributes) {
+			result.add(new OrderSpec(new AttributeExpr(column), ascending));
+		}
+		return result;
+	}
+	
 	public String toString() {
 		StringBuffer result = new StringBuffer("BlankNodeID(");
-		Iterator it = this.attributes.iterator();
+		Iterator<Attribute> it = attributes.iterator();
 		while (it.hasNext()) {
 			Attribute attribute = (Attribute) it.next();
 			result.append(attribute.qualifiedName());
@@ -128,11 +136,9 @@ public class BlankNodeID implements ValueMaker {
 	}
 	
 	public Expression toExpression() {
-		List parts = new ArrayList();
+		List<Expression> parts = new ArrayList<Expression>();
 		parts.add(new Constant(classMapID));
-		Iterator it = attributes.iterator();
-		while (it.hasNext()) {
-			Attribute attribute = (Attribute) it.next();
+		for (Attribute attribute: attributes) {
 			parts.add(new Constant(DELIMITER));
 			parts.add(new AttributeExpr(attribute));
 		}

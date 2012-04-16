@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.Iterator;
 
 import junit.framework.TestCase;
 
@@ -24,7 +23,7 @@ public class DBConnectionTest extends TestCase {
 
 	private Model mapModel;
 
-	private Collection databases;
+	private Collection<Database> databases;
 	private Database firstDatabase;
 	private ConnectedDB cdb;
 	
@@ -43,28 +42,20 @@ public class DBConnectionTest extends TestCase {
 		mediumQuery = "SELECT DISTINCT papers.PaperID FROM rel_paper_topic, papers, topics WHERE papers.PaperID=rel_paper_topic.PaperID AND rel_paper_topic.TopicID=topics.TopicID AND topics.TopicID=3 AND rel_paper_topic.RelationType = 1 AND papers.Publish = 1;";
 		complexQuery = "SELECT T0_Papers.PaperID, T0_Persons.URI, T1_Persons.Email, T1_Persons.URI FROM persons AS T1_Persons, papers AS T0_Papers, rel_person_paper AS T0_Rel_Person_Paper, persons AS T0_Persons WHERE T0_Persons.PerID=T0_Rel_Person_Paper.PersonID AND T0_Papers.PaperID=T0_Rel_Person_Paper.PaperID AND T0_Papers.Publish = 1 AND T0_Persons.URI=T1_Persons.URI AND (NOT (CONCAT('http://www.conference.org/conf02004/paper#Paper' , CAST(T0_Papers.PaperID AS char) , '') = T0_Persons.URI));";
 
-		Iterator<?> it = databases.iterator();
-		while (it.hasNext()) {
-			Database db = (Database) it.next();
+		for (Database db: databases)
 			db.connectedDB().init();
-		}
-			
 	}
 
 	protected void tearDown() throws Exception {
 		mapModel.close();
-		Iterator<?> it = databases.iterator();
-		while (it.hasNext()) {
-			Database db = (Database) it.next();
+		for (Database db: databases)
 			db.connectedDB().close();
-		}
+		
 		if (cdb != null) cdb.close();
 	}
 
 	public void testConnections() throws SQLException {
-		Iterator it = databases.iterator();
-		while (it.hasNext()) {
-			Database db = (Database) it.next();
+		for (Database db: databases) {
 			cdb = db.connectedDB();
 			Connection c = cdb.connection();
 			String result = performQuery(c, simplestQuery); // 
@@ -134,20 +125,12 @@ public class DBConnectionTest extends TestCase {
 		cdb = firstDatabase.connectedDB();
 		Connection c = cdb.connection();
 		try {
-			//Connection c=manuallyConfiguredConnection();
 			String nonDistinct = "SELECT T0_Papers.Abstract FROM papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
 			String distinct = "SELECT DISTINCT T0_Papers.Abstract FROM papers AS T0_Papers WHERE T0_Papers.PaperID=1 AND T0_Papers.Publish = 1;";
 			String distinctResult = performQuery(c, distinct);
 			String nonDistinctResult = performQuery(c, nonDistinct);
-			if (!distinctResult.equals(nonDistinctResult)) {
-				if (firstDatabase.connectedDB().allowDistinct()) {
-					fail("testDistinct() has a mismatch." +
-							" Please use a better Database or " +
-							"put into your Database specification " +
-							"d2rq:allowDistinct \"true\".");
-					assertEquals(distinctResult,nonDistinctResult);
-				}
-			}
+			c.close();
+			assertEquals(distinctResult,nonDistinctResult);
 		} finally {
 			cdb.close(c);
 		}
@@ -162,6 +145,7 @@ public class DBConnectionTest extends TestCase {
 		    //Connection c=manuallyConfiguredConnection(); // 2 is ok, 1 fails
 			String query = mediumQuery;
 			String query_results = performQuery(c, query);
+			c.close();
 			assertNotNull(query_results);
 		} finally {
 			cdb.close(c);

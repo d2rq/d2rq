@@ -36,7 +36,7 @@ public class MappingTest extends TestCase {
 		Mapping m = new Mapping();
 		Database db = new Database(database1);
 		m.addDatabase(db);
-		assertEquals(Collections.singletonList(db), new ArrayList(m.databases()));
+		assertEquals(Collections.singletonList(db), new ArrayList<Database>(m.databases()));
 		assertEquals(db, m.database(database1));
 	}
 	
@@ -107,7 +107,7 @@ public class MappingTest extends TestCase {
 		ClassMap c = new ClassMap(classMap1);
 		m.addClassMap(c);
 		assertEquals(Collections.singleton(classMap1), 
-				new HashSet(m.classMapResources()));
+				new HashSet<Resource>(m.classMapResources()));
 		assertEquals(c, m.classMap(classMap1));
 	}
 }

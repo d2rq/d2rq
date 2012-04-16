@@ -1,8 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -13,14 +10,19 @@ import org.joseki.Service;
 import org.joseki.ServiceRegistry;
 import org.joseki.processors.SPARQL;
 
+import com.hp.hpl.jena.graph.BulkUpdateHandler;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandler;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerFactory;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
+import com.hp.hpl.jena.sparql.util.Context;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.ResourceDescriber;
+import de.fuberlin.wiwiss.d2rq.SystemLoader;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.map.Mapping;
 
 /**
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts Joseki.
@@ -36,45 +38,33 @@ public class D2RServer {
 	private final static String PAGE_SERVICE_NAME = "page";
 	private final static String VOCABULARY_STEM = "vocab/";
 	
-	private final static String DEFAULT_BASE_URI = "http://localhost";
 	private final static String DEFAULT_SERVER_NAME = "D2R Server";
-	private final static String SERVER_INSTANCE = "D2RServer.SERVER_INSTANCE";
+	private final static String SYSTEM_LOADER = "D2RServer.SYSTEM_LOADER";
+
 	private static final Log log = LogFactory.getLog(D2RServer.class);
 	
-	/** d2rq mapping file */
-	private String configFile;
+	/** System loader for access to the GraphD2RQ and configuration */
+	private final SystemLoader loader;
 	
 	/** config file parser and Java representation */
-	private ConfigLoader config = null;
-	
-	/** server port from command line, overrides port in config file */
-	private int overridePort = -1;
+	private final ConfigLoader config;
 	
 	/** base URI from command line */
 	private String overrideBaseURI = null;
 	
-	/** base URI from command line */
-	private boolean overrideUseAllOptimizations = false;
-
 	/** the dataset, auto-reloadable in case of local mapping files */
 	private AutoReloadableDataset dataset;
 
-	
-	public void putIntoServletContext(ServletContext context) {
-		context.setAttribute(SERVER_INSTANCE, this);
+	public D2RServer(SystemLoader loader) {
+		this.loader = loader;
+		this.config = loader.getServerConfig();
 	}
 	
 	public static D2RServer fromServletContext(ServletContext context) {
-		return (D2RServer) context.getAttribute(SERVER_INSTANCE);
+		return retrieveSystemLoader(context).getD2RServer();
 	}
 	
-	public void overridePort(int port) {
-		log.info("using port " + port);
-		this.overridePort = port;
-	}
-
 	public void overrideBaseURI(String baseURI) {
-
 		// This is a hack to allow hash URIs to be used at least in the
 		// SPARQL endpoint. It will not work in the Web interface.
 		if (!baseURI.endsWith("/") && !baseURI.endsWith("#")) {
@@ -83,40 +73,14 @@ public class D2RServer {
 		if (baseURI.indexOf('#') != -1) {
 			log.warn("Base URIs containing '#' may not work correctly!");
 		}
-
-		log.info("using custom base URI: " + baseURI);
 		this.overrideBaseURI = baseURI;
-	}
-	
-	public void overrideUseAllOptimizations(boolean overrideAllOptimizations) {
-		this.overrideUseAllOptimizations = overrideAllOptimizations;
-	}	
-	
-	public void setConfigFile(String configFileURL) {
-		configFile = configFileURL;
 	}
 	
 	public String baseURI() {
 		if (this.overrideBaseURI != null) {
 			return this.overrideBaseURI;
 		}
-		if (this.config.baseURI() != null) {
-			return this.config.baseURI();
-		}
-		if (this.port() == 80) {
-			return D2RServer.DEFAULT_BASE_URI + "/";
-		}
-		return D2RServer.DEFAULT_BASE_URI + ":" + this.port() + "/";
-	}
-
-	public int port() {
-		if (this.overridePort != -1) {
-			return this.overridePort;
-		}
-		if (this.config.port() != -1) {
-			return this.config.port();
-		}
-		return JettyLauncher.DEFAULT_PORT;
+		return this.config.baseURI();
 	}
 	
 	public String serverName() {
@@ -141,18 +105,6 @@ public class D2RServer {
 	
 	public String resourceBaseURI() {
 		return resourceBaseURI("");
-	}
-	
-	public String graphURLDescribingResource(String resourceURI) {
-		if (resourceURI.indexOf(":") == -1) {
-			resourceURI = resourceBaseURI() + resourceURI;
-		}
-		String query = "DESCRIBE <" + resourceURI + ">";
-		try {
-			return this.baseURI() + D2RServer.SPARQL_SERVICE_NAME + "?query=" + URLEncoder.encode(query, "utf-8");
-		} catch (UnsupportedEncodingException ex) {
-			throw new RuntimeException(ex);
-		}
 	}
 	
 	public static String getResourceServiceName() {
@@ -190,11 +142,8 @@ public class D2RServer {
 		return this.dataset;
 	}
 
-	/**
-	 * @return The graph currently in use; will change to a new instance on auto-reload
-	 */
-	public GraphD2RQ currentGraph() {
-		return (GraphD2RQ) this.dataset.asDatasetGraph().getDefaultGraph();
+	public Mapping getMapping() {
+		return loader.getMapping();
 	}
 	
 	/**
@@ -213,41 +162,49 @@ public class D2RServer {
 	}
 	
 	public void start() {
-		log.info("using config file: " + configFile);
-		try {
-			this.config = new ConfigLoader(configFile);
-			this.config.load();
-
-
-			if (config.isLocalMappingFile())
-				this.dataset = new AutoReloadableDataset(config.getLocalMappingFilename(), true, overrideUseAllOptimizations, this);
-			else
-				this.dataset = new AutoReloadableDataset(config.getMappingURL(), false, overrideUseAllOptimizations, this);
-			this.dataset.forceReload();
-
-			if (currentGraph().getConfiguration().getUseAllOptimizations()) {
-				log.info("Fast mode (all optimizations)");
-			} else {
-				log.info("Safe mode (launch using --fast to use all optimizations)");
-			}
-
-			DescribeHandlerRegistry.get().clear();
-			DescribeHandlerRegistry.get().add(new FindDescribeHandlerFactory());
-
-			Registry.add(RDFServer.ServiceRegistryName, createJosekiServiceRegistry());
-			log.info("success");
-		} catch (RuntimeException e) {
-			log.fatal("Error starting D2RServer ", e);
-			e.printStackTrace();
-			throw e;
+		if (config.isLocalMappingFile()) {
+			this.dataset = new AutoReloadableDataset(loader, config.getLocalMappingFilename(), config.getAutoReloadMapping());
+		} else {
+			this.dataset = new AutoReloadableDataset(loader, null, false);
 		}
+		
+		if (loader.getMapping().configuration().getUseAllOptimizations()) {
+			log.info("Fast mode (all optimizations)");
+		} else {
+			log.info("Safe mode (launch using --fast to use all optimizations)");
+		}
+		
+		// Set up a custom DescribeHandler that calls out to
+		// {@link ResourceDescriber}
+		DescribeHandlerRegistry.get().clear();
+		DescribeHandlerRegistry.get().add(new DescribeHandlerFactory() {
+			public DescribeHandler create() {
+				return new DescribeHandler() {
+					private BulkUpdateHandler adder;
+					public void start(Model accumulateResultModel, Context qContext) {
+						adder = accumulateResultModel.getGraph().getBulkUpdateHandler();
+					}
+					public void describe(Resource resource) {
+						log.info("DESCRIBE <" + resource + ">");
+						boolean outgoingTriplesOnly =
+							isVocabularyResource(resource) && !getConfig().getVocabularyIncludeInstances();
+						adder.add(new ResourceDescriber(
+								getMapping(), resource.asNode(), 
+								outgoingTriplesOnly, 
+								Relation.NO_LIMIT).description());
+					}
+					public void finish() {}
+				};
+			}
+		});
+
+		Registry.add(RDFServer.ServiceRegistryName, createJosekiServiceRegistry());
 	}
 	
 	public void shutdown()
 	{
 		log.info("shutting down");
-		
-		currentGraph().close();
+		loader.getMapping().close();
 	}
 	
 	protected ServiceRegistry createJosekiServiceRegistry() {
@@ -259,14 +216,15 @@ public class D2RServer {
 		return services;
 	}
 	
-	private class FindDescribeHandlerFactory implements DescribeHandlerFactory {
-		
-		public DescribeHandler create() {
-			return new FindDescribeHandler(D2RServer.this);
-		}
-	}
-	
 	public ConfigLoader getConfig() {
 		return config;
+	}
+	
+	public static void storeSystemLoader(SystemLoader loader, ServletContext context) {
+		context.setAttribute(SYSTEM_LOADER, loader);
+	}
+	
+	public static SystemLoader retrieveSystemLoader(ServletContext context) {
+		return (SystemLoader) context.getAttribute(SYSTEM_LOADER);
 	}
 }

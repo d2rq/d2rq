@@ -49,9 +49,9 @@ public class TranslationTableParser {
 		}
 	}
 	
-	public Collection parseTranslations() {
+	public Collection<Translation> parseTranslations() {
 		try {
-			List result = new ArrayList();
+			List<Translation> result = new ArrayList<Translation>();
 			while (true) {
 				String line = this.reader.readLine();
 				if (line == null) {

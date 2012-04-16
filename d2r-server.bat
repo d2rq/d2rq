@@ -6,8 +6,8 @@ if NOT EXIST .\d2r-server.bat (
 set D2RQ_ROOT=%~p0
 set CP="%D2RQ_ROOT%build"
 call :findjars "%D2RQ_ROOT%lib"
-set LOGCONFIG=file:%D2RQ_ROOT%etc/log4j-server.properties
-java -cp %CP% -Xmx1G "-Dlog4j.configuration=%LOGCONFIG%" d2rq.server %1 %2 %3 %4 %5 %6 %7 %8 %9
+set LOGCONFIG=file:%D2RQ_ROOT%etc/log4j.properties
+java -cp %CP% -Xmx1G "-Dlog4j.configuration=%LOGCONFIG%" d2rq.server %*
 exit /B
 
 :findjars

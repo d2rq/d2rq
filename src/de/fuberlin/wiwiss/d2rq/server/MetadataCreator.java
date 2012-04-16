@@ -41,6 +41,7 @@ public class MetadataCreator {
 	
 	// additional template variables
 	private String resourceURI;
+	@SuppressWarnings("unused")		// TODO Why is this never read?!?
 	private String documentURL;
 	private String sparqlQuery;
 	
@@ -116,7 +117,7 @@ public class MetadataCreator {
 		while ( changes ) {
 			changes = false;
 			StmtIterator stmtIt = metadata.listStatements();
-			List remList = new ArrayList();
+			List<Statement> remList = new ArrayList<Statement>();
 			while (stmtIt.hasNext()) {
 				Statement s = stmtIt.nextStatement();
 				if (    s.getObject().isAnon()

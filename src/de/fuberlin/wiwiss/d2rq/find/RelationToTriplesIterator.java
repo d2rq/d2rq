@@ -1,23 +1,18 @@
 package de.fuberlin.wiwiss.d2rq.find;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.util.CollectionFactory;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.NullIterator;
-import com.hp.hpl.jena.util.iterator.SingletonIterator;
 import com.hp.hpl.jena.util.iterator.WrappedIterator;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
+import de.fuberlin.wiwiss.d2rq.engine.BindingMaker;
+import de.fuberlin.wiwiss.d2rq.sql.SQLIterator;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
@@ -30,17 +25,15 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * @author Chris Bizer chris@bizer.de
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class RelationToTriplesIterator implements ClosableIterator {
+public class RelationToTriplesIterator implements ClosableIterator<Triple> {
 	
-	public static ClosableIterator create(Relation relation, Collection tripleMakers) {
+	public static ClosableIterator<Triple> create(Relation relation, Collection<BindingMaker> tripleMakers) {
 		if (relation.equals(Relation.EMPTY)) {
 			return NullIterator.instance();
 		}
 		if (relation.isTrivial()) {
-			ArrayList tripleList = new ArrayList();
-			Iterator it = tripleMakers.iterator();
-			while (it.hasNext()) {
-				TripleMaker tripleMaker = (TripleMaker) it.next();
+			ArrayList<Triple> tripleList = new ArrayList<Triple>();
+			for (BindingMaker tripleMaker: tripleMakers) {
 				Triple t = tripleMaker.makeTriple(ResultRow.NO_ATTRIBUTES);
 				if (t != null)
 					tripleList.add(t);
@@ -51,15 +44,14 @@ public class RelationToTriplesIterator implements ClosableIterator {
 		return new RelationToTriplesIterator(relation, tripleMakers);
 	}
 	
-	private Collection tripleMakers;
-	private ClosableIterator sqlIterator;
-    private LinkedList tripleQueue = new LinkedList();
+	private Collection<BindingMaker> tripleMakers;
+	private ClosableIterator<ResultRow> sqlIterator;
+    private LinkedList<Triple> tripleQueue = new LinkedList<Triple>();
     private boolean explicitlyClosed = false;
-    private String sql;
     
-    private RelationToTriplesIterator(Relation relation, Collection tripleMakers) {
+    private RelationToTriplesIterator(Relation relation, Collection<BindingMaker> tripleMakers) {
     	SelectStatementBuilder select = new SelectStatementBuilder(relation);
-    	this.sqlIterator = new QueryExecutionIterator(
+    	this.sqlIterator = new SQLIterator(
     			select.getSQLStatement(), select.getColumnSpecs(), relation.database());
 		this.tripleMakers = tripleMakers;
     }
@@ -83,7 +75,7 @@ public class RelationToTriplesIterator implements ClosableIterator {
 			return true;
 	}
 
-	public Object next() {
+	public Triple next() {
 		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
@@ -106,9 +98,7 @@ public class RelationToTriplesIterator implements ClosableIterator {
 	private void tryFillTripleQueue() {
 		while (this.sqlIterator.hasNext() && this.tripleQueue.isEmpty()) {
 			ResultRow nextRow = (ResultRow) this.sqlIterator.next();
-			Iterator it = tripleMakers.iterator();
-			while (it.hasNext()) {
-				TripleMaker tripleMaker = (TripleMaker) it.next();
+			for (BindingMaker tripleMaker: tripleMakers) {
 				Triple t = tripleMaker.makeTriple(nextRow);
 				if (t != null) this.tripleQueue.add(t);
 			}

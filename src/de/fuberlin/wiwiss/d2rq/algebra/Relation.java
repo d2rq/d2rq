@@ -3,7 +3,7 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
@@ -21,47 +21,47 @@ public abstract class Relation implements RelationalOperators {
 	
 	public static Relation createSimpleRelation(
 			ConnectedDB database, Attribute[] attributes) {
-		return new RelationImpl(database, AliasMap.NO_ALIASES, Expression.TRUE,
-				Collections.EMPTY_SET, new HashSet(Arrays.asList(attributes)), false, null, false, -1, -1);
+		return new RelationImpl(database, AliasMap.NO_ALIASES, Expression.TRUE, Expression.TRUE,
+				Collections.<Join>emptySet(), 
+				new HashSet<ProjectionSpec>(Arrays.asList(attributes)), 
+				false, Collections.<OrderSpec>emptyList(), -1, -1);
 	}
 	
 	public static Relation EMPTY = new Relation() {
 		public ConnectedDB database() { return null; }
 		public AliasMap aliases() { return AliasMap.NO_ALIASES; }
-		public Set joinConditions() { return Collections.EMPTY_SET; }
-		public Set leftJoinConditions() { return Collections.EMPTY_SET; }
+		public Set<Join> joinConditions() { return Collections.<Join>emptySet(); }
 		public Expression condition() { return Expression.FALSE; }
-		public Set projections() { return Collections.EMPTY_SET; }
+		public Expression softCondition() { return Expression.FALSE; }
+		public Set<ProjectionSpec> projections() { return Collections.<ProjectionSpec>emptySet(); }
 		public Relation select(Expression condition) { return this; }
 		public Relation renameColumns(ColumnRenamer renamer) { return this; }
-		public Relation project(Set projectionSpecs) { return this; }
+		public Relation project(Set<? extends ProjectionSpec>  projectionSpecs) { return this; }
 		public boolean isUnique() { return true; }
 		public String toString() { return "Relation.EMPTY"; }
-		public Attribute order() { return null; }
-		public boolean orderDesc() { return false; }
+		public List<OrderSpec> orderSpecs() {return Collections.emptyList();}
 		public int limit() { return Relation.NO_LIMIT; }
 		public int limitInverse() { return Relation.NO_LIMIT; }
 	};
 	public static Relation TRUE = new Relation() {
 		public ConnectedDB database() { return null; }
 		public AliasMap aliases() { return AliasMap.NO_ALIASES; }
-		public Set joinConditions() { return Collections.EMPTY_SET; }
-		public Set leftJoinConditions() { return Collections.EMPTY_SET; }
+		public Set<Join> joinConditions() { return Collections.<Join>emptySet(); }
 		public Expression condition() { return Expression.TRUE; }
-		public Set projections() { return Collections.EMPTY_SET; }
+		public Expression softCondition() { return Expression.TRUE; }
+		public Set<ProjectionSpec> projections() { return Collections.<ProjectionSpec>emptySet(); }
 		public Relation select(Expression condition) {
 			if (condition.isFalse()) return Relation.EMPTY;
 			if (condition.isTrue()) return Relation.TRUE;
-			// TODO This is broken; we need to evaluate the expression, but we don't
+			// FIXME This is broken; we need to evaluate the expression, but we don't
 			// have a ConnectedDB available here so we can't really do it
 			return Relation.TRUE;
 		}
 		public Relation renameColumns(ColumnRenamer renamer) { return this; }
-		public Relation project(Set projectionSpecs) { return this; }
+		public Relation project(Set<? extends ProjectionSpec> projectionSpecs) { return this; }
 		public boolean isUnique() { return true; }
 		public String toString() { return "Relation.TRUE"; }
-		public Attribute order() { return null; }
-		public boolean orderDesc() { return false; }
+		public List<OrderSpec> orderSpecs() {return Collections.emptyList();}
 		public int limit() { return Relation.NO_LIMIT; }
 		public int limitInverse() { return Relation.NO_LIMIT; }
 	};
@@ -81,15 +81,8 @@ public abstract class Relation implements RelationalOperators {
 	 * in the relation.
 	 * @return A set of {@link Join}s 
 	 */
-	public abstract Set joinConditions();
+	public abstract Set<Join> joinConditions();
 
-	/**
-	 * Returns the leftjoin conditions that must hold between the tables
-	 * in the relation.
-	 * @return A set of {@link Join}s 
-	 */
-	public abstract Set leftJoinConditions();
-	
 	/**
 	 * An expression that must be satisfied for all tuples in the
 	 * relation.
@@ -98,24 +91,36 @@ public abstract class Relation implements RelationalOperators {
 	public abstract Expression condition();
 	
 	/**
+	 * An expression satisfied by all tuples in the relation. This
+	 * is a necessary but not sufficient condition; it is
+	 * descriptive and not prescriptive. Replacing the condition
+	 * with {@link Expression#TRUE} does not change the contents of
+	 * the relation. It is thus just an optional condition that can
+	 * be used for optimization, but can be dropped or ignored if
+	 * convenient. Typically, there is other Java code that ensures the
+	 * condition regardless of whether it is present here or not.
+	 * 
+	 * We use this in particular for adding IS NOT NULL constraints
+	 * on all nullable columns that need to have a non-NULL value to form a
+	 * triple or binding.
+	 * 
+	 * @return An expression; {@link Expression#TRUE} indicates no soft condition
+	 */
+	public abstract Expression softCondition();
+	
+	/**
 	 * The attributes or expressions that the relation is projected to.
 	 * @return A set of {@link ProjectionSpec}s
 	 */
-	public abstract Set projections();
+	public abstract Set<ProjectionSpec> projections();
 	
 	public abstract boolean isUnique();
 	
 	/**
-	 * The database used to sort the SQL result set
-	 * @return The database column name
+	 * The expressions (and ascending/descending flag) used for ordering
+	 * the relation.
 	 */
-	public abstract Attribute order();
-
-	/**
-	 * The sort order for the SQL result set
-	 * @return <code>true</code> if descending, <code>false</code> if ascending order
-	 */
-	public abstract boolean orderDesc();
+	public abstract List<OrderSpec> orderSpecs();
 
 	/**
 	 * The limit clause for the SQL result set
@@ -129,33 +134,34 @@ public abstract class Relation implements RelationalOperators {
 	 */
 	public abstract int limitInverse();
 
-	public Set allKnownAttributes() {
-		Set results = new HashSet();
+	public Set<Attribute> allKnownAttributes() {
+		Set<Attribute> results = new HashSet<Attribute>();
 		results.addAll(condition().attributes());
-		Iterator it = joinConditions().iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
+		results.addAll(softCondition().attributes());
+		for (Join join: joinConditions()) {
 			results.addAll(join.attributes1());
 			results.addAll(join.attributes2());
 		}
-		it = projections().iterator();
-		while (it.hasNext()) {
-			ProjectionSpec projection = (ProjectionSpec) it.next();
+		for (ProjectionSpec projection: projections()) {
 			results.addAll(projection.requiredAttributes());
+		}
+		for (OrderSpec order: orderSpecs()) {
+			results.addAll(order.expression().attributes());
 		}
 		return results;
 	}
 
-	public Set tables() {
-		Set results = new HashSet();
-		Iterator it = allKnownAttributes().iterator();
-		while (it.hasNext()) {
-			Attribute attribute = (Attribute) it.next();
+	public Set<RelationName> tables() {
+		Set<RelationName> results = new HashSet<RelationName>();
+		for (Attribute attribute: allKnownAttributes()) {
 			results.add(attribute.relationName());
 		}
 		return results;
 	}
 	
+	/**
+	 * @return <code>true</code> if this is the trivial table (one row, no columns)
+	 */
 	public boolean isTrivial() {
 		return projections().isEmpty() && condition().isTrue() && joinConditions().isEmpty();
 	}

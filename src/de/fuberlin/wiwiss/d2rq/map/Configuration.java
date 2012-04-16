@@ -3,7 +3,6 @@ package de.fuberlin.wiwiss.d2rq.map;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 
 /**
@@ -12,7 +11,6 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * @author Christian Becker <http://beckr.org#chris>
  */
 public class Configuration extends MapObject {
-	
 	private boolean serveVocabulary = true;
 	private boolean useAllOptimizations = false;
 	

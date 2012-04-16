@@ -27,7 +27,7 @@ import java.util.Map;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class AliasMap extends ColumnRenamer {
-	public static final AliasMap NO_ALIASES = new AliasMap(Collections.EMPTY_SET);
+	public static final AliasMap NO_ALIASES = new AliasMap(Collections.<Alias>emptySet());
 
 	public static AliasMap create1(RelationName original, RelationName alias) {
 		return new AliasMap(Collections.singletonList(new Alias(original, alias)));
@@ -58,13 +58,11 @@ public class AliasMap extends ColumnRenamer {
 		}
 	}
 	
-	private Map byAlias = new HashMap();
-	private Map byOriginal = new HashMap();
+	private Map<RelationName,Alias> byAlias = new HashMap<RelationName,Alias>();
+	private Map<RelationName,Alias> byOriginal = new HashMap<RelationName,Alias>();
 	
-	public AliasMap(Collection aliases) {
-		Iterator it = aliases.iterator();
-		while (it.hasNext()) {
-			Alias alias = (Alias) it.next();
+	public AliasMap(Collection<Alias> aliases) {
+		for (Alias alias: aliases) {
 			this.byAlias.put(alias.alias(), alias);
 			this.byOriginal.put(alias.original(), alias);
 		}
@@ -137,14 +135,11 @@ public class AliasMap extends ColumnRenamer {
 		if (other.byAlias.isEmpty()) {
 			return this;
 		}
-		Collection newAliases = new ArrayList();
-		Iterator it = other.byAlias.values().iterator();
-		while (it.hasNext()) {
-			newAliases.add(applyTo((Alias) it.next()));
+		Collection<Alias> newAliases = new ArrayList<Alias>();
+		for (Alias alias: other.byAlias.values()) {
+			newAliases.add(applyTo(alias));
 		}
-		it = this.byAlias.values().iterator();
-		while (it.hasNext()) {
-			Alias alias = (Alias) it.next();
+		for (Alias alias: byAlias.values()) {
 			if (other.isAlias(alias.original())) continue;
 			newAliases.add(alias);
 		}
@@ -166,9 +161,9 @@ public class AliasMap extends ColumnRenamer {
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		result.append("AliasMap(");
-		List tables = new ArrayList(this.byAlias.keySet());
+		List<RelationName> tables = new ArrayList<RelationName>(this.byAlias.keySet());
 		Collections.sort(tables);
-		Iterator it = tables.iterator();
+		Iterator<RelationName> it = tables.iterator();
 		while (it.hasNext()) {
 			result.append(this.byAlias.get(it.next()));
 			if (it.hasNext()) {

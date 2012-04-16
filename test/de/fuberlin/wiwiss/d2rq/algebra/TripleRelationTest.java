@@ -21,12 +21,12 @@ public class TripleRelationTest extends TestCase {
 		RelationName original = new RelationName(null, "original");
 		RelationName alias = new RelationName(null, "alias");
 		AliasMap aliases = AliasMap.create1(original, alias);
-		Set projections = new HashSet(Arrays.asList(new Attribute[]{
+		Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>(Arrays.asList(new Attribute[]{
 				new Attribute(original, "id"), 
 				new Attribute(alias, "value")}));
 		Relation rel = new RelationImpl(
-				null, aliases, Expression.TRUE, 
-				Collections.EMPTY_SET, projections, false, null, false, Relation.NO_LIMIT, Relation.NO_LIMIT);
+				null, aliases, Expression.TRUE, Expression.TRUE, 
+				Collections.<Join>emptySet(), projections, false, OrderSpec.NONE, Relation.NO_LIMIT, Relation.NO_LIMIT);
 		TripleRelation t = new TripleRelation(rel, 
 				new TypedNodeMaker(TypedNodeMaker.URI, new Pattern("http://example.org/original/@@original.id@@"), true),
 				new FixedNodeMaker(Node.createURI("http://example.org/property"), false),
@@ -37,7 +37,7 @@ public class TripleRelationTest extends TestCase {
 				t.nodeMaker(TripleRelation.OBJECT).toString());
 		assertEquals("AliasMap(original AS alias)", 
 				t.baseRelation().aliases().toString());
-		TripleRelation t4 = t.withPrefix(4);
+		NodeRelation t4 = t.withPrefix(4);
 		assertEquals("URI(Pattern(http://example.org/original/@@T4_original.id@@))", 
 				t4.nodeMaker(TripleRelation.SUBJECT).toString());
 		assertEquals("Literal(Column(T4_alias.value))", 

@@ -2,18 +2,18 @@ package de.fuberlin.wiwiss.d2rq.functional_tests;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.AnonId;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.VCARD;
 
 import de.fuberlin.wiwiss.d2rq.helpers.FindTestFramework;
-import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
 import de.fuberlin.wiwiss.d2rq.vocab.ISWC;
 import de.fuberlin.wiwiss.d2rq.vocab.SKOS;
 
 /**
- * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.GraphD2RQ}.
+ * Functional tests for the find(spo) operation of {@link de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ}.
  * For notes on running the tests, see {@link AllTests}.
  * 
  * Each test method runs one or more find queries and automatically compares the actual
@@ -163,7 +163,7 @@ public class FindTest extends FindTestFramework {
 	public void testDump() {
 		find(null, null, null);
 //		dump();
-		assertStatementCount(341);
+		assertStatementCount(322);
 	}
 
 	public void testFindPredicate() {

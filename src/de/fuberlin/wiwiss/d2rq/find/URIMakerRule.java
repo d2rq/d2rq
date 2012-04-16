@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
@@ -20,6 +20,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.Translator;
 
 /**
  * <p>The URI maker rule states that any URI that matches a URI pattern is not contained
@@ -45,11 +46,11 @@ import de.fuberlin.wiwiss.d2rq.values.Pattern;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class URIMakerRule implements Comparator {
-	private Map identifierCache = new HashMap();
+public class URIMakerRule implements Comparator<TripleRelation> {
+	private Map<NodeMaker, URIMakerIdentifier> identifierCache = new HashMap<NodeMaker, URIMakerIdentifier>();
 
-	public List sortRDFRelations(Collection tripleRelations) {
-		ArrayList results = new ArrayList(tripleRelations);
+	public List<TripleRelation> sortRDFRelations(Collection<TripleRelation> tripleRelations) {
+		ArrayList<TripleRelation> results = new ArrayList<TripleRelation>(tripleRelations);
 		Collections.sort(results, this);
 		return results;
 	}
@@ -58,12 +59,9 @@ public class URIMakerRule implements Comparator {
 		return new URIMakerRuleChecker(node);
 	}
 	
-	public int compare(Object o1, Object o2) {
-		if (!(o1 instanceof TripleRelation) || !(o2 instanceof TripleRelation)) {
-			return 0;
-		}
-		int priority1 = priority((TripleRelation) o1);
-		int priority2 = priority((TripleRelation) o2);
+	public int compare(TripleRelation o1, TripleRelation o2) {
+		int priority1 = priority(o1);
+		int priority2 = priority(o2);
 		if (priority1 > priority2) {
 			return -1;
 		}
@@ -75,10 +73,8 @@ public class URIMakerRule implements Comparator {
 	
 	private int priority(TripleRelation relation) {
 		int result = 0;
-		Iterator it = TripleRelation.SUBJ_PRED_OBJ.iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
-			URIMakerIdentifier id = uriMakerIdentifier(relation.nodeMaker(name));
+		for (Var var: relation.variables()) {
+			URIMakerIdentifier id = uriMakerIdentifier(relation.nodeMaker(var));
 			if (id.isURIPattern()) {
 				result += 3;
 			}
@@ -117,6 +113,7 @@ public class URIMakerRule implements Comparator {
 		public void limitValuesToBlankNodeID(BlankNodeID id) { }
 		public void limitValuesToPattern(Pattern pattern) { this.isPattern = true; }
 		public void limitValuesToExpression(Expression expression) { }
+		public void setUsesTranslator(Translator translator) { }
 	}
 	
 	public class URIMakerRuleChecker {

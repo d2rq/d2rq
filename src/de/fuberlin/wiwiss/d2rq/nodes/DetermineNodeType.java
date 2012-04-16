@@ -11,6 +11,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.Translator;
 
 public class DetermineNodeType implements NodeSetFilter {
 
@@ -78,24 +79,35 @@ public class DetermineNodeType implements NodeSetFilter {
 		limitedToURIs = true;
 	}
 
+	// FIXME Implement!
 	public void limitValues(String constant) {
 		logger.warn("TODO DetermineNodeType.limitValues() " + constant);
 	}
 
+	// FIXME Implement!
 	public void limitValuesToAttribute(Attribute attribute) {
 		logger.warn("TODO DetermineNodeType.limitValuesToAttribute() " + attribute);
 	}
 
+	// FIXME Implement!
 	public void limitValuesToBlankNodeID(BlankNodeID id) {
 		logger.warn("TODO DetermineNodeType.limitValuesToBlankNodeID() " + id);
 	}
 
+	// FIXME Implement!
 	public void limitValuesToExpression(Expression expression) {
 		logger.warn("TODO DetermineNodeType.limitValuesToExpression() " + expression);
 	}
 
+	// FIXME Implement!
 	public void limitValuesToPattern(Pattern pattern) {
 		logger.warn("TODO DetermineNodeType.limitValuesToPattern() " + pattern);
 	}
 
+	// FIXME Implement!
+	public void setUsesTranslator(Translator translator) {
+		if (translator != Translator.IDENTITY) {
+			logger.warn("TODO DetermineNodeType.setUsesTranslator() " + translator);
+		}
+	}
 }

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import com.hp.hpl.jena.query.Query;
@@ -55,20 +54,18 @@ public class SdbSqlEqualityTest extends LoadDataTest
 		
 	public void testSdbSqlEquality()
 	{
-		String varName;
-		Query query;
 		ResultSet resultSet;
 		QueryExecution sdbQueryExecution, d2rqQueryExecution;
-		Binding binding;
-		List sdbDataResult, hsqlDataResult, sortingConditions;
+		List<? extends Object> sdbDataResult;		// Statement or Binding
+		List<? extends Object> hsqlDataResult;	// Statement or Binding
+		List<SortCondition> sortingConditions;
 		SortCondition sortCondition;
 		Var var;
-		List queries;
+		List<Query> queries;
 		int hsqlResultSize, sdbResultSize;
 		Object sdbResultEntry, hsqlResultEntry;
 		boolean entriesEqual;
 		Model sdbModel, d2rqModel;
-		Statement statement;
 				
 		try 
 		{
@@ -78,9 +75,7 @@ public class SdbSqlEqualityTest extends LoadDataTest
 		
 			System.out.println("Loaded " + queries.size() + " Queries from Queries-Directory: " + CURR_DIR + "/" + QUERY_DIR);
 			
-			for(Iterator queryIterator = queries.iterator(); queryIterator.hasNext();)
-			{
-				query = (Query) queryIterator.next();
+			for (Query query: queries) {
 				
 				System.out.println("--------------------------------------------------------------------------------------");
 				System.out.println("Executing Query: ");
@@ -90,14 +85,10 @@ public class SdbSqlEqualityTest extends LoadDataTest
 				// now execute the query against the sdb-datamodel
 				System.out.println("Querying SDB-Data-Model!");
 				sdbQueryExecution = QueryExecutionFactory.create(query, this.sdbDataModel);
-				// collect the sdb-data-result
-				sdbDataResult = new ArrayList();
 				
 				// now execute the query against the hsql-datamodel
 				System.out.println("Querying HSQL-Data-Model!");
 				d2rqQueryExecution = QueryExecutionFactory.create(query, this.hsqlDataModel);
-				// now collect the hsql-result
-				hsqlDataResult = new ArrayList();
 				
 				// Check for SELECT-Queries
 				if (query.isSelectType())
@@ -108,35 +99,36 @@ public class SdbSqlEqualityTest extends LoadDataTest
 					// both results (sdbDataResult, mysqlDataResult) must have the same order
 					// for equality-checking
 					// create an sort-order that will be used for both results
-					sortingConditions = new ArrayList();
+					sortingConditions = new ArrayList<SortCondition>();
 					
-					for(Iterator varIterator = resultSet.getResultVars().iterator(); varIterator.hasNext(); )
-					{
-						varName = (String)varIterator.next();
+					for (String varName: resultSet.getResultVars()) {
 						var = Var.alloc(varName);
 						sortCondition = new SortCondition(var, Query.ORDER_DEFAULT);
 						sortingConditions.add(sortCondition);
 					}
 										
+					List<Binding> sdbSelectResult = new ArrayList<Binding>();
+					List<Binding> hsqlSelectResult = new ArrayList<Binding>();
 					
 					while (resultSet.hasNext()) 
 					{
-						binding = resultSet.nextBinding();
-						sdbDataResult.add(binding);
+						sdbSelectResult.add(resultSet.nextBinding());
 					}
 					
-					Collections.sort(sdbDataResult, new BindingComparator(sortingConditions));
+					Collections.sort(sdbSelectResult, new BindingComparator(sortingConditions));
 				
 					resultSet = d2rqQueryExecution.execSelect();
 					
 					
 					while (resultSet.hasNext()) 
 					{
-						binding = resultSet.nextBinding();
-						hsqlDataResult.add(binding);
+						hsqlSelectResult.add(resultSet.nextBinding());
 					}
 					
-					Collections.sort(hsqlDataResult, new BindingComparator(sortingConditions));
+					Collections.sort(hsqlSelectResult, new BindingComparator(sortingConditions));
+
+					sdbDataResult = sdbSelectResult;
+					hsqlDataResult = hsqlSelectResult;
 				}else if (query.isConstructType() || query.isDescribeType())
 				{
 					
@@ -154,29 +146,35 @@ public class SdbSqlEqualityTest extends LoadDataTest
 						d2rqModel = d2rqQueryExecution.execDescribe();
 					}
 					
+					List<Statement> sdbGraphResult = new ArrayList<Statement>();
+					List<Statement> hsqlGraphResult = new ArrayList<Statement>();
+
 					// sdb
 					for(StmtIterator iterator = sdbModel.listStatements(); iterator.hasNext();)
 					{
-						statement = (Statement)iterator.nextStatement();
-						sdbDataResult.add(statement);
+						sdbGraphResult.add(iterator.nextStatement());
 					}
-					Collections.sort(sdbDataResult, new StatementsComparator());
+					Collections.sort(sdbGraphResult, new StatementsComparator());
 					
 					
 					// hsql
 					for(StmtIterator iterator = d2rqModel.listStatements(); iterator.hasNext();)
 					{
-						statement = (Statement)iterator.nextStatement();
-						hsqlDataResult.add(statement);
+						hsqlGraphResult.add(iterator.nextStatement());
 					}
-					Collections.sort(hsqlDataResult, new StatementsComparator());
-															
+					Collections.sort(hsqlGraphResult, new StatementsComparator());
+
+					sdbDataResult = sdbGraphResult;
+					hsqlDataResult = hsqlGraphResult;
+
 				}else if (query.isAskType())
 				{
 					// TODO: test for an ask-type
+					continue;
 				}else
 				{
 					fail("Unknown Query-Type !!!");
+					continue;
 				}
 					
 					
@@ -229,13 +227,13 @@ public class SdbSqlEqualityTest extends LoadDataTest
 	}
 	
 	
-	private List loadAllQueries() throws IOException
+	private List<Query> loadAllQueries() throws IOException
 	{
 		File queryDir;
 		File[] files;
-		List queries;
+		List<Query> queries;
 		
-		queries = new ArrayList();
+		queries = new ArrayList<Query>();
 		
 		queryDir = new File(CURR_DIR + "/" + QUERY_DIR);
 		files = queryDir.listFiles();
@@ -249,7 +247,7 @@ public class SdbSqlEqualityTest extends LoadDataTest
 		return queries;
 	}
 	
-	private void readRecursiveAndCreateQuery(File file, List queries) throws IOException
+	private void readRecursiveAndCreateQuery(File file, List<Query> queries) throws IOException
 	{
 		File[] files;
 		Query query;
@@ -340,10 +338,10 @@ public class SdbSqlEqualityTest extends LoadDataTest
 	}
 
 	
-	private static class StatementsComparator implements Comparator 
+	private static class StatementsComparator implements Comparator<Statement> 
 	{
 
-		public int compare(Object arg0, Object arg1) {
+		public int compare(Statement arg0, Statement arg1) {
 			return arg0.toString().compareTo(arg1.toString());
 		}
 		

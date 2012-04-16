@@ -2,7 +2,6 @@ package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -12,8 +11,10 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
-import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
+import de.fuberlin.wiwiss.d2rq.algebra.Join;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.sql.DummyDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 
 public class CompileTest extends TestCase {
@@ -32,6 +33,7 @@ public class CompileTest extends TestCase {
 		this.model = ModelFactory.createDefaultModel();
 		this.mapping = new Mapping();
 		this.database = new Database(this.model.createResource());
+		database.useConnectedDB(new DummyDB());
 		this.mapping.addDatabase(this.database);
 
 		employees = createClassMap("http://test/employee@@e.ID@@");
@@ -80,12 +82,11 @@ public class CompileTest extends TestCase {
 	
 	public void testJoinConditionsInRefersToClassMapAreRenamed() {
 		TripleRelation relation = (TripleRelation) this.managerBridge.toTripleRelations().iterator().next();
-		Set joinsToString = new HashSet();
-		Iterator it = relation.baseRelation().joinConditions().iterator();
-		while (it.hasNext()) {
-			joinsToString.add(it.next().toString());
+		Set<String> joinsToString = new HashSet<String>();
+		for (Join join: relation.baseRelation().joinConditions()) {
+			joinsToString.add(join.toString());
 		}
-		assertEquals(new HashSet(Arrays.asList(new String[]{
+		assertEquals(new HashSet<String>(Arrays.asList(new String[]{
 				"Join(e.manager <=> m.ID)", 
 				"Join(m.ID <=> foo.bar)",
 				"Join(e.ID <=> foo.bar)"})),

@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.map.Database;
+import de.fuberlin.wiwiss.d2rq.sql.types.DataType.GenericType;
 
 
 
@@ -28,8 +29,12 @@ public class DriverConnectedDB extends ConnectedDB {
 	public static final String KEEP_ALIVE_QUERY_PROPERTY = "keepAliveQuery"; // override default keep alive query
 	public static final String DEFAULT_KEEP_ALIVE_QUERY = "SELECT 1"; // may not work for some DBMS
 	
-	private static final String ORACLE_SET_DATE_FORMAT = "ALTER SESSION SET NLS_DATE_FORMAT = 'SYYYY-MM-DD'";
-	private static final String ORACLE_SET_TIMESTAMP_FORMAT = "ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'SYYYY-MM-DD HH24:MI:SS'";
+	{
+		DriverConnectedDB.registerJDBCDriverIfPresent("com.mysql.jdbc.Driver");
+		DriverConnectedDB.registerJDBCDriverIfPresent("org.postgresql.Driver");
+		DriverConnectedDB.registerJDBCDriverIfPresent("org.hsqldb.jdbcDriver");
+	}
+
 	
 	private String jdbcURL;
 	private String username;
@@ -90,21 +95,21 @@ public class DriverConnectedDB extends ConnectedDB {
 	private final KeepAliveAgent keepAliveAgent;
 	
 	public DriverConnectedDB(String jdbcURL, String username, String password) {
-		this(jdbcURL, username, password, true,
-	         Collections.<String,SQLDataType>emptyMap(),
+		this(jdbcURL, username, password,
+	         Collections.<String,GenericType>emptyMap(),
 	         Database.NO_LIMIT, Database.NO_FETCH_SIZE, null, null);
 	}
 	
 	public DriverConnectedDB(String jdbcURL, String username, String password, String startupSQLScript) {
-		this(jdbcURL, username, password, true,
-	         Collections.<String,SQLDataType>emptyMap(),
+		this(jdbcURL, username, password,
+	         Collections.<String,GenericType>emptyMap(),
 	         Database.NO_LIMIT, Database.NO_FETCH_SIZE, null, startupSQLScript);
 	}
 	
 	public DriverConnectedDB(String jdbcURL, String username, String password,
-	                         boolean allowDistinct, Map<String,SQLDataType> columnTypes, int limit, int fetchSize,
+	                         Map<String,GenericType> columnTypes, int limit, int fetchSize,
 	                         Properties connectionProperties, String startupSQLScript) {
-		super(allowDistinct, columnTypes, limit, fetchSize);
+		super(columnTypes, limit, fetchSize);
 		
 		this.jdbcURL  = jdbcURL;
 		this.username = username;
@@ -188,12 +193,15 @@ public class DriverConnectedDB extends ConnectedDB {
 	}
 	
 	private void connect() {
+		if (jdbcURL != null && !jdbcURL.toLowerCase().startsWith("jdbc:")) {
+			throw new D2RQException("Not a JDBC URL: " + jdbcURL, D2RQException.D2RQ_DB_CONNECTION_FAILED);
+		}
 		try {
 			long now = 0L;
 		
 			if (log.isDebugEnabled()) {
 				now = System.currentTimeMillis();
-				log.debug("opening connection to " + jdbcURL);
+				log.info("Establishing JDBC connection to " + jdbcURL);
 			}
 			
 			this.connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
@@ -207,57 +215,15 @@ public class DriverConnectedDB extends ConnectedDB {
 					D2RQException.D2RQ_DB_CONNECTION_FAILED);
 		}
 		
-		dbSpecificInit();
-	}
-	
-	
-	protected void dbSpecificInit()
-	{
-		/* Database-dependent initialization */
+		// Database-dependent initialization
 		try {
-			/* 
-			 * Disable auto-commit in PostgreSQL to support cursors
-			 * @see http://jdbc.postgresql.org/documentation/83/query.html
-			 */
-			if (dbTypeIs(PostgreSQL))
-				this.connection.setAutoCommit(false);
-						
-			/*
-			 * Set Oracle date formats 
-			 */
-			if (dbTypeIs(Oracle)) {
-				Statement stmt = this.connection.createStatement();
-				try
-				{
-					stmt.execute(ORACLE_SET_DATE_FORMAT);
-					stmt.execute(ORACLE_SET_TIMESTAMP_FORMAT);
-				}
-				catch (SQLException ex) {
-					throw new D2RQException("Unable to set date format: " + ex.getMessage(), D2RQException.D2RQ_SQLEXCEPTION);					
-				}
-				finally {
-					stmt.close();
-				}
-			}
-			
-			if (dbTypeIs(HSQLDB)) {
-				// Enable storage of special Double values: NaN, INF, -INF
-				Statement stmt = this.connection.createStatement();
-				try {
-					stmt.execute("SET DATABASE SQL DOUBLE NAN FALSE");
-				} catch (SQLException ex) {
-					throw new D2RQException("Unable to SET DATABASE SQL DOUBLE NAN FALSE: " + ex.getMessage(), D2RQException.D2RQ_SQLEXCEPTION);
-				} finally {
-					stmt.close();
-				}
-			}
+			vendor().initializeConnection(connection);
 		} catch (SQLException ex) {
 			throw new D2RQException(
 					"Database initialization failed: " + ex.getMessage(), 
 					D2RQException.D2RQ_DB_CONNECTION_FAILED);
 		}
 	}
-	
 	
 	
 	private Properties getConnectionProperties() {
@@ -300,24 +266,24 @@ public class DriverConnectedDB extends ConnectedDB {
 	}
 	
 	
-    public boolean equals(Object otherObject) {
+	public boolean equals(Object otherObject) {
 		if (otherObject == null)
 			return false;
 		
 		if (this == otherObject)
 			return true;
 		
-    	if (!(otherObject instanceof DriverConnectedDB)) {
-    		return false;
-    	}
-    	DriverConnectedDB other = (DriverConnectedDB) otherObject;
-    	return this.jdbcURL.equals(other.jdbcURL);
-    }
-    
-    public int hashCode() {
-    	return this.jdbcURL.hashCode();
-    }
-    
+		if (!(otherObject instanceof DriverConnectedDB)) {
+			return false;
+		}
+		DriverConnectedDB other = (DriverConnectedDB) otherObject;
+		return this.jdbcURL.equals(other.jdbcURL);
+	}
+	
+	public int hashCode() {
+		return this.jdbcURL.hashCode();
+	}
+	
 	public String toString()
 	{
 		return this.jdbcURL;

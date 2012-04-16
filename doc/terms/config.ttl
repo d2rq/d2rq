@@ -45,24 +45,35 @@ d2r:documentMetadata a rdf:Property;
     rdfs:domain d2r:Server;
     rdfs:isDefinedBy <>;
     .
-
 d2r:vocabularyIncludeInstances a rdf:Property;
     rdfs:label "serve instance data for vocabulary resources"@en;
     rdfs:comment "Whether views of vocabulary resources should include instance data."@en;
     rdfs:domain d2r:Server;
     rdfs:isDefinedBy <>;
     .
-
 d2r:autoReloadMapping a rdf:Property;
     rdfs:label "automatically check for updated mapping file"@en;
     rdfs:comment "Whether D2R Server should check for an updated mapping file with every request."@en;
     rdfs:domain d2r:Server;
     rdfs:isDefinedBy <>;
     .
-
 d2r:metadataTemplate a rdf:Property;
     rdfs:label "metadata template"@en;
     rdfs:comment "A RDF metadata template."@en;
     rdfs:domain d2r:Server;
+    rdfs:isDefinedBy <>;
+    .
+d2r:limitPerClassMap a rdf:Property;
+    rdfs:label "Limit per class map"@en;
+    rdfs:comment "Maximum number of values for each class map that will be displayed in the web interface when browsing resources. A value of false means no limit."@en;
+    rdfs:domain d2r:Server;
+    rdfs:range rdfs:Literal;
+    rdfs:isDefinedBy <>;
+    .
+d2r:limitPerPropertyBridge a rdf:Property;
+    rdfs:label "Limit per property bridge"@en;
+    rdfs:comment "Maximum number of values for each property bridge that will be displayed in the web interface when browsing resources. A value of false means no limit."@en;
+    rdfs:domain d2r:Server;
+    rdfs:range rdfs:Literal;
     rdfs:isDefinedBy <>;
     .
