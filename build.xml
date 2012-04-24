@@ -209,26 +209,30 @@
 	</target>
 	
 	<target name="war" depends="jar" description="Generate war archive for deployment in servlet container">
-		<war destfile="${war}" needxmlfile="false">
+		<war destfile="${war}" needxmlfile="false" duplicate="preserve">
 			<fileset dir="webapp/">
 				<include name="**"/>
-				<exclude name="WEB-INF"/>
+				<exclude name="WEB-INF/**"/>
 			</fileset>
 			<!-- Include subdirectories directly, so that the files are all
 				 in the main lib directory. Otherwise, Tomcat won't pick up the jars.
 				 TODO: Do this by copying the libs to a temp dir with flatten="true" -->
 			<lib dir="${lib}">
-				<exclude name="*/*"/><!-- Do not recurse into subdirectories -->
+				<include name="${jar}"/><!-- Do not recurse into subdirectories -->
 			</lib>
-			<lib dir="${lib}/arq-2.9"/>
+			<lib dir="${lib}/arq-2.9">
+				<exclude name="junit*.jar"/>
+			</lib>
+			<!--
 			<lib dir="${lib}/hsqldb-2.2.8"/>
 			<lib dir="${lib}/jetty-8.1.1">
 				<exclude name="servlet-api-*.jar"/>
 			</lib>
+			<lib dir="${lib}/db-drivers"/>
+			-->
 			<lib dir="${lib}/joseki-3.4.4"/>
 			<lib dir="${lib}/logging"/>
 			<lib dir="${lib}/velocity-1.7"/>
-			<lib dir="${lib}/db-drivers"/>
 			<webinf dir="webapp/WEB-INF">
 				<include name="*"/>
 				<exclude name="templates"/>
