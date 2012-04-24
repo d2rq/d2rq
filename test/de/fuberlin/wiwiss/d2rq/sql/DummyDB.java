@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType.GenericType;
 import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
@@ -29,26 +30,30 @@ public class DummyDB extends ConnectedDB {
 		this.vendor = Vendor.SQL92;
 	}
 	
+	@Override
+	public DatabaseSchemaInspector schemaInspector() {
+		return null;
+	}
+	
 
 	@Override
 	public void init() {
-		// TODO Auto-generated method stub
+		// nop
 	}
 
 	@Override
 	public Connection connection() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void close(Connection c) {
-		// TODO Auto-generated method stub
+		// nop
 	}
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
+		// nop
 	}
 	
 	public void setLimit(int newLimit) {

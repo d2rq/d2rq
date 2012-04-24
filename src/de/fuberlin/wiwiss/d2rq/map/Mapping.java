@@ -127,7 +127,7 @@ public class Mapping {
 		if (connected) return;
 		connected = true;
 		for (Database db: databases()) {
-			db.connectedDB().connection();
+			db.connectedDB().init();
 		}
 		validate();
 	}

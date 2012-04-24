@@ -105,7 +105,7 @@ public abstract class ConnectedDB {
 	}
 	
 	public DatabaseSchemaInspector schemaInspector() {
-		if (this.schemaInspector == null /*&& this.jdbcURL != null */ ) {
+		if (this.schemaInspector == null) {
 			this.schemaInspector = new DatabaseSchemaInspector(this);
 		}
 		return this.schemaInspector;

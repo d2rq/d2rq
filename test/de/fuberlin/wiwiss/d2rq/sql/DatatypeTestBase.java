@@ -89,7 +89,6 @@ public abstract class DatatypeTestBase extends TestCase {
 		mapping.configuration().setUseAllOptimizations(true);
 		mapping.connect();
 		graph = getGraph(mapping);
-		graph.connect();
 		inspector = mapping.databases().iterator().next().connectedDB().schemaInspector();
 	}
 	

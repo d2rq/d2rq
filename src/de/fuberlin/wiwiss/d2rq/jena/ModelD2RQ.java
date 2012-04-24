@@ -60,6 +60,7 @@ public class ModelD2RQ extends ModelCom implements Model {
 	public ModelD2RQ(Model mapModel, String baseURIForData) {
 		super(new GraphD2RQ(new MapParser(mapModel, 
 				(baseURIForData == null) ? "http://localhost/resource/" : baseURIForData).parse()), BuiltinPersonalities.model); // BuiltinPersonalities.model really required?
+		((GraphD2RQ) getGraph()).connect();
 	}
 	
 	/**

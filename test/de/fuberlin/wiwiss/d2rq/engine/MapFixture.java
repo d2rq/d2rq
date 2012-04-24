@@ -13,6 +13,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
+import de.fuberlin.wiwiss.d2rq.sql.DummyDB;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 import de.fuberlin.wiwiss.d2rq.vocab.Test;
 
@@ -46,6 +47,7 @@ public class MapFixture {
 		dummyDB.addProperty(RDF.type, D2RQ.Database);
 		m.read(D2RQTestSuite.class.getResourceAsStream(mappingFileName), null, "TURTLE");
 		Mapping mapping = new MapParser(m, null).parse();
+		mapping.database(dummyDB).useConnectedDB(new DummyDB());
 		return mapping;
 	}
 }
