@@ -17,6 +17,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
 
 import de.fuberlin.wiwiss.d2rq.CommandLineTool;
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.SystemLoader;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
@@ -92,6 +93,7 @@ public class dump_rdf extends CommandLineTool {
 
 		loader.setResultSizeLimit(Database.NO_LIMIT);
 		Mapping mapping = loader.getMapping();
+		mapping.connect();
 		try {
 			// Trigger compilation
 			mapping.compiledPropertyBridges();
@@ -114,6 +116,13 @@ public class dump_rdf extends CommandLineTool {
 			} catch (UnsupportedEncodingException ex) {
 				throw new RuntimeException("Can't happen -- utf-8 is always supported");
 			}
+		} catch (D2RQException e) {
+			if (e.errorCode() == D2RQException.DATABASE_DATASOURCE_NOT_FOUND) {
+				System.err.println("dump_rdf does not support mapping files using d2rq:jndiDataSource");
+				System.err.println(e.getMessage());
+			}
+			else
+				throw e;
 		} finally {
 			out.close();
 			mapping.close();

@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -190,10 +191,11 @@ public class Database extends MapObject {
 				try {
 					Context envContext  = (Context) new InitialContext().lookup("java:/comp/env");
 					DataSource dataSource = (DataSource) envContext.lookup(this.dataSource);
+					if (dataSource == null)
+						throw new D2RQException("Datasource \"" + this.dataSource + "\" not found", D2RQException.DATABASE_DATASOURCE_NOT_FOUND);
 					this.connection = new DataSourceConnectedDB(dataSource, columnTypes, limit, fetchSize);
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new D2RQException(e);
+				} catch (NamingException e) {
+					throw new D2RQException("Datasource \"" + this.dataSource + "\" not found", e, D2RQException.DATABASE_DATASOURCE_NOT_FOUND);
 				}
 			} else {
 				connection = new DriverConnectedDB(jdbcDSN, username, password,

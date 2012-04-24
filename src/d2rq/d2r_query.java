@@ -17,6 +17,7 @@ import com.hp.hpl.jena.sparql.resultset.ResultsFormat;
 import com.hp.hpl.jena.sparql.util.QueryExecUtils;
 
 import de.fuberlin.wiwiss.d2rq.CommandLineTool;
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.SystemLoader;
 import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
 
@@ -81,22 +82,32 @@ public class d2r_query extends CommandLineTool {
 		}
 
 		loader.setFastMode(true);
-		Model d2rqModel = loader.getModelD2RQ();
-
-		String prefixes = "";
-		for (String prefix: d2rqModel.getNsPrefixMap().keySet()) {
-			prefixes += "PREFIX " + prefix + ": <" + d2rqModel.getNsPrefixURI(prefix) + ">\n";
-		}
-		query = prefixes + query;
-		log.info("Query:\n" + query);
-		
+		Model d2rqModel = null;
 		try {
+			d2rqModel = loader.getModelD2RQ();
+
+			String prefixes = "";
+			for (String prefix: d2rqModel.getNsPrefixMap().keySet()) {
+				prefixes += "PREFIX " + prefix + ": <" + d2rqModel.getNsPrefixURI(prefix) + ">\n";
+			}
+			query = prefixes + query;
+			log.info("Query:\n" + query);
+
+
 			QueryEngineD2RQ.register();
 			Query q = QueryFactory.create(query, loader.getResourceBaseURI());
 			QueryExecution qe = QueryExecutionFactory.create(q, d2rqModel);
 			QueryExecUtils.executeQuery(q, qe, ResultsFormat.lookup(format));
+		} catch (D2RQException e) {
+				if (e.errorCode() == D2RQException.DATABASE_DATASOURCE_NOT_FOUND) {
+					System.err.println("d2r-query does not support mapping files using d2rq:jndiDataSource");
+					System.err.println(e.getMessage());
+				}
+				else
+					throw e;
 		} finally {
-			d2rqModel.close();
+			if (d2rqModel != null)
+				d2rqModel.close();
 		}
 	}
 }

@@ -2,6 +2,7 @@ package de.fuberlin.wiwiss.d2rq;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
@@ -183,9 +184,12 @@ public class SystemLoader {
 	private DriverConnectedDB getConnectedDB() {
 		if (connectedDB == null) {
 			connectedDB = new DriverConnectedDB(jdbcURL, username, password);
+			connectedDB.init();
 			if (sqlScript != null) {
 				try {
-					SQLScriptLoader.loadFile(new File(sqlScript), connectedDB.connection());
+					Connection connection = connectedDB.connection();
+					SQLScriptLoader.loadFile(new File(sqlScript), connection);
+					connectedDB.close(connection);
 				} catch (IOException ex) {
 					connectedDB.close();
 					throw new D2RQException(
