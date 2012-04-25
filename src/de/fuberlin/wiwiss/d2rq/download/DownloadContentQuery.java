@@ -6,22 +6,26 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
+import java.sql.Types;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hsqldb.types.Types;
 
 import com.hp.hpl.jena.graph.Node;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.MutableRelation;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.map.DownloadMap;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-import de.fuberlin.wiwiss.d2rq.sql.QueryExecutionIterator;
+import de.fuberlin.wiwiss.d2rq.sql.ResultRowMap;
+import de.fuberlin.wiwiss.d2rq.sql.SQLIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
+import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 
 /**
  * A helper that evaluates a {@link DownloadMap} for a particular
@@ -31,7 +35,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * 
  * This directly runs its own SQL query because the handling of
  * BLOBs here requires returning an InputStream, and that's not
- * easily supported by {@link QueryExecutionIterator}.
+ * easily supported by {@link SQLIterator}.
  *   
  * @author RichardCyganiak
  */
@@ -39,10 +43,12 @@ public class DownloadContentQuery {
 	private static final Log log = LogFactory.getLog(DownloadContentQuery.class);
 	
 	private final DownloadMap downloadMap;
+	private final ValueMaker mediaTypeValueMaker;
 	private final String uri;
 	private Statement statement = null;
 	private ResultSet resultSet = null;
 	private InputStream resultStream = null;
+	private String mediaType = null;
 	
 	/**
 	 * @param downloadMap The download map to be queried
@@ -50,6 +56,7 @@ public class DownloadContentQuery {
 	 */
 	public DownloadContentQuery(DownloadMap downloadMap, String uri) {
 		this.downloadMap = downloadMap;
+		this.mediaTypeValueMaker = downloadMap.getMediaTypeValueMaker();
 		this.uri = uri;
 		execute();
 	}
@@ -60,6 +67,10 @@ public class DownloadContentQuery {
 	
 	public InputStream getContentStream() {
 		return resultStream;
+	}
+	
+	public String getMediaType() {
+		return mediaType;
 	}
 	
 	public void close() {
@@ -82,10 +93,15 @@ public class DownloadContentQuery {
 		NodeMaker x = downloadMap.nodeMaker().selectNode(Node.createURI(uri), newRelation);
 		// URI didn't fit the node maker
 		if (x.equals(NodeMaker.EMPTY)) return;
-		newRelation.project(Collections.singleton(downloadMap.getContentDownloadColumn()));
+		Set<ProjectionSpec> requiredProjections = new HashSet<ProjectionSpec>();
+		requiredProjections.add(downloadMap.getContentDownloadColumn());
+		requiredProjections.addAll(mediaTypeValueMaker.projectionSpecs());
+		newRelation.project(requiredProjections);
 		newRelation.limit(1);
 		Relation filteredRelation = newRelation.immutableSnapshot();
-		String sql = new SelectStatementBuilder(filteredRelation).getSQLStatement();
+		SelectStatementBuilder builder = new SelectStatementBuilder(filteredRelation);
+		String sql = builder.getSQLStatement();
+		int contentColumn = builder.getColumnSpecs().indexOf(downloadMap.getContentDownloadColumn()) + 1;
     	ConnectedDB db = filteredRelation.database();
 		Connection conn = db.connection();
 		try {
@@ -96,19 +112,21 @@ public class DownloadContentQuery {
 				close();
 				return;	// 0 results
 			}
-			int type = resultSet.getMetaData().getColumnType(1);
+			int type = resultSet.getMetaData().getColumnType(contentColumn);
 			// TODO Handle Oracle BFILE type; there's some code for that already in ResultRowMap
 			if (type == Types.BINARY || type == Types.VARBINARY || type == Types.LONGVARBINARY || type == Types.BLOB) {
-				resultStream = resultSet.getBinaryStream(1);
+				resultStream = resultSet.getBinaryStream(contentColumn);
 				if (resultSet.wasNull()) {
 					resultStream = null;
 				}
 			} else {
-				String s = resultSet.getString(1);
+				String s = resultSet.getString(contentColumn);
 				if (!resultSet.wasNull()) {
 					resultStream = new ByteArrayInputStream(s.getBytes());
 				}
 			}
+			mediaType = mediaTypeValueMaker.makeValue(
+					ResultRowMap.fromResultSet(resultSet, builder.getColumnSpecs(), db));
 		} catch (SQLException ex) {
 			throw new D2RQException(ex);
 		}

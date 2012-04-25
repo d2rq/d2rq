@@ -7,7 +7,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 /**

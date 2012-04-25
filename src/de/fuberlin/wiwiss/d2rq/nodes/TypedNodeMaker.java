@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.nodes;
 
+import java.util.List;
 import java.util.Set;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
@@ -8,6 +9,8 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.AnonId;
 
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
+import de.fuberlin.wiwiss.d2rq.algebra.OrderSpec;
+import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
@@ -53,7 +56,7 @@ public class TypedNodeMaker implements NodeMaker {
 		this.isUnique = isUnique;
 	}
 	
-	public Set projectionSpecs() {
+	public Set<ProjectionSpec> projectionSpecs() {
 		return this.valueMaker.projectionSpecs();
 	}
 	
@@ -102,6 +105,12 @@ public class TypedNodeMaker implements NodeMaker {
 	public NodeMaker renameAttributes(ColumnRenamer renamer) {
 		return new TypedNodeMaker(this.nodeType, 
 				this.valueMaker.renameAttributes(renamer), this.isUnique);
+	}
+
+	public List<OrderSpec> orderSpecs(boolean ascending) {
+		// TODO: Consider the node type (e.g., RDF datatype) in ordering,
+		//       rather than just deferring to the underlying value maker
+		return valueMaker.orderSpecs(ascending);
 	}
 
 	public String toString() {

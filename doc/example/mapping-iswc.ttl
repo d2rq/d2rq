@@ -138,7 +138,6 @@ map:Papers a d2rq:ClassMap;
 map:papers_Title a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Papers;
 	d2rq:property dc:title;
-	d2rq:property rdfs:label;
 	d2rq:column "papers.Title";
 	d2rq:lang "en";
 	.
@@ -266,7 +265,6 @@ map:topics_Type a d2rq:PropertyBridge;
 map:topics_TopicName a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Topics;
 	d2rq:property skos:prefLabel;
-	d2rq:property rdfs:label;
 	d2rq:column "topics.TopicName";
 	d2rq:datatype xsd:string;
 	.

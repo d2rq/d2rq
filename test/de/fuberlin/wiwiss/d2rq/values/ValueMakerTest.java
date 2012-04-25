@@ -32,7 +32,7 @@ public class ValueMakerTest extends TestCase {
 	}
 	
 	public void testMaxLengthConstraint() {
-		DummyValueSource source = new DummyValueSource("foo");
+		DummyValueMaker source = new DummyValueMaker("foo");
 		ValueDecorator values = new ValueDecorator(source, Collections.singletonList(ValueDecorator.maxLengthConstraint(5)));
 		assertFalse(matches(values, null));
 		assertTrue(matches(values, ""));
@@ -44,7 +44,7 @@ public class ValueMakerTest extends TestCase {
 	}
 	
 	public void testContainsConstraint() {
-		DummyValueSource source = new DummyValueSource("foo");
+		DummyValueMaker source = new DummyValueMaker("foo");
 		ValueDecorator values = new ValueDecorator(source, Collections.singletonList(ValueDecorator.containsConstraint("foo")));
 		assertFalse(matches(values, null));
 		assertTrue(matches(values, "foo"));
@@ -60,7 +60,7 @@ public class ValueMakerTest extends TestCase {
 	}
 	
 	public void testRegexConstraint() {
-		DummyValueSource source = new DummyValueSource("foo");
+		DummyValueMaker source = new DummyValueMaker("foo");
 		ValueDecorator values = new ValueDecorator(source, Collections.singletonList(ValueDecorator.regexConstraint("^[0-9]{5}$")));
 		assertFalse(matches(values, null));
 		assertTrue(matches(values, "12345"));

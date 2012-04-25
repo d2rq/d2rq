@@ -8,15 +8,27 @@ import java.util.List;
 
 import com.hp.hpl.jena.graph.Triple;
 
+import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 
+/**
+ * Matches a BGP against a collection of {@link TripleRelation}s
+ * and returns a collection of {@link NodeRelation}s.
+ * 
+ * The node relations produce the same bindings that one would
+ * get from matching the BGP against the materialized triples
+ * produced by the triple relations.
+ * 
+ * @author Richard Cyganiak (richard@cyganiak.de)
+ */
 public class GraphPatternTranslator {
-	private final List triplePatterns;
-	private final Collection tripleRelations;
+	private final List<Triple> triplePatterns;
+	private final Collection<TripleRelation> tripleRelations;
 	boolean useAllOptimizations;
 	
-	public GraphPatternTranslator(List triplePatterns, Collection tripleRelations, boolean useAllOptimizations) 
+	public GraphPatternTranslator(List<Triple> triplePatterns, 
+			Collection<TripleRelation> tripleRelations, boolean useAllOptimizations) 
 	{
 		this.triplePatterns = triplePatterns;
 		this.tripleRelations = tripleRelations;
@@ -26,12 +38,12 @@ public class GraphPatternTranslator {
 	/**
 	 * @return A list of {@link NodeRelation}s
 	 */
-	public List translate() {
+	public List<NodeRelation> translate() {
 		if (triplePatterns.isEmpty()) {
 			return Collections.singletonList(NodeRelation.TRUE);
 		}
-		Iterator it = triplePatterns.iterator();
-		List candidateLists = new ArrayList(triplePatterns.size());
+		Iterator<Triple> it = triplePatterns.iterator();
+		List<CandidateList> candidateLists = new ArrayList<CandidateList>(triplePatterns.size());
 		int index = 1;
 		while (it.hasNext()) {
 			Triple triplePattern = (Triple) it.next();
@@ -40,30 +52,24 @@ public class GraphPatternTranslator {
 			CandidateList candidates = new CandidateList(
 					triplePattern, triplePatterns.size() > 1, index);
 			if (candidates.isEmpty()) {
-				return Collections.EMPTY_LIST;
+				return Collections.<NodeRelation>emptyList();
 			}
 			candidateLists.add(candidates);
 			// inc value
 			index++;
 		}
 		Collections.sort(candidateLists);
-		List joiners = new ArrayList();
+		List<TripleRelationJoiner> joiners = new ArrayList<TripleRelationJoiner>();
 		joiners.add(TripleRelationJoiner.create(this.useAllOptimizations));
-		it = candidateLists.iterator();
-		while (it.hasNext()) {
-			CandidateList candidates = (CandidateList) it.next();
-			List nextJoiners = new ArrayList();
-			Iterator it2 = joiners.iterator();
-			while (it2.hasNext()) {
-				TripleRelationJoiner joiner = (TripleRelationJoiner) it2.next();
+		for (CandidateList candidates: candidateLists) {
+			List<TripleRelationJoiner> nextJoiners = new ArrayList<TripleRelationJoiner>();
+			for (TripleRelationJoiner joiner: joiners) {
 				nextJoiners.addAll(joiner.joinAll(candidates.triplePattern(), candidates.all()));
 			}
 			joiners = nextJoiners;
 		}
-		List results = new ArrayList(joiners.size());
-		it = joiners.iterator();
-		while (it.hasNext()) {
-			TripleRelationJoiner joiner = (TripleRelationJoiner) it.next();
+		List<NodeRelation> results = new ArrayList<NodeRelation>(joiners.size());
+		for (TripleRelationJoiner joiner: joiners) {
 			NodeRelation nodeRelation = joiner.toNodeRelation();
 			if (!nodeRelation.baseRelation().equals(Relation.EMPTY) || !useAllOptimizations)
 				results.add(nodeRelation);
@@ -71,12 +77,12 @@ public class GraphPatternTranslator {
 		return results;
 	}
 
-	private class CandidateList implements Comparable {
+	private class CandidateList implements Comparable<CandidateList> {
 		private final Triple triplePattern;
-		private final List candidates;
+		private final List<NodeRelation> candidates;
 		CandidateList(Triple triplePattern, boolean useIndex, int index) {
 			this.triplePattern = triplePattern;
-			List matches = findMatchingTripleRelations(triplePattern);
+			List<NodeRelation> matches = findMatchingTripleRelations(triplePattern);
 			if (useIndex) {
 				candidates = prefixTripleRelations(matches, index);
 			} else {
@@ -89,10 +95,10 @@ public class GraphPatternTranslator {
 		Triple triplePattern() {
 			return triplePattern;
 		}
-		List all() {
+		List<NodeRelation> all() {
 			return candidates;
 		}
-		public int compareTo(Object other) {
+		public int compareTo(CandidateList other) {
 			CandidateList otherList = (CandidateList) other;
 			if (candidates.size() < otherList.candidates.size()) {
 				return -1;
@@ -102,22 +108,18 @@ public class GraphPatternTranslator {
 			}
 			return 0;
 		}
-		private List findMatchingTripleRelations(Triple triplePattern) {
-			List results = new ArrayList();
-			Iterator it = tripleRelations.iterator();
-			while (it.hasNext()) {
-				TripleRelation tripleRelation = (TripleRelation) it.next();
+		private List<NodeRelation> findMatchingTripleRelations(Triple triplePattern) {
+			List<NodeRelation> results = new ArrayList<NodeRelation>();
+			for (TripleRelation tripleRelation: tripleRelations) {
 				TripleRelation selected = tripleRelation.selectTriple(triplePattern);
 				if (selected == null) continue;
 				results.add(selected);
 			}
 			return results;
 		}
-		private List prefixTripleRelations(List tripleRelations, int index) {
-			List results = new ArrayList(tripleRelations.size());
-			Iterator it = tripleRelations.iterator();
-			while (it.hasNext()) {
-				TripleRelation tripleRelation = (TripleRelation) it.next();
+		private List<NodeRelation> prefixTripleRelations(List<NodeRelation> tripleRelations, int index) {
+			List<NodeRelation> results = new ArrayList<NodeRelation>(tripleRelations.size());
+			for (NodeRelation tripleRelation: tripleRelations) {
 				results.add(tripleRelation.withPrefix(index));
 			}
 			return results;

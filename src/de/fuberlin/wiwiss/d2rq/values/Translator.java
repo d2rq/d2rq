@@ -29,7 +29,7 @@ package de.fuberlin.wiwiss.d2rq.values;
  */
 public interface Translator {
 
-	public static Translator identity = new Translator() {
+	public static Translator IDENTITY = new Translator() {
 		public String toRDFValue(String dbValue) { return dbValue; }
 		public String toDBValue(String rdfValue) { return rdfValue; }
 		public String toString() { return "identity"; }

@@ -3,6 +3,7 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 public class ExpressionProjectionSpec implements ProjectionSpec {
@@ -18,7 +19,7 @@ public class ExpressionProjectionSpec implements ProjectionSpec {
 		return new ExpressionProjectionSpec(renamer.applyTo(expression));
 	}
 
-	public Set requiredAttributes() {
+	public Set<Attribute> requiredAttributes() {
 		return expression.attributes();
 	}
 
@@ -28,6 +29,10 @@ public class ExpressionProjectionSpec implements ProjectionSpec {
 
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
 		return expression.toSQL(database, aliases) + " AS " + name;
+	}
+	
+	public Expression notNullExpression(ConnectedDB database, AliasMap aliases) {
+		return SQLExpression.create("(" + expression.toSQL(database, aliases) + ") IS NOT NULL");
 	}
 	
 	public boolean equals(Object other) {
@@ -41,5 +46,17 @@ public class ExpressionProjectionSpec implements ProjectionSpec {
 
 	public String toString() {
 		return "ProjectionSpec(" + expression + " AS " + name + ")";
+	}
+
+	/**
+	 * Compares columns alphanumerically by qualified name, case sensitive.
+	 * Attributes with schema are larger than attributes without schema.
+	 */
+	public int compareTo(ProjectionSpec other) {
+		if (!(other instanceof ExpressionProjectionSpec)) {
+			return 1;
+		}
+		ExpressionProjectionSpec otherExpr = (ExpressionProjectionSpec) other;
+		return this.name.compareTo(otherExpr.name);
 	}
 }

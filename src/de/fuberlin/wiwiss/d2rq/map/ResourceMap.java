@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +16,8 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
+import de.fuberlin.wiwiss.d2rq.algebra.AliasMap.Alias;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
@@ -28,12 +29,14 @@ import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker.NodeType;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.parser.RelationBuilder;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Column;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 import de.fuberlin.wiwiss.d2rq.values.SQLExpressionValueMaker;
 import de.fuberlin.wiwiss.d2rq.values.ValueDecorator;
+import de.fuberlin.wiwiss.d2rq.values.ValueDecorator.ValueConstraint;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
@@ -47,12 +50,12 @@ public abstract class ResourceMap extends MapObject {
 	protected String uriColumn = null;
 	protected String uriPattern = null;
 	protected RDFNode constantValue = null;
-	protected Collection valueRegexes = new ArrayList();
-	protected Collection valueContainses = new ArrayList();
+	protected Collection<String> valueRegexes = new ArrayList<String>();
+	protected Collection<String> valueContainses = new ArrayList<String>();
 	protected int valueMaxLength = Integer.MAX_VALUE;
-	protected Collection joins = new ArrayList();
-	protected Collection conditions = new ArrayList();
-	protected Collection aliases = new ArrayList();
+	protected Collection<String> joins = new ArrayList<String>();
+	protected Collection<String> conditions = new ArrayList<String>();
+	protected Collection<String> aliases = new ArrayList<String>();
 	protected boolean containsDuplicates;
 	protected TranslationTable translateWith = null;
 
@@ -72,13 +75,13 @@ public abstract class ResourceMap extends MapObject {
 	private NodeMaker cachedNodeMaker;
 	private Relation cachedRelation;
 	
-	Collection definitionLabels = new ArrayList();
-	Collection definitionComments = new ArrayList();
+	Collection<Literal> definitionLabels = new ArrayList<Literal>();
+	Collection<Literal> definitionComments = new ArrayList<Literal>();
 
 	/**
 	 * List of D2RQ.AdditionalProperty
 	 */
-	Collection additionalDefinitionProperties = new ArrayList();	
+	Collection<Resource> additionalDefinitionProperties = new ArrayList<Resource>();	
 
 	public ResourceMap(Resource resource, boolean defaultContainsDuplicate) {
 		super(resource);
@@ -145,32 +148,24 @@ public abstract class ResourceMap extends MapObject {
 		this.containsDuplicates = b;
 	}
 
-	private Collection aliases() {
-		Set parsedAliases = new HashSet();
-		Iterator it = aliases.iterator();
-		while (it.hasNext()) {
-			String alias = (String) it.next();
+	private Collection<Alias> aliases() {
+		Set<Alias> parsedAliases = new HashSet<Alias>();
+		for (String alias: aliases) {
 			parsedAliases.add(SQL.parseAlias(alias));
 		}
 		return parsedAliases;
 	}
 	
-	public RelationBuilder relationBuilder() {
-		RelationBuilder result = new RelationBuilder();
-		Iterator it = SQL.parseJoins(this.joins).iterator();
-		while (it.hasNext()) {
-			Join join = (Join) it.next();
+	public RelationBuilder relationBuilder(ConnectedDB database) {
+		RelationBuilder result = new RelationBuilder(database);
+		for (Join join: SQL.parseJoins(joins)) {
 			result.addJoinCondition(join);
 		}
-		it = this.conditions.iterator();
-		while (it.hasNext()) {
-			String condition = (String) it.next();
+		for (String condition: conditions) {
 			result.addCondition(condition);
 		}
 		result.addAliases(aliases());
-		it = nodeMaker().projectionSpecs().iterator();
-		while (it.hasNext()) {
-			ProjectionSpec projection = (ProjectionSpec) it.next();
+		for (ProjectionSpec projection: nodeMaker().projectionSpecs()) {
 			result.addProjection(projection);
 		}
 		if (!containsDuplicates) {
@@ -244,18 +239,14 @@ public abstract class ResourceMap extends MapObject {
 	}
 
 	public ValueMaker wrapValueSource(ValueMaker values) {
-		List constraints = new ArrayList();
+		List<ValueConstraint> constraints = new ArrayList<ValueConstraint>();
 		if (this.valueMaxLength != Integer.MAX_VALUE) {
 			constraints.add(ValueDecorator.maxLengthConstraint(this.valueMaxLength));
 		}
-		Iterator it = this.valueContainses.iterator();
-		while (it.hasNext()) {
-			String contains = (String) it.next();
+		for (String contains: valueContainses) {
 			constraints.add(ValueDecorator.containsConstraint(contains));
 		}
-		it = this.valueRegexes.iterator();
-		while (it.hasNext()) {
-			String regex = (String) it.next();
+		for (String regex: valueRegexes) {
 			constraints.add(ValueDecorator.regexConstraint(regex));
 		}
 		if (this.translateWith == null) {
@@ -302,20 +293,17 @@ public abstract class ResourceMap extends MapObject {
 		return TypeMapper.getInstance().getSafeTypeByName(datatypeURI);		
 	}
 
-	private List parseColumnList(String commaSeperated) {
-		List result = new ArrayList();
-		Iterator it = Arrays.asList(commaSeperated.split(",")).iterator();
-		while (it.hasNext()) {
-			result.add(SQL.parseAttribute((String) it.next()));
+	private List<Attribute> parseColumnList(String commaSeperated) {
+		List<Attribute> result = new ArrayList<Attribute>();
+		for (String attr: Arrays.asList(commaSeperated.split(","))) {
+			result.add(SQL.parseAttribute(attr));
 		}
 		return result;
 	}
 	
 	protected void assertHasPrimarySpec(Property[] allowedSpecs) {
-		List definedSpecs = new ArrayList();
-		Iterator it = Arrays.asList(allowedSpecs).iterator();
-		while (it.hasNext()) {
-			Property allowedProperty = (Property) it.next();
+		List<Property> definedSpecs = new ArrayList<Property>();
+		for (Property allowedProperty: Arrays.asList(allowedSpecs)) {
 			if (hasPrimarySpec(allowedProperty)) {
 				definedSpecs.add(allowedProperty);
 			}
@@ -352,15 +340,15 @@ public abstract class ResourceMap extends MapObject {
 		throw new D2RQException("No primary spec: " + property);
 	}
 	
-	public Collection getDefinitionLabels() {
+	public Collection<Literal> getDefinitionLabels() {
 		return definitionLabels;
 	}
 	
-	public Collection getDefinitionComments() {
+	public Collection<Literal> getDefinitionComments() {
 		return definitionComments;
 	}
 
-	public Collection getAdditionalDefinitionProperties() {
+	public Collection<Resource> getAdditionalDefinitionProperties() {
 		return additionalDefinitionProperties;
 	}
 

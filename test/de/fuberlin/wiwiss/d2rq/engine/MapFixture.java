@@ -10,6 +10,7 @@ import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
@@ -34,7 +35,7 @@ public class MapFixture {
 		return prefixes;
 	}
 	
-	public static Collection loadPropertyBridges(String mappingFileName) {
+	public static Collection<TripleRelation> loadPropertyBridges(String mappingFileName) {
 		Model m = ModelFactory.createDefaultModel();
 		Resource dummyDB = m.getResource(Test.DummyDatabase.getURI());
 		dummyDB.addProperty(RDF.type, D2RQ.Database);

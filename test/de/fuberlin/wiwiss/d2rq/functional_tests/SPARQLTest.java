@@ -59,7 +59,7 @@ public class SPARQLTest extends QueryLanguageTestFramework {
 		expectVariable("y", ISWC.InProceedings);
 		assertSolution();
 
-		assertResultCount(13);
+		assertResultCount(12);
 	}
 	
 	

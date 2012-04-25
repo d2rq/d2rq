@@ -11,7 +11,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-import de.fuberlin.wiwiss.d2rq.sql.SQLDataType;
+import de.fuberlin.wiwiss.d2rq.sql.types.DataType.GenericType;
 import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
@@ -30,10 +30,9 @@ public class Database extends MapObject {
 	private String jdbcDriver;
 	private String username;
 	private String password;
-	private final Map<String,SQLDataType> columnTypes = new HashMap<String,SQLDataType>();
+	private final Map<String,GenericType> columnTypes = new HashMap<String,GenericType>();
     private int limit = NO_LIMIT;
     private int fetchSize = NO_FETCH_SIZE;
-	private boolean allowDistinct = true;
 	private String startupSQLScript = null;
 	private ConnectedDB connection = null;
 	private Properties connectionProperties = new Properties();
@@ -88,57 +87,56 @@ public class Database extends MapObject {
 	
 	public void addTextColumn(String column) {
 		checkNotConnected();		
-		columnTypes.put(column, SQLDataType.CHARACTER);
+		columnTypes.put(column, GenericType.CHARACTER);
 	}
 	
 	public void addNumericColumn(String column) {
 		checkNotConnected();		
-		columnTypes.put(column, SQLDataType.NUMERIC);
+		columnTypes.put(column, GenericType.NUMERIC);
 	}
 	
 	public void addBooleanColumn(String column) {
 		checkNotConnected();		
-		columnTypes.put(column, SQLDataType.BOOLEAN);
+		columnTypes.put(column, GenericType.BOOLEAN);
 	}
 	
 	public void addDateColumn(String column) {
 		checkNotConnected();		
-		columnTypes.put(column, SQLDataType.DATE);
+		columnTypes.put(column, GenericType.DATE);
 	}
 	
 	public void addTimestampColumn(String column) {
 		checkNotConnected();		
-		columnTypes.put(column, SQLDataType.TIMESTAMP);
+		columnTypes.put(column, GenericType.TIMESTAMP);
 	}
 	
 	public void addTimeColumn(String column) {
 		checkNotConnected();		
-		columnTypes.put(column, SQLDataType.TIME);
+		columnTypes.put(column, GenericType.TIME);
 	}
 	
 	public void addBinaryColumn(String column) {
 		checkNotConnected();
-		columnTypes.put(column, SQLDataType.BINARY);
+		columnTypes.put(column, GenericType.BINARY);
 	}
 	
 	public void addBitColumn(String column) {
 		checkNotConnected();
-		columnTypes.put(column, SQLDataType.BIT);
+		columnTypes.put(column, GenericType.BIT);
 	}
 	
 	public void addIntervalColumn(String column) {
 		checkNotConnected();
-		columnTypes.put(column, SQLDataType.INTERVAL);
+		columnTypes.put(column, GenericType.INTERVAL);
 	}
 	
-	public void setAllowDistinct(boolean b) {
-		checkNotConnected();		
-		this.allowDistinct = b;
-	}
-
 	public void setResultSizeLimit(int limit) {
 		checkNotConnected();		
 		this.limit = limit;
+	}
+	
+	public int getResultSizeLimit() {
+		return limit;
 	}
 	
 	public int getFetchSize() {
@@ -162,12 +160,21 @@ public class Database extends MapObject {
 		this.connectionProperties.setProperty(key, value);
 	}
 	
+	/**
+	 * This is a hack where we can pass a pre-existing ConnectedDB that
+	 * will be used by this Database, so we avoid that the Database
+	 * opens another connection to the same DB.
+	 */
+	public void useConnectedDB(ConnectedDB db) {
+		this.connection = db;
+	}
+	
 	public ConnectedDB connectedDB() {
 		if (this.connection == null) {
 			if (jdbcDriver != null) {
 				ConnectedDB.registerJDBCDriver(jdbcDriver);
 			}
-			connection = new ConnectedDB(jdbcDSN, username, password, allowDistinct,
+			connection = new ConnectedDB(jdbcDSN, username, password,
 					columnTypes, limit, fetchSize, connectionProperties);
 			if (startupSQLScript != null) {
 				try {

@@ -185,20 +185,15 @@
     <rdfs:comment>Optimizing hint: the maximum length of values of this resource map.</rdfs:comment>
     <rdfs:label>Value max length</rdfs:label>
   </rdf:Property>
-  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#allowDistinct">
-    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
-    <rdfs:comment>Value: true/false that describe the databases ability to handle DISTINCT correctly. (e.g. MSAccess cuts fields longer than 256 chars)</rdfs:comment>
-    <rdfs:label>Allow distinct</rdfs:label>
+  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#uriSqlExpression">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
+    <rdfs:comment>An SQL expression whose result will be the URI value of this property bridge.</rdfs:comment>
+    <rdfs:label>URI SQL expression</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#valueRegex">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ResourceMap"/>
     <rdfs:comment>Optimizing hint: a regular expression matching every value of this resource map.</rdfs:comment>
     <rdfs:label>Value regex</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#uriSqlExpression">
-    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#PropertyBridge"/>
-    <rdfs:comment>An SQL expression whose result will be the URI value of this property bridge.</rdfs:comment>
-    <rdfs:label>URI SQL expression</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#startupSQLScript">
     <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Document"/>
@@ -420,6 +415,12 @@
     <rdfs:label>Datatype property bridge</rdfs:label>
     <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
   </owl:DeprecatedClass>
+  <owl:DeprecatedProperty rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#allowDistinct">
+    <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
+    <rdfs:comment>Value: true/false that describe the databases ability to handle DISTINCT correctly. Deprecated, the engine now determines this automatically.</rdfs:comment>
+    <rdfs:label>Allow distinct</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+  </owl:DeprecatedProperty>
   <owl:DeprecatedProperty rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#odbcDSN">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database"/>
     <rdfs:label>ODBC data source name. Deprecated, use JDBC instead (with ODBC-JDBC bridge if necessary).</rdfs:label>

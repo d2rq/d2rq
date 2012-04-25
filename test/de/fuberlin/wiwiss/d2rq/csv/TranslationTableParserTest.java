@@ -14,23 +14,23 @@ import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class TranslationTableParserTest extends TestCase {
-	private Collection simpleTranslations;
+	private Collection<Translation> simpleTranslations;
 	
 	public void setUp() {
-		this.simpleTranslations = new HashSet();
+		this.simpleTranslations = new HashSet<Translation>();
 		this.simpleTranslations.add(new Translation("db1", "rdf1"));
 		this.simpleTranslations.add(new Translation("db2", "rdf2"));
 	}
 	
 	public void testEmpty() {
-		Collection translations = new TranslationTableParser(
+		Collection<Translation> translations = new TranslationTableParser(
 				new StringReader("")).parseTranslations();
 		assertTrue(translations.isEmpty());
 	}
 	
 	public void testSimple() {
 		String csv = "key,value";
-		Collection translations = new TranslationTableParser(
+		Collection<Translation> translations = new TranslationTableParser(
 				new StringReader(csv)).parseTranslations();
 		assertEquals(1, translations.size());
 		Translation t = (Translation) translations.iterator().next();
@@ -40,21 +40,21 @@ public class TranslationTableParserTest extends TestCase {
 	
 	public void testTwoRows() {
 		String csv = "db1,rdf1\ndb2,rdf2";
-		Collection translations = new TranslationTableParser(
+		Collection<Translation> translations = new TranslationTableParser(
 				new StringReader(csv)).parseTranslations();
 		assertEquals(2, translations.size());
-		assertEquals(this.simpleTranslations, new HashSet(translations));
+		assertEquals(this.simpleTranslations, new HashSet<Translation>(translations));
 	}
 	
 	public void testParseFromFile() {
-		Collection translations = new TranslationTableParser(
+		Collection<Translation> translations = new TranslationTableParser(
 				D2RQTestSuite.DIRECTORY + "csv/translationtable.csv").parseTranslations();
-		assertEquals(this.simpleTranslations, new HashSet(translations));
+		assertEquals(this.simpleTranslations, new HashSet<Translation>(translations));
 	}
 	
 	public void testParseFromFileWithProtocol() {
-		Collection translations = new TranslationTableParser(
+		Collection<Translation> translations = new TranslationTableParser(
 				D2RQTestSuite.DIRECTORY_URL + "csv/translationtable.csv").parseTranslations();
-		assertEquals(this.simpleTranslations, new HashSet(translations));
+		assertEquals(this.simpleTranslations, new HashSet<Translation>(translations));
 	}
 }

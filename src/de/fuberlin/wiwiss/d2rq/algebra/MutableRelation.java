@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.algebra;
 
+import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
@@ -39,22 +40,35 @@ public class MutableRelation implements RelationalOperators {
 		return this.relation = this.relation.select(condition);
 	}
     
+	public Relation orderBy(List<OrderSpec> orderSpecs) {
+		return relation = new RelationImpl(
+	            relation.database(),
+	            relation.aliases(),
+	            relation.condition(),
+	            relation.softCondition(),
+	            relation.joinConditions(),
+	            relation.projections(),
+	            relation.isUnique(),
+	            orderSpecs,
+	            relation.limit(),
+	            relation.limitInverse());
+	}
+	
 	public Relation swapLimits() {
 	    return relation = new RelationImpl(
 	            relation.database(),
 	            relation.aliases(),
 	            relation.condition(),
+	            relation.softCondition(),
 	            relation.joinConditions(),
 	            relation.projections(),
-	            relation.leftJoinConditions(),
 	            relation.isUnique(),
-	            relation.order(),
-	            relation.orderDesc(),
+	            relation.orderSpecs(),
 	            relation.limitInverse(),
 	            relation.limit());
 	}
 	
-	public Relation project(Set projectionSpecs) {
+	public Relation project(Set<? extends ProjectionSpec> projectionSpecs) {
 		return relation = relation.project(projectionSpecs);
 	}
 	
@@ -63,13 +77,12 @@ public class MutableRelation implements RelationalOperators {
 				relation.database(),
 	            relation.aliases(),
 	            relation.condition(),
+	            relation.softCondition(),
 	            relation.joinConditions(),
 	            relation.projections(),
-	            relation.leftJoinConditions(),
 	            relation.isUnique(),
-	            relation.order(),
-	            relation.orderDesc(),
-	            Math.min(relation.limit(), limit),
+	            relation.orderSpecs(),
+	            Relation.combineLimits(relation.limit(), limit),
 				relation.limitInverse());
 	}
 }

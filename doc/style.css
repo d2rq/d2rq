@@ -7,11 +7,16 @@ h1 { font-size: 190%; margin-top: 1.3em; }
 h2 { border-bottom: 1px solid #ccc; font-size: 150%; margin-top: 2em; padding-bottom: 0.2em; }
 h3 { font-size: 125%; }
 .section-anchor, .section-anchor:visited { color: #ddd; font-family: Arial; font-size: 75%; text-decoration: none; }
-a, a code { color: #34d; text-decoration: none; }
+dt .section-anchor { padding-left: 0.3em; }
+a, a code, { color: #34d; text-decoration: none; }
 a:hover, a:hover code { text-decoration: underline; }
 a:visited, a:visited code { color: #800080; }
 code, table.properties th { color: #860; font-size: 115%; }
 pre { background: #fff9d3; border: 1px solid #fff3aa; border-radius: 0.8em; line-height: 1.25em; padding: 0.9em 1.3em; }
+pre a, pre a:visited { color: black; text-decoration: none; }
+pre:hover a { color: #34d; }
+pre:hover a:visited { color: #800080; }
+pre a:hover { text-decoration: underline; }
 ol { padding-left: 1.35em; }
 dt { font-weight: bold; margin-top: 1.5em; }
 dt code { color: #444; }
@@ -27,6 +32,8 @@ ul.toc, ul.toc ul { list-style-type: none; }
 ul.toc li { font-weight: normal; margin-top: 0.5em; padding-left: none; }
 ul.toc.small li { font-weight: 300; margin-top: 0; }
 ul.toc li li { font-weight: 300; margin-top: 0; }
+.warning { background: #fbb; border: 1px solid red; border-radius: 1em; color: black; padding: 0.9em 1.3em; }
+.warning .section-anchor { color: #c88; }
 .header { margin-bottom: 2em; }
 #doctype { margin-top: 1em; }
 .document-collection { background: #bdf; border: 1px solid #36f; border-radius: 0.6em; box-shadow: 1px 1px 2px #555; font-weight: normal; padding: 0.4em 1.1em 0.3em; }

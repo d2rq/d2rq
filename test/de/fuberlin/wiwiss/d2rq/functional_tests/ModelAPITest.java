@@ -10,7 +10,7 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.DC;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 
 /**
  * Functional tests that exercise a ModelD2RQ by calling Model API functions. For
@@ -41,7 +41,7 @@ public class ModelAPITest extends TestCase {
 //			dumpStatement(stmt);
 			count++;
 		}
-		assertEquals(341, count);
+		assertEquals(322, count);
 	}
 
 	public void testHasProperty() {

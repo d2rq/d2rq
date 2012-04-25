@@ -11,6 +11,7 @@ textarea { width: 100%; }
 ul { margin: 0; padding: 0; }
 li { margin: 0 0 0 1em; padding: 0; }
 img { border: none; }
+img.depiction { border: none; height: auto; max-width: 200px; }
 .section { margin: 0.9em; padding: 0.6em 0.9em; }
 .busy { color: #888; }
 .link { background: url(link.png) center right no-repeat; padding-right: 13px; }
@@ -25,6 +26,7 @@ img { border: none; }
 #rdficon { float: right; margin: 0.6em 1em; }
 .directory li { margin-bottom: 0.5em; }
 .directory small { font-size: 80%; color: #666; }
+.footnote { font-style: italic; color: #666; }
 
 .snorql h1, .snorql h2 { color: #400; }
 .snorql #header, .snorql .section { background: #ccf; }

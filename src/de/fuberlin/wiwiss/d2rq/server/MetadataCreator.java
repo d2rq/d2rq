@@ -13,13 +13,11 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.util.FileManager;
-import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.vocab.D2RConfig;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
@@ -39,8 +37,9 @@ public class MetadataCreator {
 	private final static String metadataPlaceholderURIPrefix = "about:metadata:";
 	// model used to generate nodes
 	private Model model;
-	// private Resource config;
+	// local d2r instance
 	private D2RServer server;
+
 	// enabling / disabling flag
 	private boolean enable = true;
 	// model that holds the rdf template
@@ -149,7 +148,7 @@ public class MetadataCreator {
 		while (changes) {
 			changes = false;
 			StmtIterator stmtIt = metadata.listStatements();
-			List remList = new ArrayList();
+			List<Statement> remList = new ArrayList<Statement>();
 			while (stmtIt.hasNext()) {
 				Statement s = stmtIt.nextStatement();
 				if (s.getObject().isAnon()

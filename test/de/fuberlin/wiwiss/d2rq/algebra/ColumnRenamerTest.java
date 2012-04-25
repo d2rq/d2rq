@@ -20,7 +20,7 @@ public class ColumnRenamerTest extends TestCase {
 	private ColumnRenamerMap col1ToCol2;
 
 	public void setUp() {
-		Map m = new HashMap();
+		Map<Attribute,Attribute> m = new HashMap<Attribute,Attribute>();
 		m.put(col1, col2);
 		this.col1ToCol2 = new ColumnRenamerMap(m);
 	}
@@ -53,7 +53,7 @@ public class ColumnRenamerTest extends TestCase {
 	}
 	
 	public void testEmptyRenamerToStringEmpty() {
-		assertEquals("ColumnRenamerMap()", new ColumnRenamerMap(Collections.EMPTY_MAP).toString());
+		assertEquals("ColumnRenamerMap()", new ColumnRenamerMap(Collections.<Attribute,Attribute>emptyMap()).toString());
 	}
 	
 	public void testToStringOneAlias() {
@@ -61,7 +61,7 @@ public class ColumnRenamerTest extends TestCase {
 	}
 	
 	public void testToStringTwoAliases() {
-		Map m = new HashMap();
+		Map<Attribute,Attribute> m = new HashMap<Attribute,Attribute>();
 		m.put(col1, col3);
 		m.put(col2, col3);
 		// Order is alphabetical by original column name

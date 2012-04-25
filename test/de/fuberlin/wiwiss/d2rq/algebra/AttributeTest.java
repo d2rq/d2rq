@@ -70,7 +70,7 @@ public class AttributeTest extends TestCase {
 	}
 	
 	public void testAttributeHashCode() {
-		Map map = new HashMap();
+		Map<Attribute,String> map = new HashMap<Attribute,String>();
 		Attribute col1 = new Attribute(null, "table", "col1");
 		Attribute col1b = new Attribute(null, "table", "col1");
 		Attribute col2 = new Attribute(null, "table", "col2");

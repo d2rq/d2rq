@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>d2r-query: Running SPARQL queries against a database | The D2RQ Platform</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="document-collection">This document is part of the <a href="/">D2RQ documentation</a>.</div>
+      <h1><code>d2r-query</code>: Running SPARQL queries against a database</h1>
+    </header>
+
+<p>The <code>d2r-query</code> tool allows executing SPARQL queries against
+a <a href="/">D2RQ</a>-mapped relational database from the command line.
+This can be done with or without a
+D2RQ mapping file. If a mapping file is specified, then the tool will query
+the virtual RDF graph defined by the mapping. If no mapping file is specified,
+then the tool will use the default mapping of
+<a href="generate-mapping"><code>generate-mapping</code></a>
+for the translation.</p>
+
+<p>To query a D2RQ-mapped database using a web-based interface, use
+<a href="d2r-server">D2R Server</a>.
+
+
+<h2 id="usage-mapping">Usage</h2>
+
+<pre>d2r-query <a href="#arg-f">[-f format]</a> <a href="#arg-b">[-b baseURI]</a> <a href="#arg-verbose">[--verbose]</a> <a href="#arg-debug">[--debug]</a> <a href="#arg-mapping-file">mapping-file.ttl</a> <a href="#arg-query">query</a></pre>
+
+<dl>
+<dt id="arg-mapping-file">mapping-file.ttl</dt>
+<dd><p>The filename of a <a href="d2rq-language">D2RQ mapping file</a> that
+contains a database mapping.</p>
+
+<p>If no mapping file is provided, then the database connection must be
+specified on the command line using the same <a href="generate-mapping#connection">connection
+parameters</a> as for the <code>generate-mapping</code> tool,
+and a default mapping will be used.</p>
+</dd>
+
+<dt id="arg-query"><code>query</code></dt>
+<dd>A SPARQL query. All prefixes defined in the mapping file are
+available without being declared. The query can also be read
+from a file by using the syntax <code>@filename</code>.</dd>
+
+<dt id="arg-f"><code>-f format</code></dt>
+<dd>The output format. Supported formats include <code>text</code>
+(the default), <code>xml</code>, <code>json</code>, <code>csv</code>,
+<code>tsv</code>, <code>srb</code>, and <code>ttl</code>.</dd>
+  
+<dt id="arg-b"><code>-b baseURI</code></dt>
+<dd>The base URI for turning relative URIs and URI patterns into absolute URIs.
+It is used both for the data and for the query.</dd>
+
+<dt id="arg-verbose"><code>--verbose</code></dt>
+<dd>Print extra progress log information.</dd>
+
+<dt id="arg-debug"><code>--debug</code></dt>
+<dd>Print all debug log information.</dd>
+</dl>
+
+
+<h2 id="examples">Examples</h2>
+
+<h3 id="example-mapping">Invocation using a mapping file</h3>
+
+<pre>d2r-query mapping-iswc.ttl "SELECT * { ?s ?p ?o } LIMIT 10"</pre>
+
+<h3 id="example-csv">Writing results to a CSV file</h3>
+
+<pre>d2r-query -f csv mapping-iswc.ttl "SELECT * { ?paper dc:title ?title }" > papers.csv</pre>
+
+<h3 id="example-default">Invocation with default mapping</h3>
+
+<pre>d2r-query -u root jdbc:mysql:///iswc "SELECT * { ?s ?p ?o } LIMIT 10"</pre>
+
+<h3 id="example-inmemory">Querying a SQL dump using a temporary in-memory database</h3>
+
+<pre>dump-rdf -l db_dump.sql -o output.nt "SELECT * { ?s ?p ?o } LIMIT 10"</pre>
+
+<h3 id="example-queryfile">Reading the query from a file</h3>
+
+<pre>dump-rdf mapping.ttl @my-query.sparql</pre>
+
+  </body>
+</html>

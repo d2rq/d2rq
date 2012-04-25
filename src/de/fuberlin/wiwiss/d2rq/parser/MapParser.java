@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.n3.IRIResolver;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -28,7 +31,6 @@ import de.fuberlin.wiwiss.d2rq.map.ClassMap;
 import de.fuberlin.wiwiss.d2rq.map.Configuration;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.DownloadMap;
-import de.fuberlin.wiwiss.d2rq.map.DynamicProperty;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
 import de.fuberlin.wiwiss.d2rq.map.ResourceMap;
@@ -45,7 +47,8 @@ import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class MapParser {
-
+	private final static Log log = LogFactory.getLog(MapParser.class);
+	
 	/**
 	 * A regular expression that matches zero or more characters that are allowed inside URIs
 	 */
@@ -104,6 +107,10 @@ public class MapParser {
 			parsePropertyBridges();
 			parseDownloadMaps();
 			this.mapping.buildVocabularyModel();
+			log.info("Done reading D2RQ map with " + 
+					mapping.databases().size() + " databases and " +
+					mapping.classMapResources().size() + " class maps");
+			return this.mapping;
 		} catch (LiteralRequiredException ex) {
 			throw new D2RQException("Expected literal, found URI resource instead: " + ex.getMessage(),
 					D2RQException.MAPPING_RESOURCE_INSTEADOF_LITERAL);
@@ -111,7 +118,6 @@ public class MapParser {
 			throw new D2RQException("Expected URI, found literal instead: " + ex.getMessage(),
 					D2RQException.MAPPING_LITERAL_INSTEADOF_RESOURCE);
 		}
-		return this.mapping;
 	}
 	
 	private void ensureAllDistinct(Resource[] distinctClasses, int errorCode) {
@@ -225,17 +231,6 @@ public class MapParser {
 		stmts = r.listProperties(D2RQ.password);
 		while (stmts.hasNext()) {
 			database.setPassword(stmts.nextStatement().getString());
-		}
-		stmts = r.listProperties(D2RQ.allowDistinct);
-		while (stmts.hasNext()) {
-			String allowDistinct = stmts.nextStatement().getString();
-			if (allowDistinct.equals("true")) {
-				database.setAllowDistinct(true);
-			} else if (allowDistinct.equals("false")) {
-				database.setAllowDistinct(false);
-			} else {
-				throw new D2RQException("d2rq:allowDistinct value must be true or false");
-			}
 		}
 		stmts = r.listProperties(D2RQ.resultSizeLimit);
 		while (stmts.hasNext()) {
@@ -531,10 +526,7 @@ public class MapParser {
 		}
 		stmts = r.listProperties(D2RQ.dynamicProperty);
 		while (stmts.hasNext()) {
-			String dynamicPropertyPattern = stmts.nextStatement().getString();
-			DynamicProperty dynamicProperty = new DynamicProperty(dynamicPropertyPattern);
-			bridge.addProperty(dynamicProperty);
-			this.mapping.setHasDynamicProperties(true);
+			bridge.addDynamicProperty(stmts.next().getString());
 		}
 		stmts = r.listProperties(D2RQ.property);
 		while (stmts.hasNext()) {

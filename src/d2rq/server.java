@@ -2,13 +2,8 @@ package d2rq;
 
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.hp.hpl.jena.shared.JenaException;
-
-import de.fuberlin.wiwiss.d2rq.server.ConfigLoader;
+import de.fuberlin.wiwiss.d2rq.CommandLineTool;
+import de.fuberlin.wiwiss.d2rq.SystemLoader;
 import de.fuberlin.wiwiss.d2rq.server.JettyLauncher;
 
 /**
@@ -16,76 +11,59 @@ import de.fuberlin.wiwiss.d2rq.server.JettyLauncher;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class server {
-	private final static String usage = "usage: d2r-server [-p port] [-b serverBaseURI] [--fast] mappingFileName";
-	private static JettyLauncher server;
-	private final static Log log = LogFactory.getLog(server.class);
-	
+public class server extends CommandLineTool {
+
 	public static void main(String[] args) {
-		CommandLine cmd = new CommandLine();
-		cmd.setUsage(usage);
-		ArgDecl portArg = new ArgDecl(true, "p", "port");
-		cmd.add(portArg);
-		ArgDecl baseURIArg = new ArgDecl(true, "b", "base");
-		cmd.add(baseURIArg);
-		ArgDecl fastArg = new ArgDecl(false, "fast");
-		cmd.add(fastArg);
-		cmd.process(args);
-		
-		if (cmd.numItems() == 0) {
-			System.err.println(usage);
-			System.exit(1);
-		}
-		if (cmd.numItems() > 2) {
-			System.err.println("too many arguments");
-			System.err.println(usage);
-			System.exit(1);
-		}
-		server = new JettyLauncher();
-		if (cmd.contains(portArg)) {
-			setPort(Integer.parseInt(cmd.getArg(portArg).getValue()));
-		}
-		if (cmd.contains(baseURIArg)) {
-			setServerBaseURI(cmd.getArg(baseURIArg).getValue());
-		}
-		if (cmd.contains(fastArg)) {
-			setUseAllOptimizations(true);
-		}
-		String mappingFileName = cmd.getItem(0);
-		setMappingFileName(mappingFileName);
-		startServer();
-	}
-	
-	public static void setPort(int port) {
-		server.overridePort(port);
+		new server().process(args);
 	}
 
-	public static void setServerBaseURI(String baseURI) {
-		server.overrideBaseURI(baseURI);
+	public void usage() {
+		System.err.println("usage:");
+		System.err.println("  d2r-server [server-options] mappingFile");
+		System.err.println("  d2r-server [server-options] [connection-options] jdbcURL");
+		System.err.println("  d2r-server [server-options] [connection-options] -l script.sql");
+		System.err.println();
+		printStandardArguments(true);
+		System.err.println();
+		System.err.println("  Server options:");
+		System.err.println("    -p port         Port where to start up the server (default: 2020)");
+		System.err.println("    -b baseURI      Server's base URI (default: " + SystemLoader.DEFAULT_BASE_URI + ")");
+		System.err.println("    --fast          Use all engine optimizations (recommended)");
+		System.err.println("    --verbose       Print debug information");
+		System.err.println();
+		System.err.println("  Database connection options (only with jdbcURL):");
+		printConnectionOptions();
+		System.err.println();
 	}
 	
-	public static void setUseAllOptimizations(boolean useAllOptimizations) {
-		server.overrideUseAllOptimizations(useAllOptimizations);
+	private ArgDecl portArg = new ArgDecl(true, "p", "port");
+	private ArgDecl baseArg = new ArgDecl(true, "b", "base");
+	private ArgDecl fastArg = new ArgDecl(false, "fast");
+
+	public void initArgs(CommandLine cmd) {
+		cmd.add(portArg);
+		cmd.add(baseArg);
+		cmd.add(fastArg);
 	}
 	
-	public static void setMappingFileName(String mappingFileName) {
-		try {
-			server.setConfigFile(ConfigLoader.toAbsoluteURI(mappingFileName));
-		} catch (JenaException ex) {
-			Throwable t = ex;
-			if (ex.getCause() != null) {
-				t = ex.getCause();
-			}
-			System.err.println(mappingFileName + ": " + t.getMessage());
-			System.exit(1);
+	public void run(CommandLine cmd, SystemLoader loader) {
+		if (cmd.numItems() == 1) {
+			loader.setMappingFileOrJdbcURL(cmd.getItem(0));
 		}
-	}
-	
-	public static void startServer() {
-		if (server.start()) {
-			log.info("[[[ Server started at " + server.getHomeURI() + " ]]]");
-		} else {
-			log.warn("[[[ Server startup failed, see messages above ]]]");
+
+		loader.setResourceStem("resource/");
+		if (cmd.contains(fastArg)) {
+			loader.setFastMode(true);
 		}
+		if (cmd.contains(portArg)) {
+			loader.setPort(Integer.parseInt(cmd.getArg(portArg).getValue()));
+		}
+		if (cmd.contains(baseArg)) {
+			loader.setSystemBaseURI(cmd.getArg(baseArg).getValue());
+		}
+
+		loader.getModelD2RQ();
+		JettyLauncher launcher = loader.getJettyLauncher();
+		launcher.start();
 	}
 }

@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 
@@ -13,7 +14,7 @@ public abstract class BinaryOperator extends Expression {
 	protected final Expression expr2;
 	protected final String operator;
 
-	private final Set columns = new HashSet();
+	private final Set<Attribute> columns = new HashSet<Attribute>();
 
 	
 	protected BinaryOperator(Expression expr1, Expression expr2, String operator) {
@@ -24,7 +25,7 @@ public abstract class BinaryOperator extends Expression {
 		columns.addAll(expr2.attributes());
 	}
 	
-	public Set attributes() {
+	public Set<Attribute> attributes() {
 		return columns;
 	}
 

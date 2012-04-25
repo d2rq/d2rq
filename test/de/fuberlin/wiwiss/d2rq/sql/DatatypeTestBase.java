@@ -16,9 +16,9 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
+import de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.map.ClassMap;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
@@ -79,13 +79,16 @@ public abstract class DatatypeTestBase extends TestCase {
 	protected void createMapping(String datatype) {
 		this.datatype = datatype;
 		Mapping mapping = generateMapping();
+		mapping.configuration().setServeVocabulary(false);
+		mapping.configuration().setUseAllOptimizations(true);
+		mapping.connect();
 		graph = getGraph(mapping);
 		inspector = mapping.databases().iterator().next().connectedDB().schemaInspector();
 	}
 	
 	protected void assertMappedType(String rdfType) {
-		assertEquals(rdfType, inspector.xsdTypeFor(inspector.columnType(
-				SQL.parseAttribute("T_" + datatype + ".VALUE"))));
+		assertEquals(rdfType, inspector.columnType(
+				SQL.parseAttribute("T_" + datatype + ".VALUE")).rdfType());
 	}
 	
 	protected void assertValues(String[] expectedValues) {
@@ -129,10 +132,7 @@ public abstract class DatatypeTestBase extends TestCase {
 	}
 	
 	private GraphD2RQ getGraph(Mapping mapping) {
-		GraphD2RQ result = new GraphD2RQ(mapping);
-		result.getConfiguration().setServeVocabulary(false);
-		result.getConfiguration().setUseAllOptimizations(true);
-		return result;
+		return new GraphD2RQ(mapping);
 	}
 	
 	private Mapping generateMapping() {

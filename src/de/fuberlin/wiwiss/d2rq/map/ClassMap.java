@@ -2,7 +2,6 @@ package de.fuberlin.wiwiss.d2rq.map;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,6 +12,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
+import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
@@ -20,9 +20,9 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 public class ClassMap extends ResourceMap {
 	private Resource resource;
 	private Database database = null;
-	private Collection classes = new ArrayList();
-	private Collection propertyBridges = new ArrayList();
-	private Collection compiledPropertyBridges = null;
+	private Collection<Resource> classes = new ArrayList<Resource>();
+	private Collection<PropertyBridge> propertyBridges = new ArrayList<PropertyBridge>();
+	private Collection<TripleRelation> compiledPropertyBridges = null;
 	private Log log = LogFactory.getLog(ClassMap.class);
 	
 	public ClassMap(Resource classMapResource) {
@@ -34,7 +34,7 @@ public class ClassMap extends ResourceMap {
 		return this.resource;
 	}
 	
-	public Collection getClasses() {
+	public Collection<Resource> getClasses() {
 		return classes;
 	}
 	
@@ -56,7 +56,7 @@ public class ClassMap extends ResourceMap {
 		this.propertyBridges.add(bridge);
 	}
 
-	public Collection propertyBridges() {
+	public Collection<PropertyBridge> propertyBridges() {
 		return this.propertyBridges;
 	}
 	
@@ -65,11 +65,6 @@ public class ClassMap extends ResourceMap {
 		assertHasPrimarySpec(new Property[]{
 				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns, D2RQ.constantValue
 		});
-		if (this.classes.isEmpty() && this.propertyBridges.isEmpty()) {
-			throw new D2RQException(toString() + 
-					" has no d2rq:PropertyBridges and no d2rq:class",
-					D2RQException.CLASSMAP_NO_PROPERTYBRIDGES);
-		}
 		if (this.constantValue != null && this.constantValue.isLiteral()) {
 			throw new D2RQException(
 					"d2rq:constantValue for class map " + toString() + " must be a URI or blank node", 
@@ -79,15 +74,17 @@ public class ClassMap extends ResourceMap {
 			this.log.warn(toString() + " has an uriPattern without any column specifications. This usually happens when no primary keys are defined for a table. If the configuration is left as is, all table rows will be mapped to a single instance. " +
 					"If this is not what you want, please define the keys in the database and re-run the mapping generator, or edit the mapping to provide the relevant keys.");
 		}
-		Iterator it = this.propertyBridges.iterator();
-		while (it.hasNext()) {
-			PropertyBridge bridge = (PropertyBridge) it.next();
+		for (PropertyBridge bridge: propertyBridges) {
 			bridge.validate();
 		}
 		// TODO
 	}
 	
-	public Collection compiledPropertyBridges() {
+	public boolean hasProperties() {
+		return (!this.classes.isEmpty() || !this.propertyBridges.isEmpty());
+	}
+	
+	public Collection<TripleRelation> compiledPropertyBridges() {
 		if (this.compiledPropertyBridges == null) {
 			compile();
 		}
@@ -95,15 +92,11 @@ public class ClassMap extends ResourceMap {
 	}
 
 	private void compile() {
-		this.compiledPropertyBridges = new ArrayList();
-		Iterator it = this.propertyBridges.iterator();
-		while (it.hasNext()) {
-			PropertyBridge bridge = (PropertyBridge) it.next();
+		this.compiledPropertyBridges = new ArrayList<TripleRelation>();
+		for (PropertyBridge bridge: propertyBridges) {
 			this.compiledPropertyBridges.addAll(bridge.toTripleRelations());
 		}
-		it = this.classes.iterator();
-		while (it.hasNext()) {
-			Resource class_ = (Resource) it.next();
+		for (Resource class_: classes) {
 			PropertyBridge bridge = new PropertyBridge(this.resource);
 			bridge.setBelongsToClassMap(this);
 			bridge.addProperty(RDF.type);
@@ -113,7 +106,7 @@ public class ClassMap extends ResourceMap {
 	}
 	
 	protected Relation buildRelation() {
-		return this.relationBuilder().buildRelation(this.database.connectedDB());
+		return this.relationBuilder(database.connectedDB()).buildRelation();
 	}
 	
 	public String toString() {

@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
@@ -15,11 +16,15 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RConfig;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class ConfigLoader {
 
+	public static final int DEFAULT_LIMIT_PER_CLASS_MAP = 50;
+	public static final int DEFAULT_LIMIT_PER_PROPERTY_BRIDGE = 50;
+	
 	/**
 	 * Accepts an absolute URI, relative file: URI, or plain
 	 * file name (including names with spaces, Windows backslashes
@@ -52,22 +57,35 @@ public class ConfigLoader {
 	private Resource documentMetadata = null;
 	private boolean vocabularyIncludeInstances = true;
 	private boolean autoReloadMapping = true;
+	private int limitPerClassMap = DEFAULT_LIMIT_PER_CLASS_MAP;
+	private int limitPerPropertyBridge = DEFAULT_LIMIT_PER_PROPERTY_BRIDGE;
 	
+	/**
+	 * @param configURL Config file URL, or <code>null</code> for an empty config
+	 */
 	public ConfigLoader(String configURL) {
 		this.configURL = configURL;
-		if (configURL.startsWith("file://")) {
-			this.isLocalMappingFile = true;
-			this.mappingFilename = configURL.substring(7);
-		} else if (configURL.startsWith("file:")) {
-			this.isLocalMappingFile = true;
-			this.mappingFilename = configURL.substring(5);
-		} else if (configURL.indexOf(":") == -1) {
-			this.isLocalMappingFile = true;
-			this.mappingFilename = configURL;
+		if (configURL == null) {
+			isLocalMappingFile = false;
+		} else {
+			if (configURL.startsWith("file://")) {
+				isLocalMappingFile = true;
+				mappingFilename = configURL.substring(7);
+			} else if (configURL.startsWith("file:")) {
+				isLocalMappingFile = true;
+				mappingFilename = configURL.substring(5);
+			} else if (configURL.indexOf(":") == -1) {
+				isLocalMappingFile = true;
+				mappingFilename = configURL;
+			}
 		}
 	}
 
-	public void load() throws JenaException {
+	public void load() {
+		if (configURL == null) {
+			model = ModelFactory.createDefaultModel();
+			return;
+		}
 		this.model = FileManager.get().loadModel(this.configURL);
 		Resource server = findServerResource();
 		if (server == null) {
@@ -83,7 +101,7 @@ public class ConfigLoader {
 			try {
 				this.port = Integer.parseInt(value);
 			} catch (NumberFormatException ex) {
-				throw new JenaException(
+				throw new D2RQException(
 						"Illegal integer value '" + value + "' for d2r:port");
 			}
 		}
@@ -102,8 +120,28 @@ public class ConfigLoader {
 		s = server.getProperty(D2RConfig.autoReloadMapping);
 		if (s != null) {
 			this.autoReloadMapping = s.getBoolean();
-		}	
-}
+		}
+		s = server.getProperty(D2RConfig.limitPerClassMap);
+		if (s != null) {
+			try {
+				limitPerClassMap = s.getInt();
+			} catch (JenaException ex) {
+				if (!s.getBoolean()) {
+					limitPerClassMap = Relation.NO_LIMIT;
+				}
+			}
+		}
+		s = server.getProperty(D2RConfig.limitPerPropertyBridge);
+		if (s != null) {
+			try {
+				limitPerPropertyBridge = s.getInt();
+			} catch (JenaException ex) {
+				if (!s.getBoolean()) {
+					limitPerPropertyBridge = Relation.NO_LIMIT;
+				}
+			}
+		}
+	}
 	
 	public boolean isLocalMappingFile() {
 		return this.isLocalMappingFile;
@@ -114,10 +152,6 @@ public class ConfigLoader {
 			return null;
 		}
 		return this.mappingFilename;
-	}
-	
-	public String getMappingURL() {
-		return this.configURL;
 	}
 	
 	public int port() {
@@ -143,6 +177,14 @@ public class ConfigLoader {
 	
 	public boolean getVocabularyIncludeInstances() {
 		return this.vocabularyIncludeInstances;
+	}
+	
+	public int getLimitPerClassMap() {
+		return limitPerClassMap;
+	}
+	
+	public int getLimitPerPropertyBridge() {
+		return limitPerPropertyBridge;
 	}
 	
 	public boolean getAutoReloadMapping() {

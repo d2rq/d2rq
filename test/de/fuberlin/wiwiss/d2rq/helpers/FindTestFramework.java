@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.helpers;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -14,8 +13,8 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
-import de.fuberlin.wiwiss.d2rq.ModelD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 
 /**
@@ -25,7 +24,7 @@ public class FindTestFramework extends TestCase {
     protected static final Model m = ModelFactory.createDefaultModel();
 
     private GraphD2RQ graph;
-	private Set resultTriples; 
+	private Set<Triple> resultTriples; 
 
 	protected void setUp() throws Exception {
 		this.graph = (GraphD2RQ) new ModelD2RQ(D2RQTestSuite.ISWC_MAP, "TURTLE", "http://test/").getGraph();
@@ -36,8 +35,8 @@ public class FindTestFramework extends TestCase {
 	}
 
 	protected void find(RDFNode s, RDFNode p, RDFNode o) {
-		this.resultTriples = new HashSet();
-		ExtendedIterator it = this.graph.find(toNode(s), toNode(p), toNode(o));
+		this.resultTriples = new HashSet<Triple>();
+		ExtendedIterator<Triple> it = this.graph.find(toNode(s), toNode(p), toNode(o));
 		while (it.hasNext()) {
 			this.resultTriples.add(it.next());
 		}
@@ -49,9 +48,7 @@ public class FindTestFramework extends TestCase {
 	
 	protected void dump() {
 		int count = 0;
-		Iterator it = this.resultTriples.iterator();
-		while (it.hasNext()) {
-			Triple t = (Triple) it.next();
+		for (Triple t: resultTriples) {
 			count++;
 			System.out.println("Result Triple " + count + ": " + 
 					PrettyPrinter.toString(t, this.graph.getPrefixMapping()));

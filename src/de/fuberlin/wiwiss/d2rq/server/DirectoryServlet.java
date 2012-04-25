@@ -1,7 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -16,9 +15,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.vocabulary.RDFS;
 
-import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.ClassMapLister;
 
 public class DirectoryServlet extends HttpServlet {
 
@@ -32,12 +30,13 @@ public class DirectoryServlet extends HttpServlet {
 			return;
 		}
 		String classMapName = request.getPathInfo().substring(1);
-		Model resourceList = graphD2RQ().classMapInventory(classMapName);
+		Model resourceList = getClassMapLister().classMapInventory(
+				classMapName, server.getConfig().getLimitPerClassMap());
 		if (resourceList == null) {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return;
 		}
-		Map resources = new TreeMap();
+		Map<String,String> resources = new TreeMap<String,String>();
 		ResIterator subjects = resourceList.listSubjects();
 		while (subjects.hasNext()) {
 			Resource resource = subjects.nextResource();
@@ -45,14 +44,12 @@ public class DirectoryServlet extends HttpServlet {
 				continue;
 			}
 			String uri = resource.getURI();
-			Statement labelStmt = resource.getProperty(RDFS.label);
+			Statement labelStmt = PageServlet.getBestLabel(resource);
 			String label = (labelStmt == null) ? resource.getURI() : labelStmt.getString();
 			resources.put(uri, label);
 		}
-		Map classMapLinks = new TreeMap();
-		Iterator it = graphD2RQ().classMapNames().iterator();
-		while (it.hasNext()) {
-			String name = (String) it.next();
+		Map<String,String> classMapLinks = new TreeMap<String,String>();
+		for (String name: getClassMapLister().classMapNames()) {
 			classMapLinks.put(name, server.baseURI() + "directory/" + name);
 		}
 		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
@@ -61,11 +58,12 @@ public class DirectoryServlet extends HttpServlet {
 		context.put("classmap", classMapName);
 		context.put("classmap_links", classMapLinks);
 		context.put("resources", resources);
+		context.put("limit_per_class_map", server.getConfig().getLimitPerClassMap());
 		velocity.mergeTemplateXHTML("directory_page.vm");
 	}
 
-	private GraphD2RQ graphD2RQ() {
-		return (GraphD2RQ) D2RServer.fromServletContext(getServletContext()).currentGraph();
+	private ClassMapLister getClassMapLister() {
+		return D2RServer.retrieveSystemLoader(getServletContext()).getClassMapLister();
 	}
 
 	private static final long serialVersionUID = 8398973058486421941L;

@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.Iterator;
 
 import junit.framework.TestCase;
 
@@ -24,7 +23,7 @@ public class DBConnectionTest extends TestCase {
 
 	private Model mapModel;
 
-	private Collection databases;
+	private Collection<Database> databases;
 	private Database firstDatabase;
 	private ConnectedDB cdb;
 	
@@ -51,9 +50,7 @@ public class DBConnectionTest extends TestCase {
 	}
 
 	public void testConnections() throws SQLException {
-		Iterator it = databases.iterator();
-		while (it.hasNext()) {
-			Database db = (Database) it.next();
+		for (Database db: databases) {
 			cdb = db.connectedDB();
 			Connection c = cdb.connection();
 			String result = performQuery(c, simplestQuery); // 
@@ -127,15 +124,7 @@ public class DBConnectionTest extends TestCase {
 		String distinctResult = performQuery(c, distinct);
 		String nonDistinctResult = performQuery(c, nonDistinct);
 		c.close();
-		if (!distinctResult.equals(nonDistinctResult)) {
-		    if (firstDatabase.connectedDB().allowDistinct()) {
-		    	fail("testDistinct() has a mismatch." +
-		               " Please use a better Database or " +
-		               "put into your Database specification " +
-		               "d2rq:allowDistinct \"true\".");
-		       assertEquals(distinctResult,nonDistinctResult);
-		    }
-		}
+		assertEquals(distinctResult,nonDistinctResult);
 	}
 	
 	// fails with wrong MSAccess Iswc DB (doc/manual/ISWC.mdb revision < 1.5)

@@ -7,6 +7,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.values.BlankNodeID;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
+import de.fuberlin.wiwiss.d2rq.values.Translator;
 
 /**
  * Defines constraints to a set of RDF {@link Node}s.
@@ -82,4 +83,10 @@ public interface NodeSetFilter {
 	 * @param expression The SQL expression that generates possible values 
 	 */
 	public void limitValuesToExpression(Expression expression);
+	
+	/**
+	 * Registers the use of a translator to create values in this node set.
+	 * @param Translator A translator used to create values in this node set 
+	 */
+	public void setUsesTranslator(Translator translator);
 }

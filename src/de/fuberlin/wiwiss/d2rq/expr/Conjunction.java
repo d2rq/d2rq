@@ -9,16 +9,15 @@ import java.util.List;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ColumnRenamer;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 public class Conjunction extends Expression {
 
-	public static Expression create(Collection expressions) {
-		Set elements = new HashSet(expressions.size());
-		Iterator it = expressions.iterator();
-		while (it.hasNext()) {
-			Expression expression = (Expression) it.next();
+	public static Expression create(Collection<Expression> expressions) {
+		Set<Expression> elements = new HashSet<Expression>(expressions.size());
+		for (Expression expression: expressions) {
 			if (expression.isFalse()) {
 				return Expression.FALSE;
 			}
@@ -40,14 +39,12 @@ public class Conjunction extends Expression {
 		return new Conjunction(elements);
 	}
 	
-	private Set expressions;
-	private Set attributes = new HashSet();
+	private Set<Expression> expressions;
+	private Set<Attribute> attributes = new HashSet<Attribute>();
 	
-	private Conjunction(Set expressions) {
+	private Conjunction(Set<Expression> expressions) {
 		this.expressions = expressions;
-		Iterator it = this.expressions.iterator();
-		while (it.hasNext()) {
-			Expression expression = (Expression) it.next();
+		for (Expression expression: expressions) {
 			this.attributes.addAll(expression.attributes());
 		}
 	}
@@ -60,30 +57,26 @@ public class Conjunction extends Expression {
 		return false;
 	}
 	
-	public Set attributes() {
+	public Set<Attribute> attributes() {
 		return this.attributes;
 	}
 
 	public Expression renameAttributes(ColumnRenamer columnRenamer) {
-		Set renamedExpressions = new HashSet();
-		Iterator it = this.expressions.iterator();
-		while (it.hasNext()) {
-			Expression expression = (Expression) it.next();
+		Set<Expression> renamedExpressions = new HashSet<Expression>();
+		for (Expression expression: expressions) {
 			renamedExpressions.add(expression.renameAttributes(columnRenamer));
 		}
 		return Conjunction.create(renamedExpressions);
 	}
 
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
-		List fragments = new ArrayList(this.expressions.size());
-		Iterator it = this.expressions.iterator();
-		while (it.hasNext()) {
-			Expression expression = (Expression) it.next();
+		List<String> fragments = new ArrayList<String>(this.expressions.size());
+		for (Expression expression: expressions) {
 			fragments.add(expression.toSQL(database, aliases));
 		}
 		Collections.sort(fragments);
 		StringBuffer result = new StringBuffer("(");
-		it = fragments.iterator();
+		Iterator<String> it = fragments.iterator();
 		while (it.hasNext()) {
 			String  fragment = (String ) it.next();
 			result.append(fragment);
@@ -96,15 +89,13 @@ public class Conjunction extends Expression {
 	}
 
 	public String toString() {
-		List fragments = new ArrayList(this.expressions.size());
-		Iterator it = this.expressions.iterator();
-		while (it.hasNext()) {
-			Expression expression = (Expression) it.next();
+		List<String> fragments = new ArrayList<String>(this.expressions.size());
+		for (Expression expression: expressions) {
 			fragments.add(expression.toString());
 		}
 		Collections.sort(fragments);
 		StringBuffer result = new StringBuffer("Conjunction(");
-		it = fragments.iterator();
+		Iterator<String> it = fragments.iterator();
 		while (it.hasNext()) {
 			String  fragment = (String ) it.next();
 			result.append(fragment);

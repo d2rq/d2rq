@@ -93,6 +93,8 @@
       <li>8.1 <a href="#download-map-properties">Properties of <code>d2rq:DownloadMap</code></a></li>
       <li>8.2 <a href="#example-download-map">Example: Making PDFs downloadable</a></li>
       <li>8.3 <a href="#example-combined-download-map">Example: Download map combined with a property bridge</a></li>
+      <li>8.4 <a href="#example-multiple-download-formats">Example: Downloads in multiple formats</a></li>
+      <li>8.5 <a href="#example-dynamic-mediatype">Example: Media type from a database column</a></li>
     </ul>
   </li>
   <li>9. <a href="#servingvocabularies">Serving Vocabulary Classes and Properties</a>
@@ -122,7 +124,7 @@
       <li>12.1 <a href="#datatype-object"><code>d2rq:DatatypePropertyBridge</code> and <code>d2rq:ObjectPropertyBridge</code></a></li>
       <li>12.2 <a href="#additionalproperty_deprecated"><code>d2rq:additionalProperty</code></a></li>
       <li>12.3 <a href="#deprecated-class-map-property-bridge"><code>d2rq:classMap</code> and <code>d2rq:propertyBridge</code> properties</a></li>
-      <li>12.4 <a href="#deprecated-odbc-dsn"><code>d2rq:odbcDSN</code></a></li>
+      <li>12.4 <a href="#deprecated-odbc-dsn"><code>d2rq:odbcDSN</code> and <code>d2rq:allowDistinct</code></a></li>
     </ul>
   </li>
 </ul>
@@ -291,11 +293,6 @@ map:location a d2rq:PropertyBridge;
        <code>dump-rdf</code> sets this value to 500 by default, or to <code>Integer.MIN_VALUE</code> for MySQL in order to
        enable <a href="http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-implementation-notes.html">streaming mode</a>.</td>
   </tr>
-  <tr> 
-    <th id="d2rq:allowDistinct">d2rq:allowDistinct</th>
-    <td>Specifies the databases ability to handle <code>DISTINCT</code> correctly. 
-    Value: "true" or "false". For example MSAccess cuts fields longer than 256 chars.</td>
-  </tr>
   <tr>
     <th id="d2rq:startupSQLScript">d2rq:startupSQLScript</th>
     <td>URL of a SQL script to be executed on startup. Useful for initializing the connection and testing. To load from the file system relative to the mapping file's location, use this syntax: <code>d2rq:startupSQLScript &lt;file:script.sql&gt;;</code></td>
@@ -442,10 +439,22 @@ mailto:@@<em>Persons.email</em>@@</pre>
       then URL encoding is applied, with an additional rule that spaces are
       converted to underscores (<code>_</code>). Some people find that this
       produces friendlier URIs.</li>
+    <li>If a column is given as <code>@@Table.Column|<strong>encode</strong>@@</code>,
+      then <a href="http://www.w3.org/TR/rdb-direct-mapping/#defn-percent-encode">percent encoding</a>
+      (as defined in W3C's <a href="http://www.w3.org/TR/rdb-direct-mapping/">Direct Mapping</a>) is applied before the string 
+      is inserted.</li>
   </ul>
+  <p class="warning" id="warning-column-functions"><strong>Warning:</strong> If the URIs produced by
+    a URI pattern with encoding are also produced elsewhere
+    in the D2RQ mapping without the use of the same encoding
+    (e.g., from a
+    <a href="#d2rq:uriColumn"><code>d2rq:uriColumn</code></a> or
+    <a href="#d2rq:constantValue"><code>d2rq:constantValue</code></a>),
+    then SPARQL queries that “join” over those URIs may not work
+    as expected.</p>
 </dd>
 
-<dt>Relative URI patterns</dt>
+<dt id="relative-uri-patterns">Relative URI patterns</dt>
 <dd><p>A relative URI pattern is a URI pattern that generates
   <em>relative URIs</em>:</p>
   <pre>persons/@@<em>Persons.ID</em>@@</pre>
@@ -457,32 +466,35 @@ mailto:@@<em>Persons.email</em>@@</pre>
   with the <code>d2rq:uriPattern</code> property.</p>
 </dd>
 
-<dt>URI columns</dt>
+<dt id="uri-columns">URI columns</dt>
 <dd><p>In some cases, the database may already contain URIs that
   can be used as resource identifiers, such as web page and
   document URLs. URI are generated from columns
   with the <code>d2rq:uriColumn</code> property.</p>
 </dd>
 
-<dt>URI expressions</dt>
+<dt id="uri-expressions">URI expressions</dt>
 <dd><p>URIs can be generated with a SQL expression, specified
    via <code>d2rq:uriSqlExpression</code>. The expression
   must yield a valid URI.</p></dd>
 
-<dt>Blank nodes</dt>
+<dt id="blank-nodes">Blank nodes</dt>
 <dd><p>RDF also has the concept of blank nodes, existential qualifiers
   that denote some resource that exists and has certain properties,
   but is not named. In D2RQ, blank nodes can be generated from one or
   more columns. A distinct blank node will be generated for each distinct
   set of values of these columns. The columns are specified using the
   with the <code>d2rq:bNodeIdColumns</code> property.</p>
+<p>Note that blank nodes cannot be referenced from outside the RDF graph they
+  exist in. This limits their usefulness, and they are best avoided.</p>
 </dd>
 
-<dt>Singleton classmaps</dt>
+<dt id="singleton-class-maps">Singleton class maps</dt>
 <dd><p>A <code>d2rq:ClassMap</code> usually produces many resources. Sometimes
   it is desirable to have a class map that only produces a single resource
   with fixed, static identity. In that case, one can use the
-  <code>d2rq:constantValue</code> property to name the single instance.</p></dd>
+  <code>d2rq:constantValue</code> property to provide the URI for the
+  single instance.</p></dd>
 </dl>
 
 
@@ -609,13 +621,6 @@ map:Topic a d2rq:ClassMap;
     d2rq:classDefinitionComment "A topic."@en;
     d2rq:dataStorage map:Database1;
     .</pre>
-  
-<p>In order to recognize bNodes across several find() calls and to be able to 
-  map bNodes to instance data in the database, D2RQ encodes the classMap name 
-  together with the primary key values in the bNode label. The map above could 
-  produce the bNode label &quot;http://www.example.org/dbserver01/db01#Topic@@6&quot;, 
-  where the number &quot;6&quot; is a primary key value and &quot;http://www.example.org/dbserver01/db01#Topic&quot; 
-  is the ClassMap name.</p>
 
 
 <h3 id="example-dynamic-type">5.5 Example: A group of classes all mapped from the same table</h3>
@@ -1003,9 +1008,16 @@ map:seeAlsoBridge a d2rq:PropertyBridge;
 <p>A <strong><code>d2rq:TranslationTable</code></strong> is an additional layer between the 
   database and the RDF world. It translates back and forth between values taken 
   from the database and RDF URIs or literals. A translation table can be attached 
-  to a class map or a property bridge using the <code>d2rq:translateWith</code> property. TranslationTables 
+  to a class map or a property bridge using the <code>d2rq:translateWith</code> property. Translation tables 
   can be used only for mappings that are unique in both directions (1:1).</p>
 
+<p class="warning" id="warning-translation-table"><strong>Warning:</strong>
+  If URIs produced using a translation table are also produced elsewhere
+  in the D2RQ mapping without the same translation table (e.g., from a
+  <a href="#d2rq:uriColumn"><code>d2rq:uriColumn</code></a> or
+  <a href="#d2rq:constantValue"><code>d2rq:constantValue</code></a>),
+  then SPARQL queries that “join” over those URIs may not work
+  as expected.</p>
 
 <h3 id="translation-table-properties">7.1 Properties of <code>d2rq:TranslationTable</code></h3>
 
@@ -1129,7 +1141,9 @@ from where the content is to be made downloadable. An instance of
       <code>Content-Type</code> header. Examples include <code>application/pdf</code>,
       <code>image/png</code>, <code>text/plain</code> and <code>text/html</code>.
       If absent, <code>application/octet-stream</code> will be sent to indicate
-      a generic binary file.</td>
+      a generic binary file. The value can be obtained from the database using
+      the <a href="#d2rq:pattern"><code>d2rq:pattern</code></a> syntax (see
+      <a href="#example-dynamic-mediatype">example</a>).</td>
   </tr>
   <tr>
     <th>d2rq:condition<br />d2rq:join<br />d2rq:alias</th>
@@ -1220,6 +1234,21 @@ map:PaperDownloadWord a d2rq:DownloadMap;
     d2rq:contentDownloadColumn "PAPER.DOWNLOAD";
     d2rq:mediaType "application/msword";
     d2rq:condition "PAPER.FORMAT = 'DOC'";
+    .
+</pre>
+
+
+<h3 id="example-dynamic-mediatype">8.5 Example: Media type from a database column</h3>
+
+<p>The <code>d2rq:mediaType</code> of a download map can be a
+pattern that is instantiated with column values:</p>
+
+<pre>
+map:PaperDownloadPDF a d2rq:DownloadMap;
+    d2rq:dataStorage map:database;
+    d2rq:uriPattern "downloads/@@PAPER.ID@@";
+    d2rq:contentDownloadColumn "PAPER.DOWNLOAD";
+    d2rq:mediaType "@@PAPER.MIMETYPE@@";
     .
 </pre>
 
@@ -1530,18 +1559,29 @@ and <code>d2rq:additionalPropertyDefinitionProperty</code>.</p>
 </table>
 
 
-<h3 id="deprecated-odbc-dsn">12.4 <code>d2rq:odbcDSN</code></h3>
+<h3 id="deprecated-odbc-dsn">12.4 <code>d2rq:odbcDSN</code> and <code>d2rq:allowDistinct</code></h3>
 
-<p>Up to D2RQ 0.7, the <code>d2rq:odbcDSN</code> property could be
+<p>These are deprecated properties of <code>d2rq:Database</code>:</p>
+
+<table class="properties">
+  <tr>
+    <th id="d2rq:odbcDSN">d2rq:odbcDSN</th>
+    <td>Up to D2RQ 0.7, the <code>d2rq:odbcDSN</code> property could be
 used on <code>d2rq:Database</code> to connect to ODBC data sources
 using Sun's ODBC-JDBC bridge. This has been deprecated since JDBC
 drivers are now readily available for most if not all data sources
-and generally work better.</p>
-
-<p>Users can still use ODBC data sources by downloading an
+and generally work better. Users can still use ODBC data sources by downloading an
 ODBC-JDBC bridge from a vendor and using it like any other
 JDBC driver, with a <code>d2rq:jdbcDSN</code> such as
-<code>jdbc:odbc:<em>mydatabase</em></code>.</p>
-
+<code>jdbc:odbc:<em>mydatabase</em></code>.</td>
+  </tr>
+  <tr> 
+    <th id="d2rq:allowDistinct">d2rq:allowDistinct</th>
+    <td>In D2RQ up to v0.8, this indicated the database's ability to handle
+      <code>DISTINCT</code> correctly. Value: <code>true</code> or <code>false</code>.
+      For example MSAccess cuts fields longer than 256 chars. The property is no
+      longer necessary, as D2RQ now determines the correct value automatically.</td>
+  </tr>
+</table>
   </body>
 </html>

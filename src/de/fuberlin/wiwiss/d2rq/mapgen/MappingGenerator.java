@@ -1,24 +1,24 @@
 package de.fuberlin.wiwiss.d2rq.mapgen;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import org.hsqldb.types.Types;
+import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
@@ -35,57 +35,52 @@ import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
-import de.fuberlin.wiwiss.d2rq.dbschema.ColumnType;
 import de.fuberlin.wiwiss.d2rq.dbschema.DatabaseSchemaInspector;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
 
 /**
  * Generates a D2RQ mapping by introspecting a database schema.
  * Result is available as a high-quality Turtle serialization, or
  * as a parsed model.
  * 
- * TODO: This does some progress logging to stdout if writing to
- *       a file. This should perhaps be done via log.info(...) with
- *       an appropriately configured log writer.
- * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class MappingGenerator {
+	private final static Logger log = Logger.getLogger(MappingGenerator.class);
+	
 	private final static String CREATOR = "D2RQ Mapping Generator";
-	private ConnectedDB database;
+	private final static OutputStream DUMMY_STREAM = 
+			new OutputStream() { public void write(int b) {}};
+
+	protected final ConnectedDB database;
+	private final DatabaseSchemaInspector schema;
 	private String mapNamespaceURI;
-	private String instanceNamespaceURI;
-	private String vocabNamespaceURI;
+	protected String instanceNamespaceURI;
+	protected String vocabNamespaceURI;
 	private String driverClass = null;
-	private String databaseSchema = null;
+	private Filter filter = Filter.ALL;
 	private PrintWriter out = null;
-	private PrintWriter err = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
-	private DatabaseSchemaInspector schema = null;
 	// name of n:m link table => name of n table
 	private Map<RelationName,RelationName> linkTables = new HashMap<RelationName,RelationName>();
 	private boolean finished = false;
-	private boolean silent = true;
 	private boolean generateClasses = true;
 	private boolean generateLabelBridges = true;
+	private boolean generateDefinitionLabels = true;
+	private boolean handleLinkTables = true;
+	private boolean serveVocabulary = true;
 	private URI startupSQLScript;
 	
 	public MappingGenerator(ConnectedDB database) {
 		this.database = database;
-		mapNamespaceURI = "#";
-		instanceNamespaceURI = database.getJdbcURL() + "#";
-		vocabNamespaceURI = database.getJdbcURL() + "/vocab#";
-		driverClass = ConnectedDB.guessJDBCDriverClass(database.getJdbcURL());
 		schema = database.schemaInspector();
+		mapNamespaceURI = "#";
+		instanceNamespaceURI = "";
+		vocabNamespaceURI = "vocab/";
+		driverClass = ConnectedDB.guessJDBCDriverClass(database.getJdbcURL());
 	}
 
-	/**
-	 * @param silent If <tt>true</tt> (default), no progress info will be logged.
-	 */
-	public void setSilent(boolean silent) {
-		this.silent = silent;
-	}
-	
 	public void setMapNamespaceURI(String uri) {
 		this.mapNamespaceURI = uri;
 	}
@@ -98,10 +93,10 @@ public class MappingGenerator {
 		this.vocabNamespaceURI = uri;
 	}
 
-	public void setDatabaseSchema(String schema) {
-		this.databaseSchema = schema;
+	public void setFilter(Filter filter) {
+		this.filter = filter;
 	}
-
+	
 	public void setJDBCDriverClass(String driverClassName) {
 		this.driverClass = driverClassName;
 	}
@@ -123,48 +118,57 @@ public class MappingGenerator {
 	public void setGenerateClasses(boolean flag) {
 		this.generateClasses = flag;
 	}
-	
-	public void writeMapping(OutputStream out, OutputStream err) {
+		
+
+	/**
+	 * @param flag Handle Link Tables as properties (true) or normal tables (false)
+	 */
+	public void setHandleLinkTables(boolean flag) {
+		this.handleLinkTables = flag;
+	}
+
+	/**
+	 * @param flag Generate ClassDefinitionLabels and PropertyDefinitionLabels?
+	 */
+	public void setGenerateDefinitionLabels(boolean flag) {
+		this.generateDefinitionLabels = flag;
+	}
+
+	/**
+	 * @param flag Value for d2rq:serveVocabulary in map:Configuration
+	 */
+	public void setServeVocabulary(boolean flag) {
+		this.serveVocabulary = flag;
+	}
+
+	public void writeMapping(OutputStream out) {
 		try {
 			Writer w = new OutputStreamWriter(out, "UTF-8");
-			Writer e = (err != null) ? new OutputStreamWriter(err, "UTF-8") : null;
-			
-			writeMapping(w, e);
-			w.flush();
-			
-			if (e != null)
-				e.flush();
-			if (!silent) System.out.println("Done!");
+			writeMapping(w);
+			w.flush();			
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 	
 	/**
-	 * Since we are not opening the Writer so we will not close it. Because the class/resource 
-	 * which invokes MappingGenerator may like to do further processing using the Writer.
-	 * 
-	 * So the calling class/resource should handle to close the Writer appropriately. This comment 
-	 * is a reference to issue #30 on GitHub.
+	 * Writes the D2RQ mapping to a writer. Note that the calling code is
+	 * responsible for closing the writers after use.
 	 * 
 	 * @param out Stream for writing data to the file or console
-	 * @param err Stream for warnings generated during the mapping process; may be <code>null</code>
 	 */
-	public void writeMapping(Writer out, Writer err) {
+	public void writeMapping(Writer out) {
 		this.out = new PrintWriter(out);
-		if (err != null)
-			this.err = new PrintWriter(err);
-		
 		run();
+		log.info("Done!");
 		this.out.flush();
 		this.out = null;
 		this.finished = true;
 	}
 
-	public Model vocabularyModel(OutputStream err) {
+	public Model vocabularyModel() {
 		if (!this.finished) {
-			StringWriter w = new StringWriter();
-			writeMapping(w, err != null ? new PrintWriter(err) : null);
+			writeMapping(DUMMY_STREAM);
 		}
 		return this.vocabModel;
 	}
@@ -173,16 +177,19 @@ public class MappingGenerator {
 	 * Returns an in-memory Jena model containing the D2RQ mapping.
 	 * 
 	 * @param baseURI Base URI for resolving relative URIs in the mapping, e.g., map namespace
-	 * @param err Stream for warnings generated during the mapping process; may be <code>null</code>
 	 * @return In-memory Jena model containing the D2RQ mapping
 	 */
-	public Model mappingModel(String baseURI, OutputStream err) {
-		StringWriter w = new StringWriter();
-		writeMapping(w, err != null ? new PrintWriter(err) : null);
-		String mappingAsTurtle = w.toString();
-		Model result = ModelFactory.createDefaultModel();
-		result.read(new StringReader(mappingAsTurtle), baseURI, "TURTLE");
-		return result;
+	public Model mappingModel(String baseURI) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		writeMapping(out);
+		try {
+			String mappingAsTurtle = out.toString("UTF-8");
+			Model result = ModelFactory.createDefaultModel();
+			result.read(new StringReader(mappingAsTurtle), baseURI, "TURTLE");
+			return result;
+		} catch (UnsupportedEncodingException ex) {
+			throw new RuntimeException("UTF-8 is always supported");
+		}
 	}
 	
 	private void run() {
@@ -195,20 +202,38 @@ public class MappingGenerator {
 		this.out.println("@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .");
 		this.out.println("@prefix jdbc: <http://d2rq.org/terms/jdbc/> .");
 		this.out.println();
+		if (!serveVocabulary) {
+			writeConfiguration();
+		}
 		writeDatabase();
 		initVocabularyModel();
-		identifyLinkTables();
-		Iterator it = schema.listTableNames(databaseSchema).iterator();
-		while (it.hasNext()) {
-			RelationName tableName = (RelationName) it.next();
-			if (!this.schema.isLinkTable(tableName)) {
+		if (handleLinkTables) {
+			identifyLinkTables();
+		}
+		for (RelationName tableName: schema.listTableNames(filter.getSingleSchema())) {
+			if (!filter.matches(tableName)) {
+				log.info("Skipping table " + tableName);
+				continue;
+			}
+			if (!handleLinkTables || !schema.isLinkTable(tableName)) {
 				writeTable(tableName);
 			}
 		}
 	}
 	
+	private void writeConfiguration() {
+		log.info("Generating d2rq:Configuration instance");
+		this.out.println(configName() + " a d2rq:Configuration;");
+		this.out.println("\td2rq:serveVocabulary false.");
+		this.out.println();
+	}
+
+	private String configName() {
+		return "map:Configuration";
+	}
+
 	private void writeDatabase() {
-		if (!silent) System.out.println("Generating d2rq:Database instance");
+		log.info("Generating d2rq:Database instance");
 		this.out.println(databaseName() + " a d2rq:Database;");
 		this.out.println("\td2rq:jdbcDriver \"" + this.driverClass + "\";");
 		this.out.println("\td2rq:jdbcDSN \"" + database.getJdbcURL() + "\";");
@@ -221,11 +246,9 @@ public class MappingGenerator {
 		if (startupSQLScript != null) {
 			out.println("\td2rq:startupSQLScript <" + startupSQLScript + ">;");
 		}
-		Properties props = database.getSyntax().getDefaultConnectionProperties();
-		Iterator it = props.keySet().iterator();
-		while (it.hasNext()) {
-			String property = (String) it.next();
-			String value = props.getProperty(property);
+		Properties props = database.vendor().getDefaultConnectionProperties();
+		for (Object property: props.keySet()) {
+			String value = props.getProperty((String) property);
 			this.out.println("\tjdbc:" + property + " \"" + value + "\";");
 		}
 		this.out.println("\t.");
@@ -234,7 +257,7 @@ public class MappingGenerator {
 	}
 	
 	public void writeTable(RelationName tableName) {
-		if (!silent) System.out.println("Generating d2rq:ClassMap instance for table " + tableName.qualifiedName()) ;
+		log.info("Generating d2rq:ClassMap instance for table " + tableName.qualifiedName()) ;
 		this.out.println("# Table " + tableName);
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
@@ -249,36 +272,61 @@ public class MappingGenerator {
 		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
 		if (generateClasses) {
 			this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
-			this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
+			if (generateDefinitionLabels) {
+				this.out.println("\td2rq:classDefinitionLabel \"" + tableName + "\";");
+			}
 		}
 		this.out.println("\t.");
-		if (generateLabelBridges) {
+		if (generateLabelBridges && hasPrimaryKey(tableName)) {
 			writeLabelBridge(tableName);
 		}
-		List foreignKeys = this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
-		Iterator it = this.schema.listColumns(tableName).iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		List<Join> foreignKeys = schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
+		for (Attribute column: schema.listColumns(tableName)) {
+			if (!filter.matches(column)) {
+				log.info("Skipping column " + column);
+				continue;
+			}
 			if (isInForeignKey(column, foreignKeys)) continue;
-			if (!isMappableColumnType(column)) {
+			if (schema.columnType(column) == null) {
 				writeWarning(new String[]{
 						"Skipping column: " + column,
-						"    Its datatype " + schema.columnType(column).typeName() + " cannot be mapped to RDF"
+						"    Its datatype " + schema.columnType(column) + " is unknown to D2RQ.",
+						"    You can override the column's datatype using d2rq:xxxColumn and add a property bridge.",
+					}, "");
+				continue;
+			}
+			if (schema.columnType(column).isUnsupported()) {
+				writeWarning(new String[]{
+						"Skipping column: " + column,
+						"    Its datatype " + schema.columnType(column) + " cannot be mapped to RDF"
 					}, "");
 				continue;
 			}
 			writeColumn(column);
 		}
-		it = foreignKeys.iterator();
-		while (it.hasNext()) {
-			Join fk = (Join) it.next();
+		for (Join fk: foreignKeys) {
+			if (!filter.matches(fk.table1()) || !filter.matches(fk.table2()) || 
+					!filter.matchesAll(fk.attributes1()) || !filter.matchesAll(fk.attributes2())) {
+				log.info("Skipping foreign key: " + fk);
+				continue;
+			}
 			writeForeignKey(fk);
 		}
-		it = this.linkTables.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			if (entry.getValue().equals(tableName)) {
-				writeLinkTable((RelationName) entry.getKey());
+		if (handleLinkTables) {
+			for (RelationName linkTable: linkTables.keySet()) {
+				if (linkTables.get(linkTable).equals(tableName)) {
+					List<Join> keys = schema.foreignKeys(linkTable, DatabaseSchemaInspector.KEYS_IMPORTED);
+					Join join1 = keys.get(0);
+					Join join2 = keys.get(1);
+					if (!filter.matches(join1.table1()) || !filter.matches(join1.table2()) || 
+							!filter.matchesAll(join1.attributes1()) || !filter.matchesAll(join1.attributes2()) ||
+							!filter.matches(join2.table1()) || !filter.matches(join2.table2()) || 
+							!filter.matchesAll(join2.attributes1()) || !filter.matchesAll(join2.attributes2())) {
+						log.info("Skipping link table " + linkTable);
+						continue;
+					}
+					writeLinkTable(linkTable, keys);
+				}
 			}
 		}
 		this.out.println();
@@ -302,17 +350,19 @@ public class MappingGenerator {
 		this.out.println(propertyBridgeName(toRelationName(column)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(column.relationName()) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(column) + ";");
-		this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
+		if (generateDefinitionLabels) {
+			this.out.println("\td2rq:propertyDefinitionLabel \"" + toRelationLabel(column) + "\";");
+		}
 		this.out.println("\td2rq:column \"" + column.qualifiedName() + "\";");
-		ColumnType colType = this.schema.columnType(column);
-		String xsd = schema.xsdTypeFor(colType);
+		DataType colType = this.schema.columnType(column);
+		String xsd = colType.rdfType();
 		if (xsd != null && !"xsd:string".equals(xsd)) {
 			// We use plain literals instead of xsd:strings, so skip
 			// this if it's an xsd:string
 			this.out.println("\td2rq:datatype " + xsd + ";");
 		}
-		if (colType.typeId() == Types.BIT) {
-			this.out.println("\td2rq:valueRegex \"^[01]*$\";");
+		if (colType.valueRegex() != null) {
+			this.out.println("\td2rq:valueRegex \"" + colType.valueRegex() + "\";");
 		}
 		writeColumnHacks(column, colType);
 		if (xsd == null) {
@@ -326,7 +376,7 @@ public class MappingGenerator {
 
 	public void writeForeignKey(Join foreignKey) {
 		RelationName primaryTable = schema.getCorrectCapitalization(foreignKey.table1());
-		List primaryColumns = foreignKey.attributes1();
+		List<Attribute> primaryColumns = foreignKey.attributes1();
 		RelationName foreignTable = schema.getCorrectCapitalization(foreignKey.table2());
 		this.out.println(propertyBridgeName(toRelationName(primaryColumns)) + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(primaryTable) + ";");
@@ -339,9 +389,7 @@ public class MappingGenerator {
 			this.out.println("\td2rq:alias \"" + foreignTable.qualifiedName() + " AS " + aliasName + "\";");
 			alias = AliasMap.create1(foreignTable, new RelationName(null, aliasName));
 		}
-		Iterator it = primaryColumns.iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		for (Attribute column: primaryColumns) {
 			this.out.println("\td2rq:join \"" + column.qualifiedName() + " " + Join.joinOperators[foreignKey.joinDirection()] + " " +
 					alias.applyTo(foreignKey.equalAttribute(column)).qualifiedName() + "\";");
 		}
@@ -350,15 +398,14 @@ public class MappingGenerator {
 	}
 
 	// TODO Factor out into its own interface & classes for different RDBMS?
-	public void writeColumnHacks(Attribute column, ColumnType colType) {
+	public void writeColumnHacks(Attribute column, DataType colType) {
 //		if (DatabaseSchemaInspector.isStringType(colType)) {
 //			// Suppress empty strings ('')
 //			out.println("\td2rq:condition \"" + column.getQualifiedName() + " != ''\";");			
 //		}
 	}
 	
-	private void writeLinkTable(RelationName linkTableName) {
-		List foreignKeys = this.schema.foreignKeys(linkTableName, DatabaseSchemaInspector.KEYS_IMPORTED);
+	private void writeLinkTable(RelationName linkTableName, List<Join> foreignKeys) {
 		Join join1 = (Join) foreignKeys.get(0);
 		Join join2 = (Join) foreignKeys.get(1);
 		RelationName table1 = this.schema.getCorrectCapitalization(join1.table2());
@@ -369,9 +416,7 @@ public class MappingGenerator {
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(table1) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(linkTableName) + ";");
 		this.out.println("\td2rq:refersToClassMap " + classMapName(table2) + ";");
-		Iterator it = join1.attributes1().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		for (Attribute column: join1.attributes1()) {
 			Attribute otherColumn = join1.equalAttribute(column);
 			this.out.println("\td2rq:join \"" + column.qualifiedName() + " " + Join.joinOperators[join1.joinDirection()] + " " + otherColumn.qualifiedName() + "\";");
 		}
@@ -383,9 +428,7 @@ public class MappingGenerator {
 			this.out.println("\td2rq:alias \"" + table2.qualifiedName() + 
 					" AS " + aliasName.qualifiedName() + "\";");
 		}
-		it = join2.attributes1().iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		for (Attribute column: join2.attributes1()) {
 			Attribute otherColumn = join2.equalAttribute(column);
 			this.out.println("\td2rq:join \"" + column.qualifiedName() + " " + Join.joinOperators[join2.joinDirection()] + " " + alias.applyTo(otherColumn).qualifiedName() + "\";");
 		}
@@ -393,17 +436,10 @@ public class MappingGenerator {
 		createLinkProperty(linkTableName, table1, table2);
 	}
 
-	private void writeWarning(String warning, String indent) {
-		writeWarning(new String[]{warning}, indent);
-	}
-	
-	private void writeWarning(String[] warning, String indent) {
-		for (int i=0; i<warning.length; i++)
-			this.out.println(indent + "# " + warning[i]);
-		
-		if (this.err != null) {
-			for (int i=0; i<warning.length; i++)
-				this.err.println(warning[i]);
+	private void writeWarning(String[] warnings, String indent) {
+		for (String warning: warnings) {
+			this.out.println(indent + "# " + warning);
+			log.warn(warning);
 		}
 	}
 	
@@ -413,9 +449,9 @@ public class MappingGenerator {
 	
 	// A very conservative pattern for the local part of a QName.
 	// If a URI doesn't match, better don't QName it.
-	private final static Pattern simpleXMLName = 
+	protected final static Pattern simpleXMLName = 
 			Pattern.compile("[a-zA-Z_][a-zA-Z0-9_-]*");
-	private String toPrefixedURI(String namespaceURI, String prefix, String s) {
+	protected String toPrefixedURI(String namespaceURI, String prefix, String s) {
 		if (simpleXMLName.matcher(s).matches()) {
 			return prefix + ":" + s;
 		}
@@ -438,29 +474,35 @@ public class MappingGenerator {
 		return toPrefixedURI(mapNamespaceURI, "map", relationName + suffix);
 	}
 	
-	private String vocabularyTermQName(RelationName table) {
+	protected String vocabularyTermQName(RelationName table) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", table.qualifiedName());
 	}
 
-	private String vocabularyTermQName(Attribute attribute) {
+	protected String vocabularyTermQName(Attribute attribute) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attribute));
 	}
 
-	private String vocabularyTermQName(List attributes) {
+	protected String vocabularyTermQName(List<Attribute> attributes) {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attributes));
 	}
 
-	private boolean hasPrimaryKey(RelationName tableName) {
-		return !this.schema.primaryKeyColumns(tableName).isEmpty();
+	protected List<Attribute> filteredPrimaryKeyColumns(RelationName tableName) {
+		List<Attribute> columns = schema.primaryKeyColumns(tableName);
+		if (filter.matchesAll(columns)) {
+			return columns;
+		}
+		return Collections.<Attribute>emptyList();
 	}
 	
-	private String uriPattern(RelationName tableName) {
+	private boolean hasPrimaryKey(RelationName tableName) {
+		return !filteredPrimaryKeyColumns(tableName).isEmpty();
+	}
+	
+	protected String uriPattern(RelationName tableName) {
 		String result = this.instanceNamespaceURI + tableName.qualifiedName();
-		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		for (Attribute column: filteredPrimaryKeyColumns(tableName)) {
 			result += "/@@" + column.qualifiedName();
-			if (DatabaseSchemaInspector.isStringType(this.schema.columnType(column))) {
+			if (!schema.columnType(column).isIRISafe()) {
 				result += "|urlify";
 			}
 			result += "@@";
@@ -470,10 +512,9 @@ public class MappingGenerator {
 	
 	private String labelPattern(RelationName tableName) {
 		String result = tableName + " #";
-		Iterator it = this.schema.primaryKeyColumns(tableName).iterator();
+		Iterator<Attribute> it = filteredPrimaryKeyColumns(tableName).iterator();
 		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
-			result += "@@" + column.qualifiedName() + "@@";
+			result += "@@" + it.next().qualifiedName() + "@@";
 			if (it.hasNext()) {
 				result += "/";
 			}
@@ -486,12 +527,10 @@ public class MappingGenerator {
 		return column.tableName() + "_" + column.attributeName();
 	}
 
-	private String toRelationName(List columns) {
+	private String toRelationName(List<Attribute> columns) {
 		StringBuffer result = new StringBuffer();
-		result.append(((Attribute) columns.get(0)).tableName());
-		Iterator it = columns.iterator();
-		while (it.hasNext()) {
-			Attribute column = (Attribute) it.next();
+		result.append((columns.get(0)).tableName());
+		for (Attribute column: columns) {
 			result.append("_" + column.attributeName());
 		}
 		return result.toString();
@@ -502,32 +541,24 @@ public class MappingGenerator {
 	}
 	
 	private void identifyLinkTables() {
-		if (!silent) System.out.println("Identifying link tables") ;
-		Iterator it = this.schema.listTableNames(databaseSchema).iterator();
-		while (it.hasNext()) {
-			RelationName tableName = (RelationName) it.next();
+		log.info("Identifying link tables");
+		for (RelationName tableName: schema.listTableNames(filter.getSingleSchema())) {
 			if (!this.schema.isLinkTable(tableName)) {
 				continue;
 			}
 			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED).get(0);
 			this.linkTables.put(tableName, firstForeignKey.table2());
 		}
-		if (!silent) System.out.println("Found " + String.valueOf(this.linkTables.size()) + " link tables") ;
+		log.info("Found " + String.valueOf(this.linkTables.size()) + " link tables") ;
 	}
 
-	private boolean isInForeignKey(Attribute column, List foreignKeys) {
-		Iterator it = foreignKeys.iterator();
-		while (it.hasNext()) {
-			Join fk = (Join) it.next();
+	private boolean isInForeignKey(Attribute column, List<Join> foreignKeys) {
+		for (Join fk: foreignKeys) {
 			if (fk.containsColumn(column)) return true;
 		}
 		return false;
 	}
 
-	private boolean isMappableColumnType(Attribute column) {
-		return schema.xsdTypeFor(schema.columnType(column)) != ColumnType.UNMAPPABLE;
-	}
-	
 	private void initVocabularyModel() {
 		this.vocabModel.setNsPrefix("rdf", RDF.getURI());
 		this.vocabModel.setNsPrefix("rdfs", RDFS.getURI());
@@ -597,7 +628,7 @@ public class MappingGenerator {
 		return this.vocabModel.createResource(propertyURI);
 	}
 	
-	private Resource propertyResource(List columns) {
+	private Resource propertyResource(List<Attribute> columns) {
 		String propertyURI = this.vocabNamespaceURI + toRelationName(columns);
 		return this.vocabModel.createResource(propertyURI);
 	}

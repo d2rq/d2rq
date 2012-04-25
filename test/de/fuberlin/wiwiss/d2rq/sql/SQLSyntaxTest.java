@@ -70,29 +70,29 @@ public class SQLSyntaxTest extends TestCase {
 	}
 	
 	public void testFindColumnsInExpression() {
-		assertEquals(new HashSet(Arrays.asList(new Attribute[]{foo_col1, bar_col2})),
+		assertEquals(new HashSet<Attribute>(Arrays.asList(new Attribute[]{foo_col1, bar_col2})),
 				SQL.findColumnsInExpression("foo.col1 + bar.col2 = 135"));
 	}
 	
 	public void testFindColumnsInExpression2() {
-		assertEquals(new HashSet(Arrays.asList(new Attribute[]{foo_col1, foo_col2})),
+		assertEquals(new HashSet<Attribute>(Arrays.asList(new Attribute[]{foo_col1, foo_col2})),
 				SQL.findColumnsInExpression("'must.not.match' = foo.col1 && foo.col2 = 'must.not' && foo.col2"));
 	}
 
 	public void testFindColumnsInExpressionWithSchema() {
-		assertEquals(new HashSet(Arrays.asList(new Attribute[]{
+		assertEquals(new HashSet<Attribute>(Arrays.asList(new Attribute[]{
 				new Attribute("s1", "t1", "c1"), 
 				new Attribute("s2", "t2", "c2")})),
 				SQL.findColumnsInExpression("s1.t1.c1 + s2.t2.c2 = 135"));
 	}
 	
 	public void testFindColumnsInExpressionWithStrings() {
-		assertEquals(new HashSet(Arrays.asList(new Attribute[]{foo_col1, foo_col2, bar_col1})),
+		assertEquals(new HashSet<Attribute>(Arrays.asList(new Attribute[]{foo_col1, foo_col2, bar_col1})),
 				SQL.findColumnsInExpression("FUNC('mustnot.match', foo.col1, 'must.not.match') = foo.col2 && FUNC(F2(), bar.col1)"));
 	}
 
 	public void testFindColumnsInExpressionWithStrings2() { // may occur with d2rq:sqlExpression
-		assertEquals(new HashSet(Arrays.asList(new Attribute[]{foo_col1})),
+		assertEquals(new HashSet<Attribute>(Arrays.asList(new Attribute[]{foo_col1})),
 				SQL.findColumnsInExpression("FUNC('mustnot.match', foo.col1, 'must.not.match')"));
 	}
 	
@@ -119,7 +119,7 @@ public class SQLSyntaxTest extends TestCase {
 	}
 	
 	public void testReplaceColumnsInExpressionWithColumnReplacer() {
-		Map map = new HashMap();
+		Map<Attribute,Attribute> map = new HashMap<Attribute,Attribute>();
 		map.put(foo_col1, bar_col2);
 		ColumnRenamerMap col1ToCol2 = new ColumnRenamerMap(map);
 		assertEquals("bar.col2", 
@@ -162,7 +162,7 @@ public class SQLSyntaxTest extends TestCase {
 	}
 	
 	public void testParseJoinOneCondition() {
-		Set joins = SQL.parseJoins(Collections.singleton("foo.col1 = bar.col2"));
+		Set<Join> joins = SQL.parseJoins(Collections.singleton("foo.col1 = bar.col2"));
 		assertEquals(1, joins.size());
 		Join join = (Join) joins.iterator().next();
 		assertEquals(Collections.singletonList(bar_col2), join.attributes1());
@@ -170,7 +170,7 @@ public class SQLSyntaxTest extends TestCase {
 	}
 	
 	public void testParseJoinTwoConditionsOnSameTables() {
-		Set joins = SQL.parseJoins(Arrays.asList(new String[]{
+		Set<Join> joins = SQL.parseJoins(Arrays.asList(new String[]{
 				"foo.col1 = bar.col1", "foo.col2 = bar.col2"}));
 		assertEquals(1, joins.size());
 		Join join = (Join) joins.iterator().next();
@@ -182,10 +182,10 @@ public class SQLSyntaxTest extends TestCase {
 	}
 	
 	public void testParseJoinTwoConditionsOnDifferentTables() {
-		Set joins = SQL.parseJoins(Arrays.asList(new String[]{
+		Set<Join> joins = SQL.parseJoins(Arrays.asList(new String[]{
 				"foo.col1 <= bar.col1", "foo.col2 => baz.col1", "foo.col2 = bar.col1"}));
 		assertEquals(3, joins.size());
-		assertEquals(new HashSet(Arrays.asList(new Join[]{
+		assertEquals(new HashSet<Join>(Arrays.asList(new Join[]{
 				new Join(bar_col1, foo_col1, Join.DIRECTION_LEFT),
 				new Join(baz_col1, foo_col2, Join.DIRECTION_RIGHT),
 				new Join(foo_col2, bar_col1, Join.DIRECTION_UNDIRECTED)})),

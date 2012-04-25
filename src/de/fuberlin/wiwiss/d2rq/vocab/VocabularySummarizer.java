@@ -17,28 +17,28 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class VocabularySummarizer {
-	private final Class vocabularyJavaClass;
-	private final Set properties;
-	private final Set classes;
+	private final Class<? extends Object> vocabularyJavaClass;
+	private final Set<Property> properties;
+	private final Set<Resource> classes;
 	
-	public VocabularySummarizer(Class vocabularyJavaClass) {
+	public VocabularySummarizer(Class<? extends Object> vocabularyJavaClass) {
 		this.vocabularyJavaClass = vocabularyJavaClass;
 		properties = findAllProperties();
 		classes = findAllClasses();
 	}
 
-	public Set getAllProperties() {
+	public Set<Property> getAllProperties() {
 		return properties;
 	}
 	
-	private Set findAllProperties() {
-		Set results = new HashSet();
+	private Set<Property> findAllProperties() {
+		Set<Property> results = new HashSet<Property>();
 		for (int i = 0; i < vocabularyJavaClass.getFields().length; i++) {
 			Field field = vocabularyJavaClass.getFields()[i];
 			if (!Modifier.isStatic(field.getModifiers())) continue;
 			if (!Property.class.isAssignableFrom(field.getType())) continue;
 			try {
-				results.add(field.get(null));
+				results.add((Property) field.get(null));
 			} catch (IllegalAccessException ex) {
 				throw new D2RQException(ex);
 			}
@@ -46,19 +46,19 @@ public class VocabularySummarizer {
 		return results;
 	}
 	
-	public Set getAllClasses() {
+	public Set<Resource> getAllClasses() {
 		return classes;
 	}
 	
-	private Set findAllClasses() {
-		Set results = new HashSet();
+	private Set<Resource> findAllClasses() {
+		Set<Resource> results = new HashSet<Resource>();
 		for (int i = 0; i < vocabularyJavaClass.getFields().length; i++) {
 			Field field = vocabularyJavaClass.getFields()[i];
 			if (!Modifier.isStatic(field.getModifiers())) continue;
 			if (!Resource.class.isAssignableFrom(field.getType())) continue;
 			if (Property.class.isAssignableFrom(field.getType())) continue;
 			try {
-				results.add(field.get(null));
+				results.add((Resource) field.get(null));
 			} catch (IllegalAccessException ex) {
 				throw new D2RQException(ex);
 			}
