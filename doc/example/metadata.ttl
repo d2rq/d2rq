@@ -4,53 +4,48 @@
 
 @prefix prv:      <http://purl.org/net/provenance/ns#> .
 @prefix prvTypes: <http://purl.org/net/provenance/types#> .
-@prefix prvIV:    <http://purl.org/net/provenance/integrity#> .
 
-@prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix sp:   <http://spinrdf.org/sp#> .
 @prefix void: <http://rdfs.org/ns/void#> .
 
+@prefix doap: <http://usefulinc.com/ns/doap#> .
 
-<about:metadata:runtime:graph> a prv:DataItem , rdfg:Graph ;
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+
+
+# This template provides provenance information about RDF graphs served by D2R.
+# The provenance information is described using the Provenance Vocabulary v0.6.
+
+<about:metadata:root:root> a prv:DataItem ;
 	foaf:primaryTopic <about:metadata:runtime:resource> ;
 	foaf:topic <about:metadata:runtime:graph> ;
 
 	prv:createdBy [
 			a prv:DataCreation ;
-			prv:performedAt <about:metadata:runtime:time> ;
+			prv:completedAt <about:metadata:runtime:time> ;
 			prv:performedBy _:d2r ;
+			
 			prv:usedData [
 				a prv:DataItem ;
-				a prvTypes:QueryResult ;
-				a rdfg:Graph ;
-
-				prv:createdBy [
-					a prv:DataCreation , prvTypes:QueryExecution ;
-					prv:performedBy _:d2r ;
-					prv:usedGuideline [
-						a prv:DataItem ;
-						a prvTypes:SPARQLQuery ;
-						a sp:Describe ;
-						rdfs:label <about:metadata:runtime:query> ;
-					]
-				] ;
+				d2rq:jdbcDSN <about:metadata:database:jdbcDSN>;
 			] ;
 		] .
            
-_:d2r a prv:Actor ,
+_:d2r a prv:NonHumanAgent ,
         prvTypes:DataCreatingService ,
         prv:DataProvidingService ;
 	rdfs:comment "This service runs D2R Server." ;
-	prv:operatedBy <about:metadata:metadata:d2rOperator> ;
-	prv:usedBy     <about:metadata:metadata:d2rUser> ;
-	prv:deployedSoftware _:d2rRelease ;
-	rdfs:seeAlso   <about:metadata:config:baseURI> .
-
-_:d2rRelease a doap:Version ;
-             doap:revision "0.8" .
+	prv:operatedBy <about:metadata:metadata:d2rUser> ;
+	prv:deployedSoftware <http://www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3> ;
+	rdfs:seeAlso <about:metadata:config:baseURI> .
+             
 <http://www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3> a doap:Project ;
-	doap:release   _:d2rRelease ;
+	doap:release [
+		a doap:Version ;
+        doap:revision "0.9";
+    ];
+	doap:name "D2R Server";
 	doap:homepage  <http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/> .
 
 <about:metadata:metadata:dataset> rdf:type void:Dataset ;
@@ -58,9 +53,5 @@ _:d2rRelease a doap:Version ;
 	rdfs:seeAlso   <about:metadata:config:baseURI> .
 
 <about:metadata:metadata:d2rUser>
-	foaf:name <about:metadata:metadata:d2rUserName> ;
-	foaf:homepage <about:metadata:metadata:d2rUserHomepage> .
-
-<about:metadata:metadata:d2rOperator>
-	foaf:name <about:metadata:metadata:d2rOperatorName> ;
-	foaf:homepage <about:metadata:metadata:d2rOperatorHomepage> .
+	foaf:name <about:metadata:metadata:operatorName> ;
+	foaf:homepage <about:metadata:metadata:operatorHomepage> .
