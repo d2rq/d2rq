@@ -24,74 +24,83 @@ import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.GraphD2RQ;
+import de.fuberlin.wiwiss.d2rq.vocab.META;
 
 public class PageServlet extends HttpServlet {
 	private PrefixMapping prefixes;
-	
-	public void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServletException {
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		server.checkMappingFileChanged();
 		String relativeResourceURI = request.getRequestURI().substring(
-				request.getContextPath().length() + request.getServletPath().length());
+				request.getContextPath().length()
+						+ request.getServletPath().length());
 		// Some servlet containers keep the leading slash, some don't
-		if (!"".equals(relativeResourceURI) && "/".equals(relativeResourceURI.substring(0, 1))) {
+		if (!"".equals(relativeResourceURI)
+				&& "/".equals(relativeResourceURI.substring(0, 1))) {
 			relativeResourceURI = relativeResourceURI.substring(1);
 		}
 		if (request.getQueryString() != null) {
-			relativeResourceURI = relativeResourceURI + "?" + request.getQueryString();
+			relativeResourceURI = relativeResourceURI + "?"
+					+ request.getQueryString();
 		}
 
 		/* Determine service stem, i.e. vocab/ in /[vocab/]page */
 		int servicePos;
-		if (-1 == (servicePos = request.getServletPath().indexOf("/" + D2RServer.getPageServiceName())))
-				throw new ServletException("Expected to find service path /" + D2RServer.getPageServiceName());
-		String serviceStem = request.getServletPath().substring(1, servicePos + 1);		
-		
-		String resourceURI = server.resourceBaseURI(serviceStem) + relativeResourceURI;
+		if (-1 == (servicePos = request.getServletPath().indexOf(
+				"/" + D2RServer.getPageServiceName())))
+			throw new ServletException("Expected to find service path /"
+					+ D2RServer.getPageServiceName());
+		String serviceStem = request.getServletPath().substring(1,
+				servicePos + 1);
+
+		String resourceURI = server.resourceBaseURI(serviceStem)
+				+ relativeResourceURI;
 		String documentURL = server.dataURL(serviceStem, relativeResourceURI);
 
 		String sparqlQuery = "DESCRIBE <" + resourceURI + ">";
-		Model description = QueryExecutionFactory.create(sparqlQuery, server.dataset()).execDescribe();			
+		Model description = QueryExecutionFactory.create(sparqlQuery,
+				server.dataset()).execDescribe();
 		if (description.size() == 0) {
 			response.sendError(404);
 			return;
 		}
-		
+
 		this.prefixes = server.getPrefixes(); // model();
 		Resource resource = description.getResource(resourceURI);
 		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
 		Context context = velocity.getContext();
-		
+
 		try {
 			// create and add metadata to context
-			MetadataCreator mc = new MetadataCreator(server, velocity);
-			mc.setResourceURI(resourceURI);
-			mc.setDocumentURL(documentURL);
-			mc.setSparqlQuery(sparqlQuery);
-			
-			Model metadata = mc.addMetadataFromTemplate(description.createResource(resourceURI), getServletContext());
+			MetadataCreator mc = server.getMetadataCreator();
+
+			Model metadata = mc.addMetadataFromTemplate(resourceURI,
+					documentURL);
 			if (!metadata.isEmpty()) {
-				context.put("metadata", metadata.getResource(documentURL).listProperties().toList());
-	
+				context.put("metadata", metadata.getResource(META.ROOT)
+						.listProperties().toList());
+
 				// add prefixes to context
 				Map nsSet = metadata.getNsPrefixMap();
 				nsSet.putAll(description.getNsPrefixMap());
-				
+
 				context.put("prefixes", nsSet.entrySet());
-				
+				context.put("metadataroot", META.ROOT);
+
 				// add a empty map for keeping track of blank nodes aliases
 				context.put("blankNodesMap", new HashMap());
 			} else {
-				context.put("metadata", Boolean.FALSE);				
+				context.put("metadata", Boolean.FALSE);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			context.put("metadata", Boolean.FALSE);
 		}
-		
+
 		context.put("uri", resourceURI);
-		context.put("rdf_link", server.dataURL(serviceStem, relativeResourceURI));
+		context.put("rdf_link",
+				server.dataURL(serviceStem, relativeResourceURI));
 		context.put("label", resource.getProperty(RDFS.label));
 		context.put("properties", collectProperties(description, resource));
 		context.put("classmap_links", classmapLinks(resource));
@@ -122,13 +131,14 @@ public class PageServlet extends HttpServlet {
 		}
 		return result;
 	}
-	
+
 	private static final long serialVersionUID = 2752377911405801794L;
-	
+
 	public class Property implements Comparable {
 		private Node property;
 		private Node value;
 		private boolean isInverse;
+
 		Property(Statement stmt, boolean isInverse) {
 			this.property = stmt.getPredicate().asNode();
 			if (isInverse) {
@@ -138,12 +148,15 @@ public class PageServlet extends HttpServlet {
 			}
 			this.isInverse = isInverse;
 		}
+
 		public boolean isInverse() {
 			return this.isInverse;
 		}
+
 		public String propertyURI() {
 			return this.property.getURI();
 		}
+
 		public String propertyQName() {
 			String qname = prefixes.qnameFor(this.property.getURI());
 			if (qname == null) {
@@ -151,6 +164,7 @@ public class PageServlet extends HttpServlet {
 			}
 			return qname;
 		}
+
 		public String propertyPrefix() {
 			String qname = propertyQName();
 			if (qname.startsWith("<")) {
@@ -158,6 +172,7 @@ public class PageServlet extends HttpServlet {
 			}
 			return qname.substring(0, qname.indexOf(":") + 1);
 		}
+
 		public String propertyLocalName() {
 			String qname = propertyQName();
 			if (qname.startsWith("<")) {
@@ -165,22 +180,27 @@ public class PageServlet extends HttpServlet {
 			}
 			return qname.substring(qname.indexOf(":") + 1);
 		}
+
 		public Node value() {
 			return this.value;
 		}
+
 		public String valueQName() {
 			if (!this.value.isURI()) {
 				return null;
 			}
 			return prefixes.qnameFor(this.value.getURI());
 		}
+
 		public String datatypeQName() {
-			String qname = prefixes.qnameFor(this.value.getLiteralDatatypeURI());
+			String qname = prefixes
+					.qnameFor(this.value.getLiteralDatatypeURI());
 			if (qname == null) {
 				return "<" + this.value.getLiteralDatatypeURI() + ">";
 			}
 			return qname;
 		}
+
 		public int compareTo(Object otherObject) {
 			if (!(otherObject instanceof Property)) {
 				return 0;
@@ -210,10 +230,12 @@ public class PageServlet extends HttpServlet {
 				if (!this.value.isBlank()) {
 					return 1;
 				}
-				return this.value.getBlankNodeLabel().compareTo(other.value.getBlankNodeLabel());
+				return this.value.getBlankNodeLabel().compareTo(
+						other.value.getBlankNodeLabel());
 			}
 			// TODO Typed literals, language literals
-			return this.value.getLiteralLexicalForm().compareTo(other.value.getLiteralLexicalForm());
+			return this.value.getLiteralLexicalForm().compareTo(
+					other.value.getLiteralLexicalForm());
 		}
 	}
 }

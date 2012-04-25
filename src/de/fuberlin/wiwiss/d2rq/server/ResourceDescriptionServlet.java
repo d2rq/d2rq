@@ -1,8 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,39 +13,45 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
-import de.fuberlin.wiwiss.d2rq.download.DownloadContentQuery;
-import de.fuberlin.wiwiss.d2rq.map.DownloadMap;
-import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.vocab.FOAF;
 
 public class ResourceDescriptionServlet extends HttpServlet {
-	
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
 		server.checkMappingFileChanged();
 		String relativeResourceURI = request.getRequestURI().substring(
-				request.getContextPath().length() + request.getServletPath().length());
+				request.getContextPath().length()
+						+ request.getServletPath().length());
 		// Some servlet containers keep the leading slash, some don't
-		if (!"".equals(relativeResourceURI) && "/".equals(relativeResourceURI.substring(0, 1))) {
+		if (!"".equals(relativeResourceURI)
+				&& "/".equals(relativeResourceURI.substring(0, 1))) {
 			relativeResourceURI = relativeResourceURI.substring(1);
 		}
 		if (request.getQueryString() != null) {
-			relativeResourceURI = relativeResourceURI + "?" + request.getQueryString();
+			relativeResourceURI = relativeResourceURI + "?"
+					+ request.getQueryString();
 		}
-		
+
 		/* Determine service stem, i.e. vocab/ in /[vocab/]data */
 		int servicePos;
-		if (-1 == (servicePos = request.getServletPath().indexOf("/" + D2RServer.getDataServiceName())))
-				throw new ServletException("Expected to find service path /" + D2RServer.getDataServiceName());
-		String serviceStem = request.getServletPath().substring(1, servicePos + 1);		
-				
-		String resourceURI = RequestParamHandler.removeOutputRequestParam(
-				server.resourceBaseURI(serviceStem) + relativeResourceURI);
+		if (-1 == (servicePos = request.getServletPath().indexOf(
+				"/" + D2RServer.getDataServiceName())))
+			throw new ServletException("Expected to find service path /"
+					+ D2RServer.getDataServiceName());
+		String serviceStem = request.getServletPath().substring(1,
+				servicePos + 1);
+
+		String resourceURI = RequestParamHandler
+				.removeOutputRequestParam(server.resourceBaseURI(serviceStem)
+						+ relativeResourceURI);
 		String documentURL = server.dataURL(serviceStem, relativeResourceURI);
 
 		String sparqlQuery = "DESCRIBE <" + resourceURI + ">";
-		Model description = QueryExecutionFactory.create(sparqlQuery, server.dataset()).execDescribe();	
-			
+		Model description = QueryExecutionFactory.create(sparqlQuery,
+				server.dataset()).execDescribe();
+
 		if (description.size() == 0) {
 			response.sendError(404);
 		}
@@ -60,19 +64,17 @@ public class ResourceDescriptionServlet extends HttpServlet {
 		document.addProperty(FOAF.primaryTopic, resource);
 		Statement label = resource.getProperty(RDFS.label);
 		if (label != null) {
-			document.addProperty(RDFS.label, "RDF Description of " + label.getString());
+			document.addProperty(RDFS.label,
+					"RDF Description of " + label.getString());
 		}
 		server.addDocumentMetadata(description, document);
-		
-		MetadataCreator mc = new MetadataCreator(server, new VelocityWrapper(this, request, response));
-		mc.setResourceURI(resourceURI);
-		mc.setDocumentURL(documentURL);
-		mc.setSparqlQuery(sparqlQuery);
 
-		description.add(mc.addMetadataFromTemplate(description.createResource(resourceURI), getServletContext()));
-				
-// TODO: Add a Content-Location header
+		// add document metadata from template
+		description.add(server.getMetadataCreator().addMetadataFromTemplate(
+				resourceURI, documentURL));
+
+		// TODO: Add a Content-Location header
 		new ModelResponse(description, request, response).serve();
-//		Resource resource = description.getResource(resourceURI);
+		// Resource resource = description.getResource(resourceURI);
 	}
 }

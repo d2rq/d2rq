@@ -102,7 +102,7 @@
 		<div id="metadata-tables">
 		#set($bnidCount = 0)
 		#set($idadd = 0)
-		#listProperties ($rdf_link $metadata 'block') 
+		#listProperties ($metadataroot $metadata 'block') 
 		</div>
 		<a href="#meta" onclick="showAllMetadata('metadata-tables')">expand all</a>
 	#end

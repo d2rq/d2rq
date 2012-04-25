@@ -9,9 +9,9 @@
 			#end
 		#end
 
-	#elseif ($node.asNode().isBlank())
+	#elseif ($node.asNode().isBlank() || $node == $metadataroot)
 		#if (!$blankNodesMap.containsKey($node))
-			#set ($bnid = "Anon_$bnidCount")
+			#set ($bnid = "_:$bnidCount")
 			#set ($test = $blankNodesMap.put($node,$bnid))
 			#set ($bnidCount = $bnidCount + 1)
 		#end

@@ -8,4 +8,5 @@ package de.fuberlin.wiwiss.d2rq.vocab;
 public class META {
 
 	public static final String NS = "http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#";
+	public static final String ROOT = "about:metadata:root:root";
 }

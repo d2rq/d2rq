@@ -16,6 +16,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RConfig;
+import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 
 public class ConfigLoader {
 
@@ -172,6 +173,14 @@ public class ConfigLoader {
 	
 	protected Resource findServerResource() {
 		ResIterator it = this.model.listSubjectsWithProperty(RDF.type, D2RConfig.Server);
+		if (!it.hasNext()) {
+			return null;
+		}
+		return it.nextResource();
+	}
+	
+	protected Resource findDatabaseResource() {
+		ResIterator it = this.model.listSubjectsWithProperty(RDF.type, D2RQ.Database);
 		if (!it.hasNext()) {
 			return null;
 		}
