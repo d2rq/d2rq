@@ -97,7 +97,8 @@ public class MetadataCreator {
 		}
 	}
 
-	public Model addMetadataFromTemplate(String resourceURI, String documentURL) {
+	public Model addMetadataFromTemplate(String resourceURI,
+			String documentURL, String pageUrl) {
 		if (!enable) {
 			return ModelFactory.createDefaultModel();
 		}
@@ -110,13 +111,13 @@ public class MetadataCreator {
 		while (it.hasNext()) {
 			Statement stmt = it.nextStatement();
 			Resource subj = stmt.getSubject();
-			com.hp.hpl.jena.rdf.model.Property pred = stmt.getPredicate();
+			Property pred = stmt.getPredicate();
 			RDFNode obj = stmt.getObject();
 
 			try {
 				if (subj.toString().contains(metadataPlaceholderURIPrefix)) {
 					subj = (Resource) parsePlaceholder(subj, documentURL,
-							resourceURI);
+							resourceURI, pageUrl);
 					if (subj == null) {
 						// create a unique blank node with a fixed id.
 						subj = model.createResource(new AnonId(String
@@ -125,7 +126,8 @@ public class MetadataCreator {
 				}
 
 				if (obj.toString().contains(metadataPlaceholderURIPrefix)) {
-					obj = parsePlaceholder(obj, documentURL, resourceURI);
+					obj = parsePlaceholder(obj, documentURL, resourceURI,
+							pageUrl);
 				}
 
 				// only add statements with some objects
@@ -165,7 +167,7 @@ public class MetadataCreator {
 	}
 
 	private RDFNode parsePlaceholder(RDFNode phRes, String documentURL,
-			String resourceURI) {
+			String resourceURI, String pageURL) {
 		String phURI = phRes.asNode().getURI();
 		// get package name and placeholder name from placeholder URI
 		phURI = phURI.replace(metadataPlaceholderURIPrefix, "");
@@ -187,6 +189,14 @@ public class MetadataCreator {
 			if (phName.equals("resource")) {
 				return model.createResource(resourceURI);
 			}
+			// <about:metadata:runtime:page> - URI of the resource
+			if (phName.equals("page")) {
+				return model.createResource(pageURL);
+			}
+			// <about:metadata:runtime:dataset> - URI of the resource
+			if (phName.equals("dataset")) {
+				return model.createResource(server.getDatasetIri());
+			}
 		}
 
 		// <about:metadata:server:*> - The d2r server configuration parameters
@@ -206,10 +216,6 @@ public class MetadataCreator {
 			if (mappingConfig.hasProperty(p)) {
 				return mappingConfig.getProperty(p).getObject();
 			}
-		}
-
-		if (phPackage.equals("root")) {
-			return model.createResource(META.ROOT);
 		}
 
 		// <about:metadata:metadata:*> - The metadata provided by users

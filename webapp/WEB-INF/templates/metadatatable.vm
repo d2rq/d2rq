@@ -9,7 +9,7 @@
 			#end
 		#end
 
-	#elseif ($node.asNode().isBlank() || $node == $metadataroot)
+	#elseif ($node.asNode().isBlank())
 		#if (!$blankNodesMap.containsKey($node))
 			#set ($bnid = "_:$bnidCount")
 			#set ($test = $blankNodesMap.put($node,$bnid))
@@ -30,6 +30,8 @@
 #end
 
 #macro( listProperties $name $metadataPropList $style)
+	#set ($test = $renderedNodesMap.put($name,true))
+
 	#set ($idadd = $idadd + 1)
 	<div class="metadata-label">#prettyNode ($name)&nbsp;
 
@@ -45,7 +47,8 @@
 			<td valign="top" class="metadata-property">#prettyNode ($statement.getPredicate())</td>
 			<td class="metadata-object">
 				#set ($object = $statement.getObject())
-				#if ($object.isResource() && $object.listProperties().toList().size() > 0 && !$statement.getSubject().equals($statement.getObject()))
+				#set ($alreadyRendered = $renderedNodesMap.containsKey($object))
+				#if ($object.isResource() && $object.listProperties().toList().size() > 0 && !$alreadyRendered)
 					#listProperties ($object $object.listProperties().toList() 'none')
 				#else
 					#prettyNode ($statement.getObject())

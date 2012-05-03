@@ -1,56 +1,53 @@
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
 @prefix prv:      <http://purl.org/net/provenance/ns#> .
 @prefix prvTypes: <http://purl.org/net/provenance/types#> .
-
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix sp:   <http://spinrdf.org/sp#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix void: <http://rdfs.org/ns/void#> .
-
 @prefix doap: <http://usefulinc.com/ns/doap#> .
-
+@prefix xhtml: <http://www.w3.org/1999/xhtml/vocab/#> .
 @prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
 
-
 # This template provides provenance information about RDF graphs served by D2R.
-# The provenance information is described using the Provenance Vocabulary v0.6.
 
-<about:metadata:root:root> a prv:DataItem ;
-	foaf:primaryTopic <about:metadata:runtime:resource> ;
-	foaf:topic <about:metadata:runtime:graph> ;
+
+<about:metadata:runtime:resource> 
+	rdfs:isDefinedBy <about:metadata:runtime:graph> ;
+	foaf:page <about:metadata:runtime:page> .
+
+<about:metadata:runtime:graph> a prv:DataItem, foaf:Document ;
+	dc:publisher <about:metadata:runtime:resource> ;
+	void:inDataset <about:metadata:runtime:dataset> ;
+	dc:date <about:metadata:runtime:time> ;
+	xhtml:alternate <about:metadata:runtime:page> ;
 
 	prv:createdBy [
 			a prv:DataCreation ;
 			prv:completedAt <about:metadata:runtime:time> ;
-			prv:performedBy _:d2r ;
-			
-			prv:usedData [
-				a prv:DataItem ;
-				d2rq:jdbcDSN <about:metadata:database:jdbcDSN>;
-			] ;
+			prv:performedBy _:d2rinstallation ;
+			prv:usedData <about:metadata:runtime:dataset> ;
 		] .
            
-_:d2r a prv:NonHumanAgent ,
+_:d2rinstallation a prv:NonHumanAgent ,
         prvTypes:DataCreatingService ,
         prv:DataProvidingService ;
+
 	rdfs:comment "This service runs D2R Server." ;
 	prv:operatedBy <about:metadata:metadata:d2rUser> ;
-	prv:deployedSoftware <http://www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3> ;
+	prv:deployedSoftware _:d2rrelease ;
 	rdfs:seeAlso <about:metadata:config:baseURI> .
              
-<http://www4.wiwiss.fu-berlin.de/is-group/resource/projects/Project3> a doap:Project ;
+_:d2rrelease a doap:Project ;
 	doap:release [
 		a doap:Version ;
         doap:revision "0.9";
     ];
 	doap:name "D2R Server";
-	doap:homepage  <http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/> .
+	doap:homepage  <http://d2rq.org/d2r-server> .
 
-<about:metadata:metadata:dataset> rdf:type void:Dataset ;
-	void:exampleResource <about:metadata:runtime:resource> ;
-	rdfs:seeAlso   <about:metadata:config:baseURI> .
 
 <about:metadata:metadata:d2rUser>
 	foaf:name <about:metadata:metadata:operatorName> ;

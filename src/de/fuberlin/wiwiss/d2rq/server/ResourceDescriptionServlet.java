@@ -46,6 +46,9 @@ public class ResourceDescriptionServlet extends HttpServlet {
 				.removeOutputRequestParam(server.resourceBaseURI(serviceStem)
 						+ relativeResourceURI);
 		String documentURL = server.dataURL(serviceStem, relativeResourceURI);
+		
+		String pageURL = server.pageURL(serviceStem, relativeResourceURI);
+
 
 		String sparqlQuery = "DESCRIBE <" + resourceURI + ">";
 		Model description = QueryExecutionFactory.create(sparqlQuery,
@@ -59,8 +62,10 @@ public class ResourceDescriptionServlet extends HttpServlet {
 			description.setNsPrefix("foaf", FOAF.NS);
 		}
 		Resource resource = description.getResource(resourceURI);
+		
 		Resource document = description.getResource(documentURL);
 		document.addProperty(FOAF.primaryTopic, resource);
+		
 		Statement label = resource.getProperty(RDFS.label);
 		if (label != null) {
 			document.addProperty(RDFS.label,
@@ -70,7 +75,7 @@ public class ResourceDescriptionServlet extends HttpServlet {
 
 		// add document metadata from template
 		description.add(server.getMetadataCreator().addMetadataFromTemplate(
-				resourceURI, documentURL));
+				resourceURI, documentURL, pageURL));
 
 		// TODO: Add a Content-Location header
 		new ModelResponse(description, request, response).serve();
