@@ -41,6 +41,14 @@ public class DatasetDescriptionServlet extends HttpServlet {
 			HttpServletResponse response) throws IOException, ServletException {
 		D2RServer server = D2RServer.fromServletContext(getServletContext());
 
+		if (!server.getConfig().serveMetadata()) {
+			response.setStatus(404);
+			response.setContentType("text/plain");
+			response.getOutputStream().println(
+					"404 Not Found: Dataset description has been disabled.");
+			return;
+		}
+		
 		Model dDesc = ModelFactory.createDefaultModel();
 		dDesc.setNsPrefix("void", VoID.NS);
 
@@ -126,9 +134,19 @@ public class DatasetDescriptionServlet extends HttpServlet {
 		dDesc.add(defaultDatasetDesc, SD.defaultGraph, datasetIRI);
 		dDesc.add(datasetIRI, RDF.type, SD.Graph);
 
-		// TODO: allow user to add his own triples here
-		
-		
+		// add user-specified dataset metadata, either from default or
+		// user-specified metadata template
+		Model datasetMetadataTemplate = server.getConfig()
+				.getDatasetMetadataTemplate(server, getServletContext());
+		MetadataCreator datasetMetadataCreator = new MetadataCreator(server,
+				datasetMetadataTemplate);
+		dDesc.add(datasetMetadataCreator.addMetadataFromTemplate(
+				server.getDatasetIri(), server.getDatasetIri(),
+				server.getDatasetIri()));
+		Map<String, String> dDescPrefixes = dDesc.getNsPrefixMap();
+		dDescPrefixes.putAll(datasetMetadataTemplate.getNsPrefixMap());
+		dDesc.setNsPrefixes(dDescPrefixes);
+
 		// decide whether to serve RDF or HTML
 		ContentTypeNegotiator negotiator = PubbyNegotiator.getPubbyNegotiator();
 		MediaRangeSpec bestMatch = negotiator.getBestMatch(
@@ -154,7 +172,7 @@ public class DatasetDescriptionServlet extends HttpServlet {
 			// add prefixes to context
 			Map<String, String> nsSet = dDesc.getNsPrefixMap();
 			context.put("prefixes", nsSet.entrySet());
-			
+
 			context.put("dataset_iri", datasetIRI);
 
 			// add a empty map for keeping track of blank nodes aliases

@@ -1,6 +1,8 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -17,17 +19,13 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.JenaException;
-import com.hp.hpl.jena.util.FileManager;
 
 import de.fuberlin.wiwiss.d2rq.vocab.D2RConfig;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 import de.fuberlin.wiwiss.d2rq.vocab.META;
 
 /**
- * Implements a metadata extension. For more information see <a href=
- * "http://sourceforge.net/apps/mediawiki/trdf/index.php?title=D2R_Server_Metadata_Extension"
- * >http://sourceforge.net/apps/mediawiki/trdf/index.php?title=
- * D2R_Server_Metadata_Extension</a>.
+ * Implements a metadata extension.
  * 
  * @author Hannes Muehleisen (hannes@muehleisen.org)
  */
@@ -36,7 +34,7 @@ public class MetadataCreator {
 
 	private final static String metadataPlaceholderURIPrefix = "about:metadata:";
 	// model used to generate nodes
-	private Model model;
+	private Model model = ModelFactory.createDefaultModel();;
 	// local d2r instance
 	private D2RServer server;
 
@@ -47,59 +45,19 @@ public class MetadataCreator {
 
 	private static final Log log = LogFactory.getLog(MetadataCreator.class);
 
-	public MetadataCreator(D2RServer server) {
+	public MetadataCreator(D2RServer server, Model template) {
 		// store D2R server config for template location
 		this.server = server;
-		model = ModelFactory.createDefaultModel();
-		// load template into a model
-
-		try {
-			Resource config = server.getConfig().findServerResource();
-			String metadataTemplate = config.getProperty(
-					D2RConfig.metadataTemplate).getString();
-
-			String templatePath;
-			if (metadataTemplate.startsWith(File.separator)) {
-				templatePath = metadataTemplate;
-			} else {
-				File mappingFile = new File(server.getConfig()
-						.getLocalMappingFilename());
-				String folder = mappingFile.getParent();
-				if (folder != null) {
-					templatePath = folder + File.separator + metadataTemplate;
-				} else {
-					templatePath = metadataTemplate;
-				}
-
-			}
-			File f = new File(templatePath);
-			if (f.exists()) {
-				log.info("Metadata extension using template file '"
-						+ templatePath + "'");
-				// add metadata from templates to model
-				tplModel = ModelFactory.createDefaultModel();
-				try {
-					tplModel = FileManager.get().loadModel(templatePath);
-					enable = true;
-				} catch (JenaException e) {
-					log.warn("Unable to load the metadata template file at '"
-							+ templatePath + "'");
-				}
-			} else {
-				log.warn("Metadata extension enabled with template path '"
-						+ templatePath + "', but file is missing.");
-				enable = false;
-			}
-
-		} catch (Exception e) {
-			// if something goes wrong, disable extension
-			enable = false;
+	
+		if (template != null && template.size() > 0) {
+			this.enable = true;
+			this.tplModel = template;
 		}
 	}
 
 	public Model addMetadataFromTemplate(String resourceURI,
 			String documentURL, String pageUrl) {
-		if (!enable) {
+		if (!enable || tplModel == null) {
 			return ModelFactory.createDefaultModel();
 		}
 
@@ -228,5 +186,51 @@ public class MetadataCreator {
 
 		return model
 				.createResource(new AnonId(String.valueOf(phRes.hashCode())));
+	}
+
+	public static File findTemplateFile(D2RServer server,
+			Property fileConfigurationProperty) {
+		Resource config = server.getConfig().findServerResource();
+		if (config == null || !config.hasProperty(fileConfigurationProperty)) {
+			return null;
+		}
+		String metadataTemplate = config.getProperty(fileConfigurationProperty)
+				.getString();
+
+		String templatePath;
+		if (metadataTemplate.startsWith(File.separator)) {
+			templatePath = metadataTemplate;
+		} else {
+			File mappingFile = new File(server.getConfig()
+					.getLocalMappingFilename());
+			String folder = mappingFile.getParent();
+			if (folder != null) {
+				templatePath = folder + File.separator + metadataTemplate;
+			} else {
+				templatePath = metadataTemplate;
+			}
+
+		}
+		File f = new File(templatePath);
+		return f;
+	}
+
+	public static Model loadTemplateFile(File f) {
+		try {
+			return loadMetadataTemplate(new FileInputStream(f));
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public static Model loadMetadataTemplate(InputStream is) {
+		try {
+			Model tplModel = ModelFactory.createDefaultModel();
+			tplModel.read(is, "about:prefix:", "TTL");
+			return tplModel;
+		} catch (JenaException e) {
+			// ignore
+		}
+		return null;
 	}
 }

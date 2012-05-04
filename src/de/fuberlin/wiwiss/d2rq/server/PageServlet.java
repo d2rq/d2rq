@@ -85,16 +85,18 @@ public class PageServlet extends HttpServlet {
 		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
 		Context context = velocity.getContext();
 
-		try {
+		if (server.getConfig().serveMetadata()) {
 			// create and add metadata to context
-			MetadataCreator mc = server.getMetadataCreator();
+			MetadataCreator resourceMetadataCreator = new MetadataCreator(
+					server, server.getConfig().getResourceMetadataTemplate(
+							server, getServletContext()));
 
-			Model metadata = mc.addMetadataFromTemplate(resourceURI,
-					documentURL, pageURL);
+			Model metadata = resourceMetadataCreator.addMetadataFromTemplate(
+					resourceURI, documentURL, pageURL);
 			if (!metadata.isEmpty()) {
 				context.put("metadata", metadata.getResource(documentURL)
 						.listProperties().toList());
-				
+
 				context.put("metadataroot", metadata.getResource(documentURL));
 
 				// add prefixes to context
@@ -110,7 +112,7 @@ public class PageServlet extends HttpServlet {
 			} else {
 				context.put("metadata", Boolean.FALSE);
 			}
-		} catch (Exception e) {
+		} else {
 			context.put("metadata", Boolean.FALSE);
 		}
 

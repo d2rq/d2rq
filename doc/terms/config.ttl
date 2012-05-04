@@ -63,6 +63,18 @@ d2r:metadataTemplate a rdf:Property;
     rdfs:domain d2r:Server;
     rdfs:isDefinedBy <>;
     .
+d2r:datasetMetadataTemplate a rdf:Property;
+    rdfs:label "dataset metadata template"@en;
+    rdfs:comment "A RDF dataset metadata template."@en;
+    rdfs:domain d2r:Server;
+    rdfs:isDefinedBy <>;
+    .
+d2r:disableMetadata a rdf:Property;
+    rdfs:label "disable all metadata generation"@en;
+    rdfs:comment "Whether to disable all metadata generation."@en;
+    rdfs:domain d2r:Server;
+    rdfs:isDefinedBy <>;
+    .
 d2r:limitPerClassMap a rdf:Property;
     rdfs:label "Limit per class map"@en;
     rdfs:comment "Maximum number of values for each class map that will be displayed in the web interface when browsing resources. A value of false means no limit."@en;

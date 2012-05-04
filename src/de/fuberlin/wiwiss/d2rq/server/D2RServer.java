@@ -1,5 +1,9 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -12,17 +16,22 @@ import org.joseki.processors.SPARQL;
 
 import com.hp.hpl.jena.graph.BulkUpdateHandler;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandler;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerFactory;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
 import com.hp.hpl.jena.sparql.util.Context;
+import com.hp.hpl.jena.util.FileManager;
 
 import de.fuberlin.wiwiss.d2rq.ResourceDescriber;
 import de.fuberlin.wiwiss.d2rq.SystemLoader;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
+import de.fuberlin.wiwiss.d2rq.vocab.D2RConfig;
 
 /**
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts
@@ -194,8 +203,6 @@ public class D2RServer {
 			log.info("Safe mode (launch using --fast to use all optimizations)");
 		}
 
-		this.metadataCreator = new MetadataCreator(this);
-
 		// Set up a custom DescribeHandler that calls out to
 		// {@link ResourceDescriber}
 		DescribeHandlerRegistry.get().clear();
@@ -256,10 +263,6 @@ public class D2RServer {
 		return (SystemLoader) context.getAttribute(SYSTEM_LOADER);
 	}
 
-	public MetadataCreator getMetadataCreator() {
-		return metadataCreator;
-	}
-
 	private static String getUri(String base, String service) {
 		return base.endsWith("/") ? base + service : base + "/" + service;
 	}
@@ -271,7 +274,6 @@ public class D2RServer {
 	}
 
 	public String getSparqlUrl() {
-		return getUri(getConfig().baseURI(),
-				D2RServer.getSparqlServiceName());
+		return getUri(getConfig().baseURI(), D2RServer.getSparqlServiceName());
 	}
 }

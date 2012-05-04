@@ -43,8 +43,14 @@ public class D2RConfig {
      */
     public static final Property limitPerPropertyBridge = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#limitPerPropertyBridge" );
     
-    /** <p>A RDF metadata template.</p> */
+    /** <p>A RDF resource metadata template.</p> */
     public static final Property metadataTemplate = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#metadataTemplate" );
+    
+    /** <p>A RDF dataset metadata template.</p> */
+    public static final Property datasetMetadataTemplate = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#datasetMetadataTemplate" );
+    
+    /** <p>Whether to disable all metadata generation</p> */
+    public static final Property disableMetadata = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#disableMetadata" );
     
     /** <p>The TCP port on which a D2R Server installation listens.</p> */
     public static final Property port = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#port" );
