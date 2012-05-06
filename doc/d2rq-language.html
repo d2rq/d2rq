@@ -266,6 +266,14 @@ map:location a d2rq:PropertyBridge;
     <td>The JDBC driver class name for the database. Used together with <code>d2rq:jdbcDSN</code>.
       Example: <code>com.mysql.jdbc.Driver</code> for MySQL.</td>
   </tr>
+  <tr>
+  <th id="d2rq:jndiDataSource">d2rq:jndiDataSource</th>
+  <td>Looks up the given datasource name using JNDI and use it to create JDBC connections.
+      This is useful when deploying D2R in a J2EE servlet container. When using a datasource, it is assumed that the JDBC
+      connections are properly configured by the container, and the properties <a href="#d2rq:jdbcDSN"><code>d2rq:jdbcDSN</code></a>,
+      <a href="#d2rq:jdbcDriver"><code>d2rq:jdbcDriver</code></a>, <a href="#d2rq:startupSQLScript"><code>d2rq:startupSQLScript</code></a>
+      and <a href="#jdbc-connection-properties">JDBC connection properties</a> should not be used for this <code>d2rq:Database</code>.</td>
+  </tr>
   <tr> 
     <th id="d2rq:username">d2rq:username</th>
     <td>A username if required by the database.</td>

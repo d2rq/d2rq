@@ -168,6 +168,7 @@ for production use.</p>
 <li>Change the <code>configFile</code> param in <code>/webapp/WEB-INF/web.xml</code>
   to the name of your configuration file. For deployment, we recommend placing
   the mapping file into the <code>/webapp/WEB-INF/</code> directory.</li>
+<li>It is recommended to use <a href="d2rq-language.html#d2rq:jndiDataSource">Datasources</a> to connect to the databases in the mapping file. In that case the appropriate Database JDBC driver jars must be placed in the servlet containers classpath and the Datasource configurations must be deployed and registered with the container using JNDI. See some examples below.</li>
 <li>In D2R Server's main directory, Run <code>ant war</code>. This creates the
   <code>d2rq.war</code> file. You need <a href="http://ant.apache.org/">Apache Ant</a> for this step.</li>
 <li>Optionally, if you want a different name for your web application,
@@ -176,6 +177,78 @@ for production use.</p>
   into Tomcat's <code>webapps</code> directory.</li>
 </ol>
 
+<h4 id="datasource-configuration-examples">3.2.1 Datasource configuration examples</h4>
+<p>Consider a mapping file containing</p>
+<pre>
+map:database a d2rq:Database;
+    d2rq:jndiDataSource "jdbc/iswc".
+</pre>
+<p>The following examples show how the Datasource with name &quot;jdbc/iswc&quot; is configured in different servlet containers.</p>
+<h5>Apache Tomcat 6</h5>
+<p>In Tomcat, DataSource are configured in the <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">Context</a> of the web application.
+One way to provide a context is to put  a <code>context.xml</code> file in the <code>META-INF</code> directory of the war file.
+Tomcat comes with <a href="http://commons.apache.org/dbcp/index.html">Commons DBCP</a>, so we can set up a connection pool.</p>
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;Context&gt;
+    &lt;Resource name="jdbc/iswc" auth="Container" type="javax.sql.DataSource"
+              maxActive="30" maxIdle="10" maxWait="10000"
+              username="root" password="password"
+              driverClassName="com.mysql.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/iswc?useCursorFetch=true&amp;useServerPrepStmts=true"/&gt;
+&lt;/Context&gt;
+</pre>
+<p>Below is the same example, but now for Oracle. This example also shows how to setup connection initialization and validation,
+more information can be found in the <a href="http://commons.apache.org/dbcp/configuration.html">DBCP configuration</a></p>
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;Context&gt;
+    &lt;Resource name="jdbc/iswc" auth="Container" type="javax.sql.DataSource"
+              username="root" password="password"
+              driverClassName="oracle.jdbc.OracleDriver"
+              factory="org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory"
+              url="jdbc:oracle:thin:@localhost:1521:iswc"
+              maxActive="30" maxIdle="10" initialSize="5" maxWait="10000"
+              testOnBorrow="true"
+              validationQuery="SELECT 1 FROM DUAL"
+              initConnectionSqls="ALTER SESSION SET NLS_DATE_FORMAT = 'SYYYY-MM-DD' NLS_TIMESTAMP_FORMAT = 'SYYYY-MM-DD HH24:MI:SS'"
+              poolPreparedStatements="false"/&gt;
+&lt;/Context&gt;
+</pre>
+<h5>JBoss AS</h5>
+<p>In JBoss, a separate <code>*-ds.xml</code> file must be deployed:</p>
+<p>iswc-ds.xml (for Oracle)</p>
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;datasources&gt;
+    &lt;local-tx-datasource&gt;
+        &lt;jndi-name&gt;jdbc/iswc&lt;jndi-name&gt;
+        &lt;use-java-context&gt;false&lt;/use-java-context&gt;
+        &lt;connection-url&gt;jdbc:oracle:thin:@localhost:1521:iswc&lt;/connection-url&gt;
+        &lt;driver-class&gt;oracle.jdbc.OracleDriver&lt;/driver-class&gt;
+        &lt;user-name&gt;root&lt;/user-name&gt;
+        &lt;password&gt;password&lt;/password&gt;
+        &lt;min-pool-size&gt;5&lt;/min-pool-size&gt;
+        &lt;max-pool-size&gt;30&lt;/max-pool-size&gt;
+        &lt;check-valid-connection-sql&gt;SELECT 1 FROM DUAL&lt;/check-valid-connection-sql&gt;
+        &lt;new-connection-sql&gt;ALTER SESSION SET NLS_DATE_FORMAT = 'SYYYY-MM-DD' NLS_TIMESTAMP_FORMAT = 'SYYYY-MM-DD HH24:MI:SS'&lt;/new-connection-sql&gt;
+        &lt;prepared-statement-cache-size&gt;0&lt;/prepared-statement-cache-size&gt;
+    &lt;/local-tx-datasource&gt;
+&lt;/datasources&gt;
+</pre>
+<p>An additonal <code>jboss-web.xml</code> file must be pacakged in the <code>WEB-INF</code> directory of the d2rq.war.</p>
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;jboss-web&gt;
+    &lt;resource-ref&gt;
+        &lt;res-ref-name&gt;jdbc/iswc&lt;/res-ref-name&gt;
+        &lt;res-type&gt;javax.sql.DataSource&lt;/res-type&gt;
+        &lt;jndi-name&gt;java:/jdbc/iswc&lt;/jndi-name&gt;
+    &lt;/resource-ref&gt;
+&lt;/jboss-web&gt;
+</pre>
+<h5>Jetty</h5>
+Jetty comes with extensive documentation on <a href="http://wiki.eclipse.org/Jetty/Howto/Configure_JNDI_Datasource">how to configure datasources</a>.
 
 <h2 id="configuration">4. D2R Server configuration</h2>
 
