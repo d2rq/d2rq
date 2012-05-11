@@ -18,37 +18,7 @@
 	rdfs:isDefinedBy <about:metadata:runtime:graph> ;
 	foaf:page <about:metadata:runtime:page> .
 
-<about:metadata:runtime:graph> a prv:DataItem, foaf:Document ;
-	dc:publisher <about:metadata:runtime:resource> ;
-	void:inDataset <about:metadata:runtime:dataset> ;
+<about:metadata:runtime:graph> a prv:DataItem, foaf:Document ;	
 	dc:date <about:metadata:runtime:time> ;
-	xhtml:alternate <about:metadata:runtime:page> ;
-
-	prv:createdBy [
-			a prv:DataCreation ;
-			prv:completedAt <about:metadata:runtime:time> ;
-			prv:performedBy _:d2rinstallation ;
-			prv:usedData <about:metadata:runtime:dataset> ;
-		] .
-           
-_:d2rinstallation a prv:NonHumanAgent ,
-        prvTypes:DataCreatingService ,
-        prv:DataProvidingService ;
-
-	rdfs:comment "This service runs D2R Server." ;
-	prv:operatedBy <about:metadata:metadata:d2rUser> ;
-	prv:deployedSoftware _:d2rrelease ;
-	rdfs:seeAlso <about:metadata:config:baseURI> .
-             
-_:d2rrelease a doap:Project ;
-	doap:release [
-		a doap:Version ;
-        doap:revision "0.9";
-    ];
-	doap:name "D2R Server";
-	doap:homepage  <http://d2rq.org/d2r-server> .
-
-
-<about:metadata:metadata:d2rUser>
-	foaf:name <about:metadata:metadata:operatorName> ;
-	foaf:homepage <about:metadata:metadata:operatorHomepage> .
+	void:inDataset <about:metadata:runtime:dataset> ;
+	prv:containedBy <about:metadata:runtime:dataset> .

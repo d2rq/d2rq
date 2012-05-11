@@ -13,7 +13,7 @@
 
 # This template provides additional metadata about RDF datasets served by D2R Server. Its values are set from the D2R Server configuration.
 
-<about:metadata:runtime:dataset> 
+<about:metadata:runtime:dataset> a prv:DataItem ;
 	dc:title <about:metadata:metadata:datasetTitle> ;
 	dc:description <about:metadata:metadata:datasetDescription> ;
 	dc:creator [ 
@@ -25,4 +25,31 @@
 		foaf:homepage <about:metadata:metadata:operatorHomepage> ;
 	] ;
 	dc:source <about:metadata:metadata:datasetSource> ;
-	dc:date <about:metadata:runtime:time> .
+	dc:date <about:metadata:runtime:time> ;
+	
+	prv:createdBy [
+			a prv:DataCreation ;
+			prv:performedBy _:d2rinstallation ;
+		] .
+           
+_:d2rinstallation a prv:NonHumanAgent ,
+        prvTypes:DataCreatingService ,
+        prv:DataProvidingService ;
+
+	rdfs:comment "This service runs D2R Server." ;
+	prv:operatedBy <about:metadata:metadata:d2rUser> ;
+	prv:deployedSoftware _:d2rrelease ;
+	rdfs:seeAlso <about:metadata:config:baseURI> .
+             
+_:d2rrelease a doap:Project ;
+	doap:release [
+		a doap:Version ;
+        doap:revision "0.8.1";
+    ];
+	doap:name "D2R Server";
+	doap:homepage  <http://d2rq.org/d2r-server> .
+
+
+<about:metadata:metadata:d2rUser>
+	foaf:name <about:metadata:metadata:operatorName> ;
+	foaf:homepage <about:metadata:metadata:operatorHomepage> .
