@@ -35,7 +35,7 @@ public abstract class DataType {
 		private final String name;
 		GenericType(int jdbcType, String name) {
 			this.jdbcType = jdbcType;
-			this.name = name;
+			this.name = name.toUpperCase();
 		}
 		public DataType dataTypeFor(Vendor vendor) {
 			return vendor.getDataType(jdbcType, name, 0);

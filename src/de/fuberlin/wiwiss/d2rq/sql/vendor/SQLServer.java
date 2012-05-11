@@ -62,7 +62,7 @@ public class SQLServer extends SQL92 {
 	@Override
 	public DataType getDataType(int jdbcType, String name, int size) {
 		// MS SQLServer 2008 driver returns DATE as VARCHAR type
-		if (name.equals("date")) {
+		if (name.equals("DATE")) {
 			return new SQLDate(this);
 		}
 		

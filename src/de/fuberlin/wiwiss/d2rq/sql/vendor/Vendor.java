@@ -133,7 +133,7 @@ public interface Vendor {
 	 * Returns a {@link DataType} corresponding to a JDBC type.
 	 * 
 	 * @param jdbcType A <code>java.sql.Types</code> constant
-	 * @param name The type name, as reported by <code>java.sql</code> metadata methods
+	 * @param name The type name, as reported by <code>java.sql</code> metadata methods, normalized to uppercase
 	 * @param size Character size of the type, or 0 if not applicable
 	 * @return A compatible D2RQ DataType instance
 	 */
