@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
+import de.fuberlin.wiwiss.d2rq.expr.BooleanToIntegerCaseExpression;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.Quoter;
@@ -183,6 +184,14 @@ public class SQL92 implements Vendor {
 		return null;
 	}
 
+	/**
+	 * In most databases, we don't have to do anything because boolean
+	 * expressions are allowed anywhere.
+	 */
+	public Expression booleanExpressionToSimpleExpression(Expression expression) {
+		return expression;
+	}
+	
 	public boolean isIgnoredTable(String schema, String table) {
 		return false;
 	}

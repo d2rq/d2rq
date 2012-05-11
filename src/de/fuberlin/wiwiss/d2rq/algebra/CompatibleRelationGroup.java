@@ -213,7 +213,8 @@ public class CompatibleRelationGroup {
 			this.softCondition = softCondition;
 		}
 		private ProjectionSpec conditionProjection() {
-			return new ExpressionProjectionSpec(condition);
+			return new ExpressionProjectionSpec(
+					firstBaseRelation.database().vendor().booleanExpressionToSimpleExpression(condition));
 		}
 		private BindingMaker makeConditional() {
 			return bMaker.makeConditional(conditionProjection());

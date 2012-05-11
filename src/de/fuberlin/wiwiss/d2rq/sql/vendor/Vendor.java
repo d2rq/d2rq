@@ -140,6 +140,14 @@ public interface Vendor {
 	DataType getDataType(int jdbcType, String name, int size);
 
 	/**
+	 * Turns a BOOLEAN expression into an expression that is guaranteed to
+	 * be usable in any place where an expression is allowed.
+	 * @param expression A boolean expression
+	 * @return A simple expression returning an equivalent value, e.g., INT 0 and 1
+	 */
+	Expression booleanExpressionToSimpleExpression(Expression expression);
+	
+	/**
 	 * TODO Use the Filter interface for this
 	 * @param schema A schema name, or <code>null</code> for the connection's default schema
 	 * @param table A table name

@@ -15,6 +15,7 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.expr.BooleanToIntegerCaseExpression;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -128,6 +129,14 @@ public class Oracle extends SQL92 {
 		return TimeZone.getDefault();
 	}
 	
+	/**
+	 * Oracle doesn't actually support booolean expressions, except in
+	 * a few places. Turn the boolean into an int using a CASE statement
+	 */
+	public Expression booleanExpressionToSimpleExpression(Expression expression) {
+		return new BooleanToIntegerCaseExpression(expression);
+	}
+
 	private static final String[] IGNORED_SCHEMAS = {
 		"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", 
 		"SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
