@@ -357,7 +357,7 @@ Even though we recommend using the default templates, there will still be users 
   .
 </pre>
 
-<p>Inside these templates, placeholders can be used to represent configuration values, or run-time information. Template placeholders are organized into three groups that represent the available data sources: <code>runtime</code>, <code>config</code>, and <code>metadata</code>. All placeholder URIs follow the scheme <code>about:metadata:<em>groupname</em>:<em>identifier</em></code>.</p>
+<p>Inside these templates, placeholders can be used to represent configuration values, or run-time information. Template placeholders are organized into three groups that represent the available data sources: <code>runtime</code>, <code>config</code>, <code>database</code>, and <code>metadata</code>. All placeholder URIs follow the scheme <code>about:metadata:<em>groupname</em>:<em>identifier</em></code>.</p>
 
 <p>The following placeholder groups are currently available:</p>
 
@@ -391,6 +391,11 @@ Even though we recommend using the default templates, there will still be users 
 
 <h5>Placeholder group: <code>config</code></h5>
 <p>This group of placeholders corresponds to the configuration options for the <code>d2r:Server</code> instance. For example, the placeholder <code>about:metadata:config:baseURI</code> is replaced with the value of the <code>d2r:baseURI</code> property defined on the <code>d2r:Server</code> instance.</p>
+
+
+<h5>Placeholder group: <code>server</code></h5>
+<p>This group of placeholders corresponds to the configuration options for the <code>d2rq:Database</code> instance. For example, the placeholder <code>about:metadata:database:jdbcDSN</code> is replaced with the value of the <code>d2rq:jdbcDSN</code> property defined on the <code>d2r:Database</code> instance.</p>
+
 
 <h5>Placeholder group: <code>metadata</code></h5>
 <p>Placeholders in this group allow the inclusion of additional metadata attributes, whose replacement attributes are defined as properties of the <code>d2r:Server</code> instance from the <code>http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#</code> namespace (abbreviated with the prefix <code>meta:</code> in the following). Each placeholder <code>about:metadata:metadata:<em>identifier</em></code> is replaced by the value of the property specified using a corresponding <code>meta:<em>identifier</em></code> predicate.</p>
