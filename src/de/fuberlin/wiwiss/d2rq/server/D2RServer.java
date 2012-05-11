@@ -1,9 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -16,22 +12,17 @@ import org.joseki.processors.SPARQL;
 
 import com.hp.hpl.jena.graph.BulkUpdateHandler;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandler;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerFactory;
 import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
 import com.hp.hpl.jena.sparql.util.Context;
-import com.hp.hpl.jena.util.FileManager;
 
 import de.fuberlin.wiwiss.d2rq.ResourceDescriber;
 import de.fuberlin.wiwiss.d2rq.SystemLoader;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
-import de.fuberlin.wiwiss.d2rq.vocab.D2RConfig;
 
 /**
  * A D2R Server instance. Sets up a service, loads the D2RQ model, and starts
@@ -65,9 +56,6 @@ public class D2RServer {
 
 	/** the dataset, auto-reloadable in case of local mapping files */
 	private AutoReloadableDataset dataset;
-
-	/** Cached single instance */
-	private MetadataCreator metadataCreator;
 
 	public D2RServer(SystemLoader loader) {
 		this.loader = loader;
