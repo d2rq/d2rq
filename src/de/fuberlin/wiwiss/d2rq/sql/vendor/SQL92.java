@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
-import de.fuberlin.wiwiss.d2rq.expr.BooleanToIntegerCaseExpression;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.Quoter;
