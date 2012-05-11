@@ -31,5 +31,6 @@ public class JenaModelExample {
 			}
 			System.out.println();
 		}
+		m.close();
 	}
 }
