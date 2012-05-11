@@ -161,7 +161,7 @@ public class MetadataCreator {
 		if (phPackage.equals("config") || phPackage.equals("server")) {
 			// look for requested property in the dataset config
 			Property p = model.createProperty(D2RConfig.NS + phName);
-			if (serverConfig.hasProperty(p)) {
+			if (serverConfig != null && serverConfig.hasProperty(p)) {
 				return serverConfig.getProperty(p).getObject();
 			}
 		}
@@ -171,7 +171,7 @@ public class MetadataCreator {
 		Resource mappingConfig = server.getConfig().findDatabaseResource();
 		if (phPackage.equals("database")) {
 			Property p = model.createProperty(D2RQ.NS + phName);
-			if (mappingConfig.hasProperty(p)) {
+			if (mappingConfig != null && mappingConfig.hasProperty(p)) {
 				return mappingConfig.getProperty(p).getObject();
 			}
 		}
@@ -180,7 +180,7 @@ public class MetadataCreator {
 		if (phPackage.equals("metadata")) {
 			// look for requested property in the dataset config
 			Property p = model.createProperty(META.NS + phName);
-			if (serverConfig.hasProperty(p))
+			if (serverConfig != null && serverConfig.hasProperty(p))
 				return serverConfig.getProperty(p).getObject();
 		}
 

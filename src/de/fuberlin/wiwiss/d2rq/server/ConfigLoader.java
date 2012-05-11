@@ -300,6 +300,11 @@ public class ConfigLoader {
 	}
 
 	protected boolean serveMetadata() {
-		return !findServerResource().hasProperty(D2RConfig.disableMetadata);
+		Resource server = findServerResource();
+		if (server == null) {
+			return true;
+		} else {
+			return !server.hasProperty(D2RConfig.disableMetadata);
+		}
 	}
 }

@@ -264,6 +264,9 @@ public class D2RServer {
 	}
 
 	private static String getUri(String base, String service) {
+		if (base == null) {
+			base = "";
+		}
 		return base.endsWith("/") ? base + service : base + "/" + service;
 	}
 
