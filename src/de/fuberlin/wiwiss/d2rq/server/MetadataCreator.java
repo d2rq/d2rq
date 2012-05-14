@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -48,7 +49,7 @@ public class MetadataCreator {
 	public MetadataCreator(D2RServer server, Model template) {
 		// store D2R server config for template location
 		this.server = server;
-	
+
 		if (template != null && template.size() > 0) {
 			this.enable = true;
 			this.tplModel = template;
@@ -155,6 +156,10 @@ public class MetadataCreator {
 			if (phName.equals("dataset")) {
 				return model.createResource(server.getDatasetIri());
 			}
+			// <about:metadata:runtime:version> - D2R Version
+			if (phName.equals("version")) {
+				return model.createTypedLiteral(D2RServer.getVersion());
+			}
 		}
 
 		// <about:metadata:server:*> - The d2r server configuration parameters
@@ -233,4 +238,11 @@ public class MetadataCreator {
 		}
 		return null;
 	}
+
+	public static Comparator<Statement> subjectSorter = new Comparator<Statement>() {
+		public int compare(Statement o1, Statement o2) {
+			return o1.getPredicate().toString()
+					.compareTo(o2.getPredicate().toString());
+		}
+	};
 }

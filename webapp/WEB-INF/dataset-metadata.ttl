@@ -44,7 +44,7 @@ _:d2rinstallation a prv:NonHumanAgent ,
 _:d2rrelease a doap:Project ;
 	doap:release [
 		a doap:Version ;
-        doap:revision "0.8.1";
+        doap:revision <about:metadata:runtime:version>;
     ];
 	doap:name "D2R Server";
 	doap:homepage  <http://d2rq.org/d2r-server> .

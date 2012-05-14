@@ -140,7 +140,11 @@
  	<target name="jar" depends="compile,test">
 -->
 	<target name="jar" depends="compile" description="Generate project jar file">
-		<jar jarfile="${jar}" basedir="${build}"/>
+		<jar jarfile="${jar}" basedir="${build}">
+			<manifest>
+				<attribute name="Implementation-Version" value="${version}"/>
+			</manifest>
+		</jar>
 	</target>
 
 	<target name="zip" depends="jar,javadoc" description="Generate distribution file in zip format">

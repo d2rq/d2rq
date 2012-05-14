@@ -2,7 +2,10 @@ package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -94,8 +97,10 @@ public class PageServlet extends HttpServlet {
 			Model metadata = resourceMetadataCreator.addMetadataFromTemplate(
 					resourceURI, documentURL, pageURL);
 			if (!metadata.isEmpty()) {
-				context.put("metadata", metadata.getResource(documentURL)
-						.listProperties().toList());
+				List<Statement> mList = metadata.getResource(documentURL)
+						.listProperties().toList();
+				Collections.sort(mList, MetadataCreator.subjectSorter);
+				context.put("metadata", mList);
 
 				context.put("metadataroot", metadata.getResource(documentURL));
 

@@ -84,8 +84,6 @@ public class ResourceDescriptionServlet extends HttpServlet {
 			Map<String, String> descPrefixes = description.getNsPrefixMap();
 			descPrefixes.putAll(resourceMetadataTemplate.getNsPrefixMap());
 			description.setNsPrefixes(descPrefixes);
-			
-			
 		}
 		// TODO: Add a Content-Location header
 		new ModelResponse(description, request, response).serve();

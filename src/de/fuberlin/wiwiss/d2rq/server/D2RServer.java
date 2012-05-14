@@ -1,5 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
+import java.io.InputStream;
+
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -266,5 +268,14 @@ public class D2RServer {
 
 	public String getSparqlUrl() {
 		return getUri(baseURI(), D2RServer.getSparqlServiceName());
+	}
+	
+	public static String getVersion() {
+		String version = D2RServer.class.getPackage().getImplementationVersion();
+		
+		if (version == null) {
+			version = "devbuild";
+		}
+		return version;
 	}
 }

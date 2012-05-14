@@ -1,8 +1,10 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,6 +20,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 
@@ -48,7 +51,7 @@ public class DatasetDescriptionServlet extends HttpServlet {
 					"404 Not Found: Dataset description has been disabled.");
 			return;
 		}
-		
+
 		Model dDesc = ModelFactory.createDefaultModel();
 		dDesc.setNsPrefix("void", VoID.NS);
 
@@ -167,7 +170,9 @@ public class DatasetDescriptionServlet extends HttpServlet {
 			Context context = velocity.getContext();
 			// context.put("classmap_links", classMapLinks);
 
-			context.put("metadata", datasetIRI.listProperties().toList());
+			List<Statement> mList = datasetIRI.listProperties().toList();
+			Collections.sort(mList, MetadataCreator.subjectSorter);
+			context.put("metadata", mList);
 
 			// add prefixes to context
 			Map<String, String> nsSet = dDesc.getNsPrefixMap();
