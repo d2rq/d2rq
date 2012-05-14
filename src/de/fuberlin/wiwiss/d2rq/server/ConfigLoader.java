@@ -70,6 +70,7 @@ public class ConfigLoader {
 	private boolean autoReloadMapping = true;
 	private int limitPerClassMap = DEFAULT_LIMIT_PER_CLASS_MAP;
 	private int limitPerPropertyBridge = DEFAULT_LIMIT_PER_PROPERTY_BRIDGE;
+	private boolean enableMetadata = true;
 
 	/**
 	 * @param configURL
@@ -152,6 +153,10 @@ public class ConfigLoader {
 					limitPerPropertyBridge = Relation.NO_LIMIT;
 				}
 			}
+		}
+		s = server.getProperty(D2RConfig.enableMetadata);
+		if (s != null) {
+			this.enableMetadata = s.getBoolean();
 		}
 	}
 
@@ -300,11 +305,6 @@ public class ConfigLoader {
 	}
 
 	protected boolean serveMetadata() {
-		Resource server = findServerResource();
-		if (server == null) {
-			return true;
-		} else {
-			return !server.hasProperty(D2RConfig.disableMetadata);
-		}
+		return enableMetadata;
 	}
 }

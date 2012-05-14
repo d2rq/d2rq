@@ -69,9 +69,9 @@ d2r:datasetMetadataTemplate a rdf:Property;
     rdfs:domain d2r:Server;
     rdfs:isDefinedBy <>;
     .
-d2r:disableMetadata a rdf:Property;
-    rdfs:label "disable all metadata generation"@en;
-    rdfs:comment "Whether to disable all metadata generation."@en;
+d2r:enableMetadata a rdf:Property;
+    rdfs:label "enable metadata generation"@en;
+    rdfs:comment "Whether to enable all metadata generation."@en;
     rdfs:domain d2r:Server;
     rdfs:isDefinedBy <>;
     .

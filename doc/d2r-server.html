@@ -258,8 +258,8 @@ configuration properties. An example follows:</p>
     <td>Overrides the default <em>dataset</em> metadata template, refers to a TTL-encoded RDF file. The literal value specifies a path name either absolute or relative to the location of the server configuration file. See <a href="#metadata-template">below</a> for a description of the placeholders available in this template.</td>
   </tr>
   <tr>
-    <th id="d2r:disableMetadata">d2r:disableMetadata</th>
-    <td>Disables the automatic creation and publication of all dataset and resource metadata, except of those added using <code>d2r:documentMetadata</code></td>
+    <th id="d2r:enableMetadata">d2r:disableMetadata</th>
+    <td>Enables the automatic creation and publication of all dataset and resource metadata. Possible values are <code>"true"</code> and <code>"false"</code>. Note that <code>"true"</code> is assumed if this flag is missing.</td>
   </tr>
   <tr>
     <th id="d2r:documentMetadata">d2r:documentMetadata</th>

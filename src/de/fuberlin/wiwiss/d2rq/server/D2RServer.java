@@ -273,10 +273,10 @@ public class D2RServer {
 	public String getDatasetIri() {
 		// construct the dataset IRI from the configured base URI and "/dataset"
 		// - as in web.xml
-		return getUri(getConfig().baseURI(), D2RServer.getDatasetServiceName());
+		return getUri(baseURI(), D2RServer.getDatasetServiceName());
 	}
 
 	public String getSparqlUrl() {
-		return getUri(getConfig().baseURI(), D2RServer.getSparqlServiceName());
+		return getUri(baseURI(), D2RServer.getSparqlServiceName());
 	}
 }

@@ -50,7 +50,7 @@ public class D2RConfig {
     public static final Property datasetMetadataTemplate = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#datasetMetadataTemplate" );
     
     /** <p>Whether to disable all metadata generation</p> */
-    public static final Property disableMetadata = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#disableMetadata" );
+    public static final Property enableMetadata = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#enableMetadata" );
     
     /** <p>The TCP port on which a D2R Server installation listens.</p> */
     public static final Property port = m_model.createProperty( "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#port" );

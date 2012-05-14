@@ -29,17 +29,11 @@
 	#end
 #end
 
-#macro( listProperties $name $metadataPropList $style)
+#macro( listProperties $name $metadataPropList)
 	#set ($test = $renderedNodesMap.put($name,true))
 
 	#set ($idadd = $idadd + 1)
-	<div class="metadata-label">#prettyNode ($name)&nbsp;
-
-	#if ($metadataPropList.size() > 0 && $style != "block")
-		<a name="anchor_$idadd"></a>
-		(<a href="#anchor_$idadd" onclick="document.getElementById('ele_$idadd').style.display = 'block';">more</a>)
-	#end
-	</div>
+	<div class="metadata-label">#prettyNode ($name)&nbsp;</div>
 
 	<table id="ele_$idadd" class="metadata-table" style="display: $style">
 	#foreach  ($statement in $metadataPropList)
@@ -49,7 +43,7 @@
 				#set ($object = $statement.getObject())
 				#set ($alreadyRendered = $renderedNodesMap.containsKey($object))
 				#if ($object.isResource() && $object.listProperties().toList().size() > 0 && !$alreadyRendered)
-					#listProperties ($object $object.listProperties().toList() 'none')
+					#listProperties ($object $object.listProperties().toList())
 				#else
 					#prettyNode ($statement.getObject())
 				#end

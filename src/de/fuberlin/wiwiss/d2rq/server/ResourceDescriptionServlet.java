@@ -1,6 +1,7 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -73,11 +74,18 @@ public class ResourceDescriptionServlet extends HttpServlet {
 		server.addDocumentMetadata(description, document);
 		if (server.getConfig().serveMetadata()) {
 			// add document metadata from template
+			Model resourceMetadataTemplate = server.getConfig().getResourceMetadataTemplate(
+					server, getServletContext());
 			MetadataCreator resourceMetadataCreator = new MetadataCreator(
-					server, server.getConfig().getResourceMetadataTemplate(
-							server, getServletContext()));
+					server, resourceMetadataTemplate);
 			description.add(resourceMetadataCreator.addMetadataFromTemplate(
 					resourceURI, documentURL, pageURL));
+			
+			Map<String, String> descPrefixes = description.getNsPrefixMap();
+			descPrefixes.putAll(resourceMetadataTemplate.getNsPrefixMap());
+			description.setNsPrefixes(descPrefixes);
+			
+			
 		}
 		// TODO: Add a Content-Location header
 		new ModelResponse(description, request, response).serve();
