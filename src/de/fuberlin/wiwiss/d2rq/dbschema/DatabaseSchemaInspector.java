@@ -53,7 +53,7 @@ public class DatabaseSchemaInspector {
 					throw new D2RQException("Column " + column + " not found in database");
 				}
 				int type = rs.getInt("DATA_TYPE");
-				String name = rs.getString("TYPE_NAME");
+				String name = rs.getString("TYPE_NAME").toUpperCase();
 				int size = rs.getInt("COLUMN_SIZE");
 				return db.vendor().getDataType(type, name, size);
 			} finally {
