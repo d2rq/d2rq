@@ -15,7 +15,6 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.expr.BooleanToIntegerCaseExpression;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -70,6 +69,11 @@ public class Oracle extends SQL92 {
 		// Special handling for TIMESTAMP(x) WITH LOCAL TIME ZONE
 		if (name.contains("WITH LOCAL TIME ZONE") || "TIMESTAMPLTZ".equals(name)) {
 			return new OracleCompatibilityTimeZoneLocalDataType(this);
+		}
+		
+		// Special handling for TIMESTAMP(x) WITH TIME ZONE
+		if(name.contains("WITH TIME ZONE") || "TIMESTAMPTZ".equals(name)) {
+			return new OracleCompatibilityTimeZoneDataType(this);
 		}
 		
 		// Oracle-specific character string types
@@ -129,14 +133,6 @@ public class Oracle extends SQL92 {
 		return TimeZone.getDefault();
 	}
 	
-	/**
-	 * Oracle doesn't actually support booolean expressions, except in
-	 * a few places. Turn the boolean into an int using a CASE statement
-	 */
-	public Expression booleanExpressionToSimpleExpression(Expression expression) {
-		return new BooleanToIntegerCaseExpression(expression);
-	}
-
 	private static final String[] IGNORED_SCHEMAS = {
 		"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", 
 		"SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
@@ -183,5 +179,20 @@ public class Oracle extends SQL92 {
 	        return dateTime.substring(0, dateTime.length()-2) + 
 	        		":" + dateTime.substring(dateTime.length()-2);
 	    }
+	}
+	
+	public static class OracleCompatibilityTimeZoneDataType extends SQLTimestamp {
+		public OracleCompatibilityTimeZoneDataType(Vendor syntax) {
+			super(syntax);
+		}
+		@Override
+		public String value(ResultSet resultSet, int column) throws SQLException {
+			// Hack for Oracle TIMESTAMP WITH TIME ZONE data type
+			try {
+				return super.value(resultSet, column);
+			} catch (SQLException ex) {
+				return null;
+			}
+		}
 	}
 }
