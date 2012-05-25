@@ -1,7 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
-import java.io.InputStream;
-
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
