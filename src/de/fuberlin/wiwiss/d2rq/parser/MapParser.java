@@ -94,7 +94,9 @@ public class MapParser {
 		if (this.mapping != null) {
 			return this.mapping;
 		}
-		findUnknownD2RQTerms();
+		new VocabularySummarizer(D2RQ.class).assertNoUndefinedTerms(model, 
+				D2RQException.MAPPING_UNKNOWN_D2RQ_PROPERTY, 
+				D2RQException.MAPPING_UNKNOWN_D2RQ_CLASS);
 		ensureAllDistinct(new Resource[]{D2RQ.Database, D2RQ.ClassMap, D2RQ.PropertyBridge, 
 				D2RQ.TranslationTable, D2RQ.Translation}, D2RQException.MAPPING_TYPECONFLICT);
 		this.mapping = new Mapping();
@@ -162,28 +164,6 @@ public class MapParser {
 		}
 	}
 
-	private void findUnknownD2RQTerms() {
-		VocabularySummarizer d2rqTerms = new VocabularySummarizer(D2RQ.class);
-		StmtIterator it = this.model.listStatements();
-		while (it.hasNext()) {
-			Statement stmt = it.nextStatement();
-			if (stmt.getPredicate().getURI().startsWith(D2RQ.NS) 
-					&& !d2rqTerms.getAllProperties().contains(stmt.getPredicate())) {
-				throw new D2RQException(
-						"Unknown property " + PrettyPrinter.toString(stmt.getPredicate()) + ", maybe a typo?",
-						D2RQException.MAPPING_UNKNOWN_D2RQ_PROPERTY);
-			}
-			if (stmt.getPredicate().equals(RDF.type)
-					&& stmt.getObject().isURIResource()
-					&& stmt.getResource().getURI().startsWith(D2RQ.NS)
-					&& !d2rqTerms.getAllClasses().contains(stmt.getObject())) {
-				throw new D2RQException(
-						"Unknown class d2rq:" + PrettyPrinter.toString(stmt.getObject()) + ", maybe a typo?",
-						D2RQException.MAPPING_UNKNOWN_D2RQ_CLASS);
-			}
-		}
-	}
-	
 	private void parseDatabases() {
 		Iterator<Individual> it = this.model.listIndividuals(D2RQ.Database);
 		while (it.hasNext()) {

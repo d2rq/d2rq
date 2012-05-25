@@ -1,5 +1,8 @@
 package de.fuberlin.wiwiss.d2rq;
 
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -40,6 +43,13 @@ public class D2RQTestSuite {
 		suite.addTest(de.fuberlin.wiwiss.d2rq.engine.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.d2rq_sdb.AllTests.suite());
 		suite.addTest(de.fuberlin.wiwiss.d2rq.optimizer.AllTests.suite());
+		suite.addTest(de.fuberlin.wiwiss.d2rq.vocab.AllTests.suite());
 		return suite;
+	}
+	
+	public static Model loadTurtle(String fileName) {
+		Model m = ModelFactory.createDefaultModel();
+		m.read(D2RQTestSuite.DIRECTORY_URL + fileName, "TURTLE");
+		return m;
 	}
 }

@@ -26,6 +26,7 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RConfig;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
+import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
 
 public class ConfigLoader {
 
@@ -104,6 +105,9 @@ public class ConfigLoader {
 		if (server == null) {
 			return;
 		}
+		new VocabularySummarizer(D2RConfig.class).assertNoUndefinedTerms(model, 
+				D2RQException.CONFIG_UNKNOWN_PROPERTY, 
+				D2RQException.CONFIG_UNKNOWN_CLASS);
 		Statement s = server.getProperty(D2RConfig.baseURI);
 		if (s != null) {
 			this.baseURI = s.getResource().getURI();

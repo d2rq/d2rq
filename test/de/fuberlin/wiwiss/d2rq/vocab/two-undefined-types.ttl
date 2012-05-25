@@ -1,0 +1,3 @@
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#>.
+
+d2rq:this a d2rq:Pint, d2rq:Shot.
