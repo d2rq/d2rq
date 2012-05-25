@@ -71,6 +71,7 @@ public class MappingGenerator {
 	private boolean handleLinkTables = true;
 	private boolean serveVocabulary = true;
 	private URI startupSQLScript;
+	private Map<Attribute,String> relationNames = new HashMap<Attribute,String>();
 	
 	public MappingGenerator(ConnectedDB database) {
 		this.database = database;
@@ -522,9 +523,25 @@ public class MappingGenerator {
 		return result;
 	}
 	
-
+	/**
+	 * Returns TABLE_COLUMN. Except if that string is already taken by
+	 * another relation name (e.g., AAA.BBB_CCC and AAA_BBB.CCC would
+	 * result in the same result AAA_BBB_CCC); in that case we add more
+	 * underscores (AAA__BBB_CCC) until we have no clash. 
+	 */
 	private String toRelationName(Attribute column) {
-		return column.tableName() + "_" + column.attributeName();
+		if (!relationNames.containsKey(column)) {
+			String separator = "_";
+			while (true) {
+				String name = column.tableName() + separator + column.attributeName();
+				if (!relationNames.containsValue(name)) {
+					relationNames.put(column, name);			
+					break;
+				}
+				separator += "_";
+			}
+		}
+		return relationNames.get(column);
 	}
 
 	private String toRelationName(List<Attribute> columns) {
