@@ -238,6 +238,12 @@ public class PageServlet extends HttpServlet {
 			if (propertyLocalName.compareTo(otherLocalName) != 0) {
 				return propertyLocalName.compareTo(otherLocalName);
 			}
+			if (propertyPrefix().compareTo(other.propertyPrefix()) != 0) {
+				return propertyPrefix().compareTo(other.propertyPrefix());
+			}
+			if (propertyURI().compareTo(other.propertyURI()) != 0) {
+				return propertyURI().compareTo(other.propertyURI());
+			}
 			if (this.isInverse != other.isInverse) {
 				return (this.isInverse) ? -1 : 1;
 			}
