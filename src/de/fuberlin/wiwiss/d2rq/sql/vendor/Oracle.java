@@ -72,6 +72,11 @@ public class Oracle extends SQL92 {
 			return new OracleCompatibilityTimeZoneLocalDataType(this);
 		}
 		
+		// Special handling for TIMESTAMP(x) WITH TIME ZONE
+		if(name.contains("WITH TIME ZONE") || "TIMESTAMPTZ".equals(name)) {
+			return new OracleCompatibilityTimeZoneDataType(this);
+		}
+		
 		// Oracle-specific character string types
 		if ("VARCHAR2".equals(name) || "NVARCHAR2".equals(name)) {
 			return new SQLCharacterString(this, true);
@@ -130,13 +135,13 @@ public class Oracle extends SQL92 {
 	}
 	
 	/**
-	 * Oracle doesn't actually support booolean expressions, except in
-	 * a few places. Turn the boolean into an int using a CASE statement
-	 */
+	* Oracle doesn't actually support booolean expressions, except in
+	* a few places. Turn the boolean into an int using a CASE statement
+	*/
 	public Expression booleanExpressionToSimpleExpression(Expression expression) {
-		return new BooleanToIntegerCaseExpression(expression);
+	    return new BooleanToIntegerCaseExpression(expression);
 	}
-
+	
 	private static final String[] IGNORED_SCHEMAS = {
 		"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", 
 		"SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
@@ -183,5 +188,20 @@ public class Oracle extends SQL92 {
 	        return dateTime.substring(0, dateTime.length()-2) + 
 	        		":" + dateTime.substring(dateTime.length()-2);
 	    }
+	}
+	
+	public static class OracleCompatibilityTimeZoneDataType extends SQLTimestamp {
+		public OracleCompatibilityTimeZoneDataType(Vendor syntax) {
+			super(syntax);
+		}
+		@Override
+		public String value(ResultSet resultSet, int column) throws SQLException {
+			// Hack for Oracle TIMESTAMP WITH TIME ZONE data type
+			try {
+				return super.value(resultSet, column);
+			} catch (SQLException ex) {
+				return null;
+			}
+		}
 	}
 }
