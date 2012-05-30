@@ -122,6 +122,10 @@ public class SystemLoader {
 	}
 	
 	public void setSystemBaseURI(String baseURI) {
+		if (!java.net.URI.create(baseURI).isAbsolute()) {
+			throw new D2RQException("Base URI '" + baseURI + "' must be an absolute URI",
+					D2RQException.STARTUP_BASE_URI_NOT_ABSOLUTE);
+		}
 		this.baseURI = baseURI;
 	}
 	
