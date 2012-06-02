@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.hp.hpl.jena.sparql.engine.ExecutionContext;
 import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
@@ -13,8 +16,8 @@ import com.hp.hpl.jena.sparql.engine.iterator.QueryIterSingleton;
 
 import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.sql.SQLIterator;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.sql.SQLIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
@@ -25,7 +28,8 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class QueryIterTableSQL extends QueryIter {
-
+	private final static Log log = LogFactory.getLog(QueryIterTableSQL.class);
+	
 	/**
 	 * Creates an instance, or a simpler QueryIterator
 	 * if optimization is possible (e.g., the relation is empty).
@@ -85,12 +89,14 @@ public class QueryIterTableSQL extends QueryIter {
 
 	@Override
 	protected void closeIterator() {
+		log.debug("closeIterator() called ...");
 		wrapped.close();
 	}
 
 	@Override
 	protected void requestCancel() {
-		wrapped.close();
+		log.info("requestCancel() called ...");
+		wrapped.cancel();
 	}
 
 	/**

@@ -92,6 +92,7 @@ public class D2RQException extends JenaException {
 	public static final int STARTUP_SQL_SCRIPT_ACCESS = 78;
 	public static final int STARTUP_SQL_SCRIPT_SYNTAX = 79;
 	public static final int DATATYPE_DOES_NOT_SUPPORT_DISTINCT = 80;
+	public static final int QUERY_TIMEOUT = 81;
 	
 	private int code;
 	
