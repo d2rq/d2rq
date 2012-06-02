@@ -81,11 +81,6 @@ public class PropertyBridge extends ResourceMap {
         return uriSqlExpression;
     }
 	
-	public void setUriSQLExpression(String uriSqlExpression) {
-		assertNotYetDefined(this.column, D2RQ.uriSqlExpression, D2RQException.PROPERTYBRIDGE_DUPLICATE_URI_SQL_EXPRESSION);
-		this.uriSqlExpression = uriSqlExpression;
-	}
-	
     public String getDatatype() {
         return datatype;
     }

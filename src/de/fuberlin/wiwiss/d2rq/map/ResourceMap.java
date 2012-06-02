@@ -103,6 +103,11 @@ public abstract class ResourceMap extends MapObject {
 		this.uriPattern = pattern;
 	}
 	
+	public void setUriSQLExpression(String uriSqlExpression) {
+		assertNotYetDefined(this.column, D2RQ.uriSqlExpression, D2RQException.PROPERTYBRIDGE_DUPLICATE_URI_SQL_EXPRESSION);
+		this.uriSqlExpression = uriSqlExpression;
+	}
+	
 	public void setConstantValue(RDFNode constantValue) {
 		assertNotYetDefined(this.constantValue, D2RQ.constantValue, D2RQException.RESOURCEMAP_DUPLICATE_CONSTANTVALUE);
 		this.constantValue = constantValue;

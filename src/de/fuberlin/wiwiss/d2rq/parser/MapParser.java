@@ -357,6 +357,10 @@ public class MapParser {
 		while (stmts.hasNext()) {
 			resourceMap.setURIPattern(ensureIsAbsolute(stmts.nextStatement().getString()));
 		}
+		stmts = r.listProperties(D2RQ.uriSqlExpression);
+		while (stmts.hasNext()) {
+			resourceMap.setUriSQLExpression(stmts.nextStatement().getString());
+		}
 		stmts = r.listProperties(D2RQ.constantValue);
 		while (stmts.hasNext()) {
 			resourceMap.setConstantValue(stmts.nextStatement().getObject());
@@ -486,10 +490,6 @@ public class MapParser {
 		stmts = r.listProperties(D2RQ.sqlExpression);
 		while (stmts.hasNext()) {
 			bridge.setSQLExpression(stmts.nextStatement().getString());
-		}
-		stmts = r.listProperties(D2RQ.uriSqlExpression);
-		while (stmts.hasNext()) {
-			bridge.setUriSQLExpression(stmts.nextStatement().getString());
 		}
 		stmts = r.listProperties(D2RQ.lang);
 		while (stmts.hasNext()) {
