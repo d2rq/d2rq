@@ -95,6 +95,7 @@ public class D2RQException extends JenaException {
 	public static final int CONFIG_UNKNOWN_PROPERTY = 81;
 	public static final int CONFIG_UNKNOWN_CLASS = 82;
 	public static final int STARTUP_BASE_URI_NOT_ABSOLUTE = 83;
+	public static final int QUERY_TIMEOUT = 84;
 	
 	private int code;
 	

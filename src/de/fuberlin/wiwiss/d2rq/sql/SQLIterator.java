@@ -10,6 +10,7 @@ import java.util.NoSuchElementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.hp.hpl.jena.query.QueryCancelledException;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
@@ -34,6 +35,7 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 	private int numCols = 0;
 	private boolean queryExecuted = false;
 	private boolean explicitlyClosed = false;
+	private boolean cancelled = false;
 
 	public SQLIterator(String sql, List<ProjectionSpec> columns, ConnectedDB db) {
 		this.sql = sql;
@@ -42,13 +44,17 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
     }
 
 	public boolean hasNext() {
-		if (this.explicitlyClosed) {
+		if (cancelled) {
+			throw new QueryCancelledException();
+		}
+		if (explicitlyClosed) {
 			return false;
 		}
-		if (this.prefetchedRow == null) {
+		if (prefetchedRow == null) {
+		    ensureQueryExecuted();
 			tryFetchNextRow();
 		}
-		return this.prefetchedRow != null;
+		return prefetchedRow != null;
 	}
 
 	/**
@@ -70,8 +76,7 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 		return next();
 	}
 
-	private void tryFetchNextRow() {
-	    ensureQueryExecuted();
+	private synchronized void tryFetchNextRow() {
 	    if (this.resultSet == null) {
 	    	this.prefetchedRow = null;
 	    	return;
@@ -96,13 +101,14 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 	 * record-set is exhausted.
 	 */
 	public void close() {
-	    this.explicitlyClosed = true;
+		if (cancelled || explicitlyClosed) return;
+		log.debug("Closing SQLIterator");
+	    explicitlyClosed = true;
 	    
 	    /* JDBC 4+ requires manual closing of result sets and statements */
 	    if (this.resultSet != null) {
 			try {
 				this.resultSet.close();
-				this.resultSet = null;
 			} catch (SQLException ex) {
 				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
 			}
@@ -111,16 +117,24 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 	    if (this.statement != null) {
 			try {
 				this.statement.close();
-				this.statement = null;
 			} catch (SQLException ex) {
 				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
 			}
 	    }
-
-	    this.prefetchedRow = null;
-
 	}
 
+	public synchronized void cancel() {
+		cancelled = true;
+		if (statement != null) {
+			try {
+				statement.cancel();
+			} catch (SQLException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		close();
+	}
+	
 	public void remove() {
 		throw new RuntimeException("Operation not supported");
 	}
@@ -142,8 +156,13 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 				catch (SQLException e) {} /* Some drivers don't support fetch sizes, e.g. JDBC-ODBC */
 			}
 			this.resultSet = this.statement.executeQuery(this.sql);
+			log.debug("SQL result set created");
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {
+        	if (cancelled) {
+        		log.debug("SQL query execution cancelled", ex);
+        		throw new QueryCancelledException();
+        	}
         	throw new D2RQException(ex.getMessage() + ": " + this.sql);
         }
     }
