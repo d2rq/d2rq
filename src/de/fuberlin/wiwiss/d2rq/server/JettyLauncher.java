@@ -45,7 +45,7 @@ public class JettyLauncher {
 		try {
 			jetty.start();
 			D2RServer server = D2RServer.fromServletContext(context.getServletContext());
-			if (server == null) {
+			if (server == null || server.errorOnStartup()) {
 				jetty.stop();
 				log.warn("[[[ Server startup failed, see messages above ]]]");
 				return false;

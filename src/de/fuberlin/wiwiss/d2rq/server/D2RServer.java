@@ -58,6 +58,8 @@ public class D2RServer {
 	/** the dataset, auto-reloadable in case of local mapping files */
 	private AutoReloadableDataset dataset;
 
+	private boolean startupError = false;
+	
 	public D2RServer(SystemLoader loader) {
 		this.loader = loader;
 		this.config = loader.getServerConfig();
@@ -178,6 +180,7 @@ public class D2RServer {
 	}
 
 	public void start() {
+		startupError = true;
 		if (config.isLocalMappingFile()) {
 			this.dataset = new AutoReloadableDataset(loader,
 					config.getLocalMappingFilename(),
@@ -228,8 +231,14 @@ public class D2RServer {
 		if (config.getSPARQLTimeout() > 0) {
 			ARQ.getContext().set(ARQ.queryTimeout, config.getSPARQLTimeout() * 1000);
 		}
+		
+		startupError = false;
 	}
 
+	public boolean errorOnStartup() {
+		return startupError;
+	}
+	
 	public void shutdown() {
 		log.info("shutting down");
 		loader.getMapping().close();
