@@ -60,7 +60,7 @@ public class SQLExpression extends Expression {
 	}
 	
 	public String toSQL(ConnectedDB database, AliasMap aliases) {
-		return SQL.quoteColumnsInExpression(this.expression, database);
+		return "(" + SQL.quoteColumnsInExpression(this.expression, database) + ")";
 	}
 	
 	public String toString() {
