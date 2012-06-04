@@ -155,6 +155,10 @@ public class PropertyBridge extends ResourceMap {
 			}
 			// TODO refersToClassMap cannot be combined w/ value constraints or translation tables
 		}
+		if (properties.isEmpty() && dynamicPropertyPatterns.isEmpty()) {
+			throw new D2RQException(toString() + " needs a d2rq:property or d2rq:dynamicProperty",
+					D2RQException.PROPERTYBRIDGE_MISSING_PREDICATESPEC);
+		}
 		assertHasPrimarySpec(new Property[]{
 				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns,
 				D2RQ.column, D2RQ.pattern, D2RQ.sqlExpression, D2RQ.uriSqlExpression, D2RQ.constantValue,
