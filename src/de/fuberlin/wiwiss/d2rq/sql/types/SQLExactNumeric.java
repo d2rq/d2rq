@@ -9,8 +9,8 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 public class SQLExactNumeric extends DataType {
 	private final String rdfType;
-	public SQLExactNumeric(Vendor syntax, int jdbcType, boolean unsigned) {
-		super(syntax, "NUMERIC");
+	public SQLExactNumeric(Vendor syntax, String name, int jdbcType, boolean unsigned) {
+		super(syntax, name);
 		switch (jdbcType) {
 		case Types.NUMERIC:  rdfType = "xsd:decimal"; break;
 		case Types.DECIMAL:  rdfType = "xsd:decimal"; break;

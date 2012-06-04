@@ -3,8 +3,8 @@ package de.fuberlin.wiwiss.d2rq.sql.types;
 import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 public class SQLBit extends DataType {
-	public SQLBit(Vendor syntax) {
-		super(syntax, "BIT");
+	public SQLBit(Vendor syntax, String name) {
+		super(syntax, name);
 	}
 	@Override
 	public boolean isIRISafe() {

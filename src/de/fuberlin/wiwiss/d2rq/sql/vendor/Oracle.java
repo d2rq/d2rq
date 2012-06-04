@@ -58,10 +58,10 @@ public class Oracle extends SQL92 {
 		
 		// Doesn't support DISTINCT over LOB types
 		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
-			return new SQLCharacterString(this, false);
+			return new SQLCharacterString(this, name, false);
 		}
 		if (jdbcType == Types.BLOB) {
-			return new SQLBinary(this, false);
+			return new SQLBinary(this, name, false);
 		}
 		
 		DataType standard = super.getDataType(jdbcType, name, size);
@@ -69,22 +69,22 @@ public class Oracle extends SQL92 {
 
 		// Special handling for TIMESTAMP(x) WITH LOCAL TIME ZONE
 		if (name.contains("WITH LOCAL TIME ZONE") || "TIMESTAMPLTZ".equals(name)) {
-			return new OracleCompatibilityTimeZoneLocalDataType(this);
+			return new OracleCompatibilityTimeZoneLocalDataType(this, name);
 		}
 		
 		// Special handling for TIMESTAMP(x) WITH TIME ZONE
 		if(name.contains("WITH TIME ZONE") || "TIMESTAMPTZ".equals(name)) {
-			return new OracleCompatibilityTimeZoneDataType(this);
+			return new OracleCompatibilityTimeZoneDataType(this, name);
 		}
 		
 		// Oracle-specific character string types
 		if ("VARCHAR2".equals(name) || "NVARCHAR2".equals(name)) {
-			return new SQLCharacterString(this, true);
+			return new SQLCharacterString(this, name, true);
 		}
 
 		// Oracle-specific floating point types
     	if ("BINARY_FLOAT".equals(name) || "BINARY_DOUBLE".equals(name)) {
-    		return new SQLApproximateNumeric(this);
+    		return new SQLApproximateNumeric(this, name);
     	}
     	
 		// Oracle binary file pointer
@@ -161,8 +161,8 @@ public class Oracle extends SQL92 {
 	 * @author Aftab Iqbal
 	 */
 	public static class OracleCompatibilityTimeZoneLocalDataType extends SQLTimestamp {
-		public OracleCompatibilityTimeZoneLocalDataType(Vendor syntax) {
-			super(syntax);
+		public OracleCompatibilityTimeZoneLocalDataType(Vendor syntax, String name) {
+			super(syntax, name);
 		}
 		
 		@Override
@@ -191,8 +191,8 @@ public class Oracle extends SQL92 {
 	}
 	
 	public static class OracleCompatibilityTimeZoneDataType extends SQLTimestamp {
-		public OracleCompatibilityTimeZoneDataType(Vendor syntax) {
-			super(syntax);
+		public OracleCompatibilityTimeZoneDataType(Vendor syntax, String name) {
+			super(syntax, name);
 		}
 		@Override
 		public String value(ResultSet resultSet, int column) throws SQLException {

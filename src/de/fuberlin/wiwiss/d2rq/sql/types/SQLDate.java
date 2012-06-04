@@ -10,8 +10,8 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 public class SQLDate extends DataType {
 	private final static Pattern DATE_PATTERN = 
 		Pattern.compile("^\\d?\\d?\\d?\\d-\\d\\d-\\d\\d$");
-	public SQLDate(Vendor syntax) {
-		super(syntax, "DATE");
+	public SQLDate(Vendor syntax, String name) {
+		super(syntax, name);
 	}
 	@Override
 	public boolean isIRISafe() {

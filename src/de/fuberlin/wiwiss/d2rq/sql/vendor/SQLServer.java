@@ -63,7 +63,7 @@ public class SQLServer extends SQL92 {
 	public DataType getDataType(int jdbcType, String name, int size) {
 		// MS SQLServer 2008 driver returns DATE as VARCHAR type
 		if (name.equals("DATE")) {
-			return new SQLDate(this);
+			return new SQLDate(this, name);
 		}
 		
 		// On SQL Server, BIT is a single-bit numeric type
@@ -73,10 +73,10 @@ public class SQLServer extends SQL92 {
 
 		// Doesn't support DISTINCT over LOB types
 		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
-			return new SQLCharacterString(this, false);
+			return new SQLCharacterString(this, name, false);
 		}
 		if (jdbcType == Types.BLOB) {
-			return new SQLBinary(this, false);
+			return new SQLBinary(this, name, false);
 		}
 
 		return super.getDataType(jdbcType, name, size);
@@ -91,7 +91,7 @@ public class SQLServer extends SQL92 {
 
 	private static class SQLServerCompatibilityBitDataType extends SQLBit {
 		public SQLServerCompatibilityBitDataType(Vendor syntax) {
-			super(syntax);
+			super(syntax, "BIT");
 		}
 		public String toSQLLiteral(String value) {
 			// On SQL Server, BIT is a single-bit numeric type

@@ -45,6 +45,9 @@ public abstract class DataType {
 	private final Vendor sqlSyntax;
 	private final String name;
 	
+	/**
+	 * @param name Name as reported by JDBC metadata, for debugging
+	 */
 	public DataType(Vendor sqlSyntax, String name) {
 		this.sqlSyntax = sqlSyntax;
 		this.name = name;
@@ -117,10 +120,18 @@ public abstract class DataType {
 	
 	@Override
 	public String toString() {
-		return "DataType:" + name;
+		return getClass().getSimpleName() + ":" + name;
 	}
 	
 	protected Vendor syntax() {
 		return sqlSyntax;
+	}
+	
+	/**
+	 * Returns the datatype's name as reported by JDBC metadata
+	 * (or closest equivalent), for debugging
+	 */
+	public String name() {
+		return name;
 	}
 }
