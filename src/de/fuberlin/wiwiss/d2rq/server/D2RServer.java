@@ -11,6 +11,7 @@ import org.joseki.ServiceRegistry;
 import org.joseki.processors.SPARQL;
 
 import com.hp.hpl.jena.graph.BulkUpdateHandler;
+import com.hp.hpl.jena.query.ARQ;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
@@ -211,7 +212,8 @@ public class D2RServer {
 								&& !getConfig().getVocabularyIncludeInstances();
 						adder.add(new ResourceDescriber(getMapping(), resource
 								.asNode(), outgoingTriplesOnly,
-								Relation.NO_LIMIT).description());
+								Relation.NO_LIMIT, 
+								Math.round(config.getSPARQLTimeout())).description());
 					}
 
 					public void finish() {
@@ -222,6 +224,10 @@ public class D2RServer {
 
 		Registry.add(RDFServer.ServiceRegistryName,
 				createJosekiServiceRegistry());
+		
+		if (config.getSPARQLTimeout() > 0) {
+			ARQ.getContext().set(ARQ.queryTimeout, config.getSPARQLTimeout() * 1000);
+		}
 	}
 
 	public void shutdown() {

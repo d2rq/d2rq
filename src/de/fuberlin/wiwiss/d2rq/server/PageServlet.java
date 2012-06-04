@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.velocity.context.Context;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QueryCancelledException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -66,26 +67,34 @@ public class PageServlet extends HttpServlet {
 		String documentURL = server.dataURL(serviceStem, relativeResourceURI);
 		String pageURL = server.pageURL(serviceStem, relativeResourceURI);
 
+		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
+		Context context = velocity.getContext();
+		context.put("uri", resourceURI);
+
 		// Build resource description
 		Resource resource = ResourceFactory.createResource(resourceURI);
 		boolean outgoingTriplesOnly = server.isVocabularyResource(resource)
 				&& !server.getConfig().getVocabularyIncludeInstances();
 		int limit = server.getConfig().getLimitPerPropertyBridge();
-		ResourceDescriber describer = new ResourceDescriber(
-				server.getMapping(), resource.asNode(), outgoingTriplesOnly,
-				limit);
-		Model description = ModelFactory.createModelForGraph(describer
-				.description());
+		Model description = null;
+		try {
+			ResourceDescriber describer = new ResourceDescriber(
+					server.getMapping(), resource.asNode(), outgoingTriplesOnly,
+					limit, Math.round(server.getConfig().getPageTimeout() * 1000));
+			description = ModelFactory.createModelForGraph(describer.description());
+		} catch (QueryCancelledException ex) {
+			velocity.reportError(
+					504, "504 Gateway Timeout", "The operation timed out.");
+			return;
+		}
 		if (description.size() == 0) {
-			response.sendError(404);
+			velocity.reportError(404, "404 Not Found", "No resource with this identifier exists in the database.");
 			return;
 		}
 		// Get a Resource that is attached to the description model
 		resource = description.getResource(resourceURI);
 
 		this.prefixes = server.getPrefixes(); // model();
-		VelocityWrapper velocity = new VelocityWrapper(this, request, response);
-		Context context = velocity.getContext();
 
 		if (server.getConfig().serveMetadata()) {
 			// create and add metadata to context
@@ -120,7 +129,6 @@ public class PageServlet extends HttpServlet {
 			context.put("metadata", Boolean.FALSE);
 		}
 
-		context.put("uri", resourceURI);
 		context.put("rdf_link", documentURL);
 		context.put("label", getBestLabel(resource));
 		context.put("properties", collectProperties(description, resource));

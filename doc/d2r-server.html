@@ -193,6 +193,9 @@ configuration properties. An example follows:</p>
   d2r:port 2020;
   d2r:vocabularyIncludeInstances true;
   
+  d2r:sparqlTimeout 300;
+  d2r:pageTimeout 5;
+
   meta:datasetTitle "My dataset" ;
   meta:datasetDescription "My dataset contains many nice resources." ;
   meta:datasetSource "This other dataset" ;
@@ -248,6 +251,16 @@ configuration properties. An example follows:</p>
       web interface. This setting does not affect RDF representations or SPARQL
       queries. The default is <code>50</code>. Use <code>false</code> to disable
       the limit.</td>
+  </tr>
+  <tr>
+    <th id="d2r:sparqlTimeout">d2r:sparqlTimeout</th>
+    <td>Specifies a timeout in seconds for the server's SPARQL endpoint.
+      A value of 0 or a negative value disables the timeout.</td>
+  </tr>
+  <tr>
+    <th id="d2r:pageTimeout">d2r:pageTimeout</th>
+    <td>Specifies a timeout in seconds for generating resource description
+      pages. A value of 0 or a negative value disables the timeout.</td>
   </tr>
   <tr>
     <th id="d2r:metadataTemplate">d2r:metadataTemplate</th>
@@ -434,6 +447,10 @@ Even though we recommend using the default templates, there will still be users 
     consider changing the values of
     <a href="#d2r:limitPerClassMap"><code>d2r:limitPerClassMap</code></a> and.
     <a href="#d2r:limitPerPropertyBridge"><code>d2r:limitPerPropertyBridge</code></a>.
+  </li>
+  <li>Consider changing the default timeout values for
+    <a href="#d2r:sparqlTimeout">SPARQL queries</a> and for
+    <a href="#d2r:pageTimeout">page generation</a>.
   </li>
     <li>To speed up the generation of large pages, consider setting
       <a href="d2rq-language#d2rq:resultSizeLimit"><code>d2rq:resultSizeLimit</code></a>,

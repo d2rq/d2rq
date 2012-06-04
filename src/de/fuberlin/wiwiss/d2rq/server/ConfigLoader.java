@@ -72,7 +72,9 @@ public class ConfigLoader {
 	private int limitPerClassMap = DEFAULT_LIMIT_PER_CLASS_MAP;
 	private int limitPerPropertyBridge = DEFAULT_LIMIT_PER_PROPERTY_BRIDGE;
 	private boolean enableMetadata = true;
-
+	private double sparqlTimeout = 60;
+	private double pageTimeout = 12;
+	
 	/**
 	 * @param configURL
 	 *            Config file URL, or <code>null</code> for an empty config
@@ -119,7 +121,7 @@ public class ConfigLoader {
 				this.port = Integer.parseInt(value);
 			} catch (NumberFormatException ex) {
 				throw new D2RQException("Illegal integer value '" + value
-						+ "' for d2r:port");
+						+ "' for d2r:port", D2RQException.MUST_BE_NUMERIC);
 			}
 		}
 		s = server.getProperty(RDFS.label);
@@ -161,6 +163,26 @@ public class ConfigLoader {
 		s = server.getProperty(D2RConfig.enableMetadata);
 		if (s != null) {
 			this.enableMetadata = s.getBoolean();
+		}
+		s = server.getProperty(D2RConfig.pageTimeout);
+		if (s != null) {
+			try {
+				String value = s.getLiteral().getLexicalForm();
+				pageTimeout = Double.parseDouble(value);
+			} catch (Exception ex) {
+				throw new D2RQException("Value for d2r:pageTimeout must be a numeric literal: '" + 
+						s.getObject() + "'", D2RQException.MUST_BE_NUMERIC);
+			}
+		}
+		s = server.getProperty(D2RConfig.sparqlTimeout);
+		if (s != null) {
+			try {
+				String value = s.getLiteral().getLexicalForm();
+				sparqlTimeout = Double.parseDouble(value);
+			} catch (Exception ex) {
+				throw new D2RQException("Value for d2r:sparqlTimeout must be a numeric literal: '" + 
+						s.getObject() + "'", D2RQException.MUST_BE_NUMERIC);
+			}
 		}
 	}
 
@@ -212,6 +234,14 @@ public class ConfigLoader {
 		return this.autoReloadMapping;
 	}
 
+	public double getPageTimeout() {
+		return pageTimeout;
+	}
+	
+	public double getSPARQLTimeout() {
+		return sparqlTimeout;
+	}
+	
 	public void addDocumentMetadata(Model document, Resource documentResource) {
 		if (this.documentMetadata == null) {
 			return;

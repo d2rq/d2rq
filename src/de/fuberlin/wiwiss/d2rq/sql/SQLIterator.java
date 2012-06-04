@@ -101,7 +101,7 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 	 * record-set is exhausted.
 	 */
 	public void close() {
-		if (cancelled || explicitlyClosed) return;
+		if (explicitlyClosed) return;
 		log.debug("Closing SQLIterator");
 	    explicitlyClosed = true;
 	    
@@ -132,7 +132,6 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 				throw new RuntimeException(ex);
 			}
 		}
-		close();
 	}
 	
 	public void remove() {

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -51,9 +52,14 @@ public class ResourceDescriptionServlet extends HttpServlet {
 		String pageURL = server.pageURL(serviceStem, relativeResourceURI);
 
 		String sparqlQuery = "DESCRIBE <" + resourceURI + ">";
-		Model description = QueryExecutionFactory.create(sparqlQuery,
-				server.dataset()).execDescribe();
-
+		QueryExecution qe = QueryExecutionFactory.create(sparqlQuery,
+				server.dataset());
+		if (server.getConfig().getPageTimeout() > 0) {
+			qe.setTimeout(Math.round(server.getConfig().getPageTimeout() * 1000));
+		}
+		Model description = qe.execDescribe();
+		qe.close();
+		
 		if (description.size() == 0) {
 			response.sendError(404);
 		}

@@ -5,6 +5,7 @@
 @prefix dc:   <http://purl.org/dc/elements/1.1/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 
 <> a owl:Ontology;
     rdfs:label "D2R Server configuration vocabulary"@en;
@@ -87,5 +88,19 @@ d2r:limitPerPropertyBridge a rdf:Property;
     rdfs:comment "Maximum number of values for each property bridge that will be displayed in the web interface when browsing resources. A value of false means no limit."@en;
     rdfs:domain d2r:Server;
     rdfs:range rdfs:Literal;
+    rdfs:isDefinedBy <>;
+    .
+d2r:sparqlTimeout a rdf:Property;
+    rdfs:label "SPARQL timeout";
+    rdfs:comment "Timeout for executing SPARQL queries, in seconds. 0 for no timeout."@en;
+    rdfs:domain d2r:Server;
+    rdfs:range xsd:decimal;
+    rdfs:isDefinedBy <>;
+    .
+d2r:pageTimeout a rdf:Property;
+    rdfs:label "Page timeout";
+    rdfs:comment "Timeout for generating HTML pages and RDF descriptions, in seconds. 0 for no timeout."@en;
+    rdfs:domain d2r:Server;
+    rdfs:range xsd:decimal;
     rdfs:isDefinedBy <>;
     .
