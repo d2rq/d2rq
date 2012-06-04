@@ -12,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 /**
  * A database column.
  * 
- * TODO: Attribute should track its {@link DataType}
+ * TODO: Attribute should track its DataType
  * TODO: Attribute should track whether it is nullable
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)

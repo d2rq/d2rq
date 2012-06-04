@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
@@ -17,11 +16,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
- * Produces {@link Binding}s or {@link Triple}s from {@link ResultRow}s.
- * 
- * A triple-producing binding maker is simply a binding maker
- * that contains exactly the three variables
- * {@link #SUBJECT}, {@link #PREDICATE} and {@link #OBJECT}.
+ * Produces {@link Binding}s from {@link ResultRow}s.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */

@@ -86,7 +86,7 @@ public interface NodeSetFilter {
 	
 	/**
 	 * Registers the use of a translator to create values in this node set.
-	 * @param Translator A translator used to create values in this node set 
+	 * @param translator A translator used to create values in this node set 
 	 */
 	public void setUsesTranslator(Translator translator);
 }

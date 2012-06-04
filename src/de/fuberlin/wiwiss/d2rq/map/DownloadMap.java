@@ -24,7 +24,8 @@ import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
  * and additionally has a d2rq:mediaType and d2rq:contentColumn.
  * 
  * Results can be retrieved via {@link #getContentDownloadColumn()},
- * {@link #getMediaType()}, {@link #nodeMaker()} (for the URI spec),
+ * {@link #getMediaTypeValueMaker()} (for the media type value make),
+ * {@link #nodeMaker()} (for the URI spec),
  * and {@link #getRelation()}.
  * 
  * @author RichardCyganiak

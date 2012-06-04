@@ -80,13 +80,12 @@ public abstract class DataType {
 	
 	/**
 	 * Creates a SQL literal for the given value, suitable
-	 * for comparison to a column of the indicated type.
+	 * for comparison to a column of this indicated type.
 	 * If the value is not suitable for the column type
-	 * (e.g., not a number for a NUMERIC_COLUMN), <code>NULL</code>
+	 * (e.g., not a number for a SQLExactNumeric), <code>NULL</code>
 	 * is returned.
 	 * 
 	 * @param value A value
-	 * @param columnType Type for which to format the value
 	 * @return A quoted and escaped SQL literal, suitable for comparison to a column 
 	 */
 	public String toSQLLiteral(String value) {

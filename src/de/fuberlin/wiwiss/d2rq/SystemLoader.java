@@ -28,7 +28,6 @@ import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 import de.fuberlin.wiwiss.d2rq.server.ConfigLoader;
 import de.fuberlin.wiwiss.d2rq.server.D2RServer;
 import de.fuberlin.wiwiss.d2rq.server.JettyLauncher;
-import de.fuberlin.wiwiss.d2rq.server.WebappInitListener;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
 
@@ -40,7 +39,7 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
  * and configured correctly. This class helps setting everything
  * up correctly.
  * 
- * TODO: {@link MapParser#absolutizeURI(String)} and {@link ConfigLoader#toAbsoluteURI(String)} and {@link WebappInitListener#absolutize()} need to be consolidated and/or folded into this class
+ * TODO: {@link MapParser#absolutizeURI(String)} and {@link ConfigLoader#toAbsoluteURI(String)} and {WebappInitListener#absolutize} need to be consolidated and/or folded into this class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */

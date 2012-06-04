@@ -19,7 +19,7 @@ import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 
 /**
- * A {@Relation} associated with a number of named {@link NodeMaker}s.
+ * A {@link Relation} associated with a number of named {@link NodeMaker}s.
  * 
  * TODO: This is really just a Relation and a BindingMaker wrapped into one. Refactor as such?
  *  
