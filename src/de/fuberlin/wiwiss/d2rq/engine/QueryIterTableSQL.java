@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.engine;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -12,6 +13,7 @@ import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIter;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIterNullIterator;
+import com.hp.hpl.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIterSingleton;
 
 import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
@@ -37,8 +39,17 @@ public class QueryIterTableSQL extends QueryIter {
 	 */
 	public static QueryIterator create(Relation relation, 
 			Collection<BindingMaker> bindingMakers, ExecutionContext execCxt) {
-		if (relation.condition().isFalse() || bindingMakers.isEmpty()) {
+		if (relation.equals(Relation.EMPTY) || relation.condition().isFalse() || bindingMakers.isEmpty()) {
 			return new QueryIterNullIterator(execCxt);
+		}
+		if (relation.isTrivial()) {
+			ArrayList<Binding> bindingList = new ArrayList<Binding>();
+			for (BindingMaker bindingMaker: bindingMakers) {
+				Binding t = bindingMaker.makeBinding(ResultRow.NO_ATTRIBUTES);
+				if (t == null) continue;
+				bindingList.add(t);
+			}
+			return new QueryIterPlainWrapper(bindingList.iterator(), execCxt);				
 		}
 		return new QueryIterTableSQL(relation, bindingMakers, execCxt);
 	}
@@ -65,7 +76,7 @@ public class QueryIterTableSQL extends QueryIter {
 	private final Collection<BindingMaker> bindingMakers;
 	private final LinkedList<Binding> queue = new LinkedList<Binding>();
 
-	public QueryIterTableSQL(Relation relation, 
+	private QueryIterTableSQL(Relation relation, 
 			Collection<BindingMaker> bindingMakers, ExecutionContext execCxt) {
 		super(execCxt);
 		this.bindingMakers = bindingMakers;
