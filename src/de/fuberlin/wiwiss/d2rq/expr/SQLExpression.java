@@ -27,12 +27,7 @@ public class SQLExpression extends Expression {
 		if ("0".equals(sql)) {
 			return Expression.FALSE;
 		}
-		if (sql.startsWith("(") && sql.endsWith(")")) {
-			return new SQLExpression(sql);
-		}
-		// Put it in brackets, otherwise we get into precedence trouble
-		// e.g. with an expression "foo OR bar"
-		return new SQLExpression("(" + sql + ")");
+		return new SQLExpression(sql);
 	}
 	
 	private String expression;
@@ -64,7 +59,7 @@ public class SQLExpression extends Expression {
 	}
 	
 	public String toString() {
-		return "SQL" + this.expression;
+		return "SQL(" + this.expression + ")";
 	}
 	
 	public boolean equals(Object other) {
