@@ -50,9 +50,9 @@ public class MapParser {
 	private final static Log log = LogFactory.getLog(MapParser.class);
 	
 	/**
-	 * A regular expression that matches zero or more characters that are allowed inside URIs
+	 * A regular expression that matches zero or more characters that are allowed inside IRIs
 	 */
-	public static final String URI_CHAR_REGEX = "([:/?#\\[\\]@!$&'()*+,;=a-zA-Z0-9._~-]|%[0-9A-Fa-f][0-9A-Fa-f])*";	
+	public static final String IRI_CHAR_REGEX = "([:/?#\\[\\]@!$&'()*+,;=a-zA-Z0-9._~\\x80-\\uFFFF-]|%[0-9A-Fa-f][0-9A-Fa-f])*";	
 
 	/**
 	 * Turns a relative URI into an absolute one, by using the
