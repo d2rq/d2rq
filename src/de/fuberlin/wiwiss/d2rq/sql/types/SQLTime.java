@@ -10,8 +10,8 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 public class SQLTime extends DataType {
 	private final static Pattern TIME_PATTERN = 
 		Pattern.compile("^\\d?\\d:\\d\\d:\\d\\d(.\\d+)?([+-]\\d?\\d:\\d\\d|Z)?$");
-	public SQLTime(Vendor syntax) {
-		super(syntax, "TIME");
+	public SQLTime(Vendor syntax, String name) {
+		super(syntax, name);
 	}
 	@Override
 	public boolean isIRISafe() {

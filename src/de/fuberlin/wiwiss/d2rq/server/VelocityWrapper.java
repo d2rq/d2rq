@@ -1,5 +1,6 @@
 package de.fuberlin.wiwiss.d2rq.server;
 
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
@@ -93,5 +94,12 @@ public class VelocityWrapper {
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	public void reportError(int statusCode, String title, String details) throws IOException {
+		response.setStatus(statusCode);
+		context.put("title", title);
+		context.put("details", details);
+		mergeTemplateXHTML("error.vm");
 	}
 }

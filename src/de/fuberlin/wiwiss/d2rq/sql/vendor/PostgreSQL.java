@@ -27,16 +27,16 @@ public class PostgreSQL extends SQL92 {
 		DataType standard = super.getDataType(jdbcType, name, size);
 		if (standard != null) return standard;
 
-		if ("uuid".equals(name)) {
-			return new SQLCharacterString(this, true);
+		if ("UUID".equals(name)) {
+			return new SQLCharacterString(this, name, true);
 		}
 		
 		// As postGis jdbc is only a wrapper of the org.postgresql.Driver,
 		// the JDBC database product type is the one of Postgresql : PostgreSQL
 		// Thus Postgis field as geometry are handled here
-		if ((jdbcType == Types.OTHER) && ("geometry".equals(name))) {
+		if ((jdbcType == Types.OTHER) && ("GEOMETRY".equals(name))) {
 			// let try the simpliest version
-			return new SQLCharacterString(this, true);
+			return new SQLCharacterString(this, name, true);
 		}
 
 		return null;

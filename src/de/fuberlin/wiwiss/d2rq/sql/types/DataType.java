@@ -35,7 +35,7 @@ public abstract class DataType {
 		private final String name;
 		GenericType(int jdbcType, String name) {
 			this.jdbcType = jdbcType;
-			this.name = name;
+			this.name = name.toUpperCase();
 		}
 		public DataType dataTypeFor(Vendor vendor) {
 			return vendor.getDataType(jdbcType, name, 0);
@@ -45,6 +45,9 @@ public abstract class DataType {
 	private final Vendor sqlSyntax;
 	private final String name;
 	
+	/**
+	 * @param name Name as reported by JDBC metadata, for debugging
+	 */
 	public DataType(Vendor sqlSyntax, String name) {
 		this.sqlSyntax = sqlSyntax;
 		this.name = name;
@@ -77,13 +80,12 @@ public abstract class DataType {
 	
 	/**
 	 * Creates a SQL literal for the given value, suitable
-	 * for comparison to a column of the indicated type.
+	 * for comparison to a column of this indicated type.
 	 * If the value is not suitable for the column type
-	 * (e.g., not a number for a NUMERIC_COLUMN), <code>NULL</code>
+	 * (e.g., not a number for a SQLExactNumeric), <code>NULL</code>
 	 * is returned.
 	 * 
 	 * @param value A value
-	 * @param columnType Type for which to format the value
 	 * @return A quoted and escaped SQL literal, suitable for comparison to a column 
 	 */
 	public String toSQLLiteral(String value) {
@@ -117,10 +119,18 @@ public abstract class DataType {
 	
 	@Override
 	public String toString() {
-		return "DataType:" + name;
+		return getClass().getSimpleName() + ":" + name;
 	}
 	
 	protected Vendor syntax() {
 		return sqlSyntax;
+	}
+	
+	/**
+	 * Returns the datatype's name as reported by JDBC metadata
+	 * (or closest equivalent), for debugging
+	 */
+	public String name() {
+		return name;
 	}
 }

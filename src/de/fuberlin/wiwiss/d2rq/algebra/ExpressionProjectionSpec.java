@@ -3,7 +3,7 @@ package de.fuberlin.wiwiss.d2rq.algebra;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
-import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
+import de.fuberlin.wiwiss.d2rq.expr.NotNull;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 
 public class ExpressionProjectionSpec implements ProjectionSpec {
@@ -32,7 +32,7 @@ public class ExpressionProjectionSpec implements ProjectionSpec {
 	}
 	
 	public Expression notNullExpression(ConnectedDB database, AliasMap aliases) {
-		return SQLExpression.create("(" + expression.toSQL(database, aliases) + ") IS NOT NULL");
+		return NotNull.create(expression);
 	}
 	
 	public boolean equals(Object other) {

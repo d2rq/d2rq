@@ -4,6 +4,7 @@
     xmlns:d2r="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#"
     xmlns:owl="http://www.w3.org/2002/07/owl#"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:d2rq="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#">
   <owl:Ontology rdf:about="">
@@ -21,23 +22,24 @@
     <rdfs:comment xml:lang="en">A configuration for a D2R Server installation.</rdfs:comment>
     <rdfs:label xml:lang="en">Server</rdfs:label>
   </rdfs:Class>
-  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#vocabularyIncludeInstances">
-    <rdfs:isDefinedBy rdf:resource=""/>
-    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
-    <rdfs:comment xml:lang="en">Whether views of vocabulary resources should include instance data.</rdfs:comment>
-    <rdfs:label xml:lang="en">serve instance data for vocabulary resources</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#port">
-    <rdfs:isDefinedBy rdf:resource=""/>
-    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
-    <rdfs:comment xml:lang="en">The TCP port on which a D2R Server installation listens.</rdfs:comment>
-    <rdfs:label xml:lang="en">server port</rdfs:label>
-  </rdf:Property>
   <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#metadataTemplate">
     <rdfs:isDefinedBy rdf:resource=""/>
     <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
     <rdfs:comment xml:lang="en">A RDF metadata template.</rdfs:comment>
     <rdfs:label xml:lang="en">metadata template</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#pageTimeout">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">Timeout for generating HTML pages and RDF descriptions, in seconds. 0 for no timeout.</rdfs:comment>
+    <rdfs:label>Page timeout</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#datasetMetadataTemplate">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">A RDF dataset metadata template.</rdfs:comment>
+    <rdfs:label xml:lang="en">dataset metadata template</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#publishes">
     <rdfs:isDefinedBy rdf:resource=""/>
@@ -70,6 +72,31 @@
     <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
     <rdfs:comment xml:lang="en">A template resource whose properties will be attached as metadata to all RDF documents published by a D2R Server installation.</rdfs:comment>
     <rdfs:label xml:lang="en">document metadata</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#vocabularyIncludeInstances">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">Whether views of vocabulary resources should include instance data.</rdfs:comment>
+    <rdfs:label xml:lang="en">serve instance data for vocabulary resources</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#port">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">The TCP port on which a D2R Server installation listens.</rdfs:comment>
+    <rdfs:label xml:lang="en">server port</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#enableMetadata">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">Whether to enable all metadata generation.</rdfs:comment>
+    <rdfs:label xml:lang="en">enable metadata generation</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#sparqlTimeout">
+    <rdfs:isDefinedBy rdf:resource=""/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    <rdfs:domain rdf:resource="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#Server"/>
+    <rdfs:comment xml:lang="en">Timeout for executing SPARQL queries, in seconds. 0 for no timeout.</rdfs:comment>
+    <rdfs:label>SPARQL timeout</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#limitPerClassMap">
     <rdfs:isDefinedBy rdf:resource=""/>

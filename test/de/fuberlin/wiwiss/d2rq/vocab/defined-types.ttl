@@ -1,0 +1,5 @@
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#>.
+
+d2rq:this a d2rq:Database.
+d2rq:that a d2rq:ClassMap.
+d2rq:them a d2rq:PropertyBridge.

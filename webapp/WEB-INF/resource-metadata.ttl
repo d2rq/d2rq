@@ -1,0 +1,24 @@
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prv:      <http://purl.org/net/provenance/ns#> .
+@prefix prvTypes: <http://purl.org/net/provenance/types#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix sp:   <http://spinrdf.org/sp#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix xhtml: <http://www.w3.org/1999/xhtml/vocab/#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+
+# This template provides provenance information about RDF graphs served by D2R.
+
+
+<about:metadata:runtime:resource> 
+	rdfs:isDefinedBy <about:metadata:runtime:graph> ;
+	foaf:page <about:metadata:runtime:page> .
+
+<about:metadata:runtime:graph> a prv:DataItem, foaf:Document ;	
+	dc:date <about:metadata:runtime:time> ;
+	void:inDataset <about:metadata:runtime:dataset> ;
+	prv:containedBy <about:metadata:runtime:dataset> .

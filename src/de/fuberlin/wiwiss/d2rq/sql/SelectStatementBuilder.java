@@ -6,6 +6,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import d2rq.d2r_query;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.AliasMap;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -27,6 +31,8 @@ import de.fuberlin.wiwiss.d2rq.expr.Expression;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class SelectStatementBuilder {
+	private static final Log log = LogFactory.getLog(d2r_query.class);
+	
 	private ConnectedDB database;
 	private List<ProjectionSpec> selectSpecs = new ArrayList<ProjectionSpec>(10);
 	private List<Expression> conditions = new ArrayList<Expression>();
@@ -68,6 +74,7 @@ public class SelectStatementBuilder {
 			for (ProjectionSpec projection: selectSpecs) {
 				for (Attribute column: projection.requiredAttributes()) {
 					if (!database.columnType(aliases.originalOf(column)).supportsDistinct()) {
+						log.info("Attempting to apply DISTINCT to relation: " + relation);
 						throw new D2RQException("Bug in engine logic: DISTINCT used with " +
 								"datatype (" + database.columnType(column) + ") that " +
 								"doesn't support it", 

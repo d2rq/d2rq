@@ -21,6 +21,7 @@ import de.fuberlin.wiwiss.d2rq.SystemLoader;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
+import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
 /**
  * Command line utility for dumping a database to RDF, using the
@@ -81,7 +82,7 @@ public class dump_rdf extends CommandLineTool {
 			File f = new File(cmd.getArg(outfileArg).getValue());
 			log.info("Writing to " + f);
 			out = new PrintStream(new FileOutputStream(f));
-			loader.setSystemBaseURI(f.toURI().toString() + "#");
+			loader.setSystemBaseURI(MapParser.absolutizeURI(f.toURI().toString() + "#"));
 		} else {
 			log.info("Writing to stdout");
 			out = System.out;

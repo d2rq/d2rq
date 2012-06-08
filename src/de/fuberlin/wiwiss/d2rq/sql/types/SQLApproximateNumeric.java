@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 public class SQLApproximateNumeric extends DataType {
-	public SQLApproximateNumeric(Vendor syntax) {
-		super(syntax, "DOUBLE");
+	public SQLApproximateNumeric(Vendor syntax, String name) {
+		super(syntax, name);
 	}
 	@Override
 	public boolean isIRISafe() {

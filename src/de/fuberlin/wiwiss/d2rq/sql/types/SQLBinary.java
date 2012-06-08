@@ -9,8 +9,8 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 public class SQLBinary extends DataType {
 	private final boolean supportsDistinct;
 	
-	public SQLBinary(Vendor syntax, boolean supportsDistinct) {
-		super(syntax, "BINARY");
+	public SQLBinary(Vendor syntax, String name, boolean supportsDistinct) {
+		super(syntax, name);
 		this.supportsDistinct = supportsDistinct;
 	}
 

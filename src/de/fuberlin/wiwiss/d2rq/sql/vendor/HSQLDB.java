@@ -23,15 +23,15 @@ public class HSQLDB extends SQL92 {
 
 		// Doesn't support DISTINCT over LOB types
 		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
-			return new SQLCharacterString(this, false);
+			return new SQLCharacterString(this, name, false);
 		}
 		if (jdbcType == Types.BLOB) {
-			return new SQLBinary(this, false);
+			return new SQLBinary(this, name, false);
 		}
 		
 		// HSQLDB 2.2.8 reports INTERVAL types as VARCHAR 
 		if (jdbcType == Types.VARCHAR && name.startsWith("INTERVAL")) {
-			return new SQLInterval(this);
+			return new SQLInterval(this, name);
 		}
 		
 		// HSQLDB supports NaN and +/-INF in DOUBLE
@@ -60,7 +60,7 @@ public class HSQLDB extends SQL92 {
 
 	public static class HSQLDBCompatibilityDoubleDataType extends SQLApproximateNumeric {
 		public HSQLDBCompatibilityDoubleDataType(Vendor syntax) {
-			super(syntax);
+			super(syntax, "DOUBLE");
 		}
 		public String toSQLLiteral(String value) {
 			if ("NaN".equals(value)) {

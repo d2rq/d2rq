@@ -15,6 +15,7 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.expr.BooleanToIntegerCaseExpression;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.expr.SQLExpression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -57,10 +58,10 @@ public class Oracle extends SQL92 {
 		
 		// Doesn't support DISTINCT over LOB types
 		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
-			return new SQLCharacterString(this, false);
+			return new SQLCharacterString(this, name, false);
 		}
 		if (jdbcType == Types.BLOB) {
-			return new SQLBinary(this, false);
+			return new SQLBinary(this, name, false);
 		}
 		
 		DataType standard = super.getDataType(jdbcType, name, size);
@@ -68,17 +69,22 @@ public class Oracle extends SQL92 {
 
 		// Special handling for TIMESTAMP(x) WITH LOCAL TIME ZONE
 		if (name.contains("WITH LOCAL TIME ZONE") || "TIMESTAMPLTZ".equals(name)) {
-			return new OracleCompatibilityTimeZoneLocalDataType(this);
+			return new OracleCompatibilityTimeZoneLocalDataType(this, name);
+		}
+		
+		// Special handling for TIMESTAMP(x) WITH TIME ZONE
+		if(name.contains("WITH TIME ZONE") || "TIMESTAMPTZ".equals(name)) {
+			return new OracleCompatibilityTimeZoneDataType(this, name);
 		}
 		
 		// Oracle-specific character string types
 		if ("VARCHAR2".equals(name) || "NVARCHAR2".equals(name)) {
-			return new SQLCharacterString(this, true);
+			return new SQLCharacterString(this, name, true);
 		}
 
 		// Oracle-specific floating point types
     	if ("BINARY_FLOAT".equals(name) || "BINARY_DOUBLE".equals(name)) {
-    		return new SQLApproximateNumeric(this);
+    		return new SQLApproximateNumeric(this, name);
     	}
     	
 		// Oracle binary file pointer
@@ -128,6 +134,14 @@ public class Oracle extends SQL92 {
 		return TimeZone.getDefault();
 	}
 	
+	/**
+	* Oracle doesn't actually support booolean expressions, except in
+	* a few places. Turn the boolean into an int using a CASE statement
+	*/
+	public Expression booleanExpressionToSimpleExpression(Expression expression) {
+	    return new BooleanToIntegerCaseExpression(expression);
+	}
+	
 	private static final String[] IGNORED_SCHEMAS = {
 		"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", 
 		"SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
@@ -147,8 +161,8 @@ public class Oracle extends SQL92 {
 	 * @author Aftab Iqbal
 	 */
 	public static class OracleCompatibilityTimeZoneLocalDataType extends SQLTimestamp {
-		public OracleCompatibilityTimeZoneLocalDataType(Vendor syntax) {
-			super(syntax);
+		public OracleCompatibilityTimeZoneLocalDataType(Vendor syntax, String name) {
+			super(syntax, name);
 		}
 		
 		@Override
@@ -174,5 +188,20 @@ public class Oracle extends SQL92 {
 	        return dateTime.substring(0, dateTime.length()-2) + 
 	        		":" + dateTime.substring(dateTime.length()-2);
 	    }
+	}
+	
+	public static class OracleCompatibilityTimeZoneDataType extends SQLTimestamp {
+		public OracleCompatibilityTimeZoneDataType(Vendor syntax, String name) {
+			super(syntax, name);
+		}
+		@Override
+		public String value(ResultSet resultSet, int column) throws SQLException {
+			// Hack for Oracle TIMESTAMP WITH TIME ZONE data type
+			try {
+				return super.value(resultSet, column);
+			} catch (SQLException ex) {
+				return null;
+			}
+		}
 	}
 }

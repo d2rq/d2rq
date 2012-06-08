@@ -1,8 +1,5 @@
 package de.fuberlin.wiwiss.d2rq.helpers;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.map.Database;
@@ -26,10 +23,9 @@ public class MappingHelper {
 	 * @throws D2RQException On error during parse
 	 */
 	public static Mapping readFromTestFile(String testFileName) {
-		Model m = ModelFactory.createDefaultModel();
-		m.read(D2RQTestSuite.DIRECTORY_URL + testFileName, "TURTLE");
-		MapParser result = new MapParser(m, "http://example.org/");
-		return result.parse();
+		return new MapParser(
+				D2RQTestSuite.loadTurtle(testFileName), 
+				"http://example.org/").parse();
 	}
 	
 	public static void connectToDummyDBs(Mapping m) {

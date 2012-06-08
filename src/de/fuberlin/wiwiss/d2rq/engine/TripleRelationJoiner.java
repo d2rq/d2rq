@@ -311,7 +311,7 @@ class TripleRelationJoiner {
 		// A node set is unique if it is constrained by only unique node makers.
 		
 		// In the meantime, copy the uniqueness from the relation if there's just one
-		boolean isUnique = useAllOptimizations && relations.size()==1 && (relations.iterator().next()).isUnique();
+		boolean isUnique = relations.size() == 1 && (relations.iterator().next()).isUnique();
 		return new RelationImpl(connectedDB, joinedAliases, Conjunction.create(expressions), 
 				Conjunction.create(softConditions),
 				joins, projections, isUnique, orderSpecs, limit, limitInverse);

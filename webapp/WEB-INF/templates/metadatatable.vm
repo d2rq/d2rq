@@ -11,7 +11,7 @@
 
 	#elseif ($node.asNode().isBlank())
 		#if (!$blankNodesMap.containsKey($node))
-			#set ($bnid = "Anon_$bnidCount")
+			#set ($bnid = "_:$bnidCount")
 			#set ($test = $blankNodesMap.put($node,$bnid))
 			#set ($bnidCount = $bnidCount + 1)
 		#end
@@ -29,15 +29,11 @@
 	#end
 #end
 
-#macro( listProperties $name $metadataPropList $style)
-	#set ($idadd = $idadd + 1)
-	<div class="metadata-label">#prettyNode ($name)&nbsp;
+#macro( listProperties $name $metadataPropList)
+	#set ($test = $renderedNodesMap.put($name,true))
 
-	#if ($metadataPropList.size() > 0 && $style != "block")
-		<a name="anchor_$idadd"></a>
-		(<a href="#anchor_$idadd" onclick="document.getElementById('ele_$idadd').style.display = 'block';">more</a>)
-	#end
-	</div>
+	#set ($idadd = $idadd + 1)
+	<div class="metadata-label">#prettyNode ($name)&nbsp;</div>
 
 	<table id="ele_$idadd" class="metadata-table" style="display: $style">
 	#foreach  ($statement in $metadataPropList)
@@ -45,8 +41,9 @@
 			<td valign="top" class="metadata-property">#prettyNode ($statement.getPredicate())</td>
 			<td class="metadata-object">
 				#set ($object = $statement.getObject())
-				#if ($object.isResource() && $object.listProperties().toList().size() > 0 && !$statement.getSubject().equals($statement.getObject()))
-					#listProperties ($object $object.listProperties().toList() 'none')
+				#set ($alreadyRendered = $renderedNodesMap.containsKey($object))
+				#if ($object.isResource() && $object.listProperties().toList().size() > 0 && !$alreadyRendered)
+					#listProperties ($object $object.listProperties().toList())
 				#else
 					#prettyNode ($statement.getObject())
 				#end

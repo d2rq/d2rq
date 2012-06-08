@@ -1,11 +1,13 @@
 package de.fuberlin.wiwiss.d2rq.mapgen;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 
 /**
@@ -24,6 +26,7 @@ public class W3CMappingGenerator extends MappingGenerator {
 		setHandleLinkTables(false);
 		setGenerateDefinitionLabels(false);
 		setServeVocabulary(false);
+		setSkipForeignKeyTargetColumns(false);
 	}
 
 	@Override
@@ -32,19 +35,56 @@ public class W3CMappingGenerator extends MappingGenerator {
 		Iterator<Attribute> it = filteredPrimaryKeyColumns(tableName).iterator();
 		int i = 0;
 		while (it.hasNext()) {
-			result += i == 0 ? "/" : ".";
+			result += i == 0 ? "/" : ";";
 			i++;
 			
 			Attribute column = it.next();
 			String attributeName = encodeColumnName(column);
 			String attributeQName = column.qualifiedName();
-			result += attributeName + "-@@" + attributeQName;
+			result += attributeName + "=@@" + attributeQName;
 			if (!database.columnType(column).isIRISafe()) {
 				result += "|encode";
 			}
 			result += "@@";
 		}
 		return result;
+	}
+	
+	@Override
+	protected void writeSubjectSpec(RelationName tableName) {
+		List<Attribute> usedColumns = new ArrayList<Attribute>();
+		for (Attribute column: schema.listColumns(tableName)) {
+			DataType type = schema.columnType(column);
+			if (type == null) {
+				writeWarning(new String[]{
+						"Ignoring " + column + " in d2rq:bNodeIdColumns because its datatype is unknown."
+					}, "");
+				continue;
+			}
+			if (type.isUnsupported()) {
+				writeWarning(new String[]{
+						"Ignoring " + column + " in d2rq:bNodeIdColumns because its datatype cannot be mapped to RDF."
+					}, "");
+				continue;
+			}
+			if (!type.supportsDistinct()) {
+				writeWarning(new String[]{
+						"Ignoring " + column + " in d2rq:bNodeIdColumns because it doesn't support DISTINCT."
+					}, "");
+				continue;
+			}
+			usedColumns.add(column);
+		}
+		out.print("\td2rq:bNodeIdColumns \"");
+		Iterator<Attribute> it = usedColumns.iterator();
+		while (it.hasNext()) {
+			Attribute column = it.next();
+			out.print(column.qualifiedName());
+			if (it.hasNext()) {
+				out.print(",");
+			}
+		}
+		out.println("\";");
 	}
 	
 	@Override
@@ -75,7 +115,7 @@ public class W3CMappingGenerator extends MappingGenerator {
 				result.append("#ref-");
 				result.append(attributeName);
 			} else {
-				result.append("." + attributeName);
+				result.append(";" + attributeName);
 			}
 			i++;
 		}
@@ -84,10 +124,10 @@ public class W3CMappingGenerator extends MappingGenerator {
 	}
 
 	private String encodeTableName(String tableName) {
-		return encFunction.encode(tableName).replaceAll("%2E", ".");
+		return encFunction.encode(tableName);
 	}
 
 	private String encodeColumnName(Attribute column) {
-		return encFunction.encode(column.attributeName()).replaceAll("-", "%3D").replaceAll("%2E", ".");
+		return encFunction.encode(column.attributeName());
 	}
 }

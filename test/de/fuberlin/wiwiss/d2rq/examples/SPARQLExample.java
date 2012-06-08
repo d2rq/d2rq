@@ -27,5 +27,6 @@ public class SPARQLExample {
 			System.out.println("Title: " + row.getLiteral("paperTitle").getString());
 			System.out.println("Author: " + row.getLiteral("authorName").getString());
 		}
+		m.close();
 	}
 }

@@ -1,0 +1,4 @@
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#>.
+
+d2rq:this d2rq:column "that".
+d2rq:this d2rq:belongsToClassMap d2rq:that.

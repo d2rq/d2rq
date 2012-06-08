@@ -29,7 +29,7 @@ public class ResultRowMap implements ResultRow {
 			ProjectionSpec key = projectionSpecs.get(i);
 			int jdbcType = metaData == null ? Integer.MIN_VALUE : metaData.getColumnType(i + 1);
 			String name = metaData == null ? "UNKNOWN" : metaData.getColumnTypeName(i + 1);
-			result.put(key, database.vendor().getDataType(jdbcType, name, -1).value(resultSet, i + 1));
+			result.put(key, database.vendor().getDataType(jdbcType, name.toUpperCase(), -1).value(resultSet, i + 1));
 		}
 		return new ResultRowMap(result);
 	}

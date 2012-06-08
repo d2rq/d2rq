@@ -78,12 +78,12 @@ public class MySQL extends SQL92 {
 		// or as Types.BIT with type name still TINYINT. All real BIT
 		// types are reported with a size > 0.
 		if (jdbcType == Types.BIT && ("TINYINT".equals(name) || size == 0)) {
-			return new SQLBoolean(this);
+			return new SQLBoolean(this, name);
 		}
 
 		// MySQL supports UNSIGNED varieties of the integer types
 		if (name.contains("UNSIGNED")) {
-			return new SQLExactNumeric(this, jdbcType, true);
+			return new SQLExactNumeric(this, name, jdbcType, true);
 		}
 		
 		// The MySQL driver chokes on some values that are supported by the
@@ -103,7 +103,7 @@ public class MySQL extends SQL92 {
 
 	public static class MySQLCompatibilityBitDataType extends SQLBit {
 		public MySQLCompatibilityBitDataType(Vendor syntax) {
-			super(syntax);
+			super(syntax, "BIT");
 		}
 		@Override
 		public String value(ResultSet resultSet, int column) throws SQLException {
@@ -126,7 +126,7 @@ public class MySQL extends SQL92 {
 	
 	public static class MySQLCompatibilityDateDataType extends SQLDate {
 		public MySQLCompatibilityDateDataType(Vendor syntax) {
-			super(syntax);
+			super(syntax, "DATE");
 		}
 		@Override
 		public String value(ResultSet resultSet, int column) throws SQLException {
@@ -142,7 +142,7 @@ public class MySQL extends SQL92 {
 	
 	public static class MySQLCompatibilityTimeDataType extends SQLTime {
 		public MySQLCompatibilityTimeDataType(Vendor syntax) {
-			super(syntax);
+			super(syntax, "TIME");
 		}
 		@Override
 		public String value(ResultSet resultSet, int column) throws SQLException {
@@ -159,7 +159,7 @@ public class MySQL extends SQL92 {
 	
 	public static class MySQLCompatibilityTimestampDataType extends SQLTimestamp {
 		public MySQLCompatibilityTimestampDataType(Vendor syntax) {
-			super(syntax);
+			super(syntax, "TIMESTAMP");
 		}
 		@Override
 		public String value(ResultSet resultSet, int column) throws SQLException {

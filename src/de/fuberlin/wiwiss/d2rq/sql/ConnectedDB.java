@@ -269,7 +269,7 @@ public class ConnectedDB {
 	/**
 	 * Reports the brand of RDBMS.
 	 * @return <tt>true</tt> if this database is of the given brand
-	 * @see #dbType()
+	 * @see #vendor()
 	 * 
 	 * TODO make private, use {@link #vendor()} and its methods instead
 	 */

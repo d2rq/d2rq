@@ -14,6 +14,7 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
+import de.fuberlin.wiwiss.d2rq.find.TripleQueryIter;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
 
@@ -83,8 +84,8 @@ public class GraphD2RQ extends GraphBase implements Graph {
 		if (log.isDebugEnabled()) {
 			log.debug("Find: " + PrettyPrinter.toString(t, getPrefixMapping()));
 		}
-		FindQuery query = new FindQuery(t, mapping.compiledPropertyBridges());
-		ExtendedIterator<Triple> result = query.iterator();
+		FindQuery query = new FindQuery(t, mapping.compiledPropertyBridges(), null);
+		ExtendedIterator<Triple> result = TripleQueryIter.create(query.iterator());
 		if (mapping.configuration().getServeVocabulary()) {
 			result = result.andThen(mapping.getVocabularyModel().getGraph().find(t));
 		}

@@ -26,6 +26,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.find.FindQuery;
+import de.fuberlin.wiwiss.d2rq.find.TripleQueryIter;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.nodes.FixedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
@@ -107,8 +108,8 @@ public class ClassMapLister {
 		}
 		Model result = ModelFactory.createDefaultModel();
 		result.setNsPrefixes(mapping.getPrefixMapping());
-		FindQuery query = new FindQuery(Triple.ANY, inventoryBridges, limitPerClassMap);
-		result.getGraph().getBulkUpdateHandler().add(query.iterator());
+		FindQuery query = new FindQuery(Triple.ANY, inventoryBridges, limitPerClassMap, null);
+		result.getGraph().getBulkUpdateHandler().add(TripleQueryIter.create(query.iterator()));
 		return result;
 	}
 

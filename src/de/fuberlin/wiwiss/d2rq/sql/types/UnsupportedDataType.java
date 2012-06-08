@@ -7,11 +7,9 @@ import de.fuberlin.wiwiss.d2rq.D2RQException;
 
 public class UnsupportedDataType extends DataType {
 	private final int jdbcType;
-	private final String name;
 	public UnsupportedDataType(int jdbcType, String name) {
-		super(null, "UNSUPPORTED");
+		super(null, name);
 		this.jdbcType = jdbcType;
-		this.name = name;
 	}
 	@Override
 	public boolean isUnsupported() {
@@ -34,6 +32,6 @@ public class UnsupportedDataType extends DataType {
 	}
 	@Override
 	public String toString() {
-		return super.toString() + "{jdbcType:" + jdbcType + ",typeName:'" + name + "'}";
+		return super.toString() + "{jdbcType:" + jdbcType + ",typeName:'" + name() + "'}";
 	}
 }

@@ -112,6 +112,11 @@ public abstract class ResourceMap extends MapObject {
 		this.logicalTable = logicalTable;
 	}
 
+	public void setUriSQLExpression(String uriSqlExpression) {
+		assertNotYetDefined(this.column, D2RQ.uriSqlExpression, D2RQException.PROPERTYBRIDGE_DUPLICATE_URI_SQL_EXPRESSION);
+		this.uriSqlExpression = uriSqlExpression;
+	}
+	
 	public void setConstantValue(RDFNode constantValue) {
 		assertNotYetDefined(this.constantValue, D2RQ.constantValue, D2RQException.RESOURCEMAP_DUPLICATE_CONSTANTVALUE);
 		this.constantValue = constantValue;
@@ -225,7 +230,7 @@ public abstract class ResourceMap extends MapObject {
 		}
 		if (this.uriPattern != null) {
 			Pattern p = new Pattern(this.uriPattern);
-			if (!p.literalPartsMatchRegex(MapParser.URI_CHAR_REGEX)) {
+			if (!p.literalPartsMatchRegex(MapParser.IRI_CHAR_REGEX)) {
 				throw new D2RQException("d2rq:uriPattern '"
 						+ this.uriPattern + "' contains characters not allowed in URIs",
 						D2RQException.RESOURCEMAP_ILLEGAL_URIPATTERN);

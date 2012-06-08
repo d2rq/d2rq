@@ -54,13 +54,13 @@ public class MappingGenerator {
 			new OutputStream() { public void write(int b) {}};
 
 	protected final ConnectedDB database;
-	private final DatabaseSchemaInspector schema;
+	protected final DatabaseSchemaInspector schema;
 	private String mapNamespaceURI;
 	protected String instanceNamespaceURI;
 	protected String vocabNamespaceURI;
 	private String driverClass = null;
 	private Filter filter = Filter.ALL;
-	private PrintWriter out = null;
+	protected PrintWriter out = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
 	// name of n:m link table => name of n table
 	private Map<RelationName,RelationName> linkTables = new HashMap<RelationName,RelationName>();
@@ -70,7 +70,9 @@ public class MappingGenerator {
 	private boolean generateDefinitionLabels = true;
 	private boolean handleLinkTables = true;
 	private boolean serveVocabulary = true;
+	private boolean skipForeignKeyTargetColumns = true;
 	private URI startupSQLScript;
+	private Map<Attribute,String> relationNames = new HashMap<Attribute,String>();
 	
 	public MappingGenerator(ConnectedDB database) {
 		this.database = database;
@@ -141,6 +143,10 @@ public class MappingGenerator {
 		this.serveVocabulary = flag;
 	}
 
+	public void setSkipForeignKeyTargetColumns(boolean flag) {
+		skipForeignKeyTargetColumns = flag;
+	}
+	
 	public void writeMapping(OutputStream out) {
 		try {
 			Writer w = new OutputStreamWriter(out, "UTF-8");
@@ -261,15 +267,12 @@ public class MappingGenerator {
 		this.out.println("# Table " + tableName);
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
-		if (!hasPrimaryKey(tableName)) {
-			writeWarning(new String[]{
-					"Sorry, I don't know which columns to put into the uriPattern",
-					"    for \"" + tableName + "\" because the table doesn't have a primary key.", 
-					"    Please specify it manually."
-				}, "\t");
+		if (hasPrimaryKey(tableName)) {
+			this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
+		} else {
+			writeSubjectSpec(tableName);
 		}
 				
-		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
 		if (generateClasses) {
 			this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
 			if (generateDefinitionLabels) {
@@ -286,7 +289,7 @@ public class MappingGenerator {
 				log.info("Skipping column " + column);
 				continue;
 			}
-			if (isInForeignKey(column, foreignKeys)) continue;
+			if (skipForeignKeyTargetColumns && isInForeignKey(column, foreignKeys)) continue;
 			if (schema.columnType(column) == null) {
 				writeWarning(new String[]{
 						"Skipping column: " + column,
@@ -338,6 +341,15 @@ public class MappingGenerator {
 		this.out.flush();
 	}
 
+	protected void writeSubjectSpec(RelationName tableName) {
+		writeWarning(new String[]{
+				"Sorry, I don't know which columns to put into the uriPattern",
+				"    for \"" + tableName + "\" because the table doesn't have a primary key.", 
+				"    Please specify it manually."
+			}, "\t");
+		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
+	}
+	
 	public void writeLabelBridge(RelationName tableName) {
 		this.out.println(propertyBridgeName(tableName.qualifiedName(), "__label") + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(tableName) + ";");
@@ -378,7 +390,7 @@ public class MappingGenerator {
 		RelationName primaryTable = schema.getCorrectCapitalization(foreignKey.table1());
 		List<Attribute> primaryColumns = foreignKey.attributes1();
 		RelationName foreignTable = schema.getCorrectCapitalization(foreignKey.table2());
-		this.out.println(propertyBridgeName(toRelationName(primaryColumns)) + " a d2rq:PropertyBridge;");
+		this.out.println(propertyBridgeName(toRelationName(primaryColumns), "ref") + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(primaryTable) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(primaryColumns) + ";");
 		this.out.println("\td2rq:refersToClassMap " + classMapName(foreignTable) + ";");
@@ -436,7 +448,7 @@ public class MappingGenerator {
 		createLinkProperty(linkTableName, table1, table2);
 	}
 
-	private void writeWarning(String[] warnings, String indent) {
+	protected void writeWarning(String[] warnings, String indent) {
 		for (String warning: warnings) {
 			this.out.println(indent + "# " + warning);
 			log.warn(warning);
@@ -522,9 +534,25 @@ public class MappingGenerator {
 		return result;
 	}
 	
-
+	/**
+	 * Returns TABLE_COLUMN. Except if that string is already taken by
+	 * another relation name (e.g., AAA.BBB_CCC and AAA_BBB.CCC would
+	 * result in the same result AAA_BBB_CCC); in that case we add more
+	 * underscores (AAA__BBB_CCC) until we have no clash. 
+	 */
 	private String toRelationName(Attribute column) {
-		return column.tableName() + "_" + column.attributeName();
+		if (!relationNames.containsKey(column)) {
+			String separator = "_";
+			while (true) {
+				String name = column.tableName() + separator + column.attributeName();
+				if (!relationNames.containsValue(name)) {
+					relationNames.put(column, name);			
+					break;
+				}
+				separator += "_";
+			}
+		}
+		return relationNames.get(column);
 	}
 
 	private String toRelationName(List<Attribute> columns) {
@@ -558,7 +586,7 @@ public class MappingGenerator {
 		}
 		return false;
 	}
-
+	
 	private void initVocabularyModel() {
 		this.vocabModel.setNsPrefix("rdf", RDF.getURI());
 		this.vocabModel.setNsPrefix("rdfs", RDFS.getURI());

@@ -2,13 +2,18 @@ package de.fuberlin.wiwiss.d2rq;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.MalformedInputException;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openjena.atlas.AtlasException;
+import org.openjena.riot.RiotException;
 
 import com.hp.hpl.jena.n3.turtle.TurtleParseException;
+import com.hp.hpl.jena.query.ARQ;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.FileUtils;
 
@@ -24,7 +29,6 @@ import de.fuberlin.wiwiss.d2rq.parser.R2RMLMapParser;
 import de.fuberlin.wiwiss.d2rq.server.ConfigLoader;
 import de.fuberlin.wiwiss.d2rq.server.D2RServer;
 import de.fuberlin.wiwiss.d2rq.server.JettyLauncher;
-import de.fuberlin.wiwiss.d2rq.server.WebappInitListener;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
 
@@ -36,11 +40,16 @@ import de.fuberlin.wiwiss.d2rq.sql.SQLScriptLoader;
  * and configured correctly. This class helps setting everything
  * up correctly.
  * 
- * TODO: {@link MapParser#absolutizeURI(String)} and {@link ConfigLoader#toAbsoluteURI(String)} and {@link WebappInitListener#absolutize()} need to be consolidated and/or folded into this class
+ * TODO: {@link MapParser#absolutizeURI(String)} and {@link ConfigLoader#toAbsoluteURI(String)} and {WebappInitListener#absolutize} need to be consolidated and/or folded into this class
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class SystemLoader {
+	
+	static {
+		ARQ.init();	// Wire RIOT into Jena, etc.
+	}
+	
 	private final static Log log = LogFactory.getLog(SystemLoader.class);
 	
 	private static final String DEFAULT_PROTOCOL = "http";
@@ -115,6 +124,10 @@ public class SystemLoader {
 	}
 	
 	public void setSystemBaseURI(String baseURI) {
+		if (!java.net.URI.create(baseURI).isAbsolute()) {
+			throw new D2RQException("Base URI '" + baseURI + "' must be an absolute URI",
+					D2RQException.STARTUP_BASE_URI_NOT_ABSOLUTE);
+		}
 		this.baseURI = baseURI;
 	}
 	
@@ -245,16 +258,38 @@ public class SystemLoader {
 			if (jdbcURL != null && !isR2rmlMapping()) {
 				mapModel = openMappingGenerator().mappingModel(getResourceBaseURI());
 			} else {
+				log.info("Reading mapping file from " + mappingFile);
+				// Guess the language/type of mapping file based on file extension. If it is not among the known types then assume that the file has TURTLE syntax and force to use TURTLE parser
+				String lang = FileUtils.guessLang(mappingFile, "unknown");
 				try {
-					log.info("Reading mapping file from " + mappingFile);
-					// Guess the language/type of mapping file based on file extension. If it is not among the known types then assume that the file has TURTLE syntax and force to use TURTLE parser
-					if (FileUtils.guessLang(mappingFile, "unknown").equals("unknown")) {
+					if (lang.equals("unknown")) {
 						mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), "TURTLE");
 					} else {
 						// if the type is known then let Jena auto-detect it and load the appropriate parser
 						mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), null);
 					}
 				} catch (TurtleParseException ex) {
+					// We have wired RIOT into Jena in the static initializer above,
+					// so this should never happen (it's for the old Jena Turtle/N3 parser)
+					throw new D2RQException(
+							"Error parsing " + mappingFile + ": " + ex.getMessage(), ex, 77);
+				} catch (JenaException ex) {
+					if (ex.getCause() != null && ex.getCause() instanceof RiotException) {
+						throw new D2RQException(
+								"Error parsing " + mappingFile + ": " + ex.getCause().getMessage(), ex, 77);
+					}
+					throw ex;
+				} catch (AtlasException ex) {
+					// Detect the specific case of non-UTF-8 encoded input files
+					// and do a custom error message
+					if (FileUtils.langTurtle.equals(lang) 
+							&& ex.getCause() != null && (ex.getCause() instanceof MalformedInputException)) {
+						throw new D2RQException("Error parsing " + mappingFile + 
+								": Turtle files must be in UTF-8 encoding; " +
+								"bad encoding found at byte " + 
+								((MalformedInputException) ex.getCause()).getInputLength(), ex, 77);
+					}
+					// Generic error message for other parse errors
 					throw new D2RQException(
 							"Error parsing " + mappingFile + ": " + ex.getMessage(), ex, 77);
 				}

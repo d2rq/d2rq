@@ -66,9 +66,10 @@ for the version used.</p>
 <li><a href="/">Download</a> D2RQ</li>
 <li>Add the <code>d2rq-<em>X.Y</em>.jar</code> file from D2RQ's
 <code>/lib</code> directory to your classpath.</li>
-<li>Add all jar files from the <code>/lib/arq-1.4</code> directory
+<li>Add all jar files from the <code>/lib/arq-<em>X.Y</em></code> directory
   to your application's classpath.</li>
-<li>Add <code>commons-logging-<em>X.Y</em>.jar</code> from D2RQ's
+<li>Add <code>commons-logging-<em>X.Y</em>.jar</code> and
+  <code>slf4j-api-<em>X.Y</em>.jar</code> from D2RQ's
 <code>/lib/logging</code> directory to your application's classpath.
 If your application doesn't configure its own logging system, add
 the other jars from that directory as well.</li>
@@ -77,21 +78,34 @@ the other jars from that directory as well.</li>
   in D2RQ's <code>/lib/db-drivers</code> directory.</li>
 </ol>
 
+<p>The D2RQ download omits some Jena/ARQ jar files
+that are not required to run D2RQ, but may be required to use
+other Jena/ARQ features. To get all jars, you can download the
+correct version of ARQ (as indicated by the name of D2RQ's
+<code>/lib/arq-<em>X.Y</em></code> directory) from the
+<a href="http://incubator.apache.org/jena/download/">Jena download site</a>.</p>
+
 
 <h2 id="logging">3. Logging</h2>
 
 <p>D2RQ logs to the
 <a href="http://commons.apache.org/logging/">Apache Commons Logging</a>
-API and ships with
-<a href="http://logging.apache.org/log4j/1.2/">Apache log4j</a> as a
-logging system. To enable D2RQ debug messages, set the log level for logger
+API. D2RQ ships with
+<a href="http://logging.apache.org/log4j/1.2/">Apache log4j</a>, but you
+can use a different logging front-end.</p>
+
+<p>To enable D2RQ debug messages, set the log level for logger
 <code>de.fuberlin.wiwiss.d2rq</code> to <code>ALL</code>.
-An easy way to do this is:</p>
+An easy way to do this is to add the log4j jars from 
+D2RQ's <code>/lib/logging</code> directory to your application's
+classpath, and create a file <code>log4j.properties</code> somewhere
+in the classpath (e.g., in your source folder) with these contents:</p>
 
-<pre>org.apache.log4j.Logger.getLogger(
-        "de.fuberlin.wiwiss.d2rq").setLevel(
-                org.apache.log4j.Level.ALL);</pre>
-
+<pre>log4j.rootLogger=INFO, stdout
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{HH:mm:ss} %-5p %-20c{1} :: %m%n
+log4j.logger.de.fuberlin.wiwiss.d2rq=ALL</pre>
 
 <h2 id="model-api">4. Using D2RQ with Jena's Model API</h2>
 
@@ -123,7 +137,8 @@ while (paperIt.hasNext()) {
         System.out.println("Author: " + author.getProperty(FOAF.name).getString());
     }
     System.out.println();
-}</pre>
+}
+m.close();</pre>
 
 <p>The ISWC and FOAF classes have been created with Jena's
 <a href="http://incubator.apache.org/jena/documentation/tools/schemagen.html">schemagen</a>
@@ -157,13 +172,14 @@ Node object = Node.createLiteral("2003", null, XSDDatatype.XSDgYear);
 Triple pattern = new Triple(subject, predicate, object);
 
 // Query the graph
-Iterator it = g.find(pattern);
+Iterator&lt;Triple> it = g.find(pattern);
 
 // Output query results
 while (it.hasNext()) {
     Triple t = (Triple) it.next();
     System.out.println("Published in 2003: " + t.getSubject());
-}</pre>
+};
+g.close();</pre>
 
 
 <h3 id="caching-graph">5.1 The <code>CachingGraphD2RQ</code></h3>
@@ -198,7 +214,8 @@ while (rs.hasNext()) {
     QuerySolution row = rs.nextSolution();
     System.out.println("Title: " + row.getLiteral("paperTitle").getString());
     System.out.println("Author: " + row.getLiteral("authorName").getString());
-}</pre>
+};
+m.close();</pre>
 
 
 <h2 id="assembler">7. The D2RQ Assembler</h2>
@@ -248,7 +265,9 @@ Resource modelSpec = assemblerSpec.createResource(assemblerSpec.expandPrefix(":m
 Model m = Assembler.general.openModel(modelSpec);
 
 // Write it to System.out
-m.write(System.out);</pre>
+m.write(System.out);
+
+m.close();</pre>
 
 
 <h2 id="javadoc">8. Javadoc API documentation</h2>
