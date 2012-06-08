@@ -23,11 +23,15 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
+import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
+import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.map.ClassMap;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.map.PropertyBridge;
+import de.fuberlin.wiwiss.d2rq.mapgen.Filter;
 import de.fuberlin.wiwiss.d2rq.pp.PrettyPrinter;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 import de.fuberlin.wiwiss.d2rq.vocab.RR;
 import de.fuberlin.wiwiss.d2rq.vocab.VocabularySummarizer;
 
@@ -66,6 +70,9 @@ public class R2RMLMapParser {
 	private String baseURI;
 	private Mapping mapping;
 	private Database database;
+	protected final ConnectedDB connectedDB;
+
+	private String schemaName;
 	
 	/**
 	 * Constructs a new R2RMLMapParser from a Jena model containing the RDF statements
@@ -73,11 +80,14 @@ public class R2RMLMapParser {
 	 * @param mapModel a Jena model containing the RDF statements from a R2RML mapping file
 	 * @param baseURI used for relative URI patterns
 	 * @param database 
+	 * @param filter 
 	 */
-	public R2RMLMapParser(Model mapModel, String baseURI, Database database) {
+	public R2RMLMapParser(Model mapModel, String baseURI, Database database, Filter filter) {
 		this.model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, mapModel);
 		this.baseURI = absolutizeURI(baseURI);
 		this.database = database;
+		this.connectedDB = new ConnectedDB(database.getJdbcURL(), database.getUsername(), database.getPassword());
+		this.schemaName = filter != null ? filter.getSingleSchema() : "";
 	}
 	
 	/**
@@ -196,12 +206,32 @@ public class R2RMLMapParser {
 		Resource class_ = stmt.getResource();
 		classMap.addClass(class_);
 		stmt = subjectMap.getProperty(RR.template);
-		String uriTemplate = stmt.getString();
+		String uriTemplate = genUriTemplate(classMap.getLogicalTable(), stmt.getString());
 		classMap.setURIPattern(ensureIsAbsolute(uriTemplate));
 		
 		parsePredicateObjectMaps(classMap, tripleMap);
 	}
 	
+	private String genUriTemplate(String logicalTable, String originalUri) {
+		String[] uriParts = originalUri.split("[{]");
+		String column = uriParts[1];
+		column = column.substring(0, column.length() - 1);
+		
+		StringBuffer template = new StringBuffer(uriParts[0]);
+		template.append("@@");
+		template.append(logicalTable);
+		template.append(".");
+		template.append(column);
+		
+		Attribute attribute = new Attribute(new RelationName(schemaName, logicalTable), column); 
+		if (!connectedDB.columnType(attribute).isIRISafe()) {
+			template.append("|encode");
+		}
+		template.append("@@");
+		
+		return template.toString();
+	}
+
 	private void parsePredicateObjectMaps(ClassMap classMap, Resource tripleMap) {
 		StmtIterator stmts;
 		stmts = tripleMap.listProperties(RR.predicateObjectMap);
@@ -226,6 +256,11 @@ public class R2RMLMapParser {
 		if (stmt != null) {
 			String column = stmt.getString();
 			bridge.setColumn(classMap.getLogicalTable() + "." + column);
+			
+			stmt = objectMap.getProperty(RR.datatype);
+			if (stmt != null) {
+				bridge.setDatatype(stmt.getResource().getURI());
+			}
 		} else {
 			stmt = objectMap.getProperty(RR.parentTriplesMap);
 
