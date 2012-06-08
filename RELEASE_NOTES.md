@@ -1,13 +1,16 @@
 # D2RQ Release Notes
 
-## D2RQ v0.8.1 - 2012-04-03
+## D2RQ v0.8.1 - 2012-06-12
 
-This release adds preliminary support for W3C's [Direct Mapping of Relational Data to RDF](http://www.w3.org/TR/rdb-direct-mapping/). The new d2r-query script allows SPARQL queries against D2RQ-mapped databases from the command line. There is a comprehensive set of options for including or excluding specific schemas, tables, and columns. The default settings of D2R Server's web interface work better for large databases. And, as usual, many bugfixes and smaller enhancements.
+This release adds support for W3C's [Direct Mapping of Relational Data to RDF](http://www.w3.org/TR/rdb-direct-mapping/). The new d2r-query script allows SPARQL queries against D2RQ-mapped databases from the command line. There is a comprehensive set of options for including or excluding specific schemas, tables, and columns. The default settings of D2R Server's web interface work better for large databases. D2R Server now serves metadata for each resource, and for the entire dataset, including VoID support. Timeouts for SPARQL queries can be specified. And, as usual, many bugfixes and smaller enhancements.
 
 ### Features
-- preliminary support for W3C Direct Mapping (generate-mapping --w3c) (Luis Eufrasio)
+- support for non-duplicate-preserving W3C Direct Mapping (generate-mapping --w3c) (Luis Eufrasio)
 - add command line options to include or exclude specific schemas, tables or columns (Jacobus Geluk)
+- added timeouts for SPARQL and page loads: -t, d2r:sparqlTimeout, d2r:pageTimeout
 - added d2r-query script to run SPARQL queries against DB from the command line
+- VoID support and dataset metadata in D2R Server (Hannes Mühleisen)
+- much improved per-resource metadata in D2R Server (Hannes Mühleisen)
 
 ### Enhancements
 - D2R Server web interface no longer blows up by default because of pages with too much data (#88)
@@ -25,6 +28,9 @@ This release adds preliminary support for W3C's [Direct Mapping of Relational Da
 - output warnings when SPARQL joins over different d2rq:translateWith or over d2rq:[uri]Pattern with different column encodings (#22)
 - refactoring: made all use of containers type-safe
 - refactoring: command line tools, datatype handling, ARQ op-tree rewriting, Jena integration
+- improved error reporting for D2R Server configuration files
+- use RIOT instead of Jena's old N3 parser for Turtle; improved error reporting for Turtle parse errors
+- support PostGIS GEOMETRY datatype
 
 ### Bugfixes
 - fix bug where any command line arguments after the 10th are ignored on Windows
@@ -35,6 +41,9 @@ This release adds preliminary support for W3C's [Direct Mapping of Relational Da
 - fixed issue #4: DISTINCT with CLOB and BLOB doesn't work on some DBs
 - fixed logic bug in isIRI() (Giovanni Mels)
 - update links to old web page in D2R Server web interface
+- Oracle TIMESTAMP WITH TIME ZONE columns now work
+- fix bug where columns AAA.BBB_CCC and AAA_BBB.CCC would cause a propertyBridge name clash in mapping generator
+- fix bug where properties with same localName but different namespace wouldn't show in D2R Server (#165)
 
 ### Performance
 - combine SELECT queries that just differ in their WHERE clauses into a single query
