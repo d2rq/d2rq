@@ -1,8 +1,8 @@
 #!/bin/bash
-D2RQ_ROOT=${0%/*}
+D2RQ_ROOT="$( dirname "${BASH_SOURCE[0]}" )"
 CP="$D2RQ_ROOT/build"
 SEP=':'
-if [ "$(uname)" = "Cygwin" ]; then SEP=';'; fi
+if [ $(uname -s | grep -ic 'cygwin\|mingw') -gt 0 ]; then SEP=';'; fi
 for jar in "$D2RQ_ROOT"/lib/*.jar "$D2RQ_ROOT"/lib/*/*.jar
 do
   if [ ! -e "$jar" ]; then continue; fi
