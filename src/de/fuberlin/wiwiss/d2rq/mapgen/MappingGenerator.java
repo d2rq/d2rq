@@ -62,8 +62,6 @@ public class MappingGenerator {
 	private Filter filter = Filter.ALL;
 	protected PrintWriter out = null;
 	private Model vocabModel = ModelFactory.createDefaultModel();
-	// name of n:m link table => name of n table
-	private Map<RelationName,RelationName> linkTables = new HashMap<RelationName,RelationName>();
 	private boolean finished = false;
 	private boolean generateClasses = true;
 	private boolean generateLabelBridges = true;
@@ -213,15 +211,16 @@ public class MappingGenerator {
 		}
 		writeDatabase();
 		initVocabularyModel();
-		if (handleLinkTables) {
-			identifyLinkTables();
-		}
-		for (RelationName tableName: schema.listTableNames(filter.getSingleSchema())) {
+		List<RelationName> tableNames = schema.listTableNames(filter.getSingleSchema());
+		log.info("Filter '" + filter + "' matches " + tableNames.size() + " total tables");
+		for (RelationName tableName: tableNames) {
 			if (!filter.matches(tableName)) {
 				log.info("Skipping table " + tableName);
 				continue;
 			}
-			if (!handleLinkTables || !schema.isLinkTable(tableName)) {
+			if (handleLinkTables && isLinkTable(tableName)) {
+				writeLinkTable(tableName);
+			} else {
 				writeTable(tableName);
 			}
 		}
@@ -315,29 +314,10 @@ public class MappingGenerator {
 			}
 			writeForeignKey(fk);
 		}
-		if (handleLinkTables) {
-			for (RelationName linkTable: linkTables.keySet()) {
-				if (linkTables.get(linkTable).equals(tableName)) {
-					List<Join> keys = schema.foreignKeys(linkTable, DatabaseSchemaInspector.KEYS_IMPORTED);
-					Join join1 = keys.get(0);
-					Join join2 = keys.get(1);
-					if (!filter.matches(join1.table1()) || !filter.matches(join1.table2()) || 
-							!filter.matchesAll(join1.attributes1()) || !filter.matchesAll(join1.attributes2()) ||
-							!filter.matches(join2.table1()) || !filter.matches(join2.table2()) || 
-							!filter.matchesAll(join2.attributes1()) || !filter.matchesAll(join2.attributes2())) {
-						log.info("Skipping link table " + linkTable);
-						continue;
-					}
-					writeLinkTable(linkTable, keys);
-				}
-			}
-		}
-		this.out.println();
 		createVocabularyClass(tableName);
-		//
+		this.out.println();
 		// Let a tail see that we're working and ensure that every table that did
 		// NOT generate an exception is actually saved...
-		//
 		this.out.flush();
 	}
 
@@ -376,7 +356,6 @@ public class MappingGenerator {
 		if (colType.valueRegex() != null) {
 			this.out.println("\td2rq:valueRegex \"" + colType.valueRegex() + "\";");
 		}
-		writeColumnHacks(column, colType);
 		if (xsd == null) {
 			createDatatypeProperty(column, null);
 		} else {
@@ -409,17 +388,17 @@ public class MappingGenerator {
 		this.out.println("\t.");
 	}
 
-	// TODO Factor out into its own interface & classes for different RDBMS?
-	public void writeColumnHacks(Attribute column, DataType colType) {
-//		if (DatabaseSchemaInspector.isStringType(colType)) {
-//			// Suppress empty strings ('')
-//			out.println("\td2rq:condition \"" + column.getQualifiedName() + " != ''\";");			
-//		}
-	}
-	
-	private void writeLinkTable(RelationName linkTableName, List<Join> foreignKeys) {
-		Join join1 = (Join) foreignKeys.get(0);
-		Join join2 = (Join) foreignKeys.get(1);
+	private void writeLinkTable(RelationName linkTableName) {
+		List<Join> keys = schema.foreignKeys(linkTableName, DatabaseSchemaInspector.KEYS_IMPORTED);
+		Join join1 = keys.get(0);
+		Join join2 = keys.get(1);
+		if (!filter.matches(join1.table1()) || !filter.matches(join1.table2()) || 
+				!filter.matchesAll(join1.attributes1()) || !filter.matchesAll(join1.attributes2()) ||
+				!filter.matches(join2.table1()) || !filter.matches(join2.table2()) || 
+				!filter.matchesAll(join2.attributes1()) || !filter.matchesAll(join2.attributes2())) {
+			log.info("Skipping link table " + linkTableName);
+			return;
+		}
 		RelationName table1 = this.schema.getCorrectCapitalization(join1.table2());
 		RelationName table2 = this.schema.getCorrectCapitalization(join2.table2());
 		boolean isSelfJoin = table1.equals(table2);
@@ -445,7 +424,9 @@ public class MappingGenerator {
 			this.out.println("\td2rq:join \"" + column.qualifiedName() + " " + Join.joinOperators[join2.joinDirection()] + " " + alias.applyTo(otherColumn).qualifiedName() + "\";");
 		}
 		this.out.println("\t.");
+		this.out.println();
 		createLinkProperty(linkTableName, table1, table2);
+		this.out.flush();
 	}
 
 	protected void writeWarning(String[] warnings, String indent) {
@@ -568,16 +549,27 @@ public class MappingGenerator {
 		return column.tableName() + " " + column.attributeName();
 	}
 	
-	private void identifyLinkTables() {
-		log.info("Identifying link tables");
-		for (RelationName tableName: schema.listTableNames(filter.getSingleSchema())) {
-			if (!this.schema.isLinkTable(tableName)) {
-				continue;
-			}
-			Join firstForeignKey = (Join) this.schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED).get(0);
-			this.linkTables.put(tableName, firstForeignKey.table2());
+	/**
+	 * A table T is considered to be a link table if it has exactly two
+	 * foreign key constraints, and the constraints reference other
+	 * tables (not T), and the constraints cover all columns of T,
+	 * and there are no foreign keys from other tables pointing to this table
+	 */
+	public boolean isLinkTable(RelationName tableName) {
+		List<Join> foreignKeys = schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
+		if (foreignKeys.size() != 2) return false;
+		
+		List<Join> exportedKeys = schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_EXPORTED);
+		if (!exportedKeys.isEmpty()) return false;
+		
+		List<Attribute> columns = schema.listColumns(tableName);
+		Iterator<Join> it = foreignKeys.iterator();
+		while (it.hasNext()) {
+			Join fk = it.next();
+			if (fk.isSameTable()) return false;
+			columns.removeAll(fk.attributes1());
 		}
-		log.info("Found " + String.valueOf(this.linkTables.size()) + " link tables") ;
+		return columns.isEmpty();
 	}
 
 	private boolean isInForeignKey(Attribute column, List<Join> foreignKeys) {

@@ -208,8 +208,9 @@ public class DatabaseSchemaInspector {
 	public List<Join> foreignKeys(RelationName tableName, int direction) {
 		try {
 			Map<String,ForeignKey> fks = new HashMap<String,ForeignKey>();
-			ResultSet rs = (direction == KEYS_IMPORTED ? this.schema.getImportedKeys(null, schemaName(tableName), tableName(tableName))
-													   : this.schema.getExportedKeys(null, schemaName(tableName), tableName(tableName)));
+			ResultSet rs = (direction == KEYS_IMPORTED
+					? this.schema.getImportedKeys(null, schemaName(tableName), tableName(tableName))
+					: this.schema.getExportedKeys(null, schemaName(tableName), tableName(tableName)));
 			while (rs.next()) {
 				RelationName pkTable = toRelationName(
 						rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
@@ -237,29 +238,6 @@ public class DatabaseSchemaInspector {
 		}
 	}	
 
-	/**
-	 * A table T is considered to be a link table if it has exactly two
-	 * foreign key constraints, and the constraints reference other
-	 * tables (not T), and the constraints cover all columns of T,
-	 * and there are no foreign keys from other tables pointing to this table
-	 */
-	public boolean isLinkTable(RelationName tableName) {
-		List<Join> foreignKeys = foreignKeys(tableName, KEYS_IMPORTED);
-		if (foreignKeys.size() != 2) return false;
-		
-		List<Join> exportedKeys = foreignKeys(tableName, KEYS_EXPORTED);
-		if (!exportedKeys.isEmpty()) return false;
-		
-		List<Attribute> columns = listColumns(tableName);
-		Iterator<Join> it = foreignKeys.iterator();
-		while (it.hasNext()) {
-			Join fk = it.next();
-			if (fk.isSameTable()) return false;
-			columns.removeAll(fk.attributes1());
-		}
-		return columns.isEmpty();
-	}
-	
 	private String schemaName(RelationName tableName) {
 		if (this.db.vendor() == Vendor.PostgreSQL && tableName.schemaName() == null) {
 			// The default schema is known as "public" in PostgreSQL 
