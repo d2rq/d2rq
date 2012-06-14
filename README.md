@@ -46,9 +46,11 @@ D2RQ uses Apache Ant as its build system. Run `ant -p` from the project's main d
 <tr><td>ant zip</td><td>Generate distribution file in zip format</td></tr>
 </table>
 
+Running D2RQ requires at least `ant jar`.
+
 ## Running D2RQ
 
-After building with `ant compile`, you can test-run the various components. Let's assume you have a MySQL database called `mydb` on your machine.
+After building with `ant jar`, you can test-run the various components. Let's assume you have a MySQL database called `mydb` on your machine.
 
 ### Generating a default mapping file
 
