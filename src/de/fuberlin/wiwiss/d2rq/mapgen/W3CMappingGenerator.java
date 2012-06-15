@@ -91,7 +91,8 @@ public class W3CMappingGenerator extends MappingGenerator {
 	}
 
 	private String encodeTableName(RelationName tableName) {
-		return IRIEncoder.encode(tableName.tableName());
+		return (tableName.schemaName() == null ? "" : IRIEncoder.encode(tableName.schemaName()) + '/')
+			+ IRIEncoder.encode(tableName.tableName());
 	}
 
 	private String encodeColumnName(Attribute column) {
