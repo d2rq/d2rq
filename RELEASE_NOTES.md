@@ -1,6 +1,6 @@
 # D2RQ Release Notes
 
-## D2RQ v0.8.1 - 2012-06-12
+## D2RQ v0.8.1 - 2012-06-18
 
 This release adds support for W3C's [Direct Mapping of Relational Data to RDF](http://www.w3.org/TR/rdb-direct-mapping/). The new d2r-query script allows SPARQL queries against D2RQ-mapped databases from the command line. There is a comprehensive set of options for including or excluding specific schemas, tables, and columns. The default settings of D2R Server's web interface work better for large databases. D2R Server now serves metadata for each resource, and for the entire dataset, including VoID support. Timeouts for SPARQL queries can be specified. And, as usual, many bugfixes and smaller enhancements.
 
@@ -31,6 +31,8 @@ This release adds support for W3C's [Direct Mapping of Relational Data to RDF](h
 - improved error reporting for D2R Server configuration files
 - use RIOT instead of Jena's old N3 parser for Turtle; improved error reporting for Turtle parse errors
 - support PostGIS GEOMETRY datatype
+- generate_mapping skips more Oracle system tables and works better for databases with many tables
+- generate_mapping puts schema name into default instance IRIs
 
 ### Bugfixes
 - fix bug where any command line arguments after the 10th are ignored on Windows
@@ -43,6 +45,7 @@ This release adds support for W3C's [Direct Mapping of Relational Data to RDF](h
 - update links to old web page in D2R Server web interface
 - Oracle TIMESTAMP WITH TIME ZONE columns now work
 - fix bug where columns AAA.BBB_CCC and AAA_BBB.CCC would cause a propertyBridge name clash in mapping generator
+- fix several issues with generate_mapping (crash with unknown datatype in PK; encoding of special chars)
 - fix bug where properties with same localName but different namespace wouldn't show in D2R Server (#165)
 
 ### Performance
