@@ -22,6 +22,7 @@ import de.fuberlin.wiwiss.d2rq.expr.Conjunction;
 import de.fuberlin.wiwiss.d2rq.expr.Constant;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
+import de.fuberlin.wiwiss.d2rq.mapgen.IRIEncoder;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetFilter;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
@@ -337,30 +338,8 @@ public class Pattern implements ValueMaker {
 		public String name() { return "urlify"; }
 	}
 	public static class EncodeFunction implements ColumnFunction {
-		private boolean isDigit(int c) {
-			return (c >= 48 && c <=57);
-		}
-		
-		private boolean isLetter(int c) {
-			return (c >= 65 && c <= 90) || (c >= 97 && c <= 122); 
-		}
-		
 		public String encode(String s) {
-			StringBuffer sbuffer = new StringBuffer();
-			for (int i = 0; i < s.length(); i++) {
-				char c = s.charAt(i);
-				int cCode = (int) c;
-
-				if (cCode > 128 || c == '-' || c == '_' || c == '~'
-						|| isDigit(cCode) || isLetter(cCode)) {
-					sbuffer.append(c);
-				} else {
-					sbuffer.append("%");
-					sbuffer.append(Integer.toHexString(cCode).toUpperCase());
-				}
-			}
-
-			return sbuffer.toString();
+			return IRIEncoder.encode(s);
 		}
 		public String decode(String s) {
 			try {

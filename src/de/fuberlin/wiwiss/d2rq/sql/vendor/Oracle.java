@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.expr.BooleanToIntegerCaseExpression;
@@ -142,12 +143,10 @@ public class Oracle extends SQL92 {
 	    return new BooleanToIntegerCaseExpression(expression);
 	}
 	
-	private static final String[] IGNORED_SCHEMAS = {
-		"CTXSYS", "EXFSYS", "FLOWS_030000", "MDSYS", "OLAPSYS", "ORDSYS", 
-		"SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
 	@Override
 	public boolean isIgnoredTable(String schema, String table) {
 		if (Arrays.binarySearch(IGNORED_SCHEMAS, schema) >= 0) return true; 
+		if (IGNORED_SCHEMAS_PATTERN.matcher(schema).matches()) return true;
 		// Skip Oracle system schemas as well as deleted tables in Oracle's Recycling Bin.
 		// The latter have names like MYSCHEMA.BIN$FoHqtx6aQ4mBaMQmlTCPTQ==$0
 		if (table.startsWith("BIN$")) return true;
@@ -156,6 +155,12 @@ public class Oracle extends SQL92 {
 		if (table.startsWith("SYS_NT")) return true;
 		return false;
 	}
+	private static final String[] IGNORED_SCHEMAS = {
+		"APPQOSSYS", "CACHEADM", "CTXSYS", "DBSNMP", "EXFSYS", "FLOWS_FILES",
+		"MDSYS", "OLAPSYS", "ORDDATA", "ORDSYS", "OUTLN", "OWBSYS",
+		"SYS", "SYSMAN", "SYSTEM", "TIMESTEN", "WKSYS", "WK_TEST", "WMSYS",
+		"XDB", "XDBEXT", "XDBPM"};
+	private final static Pattern IGNORED_SCHEMAS_PATTERN = Pattern.compile("(APEX|FLOWS)_\\d{6}");
 	
 	/**
 	 * getString() doesn't really work for TIMESTAMP WITH LOCAL TIME ZONE,
