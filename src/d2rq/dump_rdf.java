@@ -15,8 +15,10 @@ import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
+import com.hp.hpl.jena.shared.NoWriterForLangException;
 
 import de.fuberlin.wiwiss.d2rq.CommandLineTool;
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.SystemLoader;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
@@ -103,15 +105,17 @@ public class dump_rdf extends CommandLineTool {
 
 			Model d2rqModel = loader.getModelD2RQ();
 
-			RDFWriter writer = d2rqModel.getWriter(format);
-			if (format.equals("RDF/XML") || format.equals("RDF/XML-ABBREV")) {
-				writer.setProperty("showXmlDeclaration", "true");
-				if (loader.getResourceBaseURI() != null) {
-					writer.setProperty("xmlbase", loader.getResourceBaseURI());
-				}
-			}
 			try {
+				RDFWriter writer = d2rqModel.getWriter(format.toUpperCase());
+				if (format.equals("RDF/XML") || format.equals("RDF/XML-ABBREV")) {
+					writer.setProperty("showXmlDeclaration", "true");
+					if (loader.getResourceBaseURI() != null) {
+						writer.setProperty("xmlbase", loader.getResourceBaseURI());
+					}
+				}
 				writer.write(d2rqModel, new OutputStreamWriter(out, "utf-8"), loader.getResourceBaseURI());
+			} catch (NoWriterForLangException ex) {
+				throw new D2RQException("Unknown format '" + format + "'", D2RQException.STARTUP_UNKNOWN_FORMAT);
 			} catch (UnsupportedEncodingException ex) {
 				throw new RuntimeException("Can't happen -- utf-8 is always supported");
 			}
