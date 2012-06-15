@@ -30,4 +30,17 @@ public class FilterMatchColumn extends Filter {
 	}
 
 	public String getSingleSchema() { return schema.getSingleString(); }
+	
+	public String toString() {
+		StringBuffer result = new StringBuffer("column(");
+		if (schema != Filter.NULL_MATCHER) {
+			result.append(schema + ".");
+		}
+		if (table != Filter.NULL_MATCHER) {
+			result.append(table + ".");
+		}
+		result.append(column);
+		result.append(")");
+		return result.toString();
+	}
 }

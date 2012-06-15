@@ -23,13 +23,27 @@ https://lists.sourceforge.net/lists/listinfo/d2rq-map-devel
 
 Also check the open issues here on GitHub for feature/bug discussion.
 
-## Building
+## Building from source
+
+### Prerequisites
+
+You need some tools in order to be able to build D2RQ. Depending on your operating system, they may or may not be already installed.
+
+* [git](http://git-scm.com/), for forking the source code repository from GitHub. Run `git` on the command line to see if it's there.
+* [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html) v5 or later, for compiling Java sources. Run `java -version` and `javac` on the command line to see if it's there.
+* [Apache Ant](http://ant.apache.org/), for building D2RQ. Run `ant` on the command line to see if it's there.
+
+### Getting the source
 
 Get the code by forking the GitHub repository and cloning your fork, or directly clone the main repository:
 
 ```git clone git@github.com:d2rq/d2rq.git```
 
-D2RQ uses Apache Ant as its build system. Run `ant -p` from the project's main directory to get an overview of available targets:
+### Doing Ant builds
+
+D2RQ uses Apache Ant as its build system. You can run `ant -p` from the project's main directory to get an overview of available targets:
+
+To run the D2RQ tools, you need to do at least `ant jar`.
 
 <table>
 <tr><td>ant all</td><td>Generate distribution files in zip and tar.gz formats</td></tr>
@@ -48,7 +62,7 @@ D2RQ uses Apache Ant as its build system. Run `ant -p` from the project's main d
 
 ## Running D2RQ
 
-After building with `ant compile`, you can test-run the various components. Let's assume you have a MySQL database called `mydb` on your machine.
+After building with `ant jar`, you can test-run the various components. Let's assume you have a MySQL database called `mydb` on your machine.
 
 ### Generating a default mapping file
 

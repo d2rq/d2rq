@@ -21,4 +21,11 @@ public class FilterMatchSchema extends Filter {
 	}
 
 	public String getSingleSchema() { return schema.getSingleString(); }
+	
+	public String toString() {
+		StringBuffer result = new StringBuffer("schema(");
+		result.append(schema);
+		result.append(")");
+		return result.toString();
+	}
 }

@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.log4j.Logger;
+
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
@@ -29,6 +31,8 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class DatabaseSchemaInspector {
+	private final static Logger log = Logger.getLogger(DatabaseSchemaInspector.class);
+
 	private final ConnectedDB db;
 	private final DatabaseMetaData schema;
  
@@ -40,27 +44,36 @@ public class DatabaseSchemaInspector {
 		try {
 			this.schema = db.connection().getMetaData();
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}
 
+	/**
+	 * @param column
+	 * @return The column's datatype, or <code>null</code> if unknown
+	 */
 	public DataType columnType(Attribute column) {
 		try {
 			ResultSet rs = this.schema.getColumns(null, column.schemaName(), 
 					column.tableName(), column.attributeName());
 			try {
 				if (!rs.next()) {
-					throw new D2RQException("Column " + column + " not found in database");
+					throw new D2RQException("Column " + column + " not found in database",
+							D2RQException.SQL_COLUMN_NOT_FOUND);
 				}
 				int type = rs.getInt("DATA_TYPE");
 				String name = rs.getString("TYPE_NAME").toUpperCase();
 				int size = rs.getInt("COLUMN_SIZE");
-				return db.vendor().getDataType(type, name, size);
+				DataType result = db.vendor().getDataType(type, name, size);
+				if (result == null) {
+					log.warn("Unknown datatype '" + (size == 0 ? name : (name + "(" + size + ")")) + "' (" + type + ")");
+				}
+				return result;
 			} finally {
 				rs.close();
 			}
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}
 	
@@ -69,13 +82,14 @@ public class DatabaseSchemaInspector {
 			ResultSet rs = this.schema.getColumns(null, column.schemaName(), 
 					column.tableName(), column.attributeName());
 			if (!rs.next()) {
-				throw new D2RQException("Column " + column + " not found in database");
+				throw new D2RQException("Column " + column + " not found in database",
+						D2RQException.SQL_COLUMN_NOT_FOUND);
 			}
 			boolean nullable = (rs.getInt("NULLABLE") == DatabaseMetaData.columnNullable);
 			rs.close();
 			return nullable;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}
 	
@@ -103,9 +117,10 @@ public class DatabaseSchemaInspector {
 			if (foundColumn)
 				return isZerofill;	
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
-		throw new D2RQException("Column not found in DESCRIBE result: " + column);
+		throw new D2RQException("Column not found in DESCRIBE result: " + column,
+				D2RQException.SQL_COLUMN_NOT_FOUND);
 	}
 
 	/**
@@ -143,7 +158,7 @@ public class DatabaseSchemaInspector {
 			rs.close();
 			return result;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}
 	
@@ -158,7 +173,7 @@ public class DatabaseSchemaInspector {
 			rs.close();
 			return result;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}
 	
@@ -194,7 +209,8 @@ public class DatabaseSchemaInspector {
 			rs.close();
 			return result;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception (unable to determine unique columns)", ex);
+			throw new D2RQException("Database exception (unable to determine unique columns)", 
+					ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}	
 	
@@ -208,8 +224,9 @@ public class DatabaseSchemaInspector {
 	public List<Join> foreignKeys(RelationName tableName, int direction) {
 		try {
 			Map<String,ForeignKey> fks = new HashMap<String,ForeignKey>();
-			ResultSet rs = (direction == KEYS_IMPORTED ? this.schema.getImportedKeys(null, schemaName(tableName), tableName(tableName))
-													   : this.schema.getExportedKeys(null, schemaName(tableName), tableName(tableName)));
+			ResultSet rs = (direction == KEYS_IMPORTED
+					? this.schema.getImportedKeys(null, schemaName(tableName), tableName(tableName))
+					: this.schema.getExportedKeys(null, schemaName(tableName), tableName(tableName)));
 			while (rs.next()) {
 				RelationName pkTable = toRelationName(
 						rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
@@ -233,33 +250,10 @@ public class DatabaseSchemaInspector {
 			}
 			return results;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}	
 
-	/**
-	 * A table T is considered to be a link table if it has exactly two
-	 * foreign key constraints, and the constraints reference other
-	 * tables (not T), and the constraints cover all columns of T,
-	 * and there are no foreign keys from other tables pointing to this table
-	 */
-	public boolean isLinkTable(RelationName tableName) {
-		List<Join> foreignKeys = foreignKeys(tableName, KEYS_IMPORTED);
-		if (foreignKeys.size() != 2) return false;
-		
-		List<Join> exportedKeys = foreignKeys(tableName, KEYS_EXPORTED);
-		if (!exportedKeys.isEmpty()) return false;
-		
-		List<Attribute> columns = listColumns(tableName);
-		Iterator<Join> it = foreignKeys.iterator();
-		while (it.hasNext()) {
-			Join fk = it.next();
-			if (fk.isSameTable()) return false;
-			columns.removeAll(fk.attributes1());
-		}
-		return columns.isEmpty();
-	}
-	
 	private String schemaName(RelationName tableName) {
 		if (this.db.vendor() == Vendor.PostgreSQL && tableName.schemaName() == null) {
 			// The default schema is known as "public" in PostgreSQL 

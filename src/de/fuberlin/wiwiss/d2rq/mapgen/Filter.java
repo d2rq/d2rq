@@ -13,6 +13,7 @@ public abstract class Filter {
 		public boolean matchesTable(String schema, String table) { return true; }
 		public boolean matchesColumn(String schema, String table, String column) { return true; }
 		public String getSingleSchema() { return null; }
+		public String toString() { return "all"; }
 	};
 	
 	public static final Filter NOTHING = new Filter() {
@@ -20,6 +21,7 @@ public abstract class Filter {
 		public boolean matchesTable(String schema, String table) { return false; }
 		public boolean matchesColumn(String schema, String table, String column) { return false; }
 		public String getSingleSchema() { return null; }
+		public String toString() { return "none"; }
 	};
 
 	public abstract boolean matchesSchema(String schema);
@@ -59,6 +61,7 @@ public abstract class Filter {
 	public static final IdentifierMatcher NULL_MATCHER = new IdentifierMatcher() {
 		public boolean matches(String identifier) { return identifier == null; }
 		public String getSingleString() { return null; }
+		public String toString() { return "null"; }
 	};
 	public static IdentifierMatcher createStringMatcher(final String s) {
 		return new IdentifierMatcher() {

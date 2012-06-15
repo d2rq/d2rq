@@ -11,9 +11,11 @@ import junit.framework.TestSuite;
 public class AllTests {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("Test for de.fuberlin.wiwiss.d2rq.mapgen");
+		TestSuite suite = new TestSuite(
+				"Test for de.fuberlin.wiwiss.d2rq.mapgen");
 		//$JUnit-BEGIN$
 		suite.addTestSuite(FilterParserTest.class);
+		suite.addTestSuite(IRIEncoderTest.class);
 		//$JUnit-END$
 		return suite;
 	}
