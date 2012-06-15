@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.log4j.Logger;
+
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.Join;
@@ -29,6 +31,8 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class DatabaseSchemaInspector {
+	private final static Logger log = Logger.getLogger(DatabaseSchemaInspector.class);
+
 	private final ConnectedDB db;
 	private final DatabaseMetaData schema;
  
@@ -44,6 +48,10 @@ public class DatabaseSchemaInspector {
 		}
 	}
 
+	/**
+	 * @param column
+	 * @return The column's datatype, or <code>null</code> if unknown
+	 */
 	public DataType columnType(Attribute column) {
 		try {
 			ResultSet rs = this.schema.getColumns(null, column.schemaName(), 
@@ -55,7 +63,11 @@ public class DatabaseSchemaInspector {
 				int type = rs.getInt("DATA_TYPE");
 				String name = rs.getString("TYPE_NAME").toUpperCase();
 				int size = rs.getInt("COLUMN_SIZE");
-				return db.vendor().getDataType(type, name, size);
+				DataType result = db.vendor().getDataType(type, name, size);
+				if (result == null) {
+					log.warn("Unknown datatype '" + (size == 0 ? name : (name + "(" + size + ")")) + "' (" + type + ")");
+				}
+				return result;
 			} finally {
 				rs.close();
 			}

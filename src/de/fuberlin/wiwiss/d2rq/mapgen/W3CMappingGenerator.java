@@ -1,13 +1,11 @@
 package de.fuberlin.wiwiss.d2rq.mapgen;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
-import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
 import de.fuberlin.wiwiss.d2rq.values.Pattern;
 
 /**
@@ -30,51 +28,29 @@ public class W3CMappingGenerator extends MappingGenerator {
 	}
 
 	@Override
-	protected String uriPattern(RelationName tableName) {
-		String result = encodeTableName(this.instanceNamespaceURI + tableName.qualifiedName());
-		Iterator<Attribute> it = filteredPrimaryKeyColumns(tableName).iterator();
+	protected void writeEntityIdentifier(RelationName tableName, List<Attribute> identifierColumns) {
+		String uriPattern = encodeTableName(this.instanceNamespaceURI + tableName.qualifiedName());
+		Iterator<Attribute> it = identifierColumns.iterator();
 		int i = 0;
 		while (it.hasNext()) {
-			result += i == 0 ? "/" : ";";
+			uriPattern += i == 0 ? "/" : ";";
 			i++;
 			
 			Attribute column = it.next();
 			String attributeName = encodeColumnName(column);
 			String attributeQName = column.qualifiedName();
-			result += attributeName + "=@@" + attributeQName;
+			uriPattern += attributeName + "=@@" + attributeQName;
 			if (!database.columnType(column).isIRISafe()) {
-				result += "|encode";
+				uriPattern += "|encode";
 			}
-			result += "@@";
+			uriPattern += "@@";
 		}
-		return result;
+		this.out.println("\td2rq:uriPattern \"" + uriPattern + "\";");
 	}
 	
 	@Override
-	protected void writeSubjectSpec(RelationName tableName) {
-		List<Attribute> usedColumns = new ArrayList<Attribute>();
-		for (Attribute column: schema.listColumns(tableName)) {
-			DataType type = schema.columnType(column);
-			if (type == null) {
-				writeWarning(new String[]{
-						"Ignoring " + column + " in d2rq:bNodeIdColumns because its datatype is unknown."
-					}, "");
-				continue;
-			}
-			if (type.isUnsupported()) {
-				writeWarning(new String[]{
-						"Ignoring " + column + " in d2rq:bNodeIdColumns because its datatype cannot be mapped to RDF."
-					}, "");
-				continue;
-			}
-			if (!type.supportsDistinct()) {
-				writeWarning(new String[]{
-						"Ignoring " + column + " in d2rq:bNodeIdColumns because it doesn't support DISTINCT."
-					}, "");
-				continue;
-			}
-			usedColumns.add(column);
-		}
+	protected void writePseudoEntityIdentifier(RelationName tableName) {
+		List<Attribute> usedColumns = filter(schema.listColumns(tableName), true, "pseudo identifier column");
 		out.print("\td2rq:bNodeIdColumns \"");
 		Iterator<Attribute> it = usedColumns.iterator();
 		while (it.hasNext()) {

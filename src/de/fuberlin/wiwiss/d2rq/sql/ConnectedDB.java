@@ -245,6 +245,11 @@ public class ConnectedDB {
 		return this.schemaInspector;
 	}
 
+	/**
+	 * Returns a column's datatype. Caches the types for performance.
+	 * @param column
+	 * @return The column's datatype, or <code>null</code> if unknown
+	 */
 	public DataType columnType(Attribute column) {
 		if (!cachedColumnTypes.containsKey(column)) {
 			if (overriddenColumnTypes.containsKey(column)) {

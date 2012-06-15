@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -262,16 +263,18 @@ public class MappingGenerator {
 	}
 	
 	public void writeTable(RelationName tableName) {
-		log.info("Generating d2rq:ClassMap instance for table " + tableName.qualifiedName()) ;
+		log.info("Generating d2rq:ClassMap instance for table " + tableName.qualifiedName());
 		this.out.println("# Table " + tableName);
+		List<Attribute> identifierColumns = identifierColumns(tableName);
+		boolean hasIdentifier = !identifierColumns.isEmpty();
 		this.out.println(classMapName(tableName) + " a d2rq:ClassMap;");
 		this.out.println("\td2rq:dataStorage " + databaseName() + ";");
-		if (hasPrimaryKey(tableName)) {
-			this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
+		if (hasIdentifier) {
+			writeEntityIdentifier(tableName, identifierColumns);
 		} else {
-			writeSubjectSpec(tableName);
+			writePseudoEntityIdentifier(tableName);
 		}
-				
+
 		if (generateClasses) {
 			this.out.println("\td2rq:class " + vocabularyTermQName(tableName) + ";");
 			if (generateDefinitionLabels) {
@@ -279,31 +282,12 @@ public class MappingGenerator {
 			}
 		}
 		this.out.println("\t.");
-		if (generateLabelBridges && hasPrimaryKey(tableName)) {
-			writeLabelBridge(tableName);
+		if (generateLabelBridges && hasIdentifier) {
+			writeLabelBridge(tableName, identifierColumns);
 		}
 		List<Join> foreignKeys = schema.foreignKeys(tableName, DatabaseSchemaInspector.KEYS_IMPORTED);
-		for (Attribute column: schema.listColumns(tableName)) {
-			if (!filter.matches(column)) {
-				log.info("Skipping column " + column);
-				continue;
-			}
+		for (Attribute column: filter(schema.listColumns(tableName), false, "property bridge")) {
 			if (skipForeignKeyTargetColumns && isInForeignKey(column, foreignKeys)) continue;
-			if (schema.columnType(column) == null) {
-				writeWarning(new String[]{
-						"Skipping column: " + column,
-						"    Its datatype " + schema.columnType(column) + " is unknown to D2RQ.",
-						"    You can override the column's datatype using d2rq:xxxColumn and add a property bridge.",
-					}, "");
-				continue;
-			}
-			if (schema.columnType(column).isUnsupported()) {
-				writeWarning(new String[]{
-						"Skipping column: " + column,
-						"    Its datatype " + schema.columnType(column) + " cannot be mapped to RDF"
-					}, "");
-				continue;
-			}
 			writeColumn(column);
 		}
 		for (Join fk: foreignKeys) {
@@ -321,20 +305,33 @@ public class MappingGenerator {
 		this.out.flush();
 	}
 
-	protected void writeSubjectSpec(RelationName tableName) {
+	protected void writeEntityIdentifier(RelationName tableName, 
+			List<Attribute> identifierColumns) {
+		String uriPattern = this.instanceNamespaceURI + tableName.qualifiedName();
+		for (Attribute column: identifierColumns) {
+			uriPattern += "/@@" + column.qualifiedName();
+			if (!schema.columnType(column).isIRISafe()) {
+				uriPattern += "|urlify";
+			}
+			uriPattern += "@@";
+		}
+		this.out.println("\td2rq:uriPattern \"" + uriPattern + "\";");
+	}
+	
+	protected void writePseudoEntityIdentifier(RelationName tableName) {
 		writeWarning(new String[]{
 				"Sorry, I don't know which columns to put into the uriPattern",
 				"    for \"" + tableName + "\" because the table doesn't have a primary key.", 
 				"    Please specify it manually."
 			}, "\t");
-		this.out.println("\td2rq:uriPattern \"" + uriPattern(tableName) + "\";");
+		writeEntityIdentifier(tableName, Collections.<Attribute>emptyList());
 	}
 	
-	public void writeLabelBridge(RelationName tableName) {
-		this.out.println(propertyBridgeName(tableName.qualifiedName(), "__label") + " a d2rq:PropertyBridge;");
+	public void writeLabelBridge(RelationName tableName, List<Attribute> labelColumns) {
+		this.out.println(propertyBridgeName(tableName.qualifiedName(), "label") + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(tableName) + ";");
 		this.out.println("\td2rq:property rdfs:label;");
-		this.out.println("\td2rq:pattern \"" + labelPattern(tableName) + "\";");
+		this.out.println("\td2rq:pattern \"" + labelPattern(tableName, labelColumns) + "\";");
 		this.out.println("\t.");
 	}
 	
@@ -399,11 +396,12 @@ public class MappingGenerator {
 			log.info("Skipping link table " + linkTableName);
 			return;
 		}
+		log.info("Generating d2rq:PropertyBridge instance for table " + linkTableName.qualifiedName());
 		RelationName table1 = this.schema.getCorrectCapitalization(join1.table2());
 		RelationName table2 = this.schema.getCorrectCapitalization(join2.table2());
 		boolean isSelfJoin = table1.equals(table2);
-		this.out.println("# n:m table " + linkTableName + (isSelfJoin ? " (self-join)" : ""));
-		this.out.println(propertyBridgeName(linkTableName.qualifiedName()) + " a d2rq:PropertyBridge;");
+		this.out.println("# Table " + linkTableName + (isSelfJoin ? " (n:m self-join)" : " (n:m)"));
+		this.out.println(propertyBridgeName(linkTableName.qualifiedName(), "link") + " a d2rq:PropertyBridge;");
 		this.out.println("\td2rq:belongsToClassMap " + classMapName(table1) + ";");
 		this.out.println("\td2rq:property " + vocabularyTermQName(linkTableName) + ";");
 		this.out.println("\td2rq:refersToClassMap " + classMapName(table2) + ";");
@@ -464,7 +462,7 @@ public class MappingGenerator {
 	}
 	
 	private String propertyBridgeName(String relationName, String suffix) {
-		return toPrefixedURI(mapNamespaceURI, "map", relationName + suffix);
+		return toPrefixedURI(mapNamespaceURI, "map", relationName + "__" + suffix);
 	}
 	
 	protected String vocabularyTermQName(RelationName table) {
@@ -479,33 +477,51 @@ public class MappingGenerator {
 		return toPrefixedURI(vocabNamespaceURI, "vocab", toRelationName(attributes));
 	}
 
-	protected List<Attribute> filteredPrimaryKeyColumns(RelationName tableName) {
+	protected List<Attribute> identifierColumns(RelationName tableName) {
 		List<Attribute> columns = schema.primaryKeyColumns(tableName);
 		if (filter.matchesAll(columns)) {
-			return columns;
+			return filter(columns, true, "identifier column");
 		}
 		return Collections.<Attribute>emptyList();
 	}
 	
-	private boolean hasPrimaryKey(RelationName tableName) {
-		return !filteredPrimaryKeyColumns(tableName).isEmpty();
-	}
-	
-	protected String uriPattern(RelationName tableName) {
-		String result = this.instanceNamespaceURI + tableName.qualifiedName();
-		for (Attribute column: filteredPrimaryKeyColumns(tableName)) {
-			result += "/@@" + column.qualifiedName();
-			if (!schema.columnType(column).isIRISafe()) {
-				result += "|urlify";
+	protected List<Attribute> filter(List<Attribute> columns, boolean requireDistinct, String reason) {
+		List<Attribute> result = new ArrayList<Attribute>(columns.size());
+		for (Attribute column: columns) {
+			if (!filter.matches(column)) {
+				log.info("Skipping filtered column " + column + " as " + reason);
+				continue;
 			}
-			result += "@@";
+			DataType type = schema.columnType(column);
+			if (type == null) {
+				writeWarning(new String[]{
+						"Skipping column " + column + " as " + reason + ".",
+						"    Its datatype is unknown to D2RQ.",
+						"    You can override the column's datatype using d2rq:xxxColumn and add a property bridge.",
+					}, "");
+				continue;
+			}
+			if (type.isUnsupported()) {
+				writeWarning(new String[]{
+						"Skipping column " + column + " as " + reason + ".",
+						"    Its datatype " + schema.columnType(column) + " cannot be mapped to RDF."
+					}, "");
+				continue;
+			}
+			if (requireDistinct && !type.supportsDistinct()) {
+				writeWarning(new String[]{
+						"Skipping column " + column + " as " + reason + ".",
+						"    Its datatype " + schema.columnType(column) + " does not support DISTINCT."
+				}, "");
+			}
+			result.add(column);
 		}
 		return result;
 	}
 	
-	private String labelPattern(RelationName tableName) {
+	private String labelPattern(RelationName tableName, List<Attribute> labelColumns) {
 		String result = tableName + " #";
-		Iterator<Attribute> it = filteredPrimaryKeyColumns(tableName).iterator();
+		Iterator<Attribute> it = labelColumns.iterator();
 		while (it.hasNext()) {
 			result += "@@" + it.next().qualifiedName() + "@@";
 			if (it.hasNext()) {
