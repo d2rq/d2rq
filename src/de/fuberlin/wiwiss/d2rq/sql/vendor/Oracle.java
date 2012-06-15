@@ -147,10 +147,14 @@ public class Oracle extends SQL92 {
 		"SYS", "SYSTEM", "WKSYS", "WK_TEST", "WMSYS", "XDB"};
 	@Override
 	public boolean isIgnoredTable(String schema, String table) {
+		if (Arrays.binarySearch(IGNORED_SCHEMAS, schema) >= 0) return true; 
 		// Skip Oracle system schemas as well as deleted tables in Oracle's Recycling Bin.
 		// The latter have names like MYSCHEMA.BIN$FoHqtx6aQ4mBaMQmlTCPTQ==$0
-		return Arrays.binarySearch(IGNORED_SCHEMAS, schema) >= 0 
-				|| table.startsWith("BIN$");
+		if (table.startsWith("BIN$")) return true;
+		// Skip nested tables with names like SYS_NTr8Sify7K5pLgQBmQXa5h2g==
+		// There are issues where the table cannot be found later
+		if (table.startsWith("SYS_NT")) return true;
+		return false;
 	}
 	
 	/**

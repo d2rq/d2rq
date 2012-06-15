@@ -44,7 +44,7 @@ public class DatabaseSchemaInspector {
 		try {
 			this.schema = db.connection().getMetaData();
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}
 
@@ -58,7 +58,8 @@ public class DatabaseSchemaInspector {
 					column.tableName(), column.attributeName());
 			try {
 				if (!rs.next()) {
-					throw new D2RQException("Column " + column + " not found in database");
+					throw new D2RQException("Column " + column + " not found in database",
+							D2RQException.SQL_COLUMN_NOT_FOUND);
 				}
 				int type = rs.getInt("DATA_TYPE");
 				String name = rs.getString("TYPE_NAME").toUpperCase();
@@ -72,7 +73,7 @@ public class DatabaseSchemaInspector {
 				rs.close();
 			}
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}
 	
@@ -81,13 +82,14 @@ public class DatabaseSchemaInspector {
 			ResultSet rs = this.schema.getColumns(null, column.schemaName(), 
 					column.tableName(), column.attributeName());
 			if (!rs.next()) {
-				throw new D2RQException("Column " + column + " not found in database");
+				throw new D2RQException("Column " + column + " not found in database",
+						D2RQException.SQL_COLUMN_NOT_FOUND);
 			}
 			boolean nullable = (rs.getInt("NULLABLE") == DatabaseMetaData.columnNullable);
 			rs.close();
 			return nullable;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}
 	
@@ -115,9 +117,10 @@ public class DatabaseSchemaInspector {
 			if (foundColumn)
 				return isZerofill;	
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
-		throw new D2RQException("Column not found in DESCRIBE result: " + column);
+		throw new D2RQException("Column not found in DESCRIBE result: " + column,
+				D2RQException.SQL_COLUMN_NOT_FOUND);
 	}
 
 	/**
@@ -155,7 +158,7 @@ public class DatabaseSchemaInspector {
 			rs.close();
 			return result;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}
 	
@@ -170,7 +173,7 @@ public class DatabaseSchemaInspector {
 			rs.close();
 			return result;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}
 	
@@ -206,7 +209,8 @@ public class DatabaseSchemaInspector {
 			rs.close();
 			return result;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception (unable to determine unique columns)", ex);
+			throw new D2RQException("Database exception (unable to determine unique columns)", 
+					ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}	
 	
@@ -246,7 +250,7 @@ public class DatabaseSchemaInspector {
 			}
 			return results;
 		} catch (SQLException ex) {
-			throw new D2RQException("Database exception", ex);
+			throw new D2RQException("Database exception", ex, D2RQException.D2RQ_SQLEXCEPTION);
 		}
 	}	
 
