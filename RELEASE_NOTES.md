@@ -1,5 +1,18 @@
 # D2RQ Release Notes
 
+## Unreleased changes
+
+### Features
+
+### Enhancements
+
+### Bugfixes
+
+### Performance
+
+### Other
+
+
 ## D2RQ v0.8.1 - 2012-06-22
 
 This release adds support for W3C's [Direct Mapping of Relational Data to RDF](http://www.w3.org/TR/rdb-direct-mapping/). The new d2r-query script allows SPARQL queries against D2RQ-mapped databases from the command line. There is a comprehensive set of options for including or excluding specific schemas, tables, and columns. The default settings of D2R Server's web interface work better for large databases. D2R Server now serves metadata for each resource, and for the entire dataset, including [VoID](http://www.w3.org/TR/void/) support. Timeouts for SPARQL queries can be specified. And, as usual, many bugfixes and smaller enhancements.
