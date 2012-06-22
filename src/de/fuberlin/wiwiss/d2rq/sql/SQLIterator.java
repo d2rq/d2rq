@@ -29,13 +29,13 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 	private String sql;
 	private List<ProjectionSpec> columns;
 	private ConnectedDB database;
-	private Statement statement = null;
+	private volatile Statement statement = null;
 	private ResultSet resultSet = null;
 	private ResultRow prefetchedRow = null;
 	private int numCols = 0;
 	private boolean queryExecuted = false;
 	private boolean explicitlyClosed = false;
-	private boolean cancelled = false;
+	private volatile boolean cancelled = false;
 
 	public SQLIterator(String sql, List<ProjectionSpec> columns, ConnectedDB db) {
 		this.sql = sql;
