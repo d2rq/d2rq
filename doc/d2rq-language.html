@@ -222,7 +222,7 @@ map:Database1 a d2rq:Database;
 # CREATE TABLE Conferences (ConfID int, Name text, Location text);
 
 map:Conference a d2rq:ClassMap;
-    d2rq:dataStorage map:Database1.
+    d2rq:dataStorage map:Database1;
     d2rq:class :Conference;
     d2rq:uriPattern &quot;http://conferences.org/comp/confno@@Conferences.ConfID@@&quot;;
     .
