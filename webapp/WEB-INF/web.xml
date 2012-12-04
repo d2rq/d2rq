@@ -12,7 +12,7 @@
   </context-param>
 
   <listener>
-    <listener-class>de.fuberlin.wiwiss.d2rq.server.WebappInitListener</listener-class>
+    <listener-class>org.d2rq.server.WebappInitListener</listener-class>
   </listener>
 
   <!-- SERVLETS -->
@@ -25,18 +25,18 @@
 
   <servlet>
     <servlet-name>ResourceServlet</servlet-name>
-    <servlet-class>de.fuberlin.wiwiss.d2rq.server.ResourceServlet</servlet-class>
+    <servlet-class>org.d2rq.server.ResourceServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
   
   <servlet>
     <servlet-name>ClassMapServlet</servlet-name>
-    <servlet-class>de.fuberlin.wiwiss.d2rq.server.ClassMapServlet</servlet-class>
+    <servlet-class>org.d2rq.server.ClassMapServlet</servlet-class>
   </servlet>
   
   <servlet>
     <servlet-name>PageServlet</servlet-name>
-    <servlet-class>de.fuberlin.wiwiss.d2rq.server.PageServlet</servlet-class>
+    <servlet-class>org.d2rq.server.PageServlet</servlet-class>
     <init-param>
       <param-name>org.apache.velocity.properties</param-name>
       <param-value>/WEB-INF/velocity.properties</param-value>
@@ -45,19 +45,19 @@
   
   <servlet>
     <servlet-name>ResourceDescriptionServlet</servlet-name>
-    <servlet-class>de.fuberlin.wiwiss.d2rq.server.ResourceDescriptionServlet</servlet-class>
+    <servlet-class>org.d2rq.server.ResourceDescriptionServlet</servlet-class>
   </servlet>
   
   
   <servlet>
     <servlet-name>DatasetDescriptionServlet</servlet-name>
-    <servlet-class>de.fuberlin.wiwiss.d2rq.server.DatasetDescriptionServlet</servlet-class>
+    <servlet-class>org.d2rq.server.DatasetDescriptionServlet</servlet-class>
   </servlet>
   
   
   <servlet>
     <servlet-name>DirectoryServlet</servlet-name>
-    <servlet-class>de.fuberlin.wiwiss.d2rq.server.DirectoryServlet</servlet-class>
+    <servlet-class>org.d2rq.server.DirectoryServlet</servlet-class>
     <init-param>
       <param-name>org.apache.velocity.properties</param-name>
       <param-value>/WEB-INF/velocity.properties</param-value>
@@ -66,7 +66,7 @@
   
   <servlet>
     <servlet-name>RootServlet</servlet-name>
-    <servlet-class>de.fuberlin.wiwiss.d2rq.server.RootServlet</servlet-class>
+    <servlet-class>org.d2rq.server.RootServlet</servlet-class>
     <init-param>
       <param-name>org.apache.velocity.properties</param-name>
       <param-value>/WEB-INF/velocity.properties</param-value>
@@ -75,7 +75,7 @@
 
   <servlet>
     <servlet-name>NamespaceServlet</servlet-name>
-    <servlet-class>de.fuberlin.wiwiss.d2rq.server.NamespaceServlet</servlet-class>
+    <servlet-class>org.d2rq.server.NamespaceServlet</servlet-class>
   </servlet>
   
   <!-- MAPPINGS -->
