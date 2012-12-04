@@ -4,3 +4,4 @@ dump-rdf eol=lf
 generate-mapping eol=lf
 d2r-server eol=lf
 d2r-query eol=lf
+validate eol=lf

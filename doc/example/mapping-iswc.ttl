@@ -70,19 +70,19 @@ map:Organizations a d2rq:ClassMap;
 map:organizations_Type_U a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Organizations;
 	d2rq:property rdf:type;
-    d2rq:uriPattern "http://annotation.semanticweb.org/iswc/iswc.daml#University";
+    d2rq:constantValue <http://annotation.semanticweb.org/iswc/iswc.daml#University>;
     d2rq:condition "organizations.Type = 'U'";
 	.
 map:organizations_Type_D a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Organizations;
 	d2rq:property rdf:type;
-    d2rq:uriPattern "http://annotation.semanticweb.org/iswc/iswc.daml#Department";
+    d2rq:constantValue <http://annotation.semanticweb.org/iswc/iswc.daml#Department>;
     d2rq:condition "organizations.Type = 'D'";
 	.
 map:organizations_Type_I a d2rq:PropertyBridge;
 	d2rq:belongsToClassMap map:Organizations;
 	d2rq:property rdf:type;
-    d2rq:uriPattern "http://annotation.semanticweb.org/iswc/iswc.daml#Institute";
+    d2rq:constantValue <http://annotation.semanticweb.org/iswc/iswc.daml#Institute>;
     d2rq:condition "organizations.Type = 'I'";
 	.
 map:organizations_Name a d2rq:PropertyBridge;

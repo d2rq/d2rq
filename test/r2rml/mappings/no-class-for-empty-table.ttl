@@ -1,0 +1,10 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix map: <http://example.com/map#>.
+@prefix ex: <http://example.com/>.
+
+map:triples1
+    rr:logicalTable [ rr:tableName "TABLE1" ];
+    rr:subjectMap [
+        rr:constant ex:s;
+        rr:class ex:C;
+    ].

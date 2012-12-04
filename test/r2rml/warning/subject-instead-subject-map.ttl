@@ -1,0 +1,9 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix map: <http://example.com/map#>.
+@prefix ex: <http://example.com/ns#>.
+
+map:triples1
+    rr:subject map:terms1;
+    rr:logicalTable [ rr:tableName "TABLE1" ].
+
+map:terms1 rr:column "COLUMN1".

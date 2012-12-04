@@ -7,20 +7,20 @@ import jena.cmdline.CommandLine;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.d2rq.CommandLineTool;
+import org.d2rq.D2RQException;
+import org.d2rq.SystemLoader;
+import org.d2rq.tmp.QueryEngineD2RQ;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryCancelledException;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.sparql.resultset.ResultsFormat;
 import com.hp.hpl.jena.sparql.util.QueryExecUtils;
 
-import de.fuberlin.wiwiss.d2rq.CommandLineTool;
-import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.SystemLoader;
-import de.fuberlin.wiwiss.d2rq.engine.QueryEngineD2RQ;
-import de.fuberlin.wiwiss.d2rq.jena.ModelD2RQ;
 
 /**
  * Command line utility for executing SPARQL queries
@@ -41,7 +41,7 @@ public class d2r_query extends CommandLineTool {
 		System.err.println("  d2r-query [query-options] [connection-options] jdbcURL query");
 		System.err.println("  d2r-query [query-options] [connection-options] -l script.sql query");
 		System.err.println();
-		printStandardArguments(true);
+		printStandardArguments(true, false);
 		System.err.println("    query           A SPARQL query, e.g., \"SELECT * {?s rdf:type ?o} LIMIT 10\"");
 		System.err.println("                    A value of @file.sparql reads the query from a file.");
 		System.err.println("  Query options:");
@@ -51,7 +51,7 @@ public class d2r_query extends CommandLineTool {
 		System.err.println("    --verbose       Print debug information");
 		System.err.println();
 		System.err.println("  Database connection options (only with jdbcURL):");
-		printConnectionOptions();
+		printConnectionOptions(true);
 		System.err.println();
 		System.exit(1);
 	}
@@ -95,7 +95,7 @@ public class d2r_query extends CommandLineTool {
 		}
 		
 		loader.setFastMode(true);
-		ModelD2RQ d2rqModel = loader.getModelD2RQ();
+		Model d2rqModel = loader.getModelD2RQ();
 
 		String prefixes = "";
 		for (String prefix: d2rqModel.getNsPrefixMap().keySet()) {

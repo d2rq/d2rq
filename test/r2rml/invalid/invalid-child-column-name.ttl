@@ -1,0 +1,18 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix map: <http://example.com/map#>.
+@prefix ex: <http://example.com/ns#>.
+
+map:triples1
+    rr:subject ex:s;
+    rr:logicalTable [ rr:tableName "TABLE1" ];
+    rr:predicateObjectMap [
+        rr:predicate ex:p;
+        rr:objectMap [
+            rr:parentTriplesMap map:triples1;
+            rr:joinCondition map:join1;
+        ];
+    ].
+
+map:join1
+    rr:child "Not a valid column name";
+    rr:parent "COLUMN1".

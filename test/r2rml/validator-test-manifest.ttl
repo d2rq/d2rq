@@ -1,0 +1,1145 @@
+@prefix : <http://d2rq.org/terms/test.ttl#>.
+@prefix e: <http://d2rq.org/terms/r2rml-errors.ttl#>.
+@prefix map: <http://example.com/map#>.
+@prefix ex: <http://example.com/ns#>.
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+# We use this prefix to discover the base URI with Jena.
+@prefix base: <>.
+
+<> 
+    rdfs:label "An R2RML validator test suite"@en;
+    rdfs:comment """
+This is a collection of test cases for an R2RML validator.
+This manifest file lists 130+ minimalistic R2RML mappings,
+and contains information about whether they are considered
+valid, invalid (along with the reason), or valid with
+warnings (that is, they violate a SHOULD-level requirement
+in the spec).
+
+The file schemas/validator-test.sql contains the table
+definitions.
+
+The base IRI for all tests is assumed to be <http://example.com/>,
+although the choice of IRI should not matter.
+
+There are three levels of tests:
+
+1) *Passing cases* are found in the <valid/> subdirectory. They
+   conform and should produce neither errors nor warnings. They
+   do not have an associated :expect resource.
+
+2) *Warning cases* are found in the <warning/> subdirectory. They
+   violate a SHOULD-level requirement of the spec,
+   but they should not produce an error. Any :expect resources
+   associated with them have a :level of :Warning.
+
+3) *Error cases* are found in the <invalid/> subdirectory. They do not
+   conform to the spec and should produce an error
+   in a validator. They have at least one :expect resource associated
+   that does not have a :level (meaning the level is :Error, considered
+   the default).
+
+The other values of the :expect resources describe additional details
+of the expected error. The classification of errors and properties
+of the different error types are based on the error handling implemented
+in the R2RML validator of D2RQ.
+
+There are no tests (yet) for the semantics of rr:inverseExpression.
+"""@en.
+
+<invalid/file-not-found.ttl> a :R2RMLValidatorTestCase;
+    :comment "File doesn't exist";
+    :expect [
+        :problem e:IO_ERROR;
+    ].
+
+<invalid/no-triples.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:NO_TRIPLES;
+    ].
+
+<invalid/syntax-error.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:SYNTAX_ERROR;
+        :details true;
+    ].
+
+<invalid/no-r2rml-triples.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:NO_R2RML_TRIPLES;
+    ].
+
+<invalid/no-triples-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:NO_TRIPLES_MAP;
+    ], [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:termMap1;
+    ].
+
+<warning/subject-instead-subject-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:terms1;
+    ].
+
+<warning/unreferenced-base-table.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:table1;
+    ].
+
+<warning/unreferenced-r2rml-view.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:table1;
+    ].
+
+<warning/unreferenced-constant-term-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:terms1;
+    ].
+
+<warning/unreferenced-column-term-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:terms1;
+    ].
+
+<warning/unreferenced-template-term-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:terms1;
+    ].
+
+<warning/unreferenced-predicate-object-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:predicateObjects1;
+    ].
+
+<warning/unreferenced-ref-object-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:ref1;
+    ].
+
+<warning/unreferenced-join.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:join1;
+    ].
+
+<valid/well-formed1.ttl> a :R2RMLValidatorTestCase;
+    :comment "Passes".
+
+<valid/well-formed2.ttl> a :R2RMLValidatorTestCase;
+    :comment "Passes".
+
+<valid/well-formed3.ttl> a :R2RMLValidatorTestCase;
+    :comment "Passes".
+
+<warning/unknown-class-in-r2rml-namespace.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to undefined class rr:UndefinedClass";
+    :expect [
+        :level :Warning;
+        :problem e:UNKNOWN_CLASS_IN_R2RML_NAMESPACE;
+        :subject rr:UndefinedClass;
+    ].
+
+<warning/unknown-property-in-r2rml-namespace.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to undefined property rr:undefinedProperty";
+    :expect [
+        :level :Warning;
+        :problem e:UNKNOWN_PROPERTY_IN_R2RML_NAMESPACE;
+        :subject rr:undefinedProperty;
+    ].
+
+<warning/spurious-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to wrong typing of the triples map";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TYPE;
+        :subject map:triples1;
+        :predicate rdf:type;
+        :object rr:LogicalTable;
+    ].
+
+<warning/spurious-term-map-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to wrong typing of the term map";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TYPE;
+        :subject map:terms1;
+        :predicate rdf:type;
+        :object rr:ObjectMap;
+    ].
+
+<valid/correct-term-map-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Pass with correct term map type".
+
+<warning/spurious-logical-table-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to wrong typing of the logical table";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TYPE;
+        :subject map:table1;
+        :predicate rdf:type;
+        :object rr:R2RMLView;
+    ].
+
+<warning/spurious-triple1.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to spurious rr:sqlVersion triple";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TRIPLE;
+        :subject map:triples1;
+        :predicate rr:sqlVersion;
+        :object rr:SQL2008;
+    ].
+
+<warning/spurious-triple2.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to spurious rr:language triple";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TRIPLE;
+        :subject map:table1;
+        :predicate rr:language;
+        :object "en";
+    ].
+
+<warning/spurious-triple3.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to spurious rr:joinCondition triple";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TRIPLE;
+        :subject map:terms1;
+        :predicate rr:joinCondition;
+        :object map:join1;
+    ].
+
+<warning/spurious-triple4.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to spurious rr:datatype triple";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TRIPLE;
+        :subject map:predicateObjects1;
+        :predicate rr:datatype;
+        :object xsd:date;
+    ].
+
+<warning/spurious-triple5.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to spurious rr:class triple";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TRIPLE;
+        :subject map:ref1;
+        :predicate rr:class;
+        :object ex:Foo;
+    ].
+
+<warning/spurious-triple6.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to spurious rr:graph triple";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TRIPLE;
+        :subject map:join1;
+        :predicate rr:graph;
+        :object ex:graph1;
+    ].
+
+<warning/spurious-triple7.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to spurious rr:graphMap triple";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TRIPLE;
+        :subject map:triples1;
+        :predicate rr:graphMap;
+        :object map:terms1;
+    ].
+
+<warning/spurious-triple8.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to spurious rr:termType triple";
+    :expect [
+        :level :Warning;
+        :problem e:SPURIOUS_TRIPLE;
+        :subject map:triples1;
+        :predicate rr:termType;
+        :object rr:IRI;
+    ].
+
+<invalid/conflicting-properties-subject.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:CONFLICTING_PROPERTIES;
+        :subject map:triples1;
+        :predicate rr:subject, rr:subjectMap;
+    ].
+
+<invalid/conflicting-properties-literal.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:CONFLICTING_PROPERTIES;
+        :subject map:terms1;
+        :predicate rr:datatype, rr:language;
+    ].
+
+<invalid/conflicting-properties-table.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:CONFLICTING_PROPERTIES;
+        :subject map:table1;
+        :predicate rr:sqlQuery, rr:tableName;
+    ].
+
+<invalid/conflicting-properties-term-map1.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:CONFLICTING_PROPERTIES;
+        :subject map:terms1;
+        :predicate rr:constant, rr:column;
+    ].
+
+<invalid/conflicting-properties-term-map2.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:CONFLICTING_PROPERTIES;
+        :subject map:terms1;
+        :predicate rr:constant, rr:template;
+    ].
+
+<invalid/conflicting-properties-term-map3.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:CONFLICTING_PROPERTIES; :subject map:terms1; :predicate rr:template, rr:column;
+    ].
+
+<invalid/conflicting-types.ttl> a :R2RMLValidatorTestCase;
+    :comment "Note, for CONFLICTING_TYPES the objects don't form triples with subject and predicate but indicate the conflicting types of the resource that is the object of the subject-predicate triple";
+    :expect [
+        :problem e:CONFLICTING_TYPES;
+        :subject map:predicateObjects1;
+        :predicate rr:objectMap;
+        :object rr:ObjectMap, rr:RefObjectMap;
+    ].
+
+<invalid/missing-subject.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:REQUIRED_VALUE_MISSING;
+        :subject map:triples1;
+        :predicate rr:subjectMap, rr:subject;
+    ].
+
+<invalid/missing-predicate.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:REQUIRED_VALUE_MISSING;
+        :subject map:predicateObjects1;
+        :predicate rr:predicateMap, rr:predicate;
+    ].
+
+<invalid/missing-object.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:REQUIRED_VALUE_MISSING;
+        :subject map:predicateObjects1;
+        :predicate rr:objectMap, rr:object;
+    ].
+
+<invalid/missing-child.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:REQUIRED_VALUE_MISSING;
+        :subject map:join1;
+        :predicate rr:child;
+    ].
+
+<invalid/missing-parent.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:REQUIRED_VALUE_MISSING;
+        :subject map:join1;
+        :predicate rr:parent;
+    ].
+
+<invalid/duplicate-logical-table.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:DUPLICATE_VALUE;
+        :subject map:triples1;
+        :predicate rr:logicalTable;
+        :object map:table1, map:table2;
+    ], [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:table2;
+    ].
+
+<invalid/duplicate-constant.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:DUPLICATE_VALUE;
+        :subject map:term1;
+        :predicate rr:constant;
+        :object ex:s1, ex:s2;
+    ].
+
+<invalid/duplicate-subject.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:DUPLICATE_VALUE;
+        :subject map:triples1;
+        :predicate rr:subject;
+        :object ex:s1, ex:s2;
+    ].
+
+<invalid/duplicate-parent-triples-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:DUPLICATE_VALUE;
+        :subject map:ref1;
+        :predicate rr:parentTriplesMap;
+    ].
+
+<invalid/duplicate-child.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:DUPLICATE_VALUE;
+        :subject map:join1;
+        :predicate rr:child;
+    ].
+
+<invalid/duplicate-parent.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:DUPLICATE_VALUE;
+        :subject map:join1;
+        :predicate rr:parent;
+    ].
+
+<invalid/duplicate-term-type.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:DUPLICATE_VALUE;
+        :subject map:terms1;
+        :predicate rr:termType;
+        :object rr:IRI, rr:Literal;
+    ].
+
+<invalid/predicate-map-wrong-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Note, for VALUE_NOT_OF_EXPECTED_TYPE, the object is the expected type, not the resource that was expected to have this type";
+    :expect [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:predicateObjects1;
+        :predicate rr:predicateMap;
+        :object rr:PredicateMap;
+    ].
+
+<invalid/object-map-wrong-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Note, for VALUE_NOT_OF_EXPECTED_TYPE, the object is the expected type, not the resource that was expected to have this type";
+    :expect [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:predicateObjects1;
+        :predicate rr:objectMap;
+        :object rr:ObjectMap, rr:RefObjectMap;
+    ].
+
+<invalid/graph-map-wrong-type1.ttl> a :R2RMLValidatorTestCase;
+    :comment "Note, for VALUE_NOT_OF_EXPECTED_TYPE, the object is the expected type, not the resource that was expected to have this type";
+    :expect [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:predicateObjects1;
+        :predicate rr:graphMap;
+        :object rr:GraphMap;
+    ].
+
+<invalid/parent-triples-map-wrong-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Note, for VALUE_NOT_OF_EXPECTED_TYPE, the object is the expected type, not the resource that was expected to have this type";
+    :expect [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:ref1;
+        :predicate rr:parentTriplesMap;
+        :object rr:TriplesMap;
+    ].
+
+<invalid/join-condition-wrong-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Note, for VALUE_NOT_OF_EXPECTED_TYPE, the object is the expected type, not the resource that was expected to have this type";
+    :expect [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:ref1;
+        :predicate rr:joinCondition;
+        :object rr:Join;
+    ].
+
+<invalid/logical-table-wrong-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Note, for VALUE_NOT_OF_EXPECTED_TYPE, the object is the expected type, not the resource that was expected to have this type";
+    :expect [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:triples1;
+        :predicate rr:logicalTable;
+        :object rr:LogicalTable;
+    ].
+
+<invalid/subject-map-wrong-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Note, for VALUE_NOT_OF_EXPECTED_TYPE, the object is the expected type, not the resource that was expected to have this type";
+    :expect [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:triples1;
+        :predicate rr:subjectMap;
+        :object rr:SubjectMap;
+    ].
+
+<invalid/predicate-object-map-wrong-type.ttl> a :R2RMLValidatorTestCase;
+    :comment "Note, for VALUE_NOT_OF_EXPECTED_TYPE, the object is the expected type, not the resource that was expected to have this type";
+    :expect [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:triples1;
+        :predicate rr:predicateObjectMap;
+        :object rr:PredicateObjectMap;
+    ].
+
+<invalid/graph-map-wrong-type2.ttl> a :R2RMLValidatorTestCase;
+    :comment "Note, for VALUE_NOT_OF_EXPECTED_TYPE, the object is the expected type, not the resource that was expected to have this type";
+    :expect [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:terms1;
+        :predicate rr:graphMap;
+        :object rr:GraphMap;
+    ].
+
+<invalid/table-name-must-be-string1.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:table1;
+        :predicate rr:tableName;
+        :object ex:NotAString;
+    ], [
+        :problem e:MALFORMED_TABLE_OR_VIEW_NAME;
+        :subject map:table1;
+        :predicate rr:tableName;
+    ].
+
+<invalid/table-name-must-be-string2.ttl> a :R2RMLValidatorTestCase;
+    :comment "Object is a blank node";
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:table1;
+        :predicate rr:tableName;
+    ], [
+        :problem e:REQUIRED_VALUE_MISSING;
+        :subject map:table1;
+        :predicate rr:tableName;
+    ].
+
+<invalid/table-name-must-be-string3.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:table1;
+        :predicate rr:tableName;
+        :object "TABLE1"^^ex:Datatype;
+    ].
+
+<invalid/table-name-must-be-string4.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:table1;
+        :predicate rr:tableName;
+        :object "TABLE1"@en;
+    ].
+
+<invalid/column-name-must-be-string.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:terms1;
+        :predicate rr:column;
+        :object ex:COLUMN1;
+    ], [
+        :problem e:INVALID_COLUMN_NAME;
+        :subject map:terms1;
+        :predicate rr:column;
+    ].
+
+<invalid/child-must-be-string.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:join1;
+        :predicate rr:child;
+        :object ex:COLUMN1;
+    ], [
+        :problem e:INVALID_COLUMN_NAME;
+        :subject map:join1;
+        :predicate rr:child;
+    ].
+
+<invalid/parent-must-be-string.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:join1;
+        :predicate rr:parent;
+        :object ex:COLUMN2;
+    ], [
+        :problem e:INVALID_COLUMN_NAME;
+        :subject map:join1;
+        :predicate rr:parent;
+    ].
+
+<invalid/sql-query-must-be-string.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:table1;
+        :predicate rr:sqlQuery;
+        :object "SELECT * FROM TABLE1"@en;
+    ].
+
+<invalid/template-must-be-string.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:terms1;
+        :predicate rr:template;
+        :object "{COLUMN1}"@en;
+    ].
+
+<invalid/language-must-be-string.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:terms1;
+        :predicate rr:language;
+        :object ex:en;
+    ], [
+        :problem e:INVALID_LANGUAGE_TAG;
+        :subject map:terms1;
+        :predicate rr:language;
+    ].
+
+<invalid/inverse-expression-must-be-string.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_STRING_LITERAL;
+        :subject map:terms1;
+        :predicate rr:inverseExpression;
+        :object "COLUMN1 = {COLUMN1}"@en;
+    ].
+
+<invalid/sql-version-must-be-iri1.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI;
+        :subject map:table1;
+        :predicate rr:sqlVersion;
+        :object "Oracle";
+    ].
+
+<invalid/sql-version-must-be-iri2.ttl> a :R2RMLValidatorTestCase;
+    :comment "Object is a blank node";
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI;
+        :subject map:table1;
+        :predicate rr:sqlVersion;
+    ].
+
+<invalid/term-type-must-be-iri.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI;
+        :subject map:terms1;
+        :predicate rr:termType;
+        :object "IRI";
+    ].
+
+<invalid/datatype-must-be-iri.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI;
+        :subject map:terms1;
+        :predicate rr:datatype;
+        :object "xsd:dateTime";
+    ].
+
+<invalid/class-must-be-iri.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI;
+        :subject map:terms1;
+        :predicate rr:class;
+        :object "ex:Person";
+    ].
+
+<invalid/constant-must-be-iri1.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI;
+        :subject map:terms1;
+        :predicate rr:constant;
+        :object "Not an IRI";
+    ].
+
+<invalid/constant-must-be-iri2.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI;
+        :subject map:triples1;
+        :predicate rr:subject;
+        :object "Not an IRI";
+    ].
+
+<invalid/constant-must-be-iri-or-literal1.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_LITERAL;
+        :subject map:terms1;
+        :predicate rr:constant;
+    ].
+
+<invalid/constant-must-be-iri-or-literal2.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_LITERAL;
+        :subject map:predicateObjects1;
+        :predicate rr:object;
+    ].
+
+<valid/constant-literal-as-object1.ttl> a :R2RMLValidatorTestCase;
+    :comment "Literal constant is allowed for object maps".
+
+<valid/constant-literal-as-object2.ttl> a :R2RMLValidatorTestCase;
+    :comment "Literal constant is allowed for object maps".
+
+<invalid/logical-table-must-not-be-literal.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_BLANK_NODE;
+        :subject map:triples1;
+        :predicate rr:logicalTable;
+        :object "Nope";
+    ], [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:triples1;
+        :predicate rr:logicalTable;
+        :object rr:LogicalTable;
+    ].
+
+<invalid/subject-map-must-not-be-literal.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_BLANK_NODE;
+        :subject map:triples1;
+        :predicate rr:subjectMap;
+        :object "Nope";
+    ], [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:triples1;
+        :predicate rr:subjectMap;
+        :object rr:SubjectMap;
+    ].
+
+<invalid/predicate-object-map-must-not-be-literal.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_BLANK_NODE;
+        :subject map:triples1;
+        :predicate rr:predicateObjectMap;
+        :object "Nope";
+    ], [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:triples1;
+        :predicate rr:predicateObjectMap;
+        :object rr:PredicateObjectMap;
+    ].
+
+<invalid/predicate-map-must-not-be-literal.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_BLANK_NODE;
+        :subject map:predicateObjects1;
+        :predicate rr:predicateMap;
+        :object "Nope";
+    ], [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:predicateObjects1;
+        :predicate rr:predicateMap;
+        :object rr:PredicateMap;
+    ].
+
+<invalid/object-map-must-not-be-literal.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_BLANK_NODE;
+        :subject map:predicateObjects1;
+        :predicate rr:objectMap;
+        :object "Nope";
+    ], [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:predicateObjects1;
+        :predicate rr:objectMap;
+        :object rr:ObjectMap;
+    ].
+
+<invalid/graph-map-must-not-be-literal1.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_BLANK_NODE;
+        :subject map:predicateObjects1;
+        :predicate rr:graphMap;
+        :object "Nope";
+    ], [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:predicateObjects1;
+        :predicate rr:graphMap;
+        :object rr:GraphMap;
+    ].
+
+<invalid/parent-triples-map-must-not-be-literal.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_BLANK_NODE;
+        :subject map:ref1;
+        :predicate rr:parentTriplesMap;
+        :object "Nope";
+    ], [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:ref1;
+        :predicate rr:parentTriplesMap;
+        :object rr:TriplesMap;
+    ].
+
+<invalid/join-condition-must-not-be-literal.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_BLANK_NODE;
+        :subject map:ref1;
+        :predicate rr:joinCondition;
+        :object "Nope";
+    ], [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:ref1;
+        :predicate rr:joinCondition;
+        :object rr:Join;
+    ].
+
+<invalid/graph-map-must-not-be-literal2.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:VALUE_MUST_BE_IRI_OR_BLANK_NODE;
+        :subject map:terms1;
+        :predicate rr:graphMap;
+        :object "Nope";
+    ], [
+        :problem e:VALUE_NOT_OF_EXPECTED_TYPE;
+        :subject map:terms1;
+        :predicate rr:graphMap;
+        :object rr:GraphMap;
+    ].
+
+<invalid/invalid-language-tag.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_LANGUAGE_TAG;
+        :subject map:terms1;
+        :predicate rr:language;
+        :object "en/us";
+    ].
+
+<invalid/invalid-term-type.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_TERM_TYPE;
+        :subject map:terms1;
+        :predicate rr:termType;
+        :object ex:Nope;
+    ].
+
+<warning/graph-on-object-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:ONLY_ACTIVE_ON_SUBJECT_MAP;
+        :subject map:terms1;
+        :predicate rr:graph;
+    ].
+
+<warning/graph-on-graph-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:ONLY_ACTIVE_ON_SUBJECT_MAP;
+        :subject map:terms1;
+        :predicate rr:graphMap;
+    ].
+
+<invalid/wrong-term-type1.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:ONLY_ALLOWED_ON_OBJECT_MAP;
+        :subject map:terms1;
+        :predicate rr:termType;
+        :object rr:Literal;
+    ].
+
+<invalid/wrong-term-type2.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:ONLY_ALLOWED_ON_SUBJECT_OR_OBJECT_MAP;
+        :subject map:terms1;
+        :predicate rr:termType;
+        :object rr:BlankNode;
+    ].
+
+<invalid/wrong-term-type3.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:ONLY_ALLOWED_ON_SUBJECT_OR_OBJECT_MAP;
+        :subject map:terms1;
+        :predicate rr:termType;
+        :object rr:BlankNode;
+    ].
+
+<invalid/language-only-with-term-type-literal.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:ONLY_ALLOWED_IF_TERM_TYPE_LITERAL;
+        :subject map:terms1;
+        :predicate rr:language;
+    ].
+
+<invalid/datatype-only-with-term-type-literal.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:ONLY_ALLOWED_IF_TERM_TYPE_LITERAL;
+        :subject map:terms1;
+        :predicate rr:datatype;
+    ].
+
+<invalid/invalid-column-name.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_COLUMN_NAME;
+        :detailcode e:UNEXPECTED_CHARACTER;
+        :subject map:terms1;
+        :predicate rr:column;
+        :object "Not a valid column name";
+    ].
+
+<invalid/invalid-child-column-name.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_COLUMN_NAME;
+        :detailcode e:UNEXPECTED_CHARACTER;
+        :subject map:join1;
+        :predicate rr:child;
+        :object "Not a valid column name";
+    ].
+
+<invalid/invalid-parent-column-name.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_COLUMN_NAME;
+        :detailcode e:UNEXPECTED_CHARACTER;
+        :subject map:join1;
+        :predicate rr:parent;
+        :object "Not a valid column name";
+    ].
+
+<invalid/invalid-column-name-empty.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_COLUMN_NAME;
+        :detailcode e:UNEXPECTED_END;
+        :subject map:terms1;
+        :predicate rr:column;
+        :object "";
+    ].
+
+<invalid/invalid-column-name-quoted-empty.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_COLUMN_NAME;
+        :detailcode e:EMPTY_DELIMITED_IDENTIFIER;
+        :subject map:terms1;
+        :predicate rr:column;
+        :object "\"\"";
+    ].
+
+<invalid/invalid-column-name-qualified.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_COLUMN_NAME;
+        :detailcode e:TOO_MANY_IDENTIFIERS;
+        :subject map:terms1;
+        :predicate rr:column;
+        :object "TABLE1.COLUMN1";
+    ].
+
+<invalid/invalid-column-name-quoting.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_COLUMN_NAME;
+        :detailcode e:UNEXPECTED_END;
+        :subject map:terms1;
+        :predicate rr:column;
+        :object "\"COLUMN1";
+    ].
+
+<valid/valid-column-name-quoted.ttl> a :R2RMLValidatorTestCase;
+    :comment "Pass because column name is quoted and hence may contain funny characters".
+
+<invalid/malformed-table-name.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:MALFORMED_TABLE_OR_VIEW_NAME;
+        :detailcode e:UNEXPECTED_CHARACTER;
+        :subject map:table1;
+        :predicate rr:tableName;
+        :object "Not a valid table name";
+    ].
+
+<invalid/malformed-table-name-empty.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:MALFORMED_TABLE_OR_VIEW_NAME;
+        :detailcode e:UNEXPECTED_END;
+        :subject map:table1;
+        :predicate rr:tableName;
+        :object "";
+    ].
+
+<invalid/malformed-table-name-quoted-empty.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:MALFORMED_TABLE_OR_VIEW_NAME;
+        :detailcode e:EMPTY_DELIMITED_IDENTIFIER;
+        :subject map:table1;
+        :predicate rr:tableName;
+        :object "\"\"";
+    ].
+
+<invalid/malformed-table-name-too-many-periods.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:MALFORMED_TABLE_OR_VIEW_NAME;
+        :detailcode e:TOO_MANY_IDENTIFIERS;
+        :subject map:table1;
+        :predicate rr:tableName;
+        :object "INVALID.CATALOG1.SCHEMA1.COLUMN1.TABLE1";
+    ].
+
+<invalid/malformed-table-name-quoting.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:MALFORMED_TABLE_OR_VIEW_NAME;
+        :detailcode e:UNEXPECTED_END;
+        :subject map:table1;
+        :predicate rr:tableName;
+        :object "\"TABLE1";
+    ].
+
+<invalid/invalid-string-template-unmatched-curly.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_STRING_TEMPLATE;
+        :detailcode e:UNMATCHED_CURLY;
+        :subject map:terms1;
+        :predicate rr:template;
+        :object "{";
+    ].
+
+<invalid/invalid-string-template-undoubled-backslash.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_STRING_TEMPLATE;
+        :detailcode e:UNDOUBLED_BACKSLASH;
+        :subject map:terms1;
+        :predicate rr:template;
+        :object "aaa\\aaa{COLUMN1}";
+    ].
+
+<invalid/invalid-string-template-unexpected-character.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_STRING_TEMPLATE;
+        :detailcode e:UNEXPECTED_CHARACTER;
+        :subject map:terms1;
+        :predicate rr:template;
+        :object "{COLUMN 1}";
+    ].
+
+<invalid/invalid-string-template-qualified-column-name.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_STRING_TEMPLATE;
+        :detailcode e:QUALIFIED_COLUMN_NAME;
+        :subject map:terms1;
+        :predicate rr:template;
+        :object "{TABLE1.COLUMN1}";
+    ].
+
+<invalid/invalid-string-template-in-inverse-expression.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_STRING_TEMPLATE;
+        :subject map:terms1;
+        :predicate rr:inverseExpression;
+        :object "{";
+    ].
+
+<invalid/invalid-iri-template.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_IRI_TEMPLATE;
+        :subject map:terms1;
+        :predicate rr:template;
+        :object "aaa {COLUMN1}";
+    ].
+
+<warning/string-template-without-column-name.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:STRING_TEMPLATE_WITHOUT_COLUMN_NAME;
+        :subject map:terms1;
+        :predicate rr:template;
+        :object "aaa";
+    ].
+
+<warning/empty-separator-in-string-template.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:EMPTY_SEPARATOR_IN_STRING_TEMPLATE;
+        :subject map:terms1;
+        :predicate rr:template;
+        :object "{COLUMN1}{COLUMN2}";
+    ].
+
+<warning/possible-unsafe-separator-in-iri-template.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :level :Warning;
+        :problem e:POSSIBLE_UNSAFE_SEPARATOR_IN_IRI_TEMPLATE;
+        :subject map:terms1;
+        :predicate rr:template;
+        :object "{COLUMN1}-{COLUMN2}";
+    ].
+
+<invalid/missing-join.ttl> a :R2RMLValidatorTestCase;
+    :comment "Both triples maps use different logical tables, therefore an rr:joinCondition is required";
+    :expect [
+        :problem e:JOIN_REQUIRED;
+        :subject map:ref1;
+        :predicate rr:joinCondition;
+    ].
+
+<invalid/column-not-in-table.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:COLUMN_NOT_IN_LOGICAL_TABLE;
+        :subject map:terms1;
+        :object "NO_SUCH_COLUMN";
+    ].
+
+<invalid/template-column-not-in-table.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:COLUMN_NOT_IN_LOGICAL_TABLE;
+        :subject map:terms1;
+        :object "NO_SUCH_COLUMN";
+    ].
+
+<invalid/inverse-column-not-in-table.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:COLUMN_NOT_IN_LOGICAL_TABLE;
+        :subject map:terms1;
+        :object "NO_SUCH_COLUMN";
+    ].
+
+<invalid/column-not-in-view.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:COLUMN_NOT_IN_LOGICAL_TABLE;
+        :subject map:terms1;
+        :object "NO_SUCH_COLUMN";
+    ].
+
+<invalid/child-column-not-in-table.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:COLUMN_NOT_IN_LOGICAL_TABLE;
+        :subject map:join1;
+        :predicate rr:child;
+        :object "NO_SUCH_COLUMN";
+    ].
+
+<invalid/parent-column-not-in-table.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:COLUMN_NOT_IN_LOGICAL_TABLE;
+        :subject map:join1;
+        :predicate rr:parent;
+        :object "NO_SUCH_COLUMN";
+    ].
+
+<invalid/no-such-table.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:NO_SUCH_TABLE_OR_VIEW;
+        :subject map:table1;
+        :object "NO_SUCH_TABLE";
+    ].
+
+<invalid/invalid-sql-query.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:INVALID_SQL_QUERY;
+        :subject map:table1;
+        :predicate rr:sqlQuery;
+        :object "Not valid SQL";
+    ].
+
+<invalid/duplicate-column-name.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:DUPLICATE_COLUMN_NAME_IN_SQL_QUERY;
+        :subject map:table1;
+        :predicate rr:sqlQuery;
+        :object "SELECT COLUMN1, COLUMN1 FROM TABLE1";
+    ].

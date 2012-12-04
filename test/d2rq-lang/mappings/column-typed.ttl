@@ -1,0 +1,18 @@
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#>.
+@prefix map: <http://example.com/map#>.
+@prefix ex: <http://example.com/>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+map:db a d2rq:Database.
+map:Configuration a d2rq:Configuration; d2rq:serveVocabulary false.
+
+map:classmap a d2rq:ClassMap;
+	d2rq:dataStorage map:db;
+	d2rq:constantValue ex:s;
+	.
+map:pb1 a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:classmap;
+	d2rq:property ex:p;
+	d2rq:column "TABLE1.ID";
+	d2rq:datatype xsd:integer;
+	.

@@ -10,12 +10,12 @@ import jena.cmdline.CommandLine;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.d2rq.CommandLineTool;
+import org.d2rq.SystemLoader;
+import org.d2rq.mapgen.MappingGenerator;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
-import de.fuberlin.wiwiss.d2rq.CommandLineTool;
-import de.fuberlin.wiwiss.d2rq.SystemLoader;
-import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
 
 /**
  * Command line interface for {@link MappingGenerator}.
@@ -32,9 +32,9 @@ public class generate_mapping extends CommandLineTool {
 	public void usage() {
 		System.err.println("usage: generate-mapping [options] jdbcURL");
 		System.err.println();
-		printStandardArguments(false);
+		printStandardArguments(false, false);
 		System.err.println("  Options:");
-		printConnectionOptions();
+		printConnectionOptions(true);
 		System.err.println("    -o outfile.ttl  Output file name (default: stdout)");
 		System.err.println("    -v              Generate RDFS+OWL vocabulary instead of mapping file");
 		System.err.println("    --verbose       Print debug information");
@@ -65,7 +65,7 @@ public class generate_mapping extends CommandLineTool {
 			out = System.out;
 		}
 
-		MappingGenerator generator = loader.openMappingGenerator();
+		MappingGenerator generator = loader.getMappingGenerator();
 		try {
 			if (cmd.contains(vocabAsOutput)) {
 				Model model = generator.vocabularyModel();
@@ -74,7 +74,7 @@ public class generate_mapping extends CommandLineTool {
 				generator.writeMapping(out);
 			}
 		} finally {
-			loader.closeMappingGenerator();
+			loader.close();
 		}
 	}
 }

@@ -1,0 +1,35 @@
+@prefix : <http://d2rq.org/terms/test.ttl#>.
+@prefix map: <http://example.com/map#>.
+@prefix ex: <http://example.com/>.
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+# We use this to get the base URL in Jena.
+@prefix base: <>.
+
+<>
+    rdfs:label "A graph test suite for the D2RQ mapping language"@en;
+    rdfs:comment """
+Test cases for a D2RQ mapping language processor.
+    """@en.
+
+<mappings/only-constant-uris.ttl> a :D2RQProcessorTestCase;
+    :schema <schemas/empty-table1.sql>;
+    :triple (ex:s ex:p ex:o).
+
+<mappings/uri-pattern.ttl> a :D2RQProcessorTestCase;
+    :schema <schemas/table1.sql>;
+    :triple (ex:1 ex:p ex:o).
+
+<mappings/uri-pattern-empty-table.ttl> a :D2RQProcessorTestCase;
+    :schema <schemas/empty-table1.sql>.
+
+<mappings/column-typed.ttl> a :D2RQProcessorTestCase;
+    :schema <schemas/table1.sql>;
+    :triple (ex:s ex:p 1).
+
+<mappings/expression.ttl> a :D2RQProcessorTestCase;
+    :schema <schemas/table1.sql>;
+    :triple (ex:s ex:p 666).
+

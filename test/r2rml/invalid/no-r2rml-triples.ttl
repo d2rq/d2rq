@@ -1,0 +1,19 @@
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#>.
+@prefix map: <file:///Users/d2r/example.ttl#>.
+@prefix ex: <http://example.com/>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>. 
+
+map:Database1 a d2rq:Database;
+    d2rq:jdbcDSN "jdbc:mysql://localhost/iswc";
+    d2rq:jdbcDriver "com.mysql.jdbc.Driver";
+    d2rq:username "user";
+    d2rq:password "password".
+map:Conference a d2rq:ClassMap;
+    d2rq:dataStorage map:Database1;
+    d2rq:class ex:Conference;
+    d2rq:uriPattern "http://conferences.org/comp/confno@@Conferences.ConfID@@".
+map:eventTitle a d2rq:PropertyBridge;
+    d2rq:belongsToClassMap map:Conference;
+    d2rq:property ex:eventTitle;
+    d2rq:column "Conferences.Name";
+    d2rq:datatype xsd:string.

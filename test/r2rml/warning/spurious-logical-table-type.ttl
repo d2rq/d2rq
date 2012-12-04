@@ -1,0 +1,9 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix map: <http://example.com/map#>.
+@prefix ex: <http://example.com/ns#>.
+
+map:triples1
+    rr:subjectMap [ rr:column "COLUMN1" ];
+    rr:logicalTable map:table1.
+
+map:table1 a rr:R2RMLView; rr:tableName "TABLE1".

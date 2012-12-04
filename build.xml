@@ -49,7 +49,7 @@
 		<exclude name="velocity.log"/>
 	</patternset>
 
-	<property name="execfiles" value="dump-rdf generate-mapping d2r-server d2r-query"/>
+	<property name="execfiles" value="dump-rdf generate-mapping d2r-server d2r-query validate"/>
 
 	<target name="clean" description="Deletes all generated artefacts">
 		<delete dir="${build}" failonerror="false"/>

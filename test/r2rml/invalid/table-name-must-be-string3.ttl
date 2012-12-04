@@ -1,0 +1,10 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix map: <http://example.com/map#>.
+@prefix ex: <http://example.com/ns#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+map:triples1
+    rr:subject ex:s;
+    rr:logicalTable map:table1.
+
+map:table1 rr:tableName "TABLE1"^^ex:Datatype.

@@ -16,25 +16,24 @@
 # Table conferences
 map:Subjects_conferences a rr:SubjectMap;
     rr:class iswc:Conference;
-    rr:template "conferences/@@conferences.ConfID@@".
-#    rr:template "conferences/{ConfID}".
+    rr:template "conferences/{\"ConfID\"}".
 
 map:Triples_conferences a rr:TriplesMap;
-    rr:logicalTable [rr:tableName "conferences"];
+    rr:logicalTable [rr:tableName "\"conferences\""];
     rr:subjectMap map:Subjects_conferences;
     rr:predicateObjectMap [
         rr:predicate rdfs:label;
-        rr:objectMap [rr:column "Name"];
+        rr:objectMap [rr:column "\"Name\""];
     ];
     rr:predicateObjectMap [
         rr:predicate dc:date;
-        rr:objectMap [rr:column "Date"];
+        rr:objectMap [rr:column "\"Date\""];
     ];
     rr:predicateObjectMap [
         rr:predicate iswc:location;
-        rr:objectMap [rr:column "Location"];
+        rr:objectMap [rr:column "\"Location\""];
     ];
     rr:predicateObjectMap [
         rr:predicate vocab:startDate;
-        rr:objectMap [rr:column "Datum"];
+        rr:objectMap [rr:column "\"Datum\""];
     ].

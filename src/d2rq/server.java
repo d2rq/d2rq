@@ -1,10 +1,11 @@
 package d2rq;
 
+import org.d2rq.CommandLineTool;
+import org.d2rq.SystemLoader;
+import org.d2rq.server.JettyLauncher;
+
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
-import de.fuberlin.wiwiss.d2rq.CommandLineTool;
-import de.fuberlin.wiwiss.d2rq.SystemLoader;
-import de.fuberlin.wiwiss.d2rq.server.JettyLauncher;
 
 /**
  * Command line launcher for D2R Server.
@@ -20,11 +21,10 @@ public class server extends CommandLineTool {
 	public void usage() {
 		System.err.println("usage:");
 		System.err.println("  d2r-server [server-options] mappingFile");
-		System.err.println("  d2r-server [server-options] [database-options] r2rmlMappingFile");
 		System.err.println("  d2r-server [server-options] [connection-options] jdbcURL");
 		System.err.println("  d2r-server [server-options] [connection-options] -l script.sql");
 		System.err.println();
-		printStandardArguments(true);
+		printStandardArguments(true, false);
 		System.err.println();
 		System.err.println("  Server options:");
 		System.err.println("    -p port         Port where to start up the server (default: 2020)");
@@ -32,11 +32,8 @@ public class server extends CommandLineTool {
 		System.err.println("    --fast          Use all engine optimizations (recommended)");
 		System.err.println("    --verbose       Print debug information");
 		System.err.println();
-		System.err.println("  Database connection options (only with r2rml mappingFile):");
-		printDatabaseOptions();
-		System.err.println();
 		System.err.println("  Database connection options (only with jdbcURL):");
-		printConnectionOptions();
+		printConnectionOptions(true);
 		System.err.println();
 	}
 	

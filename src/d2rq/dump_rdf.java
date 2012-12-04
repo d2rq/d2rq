@@ -12,18 +12,18 @@ import jena.cmdline.CommandLine;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.d2rq.CommandLineTool;
+import org.d2rq.CompiledMapping;
+import org.d2rq.D2RQException;
+import org.d2rq.SystemLoader;
+import org.d2rq.db.SQLConnection;
+import org.d2rq.lang.D2RQReader;
+import org.d2rq.mapgen.MappingGenerator;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.shared.NoWriterForLangException;
 
-import de.fuberlin.wiwiss.d2rq.CommandLineTool;
-import de.fuberlin.wiwiss.d2rq.D2RQException;
-import de.fuberlin.wiwiss.d2rq.SystemLoader;
-import de.fuberlin.wiwiss.d2rq.map.Database;
-import de.fuberlin.wiwiss.d2rq.map.Mapping;
-import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
-import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
 /**
  * Command line utility for dumping a database to RDF, using the
@@ -46,7 +46,7 @@ public class dump_rdf extends CommandLineTool {
 		System.err.println("  dump-rdf [output-options] [connection-options] jdbcURL");
 		System.err.println("  dump-rdf [output-options] [connection-options] -l script.sql");
 		System.err.println();
-		printStandardArguments(true);
+		printStandardArguments(true, false);
 		System.err.println();
 		System.err.println("  RDF output options:");
 		System.err.println("    -b baseURI      Base URI for RDF output (default: " + SystemLoader.DEFAULT_BASE_URI + ")");
@@ -55,7 +55,7 @@ public class dump_rdf extends CommandLineTool {
 		System.err.println("    --verbose       Print debug information");
 		System.err.println();
 		System.err.println("  Database connection options (only with jdbcURL):");
-		printConnectionOptions();
+		printConnectionOptions(true);
 		System.err.println();
 		System.exit(1);
 	}
@@ -84,7 +84,7 @@ public class dump_rdf extends CommandLineTool {
 			File f = new File(cmd.getArg(outfileArg).getValue());
 			log.info("Writing to " + f);
 			out = new PrintStream(new FileOutputStream(f));
-			loader.setSystemBaseURI(MapParser.absolutizeURI(f.toURI().toString() + "#"));
+			loader.setSystemBaseURI(D2RQReader.absolutizeURI(f.toURI().toString() + "#"));
 		} else {
 			log.info("Writing to stdout");
 			out = System.out;
@@ -93,14 +93,12 @@ public class dump_rdf extends CommandLineTool {
 			loader.setSystemBaseURI(cmd.getArg(baseArg).getValue());
 		}
 
-		loader.setResultSizeLimit(Database.NO_LIMIT);
-		Mapping mapping = loader.getMapping();
+		CompiledMapping mapping = loader.getMapping();
 		try {
 			// Trigger compilation
-			mapping.compiledPropertyBridges();
-			// Override the d2rq:resultSizeLimit given in the mapping
-			for (Database db: mapping.databases()) {
-				db.connectedDB().setDefaultFetchSize(DUMP_DEFAULT_FETCH_SIZE);
+			mapping.getTripleRelations();
+			for (SQLConnection db: mapping.getSQLConnections()) {
+				db.setDefaultFetchSize(DUMP_DEFAULT_FETCH_SIZE);
 			}	
 
 			Model d2rqModel = loader.getModelD2RQ();
