@@ -29,11 +29,6 @@ import com.hp.hpl.jena.vocabulary.RDF;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 	HSQLDatabaseTest.class,
-//	de.fuberlin.wiwiss.d2rq.algebra.AllTests.class,
-//	de.fuberlin.wiwiss.d2rq.dbschema.AllTests.class,
-//	de.fuberlin.wiwiss.d2rq.engine.AllTests.class,
-//	de.fuberlin.wiwiss.d2rq.functional_tests.AllTests.class,
-//	de.fuberlin.wiwiss.d2rq.optimizer.AllTests.class,
 	org.d2rq.csv.AllTests.class,
 	org.d2rq.db.AllTests.class,
 	org.d2rq.db.expr.AllTests.class,
@@ -52,6 +47,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 	org.d2rq.nodes.AllTests.class,
 	org.d2rq.pp.AllTests.class,
 	org.d2rq.r2rml.AllTests.class,
+	org.d2rq.rdb2rdf.AllTests.class,
 	org.d2rq.values.AllTests.class,
 	org.d2rq.vocab.AllTests.class,
 })
