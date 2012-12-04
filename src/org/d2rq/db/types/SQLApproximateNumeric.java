@@ -3,6 +3,10 @@ package org.d2rq.db.types;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import org.d2rq.db.vendor.Vendor;
 
@@ -32,14 +36,17 @@ public class SQLApproximateNumeric extends DataType {
 		} else if (d == Double.NEGATIVE_INFINITY) {
 			return "-INF";
 		} else {
-			String dd = Double.toString(d);
-			if (!dd.contains("E")) {
-				// Canonical XSD form requires 0.0E0 form
-				dd += "E0";
-			}
-			return dd;
+			return fmtFloatingPoint.format(d);
+//			if (!dd.contains("E")) {
+//				// Canonical XSD form requires 0.0E0 form
+//				dd += "E0";
+//			}
+//			return dd;
 		}
 	}
+    static private DecimalFormatSymbols decimalNumberSymbols = new DecimalFormatSymbols(Locale.ROOT) ;
+    static private NumberFormat fmtFloatingPoint = new DecimalFormat("0.0#################E0", decimalNumberSymbols) ;
+	
 	@Override
 	public String toSQLLiteral(String value, Vendor vendor) {
 		try {

@@ -101,9 +101,7 @@ public class D2RQException extends JenaException {
 	public static final int STARTUP_UNKNOWN_FORMAT = 87;
 	public static final int VALIDATION_EXCEPTION = 88;
 	public static final int SQL_TABLE_NOT_FOUND = 89;
-	
-	public static final int R2RML_UNKNOWN_PROPERTY = 1001;
-	public static final int R2RML_UNKNOWN_CLASS = 1002;
+	public static final int NOT_YET_IMPLEMENTED = 90;	
 	
 	private int code;
 	

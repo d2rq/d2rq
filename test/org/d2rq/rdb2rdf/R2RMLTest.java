@@ -26,6 +26,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileManager;
 
 @RunWith(Parameterized.class)
@@ -104,15 +105,21 @@ public class R2RMLTest {
 				return;
 			}
 		}
-		Model actualTriples = loader.getModelD2RQ();
+		Model actualTriples = ModelFactory.createDefaultModel();
+		actualTriples.add(loader.getModelD2RQ());
 		Model expectedTriples = FileManager.get().loadModel(resultFile, "N-TRIPLES");
 		if (!actualTriples.isIsomorphicWith(expectedTriples)) {
 			Model missingStatements = expectedTriples.difference(actualTriples);
 			Model unexpectedStatements = actualTriples.difference(expectedTriples);
-			if (!unexpectedStatements.isEmpty()) {
+			if (missingStatements.isEmpty() && unexpectedStatements.isEmpty()) {
+				fail("Models not isomorphic; expected: " + 
+						asNTriples(expectedTriples) +
+						" actual: " + asNTriples(actualTriples));
+			}
+			if (missingStatements.isEmpty()) {
 				fail("Unexpected statement(s): " + 
 						asNTriples(unexpectedStatements));
-			} else if (!missingStatements.isEmpty()) {
+			} else if (unexpectedStatements.isEmpty()) {
 				fail("Missing statement(s): " + 
 						asNTriples(missingStatements));
 			} else {

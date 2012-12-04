@@ -259,7 +259,7 @@ public class Inspector {
 				}
 				Set<ForeignKey> result = new HashSet<ForeignKey>();
 				for (ForeignKeyBuilder fk: fks.values()) {
-					fk.toForeignKey();
+					result.add(fk.toForeignKey());
 				}
 				return result;
 			} finally {

@@ -12,17 +12,18 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.d2rq.CompiledMapping;
+import org.d2rq.D2RQException;
 import org.d2rq.D2RQOptions;
 import org.d2rq.ResourceCollection;
 import org.d2rq.algebra.DownloadRelation;
 import org.d2rq.algebra.TripleRelation;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.op.AliasOp;
+import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.ProjectOp;
 import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.SQLOp;
-import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.DataType.GenericType;
@@ -193,6 +194,10 @@ public class R2RMLCompiler implements CompiledMapping {
 				objectMaps.add(objects.asTermMap());
 			}
 			objectMaps.addAll(mapping.termMaps().getAll(poMap.getObjectMaps()));
+			if (!mapping.referencingObjectMaps().getAll(poMap.getObjectMaps()).isEmpty()) {
+				// FIXME: Implement rr:ReferencingObjectMap
+				throw new D2RQException("rr:ReferencingObjectMap not yet imlemented", D2RQException.NOT_YET_IMPLEMENTED);
+			}
 			for (TermMap objectMap: objectMaps) {
 				NodeMaker objectMaker = createNodeMaker(objectMap, Position.OBJECT_MAP);
 				currentTripleRelations.add(createTripleRelation(predicateMaker, objectMaker));
@@ -216,7 +221,9 @@ public class R2RMLCompiler implements CompiledMapping {
 	}
 	
 	private DatabaseOp createTabular(Set<ProjectionSpec> columns) {
-		return ProjectOp.create(currentTable, columns);
+		DatabaseOp op = currentTable;
+		ProjectOp.create(op, columns);
+		return op;
 	}
 	
 	private NodeMaker createNodeMaker(TermMap termMap, Position position) {
@@ -226,6 +233,10 @@ public class R2RMLCompiler implements CompiledMapping {
 	}
 	
 	private TemplateValueMaker toTemplate(StringTemplate template, TermType termType) {
+		String[] literalParts = template.getLiteralParts().clone();
+		if (termType == TermType.IRI && !literalParts[0].matches("[a-zA-Z][a-zA-Z0-9.+-]*:.*")) {
+			literalParts[0] = mapping.getBaseIRI() + literalParts[0];
+		}
 		ColumnName[] qualifiedColumns = new ColumnName[template.getColumnNames().length];
 		ColumnFunction[] functions = new ColumnFunction[template.getColumnNames().length];
 		for (int i = 0; i < qualifiedColumns.length; i++) {
@@ -233,7 +244,7 @@ public class R2RMLCompiler implements CompiledMapping {
 					template.getColumnNames()[i]);
 			functions[i] = termType == TermType.IRI ? TemplateValueMaker.ENCODE : TemplateValueMaker.IDENTITY;
 		}
-		return new TemplateValueMaker(template.getLiteralParts(), qualifiedColumns, functions);
+		return new TemplateValueMaker(literalParts, qualifiedColumns, functions);
 	}
 	
 	private String getTriplesMapName() {
