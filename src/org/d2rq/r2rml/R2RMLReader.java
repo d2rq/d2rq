@@ -22,6 +22,7 @@ import org.d2rq.r2rml.TermMap.TermType;
 import org.d2rq.validation.Report;
 import org.d2rq.validation.Message.Problem;
 import org.d2rq.vocab.RR;
+import org.d2rq.vocab.RRExtra;
 import org.d2rq.vocab.VocabularySummarizer;
 
 import com.hp.hpl.jena.rdf.model.Literal;
@@ -38,7 +39,7 @@ import com.hp.hpl.jena.vocabulary.XSD;
 
 
 /**
- * Creates an {@link R2RMLMapping} from a Jena model containing
+ * Creates an R2RML {@link Mapping} from a Jena model containing
  * an R2RML mapping graph.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
@@ -141,6 +142,7 @@ public class R2RMLReader {
 		}
 
 		VocabularySummarizer vocabulary = new VocabularySummarizer(RR.class);
+		vocabulary.addResource(RRExtra.SQL2008);
 		if (!vocabulary.usesVocabulary(model)) {
 			report.report(Problem.NO_R2RML_TRIPLES);
 			return;
@@ -154,6 +156,9 @@ public class R2RMLReader {
 		}
 		for (Property property: vocabulary.getUndefinedProperties(model)) {
 			report.report(Problem.UNKNOWN_PROPERTY_IN_R2RML_NAMESPACE, property);
+		}
+		for (Resource resource: vocabulary.getUndefinedResources(model)) {
+			report.report(Problem.UNKNOWN_RESOURCE_IN_R2RML_NAMESPACE, resource);
 		}
 
 		for (Resource r: listResourcesWith(RR.logicalTable, RR.subjectMap, 

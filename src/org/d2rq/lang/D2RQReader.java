@@ -36,7 +36,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
  * Creates a {@link Mapping} from a Jena model representation
  * of a D2RQ mapping file.
  * 
- * TODO: Rewrite using the same logic as {@link R2RMLReader} to get better error reporting
+ * TODO: Rewrite using the same logic as R2RMLReader to get better error reporting
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */

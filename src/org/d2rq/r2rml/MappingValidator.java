@@ -383,11 +383,11 @@ public class MappingValidator extends MappingVisitor.TreeWalkerImplementation {
 	 * should be named, because otherwise they cannot be reliably referenced 
 	 * in the rest of the mapping."
 	 * 
-	 * @see http://www.w3.org/TR/r2rml/#dfn-sql-query 
+	 * @see <a href="http://www.w3.org/TR/r2rml/#dfn-sql-query">R2RML: SQL query</a> 
 	 */
 	@Override
 	public void visitTerm(SQLQuery sqlQuery) {
-		if (sqlConnection != null && sqlQuery.isValid()) {
+		if (sqlConnection != null) {
 			String error = sqlConnection.getParseError(sqlQuery.toString());
 			if (error == null) {
 				List<ColumnName> columns = sqlConnection.getSelectStatement(sqlQuery.toString()).getColumns();
@@ -487,6 +487,7 @@ public class MappingValidator extends MappingVisitor.TreeWalkerImplementation {
 
 	@Override
 	public void visitTerm(LanguageTag languageTag) {
+		// TODO: Use ARQ's LangTag.parse() instead? Would be suitable for RDF 1.1
 		try {
 			new com.hp.hpl.jena.rdf.arp.lang.LanguageTag(languageTag.toString());
 		} catch (LanguageTagSyntaxException ex) {

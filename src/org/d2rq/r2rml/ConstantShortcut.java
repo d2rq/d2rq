@@ -10,7 +10,7 @@ public class ConstantShortcut extends MappingTerm {
 
 	/**
 	 * Always succeeds. Check {@link #isValid()} to see if syntax is ok.
-	 * @result <code>null</code> if arg is <code>null</code>
+	 * @return <code>null</code> if arg is <code>null</code>
 	 */
 	public static ConstantShortcut create(RDFNode constant) {
 		return constant == null ? null : new ConstantShortcut(constant);

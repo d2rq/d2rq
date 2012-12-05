@@ -8,13 +8,13 @@ import org.d2rq.db.schema.Identifier.Parser.ViolationType;
  * A column name must be a valid SQL identifier. 
  * Column names do not include any qualifying table, view or schema names.
  * 
- * @see http://www.w3.org/TR/r2rml/#dfn-column-name
+ * @see <a href="http://www.w3.org/TR/r2rml/#dfn-column-name">R2RML: Column name</a>
  */
 public class ColumnNameR2RML extends MappingTerm {
 
 	/**
 	 * Always succeeds. Check {@link #isValid()} to see if syntax is ok.
-	 * @result <code>null</code> if arg is <code>null</code>
+	 * @return <code>null</code> if arg is <code>null</code>
 	 */
 	public static ColumnNameR2RML create(String name) {
 		return name == null ? null : new ColumnNameR2RML(name);

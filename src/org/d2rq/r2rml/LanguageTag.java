@@ -5,7 +5,7 @@ public class LanguageTag extends MappingTerm {
 
 	/**
 	 * Always succeeds. Check {@link #isValid()} to see if syntax is ok.
-	 * @result <code>null</code> if arg is <code>null</code>
+	 * @return <code>null</code> if arg is <code>null</code>
 	 */
 	public static LanguageTag create(String tag) {
 		return tag == null ? null : new LanguageTag(tag);

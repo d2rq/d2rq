@@ -30,14 +30,29 @@ public class VocabularySummarizer {
 	private final String namespace;
 	private final Set<Property> properties;
 	private final Set<Resource> classes;
+	private final Set<Resource> resources = new HashSet<Resource>();
 	
 	public VocabularySummarizer(Class<? extends Object> vocabularyJavaClass) {
 		this.vocabularyJavaClass = vocabularyJavaClass;
 		namespace = findNamespace();
 		properties = findAllProperties();
 		classes = findAllClasses();
+		resources.addAll(properties);
+		resources.addAll(classes);
 	}
 
+	public void addResource(Resource resource) {
+		resources.add(resource);
+	}
+	
+	public void addClass(Resource class_) {
+		classes.add(class_);
+	}
+	
+	public void addProperty(Property property) {
+		properties.add(property);
+	}
+	
 	public Set<Property> getAllProperties() {
 		return properties;
 	}
@@ -117,6 +132,26 @@ public class VocabularySummarizer {
 			if (stmt.getPredicate().getURI().startsWith(namespace)
 					&& !properties.contains(stmt.getPredicate())) {
 				result.add(stmt.getPredicate());
+			}
+		}
+		return result;
+	}
+	
+	public Collection<Resource> getUndefinedResources(Model model) {
+		Set<Resource> result = new HashSet<Resource>();
+		StmtIterator it = model.listStatements();
+		while (it.hasNext()) {
+			Statement stmt = it.nextStatement();
+			if (stmt.getSubject().isURIResource()
+					&& stmt.getSubject().getURI().startsWith(namespace)
+					&& !resources.contains(stmt.getSubject())) {
+				result.add(stmt.getSubject());
+			}
+			if (stmt.getPredicate().equals(RDF.type)) continue;
+			if (stmt.getObject().isURIResource()
+					&& stmt.getResource().getURI().startsWith(namespace)
+					&& !resources.contains(stmt.getResource())) {
+				result.add(stmt.getResource());
 			}
 		}
 		return result;

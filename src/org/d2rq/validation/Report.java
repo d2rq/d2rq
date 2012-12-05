@@ -50,6 +50,7 @@ public class Report {
 		}
 		return result;
 	}
+	
 	public List<Message> getMessages() {
 		return messages;
 	}
@@ -96,10 +97,14 @@ public class Report {
 	public void report(Message message) {
 		if (ignoreInfo && message.getLevel() == Level.Info) return;
 		if (throwExceptionOnError && message.getLevel() == Level.Error) {
-			StringWriter out = new StringWriter();
-			new PlainTextMessageRenderer(out).render(message);
-			throw new D2RQException(out.toString(), D2RQException.VALIDATION_EXCEPTION);
+			throwException(message);
 		}
 		messages.add(message);
+	}
+	
+	public void throwException(Message message) {
+		StringWriter out = new StringWriter();
+		new PlainTextMessageRenderer(out).render(message);
+		throw new D2RQException(out.toString(), D2RQException.VALIDATION_EXCEPTION);
 	}
 }

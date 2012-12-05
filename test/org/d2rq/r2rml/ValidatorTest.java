@@ -74,7 +74,7 @@ public class ValidatorTest {
 		while (rs.hasNext()) {
 			QuerySolution qs = rs.next();
 			Resource file = qs.getResource("r2rml");
-//			if (!file.getLocalName().equals("invalid-string-template-in-inverse-expression.ttl")) continue;
+//			if (!file.getLocalName().equals("duplicate-subject-map.ttl")) continue;
 			List<MessageExpectation> expectations = new ArrayList<MessageExpectation>();
 			QueryExecution qe = QueryExecutionFactory.create(TEST_CASE_DETAILS, m);
 			qe.setInitialBinding(qs);

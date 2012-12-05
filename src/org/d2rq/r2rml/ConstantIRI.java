@@ -11,7 +11,7 @@ public class ConstantIRI extends MappingTerm {
 
 	/**
 	 * Always succeeds. Check {@link #isValid()} to see if syntax is ok.
-	 * @result <code>null</code> if arg is <code>null</code>
+	 * @return <code>null</code> if arg is <code>null</code>
 	 */
 	public static ConstantIRI create(String iri) {
 		return iri == null ? null : new ConstantIRI(iri);
@@ -19,7 +19,7 @@ public class ConstantIRI extends MappingTerm {
 
 	/**
 	 * Always succeeds. Check {@link #isValid()} to see if syntax is ok.
-	 * @result <code>null</code> if arg is <code>null</code>
+	 * @return <code>null</code> if arg is <code>null</code>
 	 */
 	public static ConstantIRI create(Resource iri) {
 		return iri == null ? null : new ConstantIRI(iri.getURI());

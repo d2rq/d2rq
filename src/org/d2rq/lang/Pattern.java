@@ -27,7 +27,7 @@ import org.d2rq.values.TemplateValueMaker.ColumnFunction;
  * 
  * Each column reference can also include an encoding function, an instance
  * of {@link ColumnFunction}: <code>aaa@@t.col1|urlify@@bbb</code>.
- * The default encoding function is {@link #IDENTITY}.
+ * The default encoding function is {@link ColumnFunction#IDENTITY}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */

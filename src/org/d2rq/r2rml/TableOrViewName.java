@@ -7,14 +7,14 @@ import org.d2rq.db.schema.Identifier.Parser.ViolationType;
 /**
  * A SQL table or view name. May be qualified with a catalog name and schema name.
  * 
- * @see http://www.w3.org/TR/r2rml/#dfn-table-or-view-name
+ * @see <a href="http://www.w3.org/TR/r2rml/#dfn-table-or-view-name">R2RML: Table or view name</a>
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class TableOrViewName extends MappingTerm {
 	
 	/**
 	 * Always succeeds. Check {@link #isValid()} to see if syntax is ok.
-	 * @result <code>null</code> if arg is <code>null</code>
+	 * @return <code>null</code> if arg is <code>null</code>
 	 */
 	public static TableOrViewName create(String tableName) {
 		return tableName == null ? null : new TableOrViewName(tableName);

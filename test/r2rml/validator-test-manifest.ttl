@@ -169,6 +169,14 @@ There are no tests (yet) for the semantics of rr:inverseExpression.
         :subject rr:undefinedProperty;
     ].
 
+<warning/unknown-resource-in-r2rml-namespace.ttl> a :R2RMLValidatorTestCase;
+    :comment "Warning message due to undefined resource rr:SQL1992";
+    :expect [
+        :level :Warning;
+        :problem e:UNKNOWN_RESOURCE_IN_R2RML_NAMESPACE;
+        :subject rr:SQL1992;
+    ].
+
 <warning/spurious-type.ttl> a :R2RMLValidatorTestCase;
     :comment "Warning message due to wrong typing of the triples map";
     :expect [
@@ -392,6 +400,18 @@ There are no tests (yet) for the semantics of rr:inverseExpression.
         :subject map:triples1;
         :predicate rr:subject;
         :object ex:s1, ex:s2;
+    ].
+
+<invalid/duplicate-subject-map.ttl> a :R2RMLValidatorTestCase;
+    :expect [
+        :problem e:DUPLICATE_VALUE;
+        :subject map:triples1;
+        :predicate rr:subjectMap;
+        :object map:subjects1, map:subjects2;
+    ], [
+        :level :Warning;
+        :problem e:UNREFERENCED_MAPPING_COMPONENT;
+        :subject map:subjects2;
     ].
 
 <invalid/duplicate-parent-triples-map.ttl> a :R2RMLValidatorTestCase;

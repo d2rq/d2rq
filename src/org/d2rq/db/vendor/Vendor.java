@@ -82,7 +82,7 @@ public interface Vendor {
 	/**
 	 * Handles special characters in qualified column names.
 	 * 
-	 * @param table A qualified column name
+	 * @param column A qualified column name
 	 * @return A string representation of the column name for use in SQL statements
 	 */
 	String toString(ColumnName column);

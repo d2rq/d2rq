@@ -43,6 +43,8 @@ public class Message {
 				"The class {resource} is used in the document, but is not defined in R2RML."),
 		UNKNOWN_PROPERTY_IN_R2RML_NAMESPACE(Level.Warning, "Undefined property {resource}",
 				"The property {resource} is used in the document, but is not defined in R2RML."),
+		UNKNOWN_RESOURCE_IN_R2RML_NAMESPACE(Level.Warning, "Undefined resource {resource}",
+				"The resource {resource} is used in the document, but is not defined in R2RML."),
 		SPURIOUS_TYPE(Level.Warning, "Spurious type statement",
 				"The resource {resource} is typed as an {object}, but it lacks the required properties."),
 		SPURIOUS_TRIPLE(Level.Warning, "Spurious property",

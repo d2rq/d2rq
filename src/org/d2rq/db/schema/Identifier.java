@@ -41,7 +41,7 @@ public class Identifier implements Comparable<Identifier> {
 	
 	/**
 	 * Caller must ensure that the name is valid.
-	 * @param isDelimited Is this a delimited identifier as per SQL spec?
+	 * @param delimited Is this a delimited identifier as per SQL spec?
 	 * @param name The identifier's name, without delimiters and unescaped
 	 * @return A matching Identifier instance, or <code>null</code> if name was null
 	 */

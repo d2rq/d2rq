@@ -39,7 +39,7 @@ public class IRIEncoder {
 	 * This includes in particular the eleven sub-delim characters
 	 * defined in [RFC3987]: !$&'()*+,;=
 	 * 
-	 * @see http://www.w3.org/TR/r2rml/#dfn-safe-separator
+	 * @see <a href="http://www.w3.org/TR/r2rml/#dfn-safe-separator">R2RML: Safe separator</a>
 	 */
 	public static boolean isSafeSeparator(String s) {
 		for (int i = 0; i < s.length(); i++) {

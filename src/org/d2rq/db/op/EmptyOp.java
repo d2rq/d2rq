@@ -34,8 +34,9 @@ public class EmptyOp extends DatabaseOp.Wrapper {
 	}
 
 	public void accept(OpVisitor visitor) {
-		visitor.visitEnter(this);
-		getWrapped().accept(visitor);
+		if (visitor.visitEnter(this)) {
+			getWrapped().accept(visitor);
+		}
 		visitor.visitLeave(this);
 	}
 

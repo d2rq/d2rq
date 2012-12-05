@@ -47,8 +47,6 @@ public interface DatabaseOp {
 	 * table. The identity element of the relational cross product operation.
 	 * In many databases, this table can be accessed by simply omitting
 	 * the <code>FROM</code> clause in a <code>SELECT</code> statement. 
-	 * 
-	 * @author Richard Cyganiak (richard@cyganiak.de)
 	 */
 	public DatabaseOp TRUE = new DatabaseOp() {
 		public TableName getTableName() {

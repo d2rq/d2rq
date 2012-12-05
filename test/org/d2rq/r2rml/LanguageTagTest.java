@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.d2rq.r2rml.LanguageTag;
-import org.d2rq.r2rml.MappingValidator;
 import org.d2rq.validation.Message.Problem;
 import org.junit.Test;
 
@@ -24,7 +22,7 @@ public class LanguageTagTest {
 	@Test public void invalid() {
 		assertFalse(LanguageTag.create("en us").isValid());
 	}
-	
+
 	@Test public void validate() {
 		MappingValidator validator = new MappingValidator(null);
 		LanguageTag.create("en us").accept(validator);

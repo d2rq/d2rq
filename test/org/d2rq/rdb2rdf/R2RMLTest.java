@@ -1,18 +1,17 @@
 package org.d2rq.rdb2rdf;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.d2rq.D2RQException;
 import org.d2rq.D2RQTestSuite;
 import org.d2rq.HSQLDatabase;
 import org.d2rq.SystemLoader;
 import org.d2rq.pp.PrettyPrinter;
 import org.d2rq.r2rml.MappingValidator;
+import org.d2rq.r2rml.R2RMLReader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,16 +93,15 @@ public class R2RMLTest {
 		loader.setStartupSQLScript(sqlFile);
 		loader.setSystemBaseURI(BASE_URI);
 		if (resultFile == null) {
-			try {
-				MappingValidator validator = new MappingValidator(
-						loader.getR2RMLReader().getMapping(), loader.getSQLConnection());
-				validator.setThrowExceptionOnError(true);
-				validator.run();
+			R2RMLReader reader = loader.getR2RMLReader();
+			MappingValidator validator = new MappingValidator(
+					reader.getMapping(), loader.getSQLConnection());
+			validator.setReport(reader.getReport());
+			validator.run();
+			if (!reader.getReport().hasError()) {
 				fail("Expected validation error");
-			} catch (D2RQException ex) {
-				assertEquals(D2RQException.VALIDATION_EXCEPTION, ex.errorCode());
-				return;
 			}
+			return;
 		}
 		Model actualTriples = ModelFactory.createDefaultModel();
 		actualTriples.add(loader.getModelD2RQ());

@@ -43,9 +43,9 @@ import org.d2rq.nodes.NodeSetFilter;
  * R2RML: http://example.com/person/{first}_{last}
  * 
  * Each column reference can also include an encoding function, an instance
- * of {@link ColumnFunction}, like {@link URLIFY}. In R2RML it is always
- * {@link ENCODE} for IRI templates and {@link IDENTITY} otherwise.
- * In D2RQ, the default encoding function is {@link #IDENTITY}.
+ * of {@link ColumnFunction}, like {@link ColumnFunction#URLIFY}. In R2RML it is always
+ * {@link ColumnFunction#ENCODE} for IRI templates and {@link ColumnFunction#IDENTITY} otherwise.
+ * In D2RQ, the default encoding function is {@link ColumnFunction#IDENTITY}.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */

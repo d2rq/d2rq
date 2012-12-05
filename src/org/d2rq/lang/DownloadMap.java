@@ -13,11 +13,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * provide further relation elements (joins, aliases, conditions),
  * and additionally has a d2rq:mediaType and d2rq:contentColumn.
  * 
- * Results can be retrieved via {@link #getContentDownloadColumn()},
- * {@link #getMediaTypeValueMaker()} (for the media type value make),
- * {@link #nodeMaker()} (for the URI spec),
- * and {@link #getRelation()}.
- * 
  * @author RichardCyganiak
  */
 public class DownloadMap extends ResourceMap {

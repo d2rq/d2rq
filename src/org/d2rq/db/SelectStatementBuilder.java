@@ -34,9 +34,9 @@ import org.d2rq.db.vendor.Vendor;
  * Turns a {@link DatabaseOp} into a SQL SELECT statement.
  * 
  * Works by doing a depth-first traversal of the query tree, collecting
- * information in a {@link SimpleQuery} object. Such an object can contain
+ * information in a <code>SimpleQuery</code> object. Such an object can contain
  * a non-nested SQL query. Once nesting is necessary, the current
- * {@link SimpleQuery} is put on a stack, a new one is allocated and
+ * <code>SimpleQuery</code> is put on a stack, a new one is allocated and
  * information collected in it, and then it is "flattened" by turning
  * it into a raw SQL string that becomes a FROM clause in the upper
  * instance.

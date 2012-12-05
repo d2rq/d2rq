@@ -46,11 +46,6 @@ public class SQLExpression extends Expression {
 	 * The actual SQL expression is obtained by alternating a literal
 	 * part with a column part. There must be one more literal parts
 	 * than column parts.
-	 * 
-	 * @param literalParts
-	 * @param columns
-	 * @param dataType
-	 * @return
 	 */
 	public static SQLExpression create(List<String> literalParts, 
 			List<ColumnName> columns, GenericType dataType) {

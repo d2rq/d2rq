@@ -4,7 +4,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 
 /**
- * An extra term that should be in the R2RML vocabulary but isn't.
+ * Extra terms that should be in the R2RML vocabulary but aren't.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
@@ -20,4 +20,7 @@ public class RRExtra {
 		RR.SubjectMap.getModel().createResource(RR.getURI() + "ColumnValuedTermMap");
 	public static Resource TemplateValuedTermMap = 
 		RR.SubjectMap.getModel().createResource(RR.getURI() + "TemplateValuedTermMap");
+
+	public static Resource SQL2008 = 
+			RR.SubjectMap.getModel().createResource(RR.getURI() + "SQL2008");
 }

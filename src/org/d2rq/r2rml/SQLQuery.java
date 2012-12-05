@@ -18,13 +18,13 @@ package org.d2rq.r2rml;
  * explicit catalog name or schema name, the default catalog and default 
  * schema of the SQL connection are assumed.
  * 
- * @see http://www.w3.org/TR/r2rml/#dfn-sql-query
+ * @see <a href="http://www.w3.org/TR/r2rml/#dfn-sql-query">R2RML: SQL query</a>
  */
 public class SQLQuery extends MappingTerm {
 
 	/**
 	 * Always succeeds. Check {@link #isValid()} to see if syntax is ok.
-	 * @result <code>null</code> if arg is <code>null</code>
+	 * @return <code>null</code> if arg is <code>null</code>
 	 */
 	public static SQLQuery create(String sql) {
 		return sql == null ? null : new SQLQuery(sql);

@@ -12,13 +12,13 @@ import org.d2rq.db.schema.Identifier;
  * from multiple components. It can reference column names by enclosing them 
  * in curly braces ("{" and "}").
  * 
- * @see http://www.w3.org/TR/r2rml/#dfn-string-template
+ * @see <a href="http://www.w3.org/TR/r2rml/#dfn-string-template">R2RML: String template</a>
  */
 public class StringTemplate extends MappingTerm {
 
 	/**
 	 * Always succeeds. Check {@link #isValid()} to see if syntax is ok.
-	 * @result <code>null</code> if arg is <code>null</code>
+	 * @return <code>null</code> if arg is <code>null</code>
 	 */
 	public static StringTemplate create(String template) {
 		return template == null ? null : new StringTemplate(template);

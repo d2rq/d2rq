@@ -240,10 +240,6 @@ public class SystemLoader {
 		return sqlConnection;
 	}
 
-	/**
-	 * Returns a mapping generator. Needs to be explicitly closed
-	 * using {@link #closeMappingGenerator()}.
-	 */
 	public MappingGenerator getMappingGenerator() {
 		if (generator == null) {
 			generator = generateDirectMapping ?
@@ -394,7 +390,7 @@ public class SystemLoader {
 	}
 
 	/**
-	 * Needs to be called if any of the openXXX() methods have been called.
+	 * Closes any created {@link SQLConnection}s and any other created resources.
 	 */
 	public void close() {
 		if (sqlConnection != null) {

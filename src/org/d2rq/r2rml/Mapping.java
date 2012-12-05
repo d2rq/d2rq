@@ -22,7 +22,7 @@ import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
  * 
  * It can represent certain kinds of invalid R2RML mappings,
  * for example those with required information missing.
- * A call to {@link #validate()} can be used to check that it's
+ * A call to {@link #isValid()} can be used to check that it's
  * ok.
  * 
  * It represent some extra bits of information that
@@ -31,7 +31,7 @@ import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
  * <ul>
  * <li>There can be unused mapping components (e.g., a term map
  * instance that is not used by anything). These can be listed
- * via {@link #getUnusedMappingComponents()}.</li>
+ * via {@link #getUnreferencedMappingComponents()}.</li>
  * <li>There is an associated prefix mapping: {@link #getPrefixMapping()}.</li>
  * <li>Mapping components are stored along with the Jena {@link Resource}
  * that represents it in the mapping graph.</li>

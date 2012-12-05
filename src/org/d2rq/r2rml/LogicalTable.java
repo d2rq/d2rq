@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.d2rq.db.SQLConnection;
+import org.d2rq.db.op.SQLOp;
+import org.d2rq.db.op.TableOp;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.vocab.RR;
@@ -33,9 +35,11 @@ public abstract class LogicalTable extends MappingComponent {
 		}
 		@Override
 		public List<Identifier> getColumns(SQLConnection connection) {
-			if (sqlQuery == null || !sqlQuery.isValid()) return null;
+			if (sqlQuery == null || !sqlQuery.isValid(connection)) return null;
+			SQLOp sqlOp = connection.getSelectStatement(sqlQuery.toString());
+			if (sqlOp == null) return null;
 			List<Identifier> result = new ArrayList<Identifier>();
-			for (ColumnName column: connection.getSelectStatement(sqlQuery.toString()).getColumns()) {
+			for (ColumnName column: sqlOp.getColumns()) {
 				result.add(column.getColumn());
 			}
 			return result;
@@ -67,9 +71,11 @@ public abstract class LogicalTable extends MappingComponent {
 		}
 		@Override
 		public List<Identifier> getColumns(SQLConnection connection) {
-			if (tableName == null || !tableName.isValid()) return null;
+			if (tableName == null || !tableName.isValid(connection)) return null;
+			TableOp table = connection.getTable(tableName.asQualifiedTableName());
+			if (table == null) return null;
 			List<Identifier> result = new ArrayList<Identifier>();
-			for (ColumnName column: connection.getTable(tableName.asQualifiedTableName()).getColumns()) {
+			for (ColumnName column: table.getColumns()) {
 				result.add(column.getColumn());
 			}
 			return result;

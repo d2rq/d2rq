@@ -69,8 +69,11 @@ public abstract class Renamer {
 	}
 	
 	/**
-	 * @param original A join
-	 * @return A join with all columns renamed according to this Renamer
+	 * Renames tables/columns in a {@link ForeignKey}.
+	 * 
+	 * @param table The table on which the foreign key is defined
+	 * @param foreignKey The foreign key to be renamed
+	 * @return A foreign key with all columns renamed according to this Renamer
 	 */
 	public ForeignKey applyTo(TableName table, ForeignKey foreignKey) {
 		return new ForeignKey(
