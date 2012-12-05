@@ -117,12 +117,28 @@ Test cases for an R2RML processor.
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p ex:1).
 
+<mappings/o-template-term-type-literal.ttl> a :R2RMLProcessorTestCase;
+    :schema <schemas/table1.sql>;
+    :triple (ex:s ex:p "foo1").
+
+<mappings/o-template-iri.ttl> a :R2RMLProcessorTestCase;
+    :schema <schemas/table1.sql>;
+    :triple (ex:s ex:p ex:foo1).
+
+<mappings/iri-column-relative.ttl> a :R2RMLProcessorTestCase;
+    :schema <schemas/table1.sql>;
+    :triple (ex:s ex:p ex:1).
+
+<mappings/iri-column-absolute.ttl> a :R2RMLProcessorTestCase;
+    :schema <schemas/table1-iri.sql>;
+    :triple (ex:s ex:p ex:1).
+
+# TODO relative URI columns and relative URI patterns
 # TODO datatypes
 # TODO overriding doesn't mess with lexical form
 # TODO overriding with natural type means lexical form is still changed
 # TODO do equal blank nodes link up? different term maps, triples maps?
 # TODO do unequal blank nodes not link up? different term maps, triples maps?
-# TODO relative URI columns and relative URI patterns
 
 
 # An old list of things to test:

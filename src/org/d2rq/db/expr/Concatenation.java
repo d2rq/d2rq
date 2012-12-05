@@ -2,7 +2,6 @@ package org.d2rq.db.expr;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +15,10 @@ import org.d2rq.db.vendor.Vendor;
 
 public class Concatenation extends Expression {
 
+	public static Expression create(Expression... expressions) {
+		return new Concatenation(expressions);
+	}
+	
 	public static Expression create(List<Expression> expressions) {
 		List<Expression> nonEmpty = new ArrayList<Expression>(expressions.size());
 		for (Expression expression: expressions) {
@@ -31,13 +34,13 @@ public class Concatenation extends Expression {
 		if (nonEmpty.size() == 1) {
 			return nonEmpty.get(0);
 		}
-		return new Concatenation(nonEmpty);
+		return new Concatenation(nonEmpty.toArray(new Expression[nonEmpty.size()]));
 	}
-	
-	private final List<Expression> parts;
+
+	private final Expression[] parts;
 	private final Set<ColumnName> columns = new HashSet<ColumnName>();
 	
-	private Concatenation(List<Expression> parts) {
+	private Concatenation(Expression[] parts) {
 		this.parts = parts;
 		for (Expression expression: parts) {
 			columns.addAll(expression.getColumns());
@@ -57,17 +60,17 @@ public class Concatenation extends Expression {
 	}
 
 	public Expression rename(Renamer columnRenamer) {
-		List<Expression> renamedExpressions = new ArrayList<Expression>(parts.size());
-		for (Expression expression: parts) {
-			renamedExpressions.add(columnRenamer.applyTo(expression));
+		Expression[] renamedExpressions = new Expression[parts.length];
+		for (int i = 0; i < parts.length; i++) {
+			renamedExpressions[i] = columnRenamer.applyTo(parts[i]);
 		}
 		return new Concatenation(renamedExpressions);
 	}
 
 	public String toSQL(DatabaseOp table, Vendor vendor) {
-		String[] fragments = new String[parts.size()];
-		for (int i = 0; i < parts.size(); i++) {
-			Expression part = (Expression) parts.get(i);
+		String[] fragments = new String[parts.length];
+		for (int i = 0; i < parts.length; i++) {
+			Expression part = (Expression) parts[i];
 			fragments[i] = part.toSQL(table, vendor);
 		}
 		return vendor.getConcatenationExpression(fragments);
@@ -88,12 +91,11 @@ public class Concatenation extends Expression {
 	
 	public String toString() {
 		StringBuffer result = new StringBuffer("Concatenation(");
-		Iterator<Expression> it = parts.iterator();
-		while (it.hasNext()) {
-			result.append(it.next());
-			if (it.hasNext()) {
+		for (int i = 0; i < parts.length; i++) {
+			if (i > 0) {
 				result.append(", ");
 			}
+			result.append(parts[i]);
 		}
 		result.append(")");
 		return result.toString();

@@ -39,9 +39,11 @@ import org.d2rq.r2rml.TermMap.ConstantValuedTermMap;
 import org.d2rq.r2rml.TermMap.Position;
 import org.d2rq.r2rml.TermMap.TemplateValuedTermMap;
 import org.d2rq.r2rml.TermMap.TermType;
+import org.d2rq.values.BaseIRIValueMaker;
 import org.d2rq.values.ColumnValueMaker;
 import org.d2rq.values.TemplateValueMaker;
 import org.d2rq.values.TemplateValueMaker.ColumnFunction;
+import org.d2rq.values.ValueMaker;
 
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Graph;
@@ -272,15 +274,17 @@ public class R2RMLCompiler implements CompiledMapping {
 		private NodeMaker result;
 		@Override
 		public void visitComponent(ConstantValuedTermMap termMap, Position position) {
-			// TODO: Determine uniqueness using database metadata
 			result = new FixedNodeMaker(termMap.getConstant().asNode());
 		}
 		public void visitComponent(ColumnValuedTermMap termMap, Position position) {
 			ColumnName qualified = ColumnName.create(currentTable.getTableName(), 
 					termMap.getColumnName().asIdentifier());
-			// TODO: Determine uniqueness using database metadata
-			result = new TypedNodeMaker(getNodeType(termMap, position, currentTable.getColumnType(qualified)), 
-					new ColumnValueMaker(qualified));
+			NodeType nodeType = getNodeType(termMap, position, currentTable.getColumnType(qualified));
+			ValueMaker baseValueMaker = new ColumnValueMaker(qualified);
+			if (nodeType == TypedNodeMaker.URI) {
+				baseValueMaker = new BaseIRIValueMaker(mapping.getBaseIRI(), baseValueMaker);
+			}
+			result = new TypedNodeMaker(nodeType, baseValueMaker);
 		}
 		public void visitComponent(TemplateValuedTermMap termMap, Position position) {
 			TemplateValueMaker pattern = toTemplate(termMap.getTemplate(), 
