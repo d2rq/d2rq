@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,19 @@ import org.d2rq.db.types.DataType;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class InnerJoinOp implements DatabaseOp {
+	
+	public static DatabaseOp join(NamedOp table1, NamedOp table2, 
+			Key key1, Key key2) {
+		Collection<NamedOp> tables = new HashSet<NamedOp>();
+		tables.add(table1);
+		tables.add(table2);
+		return InnerJoinOp.join(
+				tables, 
+				Collections.singleton(
+						ColumnListEquality.create(
+								table1.getTableName(), key1, 
+								table2.getTableName(), key2)));
+	}
 	
 	public static DatabaseOp join(Collection<NamedOp> tables, 
 			Set<ColumnListEquality> joinConditions) {

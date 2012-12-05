@@ -131,7 +131,7 @@ public class D2RQCompilerTest {
 		ClassMap cm1 = ClassMap.create(null, pattern1, mapping);
 		cm1.setContainsDuplicates(true);
 		PropertyBridge.create(null, RDF.type, cm1).setConstantValue(class1);
-		firstTripleRelation().getBaseTabular().accept(new OpVisitor.Default() {
+		firstTripleRelation().getBaseTabular().accept(new OpVisitor.Default(true) {
 			@Override
 			public boolean visitEnter(DistinctOp table) {
 				return false;
@@ -153,7 +153,7 @@ public class D2RQCompilerTest {
 		cm1.setContainsDuplicates(false);
 		PropertyBridge.create(null, RDF.type, cm1).setConstantValue(class1);
 		// Check that we have no DISTINCT
-		firstTripleRelation().getBaseTabular().accept(new OpVisitor.Default() {
+		firstTripleRelation().getBaseTabular().accept(new OpVisitor.Default(true) {
 			@Override
 			public boolean visitEnter(DistinctOp table) {
 				fail("There should be no Distinct(...) in " + table);
@@ -169,7 +169,7 @@ public class D2RQCompilerTest {
 		sql.executeSQL("CREATE TABLE T (ID INT PRIMARY KEY)");
 		ClassMap cm1 = ClassMap.create(null, pattern1, mapping);
 		PropertyBridge.create(null, RDF.type, cm1).setConstantValue(class1);
-		firstTripleRelation().getBaseTabular().accept(new OpVisitor.Default() {
+		firstTripleRelation().getBaseTabular().accept(new OpVisitor.Default(true) {
 			@Override
 			public boolean visitEnter(DistinctOp table) {
 				fail("There should be no Distinct(...) in " + table);

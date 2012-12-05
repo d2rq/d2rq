@@ -92,4 +92,14 @@ public class AliasOpTest {
 		assertFalse(alias13.equals(alias23));
 		assertFalse(alias13.hashCode() == alias23.hashCode());
 	}
+	
+	@Test
+	public void testFlattenNestedAliases() {
+		TableOp t1 = DummyDB.createTable("t1");
+		AliasOp a1 = AliasOp.create(t1, "a1");
+		AliasOp a2 = AliasOp.create(a1, "a2");
+		assertEquals(TableName.parse("a2"), a2.getTableName());
+		assertFalse(a1.equals(a2.getOriginal()));
+		assertEquals(t1, a2.getOriginal());
+	}
 }

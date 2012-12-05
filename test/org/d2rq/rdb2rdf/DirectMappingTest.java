@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.d2rq.D2RQTestSuite;
@@ -30,6 +31,7 @@ public class DirectMappingTest {
 		Collection<Object[]> results = new ArrayList<Object[]>();
 		for (File f: new File(TEST_SUITE_DIR).listFiles()) {
 			if (!f.isDirectory() || !new File(f.getAbsolutePath() + "/directGraph.ttl").exists()) continue;
+			if (Arrays.asList(D2RQTestSuite.SKIPPED_DIRECT_MAPPING_TESTS).contains(f.getName())) continue;
 			results.add(new Object[]{
 					f.getPath(), 
 					f.getAbsolutePath() + "/create.sql", 

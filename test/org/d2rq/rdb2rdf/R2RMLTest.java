@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.d2rq.D2RQTestSuite;
@@ -50,6 +51,7 @@ public class R2RMLTest {
 			ResultSet resultSet = QueryExecutionFactory.create(QUERY, model).execSelect();
 			while (resultSet.hasNext()) {
 				QuerySolution solution = resultSet.nextSolution();
+				if (Arrays.asList(D2RQTestSuite.SKIPPED_R2RML_TESTS).contains(solution.getResource("s").getLocalName())) continue;
 				results.add(new Object[]{
 						PrettyPrinter.toString(solution.getResource("s")),
 						absolutePath + "/create.sql",

@@ -66,6 +66,36 @@ public class D2RQTestSuite {
 		setNsPrefix("foaf", "http://xmlns.com/foaf/0.1/");
 	}};
 
+	public static final String[] SKIPPED_DIRECT_MAPPING_TESTS = {
+		// We implement the non-duplicate-preserving version
+		// of the Direct Mapping, so are allowed to skip these:
+		// http://www.w3.org/TR/r2rml/#dfn-duplicate-row-preservation
+		"D005-1table3columns3rows2duplicates", 
+		"D012-2tables2duplicates0nulls"
+	};
+	
+	public static final String[] SKIPPED_R2RML_TESTS = {
+		// This uses an undefined URI rr:SQL1979 in the mapping, and considers
+		// this an error. It should be considered a warning only. So we
+		// believe this test case is in error.
+		"tc0003a",
+		// This uses the language tags "..."@english and "..."@spanish.
+		// While these are nonsensical, they are not syntactically invalid,
+		// and therefore the requirement to detect them seems overly
+		// taxing. We believe this test case is in error.
+		"tc0015b",
+		// Known limitation: We don't detect data errors.
+		"tc0019b",
+		"tc0020b",
+		// Known limitation: We don't support named graphs.
+		"tc0006a",
+		"tc0007b",
+		"tc0007e",
+		"tc0007f",
+		"tc0008a",
+		"tc0009b",
+	};
+	
 	public static void main(String[] args) {
 		// Be quiet and leave error reporting to JUnit
 		Log4jHelper.turnLoggingOff();

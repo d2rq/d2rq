@@ -28,7 +28,11 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.util.FileManager;
 
-
+/**
+ * Runs R2RML tests, driven by a manifest file.
+ * 
+ * TODO: See manifest file for more R2RML test cases that should be written
+ */
 @RunWith(Parameterized.class)
 public class ProcessorTest {
 	private final static String MANIFEST_FILE = "test/r2rml/processor-test-manifest.ttl";

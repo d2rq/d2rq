@@ -1,0 +1,19 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix map: <http://example.com/map#>.
+@prefix ex: <http://example.com/>.
+
+map:triples1
+    rr:logicalTable [ rr:tableName "TABLE1" ];
+    rr:subjectMap [ rr:template "s{ID}" ];
+    rr:predicateObjectMap [
+        rr:predicate ex:p;
+        rr:objectMap [
+            rr:parentTriplesMap map:triples2;
+            rr:joinCondition [ rr:child "REF1"; rr:parent "ID1" ];
+            rr:joinCondition [ rr:child "REF2"; rr:parent "ID2" ];
+        ];
+    ].
+
+map:triples2
+    rr:logicalTable [ rr:tableName "TABLE2" ];
+    rr:subjectMap [ rr:template "o{ID1}_{ID2}" ].

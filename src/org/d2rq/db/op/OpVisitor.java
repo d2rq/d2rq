@@ -47,23 +47,25 @@ public interface OpVisitor {
 	void visitOpTrue();
 	
 	public static abstract class Default implements OpVisitor {
-		public boolean visitEnter(InnerJoinOp table) { return true; }
+		private final boolean recurse;
+		public Default(boolean recurse) { this.recurse = recurse; }
+		public boolean visitEnter(InnerJoinOp table) { return recurse; }
 		public void visitLeave(InnerJoinOp table) {}
-		public boolean visitEnter(SelectOp table) { return true; }
+		public boolean visitEnter(SelectOp table) { return recurse; }
 		public void visitLeave(SelectOp table) {}
-		public boolean visitEnter(ProjectOp table) { return true; }
+		public boolean visitEnter(ProjectOp table) { return recurse; }
 		public void visitLeave(ProjectOp table) {}
-		public boolean visitEnter(AliasOp table) { return true; }
+		public boolean visitEnter(AliasOp table) { return recurse; }
 		public void visitLeave(AliasOp table) {}
-		public boolean visitEnter(OrderOp table) { return true; }
+		public boolean visitEnter(OrderOp table) { return recurse; }
 		public void visitLeave(OrderOp table) {}
-		public boolean visitEnter(LimitOp table) { return true; }
+		public boolean visitEnter(LimitOp table) { return recurse; }
 		public void visitLeave(LimitOp table) {}
-		public boolean visitEnter(DistinctOp table) { return true; }
+		public boolean visitEnter(DistinctOp table) { return recurse; }
 		public void visitLeave(DistinctOp table) {}
-		public boolean visitEnter(AssertUniqueKeyOp table) { return true; }
+		public boolean visitEnter(AssertUniqueKeyOp table) { return recurse; }
 		public void visitLeave(AssertUniqueKeyOp table) {}
-		public boolean visitEnter(EmptyOp table) { return true; }
+		public boolean visitEnter(EmptyOp table) { return recurse; }
 		public void visitLeave(EmptyOp table) {}
 		public void visit(TableOp table) {}
 		public void visit(SQLOp table) {}

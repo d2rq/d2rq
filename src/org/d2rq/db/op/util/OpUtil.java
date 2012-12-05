@@ -24,7 +24,7 @@ public class OpUtil {
 	 */
 	public static boolean isEmpty(final DatabaseOp tabular) {
 		if (tabular == null) return true;
-		return new OpVisitor.Default() {
+		return new OpVisitor.Default(true) {
 			boolean result = false;
 			boolean getResult() {
 				tabular.accept(this);
@@ -52,7 +52,7 @@ public class OpUtil {
 	 * @return <code>true</code> if the table has one row with no columns
 	 */
 	public static boolean isTrivial(final DatabaseOp tabular) {
-		return new OpVisitor.Default() {
+		return new OpVisitor.Default(true) {
 			final Stack<Boolean> resultStack = new Stack<Boolean>();
 			boolean getResult() {
 				tabular.accept(this);

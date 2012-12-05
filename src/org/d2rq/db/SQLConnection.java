@@ -420,7 +420,7 @@ public class SQLConnection {
 	
 	private boolean isZerofillColumn(final DatabaseOp table, final ColumnName column) {
 		if (vendor() != Vendor.MySQL || !table.hasColumn(column)) return false;
-		return new OpVisitor.Default() {
+		return new OpVisitor.Default(true) {
 			{ table.accept(this); }
 			ColumnName realColumn = column;
 			boolean result = false;

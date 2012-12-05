@@ -53,6 +53,7 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 	private boolean done = false;
 	
 	public SelectStatementBuilder(DatabaseOp input, Vendor vendor) {
+		super(true);
 		this.input = input;
 		this.vendor = vendor;
 	}

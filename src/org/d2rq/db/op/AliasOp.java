@@ -20,11 +20,22 @@ public class AliasOp extends NamedOp {
 	private final Collection<Key> uniqueKeys = new ArrayList<Key>();
 	
 	public static AliasOp create(DatabaseOp original, TableName alias) {
-		return new AliasOp(original, alias);
+		return new AliasOp(new OpVisitor.Default(false) {
+			private DatabaseOp result;
+			public boolean visitEnter(AliasOp table) {
+				result = table.getOriginal();
+				return true;
+			}
+			DatabaseOp removeTopLevelAliases(DatabaseOp op) {
+				result = op;
+				op.accept(this);
+				return result;
+			}
+		}.removeTopLevelAliases(original), alias);
 	}
 	
 	public static AliasOp create(DatabaseOp original, String alias) {
-		return new AliasOp(original, 
+		return AliasOp.create(original, 
 				TableName.create(null, null, Identifier.createUndelimited(alias)));
 	}
 	

@@ -12,7 +12,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.d2rq.CompiledMapping;
-import org.d2rq.D2RQException;
 import org.d2rq.D2RQOptions;
 import org.d2rq.ResourceCollection;
 import org.d2rq.algebra.DownloadRelation;
@@ -20,11 +19,14 @@ import org.d2rq.algebra.TripleRelation;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.op.AliasOp;
 import org.d2rq.db.op.DatabaseOp;
+import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.ProjectOp;
 import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.schema.ColumnName;
+import org.d2rq.db.schema.Identifier;
+import org.d2rq.db.schema.Key;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.DataType.GenericType;
 import org.d2rq.nodes.FixedNodeMaker;
@@ -153,14 +155,17 @@ public class R2RMLCompiler implements CompiledMapping {
 		}
 	}
 	
+	private TermMap getSubjectMap(TriplesMap triplesMap) {
+		return triplesMap.getSubject() == null
+				? mapping.termMaps().get(triplesMap.getSubjectMap())
+				: triplesMap.getSubject().asTermMap();
+	}
+	
 	private void visitComponent(TriplesMap triplesMap) {
-		LogicalTable table = mapping.logicalTables().get(
-				triplesMap.getLogicalTable());
-		table.accept(new RelationCompiler());
-		TermMap subjectMap = triplesMap.getSubject() != null
-				? triplesMap.getSubject().asTermMap()
-				: mapping.termMaps().get(triplesMap.getSubjectMap());
-				subjectMaker = createNodeMaker(subjectMap, Position.SUBJECT_MAP);
+		currentTable = createTabular(triplesMap);
+		TermMap subjectMap = getSubjectMap(triplesMap);
+		subjectMaker = createNodeMaker(
+				subjectMap, Position.SUBJECT_MAP, currentTable);
 		for (PredicateObjectMap poMap: mapping.predicateObjectMaps().getAll(
 				triplesMap.getPredicateObjectMaps())) {
 			visitComponent(poMap);
@@ -168,7 +173,8 @@ public class R2RMLCompiler implements CompiledMapping {
 		for (ConstantIRI classIRI: subjectMap.getClasses()) {
 			currentTripleRelations.add(createTripleRelation(
 					new FixedNodeMaker(RDF.type.asNode()),
-					new FixedNodeMaker(Node.createURI(classIRI.toString()))));
+					new FixedNodeMaker(Node.createURI(classIRI.toString())), 
+					currentTable));
 		}
 		if (subjectMaker == null) {
 			// TODO: Remove this check once we handle all term map types
@@ -176,11 +182,27 @@ public class R2RMLCompiler implements CompiledMapping {
 		} else {
 			resourceCollections.put(getTriplesMapName(), 
 					new ResourceCollection(this, sqlConnection, subjectMaker, 
-							createTabular(subjectMaker.projectionSpecs()), 
+							createTabular(currentTable, subjectMaker.projectionSpecs()), 
 							currentTripleRelations));
 		}
 		tripleRelations.addAll(currentTripleRelations);
 		currentTripleRelations.clear();
+	}
+	
+	private Key getChildKey(List<Join> joins) {
+		List<Identifier> result = new ArrayList<Identifier>();
+		for (Join join: joins) {
+			result.add(join.getChild().asIdentifier());
+		}
+		return Key.createFromIdentifiers(result);
+	}
+	
+	private Key getParentKey(List<Join> joins) {
+		List<Identifier> result = new ArrayList<Identifier>();
+		for (Join join: joins) {
+			result.add(join.getParent().asIdentifier());
+		}
+		return Key.createFromIdentifiers(result);
 	}
 	
 	private void visitComponent(PredicateObjectMap poMap) {
@@ -190,25 +212,47 @@ public class R2RMLCompiler implements CompiledMapping {
 		}
 		predicateMaps.addAll(mapping.termMaps().getAll(poMap.getPredicateMaps()));
 		for (TermMap predicateMap: predicateMaps) {
-			NodeMaker predicateMaker = createNodeMaker(predicateMap, Position.PREDICATE_MAP);
+			NodeMaker predicateMaker = createNodeMaker(
+					predicateMap, Position.PREDICATE_MAP, currentTable);
 			Collection<TermMap> objectMaps = new ArrayList<TermMap>();
 			for (ConstantShortcut objects: poMap.getObjects()) {
 				objectMaps.add(objects.asTermMap());
 			}
 			objectMaps.addAll(mapping.termMaps().getAll(poMap.getObjectMaps()));
-			if (!mapping.referencingObjectMaps().getAll(poMap.getObjectMaps()).isEmpty()) {
-				// FIXME: Implement rr:ReferencingObjectMap
-				throw new D2RQException("rr:ReferencingObjectMap not yet imlemented", D2RQException.NOT_YET_IMPLEMENTED);
+			for (ReferencingObjectMap refObjectMap: 
+					mapping.referencingObjectMaps().getAll(poMap.getObjectMaps())) {
+				TriplesMap parentTriplesMap = mapping.triplesMaps().get(refObjectMap.getParentTriplesMap());
+				if (refObjectMap.getJoinConditions().isEmpty()) {
+					objectMaps.add(getSubjectMap(parentTriplesMap));
+				} else {
+					NamedOp parentTable = createTabular(parentTriplesMap);
+					if (refObjectMap.getParentTriplesMap().equals(currentTriplesMapResource)) {
+						parentTable = AliasOp.create(parentTable, "PARENT");
+					}
+					NodeMaker objectMaker = createNodeMaker(
+							getSubjectMap(parentTriplesMap), Position.SUBJECT_MAP, parentTable);
+					List<Join> joins = new ArrayList<Join>(
+							mapping.joins().getAll(refObjectMap.getJoinConditions()));
+					DatabaseOp joinedTables = InnerJoinOp.join(
+							currentTable, 
+							parentTable, 
+							getChildKey(joins),
+							getParentKey(joins));
+					currentTripleRelations.add(createTripleRelation(
+							predicateMaker, objectMaker, joinedTables));
+				}
 			}
 			for (TermMap objectMap: objectMaps) {
-				NodeMaker objectMaker = createNodeMaker(objectMap, Position.OBJECT_MAP);
-				currentTripleRelations.add(createTripleRelation(predicateMaker, objectMaker));
+				NodeMaker objectMaker = createNodeMaker(
+						objectMap, Position.OBJECT_MAP, currentTable);
+				currentTripleRelations.add(createTripleRelation(
+						predicateMaker, objectMaker, currentTable));
 			}
 		}
 	}
 	
 	private TripleRelation createTripleRelation(NodeMaker predicateMaker,
-			NodeMaker objectMaker) {
+			NodeMaker objectMaker, DatabaseOp baseOp) {
 		if (subjectMaker == null || predicateMaker == null || objectMaker == null) {
 			// TODO: Remove this check once we handle all term map types
 			log.warn("null term map");
@@ -218,23 +262,27 @@ public class R2RMLCompiler implements CompiledMapping {
 		columns.addAll(subjectMaker.projectionSpecs());
 		columns.addAll(predicateMaker.projectionSpecs());
 		columns.addAll(objectMaker.projectionSpecs());
-		return new TripleRelation(sqlConnection ,createTabular(columns), 
+		return new TripleRelation(sqlConnection, createTabular(baseOp, columns), 
 				subjectMaker, predicateMaker, objectMaker);
 	}
 	
-	private DatabaseOp createTabular(Set<ProjectionSpec> columns) {
-		DatabaseOp op = currentTable;
-		ProjectOp.create(op, columns);
-		return op;
+	private DatabaseOp createTabular(DatabaseOp baseOp, Set<ProjectionSpec> columns) {
+		return ProjectOp.create(baseOp, columns);
 	}
 	
-	private NodeMaker createNodeMaker(TermMap termMap, Position position) {
-		NodeMakerCompiler compiler = new NodeMakerCompiler();
+	private NamedOp createTabular(TriplesMap triplesMap) {
+		RelationCompiler compiler = new RelationCompiler();
+		triplesMap.accept(compiler);
+		return compiler.result;
+	}
+	
+	private NodeMaker createNodeMaker(TermMap termMap, Position position, NamedOp table) {
+		NodeMakerCompiler compiler = new NodeMakerCompiler(table);
 		termMap.acceptAs(compiler, position);
 		return compiler.result;
 	}
 	
-	private TemplateValueMaker toTemplate(StringTemplate template, TermType termType) {
+	private TemplateValueMaker toTemplate(StringTemplate template, TermType termType, NamedOp table) {
 		String[] literalParts = template.getLiteralParts().clone();
 		if (termType == TermType.IRI && !literalParts[0].matches("[a-zA-Z][a-zA-Z0-9.+-]*:.*")) {
 			literalParts[0] = mapping.getBaseIRI() + literalParts[0];
@@ -242,7 +290,7 @@ public class R2RMLCompiler implements CompiledMapping {
 		ColumnName[] qualifiedColumns = new ColumnName[template.getColumnNames().length];
 		ColumnFunction[] functions = new ColumnFunction[template.getColumnNames().length];
 		for (int i = 0; i < qualifiedColumns.length; i++) {
-			qualifiedColumns[i] = ColumnName.create(currentTable.getTableName(), 
+			qualifiedColumns[i] = ColumnName.create(table.getTableName(), 
 					template.getColumnNames()[i]);
 			functions[i] = termType == TermType.IRI ? TemplateValueMaker.ENCODE : TemplateValueMaker.IDENTITY;
 		}
@@ -256,30 +304,38 @@ public class R2RMLCompiler implements CompiledMapping {
 		return currentTriplesMapResource.getLocalName();
 	}
 	
-	private class RelationCompiler extends MappingVisitor.DoNothingImplementation {
+	private class RelationCompiler extends MappingVisitor.TreeWalkerImplementation {
+		private NamedOp result;
+		private RelationCompiler() {
+			super(mapping);
+		}
 		@Override
 		public void visitComponent(BaseTableOrView table) {
-			currentTable = sqlConnection.getTable(table.getTableName().asQualifiedTableName());
+			result = sqlConnection.getTable(table.getTableName().asQualifiedTableName());
 		}
 		@Override
 		public void visitComponent(R2RMLView query) {
 			String sql = query.getSQLQuery().toString();
 			String name = "VIEW" + Integer.toHexString(sql.hashCode());
 			SQLOp selectStatement = sqlConnection.getSelectStatement(sql);
-			currentTable = AliasOp.create(selectStatement, name);
+			result = AliasOp.create(selectStatement, name);
 		}
 	}
 	
 	private class NodeMakerCompiler extends MappingVisitor.DoNothingImplementation {
 		private NodeMaker result;
+		private final NamedOp table;
+		private NodeMakerCompiler(NamedOp table) {
+			this.table = table;
+		}
 		@Override
 		public void visitComponent(ConstantValuedTermMap termMap, Position position) {
 			result = new FixedNodeMaker(termMap.getConstant().asNode());
 		}
 		public void visitComponent(ColumnValuedTermMap termMap, Position position) {
-			ColumnName qualified = ColumnName.create(currentTable.getTableName(), 
+			ColumnName qualified = ColumnName.create(table.getTableName(), 
 					termMap.getColumnName().asIdentifier());
-			NodeType nodeType = getNodeType(termMap, position, currentTable.getColumnType(qualified));
+			NodeType nodeType = getNodeType(termMap, position, table.getColumnType(qualified));
 			ValueMaker baseValueMaker = new ColumnValueMaker(qualified);
 			if (nodeType == TypedNodeMaker.URI) {
 				baseValueMaker = new BaseIRIValueMaker(mapping.getBaseIRI(), baseValueMaker);
@@ -288,7 +344,7 @@ public class R2RMLCompiler implements CompiledMapping {
 		}
 		public void visitComponent(TemplateValuedTermMap termMap, Position position) {
 			TemplateValueMaker pattern = toTemplate(termMap.getTemplate(), 
-					termMap.getTermType(position));
+					termMap.getTermType(position), table);
 			DataType characterType = GenericType.CHARACTER.dataTypeFor(sqlConnection.vendor());
 			result = new TypedNodeMaker(getNodeType(termMap, position, characterType), pattern);
 		}

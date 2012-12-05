@@ -103,7 +103,7 @@ public class NodeRelationUtil {
 	
 	public static NodeRelation renameWithPrefix(NodeRelation table, final int index) {
 		final Map<TableName,TableName> oldToNew = new HashMap<TableName,TableName>();
-		table.getBaseTabular().accept(new OpVisitor.Default() {
+		table.getBaseTabular().accept(new OpVisitor.Default(true) {
 			@Override
 			public boolean visitEnter(AliasOp alias) {
 				oldToNew.put(alias.getTableName(), alias.getTableName().withPrefix(index));
