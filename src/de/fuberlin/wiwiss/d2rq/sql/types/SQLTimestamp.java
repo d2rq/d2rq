@@ -10,8 +10,8 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 public class SQLTimestamp extends DataType {
 	private final static Pattern TIMESTAMP_PATTERN = 
 		Pattern.compile("^\\d?\\d?\\d?\\d-\\d\\d-\\d\\d \\d?\\d:\\d\\d:\\d\\d(.\\d+)?([+-]\\d?\\d:\\d\\d|Z)?$");
-	public SQLTimestamp(Vendor syntax) {
-		super(syntax, "TIMESTAMP");
+	public SQLTimestamp(Vendor syntax, String name) {
+		super(syntax, name);
 	}
 	@Override
 	public boolean isIRISafe() {

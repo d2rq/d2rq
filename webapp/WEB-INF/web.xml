@@ -48,6 +48,13 @@
     <servlet-class>de.fuberlin.wiwiss.d2rq.server.ResourceDescriptionServlet</servlet-class>
   </servlet>
   
+  
+  <servlet>
+    <servlet-name>DatasetDescriptionServlet</servlet-name>
+    <servlet-class>de.fuberlin.wiwiss.d2rq.server.DatasetDescriptionServlet</servlet-class>
+  </servlet>
+  
+  
   <servlet>
     <servlet-name>DirectoryServlet</servlet-name>
     <servlet-class>de.fuberlin.wiwiss.d2rq.server.DirectoryServlet</servlet-class>
@@ -82,6 +89,16 @@
     <servlet-name>ResourceServlet</servlet-name>
     <url-pattern>/resource/*</url-pattern>
   </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>DatasetDescriptionServlet</servlet-name>
+    <url-pattern>/dataset</url-pattern>
+  </servlet-mapping> 
+  
+    <servlet-mapping>
+    <servlet-name>DatasetDescriptionServlet</servlet-name>
+    <url-pattern>/.well-known/void</url-pattern>
+  </servlet-mapping> 
   
   <servlet-mapping>
     <servlet-name>ResourceServlet</servlet-name>

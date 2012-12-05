@@ -63,7 +63,7 @@ public class ClassMap extends ResourceMap {
 	public void validate() throws D2RQException {
 		assertHasBeenDefined(this.database, D2RQ.dataStorage, D2RQException.CLASSMAP_NO_DATABASE);
 		assertHasPrimarySpec(new Property[]{
-				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns, D2RQ.constantValue
+				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.uriSqlExpression, D2RQ.bNodeIdColumns, D2RQ.constantValue
 		});
 		if (this.constantValue != null && this.constantValue.isLiteral()) {
 			throw new D2RQException(

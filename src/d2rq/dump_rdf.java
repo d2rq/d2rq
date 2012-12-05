@@ -15,12 +15,15 @@ import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
+import com.hp.hpl.jena.shared.NoWriterForLangException;
 
 import de.fuberlin.wiwiss.d2rq.CommandLineTool;
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.SystemLoader;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.mapgen.MappingGenerator;
+import de.fuberlin.wiwiss.d2rq.parser.MapParser;
 
 /**
  * Command line utility for dumping a database to RDF, using the
@@ -81,7 +84,7 @@ public class dump_rdf extends CommandLineTool {
 			File f = new File(cmd.getArg(outfileArg).getValue());
 			log.info("Writing to " + f);
 			out = new PrintStream(new FileOutputStream(f));
-			loader.setSystemBaseURI(f.toURI().toString() + "#");
+			loader.setSystemBaseURI(MapParser.absolutizeURI(f.toURI().toString() + "#"));
 		} else {
 			log.info("Writing to stdout");
 			out = System.out;
@@ -102,15 +105,17 @@ public class dump_rdf extends CommandLineTool {
 
 			Model d2rqModel = loader.getModelD2RQ();
 
-			RDFWriter writer = d2rqModel.getWriter(format);
-			if (format.equals("RDF/XML") || format.equals("RDF/XML-ABBREV")) {
-				writer.setProperty("showXmlDeclaration", "true");
-				if (loader.getResourceBaseURI() != null) {
-					writer.setProperty("xmlbase", loader.getResourceBaseURI());
-				}
-			}
 			try {
+				RDFWriter writer = d2rqModel.getWriter(format.toUpperCase());
+				if (format.equals("RDF/XML") || format.equals("RDF/XML-ABBREV")) {
+					writer.setProperty("showXmlDeclaration", "true");
+					if (loader.getResourceBaseURI() != null) {
+						writer.setProperty("xmlbase", loader.getResourceBaseURI());
+					}
+				}
 				writer.write(d2rqModel, new OutputStreamWriter(out, "utf-8"), loader.getResourceBaseURI());
+			} catch (NoWriterForLangException ex) {
+				throw new D2RQException("Unknown format '" + format + "'", D2RQException.STARTUP_UNKNOWN_FORMAT);
 			} catch (UnsupportedEncodingException ex) {
 				throw new RuntimeException("Can't happen -- utf-8 is always supported");
 			}

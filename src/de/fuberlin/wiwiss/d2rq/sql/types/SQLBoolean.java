@@ -6,8 +6,8 @@ import java.sql.SQLException;
 import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 public class SQLBoolean extends DataType {
-	public SQLBoolean(Vendor syntax) {
-		super(syntax, "BOOLEAN");
+	public SQLBoolean(Vendor syntax, String name) {
+		super(syntax, name);
 	}
 	@Override
 	public boolean isIRISafe() {

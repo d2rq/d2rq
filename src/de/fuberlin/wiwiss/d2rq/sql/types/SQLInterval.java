@@ -3,8 +3,8 @@ package de.fuberlin.wiwiss.d2rq.sql.types;
 import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 public class SQLInterval extends DataType {
-	public SQLInterval(Vendor syntax) {
-		super(syntax, "INTERVAL");
+	public SQLInterval(Vendor syntax, String name) {
+		super(syntax, name);
 	}
 	@Override
 	public boolean isIRISafe() {

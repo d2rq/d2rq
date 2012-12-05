@@ -50,9 +50,9 @@ public class MapParser {
 	private final static Log log = LogFactory.getLog(MapParser.class);
 	
 	/**
-	 * A regular expression that matches zero or more characters that are allowed inside URIs
+	 * A regular expression that matches zero or more characters that are allowed inside IRIs
 	 */
-	public static final String URI_CHAR_REGEX = "([:/?#\\[\\]@!$&'()*+,;=a-zA-Z0-9._~-]|%[0-9A-Fa-f][0-9A-Fa-f])*";	
+	public static final String IRI_CHAR_REGEX = "([:/?#\\[\\]@!$&'()*+,;=a-zA-Z0-9._~\\x80-\\uFFFF-]|%[0-9A-Fa-f][0-9A-Fa-f])*";	
 
 	/**
 	 * Turns a relative URI into an absolute one, by using the
@@ -94,7 +94,9 @@ public class MapParser {
 		if (this.mapping != null) {
 			return this.mapping;
 		}
-		findUnknownD2RQTerms();
+		new VocabularySummarizer(D2RQ.class).assertNoUndefinedTerms(model, 
+				D2RQException.MAPPING_UNKNOWN_D2RQ_PROPERTY, 
+				D2RQException.MAPPING_UNKNOWN_D2RQ_CLASS);
 		ensureAllDistinct(new Resource[]{D2RQ.Database, D2RQ.ClassMap, D2RQ.PropertyBridge, 
 				D2RQ.TranslationTable, D2RQ.Translation}, D2RQException.MAPPING_TYPECONFLICT);
 		this.mapping = new Mapping();
@@ -162,28 +164,6 @@ public class MapParser {
 		}
 	}
 
-	private void findUnknownD2RQTerms() {
-		VocabularySummarizer d2rqTerms = new VocabularySummarizer(D2RQ.class);
-		StmtIterator it = this.model.listStatements();
-		while (it.hasNext()) {
-			Statement stmt = it.nextStatement();
-			if (stmt.getPredicate().getURI().startsWith(D2RQ.NS) 
-					&& !d2rqTerms.getAllProperties().contains(stmt.getPredicate())) {
-				throw new D2RQException(
-						"Unknown property " + PrettyPrinter.toString(stmt.getPredicate()) + ", maybe a typo?",
-						D2RQException.MAPPING_UNKNOWN_D2RQ_PROPERTY);
-			}
-			if (stmt.getPredicate().equals(RDF.type)
-					&& stmt.getObject().isURIResource()
-					&& stmt.getResource().getURI().startsWith(D2RQ.NS)
-					&& !d2rqTerms.getAllClasses().contains(stmt.getObject())) {
-				throw new D2RQException(
-						"Unknown class d2rq:" + PrettyPrinter.toString(stmt.getObject()) + ", maybe a typo?",
-						D2RQException.MAPPING_UNKNOWN_D2RQ_CLASS);
-			}
-		}
-	}
-	
 	private void parseDatabases() {
 		Iterator<Individual> it = this.model.listIndividuals(D2RQ.Database);
 		while (it.hasNext()) {
@@ -377,6 +357,10 @@ public class MapParser {
 		while (stmts.hasNext()) {
 			resourceMap.setURIPattern(ensureIsAbsolute(stmts.nextStatement().getString()));
 		}
+		stmts = r.listProperties(D2RQ.uriSqlExpression);
+		while (stmts.hasNext()) {
+			resourceMap.setUriSQLExpression(stmts.nextStatement().getString());
+		}
 		stmts = r.listProperties(D2RQ.constantValue);
 		while (stmts.hasNext()) {
 			resourceMap.setConstantValue(stmts.nextStatement().getObject());
@@ -506,10 +490,6 @@ public class MapParser {
 		stmts = r.listProperties(D2RQ.sqlExpression);
 		while (stmts.hasNext()) {
 			bridge.setSQLExpression(stmts.nextStatement().getString());
-		}
-		stmts = r.listProperties(D2RQ.uriSqlExpression);
-		while (stmts.hasNext()) {
-			bridge.setUriSQLExpression(stmts.nextStatement().getString());
 		}
 		stmts = r.listProperties(D2RQ.lang);
 		while (stmts.hasNext()) {

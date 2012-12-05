@@ -53,4 +53,18 @@ public class FilterMatchAny extends Filter {
 		}
 		return null;
 	}
+	
+	public String toString() {
+		if (elements.size() == 0) {
+			return "any(-)";
+		}
+		StringBuilder builder = new StringBuilder("any(");
+		for (Filter filter: elements) {
+			builder.append(filter);
+			builder.append(",");
+		}
+		builder.deleteCharAt(builder.length() - 1);
+		builder.append(")");
+		return builder.toString();
+	}
 }

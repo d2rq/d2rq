@@ -123,27 +123,28 @@ public class SQL92 implements Vendor {
 	public DataType getDataType(int jdbcType, String name, int size) {
 		// TODO: These are in java.sql.Types as of Java 6 but not yet in Java 1.5
 		if ("NCHAR".equals(name) || "NVARCHAR".equals(name) || "NCLOB".equals(name)) {
-			return new SQLCharacterString(this, true);
+			return new SQLCharacterString(this, name, true);
 		}
 
+		
 		switch (jdbcType) {
 		case Types.CHAR:
 		case Types.VARCHAR:
 		case Types.LONGVARCHAR:
 		case Types.CLOB:
-			return new SQLCharacterString(this, true);
+			return new SQLCharacterString(this, name, true);
 			
 		case Types.BOOLEAN:
-			return new SQLBoolean(this);
+			return new SQLBoolean(this, name);
 
 		case Types.BINARY:
 		case Types.VARBINARY:
 		case Types.LONGVARBINARY:
 		case Types.BLOB:
-			return new SQLBinary(this, true);
+			return new SQLBinary(this, name, true);
 			
 		case Types.BIT:
-			return new SQLBit(this);
+			return new SQLBit(this, name);
 
 		case Types.NUMERIC:
 		case Types.DECIMAL:
@@ -151,21 +152,21 @@ public class SQL92 implements Vendor {
 		case Types.SMALLINT:
 		case Types.INTEGER:
 		case Types.BIGINT:
-			return new SQLExactNumeric(this, jdbcType, false);
+			return new SQLExactNumeric(this, name, jdbcType, false);
 			
 		case Types.REAL:
 		case Types.FLOAT:
 		case Types.DOUBLE:
-			return new SQLApproximateNumeric(this);
+			return new SQLApproximateNumeric(this, name);
 		
 		case Types.DATE:
-			return new SQLDate(this);
+			return new SQLDate(this, name);
 			
 		case Types.TIME:
-			return new SQLTime(this);
+			return new SQLTime(this, name);
 			
 		case Types.TIMESTAMP:
-			return new SQLTimestamp(this);
+			return new SQLTimestamp(this, name);
 
 		case Types.ARRAY:
 		case Types.JAVA_OBJECT:
@@ -182,6 +183,14 @@ public class SQL92 implements Vendor {
 		return null;
 	}
 
+	/**
+	 * In most databases, we don't have to do anything because boolean
+	 * expressions are allowed anywhere.
+	 */
+	public Expression booleanExpressionToSimpleExpression(Expression expression) {
+		return expression;
+	}
+	
 	public boolean isIgnoredTable(String schema, String table) {
 		return false;
 	}

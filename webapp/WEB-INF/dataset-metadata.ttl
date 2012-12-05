@@ -1,0 +1,55 @@
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prv:      <http://purl.org/net/provenance/ns#> .
+@prefix prvTypes: <http://purl.org/net/provenance/types#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix sp:   <http://spinrdf.org/sp#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix xhtml: <http://www.w3.org/1999/xhtml/vocab/#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+
+# This template provides additional metadata about RDF datasets served by D2R Server. Its values are set from the D2R Server configuration.
+
+<about:metadata:runtime:dataset> a prv:DataItem ;
+	dc:title <about:metadata:metadata:datasetTitle> ;
+	dc:description <about:metadata:metadata:datasetDescription> ;
+	dc:creator [ 
+		foaf:name <about:metadata:metadata:operatorName> ;
+		foaf:homepage <about:metadata:metadata:operatorHomepage> ;
+	] ;
+	dc:publisher [ 
+		foaf:name <about:metadata:metadata:operatorName> ;
+		foaf:homepage <about:metadata:metadata:operatorHomepage> ;
+	] ;
+	dc:source <about:metadata:metadata:datasetSource> ;
+	dc:date <about:metadata:runtime:time> ;
+	
+	prv:createdBy [
+			a prv:DataCreation ;
+			prv:performedBy _:d2rinstallation ;
+		] .
+           
+_:d2rinstallation a prv:NonHumanAgent ,
+        prvTypes:DataCreatingService ,
+        prv:DataProvidingService ;
+
+	rdfs:comment "This service runs D2R Server." ;
+	prv:operatedBy <about:metadata:metadata:d2rUser> ;
+	prv:deployedSoftware _:d2rrelease ;
+	rdfs:seeAlso <about:metadata:config:baseURI> .
+             
+_:d2rrelease a doap:Project ;
+	doap:release [
+		a doap:Version ;
+        doap:revision <about:metadata:runtime:version>;
+    ];
+	doap:name "D2R Server";
+	doap:homepage  <http://d2rq.org/d2r-server> .
+
+
+<about:metadata:metadata:d2rUser>
+	foaf:name <about:metadata:metadata:operatorName> ;
+	foaf:homepage <about:metadata:metadata:operatorHomepage> .

@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
@@ -13,23 +12,15 @@ import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
 import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
-import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
 
 /**
- * Produces {@link Binding}s or {@link Triple}s from {@link ResultRow}s.
- * 
- * A triple-producing binding maker is simply a binding maker
- * that contains exactly the three variables
- * {@link #SUBJECT}, {@link #PREDICATE} and {@link #OBJECT}.
+ * Produces {@link Binding}s from {@link ResultRow}s.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class BindingMaker {
-	private final static Var SUBJECT = Var.alloc(TripleRelation.SUBJECT);
-	private final static Var PREDICATE = Var.alloc(TripleRelation.PREDICATE);
-	private final static Var OBJECT = Var.alloc(TripleRelation.OBJECT);
 
 	public static BindingMaker createFor(NodeRelation relation) {
 		Map<Var, NodeMaker> vars = new HashMap<Var,NodeMaker>();
@@ -63,12 +54,6 @@ public class BindingMaker {
 			result.add(Var.alloc(variableName), node);
 		}
 		return result;
-	}
-	
-	public Triple makeTriple(ResultRow row) {
-		Binding b = makeBinding(row);
-		if (b == null) return null;
-		return new Triple(b.get(SUBJECT), b.get(PREDICATE), b.get(OBJECT));
 	}
 	
 	public Set<Var> variableNames() {

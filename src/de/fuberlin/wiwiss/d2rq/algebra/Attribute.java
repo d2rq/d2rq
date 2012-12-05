@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
-import de.fuberlin.wiwiss.d2rq.expr.AttributeNotNull;
+import de.fuberlin.wiwiss.d2rq.expr.NotNull;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
@@ -12,7 +12,7 @@ import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
 /**
  * A database column.
  * 
- * TODO: Attribute should track its {@link DataType}
+ * TODO: Attribute should track its DataType
  * TODO: Attribute should track whether it is nullable
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
@@ -103,7 +103,7 @@ public class Attribute implements ProjectionSpec {
 	
 	public Expression notNullExpression(ConnectedDB db, AliasMap aliases) {
 		if (db.isNullable(aliases.originalOf(this))) {
-			return AttributeNotNull.create(this);
+			return NotNull.create(new AttributeExpr(this));
 		}
 		return Expression.TRUE;
 	}

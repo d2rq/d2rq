@@ -40,5 +40,6 @@ public class JenaGraphExample {
 			Triple t = it.next();
 		    System.out.println("Published in 2003: " + t.getSubject());
 		}
+		g.close();
 	}
 }

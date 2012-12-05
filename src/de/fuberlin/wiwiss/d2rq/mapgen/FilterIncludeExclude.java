@@ -25,4 +25,18 @@ public class FilterIncludeExclude extends Filter {
 		return include.getSingleSchema();
 	}
 
+	public String toString() {
+		String in = (include == Filter.ALL) ? null : "include(" + include + ")";
+		String ex = (exclude == Filter.NOTHING) ? null : "exclude(" + exclude + ")";
+		if (in != null) {
+			if (ex == null) {
+				return in;
+			}
+			return in + "+" + ex;
+		}
+		if (ex != null) {
+			return ex;
+		}
+		return "include(all)";
+	}
 }

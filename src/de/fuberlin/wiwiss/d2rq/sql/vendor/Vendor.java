@@ -130,15 +130,27 @@ public interface Vendor {
 	Properties getDefaultConnectionProperties();
 	
 	/**
-	 * Returns a {@link DataType} corresponding to a JDBC type.
+	 * Returns a {@link DataType} corresponding to a JDBC type. This may be
+	 * an unsupported datatype; in this case, its {@link DataType#isUnsupported()}
+	 * method will return true. <code>null</code> will be returned if the vendor
+	 * code doesn't handle this datatype at all; that should generally be
+	 * considered a bug.
 	 * 
 	 * @param jdbcType A <code>java.sql.Types</code> constant
-	 * @param name The type name, as reported by <code>java.sql</code> metadata methods
+	 * @param name The type name, as reported by <code>java.sql</code> metadata methods, normalized to uppercase
 	 * @param size Character size of the type, or 0 if not applicable
-	 * @return A compatible D2RQ DataType instance
+	 * @return A compatible D2RQ DataType instance, or <code>null</code> if the vendor code is broken
 	 */
 	DataType getDataType(int jdbcType, String name, int size);
 
+	/**
+	 * Turns a BOOLEAN expression into an expression that is guaranteed to
+	 * be usable in any place where an expression is allowed.
+	 * @param expression A boolean expression
+	 * @return A simple expression returning an equivalent value, e.g., INT 0 and 1
+	 */
+	Expression booleanExpressionToSimpleExpression(Expression expression);
+	
 	/**
 	 * TODO Use the Filter interface for this
 	 * @param schema A schema name, or <code>null</code> for the connection's default schema

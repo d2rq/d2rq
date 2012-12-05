@@ -170,7 +170,7 @@ public abstract class CommandLineTool {
 	}
 	
 	public static void reportException(D2RQException ex) {
-		if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+		if (ex.getMessage() == null && ex.getCause() != null && ex.getCause().getMessage() != null) {
 			if (ex.getCause() instanceof SQLException) {
 				System.err.println("SQL error " + ex.getCause().getMessage());
 			} else {

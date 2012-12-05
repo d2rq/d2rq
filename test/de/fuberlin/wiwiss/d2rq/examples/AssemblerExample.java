@@ -19,5 +19,7 @@ public class AssemblerExample {
 		
 		// Write it to System.out
 		m.write(System.out);
+
+		m.close();
 	}
 }

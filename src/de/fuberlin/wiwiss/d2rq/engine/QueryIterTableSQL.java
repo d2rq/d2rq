@@ -1,20 +1,25 @@
 package de.fuberlin.wiwiss.d2rq.engine;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.hp.hpl.jena.sparql.engine.ExecutionContext;
 import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIter;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIterNullIterator;
+import com.hp.hpl.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import com.hp.hpl.jena.sparql.engine.iterator.QueryIterSingleton;
 
 import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.Relation;
-import de.fuberlin.wiwiss.d2rq.sql.SQLIterator;
 import de.fuberlin.wiwiss.d2rq.sql.ResultRow;
+import de.fuberlin.wiwiss.d2rq.sql.SQLIterator;
 import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
 
 /**
@@ -25,7 +30,8 @@ import de.fuberlin.wiwiss.d2rq.sql.SelectStatementBuilder;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class QueryIterTableSQL extends QueryIter {
-
+	private final static Log log = LogFactory.getLog(QueryIterTableSQL.class);
+	
 	/**
 	 * Creates an instance, or a simpler QueryIterator
 	 * if optimization is possible (e.g., the relation is empty).
@@ -33,8 +39,17 @@ public class QueryIterTableSQL extends QueryIter {
 	 */
 	public static QueryIterator create(Relation relation, 
 			Collection<BindingMaker> bindingMakers, ExecutionContext execCxt) {
-		if (relation.condition().isFalse() || bindingMakers.isEmpty()) {
+		if (relation.equals(Relation.EMPTY) || relation.condition().isFalse() || bindingMakers.isEmpty()) {
 			return new QueryIterNullIterator(execCxt);
+		}
+		if (relation.isTrivial()) {
+			ArrayList<Binding> bindingList = new ArrayList<Binding>();
+			for (BindingMaker bindingMaker: bindingMakers) {
+				Binding t = bindingMaker.makeBinding(ResultRow.NO_ATTRIBUTES);
+				if (t == null) continue;
+				bindingList.add(t);
+			}
+			return new QueryIterPlainWrapper(bindingList.iterator(), execCxt);				
 		}
 		return new QueryIterTableSQL(relation, bindingMakers, execCxt);
 	}
@@ -61,7 +76,7 @@ public class QueryIterTableSQL extends QueryIter {
 	private final Collection<BindingMaker> bindingMakers;
 	private final LinkedList<Binding> queue = new LinkedList<Binding>();
 
-	public QueryIterTableSQL(Relation relation, 
+	private QueryIterTableSQL(Relation relation, 
 			Collection<BindingMaker> bindingMakers, ExecutionContext execCxt) {
 		super(execCxt);
 		this.bindingMakers = bindingMakers;
@@ -85,12 +100,14 @@ public class QueryIterTableSQL extends QueryIter {
 
 	@Override
 	protected void closeIterator() {
+		log.debug("closeIterator() called ...");
 		wrapped.close();
 	}
 
 	@Override
 	protected void requestCancel() {
-		wrapped.close();
+		log.info("requestCancel() called ...");
+		wrapped.cancel();
 	}
 
 	/**

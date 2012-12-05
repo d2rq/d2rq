@@ -26,4 +26,14 @@ public class FilterMatchTable extends Filter {
 	}
 
 	public String getSingleSchema() { return schema.getSingleString(); }
+	
+	public String toString() {
+		StringBuffer result = new StringBuffer("table(");
+		if (schema != Filter.NULL_MATCHER) {
+			result.append(schema + ".");
+		}
+		result.append(table);
+		result.append(")");
+		return result.toString();
+	}
 }

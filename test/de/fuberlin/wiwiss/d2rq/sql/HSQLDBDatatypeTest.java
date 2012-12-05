@@ -19,25 +19,25 @@ public class HSQLDBDatatypeTest extends DatatypeTestBase {
 
 	public void testTinyInt() {
 		createMapping("TINYINT");
-		assertMappedType("xsd:byte");
+		assertMappedType("xsd:integer");
 		assertValues(new String[]{"0", "1", "-128", "127"});
 	}
 	
 	public void testSmallInt() {
 		createMapping("SMALLINT");
-		assertMappedType("xsd:short");
+		assertMappedType("xsd:integer");
 		assertValues(new String[]{"0", "1", "-32768", "32767"});
 	}
 	
 	public void testInteger() {
 		createMapping("INTEGER");
-		assertMappedType("xsd:int");
+		assertMappedType("xsd:integer");
 		assertValues(new String[]{"0", "1", "-2147483648", "2147483647"});
 	}
 	
 	public void testBigInt() {
 		createMapping("BIGINT");
-		assertMappedType("xsd:long");
+		assertMappedType("xsd:integer");
 		assertValues(new String[]{"0", "1", "-9223372036854775808", "9223372036854775807"});
 	}
 

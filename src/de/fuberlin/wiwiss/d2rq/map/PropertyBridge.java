@@ -81,11 +81,6 @@ public class PropertyBridge extends ResourceMap {
         return uriSqlExpression;
     }
 	
-	public void setUriSQLExpression(String uriSqlExpression) {
-		assertNotYetDefined(this.column, D2RQ.uriSqlExpression, D2RQException.PROPERTYBRIDGE_DUPLICATE_URI_SQL_EXPRESSION);
-		this.uriSqlExpression = uriSqlExpression;
-	}
-	
     public String getDatatype() {
         return datatype;
     }
@@ -159,6 +154,10 @@ public class PropertyBridge extends ResourceMap {
 						D2RQException.PROPERTYBRIDGE_CONFLICTING_DATABASES);
 			}
 			// TODO refersToClassMap cannot be combined w/ value constraints or translation tables
+		}
+		if (properties.isEmpty() && dynamicPropertyPatterns.isEmpty()) {
+			throw new D2RQException(toString() + " needs a d2rq:property or d2rq:dynamicProperty",
+					D2RQException.PROPERTYBRIDGE_MISSING_PREDICATESPEC);
 		}
 		assertHasPrimarySpec(new Property[]{
 				D2RQ.uriColumn, D2RQ.uriPattern, D2RQ.bNodeIdColumns,

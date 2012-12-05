@@ -1,0 +1,5 @@
+@prefix ex: <http://example.com/ns#>.
+
+ex:this a ex:Foo.
+ex:that a ex:Bar.
+ex:them a ex:Qux.

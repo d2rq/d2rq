@@ -130,9 +130,17 @@ function Snorql() {
             failure: function(report) {
                 var message = report.responseText.match(/<pre>([\s\S]*)<\/pre>/);
                 if (message) {
+                    message[1] = message[1].replace(/^\s+|\s+$/g, '');
+                    if (message[1] == 'Unknown error') {
+                        message[1] = 'Unknown error (timeout?)';
+                    }
                     dummy.displayErrorMessage(message[1]);
                 } else {
-                    dummy.displayErrorMessage(report.responseText);
+                    if (report.responseText.match(/^{/)) {
+                        dummy.displayErrorMessage('Could not parse server response (incomplete result due to timeout?)');
+                    } else {
+                        dummy.displayErrorMessage(report.responseText);
+                    }
                 }
             }
         });
