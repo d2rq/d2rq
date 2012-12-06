@@ -1,15 +1,16 @@
 package org.d2rq.lang;
 
+import static org.d2rq.ModelAssert.assertIsomorphic;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.d2rq.HSQLDatabase;
 import org.d2rq.SystemLoader;
-import org.d2rq.pp.PrettyPrinter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +29,6 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.util.FileManager;
 
 // TODO: Re-merge this class with the R2RML ProcessorTest
@@ -62,7 +62,7 @@ public class ProcessorTest {
 			qe.setInitialBinding(qs);
 			Model expectedTriples = qe.execConstruct();
 			result.add(new Object[]{baseIRI.relativize(mapping.getURI()).toString(), mapping.getURI(), 
-					schema.getURI(), expectedTriples, m});
+					schema.getURI(), expectedTriples});
 		}
 		return result;
 	}
@@ -73,20 +73,17 @@ public class ProcessorTest {
 	private final Model expectedTriples;
 	private HSQLDatabase db;
 	private SystemLoader loader;
-	private PrefixMapping prefixes;
-	private Model d2rqModel;
 	
 	public ProcessorTest(String id, String mappingFile, String schemaFile, 
-			Model expectedTriples, PrefixMapping prefixes) {
+			Model expectedTriples) {
 		this.id = id;
 		this.mappingFile = mappingFile;
 		this.schemaFile = schemaFile;
 		this.expectedTriples = expectedTriples;
-		this.prefixes = prefixes;
 	}
 	
 	@Before
-	public void setUpDatabase() {
+	public void setUp() {
 		db = new HSQLDatabase("test");
 		db.executeScript(schemaFile);
 		loader = new SystemLoader();
@@ -95,11 +92,10 @@ public class ProcessorTest {
 		loader.setUsername(db.getUser());
 		loader.setPassword(db.getPassword());
 		loader.setSystemBaseURI(BASE_IRI);
-		d2rqModel = loader.getModelD2RQ();
 	}
 	
 	@After
-	public void dropDatabase() {
+	public void tearDown() {
 		db.close(true);
 		loader.close();
 	}
@@ -107,23 +103,8 @@ public class ProcessorTest {
 	@Test 
 	public void testDump() {
 		Model actualTriples = ModelFactory.createDefaultModel();
-		actualTriples.add(d2rqModel);
-		if (!actualTriples.isIsomorphicWith(expectedTriples)) {
-			Model missingStatements = expectedTriples.difference(actualTriples);
-			Model unexpectedStatements = actualTriples.difference(expectedTriples);
-			if (missingStatements.isEmpty()) {
-				fail(id + ": Unexpected statement(s): " + 
-						asNTriples(unexpectedStatements));
-			} else if (unexpectedStatements.isEmpty()) {
-				fail(id + ": Missing statement(s): " + 
-						asNTriples(missingStatements));
-			} else {
-				fail(id + ": Missing statement(s): " + 
-						asNTriples(missingStatements) + 
-						" Unexpected statement(s): " + 
-						asNTriples(unexpectedStatements));
-			}
-		}
+		actualTriples.add(loader.getModelD2RQ());
+		assertIsomorphic(expectedTriples, actualTriples);
 	}
 	
 	@Test
@@ -131,11 +112,17 @@ public class ProcessorTest {
 		StmtIterator it = expectedTriples.listStatements();
 		while (it.hasNext()) {
 			Statement stmt = it.next();
-			assertTrue(id + ": Missing statement: " + stmt, d2rqModel.contains(stmt));
+			assertTrue(id + ": Missing statement: " + stmt, loader.getModelD2RQ().contains(stmt));
 		}
 	}
 	
-	private String asNTriples(Model model) {
-		return PrettyPrinter.toString(model, prefixes);
+	@Test
+	public void testReadWrite() {
+		StringWriter out = new StringWriter();
+		new D2RQWriter(loader.getD2RQMapping()).write(out);
+		Model parsed = ModelFactory.createDefaultModel();
+		parsed.read(new StringReader(out.toString()), 
+				loader.getD2RQMapping().getBaseURI(), "TURTLE");
+		assertIsomorphic(loader.getMappingModel(), parsed);
 	}
 }

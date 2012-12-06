@@ -1,6 +1,7 @@
 package org.d2rq.vocab; 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 /**
@@ -35,4 +36,8 @@ public class JDBC {
 	 * The namespace of the vocabulary as a resource.
 	 */
 	public static final Resource NAMESPACE = model.createResource(NS);
+	
+	public static Property getProperty(String key) {
+		return model.createProperty(NS, key);
+	}
 }

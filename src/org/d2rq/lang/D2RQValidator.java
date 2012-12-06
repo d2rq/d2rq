@@ -230,7 +230,7 @@ public class D2RQValidator implements D2RQMappingVisitor {
 	}
 	
 	private boolean hasPrimarySpec(ResourceMap map, Property property) {
-		if (property.equals(D2RQ.bNodeIdColumns)) return !map.getBNodeIdColumns().isEmpty();
+		if (property.equals(D2RQ.bNodeIdColumns)) return !map.getBNodeIdColumnsParsed().isEmpty();
 		if (property.equals(D2RQ.uriColumn)) return map.getURIColumn() != null;
 		if (property.equals(D2RQ.uriPattern)) return map.getURIPattern() != null;
 		if (property.equals(D2RQ.uriSqlExpression)) return map.getUriSQLExpression() != null;

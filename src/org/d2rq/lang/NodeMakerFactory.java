@@ -29,9 +29,11 @@ import com.hp.hpl.jena.datatypes.TypeMapper;
  */
 public class NodeMakerFactory {
 	private final SQLConnection sqlConnection;
+	private final String baseURI;
 	
-	public NodeMakerFactory(SQLConnection sqlConnection) {
+	public NodeMakerFactory(SQLConnection sqlConnection, String baseURI) {
 		this.sqlConnection = sqlConnection;
+		this.baseURI = baseURI;
 	}
 
 	public NodeMaker createFrom(final ResourceMap map) {
@@ -73,7 +75,7 @@ public class NodeMakerFactory {
 			this.map = map;
 		}
 		public NodeType getNodeType() {
-			if (!map.getBNodeIdColumns().isEmpty()) {
+			if (!map.getBNodeIdColumnsParsed().isEmpty()) {
 				return TypedNodeMaker.BLANK;
 			}
 			if (map.getURIColumn() != null || map.getURIPattern() != null) {
@@ -85,15 +87,15 @@ public class NodeMakerFactory {
 			return null;
 		}
 		public ValueMaker createRawValueMaker() {
-			if (!map.getBNodeIdColumns().isEmpty()) {
+			if (!map.getBNodeIdColumnsParsed().isEmpty()) {
 				return new BlankNodeIDValueMaker(PrettyPrinter.toString(map.resource()),
-						map.getBNodeIdColumns());
+						map.getBNodeIdColumnsParsed());
 			}
 			if (map.getURIColumn() != null) {
 				return new ColumnValueMaker(map.getURIColumn());
 			}
 			if (map.getURIPattern() != null) {
-				return new Pattern(map.getURIPattern()).toTemplate(sqlConnection);
+				return new Pattern(ensureIsAbsolute(map.getURIPattern())).toTemplate(sqlConnection);
 			}
 			if (map.getUriSQLExpression() != null) {
 				return new SQLExpressionValueMaker(
@@ -175,7 +177,14 @@ public class NodeMakerFactory {
 		}
 		public ValueMaker createRawValueMaker() {
 			ValueMaker values = forReferencedClassMap.createValueMaker();
-			return values.rename(AliasDeclaration.getRenamer(map.getAliases()));
+			return values.rename(AliasDeclaration.getRenamer(map.getAliasesParsed()));
 		}
+	}
+	
+	private String ensureIsAbsolute(String uriPattern) {
+		if (uriPattern.indexOf(":") == -1) {
+			return this.baseURI + uriPattern;
+		}
+		return uriPattern;
 	}
 }

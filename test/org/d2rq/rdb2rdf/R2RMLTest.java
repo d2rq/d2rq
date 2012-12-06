@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import org.d2rq.D2RQTestSuite;
 import org.d2rq.HSQLDatabase;
+import org.d2rq.ModelAssert;
 import org.d2rq.SystemLoader;
 import org.d2rq.pp.PrettyPrinter;
 import org.d2rq.r2rml.MappingValidator;
@@ -108,30 +109,6 @@ public class R2RMLTest {
 		Model actualTriples = ModelFactory.createDefaultModel();
 		actualTriples.add(loader.getModelD2RQ());
 		Model expectedTriples = FileManager.get().loadModel(resultFile, "N-TRIPLES");
-		if (!actualTriples.isIsomorphicWith(expectedTriples)) {
-			Model missingStatements = expectedTriples.difference(actualTriples);
-			Model unexpectedStatements = actualTriples.difference(expectedTriples);
-			if (missingStatements.isEmpty() && unexpectedStatements.isEmpty()) {
-				fail("Models not isomorphic; expected: " + 
-						asNTriples(expectedTriples) +
-						" actual: " + asNTriples(actualTriples));
-			}
-			if (missingStatements.isEmpty()) {
-				fail("Unexpected statement(s): " + 
-						asNTriples(unexpectedStatements));
-			} else if (unexpectedStatements.isEmpty()) {
-				fail("Missing statement(s): " + 
-						asNTriples(missingStatements));
-			} else {
-				fail("Missing statement(s): " + 
-						asNTriples(missingStatements) + 
-						" Unexpected statement(s): " + 
-						asNTriples(unexpectedStatements));
-			}
-		}
-	}
-	
-	private String asNTriples(Model model) {
-		return PrettyPrinter.toString(model, D2RQTestSuite.STANDARD_PREFIXES);
+		ModelAssert.assertIsomorphic(expectedTriples, actualTriples);
 	}
 }

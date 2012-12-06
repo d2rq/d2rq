@@ -28,7 +28,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class Mapping extends MapObject {
-
+	private String baseURI = null;
 	private final PrefixMapping prefixes = new PrefixMappingImpl();
 	private final Map<Resource,Database> databases = new HashMap<Resource,Database>();
 	private Configuration configuration = new Configuration();
@@ -59,6 +59,14 @@ public class Mapping extends MapObject {
 
 	public Model getVocabularyModel() {
 		return vocabularyModel;
+	}
+	
+	public void setBaseURI(String baseURI) {
+		this.baseURI = baseURI;
+	}
+	
+	public String getBaseURI() {
+		return baseURI;
 	}
 	
 	public void accept(D2RQMappingVisitor visitor) {
@@ -119,6 +127,10 @@ public class Mapping extends MapObject {
 		return (TranslationTable) this.translationTables.get(name);
 	}
 
+	public Collection<Resource> translationTableResources() {
+		return translationTables.keySet();
+	}
+	
 	public void addDownloadMap(DownloadMap downloadMap) {
 		downloadMaps.put(downloadMap.resource(), downloadMap);
 	}

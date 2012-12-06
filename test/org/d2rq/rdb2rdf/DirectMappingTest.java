@@ -1,6 +1,6 @@
 package org.d2rq.rdb2rdf;
 
-import static org.junit.Assert.fail;
+import static org.d2rq.ModelAssert.assertIsomorphic;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,7 +10,6 @@ import java.util.Collection;
 import org.d2rq.D2RQTestSuite;
 import org.d2rq.HSQLDatabase;
 import org.d2rq.SystemLoader;
-import org.d2rq.pp.PrettyPrinter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,25 +68,6 @@ public class DirectMappingTest {
 		loader.setSystemBaseURI(BASE_URI);
 		Model actualTriples = loader.getModelD2RQ();
 		Model expectedTriples = FileManager.get().loadModel(resultFile);
-		if (!actualTriples.isIsomorphicWith(expectedTriples)) {
-			Model missingStatements = expectedTriples.difference(actualTriples);
-			Model unexpectedStatements = actualTriples.difference(expectedTriples);
-			if (missingStatements.isEmpty()) {
-				fail("Unexpected statement(s): " + 
-						asNTriples(unexpectedStatements));
-			} else if (unexpectedStatements.isEmpty()) {
-				fail("Missing statement(s): " + 
-						asNTriples(missingStatements));
-			} else {
-				fail("Missing statement(s): " + 
-						asNTriples(missingStatements) + 
-						" Unexpected statement(s): " + 
-						asNTriples(unexpectedStatements));
-			}
-		}
-	}
-	
-	private String asNTriples(Model model) {
-		return PrettyPrinter.toString(model, D2RQTestSuite.STANDARD_PREFIXES);
+		assertIsomorphic(expectedTriples, actualTriples);
 	}
 }

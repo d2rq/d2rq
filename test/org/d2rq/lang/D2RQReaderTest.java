@@ -99,7 +99,7 @@ public class D2RQReaderTest {
 		Set<AliasDeclaration> aliases = D2RQTestSuite
 				.loadMapping("lang/alias.ttl")
 				.classMap(ResourceFactory.createResource("http://example.org/classmap"))
-				.propertyBridges().iterator().next().getAliases();
+				.propertyBridges().iterator().next().getAliasesParsed();
 		assertEquals(1, aliases.size());
 		AliasDeclaration alias = aliases.iterator().next();
 		assertEquals(TableName.parse("\"People\""), alias.getOriginal());
@@ -154,7 +154,7 @@ public class D2RQReaderTest {
 		assertTrue(m.downloadMapResources().contains(name));
 		DownloadMap dl = m.downloadMap(name);
 		assertEquals("http://example.org/database", dl.getDatabase().resource().getURI());
-		assertEquals("http://example.org/downloads/@@People.ID@@", dl.getURIPattern());
+		assertEquals("downloads/@@People.ID@@", dl.getURIPattern());
 		assertEquals(Microsyntax.parseColumn("People.pic"), dl.getContentDownloadColumn());
 		assertEquals("image/png", dl.getMediaType());
 	}

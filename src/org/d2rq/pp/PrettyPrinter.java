@@ -22,7 +22,7 @@ import com.hp.hpl.jena.shared.PrefixMapping;
  */
 public class PrettyPrinter {
 	private final static String NEWLINE = System.getProperty("line.separator");
-		
+
 	static {
 		// Make sure that the model behind all the
 		// D2RQ vocabulary terms has the d2rq prefix

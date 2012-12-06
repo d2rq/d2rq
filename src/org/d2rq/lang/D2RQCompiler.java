@@ -246,13 +246,13 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 				currentSQLConnection, overriddenColumnTypes);
 		result.addJoinExpressions(resourceMap.getJoins());
 		result.addConditions(resourceMap.getConditions());
-		result.addAliasDeclarations(resourceMap.getAliases());
+		result.addAliasDeclarations(resourceMap.getAliasesParsed());
 		result.setContainsDuplicates(resourceMap.getContainsDuplicates());
 		return result;
 	}
 	
 	private NodeMaker createNodeMaker(ResourceMap map) {
-		return new NodeMakerFactory(currentSQLConnection).createFrom(map);
+		return new NodeMakerFactory(currentSQLConnection, mapping.getBaseURI()).createFrom(map);
 	}
 	
 	private void checkColumns(final DatabaseOp op) {

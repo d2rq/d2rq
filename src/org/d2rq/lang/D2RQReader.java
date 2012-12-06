@@ -94,6 +94,7 @@ public class D2RQReader {
 		ensureAllDistinct(new Resource[]{D2RQ.Database, D2RQ.ClassMap, D2RQ.PropertyBridge, 
 				D2RQ.TranslationTable, D2RQ.Translation}, D2RQException.MAPPING_TYPECONFLICT);
 		this.mapping = new Mapping();
+		mapping.setBaseURI(baseURI);
 		copyPrefixes();
 		try {
 			parseDatabases();
@@ -368,7 +369,7 @@ public class D2RQReader {
 		}
 		stmts = r.listProperties(D2RQ.uriPattern);
 		while (stmts.hasNext()) {
-			resourceMap.setURIPattern(ensureIsAbsolute(stmts.nextStatement().getString()));
+			resourceMap.setURIPattern(stmts.nextStatement().getString());
 		}
 		stmts = r.listProperties(D2RQ.uriSqlExpression);
 		while (stmts.hasNext()) {
@@ -589,13 +590,5 @@ public class D2RQReader {
 		while (stmts.hasNext()) {
 			dm.setMediaType(stmts.nextStatement().getString());
 		}
-	}
-	
-	// TODO: I guess this should be done at map compile time
-	private String ensureIsAbsolute(String uriPattern) {
-		if (uriPattern.indexOf(":") == -1) {
-			return this.baseURI + uriPattern;
-		}
-		return uriPattern;
 	}
 }

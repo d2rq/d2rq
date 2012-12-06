@@ -9,8 +9,11 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * @author Christian Becker <http://beckr.org#chris>
  */
 public class Configuration extends MapObject {
-	private boolean serveVocabulary = true;
-	private boolean useAllOptimizations = false;
+	public final static boolean DEFAULT_SERVE_VOCABULARY = true;
+	public final static boolean DEFAULT_USE_ALL_OPTIMIZATIONS = false;
+	
+	private boolean serveVocabulary = DEFAULT_SERVE_VOCABULARY;
+	private boolean useAllOptimizations = DEFAULT_USE_ALL_OPTIMIZATIONS;
 	
 	public Configuration() {
 		this(null);

@@ -52,8 +52,12 @@ public abstract class ResourceMap extends MapObject {
 		bNodeIdColumns = Microsyntax.parseColumnList(columns);
 	}
 
-	public List<ColumnName> getBNodeIdColumns() {
+	public List<ColumnName> getBNodeIdColumnsParsed() {
 		return bNodeIdColumns == null ? Collections.<ColumnName>emptyList() : bNodeIdColumns;
+	}
+	
+	public String getBNodeIdColumns() {
+		return Microsyntax.toString(bNodeIdColumns);
 	}
 	
 	public void setURIColumn(String column) {
@@ -152,8 +156,16 @@ public abstract class ResourceMap extends MapObject {
 		aliases.add(Microsyntax.parseAlias(alias));
 	}
 	
-	public Set<AliasDeclaration> getAliases() {
+	public Set<AliasDeclaration> getAliasesParsed() {
 		return aliases;
+	}
+
+	public Set<String> getAliases() {
+		Set<String> result = new HashSet<String>();
+		for (AliasDeclaration alias: aliases) {
+			result.add(Microsyntax.toString(alias));
+		}
+		return result;
 	}
 	
 	public void setContainsDuplicates(boolean b) {

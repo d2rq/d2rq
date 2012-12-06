@@ -2,6 +2,7 @@ package org.d2rq.lang;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +25,7 @@ import org.d2rq.db.types.DataType;
 public class Microsyntax {
 
 	/**
-	 * Parses a comma-separated list of column names, e.g., for bNodeIdColumns
+	 * Parses a comma-separated list of column names, e.g., for d2rq:bNodeIdColumns
 	 */
 	public static List<ColumnName> parseColumnList(String commaSeparated) {
 		List<ColumnName> result = new ArrayList<ColumnName>();
@@ -32,6 +33,22 @@ public class Microsyntax {
 			result.add(Microsyntax.parseColumn(column.trim()));
 		}
 		return result;
+	}
+	
+	/**
+	 * Serializes a column list to a string usable for d2rq:bNodeIdColumns
+	 */
+	public static String toString(List<ColumnName> columnList) {
+		if (columnList == null) return null;
+		StringBuilder result = new StringBuilder();
+		Iterator<ColumnName> it = columnList.iterator();
+		while (it.hasNext()) {
+			result.append(Microsyntax.toString(it.next()));
+			if (it.hasNext()) {
+				result.append(',');
+			}
+		}
+		return result.toString();
 	}
 	
 	/**
@@ -72,6 +89,7 @@ public class Microsyntax {
 	 * Suitable for use in D2RQ mapping files, but not for SQL.
 	 */
 	public static String toString(ColumnName column) {
+		if (column == null) return null;
 		return (column.isQualified() ? toString(column.getQualifier()) + "." : "") + column.getColumn().getName();
 	}
 	/**
@@ -172,6 +190,14 @@ public class Microsyntax {
 	private static final Pattern aliasPattern = 
 		Pattern.compile("(.+)\\s+AS\\s+(.+)", Pattern.CASE_INSENSITIVE);
 
+	/**
+	 * Turns an {@link AliasDeclaration} into "foo AS bar" form for d2rq:alias.
+	 */
+	public static String toString(AliasDeclaration alias) {
+		return Microsyntax.toString(alias.getOriginal()) + 
+				" AS " + Microsyntax.toString(alias.getAlias());
+	}
+	
 	private Microsyntax() {
 		// Can't be instantiated
 	}
