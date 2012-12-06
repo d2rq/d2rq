@@ -30,6 +30,7 @@ import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.renamer.TableRenamer;
+import org.d2rq.db.schema.ColumnDef;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
@@ -49,6 +50,7 @@ import org.d2rq.db.types.DataType.GenericType;
  */
 public class TabularBuilder {
 	private final SQLConnection sqlConnection;
+	private final Map<ColumnName,GenericType> overriddenColumnTypes;
 	private Set<TableName> mentionedTableNames = new HashSet<TableName>();
 	private Expression condition = Expression.TRUE;
 	private Set<ColumnListEquality> joinConditions = new HashSet<ColumnListEquality>();
@@ -61,8 +63,10 @@ public class TabularBuilder {
 	private int limit = LimitOp.NO_LIMIT;
 	private int limitInverse = LimitOp.NO_LIMIT;
 		
-	public TabularBuilder(SQLConnection database) {
+	public TabularBuilder(SQLConnection database, 
+			Map<ColumnName,GenericType> overriddenColumnTypes) {
 		this.sqlConnection = database;
+		this.overriddenColumnTypes = overriddenColumnTypes;
 	}
 	
 	public void addCondition(Expression expression) {
@@ -200,10 +204,19 @@ public class TabularBuilder {
 	
 	private NamedOp getBaseTableOrAlias(TableName name) {
 		if (!aliasDeclarations.containsKey(name)) {
-			return assertForeignKeys(name, sqlConnection.getTable(name));
+			return getBaseTable(name);
 		}
-		TableName original = aliasDeclarations.get(name).getOriginal();
-		return AliasOp.create(assertForeignKeys(name, sqlConnection.getTable(original)), name);
+		return AliasOp.create(
+				getBaseTable(aliasDeclarations.get(name).getOriginal()), name);
+	}
+	
+	private NamedOp getBaseTable(TableName name) {
+		TableOp table = sqlConnection.getTable(name);
+		if (table == null) {
+			throw new D2RQException("Table used in mapping not found: " + name,
+					D2RQException.SQL_TABLE_NOT_FOUND);
+		}
+		return overrideColumnTypes(assertForeignKeys(name, table));
 	}
 	
 	private TableOp assertForeignKeys(TableName name, TableOp from) {
@@ -214,9 +227,30 @@ public class TabularBuilder {
 			newForeignKeys.add(entry.getKey());
 			TableDef newTableDef = new TableDef(old.getName(), old.getColumns(),
 					old.getPrimaryKey(), old.getUniqueKeys(), newForeignKeys);
-			from = new TableOp(from.getSQLConnection(), newTableDef);
+			from = new TableOp(newTableDef);
 		}
 		return from;
+	}
+	
+	private TableOp overrideColumnTypes(TableOp original) {
+		List<ColumnDef> newColumns = new ArrayList<ColumnDef>();
+		for (ColumnDef column: original.getTableDefinition().getColumns()) {
+			ColumnName name = original.getTableName().qualifyIdentifier(column.getName());
+			if (overriddenColumnTypes.containsKey(name)) {
+				newColumns.add(new ColumnDef(
+						column.getName(), 
+						overriddenColumnTypes.get(name).dataTypeFor(sqlConnection.vendor()), 
+						column.isNullable()));
+			} else {
+				newColumns.add(column);
+			}
+		}
+		return new TableOp(new TableDef(
+				original.getTableName(), 
+				newColumns, 
+				original.getTableDefinition().getPrimaryKey(), 
+				original.getTableDefinition().getUniqueKeys(),
+				original.getTableDefinition().getForeignKeys()));
 	}
 	
 	public DatabaseOp getTabular() {

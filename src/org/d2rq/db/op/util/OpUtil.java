@@ -94,7 +94,7 @@ public class OpUtil {
 			}
 		}.getResult();
 	}
-	
+
 	/**
 	 * Cannot be instantiated, just static methods.
 	 */

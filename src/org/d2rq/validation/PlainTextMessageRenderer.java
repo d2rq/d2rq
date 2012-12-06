@@ -81,6 +81,7 @@ public class PlainTextMessageRenderer implements Renderer {
 		}
 */
 		out.println(s);
+		out.flush();
 	}
 	
 	private String wordWrap(String s, String indent) {

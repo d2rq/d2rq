@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,9 +17,19 @@ import org.d2rq.algebra.DownloadRelation;
 import org.d2rq.algebra.TripleRelation;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.SQLScriptLoader;
-import org.d2rq.db.op.LimitOp;
-import org.d2rq.db.op.ProjectionSpec.ColumnProjectionSpec;
+import org.d2rq.db.expr.ColumnListEquality;
 import org.d2rq.db.op.DatabaseOp;
+import org.d2rq.db.op.InnerJoinOp;
+import org.d2rq.db.op.LimitOp;
+import org.d2rq.db.op.OpVisitor;
+import org.d2rq.db.op.ProjectOp;
+import org.d2rq.db.op.ProjectionSpec;
+import org.d2rq.db.op.ProjectionSpec.ColumnProjectionSpec;
+import org.d2rq.db.op.SelectOp;
+import org.d2rq.db.op.TableOp;
+import org.d2rq.db.schema.ColumnName;
+import org.d2rq.db.types.DataType;
+import org.d2rq.db.types.DataType.GenericType;
 import org.d2rq.nodes.FixedNodeMaker;
 import org.d2rq.nodes.NodeMaker;
 import org.d2rq.nodes.TypedNodeMaker;
@@ -39,6 +50,7 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		new ArrayList<SQLConnection>();
 	private final Collection<TripleRelation> currentClassMapTripleRelations =
 		new ArrayList<TripleRelation>();
+	private Map<ColumnName,GenericType> overriddenColumnTypes = null;
 	private NodeMaker currentSubjects = null;
 	private SQLConnection currentSQLConnection = null;
 	private TabularBuilder currentClassMapRelationBuilder = null;
@@ -73,6 +85,9 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 	}
 
 	public void visitLeave(Mapping mapping) {
+		for (TripleRelation t: result.getTripleRelations()) {
+			checkColumns(t.getBaseTabular());
+		}
 		log.info("Compiled " + result.getTripleRelations().size() + " property bridges");
 		if (log.isDebugEnabled()) {
 			for (TripleRelation rel: result.getTripleRelations()) {
@@ -123,10 +138,18 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		}
 		sqlConnection.setFetchSize(database.getFetchSize());
 		sqlConnection.setLimit(database.getResultSizeLimit());
-		sqlConnection.addOverriddenColumnTypes(database.getColumnTypes());
+		overriddenColumnTypes = database.getColumnTypes();
 		sqlConnection.connection();
 		sqlConnections.put(database.resource(), sqlConnection);
 		result.addSQLConnection(sqlConnection);
+		for (ColumnName column: overriddenColumnTypes.keySet()) {
+			TableOp table = sqlConnection.getTable(column.getQualifier());
+			if (table == null || !table.hasColumn(column)) {
+				throw new D2RQException(
+						database + ": Datatype-overridden column does not exist: " + 
+								column, D2RQException.SQL_COLUMN_NOT_FOUND);
+			}
+		}
 	}
 
 	public boolean visitEnter(ClassMap classMap) {
@@ -182,7 +205,8 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		for (String pattern: propertyBridge.getDynamicPropertyPatterns()) {
 			NodeMaker predicates = new TypedNodeMaker(
 					TypedNodeMaker.URI, new Pattern(pattern).toTemplate(currentSQLConnection));
-			TabularBuilder dynamicBuilder = new TabularBuilder(currentSQLConnection);
+			TabularBuilder dynamicBuilder = new TabularBuilder(
+					currentSQLConnection, overriddenColumnTypes);
 			dynamicBuilder.addRelationBuilder(builder);
 			dynamicBuilder.addProjections(predicates.projectionSpecs());
 			currentClassMapTripleRelations.add(new TripleRelation(
@@ -214,11 +238,12 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 	}
 
 	public void visit(TranslationTable translationTable) {
-		// TODO Auto-generated method stub
+		// Translation tables don't need compiling.
 	}
 
 	private TabularBuilder createRelationBuilder(ResourceMap resourceMap) {
-		TabularBuilder result = new TabularBuilder(currentSQLConnection);
+		TabularBuilder result = new TabularBuilder(
+				currentSQLConnection, overriddenColumnTypes);
 		result.addJoinExpressions(resourceMap.getJoins());
 		result.addConditions(resourceMap.getConditions());
 		result.addAliasDeclarations(resourceMap.getAliases());
@@ -228,5 +253,51 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 	
 	private NodeMaker createNodeMaker(ResourceMap map) {
 		return new NodeMakerFactory(currentSQLConnection).createFrom(map);
+	}
+	
+	private void checkColumns(final DatabaseOp op) {
+		op.accept(new OpVisitor.Default(true) {
+			@Override
+			public boolean visitEnter(InnerJoinOp table) {
+				for (ColumnListEquality join: table.getJoinConditions()) {
+					check(join.getColumns(), table);
+				}
+				return true;
+			}
+			@Override
+			public boolean visitEnter(SelectOp table) {
+				check(table.getCondition().getColumns(), table.getWrapped());
+				return true;
+			}
+			@Override
+			public boolean visitEnter(ProjectOp table) {
+				for (ProjectionSpec p: table.getProjections()) {
+					check(p.getColumns(), table.getWrapped());
+					for (ColumnName column: p.getColumns()) {
+						DataType datatype = table.getWrapped().getColumnType(column);
+						if (datatype == null) {
+							throw new D2RQException(
+									"Column " + column + " has unknown datatye. Use d2rq:xxxColumn to override its type.",
+									D2RQException.DATATYPE_UNKNOWN);
+						}
+						if (datatype.isUnsupported()) {
+							throw new D2RQException(
+									"Column " + column + " has unsupported datatype: " + datatype,
+									D2RQException.DATATYPE_UNMAPPABLE);
+						}						
+					}
+				}
+				return true;
+			}
+			private void check(Set<ColumnName> columns, DatabaseOp op) {
+				for (ColumnName column: columns) {
+					if (!op.hasColumn(column)) {
+						throw new D2RQException(
+								"Column used in mapping not found: " + column, 
+								D2RQException.SQL_COLUMN_NOT_FOUND);
+					}
+				}
+			}
+		});
 	}
 }

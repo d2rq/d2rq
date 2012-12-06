@@ -22,7 +22,6 @@ public class HSQLDB extends SQL92 {
 	
 	@Override
 	public DataType getDataType(int jdbcType, String name, int size) {
-
 		// Doesn't support DISTINCT over LOB types
 		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
 			return new SQLCharacterString(name, false);

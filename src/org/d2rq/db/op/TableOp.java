@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ColumnDef;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
@@ -17,15 +16,13 @@ import org.d2rq.db.types.DataType;
 
 public class TableOp extends NamedOp {
 	private final TableDef def;
-	private final SQLConnection sqlConnection;
 	private final List<Identifier> columnIDs;
 	private final List<ColumnName> columnNames;
 	private final Map<Identifier,ColumnDef> columnMetadata =
 		new HashMap<Identifier,ColumnDef>();
 
-	public TableOp(SQLConnection sqlConnection, TableDef tableDefinition) {
+	public TableOp(TableDef tableDefinition) {
 		super(tableDefinition.getName());
-		this.sqlConnection = sqlConnection;
 		this.def = tableDefinition;
 		columnIDs = new ArrayList<Identifier>(tableDefinition.getColumns().size());
 		columnNames = new ArrayList<ColumnName>(tableDefinition.getColumns().size());
@@ -56,10 +53,6 @@ public class TableOp extends NamedOp {
 	
 	public Collection<Key> getUniqueKeys() {
 		return def.getUniqueKeys();
-	}
-
-	public SQLConnection getSQLConnection() {
-		return sqlConnection;
 	}
 
 	public void accept(OpVisitor visitor) {

@@ -48,12 +48,6 @@ public class DummyDB extends SQLConnection {
 		this.vendor = vendor;
 	}
 
-	public DummyDB(Map<ColumnName,GenericType> overrideColumnTypes) {
-		super(null, null, null, null);
-		addOverriddenColumnTypes(overrideColumnTypes);
-		this.vendor = Vendor.SQL92;
-	}
-	
 	public void setVendor(Vendor vendor) {
 		this.vendor = vendor;
 	}
@@ -104,7 +98,7 @@ public class DummyDB extends SQLConnection {
 	
 	public class DummyTable extends TableOp {
 		DummyTable(TableName name) {
-			super(DummyDB.this, new TableDef(name, Collections.<ColumnDef>emptyList(),
+			super(new TableDef(name, Collections.<ColumnDef>emptyList(),
 					null,
 					Collections.<Key>emptySet(), 
 					Collections.<ForeignKey>emptySet()));

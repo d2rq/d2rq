@@ -36,6 +36,8 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 	
 	public abstract DataType getDataType(DatabaseOp table);
 	
+	public abstract Set<ColumnName> getColumns();
+	
 	public static ProjectionSpec create(ColumnName column) {
 		return new ColumnProjectionSpec(column);
 	}
@@ -83,6 +85,9 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 		}
 		public DataType getDataType(DatabaseOp table) {
 			return table.getColumnType(column);
+		}
+		public Set<ColumnName> getColumns() {
+			return Collections.singleton(column);
 		}
 		@Override
 		public String toString() {
@@ -140,13 +145,19 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 		public DataType getDataType(DatabaseOp table) {
 			return expression.getDataType(table, vendor);
 		}
+		public Set<ColumnName> getColumns() {
+			return expression.getColumns();
+		}
+		@Override
 		public boolean equals(Object other) {
 			return (other instanceof ExprProjectionSpec) 
 					&& expression.equals(((ExprProjectionSpec) other).expression);
 		}
+		@Override
 		public int hashCode() {
 			return expression.hashCode() ^ 684036;
 		}
+		@Override
 		public String toString() {
 			return expression + " AS " + name;
 		}

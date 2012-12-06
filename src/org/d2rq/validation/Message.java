@@ -23,6 +23,9 @@ public class Message {
 	public enum Level { Error, Warning, Info }
 	
 	public enum Problem {
+		// Generic
+		GENERIC_ERROR(Level.Error, "Error", "{details}"),
+		
 		// Information about D2RQ implementation limitations
 		NO_SQL_CONNECTION(Level.Info, "Not validating schema",
 				"No database connection was specified. Table/column names and SQL queries in the mapping will not be validated."),

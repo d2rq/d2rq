@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.d2rq.D2RQException;
 import org.d2rq.HSQLDatabase;
 import org.d2rq.algebra.DownloadRelation;
 import org.d2rq.algebra.TripleRelation;
@@ -33,6 +34,7 @@ import org.junit.Test;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDF;
 
@@ -43,7 +45,7 @@ public class D2RQCompilerTest {
 	private Database database;
 	private Resource class1;
 	private String pattern1;
-	private ColumnName t_id;
+	private ColumnName t_id, t_col1;
 	
 	@Before
 	public void setUp() {
@@ -56,6 +58,7 @@ public class D2RQCompilerTest {
 		class1 = ResourceFactory.createResource("http://test/Class1");
 		pattern1 = "http://test/@@T.ID@@";
 		t_id = Microsyntax.parseColumn("T.ID");
+		t_col1 = Microsyntax.parseColumn("T.COL1");
 	}
 	
 	@After
@@ -204,6 +207,153 @@ public class D2RQCompilerTest {
 					Microsyntax.parseColumn("People.ID"),
 					Microsyntax.parseColumn("People.pic")}), 
 				d.getBaseTabular().getColumns());
+	}
+	
+	@Test
+	public void testCatchUnsupportedDatatype() {
+		sql.executeSQL("CREATE TABLE T (COL1 OTHER)");
+		ClassMap.create(null, "http://example.com/@@T.COL1@@", mapping).addClass(FOAF.Person);
+		try {
+			firstTripleRelation();
+			fail("Expected error due to unsupported datatype OTHER");
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.DATATYPE_UNMAPPABLE, ex.errorCode());
+			assertTrue(ex.getMessage().contains("OTHER"));
+			assertTrue(ex.getMessage().contains("\"T\".\"COL1\""));
+		}
+	}
+	
+	@Test
+	public void testOverrideDatatype() {
+		sql.executeSQL("CREATE TABLE T (COL1 OTHER)");
+		database.addTextColumn("T.COL1");
+		ClassMap.create(null, "http://example.com/@@T.COL1@@", mapping).addClass(FOAF.Person);
+		assertFalse(firstTripleRelation().getBaseTabular().getColumnType(t_col1).isUnsupported());
+		assertEquals("VARCHAR",
+				firstTripleRelation().getBaseTabular().getColumnType(t_col1).name());
+	}
+	
+	@Test
+	public void testNonExistingTable() {
+		ClassMap.create(null, "http://example.com/@@TBL.COL1@@", mapping).addClass(FOAF.Person);
+		try {
+			firstTripleRelation();
+			fail("Expected error due to non-existing table TBL");
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.SQL_TABLE_NOT_FOUND, ex.errorCode());
+			assertTrue("Error message was: " + ex.getMessage(), 
+					ex.getMessage().contains("TBL"));
+		}
+	}
+	
+	@Test
+	public void testNonExistingTableWithAlias() {
+		ClassMap cm1 = ClassMap.create(null, "http://example.com/@@ALIAS.COL1@@", mapping);
+		cm1.addClass(FOAF.Person);
+		cm1.addAlias("TBL AS ALIAS");
+		try {
+			firstTripleRelation();
+			fail("Expected error due to non-existing table TBL");
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.SQL_TABLE_NOT_FOUND, ex.errorCode());
+			assertTrue("Error message was: " + ex.getMessage(), 
+					ex.getMessage().contains("TBL"));
+		}
+	}
+
+	@Test
+	public void testNonExistingTableInCondition() {
+		sql.executeSQL("CREATE TABLE T (COL1 INT)");
+		ClassMap cm1 = ClassMap.create(null, "http://example.com/@@T.COL1@@", mapping);
+		cm1.addClass(FOAF.Person);
+		cm1.addCondition("TBL.COL1>0");
+		try {
+			firstTripleRelation();
+			fail("Expected error due to non-existing table TBL");
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.SQL_TABLE_NOT_FOUND, ex.errorCode());
+			assertTrue("Error message was: " + ex.getMessage(), 
+					ex.getMessage().contains("TBL"));
+		}
+	}
+	
+	@Test
+	public void testNonExistingTableInJoin() {
+		sql.executeSQL("CREATE TABLE T (COL1 INT)");
+		ClassMap cm1 = ClassMap.create(null, "http://example.com/@@T.COL1@@", mapping);
+		cm1.addClass(FOAF.Person);
+		cm1.addJoin("T.COL1=TBL.COL2");
+		try {
+			firstTripleRelation();
+			fail("Expected error due to non-existing table TBL");
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.SQL_TABLE_NOT_FOUND, ex.errorCode());
+			assertTrue("Error message was: " + ex.getMessage(), 
+					ex.getMessage().contains("TBL"));
+		}
+	}
+	
+	@Test
+	public void testNonExistingColumn() {
+		sql.executeSQL("CREATE TABLE TBL (COL1 INT)");
+		ClassMap.create(null, "http://example.com/@@TBL.COL2@@", mapping).addClass(FOAF.Person);
+		try {
+			firstTripleRelation();
+			fail("Expected error due to non-existing table TBL.COL2");
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.SQL_COLUMN_NOT_FOUND, ex.errorCode());
+			assertTrue("Error message was: " + ex.getMessage(), 
+					ex.getMessage().contains("\"TBL\".\"COL2\""));
+		}
+	}
+	
+	@Test
+	public void testNonExistingColumnWithAlias() {
+		sql.executeSQL("CREATE TABLE TBL (COL1 INT)");
+		ClassMap cm1 = ClassMap.create(null, "http://example.com/@@ALIAS.COL2@@", mapping);
+		cm1.addClass(FOAF.Person);
+		cm1.addAlias("TBL AS ALIAS");
+		try {
+			firstTripleRelation();
+			fail("Expected error due to non-existing table TBL.COL2");
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.SQL_COLUMN_NOT_FOUND, ex.errorCode());
+			assertTrue("Error message was: " + ex.getMessage(), 
+					ex.getMessage().contains("\"ALIAS\".\"COL2\""));
+		}
+	}
+
+	@Test
+	public void testNonExistingColumnInCondition() {
+		sql.executeSQL("CREATE TABLE TBL (COL1 INT)");
+		ClassMap cm1 = ClassMap.create(null, "http://example.com/@@TBL.COL1@@", mapping);
+		cm1.addClass(FOAF.Person);
+		cm1.addCondition("TBL.COL2>0");
+		try {
+			firstTripleRelation();
+			fail("Expected error due to non-existing table TBL.COL2");
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.SQL_COLUMN_NOT_FOUND, ex.errorCode());
+			assertTrue("Error message was: " + ex.getMessage(), 
+					ex.getMessage().contains("\"TBL\".\"COL2\""));
+		}
+	}
+	
+	@Test
+	public void testNonExistingColumnInJoin() {
+		sql.executeSQL("CREATE TABLE T (COL1 INT)");
+		sql.executeSQL("CREATE TABLE TBL (COL1 INT)");
+		ClassMap cm1 = ClassMap.create(null, "http://example.com/@@T.COL1@@", mapping);
+		cm1.addClass(FOAF.Person);
+		cm1.addJoin("T.COL1=TBL.COL2");
+		try {
+			firstTripleRelation();
+			fail("Expected error due to non-existing table TBL.COL2");
+		} catch (D2RQException ex) {
+			assertEquals(D2RQException.SQL_COLUMN_NOT_FOUND, ex.errorCode());
+			assertTrue("Error message was: " + ex.getMessage(), 
+					ex.getMessage().contains("\"TBL\".\"COL2\""));
+		}
 	}
 	
 	private TripleRelation firstTripleRelation() {

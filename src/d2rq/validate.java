@@ -2,17 +2,15 @@ package d2rq;
 
 import java.io.IOException;
 
-import org.d2rq.CommandLineTool;
-import org.d2rq.SystemLoader;
-import org.d2rq.r2rml.Mapping;
-import org.d2rq.r2rml.MappingValidator;
-import org.d2rq.validation.Message;
-import org.d2rq.validation.PlainTextMessageRenderer;
-import org.d2rq.validation.Report;
-import org.d2rq.validation.Message.Renderer;
-
 import jena.cmdline.ArgDecl;
 import jena.cmdline.CommandLine;
+
+import org.d2rq.CommandLineTool;
+import org.d2rq.SystemLoader;
+import org.d2rq.validation.Message;
+import org.d2rq.validation.Message.Renderer;
+import org.d2rq.validation.PlainTextMessageRenderer;
+import org.d2rq.validation.Report;
 
 public class validate extends CommandLineTool {
 
@@ -60,13 +58,8 @@ public class validate extends CommandLineTool {
 
 		int exit = 0;
 		try {
-			Mapping mapping = loader.getR2RMLReader().getMapping();
-			Report report = loader.getR2RMLReader().getReport();
-			if (mapping != null) {
-				MappingValidator validator = new MappingValidator(mapping, loader.getSQLConnection());
-				validator.setReport(report);
-				validator.run();
-			}
+			Report report = loader.getReport();
+			loader.validate();
 			System.out.println();
 			System.out.println("=== Validation report for " + mappingFile + " ===");
 			System.out.println();
@@ -75,7 +68,9 @@ public class validate extends CommandLineTool {
 				renderer.render(message);
 			}
 			if (report.countWarnings() == 0 && report.countErrors() == 0) {
-				System.out.println("SUCCESS: The mapping document validates as R2RML 1.0.");
+				System.out.println(
+						"SUCCESS: The document is a valid " + 
+						loader.getMappingLanguage() + " mapping.");
 				System.out.println();
 			}
 			if (report.hasError()) {

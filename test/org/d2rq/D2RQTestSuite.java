@@ -84,10 +84,10 @@ public class D2RQTestSuite {
 		// and therefore the requirement to detect them seems overly
 		// taxing. We believe this test case is in error.
 		"tc0015b",
-		// Known limitation: We don't detect data errors.
+		//TODO: Known limitation: We don't detect data errors.
 		"tc0019b",
 		"tc0020b",
-		// Known limitation: We don't support named graphs.
+		//TODO: Known limitation: We don't support named graphs.
 		"tc0006a",
 		"tc0007b",
 		"tc0007e",

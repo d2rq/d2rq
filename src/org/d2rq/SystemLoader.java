@@ -12,15 +12,19 @@ import org.d2rq.db.SQLScriptLoader;
 import org.d2rq.jena.GraphD2RQ;
 import org.d2rq.lang.D2RQCompiler;
 import org.d2rq.lang.D2RQReader;
-import org.d2rq.lang.Mapping;
+import org.d2rq.lang.D2RQValidator;
 import org.d2rq.mapgen.Filter;
 import org.d2rq.mapgen.MappingGenerator;
 import org.d2rq.mapgen.W3CMappingGenerator;
+import org.d2rq.r2rml.MappingValidator;
 import org.d2rq.r2rml.R2RMLCompiler;
 import org.d2rq.r2rml.R2RMLReader;
 import org.d2rq.server.ConfigLoader;
 import org.d2rq.server.D2RServer;
 import org.d2rq.server.JettyLauncher;
+import org.d2rq.validation.Message;
+import org.d2rq.validation.Message.Problem;
+import org.d2rq.validation.Report;
 import org.d2rq.vocab.D2RQ;
 import org.d2rq.vocab.RR;
 import org.d2rq.vocab.VocabularySummarizer;
@@ -78,6 +82,14 @@ public class SystemLoader {
 		return loader.getMapping();
 	}
 	
+	public enum MappingLanguage {
+		D2RQ("D2RQ Mapping Language"),
+		R2RML("R2RML 1.0");
+		private String name;
+		MappingLanguage(String name) { this.name = name; }
+		public String toString() { return name; }
+	}
+	
 	private String username = null;
 	private String password = null;
 	private String jdbcDriverClass = null;
@@ -97,13 +109,16 @@ public class SystemLoader {
 	private Model mapModel = null;
 	private CompiledMapping mapping = null;
 	private R2RMLReader r2rmlReader = null;
+	private org.d2rq.r2rml.Mapping r2rmlMapping = null;
+	private D2RQReader d2rqReader = null;
+	private org.d2rq.lang.Mapping d2rqMapping = null;
 	private Model dataModel = null;
 	private GraphD2RQ dataGraph = null;
 	private JettyLauncher jettyLauncher = null;
 	private ConfigLoader serverConfig = null;
 	private D2RServer d2rServer = null;
-
-	private boolean isR2RMLMapping;
+	private Report report = null;
+	private MappingLanguage mappingLanguage = null;
 	
 	public void setUsername(String username) {
 		this.username = username;
@@ -131,6 +146,10 @@ public class SystemLoader {
 	
 	public void setJdbcURL(String jdbcURL) {
 		this.jdbcURL = jdbcURL;
+	}
+	
+	public String getJdbcURL() {
+		return jdbcURL;
 	}
 	
 	public void setMappingFileOrJdbcURL(String value) {
@@ -258,7 +277,7 @@ public class SystemLoader {
 
 	public void setMappingModel(Model mapModel) {
 		this.mapModel = mapModel;
-		identifyMappingLanguage();
+		mappingLanguage = null;
 	}
 	
 	public Model getMappingModel() {
@@ -305,23 +324,21 @@ public class SystemLoader {
 							"Error parsing " + mappingFile + ": " + ex.getMessage(), ex, 77);
 				}
 			}
-			identifyMappingLanguage();
 		}
 		return mapModel;
 	}
 
 	public CompiledMapping getMapping() {
 		if (mapping == null) {
-			Model m = getMappingModel();
-			if (isR2RMLMapping) {
+			if (getMappingLanguage() == MappingLanguage.R2RML) {
+				validateR2RML();
 				R2RMLCompiler compiler = new R2RMLCompiler(
-						getR2RMLReader().getMapping(), getSQLConnection());
+						getR2RMLMapping(), getSQLConnection());
 				compiler.setFastMode(fastMode);
 				mapping = compiler;
 			} else {
-				Mapping d2rqMapping = new D2RQReader(m, getResourceBaseURI()).getMapping();
-				d2rqMapping.configuration().setUseAllOptimizations(fastMode);
-				D2RQCompiler compiler = new D2RQCompiler(d2rqMapping);
+				validateD2RQ();
+				D2RQCompiler compiler = new D2RQCompiler(getD2RQMapping());
 				if (sqlConnection != null || jdbcURL != null) {
 					compiler.useConnection(getSQLConnection());
 				}
@@ -331,12 +348,66 @@ public class SystemLoader {
 		return mapping;
 	}
 
+	public Report getReport() {
+		if (report == null) {
+			report = new Report();
+		}
+		return report;
+	}
+	
 	public R2RMLReader getR2RMLReader() {
 		if (r2rmlReader == null) {
-			r2rmlReader = new R2RMLReader(getMappingModel(), 
-					getResourceBaseURI());
+			r2rmlReader = new R2RMLReader(getMappingModel(), getResourceBaseURI());
+			r2rmlReader.setReport(getReport());
 		}
 		return r2rmlReader;
+	}
+	
+	public D2RQReader getD2RQReader() {
+		if (d2rqReader == null) {
+			d2rqReader = new D2RQReader(getMappingModel(), getResourceBaseURI());
+		}
+		return d2rqReader;
+	}
+	
+	public org.d2rq.r2rml.Mapping getR2RMLMapping() {
+		if (r2rmlMapping == null) {
+			r2rmlMapping = getR2RMLReader().getMapping();
+		}
+		return r2rmlMapping;
+	}
+	
+	public org.d2rq.lang.Mapping getD2RQMapping() {
+		if (d2rqMapping == null) {
+			d2rqMapping = getD2RQReader().getMapping();
+			d2rqMapping.configuration().setUseAllOptimizations(fastMode);
+		}
+		return d2rqMapping;
+	}
+	
+	private void validateR2RML() {
+		if (getR2RMLMapping() == null) return;
+		SQLConnection connection = getJdbcURL() == null ? null : getSQLConnection();
+		MappingValidator validator = new MappingValidator(
+				getR2RMLMapping(), connection);
+		validator.setReport(report);
+		validator.run();
+	}
+
+	private void validateD2RQ() {
+		try {
+			new D2RQValidator(getD2RQMapping()).run();
+		} catch (D2RQException ex) {
+			report.report(new Message(Problem.GENERIC_ERROR, ex.getMessage()));
+		}
+	}
+	
+	public void validate() {
+		if (getMappingLanguage() == MappingLanguage.R2RML) {
+			validateR2RML();
+		} else {
+			getMapping();
+		}
 	}
 	
 	public Model getModelD2RQ() {
@@ -398,17 +469,22 @@ public class SystemLoader {
 		}
 	}
 
-	private void identifyMappingLanguage() {
-		boolean isD2RQ = new VocabularySummarizer(D2RQ.class).usesVocabulary(getMappingModel());
-		boolean isR2RML = new VocabularySummarizer(RR.class).usesVocabulary(getMappingModel());
-		if (isD2RQ && isR2RML) {
-			throw new D2RQException("Mapping uses both D2RQ and R2RML terms");
+	public MappingLanguage getMappingLanguage() {
+		if (mappingLanguage == null) {
+			boolean isD2RQ = new VocabularySummarizer(D2RQ.class).usesVocabulary(getMappingModel());
+			boolean isR2RML = new VocabularySummarizer(RR.class).usesVocabulary(getMappingModel());
+			if (isD2RQ && isR2RML) {
+				throw new D2RQException("Mapping uses both D2RQ and R2RML terms");
+			}
+			boolean isR2RMLMapping = isR2RML || (!isR2RML && !isD2RQ);
+			if (isR2RMLMapping) {
+				mappingLanguage = MappingLanguage.R2RML;
+				log.debug("Identified mapping model as an R2RML mapping");
+			} else {
+				mappingLanguage = MappingLanguage.D2RQ;
+				log.debug("Identified mapping model as a D2RQ mapping");
+			}
 		}
-		isR2RMLMapping = isR2RML || (!isR2RML && !isD2RQ);
-		if (isR2RMLMapping) {
-			log.debug("Identified mapping model as an R2RML mapping");
-		} else {
-			log.debug("Identified mapping model as a D2RQ mapping");
-		}
+		return mappingLanguage;
 	}
 }

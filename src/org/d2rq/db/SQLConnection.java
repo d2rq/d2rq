@@ -13,15 +13,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.d2rq.D2RQException;
 import org.d2rq.db.op.AliasOp;
-import org.d2rq.db.op.SQLOp;
-import org.d2rq.db.op.TableOp;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.OpVisitor;
+import org.d2rq.db.op.SQLOp;
+import org.d2rq.db.op.TableOp;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Inspector;
 import org.d2rq.db.schema.TableDef;
 import org.d2rq.db.schema.TableName;
-import org.d2rq.db.types.DataType.GenericType;
 import org.d2rq.db.vendor.Vendor;
 import org.d2rq.lang.Database;
 
@@ -51,8 +50,6 @@ public class SQLConnection {
 	private final String jdbcDriverClass;
 	private final String username;
 	private final String password;
-	private final Map<ColumnName,GenericType> overriddenColumnTypes =
-		new HashMap<ColumnName,GenericType>();
 	private final Properties connectionProperties;
 	private int limit;
 	private int fetchSize = Database.NO_FETCH_SIZE;
@@ -218,7 +215,7 @@ public class SQLConnection {
 		if (tableCache.containsKey(table)) return;
 		TableDef tableDef = metadata().describeTableOrView(table);
 		if (tableDef != null) {
-			tableCache.put(table, new TableOp(this, tableDef));
+			tableCache.put(table, new TableOp(tableDef));
 		}
 	}
 	
@@ -279,10 +276,6 @@ public class SQLConnection {
 		return fetchSize;
 	}
 
-	public void addOverriddenColumnTypes(Map<ColumnName,GenericType> types) {
-		overriddenColumnTypes.putAll(types);
-	}
-	
 	private void connect() {
 		if (jdbcURL != null && !jdbcURL.toLowerCase().startsWith("jdbc:")) {
 			throw new D2RQException("Not a JDBC URL: " + jdbcURL, D2RQException.D2RQ_DB_CONNECTION_FAILED);
