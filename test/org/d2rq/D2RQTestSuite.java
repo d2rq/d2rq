@@ -28,7 +28,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	HSQLDatabaseTest.class,
+	org.d2rq.AllTests.class,
 	org.d2rq.csv.AllTests.class,
 	org.d2rq.db.AllTests.class,
 	org.d2rq.db.expr.AllTests.class,

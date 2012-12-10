@@ -19,22 +19,18 @@ import org.d2rq.db.expr.Constant;
 import org.d2rq.db.expr.Equality;
 import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.ProjectionSpec;
-import org.d2rq.db.op.TableOp;
 import org.d2rq.db.op.ProjectionSpec.ColumnProjectionSpec;
+import org.d2rq.db.op.TableOp;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.types.DataType.GenericType;
 import org.d2rq.db.vendor.Vendor;
-import org.d2rq.lang.Microsyntax;
-import org.d2rq.lang.Pattern;
 import org.d2rq.values.TemplateValueMaker;
 import org.junit.Before;
 import org.junit.Test;
 
 
 /**
- * Tests the {@link Pattern} class.
- *
- * @author Richard Cyganiak (richard@cyganiak.de)
+ * TOOD: This mixes tests for {@link Microsyntax#parsePattern(String)} and {@link TemplateValueMaker}; separate these
  */
 public class PatternTest {
 	private ColumnName col1, col2, col3, col4, col5;
@@ -218,7 +214,7 @@ public class PatternTest {
 
 	@Test
 	public void testToString() {
-		assertEquals("Pattern(foo@@table.col1@@)", create("foo@@table.col1@@").toString());
+		assertEquals("foo@@table.col1@@", Microsyntax.toString(create("foo@@table.col1@@")));
 	}
 	
 	@Test
@@ -280,31 +276,6 @@ public class PatternTest {
 		assertFalse(p2.isEquivalentTo(p1));
 	}
 	
-	@Test
-	public void testLiteralPatternsMatchTrivialRegex() {
-		assertTrue(new Pattern("asdf").literalPartsMatchRegex(".*"));
-	}
-	
-	@Test
-	public void testLiteralPatternsDontMatchTrivialRegex() {
-		assertFalse(new Pattern("asdf").literalPartsMatchRegex("foo"));
-	}
-	
-	@Test
-	public void testLiteralPatternRegexIsAnchored() {
-		assertFalse(new Pattern("aaa").literalPartsMatchRegex("b*"));
-	}
-	
-	@Test
-	public void testLiteralPatternRegexMultipleParts() {
-		assertTrue(new Pattern("aaa@@aaa.aaa@@aaa").literalPartsMatchRegex("aaa"));
-	}
-	
-	@Test
-	public void testLiteralPatternRegexMatchesOnlyLiteralParts() {
-		assertTrue(new Pattern("aaa@@bbb.ccc@@aaa").literalPartsMatchRegex("a+"));
-	}
-
 	@Test
 	public void testPatternURLEncode() {
 		TemplateValueMaker p = create("aaa@@table.col1|urlencode@@bbb");
@@ -369,7 +340,7 @@ public class PatternTest {
 	}
 	
 	private TemplateValueMaker create(String pattern) {
-		return new Pattern(pattern).toTemplate(new DummyDB());
+		return Microsyntax.parsePattern(pattern);
 	}
 	
 	private void assertPattern(String expected, String pattern) {

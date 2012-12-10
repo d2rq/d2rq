@@ -58,7 +58,8 @@ public class validate extends CommandLineTool {
 
 		int exit = 0;
 		try {
-			Report report = loader.getReport();
+			Report report = new Report();
+			loader.setReport(report);
 			loader.validate();
 			System.out.println();
 			System.out.println("=== Validation report for " + mappingFile + " ===");

@@ -30,7 +30,7 @@ public class JoinSetParserTest {
 	@Test
 	public void testParseInvalidJoin() {
 		try {
-			new JoinSetParser(Collections.singleton("asdf")).getExpressions();
+			JoinSetParser.create("asdf").getExpressions();
 		} catch (D2RQException ex) {
 			assertEquals(D2RQException.SQL_INVALID_JOIN, ex.errorCode());
 		}
@@ -38,8 +38,7 @@ public class JoinSetParserTest {
 	
 	@Test
 	public void testParseJoinOneCondition() {
-		Set<ColumnListEquality> joins = new JoinSetParser(
-				Collections.singleton("foo.col1 = bar.col2")).getExpressions();
+		Set<ColumnListEquality> joins = JoinSetParser.create("foo.col1 = bar.col2").getExpressions();
 		assertEquals(1, joins.size());
 		ColumnListEquality join = (ColumnListEquality) joins.iterator().next();
 		assertEquals(Collections.singletonList(bar_col2.getColumn()), join.getColumns1().getColumns());
@@ -48,8 +47,8 @@ public class JoinSetParserTest {
 	
 	@Test
 	public void testParseJoinTwoConditionsOnSameTables() {
-		Set<ColumnListEquality> joins = new JoinSetParser(Arrays.asList(new String[]{
-		"foo.col1 = bar.col1", "foo.col2 = bar.col2"})).getExpressions();
+		Set<ColumnListEquality> joins = JoinSetParser.create("foo.col1 = bar.col1", 
+				"foo.col2 = bar.col2").getExpressions();
 		assertEquals(1, joins.size());
 		ColumnListEquality join = (ColumnListEquality) joins.iterator().next();
 		assertEquals(Arrays.asList(new Identifier[]{foo_col1.getColumn(), foo_col2.getColumn()}),
@@ -61,8 +60,8 @@ public class JoinSetParserTest {
 	
 	@Test
 	public void testParseJoinTwoConditionsOnDifferentTables() {
-		Set<ColumnListEquality> joins = new JoinSetParser(Arrays.asList(new String[]{
-		"foo.col1 = bar.col1", "foo.col1 = baz.col1"})).getExpressions();
+		Set<ColumnListEquality> joins = JoinSetParser.create(
+		"foo.col1 = bar.col1", "foo.col1 = baz.col1").getExpressions();
 		assertEquals(2, joins.size());
 		assertEquals(new HashSet<ColumnListEquality>(Arrays.asList(new ColumnListEquality[]{
 				ColumnListEquality.create(foo_col1, bar_col1),
@@ -72,11 +71,9 @@ public class JoinSetParserTest {
 	
 	@Test
 	public void testParseJoinConflictingOperators() {
-		new JoinSetParser(Arrays.asList(new String[]{
-		"foo.col1 => bar.col1", "foo.col2 => bar.col2"})).getExpressions();
+		JoinSetParser.create("foo.col1 => bar.col1", "foo.col2 => bar.col2").getExpressions();
 		try {
-			new JoinSetParser(Arrays.asList(new String[]{
-			"foo.col1 <= bar.col1", "foo.col2 => bar.col2"})).getExpressions();
+			JoinSetParser.create("foo.col1 <= bar.col1", "foo.col2 => bar.col2").getExpressions();
 		} catch (D2RQException ex) {
 			assertEquals(D2RQException.SQL_INVALID_JOIN, ex.errorCode());
 		}
@@ -84,13 +81,14 @@ public class JoinSetParserTest {
 	
 	@Test
 	public void testUndirectedJoinDoesNotAssertForeignKey() {
-		assertTrue(new JoinSetParser(Collections.singleton("foo.col1 = bar.col2")).getAssertedForeignKeys().isEmpty());
+		assertTrue(JoinSetParser.create("foo.col1 = bar.col2").getAssertedForeignKeys().isEmpty());
 	}
 	
 	@Test
 	public void testAssertedForeignKeys() {
-		Map<ForeignKey,TableName> actual = new JoinSetParser(Arrays.asList(new String[]{
-		"foo.col1 <= bar.col1", "foo.col1 => baz.col1", "bar.col1 = baz.col1"})).getAssertedForeignKeys();
+		Map<ForeignKey,TableName> actual = JoinSetParser.create(
+				"foo.col1 <= bar.col1", "foo.col1 => baz.col1", 
+				"bar.col1 = baz.col1").getAssertedForeignKeys();
 		Map<ForeignKey,TableName> expected = new HashMap<ForeignKey,TableName>();
 		expected.put(new ForeignKey(Key.create(bar_col1), Key.create(foo_col1), foo_col1.getQualifier()), bar_col1.getQualifier());
 		expected.put(new ForeignKey(Key.create(foo_col1), Key.create(baz_col1), baz_col1.getQualifier()), foo_col1.getQualifier());

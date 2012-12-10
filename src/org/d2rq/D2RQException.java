@@ -1,5 +1,8 @@
 package org.d2rq;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 import com.hp.hpl.jena.shared.JenaException;
 
 /**
@@ -103,6 +106,24 @@ public class D2RQException extends JenaException {
 	public static final int SQL_TABLE_NOT_FOUND = 89;
 	public static final int NOT_YET_IMPLEMENTED = 90;	
 	
+	/**
+	 * Returns the name of one of the D2RQException.XXX error constants
+	 */
+	public static String getErrorCodeName(int code) {
+		try {
+			for (Field field: D2RQException.class.getFields()) {
+				if (!Modifier.isPublic(field.getModifiers())) continue;
+				if (!Modifier.isStatic(field.getModifiers())) continue;
+				if (!Integer.TYPE.equals(field.getType())) continue;
+				if (field.getInt(null) != code) continue;
+				return field.getName();
+			}
+		} catch (IllegalAccessException ex) {
+			// Shouldn't happen, we've checked that it's public
+		}
+		return null;
+	}
+	
 	private int code;
 	
 	public D2RQException(String message) {
@@ -133,7 +154,11 @@ public class D2RQException extends JenaException {
 	}
 	
 	public int errorCode() {
-		return this.code;
+		return code;
+	}
+	
+	public String errorCodeAsString() {
+		return getErrorCodeName(code);
 	}
 }
 

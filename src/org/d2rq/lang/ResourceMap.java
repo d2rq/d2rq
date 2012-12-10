@@ -31,7 +31,7 @@ public abstract class ResourceMap extends MapObject {
 	private Collection<String> valueRegexes = new ArrayList<String>();
 	private Collection<String> valueContainses = new ArrayList<String>();
 	private int valueMaxLength = Integer.MAX_VALUE;
-	private Collection<String> joins = new ArrayList<String>();
+	private Collection<Join> joins = new ArrayList<Join>();
 	private Collection<String> conditions = new ArrayList<String>();
 	private Set<AliasDeclaration> aliases = new HashSet<AliasDeclaration>();
 	private boolean containsDuplicates;
@@ -47,9 +47,9 @@ public abstract class ResourceMap extends MapObject {
 	
 	public abstract Database getDatabase();
 		
-	public void setBNodeIdColumns(String columns) {
+	public void setBNodeIdColumns(List<ColumnName> columns) {
 		assertNotYetDefined(this.bNodeIdColumns, D2RQ.bNodeIdColumns, D2RQException.RESOURCEMAP_DUPLICATE_BNODEIDCOLUMNS);
-		bNodeIdColumns = Microsyntax.parseColumnList(columns);
+		bNodeIdColumns = columns;
 	}
 
 	public List<ColumnName> getBNodeIdColumnsParsed() {
@@ -60,9 +60,9 @@ public abstract class ResourceMap extends MapObject {
 		return Microsyntax.toString(bNodeIdColumns);
 	}
 	
-	public void setURIColumn(String column) {
+	public void setURIColumn(ColumnName column) {
 		assertNotYetDefined(this.uriColumn, D2RQ.uriColumn, D2RQException.RESOURCEMAP_DUPLICATE_URICOLUMN);
-		uriColumn = Microsyntax.parseColumn(column);
+		uriColumn = column;
 	}
 
 	public ColumnName getURIColumn() {
@@ -136,11 +136,11 @@ public abstract class ResourceMap extends MapObject {
 		return translateWith;
 	}
 	
-	public void addJoin(String join) {
+	public void addJoin(Join join) {
 		joins.add(join);
 	}
 	
-	public Collection<String> getJoins() {
+	public Collection<Join> getJoins() {
 		return joins;
 	}
 	
@@ -152,22 +152,14 @@ public abstract class ResourceMap extends MapObject {
 		return conditions;
 	}
 	
-	public void addAlias(String alias) {
-		aliases.add(Microsyntax.parseAlias(alias));
+	public void addAlias(AliasDeclaration alias) {
+		aliases.add(alias);
 	}
 	
-	public Set<AliasDeclaration> getAliasesParsed() {
+	public Set<AliasDeclaration> getAliases() {
 		return aliases;
 	}
 
-	public Set<String> getAliases() {
-		Set<String> result = new HashSet<String>();
-		for (AliasDeclaration alias: aliases) {
-			result.add(Microsyntax.toString(alias));
-		}
-		return result;
-	}
-	
 	public void setContainsDuplicates(boolean b) {
 		this.containsDuplicates = b;
 	}

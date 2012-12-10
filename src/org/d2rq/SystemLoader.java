@@ -12,7 +12,6 @@ import org.d2rq.db.SQLScriptLoader;
 import org.d2rq.jena.GraphD2RQ;
 import org.d2rq.lang.D2RQCompiler;
 import org.d2rq.lang.D2RQReader;
-import org.d2rq.lang.D2RQValidator;
 import org.d2rq.mapgen.Filter;
 import org.d2rq.mapgen.MappingGenerator;
 import org.d2rq.mapgen.W3CMappingGenerator;
@@ -22,8 +21,6 @@ import org.d2rq.r2rml.R2RMLReader;
 import org.d2rq.server.ConfigLoader;
 import org.d2rq.server.D2RServer;
 import org.d2rq.server.JettyLauncher;
-import org.d2rq.validation.Message;
-import org.d2rq.validation.Message.Problem;
 import org.d2rq.validation.Report;
 import org.d2rq.vocab.D2RQ;
 import org.d2rq.vocab.RR;
@@ -103,6 +100,7 @@ public class SystemLoader {
 	private boolean fastMode = false;
 	private int port = -1;
 	private boolean useServerConfig = true;
+	private Boolean serveVocabulary = null;
 	
 	private SQLConnection sqlConnection = null;
 	private MappingGenerator generator = null;
@@ -162,6 +160,10 @@ public class SystemLoader {
 	
 	public void setUseServerConfig(boolean flag) {
 		this.useServerConfig = flag;
+	}
+	
+	public void setServeVocabulary(boolean flag) {
+		this.serveVocabulary = flag;
 	}
 	
 	public void setSystemBaseURI(String baseURI) {
@@ -286,7 +288,7 @@ public class SystemLoader {
 				throw new D2RQException("no mapping file or JDBC URL specified");
 			}
 			if (mappingFile == null) {
-				mapModel = getMappingGenerator().mappingModel(getResourceBaseURI());
+				mapModel = getMappingGenerator().getMappingModel(getResourceBaseURI());
 			} else {
 				log.info("Reading mapping file from " + mappingFile);
 				// Guess the language/type of mapping file based on file extension. If it is not among the known types then assume that the file has TURTLE syntax and force to use TURTLE parser
@@ -337,10 +339,12 @@ public class SystemLoader {
 				compiler.setFastMode(fastMode);
 				mapping = compiler;
 			} else {
-				validateD2RQ();
 				D2RQCompiler compiler = new D2RQCompiler(getD2RQMapping());
 				if (sqlConnection != null || jdbcURL != null) {
 					compiler.useConnection(getSQLConnection());
+				}
+				if (report != null) {
+					compiler.setReport(report);
 				}
 				mapping = compiler.getResult();
 			}
@@ -348,17 +352,16 @@ public class SystemLoader {
 		return mapping;
 	}
 
-	public Report getReport() {
-		if (report == null) {
-			report = new Report();
-		}
-		return report;
+	public void setReport(Report report) {
+		this.report = report;
 	}
 	
 	public R2RMLReader getR2RMLReader() {
 		if (r2rmlReader == null) {
 			r2rmlReader = new R2RMLReader(getMappingModel(), getResourceBaseURI());
-			r2rmlReader.setReport(getReport());
+			if (report != null) {
+				r2rmlReader.setReport(report);
+			}
 		}
 		return r2rmlReader;
 	}
@@ -381,6 +384,9 @@ public class SystemLoader {
 		if (d2rqMapping == null) {
 			d2rqMapping = getD2RQReader().getMapping();
 			d2rqMapping.configuration().setUseAllOptimizations(fastMode);
+			if (serveVocabulary != null) {
+				d2rqMapping.configuration().setServeVocabulary(serveVocabulary);
+			}
 		}
 		return d2rqMapping;
 	}
@@ -390,18 +396,12 @@ public class SystemLoader {
 		SQLConnection connection = getJdbcURL() == null ? null : getSQLConnection();
 		MappingValidator validator = new MappingValidator(
 				getR2RMLMapping(), connection);
-		validator.setReport(report);
+		if (report != null) {
+			validator.setReport(report);
+		}
 		validator.run();
 	}
 
-	private void validateD2RQ() {
-		try {
-			new D2RQValidator(getD2RQMapping()).run();
-		} catch (D2RQException ex) {
-			report.report(new Message(Problem.GENERIC_ERROR, ex.getMessage()));
-		}
-	}
-	
 	public void validate() {
 		if (getMappingLanguage() == MappingLanguage.R2RML) {
 			validateR2RML();

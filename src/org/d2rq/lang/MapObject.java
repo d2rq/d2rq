@@ -15,6 +15,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
  */
 public abstract class MapObject {
 	private Resource resource;
+	private String comment = null;
 	
 	public MapObject(Resource resource) {
 		this.resource = resource;
@@ -24,6 +25,14 @@ public abstract class MapObject {
 		return this.resource;
 	}
 
+	public String getComment() {
+		return comment;
+	}
+	
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+	
 	public abstract void accept(D2RQMappingVisitor visitor);
 
 	public String toString() {

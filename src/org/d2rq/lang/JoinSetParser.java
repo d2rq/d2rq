@@ -10,11 +10,11 @@ import java.util.Set;
 
 import org.d2rq.D2RQException;
 import org.d2rq.db.expr.ColumnListEquality;
-import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.schema.Key;
 import org.d2rq.db.schema.TableName;
+import org.d2rq.lang.Join.Direction;
 
 
 /**
@@ -30,16 +30,29 @@ import org.d2rq.db.schema.TableName;
  * keys can be retrieved as well.
  */
 public class JoinSetParser {
-	private final Collection<String> joins;
+	
+	/**
+	 * @param joinExpressions a collection of D2RQ-style join expressions
+	 */
+	public static JoinSetParser create(String... joinExpressions) {
+		List<Join> result = new ArrayList<Join>();
+		for (String join: joinExpressions) {
+			result.add(Microsyntax.parseJoin(join));
+		}
+		return new JoinSetParser(result);
+	}
+	
+	public static JoinSetParser create(Collection<Join> joinExpressions) {
+		return new JoinSetParser(joinExpressions);
+	}
+	
+	private final Collection<Join> joins;
 	private final Set<ColumnListEquality> expressions = new HashSet<ColumnListEquality>();
 	private final Map<ForeignKey,TableName> assertedForeignKeys = 
 			new HashMap<ForeignKey,TableName>();
 	private boolean done = false;
 
-	/**
-	 * @param joinExpressions a collection of D2RQ-style join expressions
-	 */
-	public JoinSetParser(Collection<String> joinExpressions) {
+	private JoinSetParser(Collection<Join> joinExpressions) {
 		this.joins = joinExpressions;
 	}
 	
@@ -57,17 +70,16 @@ public class JoinSetParser {
 		if (done) return;
 		done = true;
 		List<Bucket> buckets = new ArrayList<Bucket>();
-		for (String expression: joins) {
-			Join parsed = parseJoinCondition(expression);
+		for (Join join: joins) {
 			for (Bucket bucket: buckets) {
-				if (bucket.joinsSameTablesAs(parsed)) {
-					bucket.add(parsed);
-					parsed = null;
+				if (bucket.joinsSameTablesAs(join)) {
+					bucket.add(join);
+					join = null;
 					break;
 				}
 			}
-			if (parsed != null) {
-				buckets.add(new Bucket(parsed));
+			if (join != null) {
+				buckets.add(new Bucket(join));
 			}
 		}
 		for (Bucket bucket: buckets) {
@@ -80,26 +92,6 @@ public class JoinSetParser {
 		}
 	}
 
-	private Join parseJoinCondition(String joinCondition) {
-		Direction operator = null;
-		int index = -1;
-		for (Direction direction: Direction.values()) {
-			index = joinCondition.indexOf(direction.operator);
-			if (index >= 0) {
-				operator = direction;
-				break;
-			}
-		}
-		if (operator == null) {
-			throw new D2RQException("d2rq:join \"" + joinCondition +
-					"\" is not in \"table1.col1 [ <= | => | = ] table2.col2\" form",
-					D2RQException.SQL_INVALID_JOIN);
-		}
-		ColumnName leftSide = Microsyntax.parseColumn(joinCondition.substring(0, index).trim());
-		ColumnName rightSide = Microsyntax.parseColumn(joinCondition.substring(index + operator.operator.length()).trim());
-		return new Join(leftSide, rightSide, operator);
-	}
-	
 	private class Bucket {
 		private final TableName table1;
 		private final TableName table2;
@@ -107,30 +99,30 @@ public class JoinSetParser {
 		private final List<Identifier> columns2 = new ArrayList<Identifier>();
 		private final Direction operator;
 		Bucket(Join seed) {
-			this.table1 = seed.column1.getQualifier();
-			this.table2 = seed.column2.getQualifier();
-			this.operator = seed.operator;
+			this.table1 = seed.getTable1();
+			this.table2 = seed.getTable2();
+			this.operator = seed.getDirection();
 			add(seed);
 		}
 		void add(Join join) {
-			if (join.operator != operator) {
+			if (join.getDirection() != operator) {
 				throw new D2RQException(
-						"d2rq:join between " + join.column1.getQualifier() + " and " + 
-						join.column2.getQualifier() + " has conflicting join operators " +
-						operator.operator + " and " + join.operator.operator, 
+						"d2rq:join between " + join.getTable1() + " and " + 
+						join.getTable2() + " has conflicting join operators " +
+						operator + " and " + join.getDirection(), 
 						D2RQException.SQL_INVALID_JOIN);
 			}
-			if (!table1.equals(join.column1.getQualifier())) {
-				join = join.flip();
+			if (!table1.equals(join.getTable1())) {
+				join = join.getFlipped();
 			}
-			columns1.add(join.column1.getColumn());
-			columns2.add(join.column2.getColumn());
+			columns1.add(join.getColumn1().getColumn());
+			columns2.add(join.getColumn2().getColumn());
 		}
 		boolean joinsSameTablesAs(Join join) {
-			return (table1.equals(join.column1.getQualifier()) && 
-					table2.equals(join.column2.getQualifier())) ||
-					(table1.equals(join.column2.getQualifier()) && 
-					table2.equals(join.column1.getQualifier()));
+			return (table1.equals(join.getTable1()) && 
+					table2.equals(join.getTable2())) ||
+					(table1.equals(join.getTable2()) && 
+					table2.equals(join.getTable1()));
 		}
 		ColumnListEquality getExpression() {
 			return ColumnListEquality.create(
@@ -156,37 +148,6 @@ public class JoinSetParser {
 						Key.createFromIdentifiers(columns1), table1);
 			}
 			return null;
-		}
-	}
-	
-	private class Join {
-		final ColumnName column1;
-		final ColumnName column2;
-		final Direction operator;
-		Join(ColumnName column1, ColumnName column2, Direction operator) {
-			this.column1 = column1;
-			this.column2 = column2;
-			this.operator = operator;
-		}
-		Join flip() {
-			return new Join(column2, column1, operator.flipped());
-		}
-	}
-
-	public enum Direction {
-		LEFT("<="),
-		RIGHT("=>"),
-		UNDIRECTED("=");
-		public final String operator;
-		Direction(String operator) {
-			this.operator = operator;
-		}
-		public Direction flipped() {
-			switch (this) {
-			case LEFT: return RIGHT;
-			case RIGHT: return LEFT;
-			default: return UNDIRECTED;
-			}
 		}
 	}
 }

@@ -10,11 +10,7 @@ import java.util.Collections;
 import org.d2rq.db.DummyDB;
 import org.d2rq.db.expr.Expression;
 import org.d2rq.db.schema.ColumnName;
-import org.d2rq.lang.Pattern;
-import org.d2rq.values.BlankNodeIDValueMaker;
-import org.d2rq.values.ColumnValueMaker;
-import org.d2rq.values.DecoratingValueMaker;
-import org.d2rq.values.ValueMaker;
+import org.d2rq.lang.Microsyntax;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,11 +33,6 @@ public class ValueMakerTest {
 	@Test
 	public void testColumnToString() {
 		assertEquals("Column(foo.col1)", new ColumnValueMaker(foo_col1).toString());
-	}
-	
-	@Test
-	public void testPatternToString() {
-		assertEquals("http://test/@@foo.bar@@", new Pattern("http://test/@@foo.bar@@").toString());
 	}
 	
 	@Test
@@ -99,15 +90,22 @@ public class ValueMakerTest {
 	}
 	
 	@Test
-	public void testPatternDoesNotMatchNull() {
-		ValueMaker pattern = new Pattern("foo/@@foo.bar@@").toTemplate(new DummyDB());
-		assertFalse(matches(pattern, null));
-	}
-	
-	@Test
 	public void testBlankNodeIDDoesNotMatchNull() {
 		BlankNodeIDValueMaker bNodeID = new BlankNodeIDValueMaker("classmap", Collections.singletonList(foo_col1));
 		assertFalse(matches(bNodeID, null));
+	}
+	
+	@Test
+	public void testPatternToString() {
+		assertEquals(
+				"http://test/@@foo.bar@@", 
+				Microsyntax.toString(Microsyntax.parsePattern("http://test/@@foo.bar@@")));
+	}
+	
+	@Test
+	public void testPatternDoesNotMatchNull() {
+		ValueMaker pattern = Microsyntax.parsePattern("foo/@@foo.bar@@");
+		assertFalse(matches(pattern, null));
 	}
 	
 	private boolean matches(ValueMaker valueMaker, String value) {

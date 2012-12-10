@@ -1,0 +1,163 @@
+@prefix : <http://d2rq.org/terms/test.ttl#>.
+@prefix test: <#>.
+@prefix ex: <http://example.com/>.
+@prefix vocab: <http://example.com/vocab/>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+# We use this to get the base URL in Jena.
+@prefix base: <>.
+
+<>
+    rdfs:label "A graph test suite for the D2RQ mapping generator"@en;
+    rdfs:comment """
+Test cases for the D2RQ mapping generator.
+    """@en.
+
+test:simple a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID INT PRIMARY KEY);
+    INSERT INTO T1 VALUES (1);
+    """;
+    :triple
+        (<http://example.com/T1/1> rdf:type vocab:T1),
+        (<http://example.com/T1/1> rdfs:label "T1 #1"),
+        (<http://example.com/T1/1> vocab:T1_ID 1).
+
+test:string-column a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID INT PRIMARY KEY, VALUE VARCHAR(50));
+    INSERT INTO T1 VALUES (1, 'foo');
+    """;
+    :triple
+        (<http://example.com/T1/1> rdf:type vocab:T1),
+        (<http://example.com/T1/1> rdfs:label "T1 #1"),
+        (<http://example.com/T1/1> vocab:T1_ID 1),
+        (<http://example.com/T1/1> vocab:T1_VALUE "foo").
+
+test:primary-key-2col a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID1 INT, ID2 INT, PRIMARY KEY (ID1, ID2));
+    INSERT INTO T1 VALUES (1, 2);
+    """;
+    :triple
+        (<http://example.com/T1/1/2> rdf:type vocab:T1),
+        (<http://example.com/T1/1/2> rdfs:label "T1 #1/2"),
+        (<http://example.com/T1/1/2> vocab:T1_ID1 1),
+        (<http://example.com/T1/1/2> vocab:T1_ID2 2).
+
+test:no-pk a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID INT);
+    INSERT INTO T1 VALUES (1);
+    """;
+    :triple
+        (<http://example.com/T1> rdf:type vocab:T1),
+        (<http://example.com/T1> vocab:T1_ID 1).
+
+test:unique-key a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID INT UNIQUE);
+    INSERT INTO T1 VALUES (1);
+    """;
+    :triple
+        (<http://example.com/T1/1> rdf:type vocab:T1),
+        (<http://example.com/T1/1> rdfs:label "T1 #1"),
+        (<http://example.com/T1/1> vocab:T1_ID 1).
+
+test:unique-key-2col a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID1 INT, ID2 INT, UNIQUE (ID1, ID2));
+    INSERT INTO T1 VALUES (1, 2);
+    """;
+    :triple
+        (<http://example.com/T1/1/2> rdf:type vocab:T1),
+        (<http://example.com/T1/1/2> rdfs:label "T1 #1/2"),
+        (<http://example.com/T1/1/2> vocab:T1_ID1 1),
+        (<http://example.com/T1/1/2> vocab:T1_ID2 2).
+
+test:foreign-key a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID INT PRIMARY KEY);
+    INSERT INTO T1 VALUES (1);
+    CREATE TABLE T2 (ID INT PRIMARY KEY, REF INT, FOREIGN KEY (REF) REFERENCES T1 (ID));
+    INSERT INTO T2 VALUES (10, 1);
+    """;
+    :triple
+        (<http://example.com/T1/1> rdf:type vocab:T1),
+        (<http://example.com/T1/1> rdfs:label "T1 #1"),
+        (<http://example.com/T1/1> vocab:T1_ID 1),
+        (<http://example.com/T2/10> rdf:type vocab:T2),
+        (<http://example.com/T2/10> rdfs:label "T2 #10"),
+        (<http://example.com/T2/10> vocab:T2_ID 10),
+        (<http://example.com/T2/10> vocab:T2_REF <http://example.com/T1/1>).
+
+test:foreign-key-2col a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID1 INT, ID2 INT, PRIMARY KEY (ID1, ID2));
+    INSERT INTO T1 VALUES (1, 2);
+    CREATE TABLE T2 (ID INT PRIMARY KEY, REF1 INT, REF2 INT, FOREIGN KEY (REF1, REF2) REFERENCES T1 (ID1, ID2));
+    INSERT INTO T2 VALUES (10, 1, 2);
+    """;
+    :triple
+        (<http://example.com/T1/1/2> rdf:type vocab:T1),
+        (<http://example.com/T1/1/2> rdfs:label "T1 #1/2"),
+        (<http://example.com/T1/1/2> vocab:T1_ID1 1),
+        (<http://example.com/T1/1/2> vocab:T1_ID2 2),
+        (<http://example.com/T2/10> rdf:type vocab:T2),
+        (<http://example.com/T2/10> rdfs:label "T2 #10"),
+        (<http://example.com/T2/10> vocab:T2_ID 10),
+        (<http://example.com/T2/10> vocab:T2_REF1_REF2 <http://example.com/T1/1/2>).
+
+test:foreign-key-self a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID INT PRIMARY KEY, REF INT, FOREIGN KEY (REF) REFERENCES T1 (ID));
+    INSERT INTO T1 VALUES (1, NULL);
+    INSERT INTO T1 VALUES (2, 1);
+    """;
+    :triple
+        (<http://example.com/T1/1> rdf:type vocab:T1),
+        (<http://example.com/T1/1> rdfs:label "T1 #1"),
+        (<http://example.com/T1/1> vocab:T1_ID 1),
+        (<http://example.com/T1/2> rdf:type vocab:T1),
+        (<http://example.com/T1/2> rdfs:label "T1 #2"),
+        (<http://example.com/T1/2> vocab:T1_ID 2),
+        (<http://example.com/T1/2> vocab:T1_REF <http://example.com/T1/1>).
+
+test:link-table a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID INT PRIMARY KEY);
+    INSERT INTO T1 VALUES (1);
+    CREATE TABLE T2 (ID INT PRIMARY KEY);
+    INSERT INTO T2 VALUES (10);
+    CREATE TABLE T1T2 (T1ID INT, T2ID INT, PRIMARY KEY (T1ID, T2ID), FOREIGN KEY (T1ID) REFERENCES T1 (ID), FOREIGN KEY (T2ID) REFERENCES T2 (ID));
+    INSERT INTO T1T2 VALUES (1, 10);
+    """;
+    :triple
+        (<http://example.com/T1/1> rdf:type vocab:T1),
+        (<http://example.com/T1/1> rdfs:label "T1 #1"),
+        (<http://example.com/T1/1> vocab:T1_ID 1),
+        (<http://example.com/T2/10> rdf:type vocab:T2),
+        (<http://example.com/T2/10> rdfs:label "T2 #10"),
+        (<http://example.com/T2/10> vocab:T2_ID 10),
+        (<http://example.com/T1/1> vocab:T1T2 <http://example.com/T2/10>).
+
+test:link-table-self a :MappingGeneratorTestCase;
+    :sql """
+    CREATE TABLE T1 (ID INT PRIMARY KEY);
+    INSERT INTO T1 VALUES (1);
+    INSERT INTO T1 VALUES (2);
+    CREATE TABLE LINK (ID1 INT, ID2 INT, PRIMARY KEY (ID1, ID2), FOREIGN KEY (ID1) REFERENCES T1 (ID), FOREIGN KEY (ID2) REFERENCES T1 (ID));
+    INSERT INTO LINK VALUES (1, 1);
+    INSERT INTO LINK VALUES (1, 2);
+    """;
+    :triple
+        (<http://example.com/T1/1> rdf:type vocab:T1),
+        (<http://example.com/T1/1> rdfs:label "T1 #1"),
+        (<http://example.com/T1/1> vocab:T1_ID 1),
+        (<http://example.com/T1/2> rdf:type vocab:T1),
+        (<http://example.com/T1/2> rdfs:label "T1 #2"),
+        (<http://example.com/T1/2> vocab:T1_ID 2),
+        (<http://example.com/T1/1> vocab:LINK <http://example.com/T1/1>),
+        (<http://example.com/T1/1> vocab:LINK <http://example.com/T1/2>).
+

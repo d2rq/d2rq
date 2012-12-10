@@ -95,7 +95,7 @@ public class NodeMakerFactory {
 				return new ColumnValueMaker(map.getURIColumn());
 			}
 			if (map.getURIPattern() != null) {
-				return new Pattern(ensureIsAbsolute(map.getURIPattern())).toTemplate(sqlConnection);
+				return Microsyntax.parsePattern(ensureIsAbsolute(map.getURIPattern()));
 			}
 			if (map.getUriSQLExpression() != null) {
 				return new SQLExpressionValueMaker(
@@ -152,7 +152,7 @@ public class NodeMakerFactory {
 			if (map.getColumn() != null) {
 				return new ColumnValueMaker(map.getColumn());
 			} else if (map.getPattern() != null) {
-				return new Pattern(map.getPattern()).toTemplate(sqlConnection);
+				return Microsyntax.parsePattern(map.getPattern());
 			} else if (map.getSQLExpression() != null) {
 				return new SQLExpressionValueMaker(
 						Microsyntax.parseSQLExpression(
@@ -177,7 +177,7 @@ public class NodeMakerFactory {
 		}
 		public ValueMaker createRawValueMaker() {
 			ValueMaker values = forReferencedClassMap.createValueMaker();
-			return values.rename(AliasDeclaration.getRenamer(map.getAliasesParsed()));
+			return values.rename(AliasDeclaration.getRenamer(map.getAliases()));
 		}
 	}
 	

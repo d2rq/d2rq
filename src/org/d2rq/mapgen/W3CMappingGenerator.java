@@ -1,14 +1,20 @@
 package org.d2rq.mapgen;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.d2rq.db.SQLConnection;
+import org.d2rq.db.schema.ColumnDef;
+import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.schema.Key;
 import org.d2rq.db.schema.TableDef;
 import org.d2rq.db.schema.TableName;
-import org.d2rq.lang.Microsyntax;
+import org.d2rq.lang.ClassMap;
+import org.d2rq.values.TemplateValueMaker;
+
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
 
 
 /**
@@ -27,55 +33,60 @@ public class W3CMappingGenerator extends MappingGenerator {
 		setGenerateDefinitionLabels(false);
 		setServeVocabulary(false);
 		setSkipForeignKeyTargetColumns(false);
+		setUseUniqueKeysAsEntityID(false);
+		setVocabNamespaceURI("");
 	}
 
 	@Override
-	protected void writeEntityIdentifier(TableDef table, List<Identifier> identifierColumns) {
-		String uriPattern = this.instanceNamespaceURI + encodeTableName(table.getName());
-		Iterator<Identifier> it = identifierColumns.iterator();
-		int i = 0;
-		while (it.hasNext()) {
-			uriPattern += i == 0 ? "/" : ";";
-			i++;
-			
-			Identifier column = it.next();
-			uriPattern += encodeColumnName(column) + "=@@" + Microsyntax.toString(table.getName(), column);
-			if (!table.getColumnDef(column).getDataType().isIRISafe()) {
-				uriPattern += "|encode";
-			}
-			uriPattern += "@@";
-		}
-		this.out.println("\td2rq:uriPattern \"" + uriPattern + "\";");
-	}
-	
-	@Override
-	protected void writePseudoEntityIdentifier(TableDef table) {
-		List<Identifier> usedColumns = filter(table, table.getColumnNames(), true, "pseudo identifier column");
-		out.print("\td2rq:bNodeIdColumns \"");
-		Iterator<Identifier> it = usedColumns.iterator();
-		while (it.hasNext()) {
-			out.print(Microsyntax.toString(table.getName(), it.next()));
-			if (it.hasNext()) {
-				out.print(",");
+	protected TemplateValueMaker getEntityIdentifierPattern(
+			TableDef table, Key columns) {
+		TemplateValueMaker.Builder builder = TemplateValueMaker.builder();
+		builder.add(instanceNamespaceURI);
+		builder.add(encodeTableName(table.getName()));
+		if (columns != null) {
+			int i = 0;
+			for (Identifier column: columns) {
+				builder.add(i == 0 ? "/" : ";");
+				i++;
+				builder.add(encodeColumnName(column));
+				builder.add("=");
+				if (table.getColumnDef(column).getDataType().isIRISafe()) {
+					builder.add(table.getName().qualifyIdentifier(column));
+				} else {
+					builder.add(table.getName().qualifyIdentifier(column), TemplateValueMaker.ENCODE);
+				}
 			}
 		}
-		out.println("\";");
+		return builder.build();
 	}
 	
 	@Override
-	protected String vocabularyIRITurtle(TableName tableName) {
-		return "<" + encodeTableName(tableName) + ">";
+	protected void definePseudoEntityIdentifier(ClassMap result, TableDef table) {
+		List<ColumnName> columns = new ArrayList<ColumnName>();
+		for (ColumnDef column: table.getColumns()) {
+			if (!isFiltered(table, column.getName(), true)) {
+				columns.add(table.getName().qualifyIdentifier(column.getName()));
+			}
+		}
+		result.setBNodeIdColumns(columns);
 	}
 	
 	@Override
-	protected String vocabularyIRITurtle(TableName tableName, Identifier column) {
-		return "<" + encodeTableName(tableName) + "#" + encodeColumnName(column) + ">";
+	protected Resource getTableClass(TableName tableName) {
+		return mappingResources.createResource(
+				vocabNamespaceURI + encodeTableName(tableName));
 	}
 	
 	@Override
-	protected String vocabularyIRITurtle(TableName tableName, Key columns) {
-		StringBuffer result = new StringBuffer();
-		result.append("<");
+	protected Property getColumnProperty(TableName tableName, Identifier column) {
+		return mappingResources.createProperty(
+				vocabNamespaceURI + encodeTableName(tableName) + 
+				"#" + encodeColumnName(column));
+	}
+	
+	@Override
+	protected Property getForeignKeyProperty(TableName tableName, Key columns) {
+		StringBuffer result = new StringBuffer(vocabNamespaceURI);
 		result.append(encodeTableName(tableName));
 		int i = 1;
 		for (Identifier column: columns.getColumns()) {
@@ -88,8 +99,7 @@ public class W3CMappingGenerator extends MappingGenerator {
 			}
 			i++;
 		}
-		result.append(">");
-		return result.toString();
+		return mappingResources.createProperty(result.toString());
 	}
 
 	private String encodeTableName(TableName tableName) {

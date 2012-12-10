@@ -14,6 +14,9 @@ import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
+import org.d2rq.lang.Join.Direction;
+import org.d2rq.values.TemplateValueMaker;
+import org.d2rq.values.TemplateValueMaker.ColumnFunction;
 
 
 /**
@@ -198,6 +201,116 @@ public class Microsyntax {
 				" AS " + Microsyntax.toString(alias.getAlias());
 	}
 	
+	/**
+	 * Parses a d2rq:join value: "table1.col1 (<=|=|=>) table2.col2"
+	 */
+	public static Join parseJoin(String join) {
+		Direction operator = null;
+		int index = -1;
+		for (Direction direction: Direction.values()) {
+			index = join.indexOf(direction.toString());
+			if (index >= 0) {
+				operator = direction;
+				break;
+			}
+		}
+		if (operator == null) {
+			throw new D2RQException("d2rq:join \"" + join +
+					"\" is not in \"table1.col1 [ <= | => | = ] table2.col2\" form",
+					D2RQException.SQL_INVALID_JOIN);
+		}
+		ColumnName leftSide = Microsyntax.parseColumn(join.substring(0, index).trim());
+		ColumnName rightSide = Microsyntax.parseColumn(join.substring(index + operator.toString().length()).trim());
+		return new Join(leftSide, rightSide, operator);
+	}
+	
+	/**
+	 * Turns a {@link Join} into d2rq:join syntax: "table1.col1 (<=|=|=>) table2.col2"
+	 */
+	public static String toString(Join join) {
+		return Microsyntax.toString(join.getColumn1()) + " " + 
+				join.getDirection() + " " +
+				Microsyntax.toString(join.getColumn2());
+	}
+	
+	/**
+	 * Parses a pattern that combines one or more database columns into a String.
+	 * Used with <code>d2rq:pattern</code> and <code>d2rq:uriPattern</code>,
+	 * often for generating URIs from a column's primary key.
+	 *
+	 * Patterns consist of alternating literal parts and column references.
+	 * The D2RQ syntax encloses column references
+	 * in <code>@@...@@</code>. Column names must be fully qualified.
+	 * 
+	 * Example: <code>aaa@@t.col1@@bbb@@t.col2@@@@t.col3@@ccc</code>
+	 *
+	 * This has four literal parts: "aaa", "bbb", "", "ccc".
+	 * It has three column references: t.col1, t.col2, t.col3
+	 * 
+	 * Each column reference can also include an encoding function, an instance
+	 * of {@link ColumnFunction}: <code>aaa@@t.col1|urlify@@bbb</code>.
+	 * The default encoding function is {@link ColumnFunction#IDENTITY}.
+	 */
+	public static TemplateValueMaker parsePattern(String pattern) {
+		List<String> literalParts = new ArrayList<String>();
+		List<ColumnName> columns = new ArrayList<ColumnName>();
+		List<ColumnFunction> functions = new ArrayList<ColumnFunction>();
+		Matcher match = embeddedColumnRegex.matcher(pattern);
+		boolean matched = match.find();
+		int firstLiteralEnd = matched ? match.start() : pattern.length();
+		literalParts.add(pattern.substring(0, firstLiteralEnd));
+		while (matched) {
+			columns.add(Microsyntax.parseColumn(match.group(1)));
+			functions.add(getColumnFunction(match.group(2)));
+			int nextLiteralStart = match.end();
+			matched = match.find();
+			int nextLiteralEnd = matched ? match.start() : pattern.length();
+			literalParts.add(pattern.substring(nextLiteralStart, nextLiteralEnd));
+		}
+		return new TemplateValueMaker(
+				literalParts.toArray(new String[literalParts.size()]), 
+				columns.toArray(new ColumnName[columns.size()]), 
+				functions.toArray(new ColumnFunction[functions.size()]));
+	}
+	private final static String patternDelimiter = "@@";
+	private final static java.util.regex.Pattern embeddedColumnRegex = 
+			java.util.regex.Pattern.compile("@@([^@]+?)(?:\\|(urlencode|urlify|encode))?@@");
+	private static ColumnFunction getColumnFunction(String functionName) {
+		if (functionName == null || "".equals(functionName)) {
+			return TemplateValueMaker.IDENTITY;
+		}
+		if ("urlencode".equals(functionName)) {
+			return TemplateValueMaker.URLENCODE;
+		}
+		if ("urlify".equals(functionName)) {
+			return TemplateValueMaker.URLIFY;
+		}
+		if ("encode".equals(functionName)) {
+			return TemplateValueMaker.ENCODE;
+		}
+		// Shouldn't happen
+		throw new D2RQException("Unrecognized column function '" + functionName + "'");
+	}
+	
+	/**
+	 * Turns a {@link TemplateValueMaker} into a <code>d2rq:pattern</code>
+	 * style string.
+	 */
+	public static String toString(TemplateValueMaker pattern) {
+		StringBuilder s = new StringBuilder(pattern.literalParts()[0]);
+		for (int i = 0; i < pattern.columns().length; i++) {
+			s.append(patternDelimiter);
+			s.append(Microsyntax.toString(pattern.columns()[i]));
+			if (pattern.functions()[i].name() != null) {
+				s.append("|");
+				s.append(pattern.functions()[i].name());
+			}
+			s.append(patternDelimiter);
+			s.append(pattern.literalParts()[i + 1]);
+		}
+		return s.toString();
+	}
+
 	private Microsyntax() {
 		// Can't be instantiated
 	}

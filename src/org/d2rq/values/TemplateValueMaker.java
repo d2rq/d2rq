@@ -18,15 +18,14 @@ import org.d2rq.db.expr.Conjunction;
 import org.d2rq.db.expr.Constant;
 import org.d2rq.db.expr.Equality;
 import org.d2rq.db.expr.Expression;
+import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.OrderOp.OrderSpec;
 import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.ProjectionSpec.ColumnProjectionSpec;
-import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.types.DataType.GenericType;
 import org.d2rq.db.vendor.Vendor;
-import org.d2rq.lang.Pattern;
 import org.d2rq.mapgen.IRIEncoder;
 import org.d2rq.nodes.NodeSetFilter;
 
@@ -51,10 +50,50 @@ import org.d2rq.nodes.NodeSetFilter;
  */
 public class TemplateValueMaker implements ValueMaker {
 
+	public static class Builder {
+		private ArrayList<String> literalParts = new ArrayList<String>();
+		private List<ColumnName> columns = new ArrayList<ColumnName>();
+		private List<ColumnFunction> functions = new ArrayList<ColumnFunction>();
+		private boolean complete = false;
+		private Builder() {} // instantiate through #builder()
+		public Builder add(ColumnName column) {
+			return add(column, IDENTITY);
+		}
+		public Builder add(ColumnName column, ColumnFunction function) {
+			if (!complete) {
+				add("");
+			}
+			columns.add(column);
+			functions.add(function);
+			complete = false;
+			return this;
+		}
+		public Builder add(String literalPart) {
+			if (complete) {
+				literalPart = literalParts.remove(literalParts.size() - 1) + literalPart;
+			}
+			literalParts.add(literalPart);
+			complete = true;
+			return this;
+		}
+		public TemplateValueMaker build() {
+			if (!complete) {
+				add("");
+			}
+			return new TemplateValueMaker(
+					literalParts.toArray(new String[literalParts.size()]),
+					columns.toArray(new ColumnName[columns.size()]),
+					functions.toArray(new ColumnFunction[functions.size()]));
+		}
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+	
 	private final String[] literalParts;	// size n + 1
 	private final ColumnName[] columns;		// size n
 	private final ColumnFunction[] functions;	// size n
-	private final String pattern;
 	private final ProjectionSpec[] projections;
 	private final Set<ProjectionSpec> columnsAsSet;
 	private final java.util.regex.Pattern regex;
@@ -68,7 +107,6 @@ public class TemplateValueMaker implements ValueMaker {
 		this.literalParts = literalParts;
 		this.columns = columns;
 		this.functions = functions;
-		pattern = Pattern.toPatternString(literalParts, columns, functions);
 		projections = new ProjectionSpec[columns.length];
 		for (int i = 0; i < columns.length; i++) { 
 			projections[i] = ColumnProjectionSpec.create(columns[i]);
@@ -95,11 +133,19 @@ public class TemplateValueMaker implements ValueMaker {
 		return java.util.regex.Pattern.compile(s.toString(), 
 				java.util.regex.Pattern.DOTALL);
 	}
+
+	public String[] literalParts() {
+		return literalParts;
+	}
 	
 	public ColumnName[] columns() { 
 		return columns;
 	}
 	
+	public ColumnFunction[] functions() {
+		return functions;
+	}
+
 	public String firstLiteralPart() {
 		return literalParts[0];
 	}
@@ -181,7 +227,18 @@ public class TemplateValueMaker implements ValueMaker {
 	}
 	
 	public String toString() {
-		return "Pattern(" + pattern + ")";
+		StringBuilder s = new StringBuilder(literalParts[0]);
+		for (int i = 0; i < columns.length; i++) {
+			s.append("{");
+			s.append(columns[i]);
+			if (functions[i].name() != null) {
+				s.append("|");
+				s.append(functions[i].name());
+			}
+			s.append("}");
+			s.append(literalParts[i + 1]);
+		}
+		return s.toString();
 	}
 
 	public boolean equals(Object otherObject) {
@@ -189,11 +246,14 @@ public class TemplateValueMaker implements ValueMaker {
 			return false;
 		}
 		TemplateValueMaker other = (TemplateValueMaker) otherObject;
-		return pattern.equals(other.pattern);
+		return Arrays.equals(literalParts, other.literalParts) &&
+				Arrays.equals(columns, other.columns) && 
+				Arrays.equals(functions, other.functions);
 	}
 	
 	public int hashCode() {
-		return pattern.hashCode();
+		return Arrays.hashCode(literalParts) ^ Arrays.hashCode(columns) ^ 
+				Arrays.hashCode(functions) ^ 17;
 	}
 	
 	/**

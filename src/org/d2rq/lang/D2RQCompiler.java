@@ -33,6 +33,7 @@ import org.d2rq.db.types.DataType.GenericType;
 import org.d2rq.nodes.FixedNodeMaker;
 import org.d2rq.nodes.NodeMaker;
 import org.d2rq.nodes.TypedNodeMaker;
+import org.d2rq.validation.Report;
 import org.d2rq.values.ValueMaker;
 
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -44,6 +45,7 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 
 	private final Mapping mapping;
 	private final CompiledD2RQMapping result;
+	private Report report = null;
 	private final Map<Resource,SQLConnection> sqlConnections =
 		new HashMap<Resource,SQLConnection>();
 	private final Collection<SQLConnection> overriddenSQLConnections =
@@ -59,6 +61,10 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 	public D2RQCompiler(Mapping mapping) {
 		this.mapping = mapping;
 		result = new CompiledD2RQMapping();
+	}
+	
+	public void setReport(Report report) {
+		this.report = report;
 	}
 	
 	public CompiledD2RQMapping getResult() {
@@ -80,7 +86,11 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 	
 	public boolean visitEnter(Mapping mapping) {
 		result.setPrefixes(mapping.getPrefixes());
-		D2RQValidator.validate(mapping);
+		D2RQValidator validator = new D2RQValidator(mapping);
+		if (report != null) {
+			validator.setReport(report);
+		}
+		validator.run();
 		return true;
 	}
 
@@ -204,7 +214,7 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		}
 		for (String pattern: propertyBridge.getDynamicPropertyPatterns()) {
 			NodeMaker predicates = new TypedNodeMaker(
-					TypedNodeMaker.URI, new Pattern(pattern).toTemplate(currentSQLConnection));
+					TypedNodeMaker.URI, Microsyntax.parsePattern(pattern));
 			TabularBuilder dynamicBuilder = new TabularBuilder(
 					currentSQLConnection, overriddenColumnTypes);
 			dynamicBuilder.addRelationBuilder(builder);
@@ -219,7 +229,7 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		currentSQLConnection = sqlConnections.get(
 				downloadMap.getDatabaseFromHereOrClassMap().resource()); 
 		String mediaType = downloadMap.getMediaType();
-		ValueMaker mediaTypeMaker = mediaType == null ? ValueMaker.NULL : new Pattern(mediaType).toTemplate(currentSQLConnection);
+		ValueMaker mediaTypeMaker = mediaType == null ? ValueMaker.NULL : Microsyntax.parsePattern(mediaType);
 		NodeMaker nodeMaker = createNodeMaker(downloadMap);
 		TabularBuilder builder = createRelationBuilder(downloadMap);
 		builder.addProjections(nodeMaker.projectionSpecs());
@@ -246,7 +256,7 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 				currentSQLConnection, overriddenColumnTypes);
 		result.addJoinExpressions(resourceMap.getJoins());
 		result.addConditions(resourceMap.getConditions());
-		result.addAliasDeclarations(resourceMap.getAliasesParsed());
+		result.addAliasDeclarations(resourceMap.getAliases());
 		result.setContainsDuplicates(resourceMap.getContainsDuplicates());
 		return result;
 	}

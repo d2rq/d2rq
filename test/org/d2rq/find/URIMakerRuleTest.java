@@ -1,5 +1,6 @@
 package org.d2rq.find;
 
+import static org.d2rq.lang.Microsyntax.parsePattern;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -12,9 +13,7 @@ import org.d2rq.algebra.TripleRelation;
 import org.d2rq.db.DummyDB;
 import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.schema.ColumnName;
-import org.d2rq.find.URIMakerRule;
 import org.d2rq.find.URIMakerRule.URIMakerRuleChecker;
-import org.d2rq.lang.Pattern;
 import org.d2rq.nodes.FixedNodeMaker;
 import org.d2rq.nodes.TypedNodeMaker;
 import org.d2rq.values.ColumnValueMaker;
@@ -59,15 +58,15 @@ public class URIMakerRuleTest {
 		NamedOp base = db.table("employees", new String[]{"ID", "manager", "homepage"});
 		this.withURIPatternSubject = new TripleRelation(db, base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
-						new Pattern("http://test/person@@employees.ID@@").toTemplate(db)),
+						parsePattern("http://test/person@@employees.ID@@")),
 				new FixedNodeMaker(RDF.type.asNode()),
 				new FixedNodeMaker(FOAF.Person.asNode()));
 		this.withURIPatternSubjectAndObject = new TripleRelation(db, base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
-						new Pattern("http://test/person@@employees.ID@@").toTemplate(db)),
+						parsePattern("http://test/person@@employees.ID@@")),
 				new FixedNodeMaker(FOAF.knows.asNode()),
 				new TypedNodeMaker(TypedNodeMaker.URI, 
-						new Pattern("http://test/person@@employees.manager@@").toTemplate(db)));
+						parsePattern("http://test/person@@employees.manager@@")));
 		this.withURIColumnSubject = new TripleRelation(db, base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new ColumnValueMaker(ColumnName.parse("employees.homepage"))),
@@ -75,7 +74,7 @@ public class URIMakerRuleTest {
 				new FixedNodeMaker(FOAF.Document.asNode()));
 		this.withURIPatternSubjectAndURIColumnObject = new TripleRelation(db, base,
 				new TypedNodeMaker(TypedNodeMaker.URI, 
-						new Pattern("http://test/person@@employees.ID@@").toTemplate(db)),
+						parsePattern("http://test/person@@employees.ID@@")),
 				new FixedNodeMaker(FOAF.homepage.asNode()),
 				new TypedNodeMaker(TypedNodeMaker.URI, 
 						new ColumnValueMaker(ColumnName.parse("employees.homepage"))));

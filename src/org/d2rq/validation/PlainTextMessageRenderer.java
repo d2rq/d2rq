@@ -164,6 +164,15 @@ public class PlainTextMessageRenderer implements Renderer {
 		if (message.getDetails() != null) {
 			template = template.replace("{details}", message.getDetails());
 		}
+		if (message.getDetails() != null) {
+			template = template.replace("{details|withcode}", 
+					(message.getDetailCode() == null)
+						? message.getDetails()
+						: (message.getDetails() + " (" + message.getDetailCode() + ")"));
+		}
+		if (message.getDetailCode() != null) {
+			template = template.replace("{detailcode}", message.getDetailCode());
+		}
 		return template;
 	}
 	

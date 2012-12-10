@@ -99,7 +99,7 @@ public class D2RQReaderTest {
 		Set<AliasDeclaration> aliases = D2RQTestSuite
 				.loadMapping("lang/alias.ttl")
 				.classMap(ResourceFactory.createResource("http://example.org/classmap"))
-				.propertyBridges().iterator().next().getAliasesParsed();
+				.propertyBridges().iterator().next().getAliases();
 		assertEquals(1, aliases.size());
 		AliasDeclaration alias = aliases.iterator().next();
 		assertEquals(TableName.parse("\"People\""), alias.getOriginal());

@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
 import org.d2rq.D2RQException;
 import org.d2rq.r2rml.MappingTerm;
 import org.d2rq.validation.Message.Level;
@@ -18,6 +19,7 @@ public class Report {
 	private final List<Message> messages = new ArrayList<Message>();
 	private boolean ignoreInfo = false;
 	private boolean throwExceptionOnError = false;
+	private Log warningLog = null;
 	
 	public void setIgnoreInfo(boolean ignoreInfo) {
 		this.ignoreInfo = ignoreInfo;
@@ -25,6 +27,10 @@ public class Report {
 	
 	public void setThrowExceptionOnError(boolean flag) {
 		this.throwExceptionOnError = flag;
+	}
+	
+	public void setWarningLogger(Log log) {
+		this.warningLog = log;
 	}
 	
 	public String toString() {
@@ -98,6 +104,9 @@ public class Report {
 		if (ignoreInfo && message.getLevel() == Level.Info) return;
 		if (throwExceptionOnError && message.getLevel() == Level.Error) {
 			throwException(message);
+		}
+		if (warningLog != null && message.getLevel() == Level.Warning) {
+			warningLog.warn(message);
 		}
 		messages.add(message);
 	}

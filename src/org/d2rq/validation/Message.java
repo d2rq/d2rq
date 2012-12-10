@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.d2rq.D2RQException;
 import org.d2rq.pp.PrettyPrinter;
 import org.d2rq.r2rml.MappingTerm;
 import org.d2rq.r2rml.RDFComparator;
@@ -24,7 +25,8 @@ public class Message {
 	
 	public enum Problem {
 		// Generic
-		GENERIC_ERROR(Level.Error, "Error", "{details}"),
+		GENERIC_ERROR(Level.Error, "Error", "{details|withcode}"),
+		GENERIC_WARNING(Level.Warning, "Warning", "{details|withcode}"),
 		
 		// Information about D2RQ implementation limitations
 		NO_SQL_CONNECTION(Level.Info, "Not validating schema",
@@ -175,6 +177,10 @@ public class Message {
 	
 	public Message(Problem problem, String details) {
 		this(problem, null, null, details, null, null);
+	}
+	
+	public Message(Problem problem, String details, int code) {
+		this(problem, null, D2RQException.getErrorCodeName(code), details, null, null);
 	}
 	
 	/**

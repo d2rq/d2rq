@@ -208,9 +208,13 @@ public class D2RQWriter {
 		writeStringProperties(D2RQ.valueContains, map.getValueContainses());
 		writeProperty(map.getValueMaxLength() != Integer.MAX_VALUE,
 				D2RQ.valueMaxLength, map.getValueMaxLength());
-		writeStringProperties(D2RQ.join, map.getJoins());
+		for (Join join: map.getJoins()) {
+			writeProperty(D2RQ.join, Microsyntax.toString(join));
+		}
 		writeStringProperties(D2RQ.condition, map.getConditions());
-		writeStringProperties(D2RQ.alias, map.getAliases());
+		for (AliasDeclaration alias: map.getAliases()) {
+			writeProperty(D2RQ.alias, Microsyntax.toString(alias));
+		}
 		writeProperty(D2RQ.translateWith, map.getTranslateWith());
 	}
 	
@@ -238,6 +242,12 @@ public class D2RQWriter {
 	}
 	
 	private void writeMapObject(MapObject object, Resource class_) {
+		if (object.getComment() != null) {
+			for (String commentLine: object.getComment().split("[\r\n]+")) {
+				out.print("# ");
+				out.println(commentLine);
+			}
+		}
 		writeResourceStart(object.resource(), class_);
 	}
 

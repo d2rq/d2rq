@@ -361,11 +361,13 @@ public class D2RQReader {
 		StmtIterator stmts;
 		stmts = r.listProperties(D2RQ.bNodeIdColumns);
 		while (stmts.hasNext()) {
-			resourceMap.setBNodeIdColumns(stmts.nextStatement().getString());
+			resourceMap.setBNodeIdColumns(
+					Microsyntax.parseColumnList(stmts.nextStatement().getString()));
 		}
 		stmts = r.listProperties(D2RQ.uriColumn);
 		while (stmts.hasNext()) {
-			resourceMap.setURIColumn(stmts.nextStatement().getString());
+			resourceMap.setURIColumn(
+					Microsyntax.parseColumn(stmts.nextStatement().getString()));
 		}
 		stmts = r.listProperties(D2RQ.uriPattern);
 		while (stmts.hasNext()) {
@@ -399,7 +401,8 @@ public class D2RQReader {
 		}
 		stmts = r.listProperties(D2RQ.join);
 		while (stmts.hasNext()) {
-			resourceMap.addJoin(stmts.nextStatement().getString());
+			resourceMap.addJoin(Microsyntax.parseJoin(
+					stmts.nextStatement().getString()));
 		}
 		stmts = r.listProperties(D2RQ.condition);
 		while (stmts.hasNext()) {
@@ -407,7 +410,8 @@ public class D2RQReader {
 		}
 		stmts = r.listProperties(D2RQ.alias);
 		while (stmts.hasNext()) {
-			resourceMap.addAlias(stmts.nextStatement().getString());
+			resourceMap.addAlias(
+					Microsyntax.parseAlias(stmts.nextStatement().getString()));
 		}
 		stmts = r.listProperties(D2RQ.containsDuplicates);
 		while (stmts.hasNext()) {
@@ -485,9 +489,9 @@ public class D2RQReader {
 		while (stmts.hasNext()) {
 			if (r.getProperty(RDF.type).equals(D2RQ.ObjectPropertyBridge)) {
 				// Legacy
-				bridge.setURIColumn(stmts.nextStatement().getString());
+				bridge.setURIColumn(Microsyntax.parseColumn(stmts.nextStatement().getString()));
 			} else {
-				bridge.setColumn(stmts.nextStatement().getString());
+				bridge.setColumn(Microsyntax.parseColumn(stmts.nextStatement().getString()));
 			}
 		}
 		stmts = r.listProperties(D2RQ.pattern);

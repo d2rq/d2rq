@@ -102,8 +102,8 @@ public class TabularBuilder {
 		}
 	}
 	
-	public void addJoinExpressions(Collection<String> joinExpressions) {
-		JoinSetParser parsedJoins = new JoinSetParser(joinExpressions);
+	public void addJoinExpressions(Collection<Join> joinExpressions) {
+		JoinSetParser parsedJoins = JoinSetParser.create(joinExpressions);
 		addJoins(parsedJoins.getExpressions());
 		assertedForeignKeys.putAll(parsedJoins.getAssertedForeignKeys());
 	}

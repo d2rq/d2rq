@@ -46,6 +46,7 @@ public class D2RQCompilerTest {
 	private Resource class1;
 	private String pattern1;
 	private ColumnName t_id, t_col1;
+	private Join t_ref_a_id;
 	
 	@Before
 	public void setUp() {
@@ -59,6 +60,7 @@ public class D2RQCompilerTest {
 		pattern1 = "http://test/@@T.ID@@";
 		t_id = Microsyntax.parseColumn("T.ID");
 		t_col1 = Microsyntax.parseColumn("T.COL1");
+		t_ref_a_id = Microsyntax.parseJoin("T.REF = A.ID");
 	}
 	
 	@After
@@ -72,9 +74,9 @@ public class D2RQCompilerTest {
 		ClassMap cm1 = ClassMap.create(null, pattern1, mapping);
 		PropertyBridge pb1 = PropertyBridge.create(null, DC.relation, cm1);
 		pb1.setRefersToClassMap(cm1);
-		pb1.addJoin("T.REF = A.ID");
-		pb1.addAlias("T AS A");
-		assertEquals("URI(Pattern(http://test/@@A.ID@@))", 
+		pb1.addJoin(t_ref_a_id);
+		pb1.addAlias(Microsyntax.parseAlias("T AS A"));
+		assertEquals("URI(http://test/{\"A\".\"ID\"})", 
 				firstTripleRelation().getBindingMaker().get(TripleRelation.OBJECT).toString());
 	}
 	
@@ -85,8 +87,8 @@ public class D2RQCompilerTest {
 		cm1.addCondition("T.ID < 100");
 		PropertyBridge pb1 = PropertyBridge.create(null, DC.relation, cm1);
 		pb1.setRefersToClassMap(cm1);
-		pb1.addJoin("T.REF = A.ID");
-		pb1.addAlias("T AS A");
+		pb1.addJoin(t_ref_a_id);
+		pb1.addAlias(Microsyntax.parseAlias("T AS A"));
 		assertTrue(firstTripleRelation().getBaseTabular().toString().contains("\"T\".\"ID\" < 100"));
 		assertTrue(firstTripleRelation().getBaseTabular().toString().contains("\"A\".\"ID\" < 100"));
 	}
@@ -96,11 +98,11 @@ public class D2RQCompilerTest {
 		sql.executeSQL("CREATE TABLE T (ID INT PRIMARY KEY, REF INT)");
 		sql.executeSQL("CREATE TABLE OTHER (ID INT PRIMARY KEY)");
 		ClassMap cm1 = ClassMap.create(null, pattern1, mapping);
-		cm1.addJoin("T.ID = OTHER.ID");
+		cm1.addJoin(Microsyntax.parseJoin("T.ID = OTHER.ID"));
 		PropertyBridge pb1 = PropertyBridge.create(null, DC.relation, cm1);
 		pb1.setRefersToClassMap(cm1);
-		pb1.addJoin("T.REF = A.ID");
-		pb1.addAlias("T AS A");
+		pb1.addJoin(t_ref_a_id);
+		pb1.addAlias(Microsyntax.parseAlias("T AS A"));
 		assertTrue(firstTripleRelation().getBaseTabular().toString().contains("(\"OTHER\".\"ID\"=\"T\".\"ID\")"));
 		assertTrue(firstTripleRelation().getBaseTabular().toString().contains("(\"A\".\"ID\"=\"OTHER\".\"ID\")"));
 	}
@@ -108,11 +110,11 @@ public class D2RQCompilerTest {
 	public void testAliasesInRefersToClassMapAreRenamed() {
 		sql.executeSQL("CREATE TABLE X (ID INT PRIMARY KEY, REF INT)");
 		ClassMap cm1 = ClassMap.create(null, pattern1, mapping);
-		cm1.addAlias("X as T");
+		cm1.addAlias(Microsyntax.parseAlias("X as T"));
 		PropertyBridge pb1 = PropertyBridge.create(null, DC.relation, cm1);
 		pb1.setRefersToClassMap(cm1);
-		pb1.addJoin("T.REF = A.ID");
-		pb1.addAlias("T AS A");
+		pb1.addJoin(t_ref_a_id);
+		pb1.addAlias(Microsyntax.parseAlias("T AS A"));
 		assertTrue(firstTripleRelation().getBaseTabular().toString().contains("\"T\".\"ID\" <=> \"OTHER\".\"ID\""));
 		assertTrue(firstTripleRelation().getBaseTabular().toString().contains("\"A\".\"ID\" <=> \"OTHER\".\"ID\""));
 	}
@@ -200,7 +202,7 @@ public class D2RQCompilerTest {
 				d.nodeMaker(DownloadRelation.MEDIA_TYPE).makeNode(
 						new ResultRow(null) {public String get(ProjectionSpec column) {return null;}}));
 		assertEquals(Microsyntax.parseColumn("People.pic"), d.getContentDownloadColumn());
-		assertEquals("URI(Pattern(http://example.org/downloads/@@People.ID@@))", 
+		assertEquals("URI(http://example.org/downloads/{\"People\".\"ID\"})", 
 				d.nodeMaker(DownloadRelation.RESOURCE).toString());
 		assertFalse(d.getBaseTabular().getUniqueKeys().isEmpty());
 		assertEquals(Arrays.asList(new ColumnName[]{
@@ -250,7 +252,7 @@ public class D2RQCompilerTest {
 	public void testNonExistingTableWithAlias() {
 		ClassMap cm1 = ClassMap.create(null, "http://example.com/@@ALIAS.COL1@@", mapping);
 		cm1.addClass(FOAF.Person);
-		cm1.addAlias("TBL AS ALIAS");
+		cm1.addAlias(Microsyntax.parseAlias("TBL AS ALIAS"));
 		try {
 			firstTripleRelation();
 			fail("Expected error due to non-existing table TBL");
@@ -282,7 +284,7 @@ public class D2RQCompilerTest {
 		sql.executeSQL("CREATE TABLE T (COL1 INT)");
 		ClassMap cm1 = ClassMap.create(null, "http://example.com/@@T.COL1@@", mapping);
 		cm1.addClass(FOAF.Person);
-		cm1.addJoin("T.COL1=TBL.COL2");
+		cm1.addJoin(Microsyntax.parseJoin("T.COL1=TBL.COL2"));
 		try {
 			firstTripleRelation();
 			fail("Expected error due to non-existing table TBL");
@@ -312,7 +314,7 @@ public class D2RQCompilerTest {
 		sql.executeSQL("CREATE TABLE TBL (COL1 INT)");
 		ClassMap cm1 = ClassMap.create(null, "http://example.com/@@ALIAS.COL2@@", mapping);
 		cm1.addClass(FOAF.Person);
-		cm1.addAlias("TBL AS ALIAS");
+		cm1.addAlias(Microsyntax.parseAlias("TBL AS ALIAS"));
 		try {
 			firstTripleRelation();
 			fail("Expected error due to non-existing table TBL.COL2");
@@ -345,7 +347,7 @@ public class D2RQCompilerTest {
 		sql.executeSQL("CREATE TABLE TBL (COL1 INT)");
 		ClassMap cm1 = ClassMap.create(null, "http://example.com/@@T.COL1@@", mapping);
 		cm1.addClass(FOAF.Person);
-		cm1.addJoin("T.COL1=TBL.COL2");
+		cm1.addJoin(Microsyntax.parseJoin("T.COL1=TBL.COL2"));
 		try {
 			firstTripleRelation();
 			fail("Expected error due to non-existing table TBL.COL2");

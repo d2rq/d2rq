@@ -30,7 +30,7 @@ public class D2RQValidatorTest {
 		try {
 			new D2RQValidator(m).run();
 		} catch (D2RQException ex) {
-			assertEquals(D2RQException.MAPPING_NO_DATABASE, ex.errorCode());
+			assertTrue(ex.getMessage().contains("MAPPING_NO_DATABASE"));
 		}
 	}
 	
@@ -62,7 +62,7 @@ public class D2RQValidatorTest {
 			m.addClassMap(c);
 			new D2RQValidator(m).run();
 		} catch (D2RQException ex) {
-			assertEquals(D2RQException.CLASSMAP_NO_DATABASE, ex.errorCode());
+			assertTrue(ex.getMessage().contains("CLASSMAP_NO_DATABASE"));
 		}
 	}
 }

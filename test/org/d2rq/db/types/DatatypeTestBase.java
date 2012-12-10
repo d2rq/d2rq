@@ -120,7 +120,7 @@ public abstract class DatatypeTestBase {
 		PropertyBridge propertyBridge = new PropertyBridge(propertyBridgeURI);
 		propertyBridge.setBelongsToClassMap(classMap);
 		propertyBridge.addProperty(valueProperty);
-		propertyBridge.setColumn("T_" + datatype + ".VALUE");
+		propertyBridge.setColumn(ColumnName.parse("T_" + datatype + ".VALUE"));
 		return mapping;
 	}
 }

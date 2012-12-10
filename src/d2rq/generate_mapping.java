@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.d2rq.CommandLineTool;
 import org.d2rq.SystemLoader;
+import org.d2rq.lang.D2RQWriter;
 import org.d2rq.mapgen.MappingGenerator;
 
 import com.hp.hpl.jena.rdf.model.Model;
@@ -68,10 +69,10 @@ public class generate_mapping extends CommandLineTool {
 		MappingGenerator generator = loader.getMappingGenerator();
 		try {
 			if (cmd.contains(vocabAsOutput)) {
-				Model model = generator.vocabularyModel();
+				Model model = generator.getVocabularyModel();
 				model.write(out, "TURTLE");
 			} else {
-				generator.writeMapping(out);
+				new D2RQWriter(generator.getMapping()).write(out);
 			}
 		} finally {
 			loader.close();

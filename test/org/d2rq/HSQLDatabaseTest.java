@@ -96,7 +96,7 @@ public class HSQLDatabaseTest {
 				db.getJdbcURL(), HSQLDatabase.DRIVER_CLASS,
 				db.getUser(), null);
 		MappingGenerator generator = new MappingGenerator(sqlConnection);
-		return generator.mappingModel(EX);
+		return generator.getMappingModel(EX);
 	}
 	
 	private Mapping generateDefaultMapping() {

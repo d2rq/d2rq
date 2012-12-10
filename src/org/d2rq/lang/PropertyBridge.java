@@ -84,9 +84,9 @@ public class PropertyBridge extends ResourceMap {
         return column;
     }
 
-	public void setColumn(String column) {
+	public void setColumn(ColumnName column) {
 		assertNotYetDefined(this.column, D2RQ.column, D2RQException.PROPERTYBRIDGE_DUPLICATE_COLUMN);
-		this.column = Microsyntax.parseColumn(column);
+		this.column = column;
 	}
 
     public String getPattern() {
