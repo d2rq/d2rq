@@ -184,11 +184,20 @@ public class PageServlet extends HttpServlet {
 		}
 
 		public String propertyQName() {
-			String qname = prefixes.shortForm(this.property.getURI());
-			if (qname == null) {
+			String longestNS = null;
+			String longestPrefix = null;
+			for (String prefix: prefixes.getNsPrefixMap().keySet()) {
+				String ns = prefixes.getNsPrefixURI(prefix);
+				if (property.getURI().startsWith(ns) && 
+						(longestNS == null || longestNS.length() < ns.length())) {
+					longestNS = ns;
+					longestPrefix = prefix;
+				}
+			}
+			if (longestNS == null) {
 				return "<" + this.property.getURI() + ">";
 			}
-			return qname;
+			return longestPrefix + ":" + property.getURI().substring(longestNS.length());
 		}
 
 		public String propertyPrefix() {

@@ -42,6 +42,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.shared.PrefixMapping.IllegalPrefixException;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -201,7 +202,6 @@ public class MappingGenerator {
 		mapping = new Mapping();
 		mappingResources.setNsPrefixes(mapping.getPrefixes());
 		mappingResources.setNsPrefix("map", mapNamespaceURI);
-		mappingResources.setNsPrefix("", instanceNamespaceURI);
 		if (!vocabNamespaceURI.equals(instanceNamespaceURI)) {
 			mappingResources.setNsPrefix("vocab", vocabNamespaceURI);
 		}
@@ -247,6 +247,14 @@ public class MappingGenerator {
 			} else {
 				mapping.addClassMap(getClassMap(table, database));
 			}
+			if (tableName.getSchema() != null) {
+				tryRegisterPrefix(tableName.getSchema().getName().toLowerCase(),
+						getTableClass(tableName).getNameSpace());
+			}
+			if (tableName.getCatalog() != null) {
+				tryRegisterPrefix(tableName.getCatalog().getName().toLowerCase(),
+						getTableClass(tableName).getNameSpace());
+			}
 		}
 		for (Entry<PropertyBridge,TableName> entry: refersToClassMaps.entrySet()) {
 			entry.getKey().setRefersToClassMap(mapping.classMap(getClassMapResource(entry.getValue())));
@@ -272,6 +280,16 @@ public class MappingGenerator {
 		}
 		log.info("Done!");
 		this.finished = true;
+	}
+
+	private void tryRegisterPrefix(String prefix, String uri) {
+		if (mapping.getPrefixes().getNsPrefixMap().containsKey(prefix)) return;
+		if (mapping.getPrefixes().getNsPrefixMap().containsValue(uri)) return;
+		try {
+			mapping.getPrefixes().setNsPrefix(prefix, uri);
+		} catch (IllegalPrefixException ex) {
+			// Oh well, no prefix then.
+		}
 	}
 
 	private Configuration getConfiguration() {
@@ -398,6 +416,8 @@ public class MappingGenerator {
 		} else {
 			createDatatypeProperty(table, column, TypeMapper.getInstance().getSafeTypeByName(datatypeURI));
 		}
+		tryRegisterPrefix(table.getTable().getName().toLowerCase(), 
+				getColumnProperty(table, column).getNameSpace());
 		return bridge;
 	}
 
