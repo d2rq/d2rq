@@ -32,7 +32,7 @@ import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
  * <li>There can be unused mapping components (e.g., a term map
  * instance that is not used by anything). These can be listed
  * via {@link #getUnreferencedMappingComponents()}.</li>
- * <li>There is an associated prefix mapping: {@link #getPrefixMapping()}.</li>
+ * <li>There is an associated prefix mapping: {@link #getPrefixes()}.</li>
  * <li>Mapping components are stored along with the Jena {@link Resource}
  * that represents it in the mapping graph.</li>
  * </ul> 
@@ -78,7 +78,7 @@ public class Mapping extends MappingComponent {
 		this.prefixes = prefixes; 
 	}
 	
-	public PrefixMapping getPrefixMapping() {
+	public PrefixMapping getPrefixes() {
 		return prefixes;
 	}
 

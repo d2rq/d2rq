@@ -1,5 +1,10 @@
 package org.d2rq.r2rml;
 
+import static org.d2rq.ModelAssert.assertIsomorphic;
+import static org.junit.Assert.assertTrue;
+
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +28,8 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.FileManager;
 
 /**
@@ -84,6 +91,11 @@ public class ProcessorTest {
 		db = new HSQLDatabase("test");
 		db.executeScript(schemaFile);
 		loader = new SystemLoader();
+		loader.setMappingFile(mappingFile);
+		loader.setJdbcURL(db.getJdbcURL());
+		loader.setUsername(db.getUser());
+		loader.setPassword(db.getPassword());
+		loader.setSystemBaseURI(BASE_IRI);
 	}
 	
 	@After
@@ -93,16 +105,28 @@ public class ProcessorTest {
 	}
 	
 	@Test 
-	public void run() {
-		SystemLoader loader = new SystemLoader();
-		loader.setMappingFile(mappingFile);
-		loader.setJdbcURL(db.getJdbcURL());
-		loader.setUsername(db.getUser());
-		loader.setPassword(db.getPassword());
-		loader.setSystemBaseURI(BASE_IRI);
-		Model m = loader.getModelD2RQ();
+	public void testDump() {
 		Model actualTriples = ModelFactory.createDefaultModel();
-		actualTriples.add(m);
+		actualTriples.add(loader.getModelD2RQ());
 		ModelAssert.assertIsomorphic(expectedTriples, actualTriples);
+	}
+	
+	@Test
+	public void testAsk() {
+		StmtIterator it = expectedTriples.listStatements();
+		while (it.hasNext()) {
+			Statement stmt = it.next();
+			assertTrue("Missing statement: " + stmt, loader.getModelD2RQ().contains(stmt));
+		}
+	}
+	
+	@Test
+	public void testReadWrite() {
+		StringWriter out = new StringWriter();
+		new R2RMLWriter(loader.getR2RMLMapping()).write(out);
+		Model parsed = ModelFactory.createDefaultModel();
+		parsed.read(new StringReader(out.toString()), 
+				loader.getD2RQMapping().getBaseURI(), "TURTLE");
+		assertIsomorphic(loader.getMappingModel(), parsed);
 	}
 }

@@ -134,7 +134,7 @@ Test cases for an R2RML processor.
 
 <mappings/iri-column-absolute.ttl> a :R2RMLProcessorTestCase;
     :schema <schemas/table1-iri.sql>;
-    :triple (ex:s ex:p ex:1).
+    :triple (ex:s ex:p <http://other.example.com/1>).
 
 <mappings/iri-template-relative.ttl> a :R2RMLProcessorTestCase;
 	:schema <schemas/table1.sql>;

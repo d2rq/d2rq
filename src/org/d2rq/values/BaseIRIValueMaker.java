@@ -40,6 +40,10 @@ public class BaseIRIValueMaker implements ValueMaker {
 
 	public Expression valueExpression(String value, DatabaseOp tabular,
 			Vendor vendor) {
+		if (value.startsWith(baseIRI)) {
+			return wrapped.valueExpression(
+					value.substring(baseIRI.length()), tabular, vendor);
+		}
 		return URI.create(value).isAbsolute() 
 				? wrapped.valueExpression(value, tabular, vendor) 
 				: Concatenation.create(

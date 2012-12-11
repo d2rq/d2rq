@@ -1,2 +1,2 @@
 CREATE TABLE TABLE1 (ID VARCHAR(100) PRIMARY KEY);
-INSERT INTO TABLE1 VALUES ('http://example.com/1');
+INSERT INTO TABLE1 VALUES ('http://other.example.com/1');

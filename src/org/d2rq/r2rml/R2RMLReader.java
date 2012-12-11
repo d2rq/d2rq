@@ -212,14 +212,14 @@ public class R2RMLReader {
 	 * are not wanted in the actual data.
 	 */ 
 	private void copyPrefixes() {
-		mapping.getPrefixMapping().setNsPrefixes(model);
+		mapping.getPrefixes().setNsPrefixes(model);
 		Iterator<Map.Entry<String, String>> it = 
-			mapping.getPrefixMapping().getNsPrefixMap().entrySet().iterator();
+			mapping.getPrefixes().getNsPrefixMap().entrySet().iterator();
 		while (it.hasNext()) {
 			Entry<String,String> entry = it.next();
 			String namespace = entry.getValue();
 			if (RR.NS.equals(namespace) && "rr".equals(entry.getKey())) {
-				mapping.getPrefixMapping().removeNsPrefix(entry.getKey());
+				mapping.getPrefixes().removeNsPrefix(entry.getKey());
 			}
 		}
 	}

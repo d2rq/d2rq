@@ -3,6 +3,7 @@ package org.d2rq.r2rml;
 import com.hp.hpl.jena.iri.IRI;
 import com.hp.hpl.jena.iri.IRIFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 /**
  * A string that can be validated as an absolute IRI according to RFC 3987.
@@ -35,6 +36,10 @@ public class ConstantIRI extends MappingTerm {
 	
 	public IRI asJenaIRI() {
 		return iri;
+	}
+	
+	public Resource asResource() {
+		return ResourceFactory.createResource(iri.toString());
 	}
 	
 	@Override

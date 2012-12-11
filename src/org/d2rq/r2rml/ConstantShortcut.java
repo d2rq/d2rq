@@ -34,6 +34,10 @@ public class ConstantShortcut extends MappingTerm {
 		return termMap;
 	}
 	
+	public RDFNode asRDFNode() {
+		return constant;
+	}
+	
 	@Override
 	public void accept(MappingVisitor visitor) {
 		acceptAs(visitor, null);

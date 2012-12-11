@@ -89,7 +89,7 @@ public class R2RMLCompiler implements CompiledMapping {
 	}
 	
 	public PrefixMapping getPrefixes() {
-		return mapping.getPrefixMapping();
+		return mapping.getPrefixes();
 	}
 	
 	public Collection<TripleRelation> getTripleRelations() {

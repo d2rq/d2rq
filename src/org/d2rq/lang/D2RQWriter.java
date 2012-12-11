@@ -2,23 +2,22 @@ package org.d2rq.lang;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.lang.TranslationTable.Translation;
-import org.d2rq.pp.PrettyPrinter;
+import org.d2rq.pp.PrettyTurtleWriter;
 import org.d2rq.vocab.D2RQ;
 import org.d2rq.vocab.JDBC;
 
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -36,11 +35,14 @@ import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 public class D2RQWriter {
 	private final Mapping mapping;
 	private final PrefixMapping prefixes = new PrefixMappingImpl();
-	private PrintWriter out;
+	private PrettyTurtleWriter out;
 	
 	public D2RQWriter(Mapping mapping) {
 		this.mapping = mapping;
 		this.prefixes.setNsPrefixes(mapping.getPrefixes());
+		if (!mapping.getPrefixes().getNsPrefixMap().containsValue(D2RQ.NS)) {
+			prefixes.setNsPrefix("d2rq", D2RQ.NS);
+		}
 	}
 	
 	public void write(OutputStream outStream) {
@@ -52,82 +54,65 @@ public class D2RQWriter {
 	}
 	
 	public void write(Writer outWriter) {
-		out = new PrintWriter(outWriter);
-		if (!mapping.getPrefixes().getNsPrefixMap().containsValue(D2RQ.NS)) {
-			prefixes.setNsPrefix("d2rq", D2RQ.NS);
-		}
-		writePrefixes(prefixes);
-		writeConfiguration(mapping.configuration());
+		out = new PrettyTurtleWriter(prefixes, outWriter);
+		printConfiguration(mapping.configuration());
 		for (Database database: mapping.databases()) {
-			writeDatabase(database);
+			printDatabase(database);
 		}
 		out.println();
 		for (Resource r: mapping.classMapResources()) {
 			ClassMap classMap = mapping.classMap(r);
-			writeClassMap(classMap);
+			printClassMap(classMap);
 			for (PropertyBridge bridge: classMap.propertyBridges()) {
-				writePropertyBridge(bridge);
+				printPropertyBridge(bridge);
 			}
 			out.println();
 		}
 		for (Resource r: mapping.downloadMapResources()) {
 			DownloadMap downloadMap = mapping.downloadMap(r);
-			writeDownloadMap(downloadMap);
+			printDownloadMap(downloadMap);
 		}
 		out.println();
 		for (Resource r: mapping.translationTableResources()) {
 			TranslationTable translationTable = mapping.translationTable(r);
-			writeTranslationTable(translationTable);
+			printTranslationTable(translationTable);
 		}
 		out.flush();
 	}
 	
-	private void writePrefixes(PrefixMapping prefixes) {
-		List<String> p = new ArrayList<String>(prefixes.getNsPrefixMap().keySet());
-		Collections.sort(p);
-		for (String prefix: p) {
-			writePrefix(prefix, prefixes.getNsPrefixURI(prefix));
-		}
-		out.println();
-	}
-	
-	private void writePrefix(String prefix, String uri) {
-		out.println("@prefix " + prefix + ": <" + uri + ">.");
-	}
-	
-	private void writeConfiguration(Configuration configuration) {
+	private void printConfiguration(Configuration configuration) {
 		if (configuration.getServeVocabulary() == Configuration.DEFAULT_SERVE_VOCABULARY
 				&& configuration.getUseAllOptimizations() == Configuration.DEFAULT_USE_ALL_OPTIMIZATIONS) {
 			return;
 		}
-		writeMapObject(configuration, D2RQ.Configuration);
-		writeProperty(
+		printMapObject(configuration, D2RQ.Configuration);
+		out.printProperty(
 				configuration.getServeVocabulary() != Configuration.DEFAULT_SERVE_VOCABULARY,
 				D2RQ.serveVocabulary, 
 				configuration.getServeVocabulary());
-		writeProperty(
+		out.printProperty(
 				configuration.getUseAllOptimizations() != Configuration.DEFAULT_USE_ALL_OPTIMIZATIONS,
 				D2RQ.useAllOptimizations,
 				configuration.getUseAllOptimizations());
-		writeResourceEnd();
+		out.printResourceEnd();
 	}
 
-	private void writeDatabase(Database db) {
-		writeMapObject(db, D2RQ.Database);
-		writeProperty(D2RQ.jdbcURL, db.getJdbcURL());
-		writeProperty(D2RQ.jdbcDriver, db.getJDBCDriver());
-		writeProperty(D2RQ.username, db.getUsername());
-		writeProperty(D2RQ.password, db.getPassword());
+	private void printDatabase(Database db) {
+		printMapObject(db, D2RQ.Database);
+		out.printProperty(D2RQ.jdbcURL, db.getJdbcURL());
+		out.printProperty(D2RQ.jdbcDriver, db.getJDBCDriver());
+		out.printProperty(D2RQ.username, db.getUsername());
+		out.printProperty(D2RQ.password, db.getPassword());
 		for (String jdbcProperty: db.getConnectionProperties().stringPropertyNames()) {
-			writeProperty(
+			out.printProperty(
 					JDBC.getProperty(jdbcProperty), 
 					db.getConnectionProperties().getProperty(jdbcProperty));
 		}
-		writeProperty(db.getResultSizeLimit() != Database.NO_LIMIT,
+		out.printProperty(db.getResultSizeLimit() != Database.NO_LIMIT,
 				D2RQ.resultSizeLimit, db.getResultSizeLimit());
-		writeProperty(db.getFetchSize() != Database.NO_FETCH_SIZE, 
+		out.printProperty(db.getFetchSize() != Database.NO_FETCH_SIZE, 
 				D2RQ.fetchSize, db.getFetchSize());
-		writeURIProperty(D2RQ.startupSQLScript, db.getStartupSQLScript());
+		out.printURIProperty(D2RQ.startupSQLScript, db.getStartupSQLScript());
 		List<ColumnName> overriddenColumns = new ArrayList<ColumnName>(db.getColumnTypes().keySet());
 		Collections.sort(overriddenColumns);
 		for (ColumnName column: overriddenColumns) {
@@ -144,206 +129,104 @@ public class D2RQWriter {
 				case INTERVAL: property = D2RQ.intervalColumn; break;
 				default: continue;
 			}
-			writeProperty(property, Microsyntax.toString(column));
+			out.printProperty(property, Microsyntax.toString(column));
 		}
-		writeResourceEnd();
+		out.printResourceEnd();
 	}
 
-	private void writeClassMap(ClassMap classMap) {
-		writeMapObject(classMap, D2RQ.ClassMap);
-		writeProperty(D2RQ.dataStorage, classMap.getDatabase());
-		writeRDFNodeProperties(D2RQ.class_, classMap.getClasses());
-		writeResourceMapProperties(classMap);
-		writeRDFNodeProperties(D2RQ.classDefinitionLabel, classMap.getDefinitionLabels());
-		writeRDFNodeProperties(D2RQ.classDefinitionComment, classMap.getDefinitionComments());
-		writeProperty(classMap.getContainsDuplicates(),
+	private void printClassMap(ClassMap classMap) {
+		printMapObject(classMap, D2RQ.ClassMap);
+		out.printProperty(D2RQ.dataStorage, classMap.getDatabase());
+		out.printRDFNodeProperties(D2RQ.class_, classMap.getClasses());
+		printResourceMapProperties(classMap);
+		out.printRDFNodeProperties(D2RQ.classDefinitionLabel, classMap.getDefinitionLabels());
+		out.printRDFNodeProperties(D2RQ.classDefinitionComment, classMap.getDefinitionComments());
+		out.printProperty(classMap.getContainsDuplicates(),
 				D2RQ.containsDuplicates, classMap.getContainsDuplicates());
-		writeResourceEnd();
+		out.printResourceEnd();
 	}
 	
-	private void writePropertyBridge(PropertyBridge bridge) {
-		writeMapObject(bridge, D2RQ.PropertyBridge);
-		writeProperty(D2RQ.belongsToClassMap, bridge.getBelongsToClassMap());
-		writeRDFNodeProperties(D2RQ.property, bridge.getProperties());
-		writeStringProperties(D2RQ.dynamicProperty, bridge.getDynamicPropertyPatterns());
-		writeProperty(D2RQ.column, Microsyntax.toString(bridge.getColumn()));
-		writeProperty(D2RQ.pattern, bridge.getPattern());
-		writeProperty(D2RQ.sqlExpression, bridge.getSQLExpression());
-		writeProperty(D2RQ.refersToClassMap, bridge.getRefersToClassMap());
-		writeProperty(D2RQ.lang, bridge.getLang());
-		writeURIProperty(D2RQ.datatype, bridge.getDatatype());
-		writeResourceMapProperties(bridge);
-		writeRDFNodeProperties(D2RQ.propertyDefinitionLabel, bridge.getDefinitionLabels());
-		writeRDFNodeProperties(D2RQ.propertyDefinitionComment, bridge.getDefinitionComments());
-		writeProperty(bridge.getLimit() != LimitOp.NO_LIMIT,
+	private void printPropertyBridge(PropertyBridge bridge) {
+		printMapObject(bridge, D2RQ.PropertyBridge);
+		out.printProperty(D2RQ.belongsToClassMap, bridge.getBelongsToClassMap());
+		out.printRDFNodeProperties(D2RQ.property, bridge.getProperties());
+		out.printStringProperties(D2RQ.dynamicProperty, bridge.getDynamicPropertyPatterns());
+		out.printProperty(D2RQ.column, Microsyntax.toString(bridge.getColumn()));
+		out.printProperty(D2RQ.pattern, bridge.getPattern());
+		out.printProperty(D2RQ.sqlExpression, bridge.getSQLExpression());
+		out.printProperty(D2RQ.refersToClassMap, bridge.getRefersToClassMap());
+		out.printProperty(D2RQ.lang, bridge.getLang());
+		out.printURIProperty(D2RQ.datatype, bridge.getDatatype());
+		printResourceMapProperties(bridge);
+		out.printRDFNodeProperties(D2RQ.propertyDefinitionLabel, bridge.getDefinitionLabels());
+		out.printRDFNodeProperties(D2RQ.propertyDefinitionComment, bridge.getDefinitionComments());
+		out.printProperty(bridge.getLimit() != LimitOp.NO_LIMIT,
 				D2RQ.limit, bridge.getLimit());
-		writeProperty(bridge.getLimitInverse() != LimitOp.NO_LIMIT,
+		out.printProperty(bridge.getLimitInverse() != LimitOp.NO_LIMIT,
 				D2RQ.limitInverse, bridge.getLimitInverse());
-		writeProperty(bridge.getOrder() != null && !bridge.getOrderDesc(), 
+		out.printProperty(bridge.getOrder() != null && !bridge.getOrderDesc(), 
 				D2RQ.orderAsc, bridge.getOrder());
-		writeProperty(bridge.getOrder() != null && bridge.getOrderDesc(),
+		out.printProperty(bridge.getOrder() != null && bridge.getOrderDesc(),
 				D2RQ.orderDesc, bridge.getOrder());
-		writeProperty(!bridge.getContainsDuplicates(),
+		out.printProperty(!bridge.getContainsDuplicates(),
 				D2RQ.containsDuplicates, bridge.getContainsDuplicates());
-		writeResourceEnd();
+		out.printResourceEnd();
 	}
 	
-	private void writeDownloadMap(DownloadMap map) {
-		writeMapObject(map, D2RQ.DownloadMap);
-		writeProperty(D2RQ.dataStorage, map.getDatabase());
-		writeProperty(D2RQ.belongsToClassMap, map.getBelongsToClassMap());
-		writeResourceMapProperties(map);
-		writeProperty(D2RQ.contentDownloadColumn, Microsyntax.toString(map.getContentDownloadColumn()));
-		writeProperty(D2RQ.mediaType, map.getMediaType());
-		writeResourceEnd();
+	private void printDownloadMap(DownloadMap map) {
+		printMapObject(map, D2RQ.DownloadMap);
+		out.printProperty(D2RQ.dataStorage, map.getDatabase());
+		out.printProperty(D2RQ.belongsToClassMap, map.getBelongsToClassMap());
+		printResourceMapProperties(map);
+		out.printProperty(D2RQ.contentDownloadColumn, Microsyntax.toString(map.getContentDownloadColumn()));
+		out.printProperty(D2RQ.mediaType, map.getMediaType());
+		out.printResourceEnd();
 	}
 	
-	private void writeResourceMapProperties(ResourceMap map) {
-		writeProperty(D2RQ.bNodeIdColumns, map.getBNodeIdColumns());
-		writeProperty(D2RQ.uriColumn, Microsyntax.toString(map.getURIColumn()));
-		writeProperty(D2RQ.uriPattern, map.getURIPattern());
-		writeProperty(D2RQ.uriSqlExpression, map.getUriSQLExpression());
-		writeProperty(D2RQ.constantValue, map.getConstantValue());
-		writeStringProperties(D2RQ.valueRegex, map.getValueRegexes());
-		writeStringProperties(D2RQ.valueContains, map.getValueContainses());
-		writeProperty(map.getValueMaxLength() != Integer.MAX_VALUE,
+	private void printResourceMapProperties(ResourceMap map) {
+		out.printProperty(D2RQ.bNodeIdColumns, map.getBNodeIdColumns());
+		out.printProperty(D2RQ.uriColumn, Microsyntax.toString(map.getURIColumn()));
+		out.printProperty(D2RQ.uriPattern, map.getURIPattern());
+		out.printProperty(D2RQ.uriSqlExpression, map.getUriSQLExpression());
+		out.printProperty(D2RQ.constantValue, map.getConstantValue());
+		out.printStringProperties(D2RQ.valueRegex, map.getValueRegexes());
+		out.printStringProperties(D2RQ.valueContains, map.getValueContainses());
+		out.printProperty(map.getValueMaxLength() != Integer.MAX_VALUE,
 				D2RQ.valueMaxLength, map.getValueMaxLength());
 		for (Join join: map.getJoins()) {
-			writeProperty(D2RQ.join, Microsyntax.toString(join));
+			out.printProperty(D2RQ.join, Microsyntax.toString(join));
 		}
-		writeStringProperties(D2RQ.condition, map.getConditions());
+		out.printStringProperties(D2RQ.condition, map.getConditions());
 		for (AliasDeclaration alias: map.getAliases()) {
-			writeProperty(D2RQ.alias, Microsyntax.toString(alias));
+			out.printProperty(D2RQ.alias, Microsyntax.toString(alias));
 		}
-		writeProperty(D2RQ.translateWith, map.getTranslateWith());
+		out.printProperty(D2RQ.translateWith, map.getTranslateWith());
 	}
 	
-	private void writeTranslationTable(TranslationTable table) {
-		writeMapObject(table, D2RQ.TranslationTable);
-		writeURIProperty(D2RQ.href, table.getHref());
-		writeProperty(D2RQ.javaClass, table.getJavaClass());
+	private void printTranslationTable(TranslationTable table) {
+		printMapObject(table, D2RQ.TranslationTable);
+		out.printURIProperty(D2RQ.href, table.getHref());
+		out.printProperty(D2RQ.javaClass, table.getJavaClass());
 		Iterator<Translation> it = table.getTranslations().iterator();
-		if (it.hasNext()) {
-			out.print("    ");
-			out.println(toTurtle(D2RQ.translation));
-			while (it.hasNext()) {
-				Translation translation = it.next();
-				out.print("        [ ");
-				out.print(toTurtle(D2RQ.databaseValue));
-				out.print(" ");
-				out.print(quote(translation.dbValue()));
-				out.print("; ");
-				out.print(toTurtle(D2RQ.rdfValue));
-				out.println(quote(translation.rdfValue()));
-				out.print(" ]");
-				out.println(it.hasNext() ? "," : ";");
-			}
+		List<Map<Property,RDFNode>> values = new ArrayList<Map<Property,RDFNode>>();
+		while (it.hasNext()) {
+			Translation translation = it.next();
+			Map<Property,RDFNode> r = new LinkedHashMap<Property,RDFNode>();
+			r.put(D2RQ.databaseValue, 
+					ResourceFactory.createPlainLiteral(translation.dbValue()));
+			r.put(D2RQ.rdfValue, 
+					ResourceFactory.createPlainLiteral(translation.rdfValue()));
+			values.add(r);
 		}
+		out.printCompactBlankNodeProperties(D2RQ.translation, values);
 	}
 	
-	private void writeMapObject(MapObject object, Resource class_) {
+	private void printMapObject(MapObject object, Resource class_) {
 		if (object.getComment() != null) {
 			for (String commentLine: object.getComment().split("[\r\n]+")) {
-				out.print("# ");
-				out.println(commentLine);
+				out.printComment(commentLine);
 			}
 		}
-		writeResourceStart(object.resource(), class_);
-	}
-
-	private void writeProperty(Property property, MapObject object) {
-		if (object == null) return;
-		writeProperty(property, object.resource());
-	}
-	
-	private void writeResourceStart(Resource resource, Resource class_) {
-		out.print(toTurtle(resource));
-		out.print(" a ");
-		out.print(toTurtle(class_));
-		out.println(";");
-	}
-	
-	private void writeResourceEnd() {
-		out.println("    .");
-	}
-	
-	private void writeProperty(boolean writeIt, Property property, boolean value) {
-		if (!writeIt) return;
-		writePropertyTurtle(writeIt, property, value ? "true" : "false");
-	}
-	
-	private void writeProperty(boolean writeIt, Property property, int value) {
-		if (!writeIt) return;
-		writePropertyTurtle(writeIt, property, Integer.toString(value));
-	}
-	
-	private void writeProperty(boolean writeIt, Property property, String value) {
-		if (!writeIt) return;
-		writePropertyTurtle(writeIt, property, quote(value));
-	}
-	
-	private void writeProperty(Property property, String value) {
-		writeProperty(value != null, property, value);
-	}
-	
-	private void writeURIProperty(Property property, String uri) {
-		writePropertyTurtle(uri != null, property, "<" + uri + ">");
-	}
-	
-	private void writeProperty(Property property, RDFNode term) {
-		if (term == null) return;
-		if (term.isResource()) {
-			writePropertyTurtle(term != null, property, toTurtle(term.asResource()));
-		} else {
-			writePropertyTurtle(term != null, property, toTurtle(term.asLiteral()));
-		}
-	}
-	
-	private void writeRDFNodeProperties(Property property, Collection<? extends RDFNode> terms) {
-		for (RDFNode term: terms) {
-			writeProperty(property, term);
-		}
-	}
-	
-	private void writeStringProperties(Property property, Collection<String> values) {
-		for (String value: values) {
-			writeProperty(property, value);
-		}
-	}
-	
-	private void writePropertyTurtle(boolean writeIt, Property property, String turtleSnippet) {
-		if (!writeIt) return;
-		out.print("    ");
-		out.print(toTurtle(property));
-		out.print(" ");
-		out.print(turtleSnippet);
-		out.println(";");
-	}
-	
-	private String quote(String s) {
-		if (s.contains("\n") || s.contains("\r")) {
-			return quoteLong(s);
-		}
-		return "\"" + s.replaceAll("\"", "\\\"") + "\"";
-	}
-	
-	private String quoteLong(String s) {
-		return "\"\"\"" + s.replaceAll("\"", "\\\"") + "\"\"\"";
-	}
-	
-	private String toTurtle(Resource r) {
-		return PrettyPrinter.toString(r.asNode(), prefixes);
-	}
-	
-	private String toTurtle(Literal l) {
-		StringBuffer result = new StringBuffer(quote(l.getLexicalForm()));
-		if (!"".equals(l.getLanguage())) {
-			result.append("@");
-			result.append(l.getLanguage());
-		} else if (l.getDatatype() != null) {
-			result.append("^^");
-			result.append(toTurtle(ResourceFactory.createResource(l.getDatatypeURI())));
-		}
-		return result.toString();
+		out.printResourceStart(object.resource(), class_);
 	}
 }
