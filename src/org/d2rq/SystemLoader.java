@@ -13,9 +13,10 @@ import org.d2rq.jena.GraphD2RQ;
 import org.d2rq.lang.D2RQCompiler;
 import org.d2rq.lang.D2RQReader;
 import org.d2rq.lang.D2RQWriter;
+import org.d2rq.mapgen.D2RQMappingStyle;
 import org.d2rq.mapgen.Filter;
 import org.d2rq.mapgen.MappingGenerator;
-import org.d2rq.mapgen.W3CMappingGenerator;
+import org.d2rq.mapgen.DirectMappingStyle;
 import org.d2rq.r2rml.MappingValidator;
 import org.d2rq.r2rml.R2RMLCompiler;
 import org.d2rq.r2rml.R2RMLReader;
@@ -268,8 +269,8 @@ public class SystemLoader {
 	public MappingGenerator getMappingGenerator() {
 		if (generator == null) {
 			generator = generateDirectMapping ?
-					new W3CMappingGenerator(getSQLConnection()) :
-					new MappingGenerator(getSQLConnection());
+					new DirectMappingStyle(getSQLConnection()).getMappingGenerator() :
+					new D2RQMappingStyle(getSQLConnection()).getMappingGenerator();
 			if (filter != null) {
 				generator.setFilter(filter);
 			}

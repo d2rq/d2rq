@@ -1,5 +1,8 @@
 package org.d2rq.db.schema;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.d2rq.db.vendor.Vendor;
 
 
@@ -68,6 +71,14 @@ public class TableName implements Comparable<TableName> {
 			return column;
 		}
 		return ColumnName.create(this, column.getColumn());
+	}
+
+	public List<ColumnName> qualifyIdentifiers(List<Identifier> identifiers) {
+		List<ColumnName> result = new ArrayList<ColumnName>(identifiers.size());
+		for (Identifier identifier: identifiers) {
+			result.add(qualifyIdentifier(identifier));
+		}
+		return result;
 	}
 	
 	public TableName withPrefix(int index) {

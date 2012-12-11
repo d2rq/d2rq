@@ -11,6 +11,7 @@ import org.d2rq.db.schema.TableName;
 import org.d2rq.jena.GraphD2RQ;
 import org.d2rq.lang.D2RQReader;
 import org.d2rq.lang.Mapping;
+import org.d2rq.mapgen.D2RQMappingStyle;
 import org.d2rq.mapgen.MappingGenerator;
 import org.junit.After;
 import org.junit.Before;
@@ -95,7 +96,8 @@ public class HSQLDatabaseTest {
 		SQLConnection sqlConnection = new SQLConnection(
 				db.getJdbcURL(), HSQLDatabase.DRIVER_CLASS,
 				db.getUser(), null);
-		MappingGenerator generator = new MappingGenerator(sqlConnection);
+		MappingGenerator generator = 
+				new D2RQMappingStyle(sqlConnection).getMappingGenerator();
 		return generator.getMappingModel(EX);
 	}
 	

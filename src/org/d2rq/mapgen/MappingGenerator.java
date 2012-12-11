@@ -15,7 +15,6 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ColumnDef;
-import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.schema.Key;
@@ -31,16 +30,11 @@ import org.d2rq.lang.Join;
 import org.d2rq.lang.Mapping;
 import org.d2rq.lang.Microsyntax;
 import org.d2rq.lang.PropertyBridge;
-import org.d2rq.values.TemplateValueMaker;
-import org.d2rq.vocab.D2RQ;
-import org.d2rq.vocab.JDBC;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping.IllegalPrefixException;
 import com.hp.hpl.jena.vocabulary.DC;
@@ -59,15 +53,14 @@ import com.hp.hpl.jena.vocabulary.XSD;
  */
 public class MappingGenerator {
 	private final static Logger log = Logger.getLogger(MappingGenerator.class);
-	
 	private final static String CREATOR = "D2RQ Mapping Generator";
 
+	private final MappingStyle style;
 	private final SQLConnection sqlConnection;
+	private final Model model;
+	private final UniqueLocalNameGenerator stringMaker = new UniqueLocalNameGenerator();
 	private Mapping mapping = null;
-	protected Model mappingResources = null;
-	private String mapNamespaceURI;
-	protected String instanceNamespaceURI;
-	protected String vocabNamespaceURI;
+	private String mapNamespaceURI = "#";;
 	private Filter filter = Filter.ALL;
 	private Model vocabModel = ModelFactory.createDefaultModel();
 	private boolean finished = false;
@@ -80,8 +73,6 @@ public class MappingGenerator {
 	private boolean useUniqueKeysAsEntityID = true;
 	private boolean suppressWarnings = false;
 	private URI startupSQLScript;
-	private final Map<String,Object> assignedNames = 
-			new HashMap<String,Object>();
 	private final List<TableName> tablesWithoutUniqueKey = 
 			new ArrayList<TableName>();
 	private final Map<PropertyBridge,TableName> refersToClassMaps = 
@@ -89,25 +80,17 @@ public class MappingGenerator {
 	private final Map<PropertyBridge,TableName> belongsToClassMaps = 
 			new HashMap<PropertyBridge,TableName>();
 	
-	public MappingGenerator(SQLConnection sqlConnection) {
+	public MappingGenerator(MappingStyle style, SQLConnection sqlConnection,
+			Model model) {
+		this.style = style;
 		this.sqlConnection = sqlConnection;
-		mapNamespaceURI = "#";
-		instanceNamespaceURI = "";
-		vocabNamespaceURI = "vocab/";
+		this.model = model;
 	}
 
 	public void setMapNamespaceURI(String uri) {
 		this.mapNamespaceURI = uri;
 	}
 	
-	public void setInstanceNamespaceURI(String uri) {
-		this.instanceNamespaceURI = uri;
-	}
-
-	public void setVocabNamespaceURI(String uri) {
-		this.vocabNamespaceURI = uri;
-	}
-
 	public void setFilter(Filter filter) {
 		this.filter = filter;
 	}
@@ -198,25 +181,23 @@ public class MappingGenerator {
 	
 	private void writeMapping() {
 		if (finished) return;
-		mappingResources = ModelFactory.createDefaultModel();
+		
+		initVocabularyModel();
+
+		model.setNsPrefix("map", mapNamespaceURI);
 		mapping = new Mapping();
-		mappingResources.setNsPrefixes(mapping.getPrefixes());
-		mappingResources.setNsPrefix("map", mapNamespaceURI);
-		if (!vocabNamespaceURI.equals(instanceNamespaceURI)) {
-			mappingResources.setNsPrefix("vocab", vocabNamespaceURI);
+		for (String prefix: mapping.getPrefixes().getNsPrefixMap().keySet()) {
+			model.setNsPrefix(prefix, mapping.getPrefixes().getNsPrefixURI(prefix));
 		}
-		mappingResources.setNsPrefix("rdf", RDF.getURI());
-		mappingResources.setNsPrefix("rdfs", RDFS.getURI());
-		mappingResources.setNsPrefix("xsd", XSD.getURI());
-		mappingResources.setNsPrefix("d2rq", D2RQ.getURI());
-		mappingResources.setNsPrefix("jdbc", JDBC.getURI());
-		mapping.getPrefixes().setNsPrefixes(mappingResources);
+		mapping.getPrefixes().setNsPrefixes(model);
+
 		log.info("Generating d2rq:Configuration instance");
 		mapping.setConfiguration(getConfiguration());
+
 		log.info("Generating d2rq:Database instance");
 		Database database = getDatabase();
 		mapping.addDatabase(database);
-		initVocabularyModel();
+
 		List<TableName> tableNames = new ArrayList<TableName>();
 		for (TableName tableName: sqlConnection.getTableNames(filter.getSingleSchema())) {
 			if (!filter.matches(tableName)) {
@@ -249,11 +230,11 @@ public class MappingGenerator {
 			}
 			if (tableName.getSchema() != null) {
 				tryRegisterPrefix(tableName.getSchema().getName().toLowerCase(),
-						getTableClass(tableName).getNameSpace());
+						style.getTableClass(tableName).getNameSpace());
 			}
 			if (tableName.getCatalog() != null) {
 				tryRegisterPrefix(tableName.getCatalog().getName().toLowerCase(),
-						getTableClass(tableName).getNameSpace());
+						style.getTableClass(tableName).getNameSpace());
 			}
 		}
 		for (Entry<PropertyBridge,TableName> entry: refersToClassMaps.entrySet()) {
@@ -294,20 +275,20 @@ public class MappingGenerator {
 
 	private Configuration getConfiguration() {
 		Configuration result = new Configuration(
-				mappingResources.createResource(mapNamespaceURI + "configuration"));
+				model.createResource(mapNamespaceURI + "configuration"));
 		result.setServeVocabulary(serveVocabulary);
 		return result;
 	}
 
 	private Database getDatabase() {
 		Database result = new Database(
-				mappingResources.createResource(mapNamespaceURI + "database"));
+				model.createResource(mapNamespaceURI + "database"));
 		result.setJDBCDriver(sqlConnection.getJdbcDriverClass());
 		result.setJdbcURL(sqlConnection.getJdbcURL());
 		result.setUsername(sqlConnection.getUsername());
 		result.setPassword(sqlConnection.getPassword());
 		if (startupSQLScript != null) {
-			result.setStartupSQLScript(mappingResources.createResource(startupSQLScript.toString()));
+			result.setStartupSQLScript(model.createResource(startupSQLScript.toString()));
 		}
 		Properties props = sqlConnection.vendor().getDefaultConnectionProperties();
 		for (String property: props.stringPropertyNames()) {
@@ -323,15 +304,25 @@ public class MappingGenerator {
 		result.setDatabase(database);
 		Key key = findBestKey(table);
 		if (key == null) {
-			definePseudoEntityIdentifier(result, table);
+			if (style.getEntityPseudoKeyColumns(table.getColumns()) == null) {
+				result.setComment(result.getComment() + 
+						"\nNOTE: Sorry, I don't know which columns to put into the d2rq:uriPattern\n" +
+						"because the table doesn't have a primary key. Please specify it manually.");
+				result.setURIPattern(Microsyntax.toString(
+						style.getEntityIRIPattern(table, null)));
+				tablesWithoutUniqueKey.add(table.getName());
+			} else {
+				result.setBNodeIdColumns(table.getName().qualifyIdentifiers(
+						style.getEntityPseudoKeyColumns(table.getColumns())));
+			}
 		} else {
 			result.setURIPattern(Microsyntax.toString(
-					getEntityIdentifierPattern(table, key)));
+					style.getEntityIRIPattern(table, key)));
 		}
 		if (generateClasses) {
-			result.addClass(getTableClass(table.getName()));
+			result.addClass(style.getTableClass(table.getName()));
 			if (generateDefinitionLabels) {
-				result.addDefinitionLabel(mappingResources.createLiteral(
+				result.addDefinitionLabel(model.createLiteral(
 						Microsyntax.toString(table.getName())));
 			}
 		}
@@ -378,27 +369,18 @@ public class MappingGenerator {
 		return result;
 	}
 
-	protected void definePseudoEntityIdentifier(ClassMap result, TableDef table) {
-		result.setComment(result.getComment() + 
-				"\nNOTE: Sorry, I don't know which columns to put into the d2rq:uriPattern\n" +
-				"because the table doesn't have a primary key. Please specify it manually.");
-		result.setURIPattern(Microsyntax.toString(
-				getEntityIdentifierPattern(table, null)));
-		tablesWithoutUniqueKey.add(table.getName());
-	}
-	
 	private PropertyBridge getLabelBridge(TableName table, Key columns) {
 		PropertyBridge bridge = new PropertyBridge(getLabelBridgeResource(table));
 		bridge.addProperty(RDFS.label);
-		bridge.setPattern(Microsyntax.toString(getLabelPattern(table, columns)));
+		bridge.setPattern(Microsyntax.toString(style.getEntityLabelPattern(table, columns)));
 		return bridge;
 	}
 	
 	private PropertyBridge getPropertyBridge(TableName table, Identifier column, DataType datatype) {
 		PropertyBridge bridge = new PropertyBridge(getPropertyBridgeResource(table, column));
-		bridge.addProperty(getColumnProperty(table, column));
+		bridge.addProperty(style.getColumnProperty(table, column));
 		if (generateDefinitionLabels) {
-			bridge.addDefinitionLabel(mappingResources.createLiteral(
+			bridge.addDefinitionLabel(model.createLiteral(
 					table.getTable().getName() + " " + column.getName()));
 		}
 		bridge.setColumn(table.qualifyIdentifier(column));
@@ -417,7 +399,7 @@ public class MappingGenerator {
 			createDatatypeProperty(table, column, TypeMapper.getInstance().getSafeTypeByName(datatypeURI));
 		}
 		tryRegisterPrefix(table.getTable().getName().toLowerCase(), 
-				getColumnProperty(table, column).getNameSpace());
+				style.getColumnProperty(table, column).getNameSpace());
 		return bridge;
 	}
 
@@ -426,7 +408,7 @@ public class MappingGenerator {
 		TableName referencedTable = foreignKey.getReferencedTable();
 		PropertyBridge bridge = new PropertyBridge(
 				getPropertyBridgeResource(table, localColumns));
-		bridge.addProperty(getForeignKeyProperty(table, localColumns));
+		bridge.addProperty(style.getForeignKeyProperty(table, foreignKey));
 		refersToClassMaps.put(bridge, referencedTable);
 		TableName target = referencedTable;
 		if (referencedTable.equals(table)) {
@@ -453,7 +435,7 @@ public class MappingGenerator {
 		boolean isSelfJoin = referencedTable1.equals(referencedTable2);
 		bridge.setComment("Table " + Microsyntax.toString(table) + (isSelfJoin ? " (n:m self-join)" : " (n:m)"));
 		belongsToClassMaps.put(bridge, referencedTable1);
-		bridge.addProperty(getLinkProperty(table));
+		bridge.addProperty(style.getLinkProperty(table));
 		refersToClassMaps.put(bridge, referencedTable2);
 		TableName target = referencedTable2;
 		if (isSelfJoin) {
@@ -475,143 +457,31 @@ public class MappingGenerator {
 		return bridge;
 	}
 
-	/**
-	 * Returns SCHEMA_TABLE. Except if that string is already taken
-	 * by another table name (or column name); in that case we add
-	 * more underscores until we have no clash.
-	 */
-	private String toUniqueString(TableName tableName) {
-		if (tableName.getSchema() == null) {
-			return tableName.getTable().getName();
-		}
-		String separator = "_";
-		while (true) {
-			String candidate = tableName.getSchema().getName() + separator + tableName.getTable().getName();
-			if (!assignedNames.containsKey(candidate)) {
-				assignedNames.put(candidate, tableName);
-				return candidate;
-			}
-			if (assignedNames.get(candidate).equals(tableName)) {
-				return candidate;
-			}
-			separator += "_";
-		}
-	}
-	
-	/**
-	 * Returns TABLE_COLUMN. Except if that string is already taken by
-	 * another column name (e.g., AAA.BBB_CCC and AAA_BBB.CCC would
-	 * result in the same result AAA_BBB_CCC); in that case we add more
-	 * underscores (AAA__BBB_CCC) until we have no clash. 
-	 */
-	private String toUniqueString(TableName tableName, Identifier column) {
-		String separator = "_";
-		while (true) {
-			String candidate = toUniqueString(tableName) + separator + column.getName();
-			if (!assignedNames.containsKey(candidate)) {
-				assignedNames.put(candidate, ColumnName.create(tableName, column));
-				return candidate;
-			}
-			if (assignedNames.get(candidate).equals(ColumnName.create(tableName, column))) {
-				return candidate;
-			}
-			separator += "_";
-		}
-	}
-
-	private String toUniqueString(TableName tableName, Key columns) {
-		StringBuffer result = new StringBuffer();
-		result.append(toUniqueString(tableName));
-		for (Identifier column: columns.getColumns()) {
-			result.append("_" + column.getName());
-		}
-		return result.toString();
-	}
-
 	private Resource getClassMapResource(TableName table) {
-		return mappingResources.createResource(mapNamespaceURI + 
-				IRIEncoder.encode(toUniqueString(table)));
+		return model.createResource(mapNamespaceURI + 
+				IRIEncoder.encode(stringMaker.toString(table)));
 	}
 	
 	private Resource getLabelBridgeResource(TableName table) {
-		return mappingResources.createResource(mapNamespaceURI + 
-				IRIEncoder.encode(toUniqueString(table) + "__label"));
+		return model.createResource(mapNamespaceURI + 
+				IRIEncoder.encode(stringMaker.toString(table) + "__label"));
 	}
 	
 	private Resource getPropertyBridgeResource(TableName table, Identifier column) {
-		return mappingResources.createResource(mapNamespaceURI + 
-				IRIEncoder.encode(toUniqueString(table, column)));
+		return model.createResource(mapNamespaceURI + 
+				IRIEncoder.encode(stringMaker.toString(table, column)));
 	}
 	
 	private Resource getPropertyBridgeResource(TableName table, Key columns) {
-		return mappingResources.createResource(mapNamespaceURI + 
-				IRIEncoder.encode(toUniqueString(table, columns) + "__ref"));
+		return model.createResource(mapNamespaceURI + 
+				IRIEncoder.encode(stringMaker.toString(table, columns) + "__ref"));
 	}
 	
 	private Resource getLinkPropertyBridgeResource(TableName table) {
-		return mappingResources.createResource(mapNamespaceURI + 
-				IRIEncoder.encode(toUniqueString(table) + "__link"));
+		return model.createResource(mapNamespaceURI + 
+				IRIEncoder.encode(stringMaker.toString(table) + "__link"));
 	}
 	
-	protected Resource getTableClass(TableName tableName) {
-		return mappingResources.createResource(
-				vocabNamespaceURI + IRIEncoder.encode(toUniqueString(tableName)));
-	}
-	
-	protected Property getColumnProperty(TableName tableName, Identifier column) {
-		return mappingResources.createProperty(
-				vocabNamespaceURI + IRIEncoder.encode(toUniqueString(tableName, column)));
-	}
-	
-	protected Property getForeignKeyProperty(TableName tableName, Key columns) {
-		return mappingResources.createProperty(
-				vocabNamespaceURI + IRIEncoder.encode(toUniqueString(tableName, columns)));
-	}
-
-	private Property getLinkProperty(TableName linkTable) {
-		return mappingResources.createProperty(
-				vocabNamespaceURI + IRIEncoder.encode(toUniqueString(linkTable)));
-	}
-	
-	private Resource getOntologyResource() {
-		return mappingResources.createResource(dropTrailingHash(vocabNamespaceURI));
-	}
-	
-	protected TemplateValueMaker getEntityIdentifierPattern(TableDef table, Key columns) {
-		TemplateValueMaker.Builder builder = TemplateValueMaker.builder();
-		builder.add(instanceNamespaceURI);
-		if (table.getName().getSchema() != null) {
-			builder.add(IRIEncoder.encode(table.getName().getSchema().getName()));
-			builder.add("/");
-		}
-		builder.add(IRIEncoder.encode(table.getName().getTable().getName()));
-		if (columns != null) {
-			for (Identifier column: columns) {
-				builder.add("/");
-				if (table.getColumnDef(column).getDataType().isIRISafe()) {
-					builder.add(table.getName().qualifyIdentifier(column));
-				} else {
-					builder.add(table.getName().qualifyIdentifier(column), TemplateValueMaker.URLIFY);
-				}
-			}
-		}
-		return builder.build();
-	}
-	
-	private TemplateValueMaker getLabelPattern(TableName tableName, Key columns) {
-		TemplateValueMaker.Builder builder = TemplateValueMaker.builder();
-		builder.add(tableName.getTable().getName());
-		builder.add(" #");
-		Iterator<Identifier> it = columns.iterator();
-		while (it.hasNext()) {
-			builder.add(tableName.qualifyIdentifier(it.next()));
-			if (it.hasNext()) {
-				builder.add("/");
-			}
-		}
-		return builder.build();
-	}
-
 	private Key findBestKey(TableDef table) {
 		if (table.getPrimaryKey() != null) {
 			if (!isFiltered(table, table.getPrimaryKey(), true)) {
@@ -634,7 +504,7 @@ public class MappingGenerator {
 		return false;
 	}
 	
-	protected boolean isFiltered(TableDef table, Identifier column, boolean requireDistinct) {
+	private boolean isFiltered(TableDef table, Identifier column, boolean requireDistinct) {
 		if (!filter.matches(table.getName(), column)) return true;
 		DataType type = table.getColumnDef(column).getDataType();
 		return type == null || type.isUnsupported() || (requireDistinct && !type.supportsDistinct());
@@ -671,32 +541,32 @@ public class MappingGenerator {
 	}
 	
 	private void initVocabularyModel() {
-		this.vocabModel.setNsPrefix("rdf", RDF.getURI());
-		this.vocabModel.setNsPrefix("rdfs", RDFS.getURI());
-		this.vocabModel.setNsPrefix("owl", OWL.getURI());
-		this.vocabModel.setNsPrefix("dc", DC.getURI());
-		this.vocabModel.setNsPrefix("xsd", XSDDatatype.XSD + "#");
-		this.vocabModel.setNsPrefix("", this.vocabNamespaceURI);
-		Resource r = getOntologyResource();
+		vocabModel.setNsPrefixes(model.getNsPrefixMap());
+		vocabModel.setNsPrefix("rdf", RDF.getURI());
+		vocabModel.setNsPrefix("rdfs", RDFS.getURI());
+		vocabModel.setNsPrefix("owl", OWL.getURI());
+		vocabModel.setNsPrefix("dc", DC.getURI());
+		vocabModel.setNsPrefix("xsd", XSD.getURI());
+		Resource r = style.getGeneratedOntologyResource();
 		r.addProperty(RDF.type, OWL.Ontology);
 		r.addProperty(OWL.imports, this.vocabModel.getResource(dropTrailingHash(DC.getURI())));
 		r.addProperty(DC.creator, CREATOR);
 	}
 
 	private void createVocabularyClass(TableName tableName) {
-		Resource r = getTableClass(tableName);
+		Resource r = style.getTableClass(tableName);
 		r.addProperty(RDF.type, RDFS.Class);
 		r.addProperty(RDF.type, OWL.Class);
 		r.addProperty(RDFS.label, Microsyntax.toString(tableName));
-		r.addProperty(RDFS.isDefinedBy, getOntologyResource());
+		r.addProperty(RDFS.isDefinedBy, style.getGeneratedOntologyResource());
 	}
 
 	private void createDatatypeProperty(TableName tableName, Identifier column, RDFDatatype datatype) {
-		Resource r = getColumnProperty(tableName, column);
+		Resource r = style.getColumnProperty(tableName, column);
 		r.addProperty(RDF.type, RDF.Property);
-		r.addProperty(RDFS.label, toUniqueString(tableName, column));
-		r.addProperty(RDFS.domain, getTableClass(tableName));
-		r.addProperty(RDFS.isDefinedBy, getOntologyResource());		
+		r.addProperty(RDFS.label, stringMaker.toString(tableName, column));
+		r.addProperty(RDFS.domain, style.getTableClass(tableName));
+		r.addProperty(RDFS.isDefinedBy, style.getGeneratedOntologyResource());		
 		r.addProperty(RDF.type, OWL.DatatypeProperty);
 		if (datatype != null) {
 			r.addProperty(RDFS.range, this.vocabModel.getResource(datatype.getURI()));
@@ -704,27 +574,26 @@ public class MappingGenerator {
 	}
 
 	private void createObjectProperty(TableName tableName, ForeignKey fk) {
-		Resource r = getForeignKeyProperty(tableName, fk.getLocalColumns());
+		Resource r = style.getForeignKeyProperty(tableName, fk);
 		r.addProperty(RDF.type, RDF.Property);
 		r.addProperty(RDF.type, OWL.ObjectProperty);
-		r.addProperty(RDFS.label, toUniqueString(tableName, fk.getLocalColumns()));
-		r.addProperty(RDFS.domain, getTableClass(tableName));
-		r.addProperty(RDFS.range, getTableClass(fk.getReferencedTable()));
-		r.addProperty(RDFS.isDefinedBy, getOntologyResource());		
+		r.addProperty(RDFS.label, stringMaker.toString(tableName, fk.getLocalColumns()));
+		r.addProperty(RDFS.domain, style.getTableClass(tableName));
+		r.addProperty(RDFS.range, style.getTableClass(fk.getReferencedTable()));
+		r.addProperty(RDFS.isDefinedBy, style.getGeneratedOntologyResource());		
 	}
 	
 	private void createLinkProperty(TableName linkTableName, TableName fromTable, TableName toTable) {
-		String propertyURI = this.vocabNamespaceURI + IRIEncoder.encode(linkTableName.getTable().getName());
-		Resource r = this.vocabModel.createResource(propertyURI);
+		Resource r = style.getLinkProperty(linkTableName);
 		r.addProperty(RDF.type, RDF.Property);
 		r.addProperty(RDF.type, OWL.ObjectProperty);
 		r.addProperty(RDFS.label, Microsyntax.toString(linkTableName));
-		r.addProperty(RDFS.domain, getTableClass(fromTable));
-		r.addProperty(RDFS.range, getTableClass(toTable));
-		r.addProperty(RDFS.isDefinedBy, getOntologyResource());
+		r.addProperty(RDFS.domain, style.getTableClass(fromTable));
+		r.addProperty(RDFS.range, style.getTableClass(toTable));
+		r.addProperty(RDFS.isDefinedBy, style.getGeneratedOntologyResource());
 	}
 	
-	private String dropTrailingHash(String uri) {
+	public static String dropTrailingHash(String uri) {
 		if (!uri.endsWith("#")) {
 			return uri;
 		}

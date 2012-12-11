@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.d2rq.vocab.D2RQ;
+import org.d2rq.vocab.JDBC;
 
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -40,6 +41,8 @@ public class Mapping extends MapObject {
 
 	public Mapping() {
 		this(null);
+		prefixes.setNsPrefix("d2rq", D2RQ.getURI());
+		prefixes.setNsPrefix("jdbc", JDBC.getURI());
 	}
 
 	public Mapping(String mappingURI) {
