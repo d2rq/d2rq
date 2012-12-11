@@ -64,6 +64,7 @@ public class PrettyTurtleWriter {
 	}
 	
 	public void flush() {
+		out.println();
 		out.flush();
 	}
 	
@@ -230,14 +231,17 @@ public class PrettyTurtleWriter {
 		if (s.contains("\n") || s.contains("\r")) {
 			return quoteLong(s);
 		}
-		return "\"" + s.replaceAll("\"", "\\\"") + "\"";
+		if (s.contains("\"") && !s.contains("'")) {
+			return "'" + s + "'";
+		}
+		return "\"" + s.replace("\"", "\\\"") + "\"";
 	}
 	
 	private String quoteLong(String s) {
 		if (s.endsWith("\"")) {
 			s = s.substring(0, s.length() - 1) + "\\\"";
 		}
-		return "\"\"\"" + s.replaceAll("\"\"\"", "\\\"\\\"\\\"") + "\"\"\"";
+		return "\"\"\"" + s.replace("\"\"\"", "\\\"\\\"\\\"") + "\"\"\"";
 	}
 	
 	private String toTurtle(RDFNode r) {

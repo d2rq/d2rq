@@ -54,6 +54,7 @@ public class R2RMLTarget implements Target {
 	public void init(String baseIRI, Resource generatedOntology, 
 			boolean serveVocabulary, boolean generateDefinitionLabels) {
 		mapping = new Mapping(baseIRI);
+		addPrefix("map", baseIRI + "#");
 	}
 
 	public void addPrefix(String prefix, String uri) {

@@ -84,18 +84,27 @@ public class R2RMLWriter extends MappingVisitor.TreeWalkerImplementation impleme
 			ComponentType... types) {
 		if (resource == null) return;
 		if (property == null) {
-			out.printResourceStart(resource);
+			if (types.length == 1 && types[0] == ComponentType.TRIPLES_MAP) {
+				// cosmetics
+				out.println();
+				out.printResourceStart(resource, RR.TriplesMap); 
+			} else {
+				out.printResourceStart(resource);
+			}
 			super.visitComponentProperty(property, resource, types);
 			out.printResourceEnd();
 		} else if (resource.isAnon()) {
-			out.printPropertyStart(property, COMPACT_PROPERTIES.contains(property));
+			boolean isRefObjectMap = property.equals(RR.objectMap) && 
+					mapping.referencingObjectMaps().has(resource);
+			out.printPropertyStart(property, 
+					COMPACT_PROPERTIES.contains(property) && !isRefObjectMap);
 			super.visitComponentProperty(property, resource, types);
 			out.printPropertyEnd();
 		} else {
 			out.printProperty(property, resource);
 		}
 	}
-
+	
 	@Override
 	public void visitTermProperty(Property property, MappingTerm term) {
 		if (term == null) return;
