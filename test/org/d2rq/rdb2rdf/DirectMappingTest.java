@@ -68,7 +68,6 @@ public class DirectMappingTest {
 		loader.setSystemBaseURI(BASE_URI);
 		Model actualTriples = loader.getModelD2RQ();
 		Model expectedTriples = FileManager.get().loadModel(resultFile);
-		expectedTriples.setNsPrefixes(actualTriples);
 		assertIsomorphic(expectedTriples, actualTriples);
 	}
 }

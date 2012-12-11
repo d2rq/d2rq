@@ -215,7 +215,7 @@ public class D2RQValidator implements D2RQMappingVisitor {
 			}
 		}
 		if (definedSpecs.isEmpty()) {
-			StringBuffer error = new StringBuffer(toString());
+			StringBuffer error = new StringBuffer(resourceMap.toString());
 			error.append(" needs one of ");
 			for (int i = 0; i < allowedSpecs.length; i++) {
 				if (i > 0) {

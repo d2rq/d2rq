@@ -12,6 +12,7 @@ import org.d2rq.values.TemplateValueMaker;
 
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.shared.PrefixMapping;
 
 /**
  * A style of default mapping. Allows customizing the mapping generator to
@@ -24,16 +25,34 @@ public interface MappingStyle {
 	 * @return A mapping generator that creates a mapping according to this style
 	 */
 	MappingGenerator getMappingGenerator();
+
+	/**
+	 * @return An absolute IRI that will be used as a base for instance and vocabulary namespaces
+	 */
+	String getBaseIRI();
 	
+	/**
+	 * Returns a prefix mapping with convenient prefix declarations for
+	 * this style of mapping. This could be mappings for the instance and
+	 * vocabulary namespace(s) used by the style, and any vocabulary
+	 * namespaces used.
+	 * @return A prefix mapping 
+	 */
+	PrefixMapping getPrefixes();
+
 	/**
 	 * Returns an IRI template to be used to uniquely identify the records
 	 * in a table. Can be invoked with a null argument to indicate that
 	 * all records should receive the same IRI.
+	 * 
+	 * <strong>Note:</strong> The pattern may produce relative IRIs, assuming
+	 * the base IRI from {@link #getBaseIRI()}.
+	 * 
 	 * @param table The table definition
 	 * @param columns The primary or unique key to be used, or null
 	 * @return An IRI template
 	 */
-	TemplateValueMaker getEntityIRIPattern(TableDef table, Key columns);
+	TemplateValueMaker getEntityIRITemplate(TableDef table, Key columns);
 
 	/**
 	 * Returns a list of columns to be used to form blank node identifiers
@@ -87,5 +106,5 @@ public interface MappingStyle {
 	 * @param columns A list of columns in the table 
 	 * @return A template for generating labels for the records
 	 */
-	TemplateValueMaker getEntityLabelPattern(TableName tableName, Key columns);
+	TemplateValueMaker getEntityLabelTemplate(TableName tableName, Key columns);
 }

@@ -12,10 +12,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.d2rq.CommandLineTool;
 import org.d2rq.SystemLoader;
-import org.d2rq.lang.D2RQWriter;
 import org.d2rq.mapgen.MappingGenerator;
-
-import com.hp.hpl.jena.rdf.model.Model;
+import org.d2rq.mapgen.OntologyTarget;
 
 
 /**
@@ -37,6 +35,7 @@ public class generate_mapping extends CommandLineTool {
 		System.err.println("  Options:");
 		printConnectionOptions(true);
 		System.err.println("    -o outfile.ttl  Output file name (default: stdout)");
+		System.err.println("    --r2rml         Generate R2RML mapping file");
 		System.err.println("    -v              Generate RDFS+OWL vocabulary instead of mapping file");
 		System.err.println("    --verbose       Print debug information");
 		System.err.println();
@@ -44,9 +43,11 @@ public class generate_mapping extends CommandLineTool {
 	}
 
 	private ArgDecl outfileArg = new ArgDecl(true, "o", "out", "outfile");
+	private ArgDecl r2rmlArg = new ArgDecl(false, "r2rml");
 	private ArgDecl vocabAsOutput = new ArgDecl(false, "v", "vocab");
 	
 	public void initArgs(CommandLine cmd) {
+		cmd.add(r2rmlArg);
 		cmd.add(outfileArg);
 		cmd.add(vocabAsOutput);
 	}
@@ -56,6 +57,9 @@ public class generate_mapping extends CommandLineTool {
 			loader.setJdbcURL(cmd.getItem(0));
 		}
 		
+		if (cmd.contains(r2rmlArg)) {
+			loader.setGenerateR2RML(true);
+		}
 		PrintStream out;
 		if (cmd.contains(outfileArg)) {
 			File f = new File(cmd.getArg(outfileArg).getValue());
@@ -69,10 +73,11 @@ public class generate_mapping extends CommandLineTool {
 		MappingGenerator generator = loader.getMappingGenerator();
 		try {
 			if (cmd.contains(vocabAsOutput)) {
-				Model model = generator.getVocabularyModel();
-				model.write(out, "TURTLE");
+				OntologyTarget target = new OntologyTarget();
+				generator.generate(target);
+				target.getOntologyModel().write(out, "TURTLE");
 			} else {
-				new D2RQWriter(generator.getMapping()).write(out);
+				loader.getWriter().write(out);
 			}
 		} finally {
 			loader.close();

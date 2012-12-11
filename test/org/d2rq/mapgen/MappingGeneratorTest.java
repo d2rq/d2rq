@@ -96,7 +96,6 @@ public class MappingGeneratorTest {
 	@Test
 	public void run() {
 		Model actualTriples = loader.getModelD2RQ();
-		expectedTriples.setNsPrefixes(actualTriples);
 		assertIsomorphic(expectedTriples, actualTriples);
 	}
 }

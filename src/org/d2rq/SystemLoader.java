@@ -2,6 +2,8 @@ package org.d2rq;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.nio.charset.MalformedInputException;
 import java.sql.SQLException;
 
@@ -14,9 +16,11 @@ import org.d2rq.lang.D2RQCompiler;
 import org.d2rq.lang.D2RQReader;
 import org.d2rq.lang.D2RQWriter;
 import org.d2rq.mapgen.D2RQMappingStyle;
+import org.d2rq.mapgen.D2RQTarget;
+import org.d2rq.mapgen.DirectMappingStyle;
 import org.d2rq.mapgen.Filter;
 import org.d2rq.mapgen.MappingGenerator;
-import org.d2rq.mapgen.DirectMappingStyle;
+import org.d2rq.mapgen.R2RMLTarget;
 import org.d2rq.r2rml.MappingValidator;
 import org.d2rq.r2rml.R2RMLCompiler;
 import org.d2rq.r2rml.R2RMLReader;
@@ -96,6 +100,7 @@ public class SystemLoader {
 	private String jdbcDriverClass = null;
 	private String sqlScript = null;
 	private boolean generateDirectMapping = false;
+	private boolean generateR2RML = false;
 	private String jdbcURL = null;
 	private String mappingFile = null;
 	private String baseURI = null;
@@ -108,7 +113,7 @@ public class SystemLoader {
 	
 	private SQLConnection sqlConnection = null;
 	private MappingGenerator generator = null;
-	private Model mapModel = null;
+	private Model mappingModel = null;
 	private CompiledMapping mapping = null;
 	private R2RMLReader r2rmlReader = null;
 	private org.d2rq.r2rml.Mapping r2rmlMapping = null;
@@ -143,6 +148,10 @@ public class SystemLoader {
 		this.sqlScript = sqlFile;
 	}
 
+	public void setGenerateR2RML(boolean flag) {
+		this.generateR2RML = flag;
+	}
+	
 	public void setGenerateW3CDirectMapping(boolean flag) {
 		this.generateDirectMapping = flag;
 	}
@@ -269,8 +278,10 @@ public class SystemLoader {
 	public MappingGenerator getMappingGenerator() {
 		if (generator == null) {
 			generator = generateDirectMapping ?
-					new DirectMappingStyle(getSQLConnection()).getMappingGenerator() :
-					new D2RQMappingStyle(getSQLConnection()).getMappingGenerator();
+					new DirectMappingStyle(getSQLConnection(), 
+							getResourceBaseURI()).getMappingGenerator() :
+					new D2RQMappingStyle(getSQLConnection(), 
+							getResourceBaseURI()).getMappingGenerator();
 			if (filter != null) {
 				generator.setFilter(filter);
 			}
@@ -283,56 +294,75 @@ public class SystemLoader {
 	}
 
 	public void setMappingModel(Model mapModel) {
-		this.mapModel = mapModel;
-		mappingLanguage = null;
+		resetMappingFile();
+		this.mappingModel = mapModel;
+	}
+
+	private void generateMapping() {
+		if (generateR2RML) {
+			mappingLanguage = MappingLanguage.R2RML;
+			R2RMLTarget target = new R2RMLTarget();
+			getMappingGenerator().generate(target);
+			r2rmlMapping = target.getMapping();
+		} else {
+			mappingLanguage = MappingLanguage.D2RQ;
+			D2RQTarget target = new D2RQTarget();
+			getMappingGenerator().generate(target);
+			d2rqMapping = target.getMapping();
+		}
 	}
 	
 	public Model getMappingModel() {
-		if (mapModel == null) {
-			if (jdbcURL == null && mappingFile == null) {
-				throw new D2RQException("no mapping file or JDBC URL specified");
+		if (mappingModel == null && jdbcURL == null && mappingFile == null) {
+			throw new D2RQException("no mapping file or JDBC URL specified");
+		}
+		if (mappingModel == null && mappingFile == null) {
+			if (d2rqMapping == null && r2rmlMapping == null) {
+				generateMapping();
 			}
-			if (mappingFile == null) {
-				mapModel = getMappingGenerator().getMappingModel(getResourceBaseURI());
-			} else {
-				log.info("Reading mapping file from " + mappingFile);
-				// Guess the language/type of mapping file based on file extension. If it is not among the known types then assume that the file has TURTLE syntax and force to use TURTLE parser
-				String lang = FileUtils.guessLang(mappingFile, "unknown");
-				try {
-					if (lang.equals("unknown")) {
-						mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), "TURTLE");
-					} else {
-						// if the type is known then let Jena auto-detect it and load the appropriate parser
-						mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), null);
-					}
-				} catch (TurtleParseException ex) {
-					// We have wired RIOT into Jena in the static initializer above,
-					// so this should never happen (it's for the old Jena Turtle/N3 parser)
-					throw new D2RQException(
-							"Error parsing " + mappingFile + ": " + ex.getMessage(), ex, 77);
-				} catch (JenaException ex) {
-					if (ex.getCause() != null && ex.getCause() instanceof RiotException) {
-						throw new D2RQException(
-								"Error parsing " + mappingFile + ": " + ex.getCause().getMessage(), ex, 77);
-					}
-					throw ex;
-				} catch (AtlasException ex) {
-					// Detect the specific case of non-UTF-8 encoded input files
-					// and do a custom error message
-					if (FileUtils.langTurtle.equals(lang) 
-							&& ex.getCause() != null && (ex.getCause() instanceof MalformedInputException)) {
-						throw new D2RQException("Error parsing " + mappingFile + 
-								": Turtle files must be in UTF-8 encoding; " +
-								"bad encoding found at byte " + 
-								((MalformedInputException) ex.getCause()).getInputLength(), ex, 77);
-					}
-					// Generic error message for other parse errors
-					throw new D2RQException(
-							"Error parsing " + mappingFile + ": " + ex.getMessage(), ex, 77);
+			StringWriter out = new StringWriter();
+			getWriter().write(out);
+			mappingModel = ModelFactory.createDefaultModel();
+			mappingModel.read(new StringReader(out.toString()), getResourceBaseURI(), "TURTLE");
+		}
+		if (mappingModel == null) {
+			log.info("Reading mapping file from " + mappingFile);
+			// Guess the language/type of mapping file based on file extension. If it is not among the known types then assume that the file has TURTLE syntax and force to use TURTLE parser
+			String lang = FileUtils.guessLang(mappingFile, "unknown");
+			try {
+				if (lang.equals("unknown")) {
+					mappingModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), "TURTLE");
+				} else {
+					// if the type is known then let Jena auto-detect it and load the appropriate parser
+					mappingModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), null);
 				}
+			} catch (TurtleParseException ex) {
+				// We have wired RIOT into Jena in the static initializer above,
+				// so this should never happen (it's for the old Jena Turtle/N3 parser)
+				throw new D2RQException(
+						"Error parsing " + mappingFile + ": " + ex.getMessage(), ex, 77);
+			} catch (JenaException ex) {
+				if (ex.getCause() != null && ex.getCause() instanceof RiotException) {
+					throw new D2RQException(
+							"Error parsing " + mappingFile + ": " + ex.getCause().getMessage(), ex, 77);
+				}
+				throw ex;
+			} catch (AtlasException ex) {
+				// Detect the specific case of non-UTF-8 encoded input files
+				// and do a custom error message
+				if (FileUtils.langTurtle.equals(lang) 
+						&& ex.getCause() != null && (ex.getCause() instanceof MalformedInputException)) {
+					throw new D2RQException("Error parsing " + mappingFile + 
+							": Turtle files must be in UTF-8 encoding; " +
+							"bad encoding found at byte " + 
+							((MalformedInputException) ex.getCause()).getInputLength(), ex, 77);
+				}
+				// Generic error message for other parse errors
+				throw new D2RQException(
+						"Error parsing " + mappingFile + ": " + ex.getMessage(), ex, 77);
 			}
 		}
-		return mapModel;
+		return mappingModel;
 	}
 
 	public CompiledMapping getMapping() {
@@ -469,7 +499,12 @@ public class SystemLoader {
 	}
 	
 	public void resetMappingFile() {
-		mapModel = null;
+		mappingLanguage = null;
+		d2rqMapping = null;
+		r2rmlMapping = null;
+		writer = null;
+		dataModel = null;
+		mappingModel = null;
 		mapping = null;
 		dataModel = null;
 		if (dataGraph != null) dataGraph.close();
@@ -487,6 +522,11 @@ public class SystemLoader {
 
 	public MappingLanguage getMappingLanguage() {
 		if (mappingLanguage == null) {
+			if (mappingModel == null && mappingFile == null) {
+				mappingLanguage = generateR2RML ? MappingLanguage.R2RML : MappingLanguage.D2RQ;
+				generateMapping();
+				return mappingLanguage;
+			}
 			boolean isD2RQ = new VocabularySummarizer(D2RQ.class).usesVocabulary(getMappingModel());
 			boolean isR2RML = new VocabularySummarizer(RR.class).usesVocabulary(getMappingModel());
 			if (isD2RQ && isR2RML) {

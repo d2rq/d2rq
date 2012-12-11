@@ -71,7 +71,7 @@ public class PrettyPrinter {
 		return s;
 	}
 	
-	private static String qNameOrURI(String uri, PrefixMapping prefixes) {
+	public static String qNameOrURI(String uri, PrefixMapping prefixes) {
 		if (prefixes == null) {
 			return "<" + uri + ">";
 		}

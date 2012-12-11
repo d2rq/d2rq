@@ -1,7 +1,6 @@
 package org.d2rq;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -9,16 +8,14 @@ import java.util.ArrayList;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.jena.GraphD2RQ;
-import org.d2rq.lang.D2RQReader;
 import org.d2rq.lang.Mapping;
 import org.d2rq.mapgen.D2RQMappingStyle;
-import org.d2rq.mapgen.MappingGenerator;
+import org.d2rq.mapgen.D2RQTarget;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 
@@ -55,12 +52,6 @@ public class HSQLDatabaseTest {
 	}
 	
 	@Test
-	public void testGenerateDefaultMappingModel() {
-		Model model = generateDefaultMappingModel();
-		assertFalse(model.isEmpty());
-	}
-	
-	@Test
 	public void testGenerateSomeClassMapsInDefaultMapping() {
 		Mapping mapping = generateDefaultMapping();
 		assertEquals(1, mapping.classMapResources().size());
@@ -92,17 +83,13 @@ public class HSQLDatabaseTest {
 		assertEquals(1, g.size());
 	}
 	
-	private Model generateDefaultMappingModel() {
+	private Mapping generateDefaultMapping() {
 		SQLConnection sqlConnection = new SQLConnection(
 				db.getJdbcURL(), HSQLDatabase.DRIVER_CLASS,
 				db.getUser(), null);
-		MappingGenerator generator = 
-				new D2RQMappingStyle(sqlConnection).getMappingGenerator();
-		return generator.getMappingModel(EX);
-	}
-	
-	private Mapping generateDefaultMapping() {
-		return new D2RQReader(generateDefaultMappingModel(), EX).getMapping();
+		D2RQTarget target = new D2RQTarget();
+		new D2RQMappingStyle(sqlConnection, EX).getMappingGenerator().generate(target);
+		return target.getMapping();
 	}
 	
 	private GraphD2RQ generateDefaultGraphD2RQ() {

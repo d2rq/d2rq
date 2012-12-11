@@ -16,6 +16,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
@@ -29,31 +30,40 @@ public class D2RQMappingStyle implements MappingStyle {
 	private final MappingGenerator generator;
 	private final Model model = ModelFactory.createDefaultModel();
 	private final UniqueLocalNameGenerator stringMaker = new UniqueLocalNameGenerator();
-	private final String instanceNamespaceURI = "";
-	private final String vocabNamespaceURI = "vocab/";
+	private final String baseIRI;
+	private final String vocabBaseIRI;
 
-	public D2RQMappingStyle(SQLConnection connection) {
+	public D2RQMappingStyle(SQLConnection connection, String baseIRI) {
+		this.baseIRI = baseIRI;
+		this.vocabBaseIRI = baseIRI + "vocab/";
 		model.setNsPrefix("rdf", RDF.getURI());
 		model.setNsPrefix("rdfs", RDFS.getURI());
 		model.setNsPrefix("xsd", XSD.getURI());
-		model.setNsPrefix("vocab", vocabNamespaceURI);
-		generator = new MappingGenerator(this, connection, model);
+		model.setNsPrefix("vocab", vocabBaseIRI);
+		generator = new MappingGenerator(this, connection);
 		generator.setGenerateLabelBridges(true);
 		generator.setHandleLinkTables(true);
 		generator.setGenerateDefinitionLabels(true);
 		generator.setServeVocabulary(true);
 		generator.setSkipForeignKeyTargetColumns(true);
 		generator.setUseUniqueKeysAsEntityID(true);
-		generator.setMapNamespaceURI("#");
 	}
 	
 	public MappingGenerator getMappingGenerator() {
 		return generator;
 	}
 	
-	public TemplateValueMaker getEntityIRIPattern(TableDef table, Key columns) {
+	public String getBaseIRI() {
+		return baseIRI;
+	}
+	
+	public PrefixMapping getPrefixes() {
+		return model;
+	}
+	
+	public TemplateValueMaker getEntityIRITemplate(TableDef table, Key columns) {
 		TemplateValueMaker.Builder builder = TemplateValueMaker.builder();
-		builder.add(instanceNamespaceURI);
+		// We don't use the base IRI here, so the template will produce relative IRIs
 		if (table.getName().getSchema() != null) {
 			builder.add(IRIEncoder.encode(table.getName().getSchema().getName()));
 			builder.add("/");
@@ -77,30 +87,30 @@ public class D2RQMappingStyle implements MappingStyle {
 	}
 	
 	public Resource getGeneratedOntologyResource() {
-		return model.createResource(MappingGenerator.dropTrailingHash(vocabNamespaceURI));
+		return model.createResource(MappingGenerator.dropTrailingHash(vocabBaseIRI));
 	}
 	
 	public Resource getTableClass(TableName tableName) {
-		return model.createResource(vocabNamespaceURI + 
+		return model.createResource(vocabBaseIRI + 
 				IRIEncoder.encode(stringMaker.toString(tableName)));
 	}
 	
 	public Property getColumnProperty(TableName tableName, Identifier column) {
-		return model.createProperty(vocabNamespaceURI + 
+		return model.createProperty(vocabBaseIRI + 
 				IRIEncoder.encode(stringMaker.toString(tableName, column)));
 	}
 	
 	public Property getForeignKeyProperty(TableName tableName, ForeignKey fk) {
-		return model.createProperty(vocabNamespaceURI + 
+		return model.createProperty(vocabBaseIRI + 
 				IRIEncoder.encode(stringMaker.toString(tableName, fk.getLocalColumns())));
 	}	
 
 	public Property getLinkProperty(TableName linkTable) {
-		return model.createProperty(vocabNamespaceURI + 
+		return model.createProperty(vocabBaseIRI + 
 				IRIEncoder.encode(stringMaker.toString(linkTable)));
 	}
 	
-	public TemplateValueMaker getEntityLabelPattern(TableName tableName, Key columns) {
+	public TemplateValueMaker getEntityLabelTemplate(TableName tableName, Key columns) {
 		TemplateValueMaker.Builder builder = TemplateValueMaker.builder();
 		builder.add(tableName.getTable().getName());
 		builder.add(" #");

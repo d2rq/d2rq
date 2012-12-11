@@ -17,8 +17,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 
@@ -31,12 +31,12 @@ import com.hp.hpl.jena.vocabulary.XSD;
 public class DirectMappingStyle implements MappingStyle {
 	private final MappingGenerator generator;
 	private final Model model = ModelFactory.createDefaultModel();
-	private final String baseIRI = "";
+	private final String baseIRI;
 	
-	public DirectMappingStyle(SQLConnection connection) {
-		this.generator = new MappingGenerator(this, connection, model);
+	public DirectMappingStyle(SQLConnection connection, String baseIRI) {
+		this.generator = new MappingGenerator(this, connection);
+		this.baseIRI = baseIRI;
 		model.setNsPrefix("rdf", RDF.getURI());
-		model.setNsPrefix("rdfs", RDFS.getURI());
 		model.setNsPrefix("xsd", XSD.getURI());
 		generator.setGenerateLabelBridges(false);
 		generator.setHandleLinkTables(false);
@@ -44,16 +44,23 @@ public class DirectMappingStyle implements MappingStyle {
 		generator.setServeVocabulary(false);
 		generator.setSkipForeignKeyTargetColumns(false);
 		generator.setUseUniqueKeysAsEntityID(false);
-		generator.setMapNamespaceURI("#");
 	}
 	
 	public MappingGenerator getMappingGenerator() {
 		return generator;
 	}
 	
-	public TemplateValueMaker getEntityIRIPattern(TableDef table, Key columns) {
+	public String getBaseIRI() {
+		return baseIRI;
+	}
+	
+	public PrefixMapping getPrefixes() {
+		return model;
+	}
+	
+	public TemplateValueMaker getEntityIRITemplate(TableDef table, Key columns) {
 		TemplateValueMaker.Builder builder = TemplateValueMaker.builder();
-		builder.add(baseIRI);
+		// We don't use baseIRI here, so the template will produce relative IRIs.
 		builder.add(encodeTableName(table.getName()));
 		if (columns != null) {
 			int i = 0;
@@ -84,8 +91,8 @@ public class DirectMappingStyle implements MappingStyle {
 		return result;
 	}
 	
-	public TemplateValueMaker getEntityLabelPattern(TableName tableName, Key columns) {
-		// Direct Mapping doesn't do label patterns, so we don't need this
+	public TemplateValueMaker getEntityLabelTemplate(TableName tableName, Key columns) {
+		// Direct Mapping doesn't do label templates, so we don't need this
 		return null;
 	}
 	

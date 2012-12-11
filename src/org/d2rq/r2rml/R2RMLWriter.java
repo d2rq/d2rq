@@ -49,7 +49,7 @@ public class R2RMLWriter extends MappingVisitor.TreeWalkerImplementation impleme
 	}
 	
 	public void write(Writer outWriter) {
-		out = new PrettyTurtleWriter(prefixes, outWriter);
+		out = new PrettyTurtleWriter(mapping.getBaseIRI(), prefixes, outWriter);
 		mapping.accept(this);
 		out.flush();
 	}
@@ -104,7 +104,7 @@ public class R2RMLWriter extends MappingVisitor.TreeWalkerImplementation impleme
 		} else if (term instanceof ConstantIRI) {
 			out.printProperty(property, ((ConstantIRI) term).asResource()); 
 		} else if (term instanceof SQLQuery) {
-			out.printLongStringProperty(property, term.toString()); 
+			out.printLongStringProperty(property, term.toString());
 		} else {
 			out.printProperty(property, term.toString());
 		}

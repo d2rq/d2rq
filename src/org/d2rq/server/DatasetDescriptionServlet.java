@@ -35,7 +35,7 @@ import de.fuberlin.wiwiss.pubby.negotiation.PubbyNegotiator;
  * Serves a VoID Dataset Description for the virtual resources offered by this
  * instance of D2R Server
  * 
- * @author Hannes Mühleisen <hannes@muehleisen.org>
+ * @author Hannes Muehleisen <hannes@muehleisen.org>
  * 
  */
 public class DatasetDescriptionServlet extends HttpServlet {

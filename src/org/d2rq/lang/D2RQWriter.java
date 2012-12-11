@@ -44,6 +44,9 @@ public class D2RQWriter implements MappingWriter {
 		if (!mapping.getPrefixes().getNsPrefixMap().containsValue(D2RQ.NS)) {
 			prefixes.setNsPrefix("d2rq", D2RQ.NS);
 		}
+		if (!mapping.getPrefixes().getNsPrefixMap().containsValue(JDBC.NS)) {
+			prefixes.setNsPrefix("d2rq", JDBC.NS);
+		}
 	}
 	
 	public void write(OutputStream outStream) {
@@ -55,7 +58,7 @@ public class D2RQWriter implements MappingWriter {
 	}
 	
 	public void write(Writer outWriter) {
-		out = new PrettyTurtleWriter(prefixes, outWriter);
+		out = new PrettyTurtleWriter(mapping.getBaseIRI(), prefixes, outWriter);
 		printConfiguration(mapping.configuration());
 		for (Database database: mapping.databases()) {
 			printDatabase(database);

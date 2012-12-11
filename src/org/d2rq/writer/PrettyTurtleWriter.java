@@ -21,6 +21,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.shared.PrefixMapping;
+import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 
 public class PrettyTurtleWriter {
 	
@@ -33,22 +34,33 @@ public class PrettyTurtleWriter {
 		}
 	}
 	
-	private final PrintWriter out;
+	private final String baseIRI;
 	private final PrefixMapping prefixes;
+	private final PrintWriter out;
 	private final Map<Resource,String> blankNodeMap = new HashMap<Resource,String>();
 	private final Stack<Boolean> compactStack = new Stack<Boolean>();
 	private int blankNodeCounter = 1;
 	private int indent = 0;
 	
-	public PrettyTurtleWriter(PrefixMapping prefixes, Writer out) {
+	/**
+	 * @param baseIRI Any IRIs starting with this one will be written as relative
+	 */
+	public PrettyTurtleWriter(String baseIRI, PrefixMapping prefixes, Writer out) {
+		this.baseIRI = baseIRI;
 		this.out = new PrintWriter(out);
-		this.prefixes = prefixes;
-		printPrefixes(prefixes);
+		this.prefixes = new PrefixMappingImpl();
+		for (String prefix: prefixes.getNsPrefixMap().keySet()) {
+			this.prefixes.setNsPrefix(prefix, relativize(prefixes.getNsPrefixURI(prefix)));
+		}
+		printPrefixes(this.prefixes);
 		compactStack.push(false);
 	}
 	
-	public PrettyTurtleWriter(PrefixMapping prefixes, OutputStream out) {
-		this(prefixes, toWriter(out));
+	/**
+	 * @param baseIRI Any IRIs starting with this one will be written as relative
+	 */
+	public PrettyTurtleWriter(String baseIRI, PrefixMapping prefixes, OutputStream out) {
+		this(baseIRI, prefixes, toWriter(out));
 	}
 	
 	public void flush() {
@@ -230,7 +242,7 @@ public class PrettyTurtleWriter {
 	
 	private String toTurtle(RDFNode r) {
 		if (r.isURIResource()) {
-			return PrettyPrinter.toString(r.asNode(), prefixes);
+			return PrettyPrinter.qNameOrURI(relativize(r.asResource().getURI()), prefixes);
 		} else if (r.isLiteral()) {
 			StringBuffer result = new StringBuffer(quote(r.asLiteral().getLexicalForm()));
 			if (!"".equals(r.asLiteral().getLanguage())) {
@@ -260,5 +272,9 @@ public class PrettyTurtleWriter {
 		}
 		result.append("]");
 		return result.toString();
+	}
+	
+	public String relativize(String iri) {
+		return iri.startsWith(baseIRI) ? iri.substring(baseIRI.length()) : iri;
 	}
 }
