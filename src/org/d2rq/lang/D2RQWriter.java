@@ -14,9 +14,10 @@ import java.util.Map;
 import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.lang.TranslationTable.Translation;
-import org.d2rq.pp.PrettyTurtleWriter;
 import org.d2rq.vocab.D2RQ;
 import org.d2rq.vocab.JDBC;
+import org.d2rq.writer.MappingWriter;
+import org.d2rq.writer.PrettyTurtleWriter;
 
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -32,7 +33,7 @@ import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class D2RQWriter {
+public class D2RQWriter implements MappingWriter {
 	private final Mapping mapping;
 	private final PrefixMapping prefixes = new PrefixMappingImpl();
 	private PrettyTurtleWriter out;

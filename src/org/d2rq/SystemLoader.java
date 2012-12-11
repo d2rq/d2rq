@@ -12,12 +12,14 @@ import org.d2rq.db.SQLScriptLoader;
 import org.d2rq.jena.GraphD2RQ;
 import org.d2rq.lang.D2RQCompiler;
 import org.d2rq.lang.D2RQReader;
+import org.d2rq.lang.D2RQWriter;
 import org.d2rq.mapgen.Filter;
 import org.d2rq.mapgen.MappingGenerator;
 import org.d2rq.mapgen.W3CMappingGenerator;
 import org.d2rq.r2rml.MappingValidator;
 import org.d2rq.r2rml.R2RMLCompiler;
 import org.d2rq.r2rml.R2RMLReader;
+import org.d2rq.r2rml.R2RMLWriter;
 import org.d2rq.server.ConfigLoader;
 import org.d2rq.server.D2RServer;
 import org.d2rq.server.JettyLauncher;
@@ -25,6 +27,7 @@ import org.d2rq.validation.Report;
 import org.d2rq.vocab.D2RQ;
 import org.d2rq.vocab.RR;
 import org.d2rq.vocab.VocabularySummarizer;
+import org.d2rq.writer.MappingWriter;
 import org.openjena.atlas.AtlasException;
 import org.openjena.riot.RiotException;
 
@@ -116,6 +119,7 @@ public class SystemLoader {
 	private ConfigLoader serverConfig = null;
 	private D2RServer d2rServer = null;
 	private Report report = null;
+	private MappingWriter writer = null;
 	private MappingLanguage mappingLanguage = null;
 	
 	public void setUsername(String username) {
@@ -422,6 +426,17 @@ public class SystemLoader {
 			dataGraph = new GraphD2RQ(getMapping());
 		}
 		return dataGraph;
+	}
+	
+	public MappingWriter getWriter() {
+		if (writer == null) {
+			if (getMappingLanguage() == MappingLanguage.R2RML) {
+				writer = new R2RMLWriter(getR2RMLMapping());
+			} else {
+				writer = new D2RQWriter(getD2RQMapping());
+			}
+		}
+		return writer;
 	}
 	
 	public JettyLauncher getJettyLauncher() {

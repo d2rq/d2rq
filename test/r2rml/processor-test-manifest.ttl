@@ -14,157 +14,157 @@
 Test cases for an R2RML processor.
     """@en.
 
-<mappings/no-p-o-maps.ttl> a :R2RMLProcessorTestCase;
+<mappings/no-p-o-maps.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>.
 
-<mappings/only-shortcut-iris.ttl> a :R2RMLProcessorTestCase;
+<mappings/only-shortcut-iris.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p ex:o).
 
-<mappings/no-triple-for-empty-table.ttl> a :R2RMLProcessorTestCase;
+<mappings/no-triple-for-empty-table.ttl> a :ProcessorTestCase;
     :schema <schemas/empty-table1.sql>.
 
-<mappings/shortcut-literal.ttl> a :R2RMLProcessorTestCase;
+<mappings/shortcut-literal.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p "o").
 
-<mappings/shortcut-literal-typed.ttl> a :R2RMLProcessorTestCase;
+<mappings/shortcut-literal-typed.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p 42).
 
-<mappings/shortcut-literal-language.ttl> a :R2RMLProcessorTestCase;
+<mappings/shortcut-literal-language.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p "a"@en).
 
-<mappings/constant-subject.ttl> a :R2RMLProcessorTestCase;
+<mappings/constant-subject.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p ex:o).
 
-<mappings/constant-predicate.ttl> a :R2RMLProcessorTestCase;
+<mappings/constant-predicate.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p ex:o).
 
-<mappings/constant-object.ttl> a :R2RMLProcessorTestCase;
+<mappings/constant-object.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p ex:o).
 
-<mappings/reuse-term-map.ttl> a :R2RMLProcessorTestCase;
+<mappings/reuse-term-map.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:x ex:x ex:x).
 
-<mappings/two-p-o-maps.ttl> a :R2RMLProcessorTestCase;
+<mappings/two-p-o-maps.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p1 ex:o1), (ex:s ex:p2 ex:o2).
 
-<mappings/two-p-shortcuts.ttl> a :R2RMLProcessorTestCase;
+<mappings/two-p-shortcuts.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p1 ex:o), (ex:s ex:p2 ex:o).
 
-<mappings/two-o-shortcuts.ttl> a :R2RMLProcessorTestCase;
+<mappings/two-o-shortcuts.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p ex:o1), (ex:s ex:p ex:o2).
 
-<mappings/two-p-maps.ttl> a :R2RMLProcessorTestCase;
+<mappings/two-p-maps.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p1 ex:o), (ex:s ex:p2 ex:o).
 
-<mappings/two-o-maps.ttl> a :R2RMLProcessorTestCase;
+<mappings/two-o-maps.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p ex:o1), (ex:s ex:p ex:o2).
 
-<mappings/two-p-two-o-shortcuts.ttl> a :R2RMLProcessorTestCase;
+<mappings/two-p-two-o-shortcuts.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple
         (ex:s ex:p1 ex:o1), (ex:s ex:p1 ex:o2),
         (ex:s ex:p2 ex:o1), (ex:s ex:p2 ex:o2).
 
-<mappings/class.ttl> a :R2RMLProcessorTestCase;
+<mappings/class.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s rdf:type ex:C).
 
-<mappings/no-class-for-empty-table.ttl> a :R2RMLProcessorTestCase;
+<mappings/no-class-for-empty-table.ttl> a :ProcessorTestCase;
     :schema <schemas/empty-table1.sql>.
 
-<mappings/two-classes.ttl> a :R2RMLProcessorTestCase;
+<mappings/two-classes.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s rdf:type ex:C1), (ex:s rdf:type ex:C2).
 
-<mappings/o-column-literal.ttl> a :R2RMLProcessorTestCase;
+<mappings/o-column-literal.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p 1).
 
-<mappings/null-no-triple.ttl> a :R2RMLProcessorTestCase;
+<mappings/null-no-triple.ttl> a :ProcessorTestCase;
     :schema <schemas/table1-null.sql>.
 
-<mappings/o-column-literal-typed-natural.ttl> a :R2RMLProcessorTestCase;
+<mappings/o-column-literal-typed-natural.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p 1).
 
-<mappings/o-column-literal-typed-string.ttl> a :R2RMLProcessorTestCase;
+<mappings/o-column-literal-typed-string.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p "1"^^xsd:string).
 
-<mappings/o-column-literal-typed-custom.ttl> a :R2RMLProcessorTestCase;
+<mappings/o-column-literal-typed-custom.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p "1"^^ex:dt).
 
-<mappings/o-column-literal-language.ttl> a :R2RMLProcessorTestCase;
+<mappings/o-column-literal-language.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p "1"@en).
 
-<mappings/o-column-term-type-literal.ttl> a :R2RMLProcessorTestCase;
+<mappings/o-column-term-type-literal.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p 1).
 
-<mappings/o-column-term-type-iri.ttl> a :R2RMLProcessorTestCase;
+<mappings/o-column-term-type-iri.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p ex:1).
 
-<mappings/o-template-term-type-literal.ttl> a :R2RMLProcessorTestCase;
+<mappings/o-template-term-type-literal.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p "foo1").
 
-<mappings/o-template-iri.ttl> a :R2RMLProcessorTestCase;
+<mappings/o-template-iri.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p ex:foo1).
 
-<mappings/iri-column-relative.ttl> a :R2RMLProcessorTestCase;
+<mappings/iri-column-relative.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p ex:1).
 
-<mappings/iri-column-absolute.ttl> a :R2RMLProcessorTestCase;
+<mappings/iri-column-absolute.ttl> a :ProcessorTestCase;
     :schema <schemas/table1-iri.sql>;
     :triple (ex:s ex:p <http://other.example.com/1>).
 
-<mappings/iri-template-relative.ttl> a :R2RMLProcessorTestCase;
+<mappings/iri-template-relative.ttl> a :ProcessorTestCase;
 	:schema <schemas/table1.sql>;
 	:triple (ex:s ex:p <http://example.com/path/1>).
 
-<mappings/iri-template-absolute.ttl> a :R2RMLProcessorTestCase;
+<mappings/iri-template-absolute.ttl> a :ProcessorTestCase;
 	:schema <schemas/table1.sql>;
 	:triple (ex:s ex:p <http://notbase.example.com/1>).
 
-<mappings/ref-object-map-no-joins1.ttl> a :R2RMLProcessorTestCase;
+<mappings/ref-object-map-no-joins1.ttl> a :ProcessorTestCase;
 	:schema <schemas/table1.sql>;
 	:triple (ex:s ex:p ex:s).
 
-<mappings/ref-object-map-no-joins2.ttl> a :R2RMLProcessorTestCase;
+<mappings/ref-object-map-no-joins2.ttl> a :ProcessorTestCase;
 	:schema <schemas/table1.sql>;
 	:triple (ex:1 ex:p ex:1).
 
-<mappings/ref-object-map-join-different-table.ttl> a :R2RMLProcessorTestCase;
+<mappings/ref-object-map-join-different-table.ttl> a :ProcessorTestCase;
     :schema <schemas/two-tables.sql>;
     :triple (ex:s1 ex:p ex:o11).
 
-<mappings/ref-object-map-join-same-table.ttl> a :R2RMLProcessorTestCase;
+<mappings/ref-object-map-join-same-table.ttl> a :ProcessorTestCase;
     :schema <schemas/same-table-ref.sql>;
     :triple (ex:2 ex:p ex:1).
 
-<mappings/ref-object-map-two-joins.ttl> a :R2RMLProcessorTestCase;
+<mappings/ref-object-map-two-joins.ttl> a :ProcessorTestCase;
     :schema <schemas/two-tables-multicol.sql>;
     :triple (ex:s1 ex:p ex:o10_1), (ex:s2 ex:p ex:o10_2), (ex:s3 ex:p ex:o11_1).
 
-<mappings/ref-object-map-join-same-view.ttl> a :R2RMLProcessorTestCase;
+<mappings/ref-object-map-join-same-view.ttl> a :ProcessorTestCase;
     :schema <schemas/same-table-ref.sql>;
     :triple (ex:2 ex:p ex:1).
 

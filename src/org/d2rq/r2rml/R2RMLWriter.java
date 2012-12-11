@@ -8,10 +8,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.d2rq.pp.PrettyTurtleWriter;
 import org.d2rq.r2rml.MappingComponent.ComponentType;
 import org.d2rq.r2rml.TermMap.TermType;
 import org.d2rq.vocab.RR;
+import org.d2rq.writer.MappingWriter;
+import org.d2rq.writer.PrettyTurtleWriter;
 
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -19,7 +20,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 
-public class R2RMLWriter extends MappingVisitor.TreeWalkerImplementation {
+public class R2RMLWriter extends MappingVisitor.TreeWalkerImplementation implements MappingWriter {
 	private final static Set<Property> COMPACT_PROPERTIES = new HashSet<Property>(
 			Arrays.asList(new Property[]{
 					RR.logicalTable, RR.joinCondition, 

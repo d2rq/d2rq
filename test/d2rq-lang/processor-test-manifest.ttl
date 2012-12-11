@@ -14,22 +14,22 @@
 Test cases for a D2RQ mapping language processor.
     """@en.
 
-<mappings/only-constant-uris.ttl> a :D2RQProcessorTestCase;
+<mappings/only-constant-uris.ttl> a :ProcessorTestCase;
     :schema <schemas/empty-table1.sql>;
     :triple (ex:s ex:p ex:o).
 
-<mappings/uri-pattern.ttl> a :D2RQProcessorTestCase;
+<mappings/uri-pattern.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:1 ex:p ex:o).
 
-<mappings/uri-pattern-empty-table.ttl> a :D2RQProcessorTestCase;
+<mappings/uri-pattern-empty-table.ttl> a :ProcessorTestCase;
     :schema <schemas/empty-table1.sql>.
 
-<mappings/column-typed.ttl> a :D2RQProcessorTestCase;
+<mappings/column-typed.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p 1).
 
-<mappings/expression.ttl> a :D2RQProcessorTestCase;
+<mappings/expression.ttl> a :ProcessorTestCase;
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p 666).
 

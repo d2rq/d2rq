@@ -262,7 +262,7 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 	}
 	
 	private NodeMaker createNodeMaker(ResourceMap map) {
-		return new NodeMakerFactory(currentSQLConnection, mapping.getBaseURI()).createFrom(map);
+		return new NodeMakerFactory(currentSQLConnection, mapping.getBaseIRI()).createFrom(map);
 	}
 	
 	private void checkColumns(final DatabaseOp op) {

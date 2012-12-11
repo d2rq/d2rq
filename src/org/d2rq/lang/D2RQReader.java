@@ -94,7 +94,7 @@ public class D2RQReader {
 		ensureAllDistinct(new Resource[]{D2RQ.Database, D2RQ.ClassMap, D2RQ.PropertyBridge, 
 				D2RQ.TranslationTable, D2RQ.Translation}, D2RQException.MAPPING_TYPECONFLICT);
 		this.mapping = new Mapping();
-		mapping.setBaseURI(baseURI);
+		mapping.setBaseIRI(baseURI);
 		copyPrefixes();
 		try {
 			parseDatabases();
