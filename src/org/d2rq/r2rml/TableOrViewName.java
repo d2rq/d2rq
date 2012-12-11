@@ -3,6 +3,7 @@ package org.d2rq.r2rml;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.schema.Identifier.Parser.ViolationType;
+import org.d2rq.db.vendor.Vendor;
 
 /**
  * A SQL table or view name. May be qualified with a catalog name and schema name.
@@ -17,6 +18,10 @@ public class TableOrViewName extends MappingTerm {
 	 * @return <code>null</code> if arg is <code>null</code>
 	 */
 	public static TableOrViewName create(String tableName) {
+		return tableName == null ? null : new TableOrViewName(tableName);
+	}
+	
+	public static TableOrViewName create(TableName tableName) {
 		return tableName == null ? null : new TableOrViewName(tableName);
 	}
 	
@@ -41,6 +46,11 @@ public class TableOrViewName extends MappingTerm {
 		}
 	}
 
+	private TableOrViewName(TableName tableName) {
+		asString = Vendor.SQL92.toString(tableName);
+		parsed = tableName;
+	}
+	
 	public TableName asQualifiedTableName() {
 		return parsed;
 	}

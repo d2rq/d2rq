@@ -2,6 +2,7 @@ package org.d2rq.r2rml;
 
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.schema.Identifier.Parser.ViolationType;
+import org.d2rq.db.vendor.Vendor;
 
 /**
  * A column name is the name of a column of a logical table. 
@@ -20,6 +21,10 @@ public class ColumnNameR2RML extends MappingTerm {
 		return name == null ? null : new ColumnNameR2RML(name);
 	}
 
+	public static ColumnNameR2RML create(Identifier name) {
+		return name == null ? null : new ColumnNameR2RML(Vendor.SQL92.toString(name));
+	}
+	
 	private final String asString;
 	private final Identifier parsed;
 	private ViolationType error;

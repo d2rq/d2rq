@@ -94,7 +94,15 @@ public class MappingGeneratorTest {
 	}
 	
 	@Test
-	public void run() {
+	public void testGenerateD2RQMapping() {
+		loader.setGenerateR2RML(false);
+		Model actualTriples = loader.getModelD2RQ();
+		assertIsomorphic(expectedTriples, actualTriples);
+	}
+	
+	@Test
+	public void testGenerateR2RMLMapping() {
+		loader.setGenerateR2RML(true);
 		Model actualTriples = loader.getModelD2RQ();
 		assertIsomorphic(expectedTriples, actualTriples);
 	}
