@@ -42,7 +42,9 @@ public class DirectMappingTest {
 	private final String sqlFile;
 	private final String resultFile;
 	private HSQLDatabase db;
-	
+	private SystemLoader loader;
+	private Model expectedTriples;
+
 	public DirectMappingTest(String name, String sqlFile, String resultFile) {
 		this.sqlFile = sqlFile;
 		this.resultFile = resultFile;
@@ -51,6 +53,13 @@ public class DirectMappingTest {
 	@Before
 	public void setUp() {
 		db = new HSQLDatabase("test");
+		loader = new SystemLoader();
+		loader.setMappingFileOrJdbcURL(db.getJdbcURL());
+		loader.setUsername(db.getUser());
+		loader.setGenerateW3CDirectMapping(true);
+		loader.setStartupSQLScript(sqlFile);
+		loader.setSystemBaseURI(BASE_URI);
+		expectedTriples = FileManager.get().loadModel(resultFile);
 	}
 	
 	@After
@@ -59,15 +68,16 @@ public class DirectMappingTest {
 	}
 	
 	@Test
-	public void run() {
-		SystemLoader loader = new SystemLoader();
-		loader.setMappingFileOrJdbcURL(db.getJdbcURL());
-		loader.setUsername(db.getUser());
-		loader.setGenerateW3CDirectMapping(true);
-		loader.setStartupSQLScript(sqlFile);
-		loader.setSystemBaseURI(BASE_URI);
+	public void testGenerateD2RQMapping() {
+		loader.setGenerateR2RML(false);
 		Model actualTriples = loader.getModelD2RQ();
-		Model expectedTriples = FileManager.get().loadModel(resultFile);
+		assertIsomorphic(expectedTriples, actualTriples);
+	}
+	
+	@Test
+	public void testGenerateR2RMLMapping() {
+		loader.setGenerateR2RML(true);
+		Model actualTriples = loader.getModelD2RQ();
 		assertIsomorphic(expectedTriples, actualTriples);
 	}
 }

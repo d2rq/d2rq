@@ -141,7 +141,7 @@ public class R2RMLTarget implements Target {
 		TemplateValuedTermMap result = new TemplateValuedTermMap();
 		result.setTemplate(toStringTemplate(template));
 		if (termType != null) {
-			result.setSpecifiedTermType(TermType.LITERAL);
+			result.setSpecifiedTermType(termType);
 		}
 		return result;
 	}
