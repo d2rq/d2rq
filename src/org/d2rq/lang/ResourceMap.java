@@ -176,6 +176,7 @@ public abstract class ResourceMap extends MapObject {
 		return definitionComments;
 	}
 
+	// TODO: Handling of d2rq:additionalDefinitionProperty is a bit broken, the property and value should be parsed by the reader into a structured Java object that's stored here. Also, better redesign into something more RDFS-ish?
 	public Collection<Resource> getAdditionalDefinitionProperties() {
 		return additionalDefinitionProperties;
 	}
@@ -188,7 +189,7 @@ public abstract class ResourceMap extends MapObject {
 		definitionComments.add(definitionComment);
 	}
 
-	public void addDefinitionProperty(Resource additionalProperty) {
+	public void addAdditionalDefinitionProperty(Resource additionalProperty) {
 		additionalDefinitionProperties.add(additionalProperty);
 	}		
 }

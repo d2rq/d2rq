@@ -145,6 +145,14 @@ public class D2RQWriter implements MappingWriter {
 		printResourceMapProperties(classMap);
 		out.printRDFNodeProperties(D2RQ.classDefinitionLabel, classMap.getDefinitionLabels());
 		out.printRDFNodeProperties(D2RQ.classDefinitionComment, classMap.getDefinitionComments());
+		for (Resource r: classMap.getAdditionalDefinitionProperties()) {
+			Resource property = r.getPropertyResourceValue(D2RQ.propertyName);
+			Resource value = r.getPropertyResourceValue(D2RQ.propertyValue);
+			out.printPropertyStart(D2RQ.additionalClassDefinitionProperty);
+			out.printProperty(D2RQ.propertyName, property);
+			out.printProperty(D2RQ.propertyValue, value);
+			out.printPropertyEnd();
+		}
 		out.printProperty(classMap.getContainsDuplicates(),
 				D2RQ.containsDuplicates, classMap.getContainsDuplicates());
 		out.printResourceEnd();
@@ -164,6 +172,14 @@ public class D2RQWriter implements MappingWriter {
 		printResourceMapProperties(bridge);
 		out.printRDFNodeProperties(D2RQ.propertyDefinitionLabel, bridge.getDefinitionLabels());
 		out.printRDFNodeProperties(D2RQ.propertyDefinitionComment, bridge.getDefinitionComments());
+		for (Resource r: bridge.getAdditionalDefinitionProperties()) {
+			Resource property = r.getPropertyResourceValue(D2RQ.propertyName);
+			Resource value = r.getPropertyResourceValue(D2RQ.propertyValue);
+			out.printPropertyStart(D2RQ.additionalPropertyDefinitionProperty);
+			out.printProperty(D2RQ.propertyName, property);
+			out.printProperty(D2RQ.propertyValue, value);
+			out.printPropertyEnd();
+		}
 		out.printProperty(bridge.getLimit() != LimitOp.NO_LIMIT,
 				D2RQ.limit, bridge.getLimit());
 		out.printProperty(bridge.getLimitInverse() != LimitOp.NO_LIMIT,

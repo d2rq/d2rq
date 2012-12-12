@@ -33,3 +33,6 @@ Test cases for a D2RQ mapping language processor.
     :schema <schemas/table1.sql>;
     :triple (ex:s ex:p 666).
 
+<mappings/additional-definition-properties.ttl> a :ProcessorTestCase;
+    rdfs:comment "Just exercises the reader and writer.";
+    :schema <schemas/empty-table1.sql>.

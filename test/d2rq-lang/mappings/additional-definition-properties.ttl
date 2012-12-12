@@ -1,0 +1,29 @@
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#>.
+@prefix map: <http://example.com/map#>.
+@prefix ex: <http://example.com/>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+map:db a d2rq:Database.
+map:Configuration a d2rq:Configuration; d2rq:serveVocabulary false.
+
+map:classmap a d2rq:ClassMap;
+	d2rq:dataStorage map:db;
+	d2rq:uriPattern "http://example.com/@@TABLE1.ID@@";
+	d2rq:class ex:MyClass;
+	d2rq:classDefinitionLabel "My Class";
+	d2rq:classDefinitionComment "This is a comment.";
+	d2rq:additionalClassDefinitionProperty [
+	    d2rq:propertyName rdfs:isDefinedBy;
+	    d2rq:propertyValue <http://example.com/>;
+	];
+	.
+map:pb1 a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:classmap;
+	d2rq:property ex:myProperty;
+	d2rq:propertyDefinitionLabel "My Property";
+	d2rq:propertyDefinitionComment "This is a comment.";
+	d2rq:additionalPropertyDefinitionProperty [
+	    d2rq:propertyName rdfs:isDefinedBy;
+	    d2rq:propertyValue <http://example.com/>;
+	];
+	d2rq:constantValue ex:o;
+	.

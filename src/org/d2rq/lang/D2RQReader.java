@@ -466,7 +466,7 @@ public class D2RQReader {
 		stmts = r.listProperties(D2RQ.additionalClassDefinitionProperty);
 		while (stmts.hasNext()) {
 			Resource additionalProperty = stmts.nextStatement().getResource();
-			classMap.addDefinitionProperty(additionalProperty);
+			classMap.addAdditionalDefinitionProperty(additionalProperty);
 		}
 	}
 	
@@ -543,7 +543,7 @@ public class D2RQReader {
 		stmts = r.listProperties(D2RQ.additionalPropertyDefinitionProperty);
 		while (stmts.hasNext()) {
 			Resource additionalProperty = stmts.nextStatement().getResource();
-			bridge.addDefinitionProperty(additionalProperty);
+			bridge.addAdditionalDefinitionProperty(additionalProperty);
 		}
 		stmts = r.listProperties(D2RQ.limit);
 		while (stmts.hasNext()) {

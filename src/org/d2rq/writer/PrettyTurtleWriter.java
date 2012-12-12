@@ -116,10 +116,16 @@ public class PrettyTurtleWriter {
 		indent -= 4;
 	}
 	
+	/**
+	 * Opens a blank node.
+	 */
 	public void printPropertyStart(Property property) {
 		printPropertyStart(property, false);
 	}
 	
+	/**
+	 * Opens a blank node.
+	 */
 	public void printPropertyStart(Property property, boolean compact) {
 		printIndent();
 		out.print(toTurtle(property));
