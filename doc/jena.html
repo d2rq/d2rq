@@ -95,7 +95,7 @@ API. D2RQ ships with
 can use a different logging front-end.</p>
 
 <p>To enable D2RQ debug messages, set the log level for logger
-<code>de.fuberlin.wiwiss.d2rq</code> to <code>ALL</code>.
+<code>org.d2rq</code> to <code>ALL</code>.
 An easy way to do this is to add the log4j jars from 
 D2RQ's <code>/lib/logging</code> directory to your application's
 classpath, and create a file <code>log4j.properties</code> somewhere
@@ -105,7 +105,7 @@ in the classpath (e.g., in your source folder) with these contents:</p>
 log4j.appender.stdout=org.apache.log4j.ConsoleAppender
 log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
 log4j.appender.stdout.layout.ConversionPattern=%d{HH:mm:ss} %-5p %-20c{1} :: %m%n
-log4j.logger.de.fuberlin.wiwiss.d2rq=ALL</pre>
+log4j.logger.org.d2rq=ALL</pre>
 
 <h2 id="model-api">4. Using D2RQ with Jena's Model API</h2>
 

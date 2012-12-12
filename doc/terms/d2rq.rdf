@@ -16,7 +16,7 @@
     <dc:title>D2RQ - Language Specification v0.8</dc:title>
   </owl:Ontology>
   <rdfs:Class rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#D2RQModel">
-    <ja:assembler>de.fuberlin.wiwiss.d2rq.assembler.D2RQAssembler</ja:assembler>
+    <ja:assembler>org.d2rq.assembler.D2RQAssembler</ja:assembler>
     <rdfs:comment>Jena Assemler specification for a relational database, mapped to RDF using the D2RQ tool.</rdfs:comment>
     <rdfs:label>D2RQ model</rdfs:label>
     <rdfs:subClassOf rdf:resource="http://jena.hpl.hp.com/2005/11/Assembler#Object"/>
@@ -348,7 +348,7 @@
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#javaClass">
     <rdfs:domain rdf:resource="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#ClassMap"/>
-    <rdfs:comment>Qualified name of a Java class that implements de.fuberlin.wiwiss.d2rq.Translator and translates between database and RDF.</rdfs:comment>
+    <rdfs:comment>Qualified name of a Java class that implements org.d2rq.values.Translator and translates between database and RDF.</rdfs:comment>
     <rdfs:label>Java class</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#column">

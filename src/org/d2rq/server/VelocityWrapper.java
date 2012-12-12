@@ -17,9 +17,9 @@ import de.fuberlin.wiwiss.pubby.negotiation.MediaRangeSpec;
 
 public class VelocityWrapper {
 	private final static String VELOCITY_ENGINE_INSTANCE = 
-			"de.fuberlin.wiwiss.d2rs.VelocityHelper.VELOCITY_ENGINE_INSTANCE";
+			"org.d2rq.server.VelocityHelper.VELOCITY_ENGINE_INSTANCE";
 	private final static String VELOCITY_DEFAULT_CONTEXT = 
-			"de.fuberlin.wiwiss.d2rs.VelocityHelper.VELOCITY_DEFAULT_CONTEXT";
+			"org.d2rq.server.VelocityHelper.VELOCITY_DEFAULT_CONTEXT";
 	
 	private final static String TEXTHTML_CONTENTTYPE = "text/html; charset=utf-8";
 	private final static String APPLICATIONXML_CONTENTTYPE = "application/xhtml+xml; charset=utf-8";

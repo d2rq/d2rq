@@ -15,13 +15,13 @@ public class Log4jHelper {
 
 	public static void turnLoggingOff() {
 		System.err.println("Logging is turned off!");
-		Logger.getLogger("de.fuberlin.wiwiss.d2rq").setLevel(Level.OFF);
+		Logger.getLogger("org.d2rq").setLevel(Level.OFF);
 	}
 	
 	public static void setVerboseLogging() {
 		// Adjust Log4j log level to show more stuff
 		Logger.getLogger("d2rq").setLevel(Level.INFO);
-		Logger.getLogger("de.fuberlin.wiwiss.d2rq").setLevel(Level.INFO);
+		Logger.getLogger("org.d2rq").setLevel(Level.INFO);
 		Logger.getLogger("org.eclipse.jetty").setLevel(Level.INFO);
 		Logger.getLogger("org.joseki").setLevel(Level.INFO);
 	}
@@ -29,7 +29,7 @@ public class Log4jHelper {
 	public static void setDebugLogging() {
 		// Adjust Log4j log level to show MUCH more stuff 
 		Logger.getLogger("d2rq").setLevel(Level.ALL);
-		Logger.getLogger("de.fuberlin.wiwiss.d2rq").setLevel(Level.ALL);
+		Logger.getLogger("org.d2rq").setLevel(Level.ALL);
 		Logger.getLogger("org.eclipse.jetty").setLevel(Level.INFO);
 		Logger.getLogger("org.joseki").setLevel(Level.INFO);
 	}

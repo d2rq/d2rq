@@ -444,7 +444,7 @@ d2rq:href a rdf:Property;
 	.
 d2rq:javaClass a rdf:Property;
 	rdfs:label "Java class";
-	rdfs:comment "Qualified name of a Java class that implements de.fuberlin.wiwiss.d2rq.Translator and translates between database and RDF.";
+	rdfs:comment "Qualified name of a Java class that implements org.d2rq.values.Translator and translates between database and RDF.";
 	rdfs:domain d2rq:ClassMap;
 	.
 d2rq:translation a rdf:Property;
@@ -474,7 +474,7 @@ d2rq:D2RQModel a rdfs:Class;
 	rdfs:subClassOf ja:Object;
 	rdfs:label "D2RQ model";
 	rdfs:comment "Jena Assemler specification for a relational database, mapped to RDF using the D2RQ tool.";
-	ja:assembler "de.fuberlin.wiwiss.d2rq.assembler.D2RQAssembler";
+	ja:assembler "org.d2rq.assembler.D2RQAssembler";
 	.
 d2rq:mappingFile a rdf:Property;
 	rdfs:label "Mapping file";
