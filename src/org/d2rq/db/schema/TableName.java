@@ -3,6 +3,7 @@ package org.d2rq.db.schema;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.vendor.Vendor;
 
 
@@ -14,16 +15,12 @@ import org.d2rq.db.vendor.Vendor;
 public class TableName implements Comparable<TableName> {
 
 	public static TableName parse(String s) {
-		Identifier.Parser parser = new Identifier.Parser(s);
-		if (parser.error() != null) {
+		try {
+			return create(Vendor.SQL92.parseIdentifiers(s, 1, 3));
+		} catch (IdentifierParseException ex) {
 			throw new IllegalArgumentException(
-					"Malformed qualified table name " + s + ": " + parser.message());
+					"Malformed qualified table name " + s + ": " + ex.getMessage());
 		}
-		if (parser.countParts() > 3) {
-			throw new IllegalArgumentException(
-					"Malformed qualified table name " + s + ": Too many qualifiers");
-		}
-		return create(parser.result());
 	}
 	
 	public static TableName create(Identifier catalog, Identifier schema, Identifier table) {
@@ -92,7 +89,8 @@ public class TableName implements Comparable<TableName> {
 		 * we need to cut those longer names off but keep them unique.
 		 * 
 		 * TODO: Make this dependent on whether we're dealing with an Oracle
-		 * database or not.
+		 * database or not, or discover the maximum length via
+		 * DatabaseMetaData.getMaxTableLength()
 		 */
 		if (name.length() > 30) {
 			name = "T" + index + "_" + Integer.toHexString(name.hashCode());

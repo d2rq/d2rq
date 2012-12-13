@@ -46,6 +46,7 @@ public class R2RMLTarget implements Target {
 	private final Map<TableName,TemplateValueMaker> iriTemplates =
 			new HashMap<TableName,TemplateValueMaker>();
 	private Mapping mapping = null;
+	private Vendor vendor = null;
 	
 	public Mapping getMapping() {
 		return mapping;
@@ -64,7 +65,7 @@ public class R2RMLTarget implements Target {
 
 	public void generateDatabase(SQLConnection connection,
 			String startupSQLScript) {
-		// Do nothing, R2RML mappings can't hold this kind of information
+		vendor = connection.vendor();
 	}
 
 	public void generateEntities(Resource class_, TableName tableName,
@@ -133,7 +134,7 @@ public class R2RMLTarget implements Target {
 	
 	private BaseTableOrView createBaseTableOrView(TableName tableName) {
 		BaseTableOrView table = new BaseTableOrView();
-		table.setTableName(TableOrViewName.create(tableName));
+		table.setTableName(TableOrViewName.create(tableName, vendor));
 		return table;
 	}
 	
@@ -148,7 +149,7 @@ public class R2RMLTarget implements Target {
 	
 	private TermMap createTermMap(Identifier column) {
 		ColumnValuedTermMap result = new ColumnValuedTermMap();
-		result.setColumnName(ColumnNameR2RML.create(column));
+		result.setColumnName(ColumnNameR2RML.create(column, vendor));
 		return result;
 	}
 	
@@ -157,8 +158,10 @@ public class R2RMLTarget implements Target {
 		result.setParentTriplesMap(getTriplesMapResource(foreignKey.getReferencedTable()));
 		for (int i = 0; i < foreignKey.getLocalColumns().size(); i++) {
 			Join join = new Join();
-			join.setChild(ColumnNameR2RML.create(foreignKey.getLocalColumns().get(i)));
-			join.setParent(ColumnNameR2RML.create(foreignKey.getReferencedColumns().get(i)));
+			join.setChild(ColumnNameR2RML.create(
+					foreignKey.getLocalColumns().get(i), vendor));
+			join.setParent(ColumnNameR2RML.create(
+					foreignKey.getReferencedColumns().get(i), vendor));
 			Resource joinResource = model.createResource();
 			mapping.joins().put(joinResource, join);
 			result.getJoinConditions().add(joinResource);
@@ -220,7 +223,7 @@ public class R2RMLTarget implements Target {
 		int i = 0;
 		while (i < template.columns().length) {
 			s.append('{');
-			s.append(Vendor.SQL92.toString(template.columns()[i].getColumn()));
+			s.append(vendor.toString(template.columns()[i].getColumn()));
 			s.append('}');
 			i++;
 			s.append(escapeForStringTemplate(template.literalParts()[i]));

@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.d2rq.db.schema.Identifier;
+import org.d2rq.db.SQLConnection;
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
 
 
 /**
@@ -26,7 +27,7 @@ public class StringTemplate extends MappingTerm {
 
 	private final String asString;
 	private final String[] literalParts;
-	private final Identifier[] columnNameParts;
+	private final String[] columnNameParts;
 	private final String errorName;
 	private final String errorMessage;
 	
@@ -48,7 +49,7 @@ public class StringTemplate extends MappingTerm {
 		return literalParts;
 	}
 	
-	public Identifier[] getColumnNames() {
+	public String[] getColumnNames() {
 		return columnNameParts;
 	}
 
@@ -68,6 +69,19 @@ public class StringTemplate extends MappingTerm {
 	@Override
 	public boolean isValid() {
 		return errorName == null;
+	}
+	
+	@Override
+	public boolean isValid(SQLConnection connection) {
+		if (!isValid()) return false;
+		try {
+			for (String column: columnNameParts) {
+				connection.vendor().parseIdentifiers(column, 1, 1);
+			}
+		} catch (IdentifierParseException ex) {
+			return false;
+		}
+		return true;
 	}
 	
 	@Override
@@ -94,7 +108,7 @@ public class StringTemplate extends MappingTerm {
 		private int position = 1;
 		private int lastOpenCurly = -1;
 		private List<String> literalParts = new ArrayList<String>();
-		private List<Identifier> columnParts = new ArrayList<Identifier>();
+		private List<String> columnParts = new ArrayList<String>();
 		private StringBuilder buffer = new StringBuilder();
 		private boolean inColumnPart = false;
 		private boolean seenBackslash = false;
@@ -107,8 +121,8 @@ public class StringTemplate extends MappingTerm {
 		String[] literalParts() {
 			return literalParts.toArray(new String[literalParts.size()]);
 		}
-		Identifier[] columnNameParts() {
-			return columnParts.toArray(new Identifier[columnParts.size()]);
+		String[] columnNameParts() {
+			return columnParts.toArray(new String[columnParts.size()]);
 		}
 		String errorName() {
 			return errorName;
@@ -165,16 +179,7 @@ public class StringTemplate extends MappingTerm {
 			buffer = new StringBuilder();
 		}
 		private void finishColumnPart() {
-			Identifier.Parser columnParser = new Identifier.Parser(buffer.toString());
-			if (columnParser.error() == null) {
-				if (columnParser.result().length > 1) {
-					error("QUALIFIED_COLUMN_NAME", "Column name must be unqualified");
-				} else {
-					columnParts.add(columnParser.result()[0]);
-				}
-			} else {
-				error(columnParser.error().name(), columnParser.message() + " in column name");
-			}
+			columnParts.add(buffer.toString());
 			buffer = new StringBuilder();
 		}
 		private void error(String name, String message) {

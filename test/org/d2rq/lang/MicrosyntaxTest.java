@@ -55,7 +55,7 @@ public class MicrosyntaxTest {
 			Microsyntax.parseTable(".");
 			fail();
 		} catch (D2RQException ex) {
-			assertEquals(D2RQException.SQL_INVALID_RELATIONNAME, ex.errorCode());
+			assertEquals(D2RQException.SQL_INVALID_TABLE_NAME, ex.errorCode());
 		}
 	}
 
@@ -76,7 +76,7 @@ public class MicrosyntaxTest {
 			Microsyntax.parseColumn("column");
 			fail("not fully qualified name -- should have failed");
 		} catch (D2RQException ex) {
-			assertEquals(D2RQException.SQL_INVALID_ATTRIBUTENAME, ex.errorCode());
+			assertEquals(D2RQException.SQL_INVALID_COLUMN_NAME, ex.errorCode());
 		}
 	}
 

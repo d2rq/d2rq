@@ -1,7 +1,7 @@
 package org.d2rq.r2rml;
 
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Identifier.Parser.ViolationType;
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.vendor.Vendor;
 
 /**
@@ -21,48 +21,27 @@ public class ColumnNameR2RML extends MappingTerm {
 		return name == null ? null : new ColumnNameR2RML(name);
 	}
 
-	public static ColumnNameR2RML create(Identifier name) {
-		return name == null ? null : new ColumnNameR2RML(Vendor.SQL92.toString(name));
+	public static ColumnNameR2RML create(Identifier name, Vendor vendor) {
+		return name == null ? null : new ColumnNameR2RML(vendor.toString(name));
 	}
 	
 	private final String asString;
-	private final Identifier parsed;
-	private ViolationType error;
-	private String message;
 	
 	private ColumnNameR2RML(String name) {
 		asString = name.trim();
-		Identifier.Parser parser = new Identifier.Parser(asString);
-		if (parser.error() == null) {
-			if (parser.result().length > 1) {
-				parsed = null;
-				error = ViolationType.TOO_MANY_IDENTIFIERS;
-				message = "Column names must be unqualified";
-			} else {
-				parsed = parser.result()[0];
-			}
-		} else {
-			parsed = null;
-			error = parser.error();
-			message = parser.message();
+	}
+
+	public Identifier asIdentifier(Vendor vendor) {
+		try {
+			return vendor.parseIdentifiers(asString, 1, 1)[0];
+		} catch (IdentifierParseException ex) {
+			return null;
 		}
 	}
 	
 	@Override
 	public String toString() {
 		return asString;
-	}
-	
-	public ViolationType getSyntaxError() {
-		return error;
-	}
-	
-	public String getSyntaxErrorMessage() {
-		return message;
-	}
-	
-	public Identifier asIdentifier() {
-		return parsed;
 	}
 	
 	@Override
@@ -72,16 +51,16 @@ public class ColumnNameR2RML extends MappingTerm {
 	
 	@Override
 	public boolean isValid() {
-		return error == null;
+		return true;
 	}
 	
 	public boolean equals(Object otherObject) {
 		if (!(otherObject instanceof ColumnNameR2RML)) return false;
 		ColumnNameR2RML other = (ColumnNameR2RML) otherObject;
-		return (error == null) ? parsed.equals(other.parsed) : asString.equals(other.asString);
+		return asString.equals(other.asString);
 	}
 	
 	public int hashCode() {
-		return ((error == null) ? parsed.hashCode() : asString.hashCode()) ^ 66456;
+		return asString.hashCode() ^ 66456;
 	}
 }

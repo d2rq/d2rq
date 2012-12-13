@@ -3,12 +3,16 @@ package org.d2rq.db.vendor;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.d2rq.db.expr.Expression;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
+import org.d2rq.db.schema.Identifier.ViolationType;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.SQLApproximateNumeric;
@@ -60,6 +64,16 @@ public class SQL92 implements Vendor {
 	
 	public String getTrueTable() {
 		return "(VALUES(NULL))";
+	}
+	
+	public Identifier[] parseIdentifiers(String s, int minParts, int maxParts) 
+	throws IdentifierParseException {
+		IdentifierParser parser = new IdentifierParser(s, minParts, maxParts);
+		if (parser.error() == null) {
+			return parser.result();
+		} else {
+			throw new IdentifierParseException(parser.error(), parser.message());
+		}
 	}
 	
 	public String toString(Identifier identifier) {
@@ -226,4 +240,185 @@ public class SQL92 implements Vendor {
 			return quote + pattern.matcher(s).replaceAll("$1$1") + quote;
 		}
 	};
+	/**
+	 * Parser for standard SQL92 identifiers.
+	 */
+	public static class IdentifierParser {
+		private enum ParserState { 
+			IDENTIFIER_START, 
+			IN_UNDELIMITED_IDENTIFIER,
+			IN_DELIMITED_IDENTIFIER, 
+			DELIMITED_IDENTIFIER_END
+		}
+
+		private final String input;
+		private final int maxParts;
+		private final List<Identifier> result = new ArrayList<Identifier>(3);
+		private ParserState state = ParserState.IDENTIFIER_START;
+		private int position = 0;
+		private StringBuilder buffer = new StringBuilder();
+		private ViolationType error = null;
+		private String message = null;
+		
+		public IdentifierParser(String s, int minParts, int maxParts) {
+			input = s;
+			this.maxParts = maxParts;
+			parse();
+			if (error == null && result.size() < minParts) {
+				error = ViolationType.UNEXPECTED_END;
+				message = "Unexpected end; expected at least " + 
+						minParts + " identifiers";
+			}
+		}
+		
+		public Identifier[] result() {
+			return (error == null) ? result.toArray(new Identifier[result.size()]) : null; 
+		}
+		
+		public ViolationType error() {
+			return error;
+		}
+		
+		public String message() {
+			return message;
+		}
+
+		private void parse() {
+			while (position <= input.length()) {
+				boolean atEnd = (position == input.length());
+				char c = atEnd ? '.' : input.charAt(position);
+				switch (state) {
+				case IDENTIFIER_START:
+					if (isOpeningQuoteChar(c)) {
+						state = ParserState.IN_DELIMITED_IDENTIFIER;
+					} else if (isIdentifierStartChar(c)) {
+						state = ParserState.IN_UNDELIMITED_IDENTIFIER;
+						buffer.append(c);
+					} else if (atEnd) {
+						error = ViolationType.UNEXPECTED_END;
+						message = "Unexpected end; expected a SQL identifier";
+						return;
+					} else {
+						error = ViolationType.UNEXPECTED_CHARACTER;
+						message = "Unexpected character '" + c + "' at " + (position + 1) + " in SQL identifier";
+						return;
+					}
+					break;
+				case IN_DELIMITED_IDENTIFIER:
+					if (isClosingQuoteChar(c)) {
+						state = ParserState.DELIMITED_IDENTIFIER_END;
+					} else if (atEnd) {
+						error = ViolationType.UNEXPECTED_END;
+						message = "Unexpected end; expected closing delimiter";
+						return;
+					} else {
+						buffer.append(c);
+					}
+					break;
+				case DELIMITED_IDENTIFIER_END:
+					if (isOpeningQuoteChar(c)) {
+						state = ParserState.IN_DELIMITED_IDENTIFIER;
+						buffer.append(c);
+					} else if (c == '.') {
+						if (buffer.length() == 0) {
+							error = ViolationType.EMPTY_DELIMITED_IDENTIFIER;
+							message = "Empty delimited identifier";
+							return;
+						}
+						if (!finishIdentifier(true)) return;
+						state = ParserState.IDENTIFIER_START;
+					} else {
+						error = ViolationType.UNEXPECTED_CHARACTER;
+						message = "Unexpected character '" + c + "' at " + (position + 1) + " in SQL identifier";
+						return;
+					}
+					break;
+				case IN_UNDELIMITED_IDENTIFIER:
+					if (c == '.') {
+						if (!finishIdentifier(false)) return;
+						state = ParserState.IDENTIFIER_START;
+					} else if (isIdentifierBodyChar(c)) {
+						buffer.append(c);
+					} else {
+						error = ViolationType.UNEXPECTED_CHARACTER;
+						message = "Unexpected character '" + c + "' at " + (position + 1) + " in SQL identifier";
+						return;
+					}
+					break;
+				}
+				position++;
+			}
+		}
+
+		private boolean finishIdentifier(boolean delimited) {
+			if (result.size() >= maxParts) {
+				error = ViolationType.TOO_MANY_IDENTIFIERS;
+				message = maxParts == 1
+						? "Expected unqualified identifier"
+						: "Too many qualifiers";
+				return false;
+			}
+			if (!isValidIdentifier(buffer.toString(), delimited)) {
+				error = ViolationType.UNEXPECTED_CHARACTER;
+				message = "Failed database-specific identifier validation rule";
+				return false;
+			}
+			result.add(Identifier.create(delimited, buffer.toString()));
+			buffer = new StringBuilder();
+			return true;
+		}
+		
+		protected boolean isValidIdentifier(String identifier, boolean delimited) {
+			return true;
+		}
+		
+		protected boolean isOpeningQuoteChar(char c) {
+			return c == '"';
+		}
+		
+		protected boolean isClosingQuoteChar(char c) {
+			return c == '"';
+		}
+		
+		/**
+		 * Regular identifiers must start with a Unicode character from any of the 
+		 * following character classes: upper-case letter, lower-case letter, 
+		 * title-case letter, modifier letter, other letter, or letter number.
+		 * 
+		 * @see http://www.w3.org/TR/r2rml/#dfn-sql-identifier
+		 */
+		protected boolean isIdentifierStartChar(char c) {
+			int category = Character.getType(c);
+			for (byte b: identifierStartCategories) {
+				if (category == b) return true;
+			}
+			return false;
+		}
+		private final static byte[] identifierStartCategories = {
+				Character.UPPERCASE_LETTER, Character.LOWERCASE_LETTER,
+				Character.TITLECASE_LETTER, Character.MODIFIER_LETTER,
+				Character.OTHER_LETTER, Character.LETTER_NUMBER
+		};
+	
+		/**
+		 * Subsequent characters may be any of these, or a nonspacing mark, 
+		 * spacing combining mark, decimal number, connector punctuation, 
+		 * and formatting code.
+		 * 
+		 * @see http://www.w3.org/TR/r2rml/#dfn-sql-identifier
+		 */
+		protected boolean isIdentifierBodyChar(char c) {
+			if (isIdentifierStartChar(c)) return true;
+			int category = Character.getType(c);
+			for (byte b: identifierBodyCategories) {
+				if (category == b) return true;
+			}
+			return false;
+		}
+		private final static byte[] identifierBodyCategories = {
+				Character.NON_SPACING_MARK, Character.COMBINING_SPACING_MARK,
+				Character.DECIMAL_DIGIT_NUMBER, Character.CONNECTOR_PUNCTUATION,
+				Character.FORMAT
+		};
+	}
 }

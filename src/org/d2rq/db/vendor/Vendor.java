@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.d2rq.db.expr.Expression;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.lang.Database;
@@ -61,6 +62,22 @@ public interface Vendor {
 	 * that table.
 	 */
 	String getTrueTable();
+	
+	/**
+	 * Parses SQL identifiers, such as column names and table names. These
+	 * might be qualified, that is, multiple period-separated identifiers.
+	 * They might also be quoted if this is supported by the SQL syntax.
+	 * For example, a fully qualified column name might be:
+	 * <code>MYCATALOG.MYSCHEMA."Table 1".ID</code>
+	 * 
+	 * @param s The input string
+	 * @param minParts Minimum required identifiers, e.g., 1 for an unqualified identifier
+	 * @param maxParts Maximum required identifiers, e.g., 4 for a fully qualified column name
+	 * @return Array of identifiers
+	 * @throws IdentifierParseException on invalid syntax
+	 */
+	Identifier[] parseIdentifiers(String s, int minParts, int maxParts)
+	throws IdentifierParseException;
 	
 	/**
 	 * Handles special characters in identifiers. For example, SQL 92 puts

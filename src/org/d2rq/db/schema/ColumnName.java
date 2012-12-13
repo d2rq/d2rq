@@ -2,6 +2,7 @@ package org.d2rq.db.schema;
 
 import java.util.Arrays;
 
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.vendor.Vendor;
 
 
@@ -10,12 +11,12 @@ import org.d2rq.db.vendor.Vendor;
 public class ColumnName implements Comparable<ColumnName> {
 
 	public static ColumnName parse(String s) {
-		Identifier.Parser parser = new Identifier.Parser(s);
-		if (parser.error() != null) {
+		try {
+			return create(Vendor.SQL92.parseIdentifiers(s, 1, 4));
+		} catch (IdentifierParseException ex) {
 			throw new IllegalArgumentException(
-					"Malformed column name " + s + ": " + parser.message());
+					"Malformed column name " + s + ": " + ex.getMessage());
 		}
-		return create(parser.result());
 	}
 	
 	public static ColumnName create(Identifier[] parts) {

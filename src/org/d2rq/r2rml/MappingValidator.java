@@ -9,6 +9,9 @@ import java.util.Stack;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
+import org.d2rq.db.schema.Identifier.ViolationType;
+import org.d2rq.db.schema.TableName;
 import org.d2rq.mapgen.IRIEncoder;
 import org.d2rq.r2rml.LogicalTable.BaseTableOrView;
 import org.d2rq.r2rml.LogicalTable.R2RMLView;
@@ -19,8 +22,8 @@ import org.d2rq.r2rml.TermMap.ConstantValuedTermMap;
 import org.d2rq.r2rml.TermMap.Position;
 import org.d2rq.r2rml.TermMap.TemplateValuedTermMap;
 import org.d2rq.r2rml.TermMap.TermType;
-import org.d2rq.validation.Report;
 import org.d2rq.validation.Message.Problem;
+import org.d2rq.validation.Report;
 import org.d2rq.vocab.RR;
 
 import com.hp.hpl.jena.iri.Violation;
@@ -197,11 +200,19 @@ public class MappingValidator extends MappingVisitor.TreeWalkerImplementation {
 				&& contextLogicalTable.getColumns(sqlConnection) != null
 				&& termMap.getInverseExpression() != null
 				&& termMap.getInverseExpression().getColumnNames() != null) {
-			for (Identifier column: termMap.getInverseExpression().getColumnNames()) {
-				if (!contextLogicalTable.getColumns(sqlConnection).contains(column)) {
-					report.report(Problem.COLUMN_NOT_IN_LOGICAL_TABLE, 
-							getContextResource(), RR.inverseExpression,
-							ResourceFactory.createPlainLiteral(column.toString()));
+			for (String columnName: termMap.getInverseExpression().getColumnNames()) {
+				try {
+					Identifier column = sqlConnection.vendor().parseIdentifiers(columnName, 1, 1)[0];
+					if (!contextLogicalTable.getColumns(sqlConnection).contains(column)) {
+						report.report(Problem.COLUMN_NOT_IN_LOGICAL_TABLE, 
+								getContextResource(), RR.inverseExpression,
+								ResourceFactory.createPlainLiteral(column.toString()));
+					}
+				} catch (IdentifierParseException ex) {
+					report.report(Problem.INVALID_COLUMN_NAME, 
+							getContextResource(), RR.inverseExpression, 
+							termMap.getInverseExpression(), 
+							ex.getViolationType().name(), ex.getMessage());
 				}
 			}
 		}
@@ -223,9 +234,9 @@ public class MappingValidator extends MappingVisitor.TreeWalkerImplementation {
 		if (sqlConnection != null && contextLogicalTable != null 
 				&& contextLogicalTable.getColumns(sqlConnection) != null
 				&& termMap.getColumnName() != null 
-				&& termMap.getColumnName().asIdentifier() != null) {
-			Identifier column = termMap.getColumnName().asIdentifier();
-			if (!contextLogicalTable.getColumns(sqlConnection).contains(column)) {
+				&& termMap.getColumnName().isValid(sqlConnection)) {
+			Identifier column = termMap.getColumnName().asIdentifier(sqlConnection.vendor());
+			if (column != null && !contextLogicalTable.getColumns(sqlConnection).contains(column)) {
 				report.report(Problem.COLUMN_NOT_IN_LOGICAL_TABLE, 
 						getContextResource(), RR.column, 
 						ResourceFactory.createPlainLiteral(column.toString()));
@@ -264,11 +275,19 @@ public class MappingValidator extends MappingVisitor.TreeWalkerImplementation {
 				&& contextLogicalTable.getColumns(sqlConnection) != null
 				&& termMap.getTemplate() != null
 				&& termMap.getTemplate().getColumnNames() != null) {
-			for (Identifier column: termMap.getTemplate().getColumnNames()) {
-				if (!contextLogicalTable.getColumns(sqlConnection).contains(column)) {
-					report.report(Problem.COLUMN_NOT_IN_LOGICAL_TABLE, 
+			for (String columnName: termMap.getTemplate().getColumnNames()) {
+				try {
+					Identifier column = sqlConnection.vendor().parseIdentifiers(columnName, 1, 1)[0];
+					if (!contextLogicalTable.getColumns(sqlConnection).contains(column)) {
+						report.report(Problem.COLUMN_NOT_IN_LOGICAL_TABLE, 
+								getContextResource(), RR.template, 
+								ResourceFactory.createPlainLiteral(column.toString()));
+					}
+				} catch (IdentifierParseException ex) {
+					report.report(Problem.INVALID_COLUMN_NAME, 
 							getContextResource(), RR.template, 
-							ResourceFactory.createPlainLiteral(column.toString()));
+							termMap.getTemplate(), 
+							ex.getViolationType().name(), ex.getMessage());
 				}
 			}
 		}
@@ -340,38 +359,47 @@ public class MappingValidator extends MappingVisitor.TreeWalkerImplementation {
 		// that contains the referencing object map"
 		if (sqlConnection != null && contextLogicalTable != null 
 				&& contextLogicalTable.getColumns(sqlConnection) != null
-				&& join.getChild() != null && join.getChild().asIdentifier() != null
-				&& !contextLogicalTable.getColumns(sqlConnection).contains(join.getChild().asIdentifier())) {
-			report.report(Problem.COLUMN_NOT_IN_LOGICAL_TABLE, 
-					getContextResource(), RR.child,
-					join.getChild());
+				&& join.getChild() != null) {
+			Identifier child = join.getChild().asIdentifier(sqlConnection.vendor());
+			if (child != null && !contextLogicalTable.getColumns(sqlConnection).contains(child)) {
+				report.report(Problem.COLUMN_NOT_IN_LOGICAL_TABLE, 
+						getContextResource(), RR.child, join.getChild());
+			}
 		}
 		// "rr:parent must be a column name that exists in the logical table of the
 		// referencing object map's parent triples map"
 		if (sqlConnection != null && contextParentLogicalTable != null 
 				&& contextParentLogicalTable.getColumns(sqlConnection) != null
-				&& join.getParent() != null && join.getParent().asIdentifier() != null 
-				&& !contextParentLogicalTable.getColumns(sqlConnection).contains(join.getParent().asIdentifier())) {
-			report.report(Problem.COLUMN_NOT_IN_LOGICAL_TABLE, 
-					getContextResource(), RR.parent,
-					join.getParent());
+				&& join.getParent() != null) {
+			Identifier parent = join.getParent().asIdentifier(sqlConnection.vendor());
+			if (parent  != null && !contextParentLogicalTable.getColumns(sqlConnection).contains(parent)) {
+				report.report(Problem.COLUMN_NOT_IN_LOGICAL_TABLE, 
+						getContextResource(), RR.parent, join.getParent());
+			}
 		}
 	}
 
 	@Override
 	public void visitTerm(TableOrViewName tableName) {
-		if (tableName.getSyntaxError() == null) {
-			if (sqlConnection != null && !sqlConnection.isTable(
-					tableName.asQualifiedTableName())) {
-				report.report(Problem.NO_SUCH_TABLE_OR_VIEW, 
+		if (sqlConnection != null) {
+			try {
+				TableName parsed = TableName.create(
+						sqlConnection.vendor().parseIdentifiers(tableName.toString(), 1, 3));
+				if (!sqlConnection.isTable(parsed)) {
+					report.report(Problem.NO_SUCH_TABLE_OR_VIEW, 
+							getContextResource(), getContextProperty(),
+							tableName);
+				}
+			} catch (IdentifierParseException ex) {
+				String message = ex.getMessage();
+				if (ex.getViolationType() == ViolationType.TOO_MANY_IDENTIFIERS) {
+					message += "; must be in [catalog.][schema.]table form";
+				}
+				report.report(Problem.MALFORMED_TABLE_OR_VIEW_NAME, 
 						getContextResource(), getContextProperty(),
-						tableName);
+						tableName,
+						ex.getViolationType().name(), message);
 			}
-		} else {
-			report.report(Problem.MALFORMED_TABLE_OR_VIEW_NAME, 
-					getContextResource(), getContextProperty(),
-					tableName,
-					tableName.getSyntaxError().name(), tableName.getSyntaxErrorMessage());
 		}
 	}
 	
@@ -428,11 +456,15 @@ public class MappingValidator extends MappingVisitor.TreeWalkerImplementation {
 	
 	@Override
 	public void visitTerm(ColumnNameR2RML columnName) {
-		if (columnName.getSyntaxError() != null) {
+		try {
+			if (sqlConnection != null) {
+				sqlConnection.vendor().parseIdentifiers(columnName.toString(), 1, 1);
+			}
+		} catch (IdentifierParseException ex) {
 			report.report(Problem.INVALID_COLUMN_NAME, 
 					getContextResource(), getContextProperty(),
 					columnName, 
-					columnName.getSyntaxError().name(), columnName.getSyntaxErrorMessage());
+					ex.getViolationType().name(), ex.getMessage());
 		}
 	}
 

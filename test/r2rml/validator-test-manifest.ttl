@@ -1030,7 +1030,7 @@ There are no tests (yet) for the semantics of rr:inverseExpression.
 
 <invalid/invalid-string-template-unexpected-character.ttl> a :R2RMLValidatorTestCase;
     :expect [
-        :problem e:INVALID_STRING_TEMPLATE;
+        :problem e:INVALID_COLUMN_NAME;
         :detailcode e:UNEXPECTED_CHARACTER;
         :subject map:terms1;
         :predicate rr:template;
@@ -1039,8 +1039,8 @@ There are no tests (yet) for the semantics of rr:inverseExpression.
 
 <invalid/invalid-string-template-qualified-column-name.ttl> a :R2RMLValidatorTestCase;
     :expect [
-        :problem e:INVALID_STRING_TEMPLATE;
-        :detailcode e:QUALIFIED_COLUMN_NAME;
+        :problem e:INVALID_COLUMN_NAME;
+        :detailcode e:TOO_MANY_IDENTIFIERS;
         :subject map:terms1;
         :predicate rr:template;
         :object "{TABLE1.COLUMN1}";

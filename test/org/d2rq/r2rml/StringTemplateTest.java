@@ -4,8 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.d2rq.db.schema.Identifier;
-import org.d2rq.r2rml.StringTemplate;
+import org.d2rq.db.DummyDB;
 import org.junit.Test;
 
 
@@ -19,8 +18,7 @@ public class StringTemplateTest {
 		assertEquals(1, template.getColumnNames().length);
 		assertEquals("person/", template.getLiteralParts()[0]);
 		assertEquals("", template.getLiteralParts()[1]);
-		assertEquals(Identifier.createUndelimited("ID"), 
-				template.getColumnNames()[0]);
+		assertEquals("ID", template.getColumnNames()[0]);
 	}
 	
 	@Test public void testUnescapedBackslash() {
@@ -52,10 +50,10 @@ public class StringTemplateTest {
 	}
 	
 	@Test public void testInvalidColumnName() {
-		assertFalse(StringTemplate.create("foo{a b}bar").isValid());
+		assertFalse(StringTemplate.create("foo{a b}bar").isValid(new DummyDB()));
 	}
 	
 	@Test public void testQualifiedColumnName() {
-		assertFalse(StringTemplate.create("foo{a.b}bar").isValid());
+		assertFalse(StringTemplate.create("foo{a.b}bar").isValid(new DummyDB()));
 	}
 }

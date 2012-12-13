@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.d2rq.db.schema.Identifier;
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.SQLBit;
 import org.d2rq.db.types.SQLBoolean;
@@ -43,6 +44,17 @@ public class MySQL extends SQL92 {
 	@Override
 	public String getTrueTable() {
 		return null;
+	}
+	
+	@Override
+	public Identifier[] parseIdentifiers(String s, int minParts, int maxParts) 
+	throws IdentifierParseException {
+		IdentifierParser parser = new MySQLIdentifierParser(s, minParts, maxParts);
+		if (parser.error() == null) {
+			return parser.result();
+		} else {
+			throw new IdentifierParseException(parser.error(), parser.message());
+		}
 	}
 	
 	@Override
@@ -176,6 +188,43 @@ public class MySQL extends SQL92 {
 			} catch (SQLException ex) {
 				return null;
 			}
+		}
+	}
+	
+	public class MySQLIdentifierParser extends IdentifierParser {
+		public MySQLIdentifierParser(String input, int minParts, int maxParts) {
+			super(input, minParts, maxParts);
+		}
+		@Override
+		protected boolean isValidIdentifier(String identifier, boolean delimited) {
+			// Only digits is not valid in undelimited
+			if (!delimited && identifier.matches("^[0-9]*$")) return false;
+			// ASCII NUL is not valid, even in delimited
+			if (identifier.contains("\u0000")) return false;
+			// Cannot end with space
+			if (identifier.endsWith(" ")) return false;
+			return true;
+		}
+		@Override
+		protected boolean isOpeningQuoteChar(char c) {
+			return c == '`';
+		}
+		@Override
+		protected boolean isClosingQuoteChar(char c) {
+			return c == '`';
+		}
+		@Override
+		protected boolean isIdentifierStartChar(char c) {
+			if (c >= '0' && c <= '9') return true;
+			if (c >= 'a' && c <= 'z') return true;
+			if (c >= 'A' && c <= 'Z') return true;
+			if (c == '_' || c == '$') return true;
+			if (c >= '\u0080' && c <= '\uffff') return true;
+			return false;
+		}
+		@Override
+		protected boolean isIdentifierBodyChar(char c) {
+			return isIdentifierStartChar(c);
 		}
 	}
 }

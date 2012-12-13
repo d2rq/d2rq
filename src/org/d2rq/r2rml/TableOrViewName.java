@@ -1,8 +1,7 @@
 package org.d2rq.r2rml;
 
-import org.d2rq.db.schema.Identifier;
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.schema.TableName;
-import org.d2rq.db.schema.Identifier.Parser.ViolationType;
 import org.d2rq.db.vendor.Vendor;
 
 /**
@@ -21,38 +20,22 @@ public class TableOrViewName extends MappingTerm {
 		return tableName == null ? null : new TableOrViewName(tableName);
 	}
 	
-	public static TableOrViewName create(TableName tableName) {
-		return tableName == null ? null : new TableOrViewName(tableName);
+	public static TableOrViewName create(TableName tableName, Vendor vendor) {
+		return tableName == null ? null : new TableOrViewName(vendor.toString(tableName));
 	}
 	
 	private final String asString;
-	private final TableName parsed;
-	private ViolationType error = null;
-	private String message = null;
 	
 	private TableOrViewName(String s) {
 		asString = s.trim();
-		Identifier.Parser parser = new Identifier.Parser(asString);
-		if (parser.error() != null) {
-			error = parser.error();
-			message = parser.message();
-			parsed = null;
-		} else if (parser.countParts() > 3) {
-			error = ViolationType.TOO_MANY_IDENTIFIERS;
-			message = "Too many identifiers; must be in [catalog.][schema.]table form";
-			parsed = null;
-		} else {
-			parsed = TableName.create(parser.result());
-		}
 	}
 
-	private TableOrViewName(TableName tableName) {
-		asString = Vendor.SQL92.toString(tableName);
-		parsed = tableName;
-	}
-	
-	public TableName asQualifiedTableName() {
-		return parsed;
+	public TableName asQualifiedTableName(Vendor vendor) {
+		try {
+			return TableName.create(vendor.parseIdentifiers(asString, 1, 3)); 
+		} catch (IdentifierParseException ex) {
+			return null;
+		}
 	}
 	
 	/**
@@ -63,34 +46,20 @@ public class TableOrViewName extends MappingTerm {
 		return asString;
 	}
 
-	public ViolationType getSyntaxError() {
-		return error;
-	}
-	
-	public String getSyntaxErrorMessage() {
-		return message;
-	}
-	
 	@Override
 	public void accept(MappingVisitor visitor) {
 		visitor.visitTerm(this);
 	}
 
 	@Override
-	public boolean isValid() {
-		return error == null;
-	}
-
-	@Override
 	public boolean equals(Object otherObject) {
 		if (!(otherObject instanceof TableOrViewName)) return false;
 		TableOrViewName other = (TableOrViewName) otherObject;
-		if (isValid() != other.isValid()) return false;
-		return isValid() ? parsed.equals(other.parsed) : asString.equals(other.asString);
+		return asString.equals(other.asString);
 	}
 
 	@Override
 	public int hashCode() {
-		return (isValid() ? parsed.hashCode() : asString.hashCode()) ^ 284;
+		return asString.hashCode() ^ 284;
 	}
 }

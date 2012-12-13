@@ -63,7 +63,7 @@ public class Microsyntax {
 		if (!match.matches()) {
 			throw new D2RQException("Table name \"" + s + 
 					"\" is not in \"[schema.]table\" notation",
-					D2RQException.SQL_INVALID_RELATIONNAME);
+					D2RQException.SQL_INVALID_TABLE_NAME);
 		}
 		return TableName.create(null, 
 				Identifier.createDelimited(match.group(1)),
@@ -105,7 +105,7 @@ public class Microsyntax {
 		if (!match.matches()) {
 			throw new D2RQException("Column name \"" + s + 
 					"\" is not in \"[schema.]table.column\" notation",
-					D2RQException.SQL_INVALID_ATTRIBUTENAME);
+					D2RQException.SQL_INVALID_COLUMN_NAME);
 		}
 		return createColumn(match.group(1), match.group(2), match.group(3));
 	}

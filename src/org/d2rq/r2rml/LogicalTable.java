@@ -72,7 +72,8 @@ public abstract class LogicalTable extends MappingComponent {
 		@Override
 		public List<Identifier> getColumns(SQLConnection connection) {
 			if (tableName == null || !tableName.isValid(connection)) return null;
-			TableOp table = connection.getTable(tableName.asQualifiedTableName());
+			TableOp table = connection.getTable(tableName.asQualifiedTableName(
+					connection.vendor()));
 			if (table == null) return null;
 			List<Identifier> result = new ArrayList<Identifier>();
 			for (ColumnName column: table.getColumns()) {

@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.d2rq.CompiledMapping;
+import org.d2rq.D2RQException;
 import org.d2rq.D2RQOptions;
 import org.d2rq.ResourceCollection;
 import org.d2rq.algebra.DownloadRelation;
@@ -26,6 +27,7 @@ import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.schema.Key;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.DataType.GenericType;
@@ -192,7 +194,7 @@ public class R2RMLCompiler implements CompiledMapping {
 	private Key getChildKey(List<Join> joins) {
 		List<Identifier> result = new ArrayList<Identifier>();
 		for (Join join: joins) {
-			result.add(join.getChild().asIdentifier());
+			result.add(join.getChild().asIdentifier(sqlConnection.vendor()));
 		}
 		return Key.createFromIdentifiers(result);
 	}
@@ -200,7 +202,7 @@ public class R2RMLCompiler implements CompiledMapping {
 	private Key getParentKey(List<Join> joins) {
 		List<Identifier> result = new ArrayList<Identifier>();
 		for (Join join: joins) {
-			result.add(join.getParent().asIdentifier());
+			result.add(join.getParent().asIdentifier(sqlConnection.vendor()));
 		}
 		return Key.createFromIdentifiers(result);
 	}
@@ -289,12 +291,18 @@ public class R2RMLCompiler implements CompiledMapping {
 		}
 		ColumnName[] qualifiedColumns = new ColumnName[template.getColumnNames().length];
 		ColumnFunction[] functions = new ColumnFunction[template.getColumnNames().length];
-		for (int i = 0; i < qualifiedColumns.length; i++) {
-			qualifiedColumns[i] = ColumnName.create(table.getTableName(), 
-					template.getColumnNames()[i]);
-			functions[i] = termType == TermType.IRI ? TemplateValueMaker.ENCODE : TemplateValueMaker.IDENTITY;
+		try {
+			for (int i = 0; i < qualifiedColumns.length; i++) {
+				Identifier column = sqlConnection.vendor().parseIdentifiers(
+						template.getColumnNames()[i], 1, 1)[0];
+				qualifiedColumns[i] = ColumnName.create(table.getTableName(), column);
+				functions[i] = termType == TermType.IRI ? 
+						TemplateValueMaker.ENCODE : TemplateValueMaker.IDENTITY;
+			}
+			return new TemplateValueMaker(literalParts, qualifiedColumns, functions);
+		} catch (IdentifierParseException ex) {
+			throw new D2RQException(ex.getMessage(), ex, D2RQException.SQL_INVALID_IDENTIFIER);
 		}
-		return new TemplateValueMaker(literalParts, qualifiedColumns, functions);
 	}
 	
 	private String getTriplesMapName() {
@@ -311,7 +319,8 @@ public class R2RMLCompiler implements CompiledMapping {
 		}
 		@Override
 		public void visitComponent(BaseTableOrView table) {
-			result = sqlConnection.getTable(table.getTableName().asQualifiedTableName());
+			result = sqlConnection.getTable(
+					table.getTableName().asQualifiedTableName(sqlConnection.vendor()));
 		}
 		@Override
 		public void visitComponent(R2RMLView query) {
@@ -334,7 +343,7 @@ public class R2RMLCompiler implements CompiledMapping {
 		}
 		public void visitComponent(ColumnValuedTermMap termMap, Position position) {
 			ColumnName qualified = ColumnName.create(table.getTableName(), 
-					termMap.getColumnName().asIdentifier());
+					termMap.getColumnName().asIdentifier(sqlConnection.vendor()));
 			NodeType nodeType = getNodeType(termMap, position, table.getColumnType(qualified));
 			ValueMaker baseValueMaker = new ColumnValueMaker(qualified);
 			if (nodeType == TypedNodeMaker.URI) {

@@ -2,6 +2,8 @@ package org.d2rq.db.vendor;
 
 import java.sql.Types;
 
+import org.d2rq.db.schema.Identifier;
+import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.SQLBinary;
 import org.d2rq.db.types.SQLBit;
@@ -93,6 +95,38 @@ public class SQLServer extends SQL92 {
         // along with tables which need to be ignored
 		return "sys".equals(schema) || "INFORMATION_SCHEMA".equals(schema) || "sysdiagrams".equals(table);
 	}
+
+	/**
+	 * Implements the special rules according to http://msdn.microsoft.com/en-us/library/ms175874.aspx
+	 */
+	@Override
+	public Identifier[] parseIdentifiers(String s, int minParts, int maxParts)
+			throws IdentifierParseException {
+		IdentifierParser parser = new IdentifierParser(s, minParts, maxParts) {
+			@Override
+			protected boolean isOpeningQuoteChar(char c) {
+				return c == '"' || c == '[';
+			}
+			@Override
+			protected boolean isClosingQuoteChar(char c) {
+				return c == '"' || c == ']';
+			}
+			@Override
+			protected boolean isIdentifierStartChar(char c) {
+				return super.isIdentifierStartChar(c) || c == '_';
+			}
+			@Override
+			protected boolean isIdentifierBodyChar(char c) {
+				return super.isIdentifierBodyChar(c) || c == '$' || c == '@' || c == '#';
+			}
+		};
+		if (parser.error() == null) {
+			return parser.result();
+		} else {
+			throw new IdentifierParseException(parser.error(), parser.message());
+		}
+	}
+
 
 	private static class SQLServerCompatibilityBitDataType extends SQLBit {
 		public SQLServerCompatibilityBitDataType() {

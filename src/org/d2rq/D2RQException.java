@@ -57,8 +57,8 @@ public class D2RQException extends JenaException {
 //	public static final int DATABASE_ODBC_WITH_JDBCDRIVER = 41;
 	public static final int DATABASE_JDBCDRIVER_CLASS_NOT_FOUND = 42;
 	public static final int D2RQ_SQLEXCEPTION = 43;
-	public static final int SQL_INVALID_RELATIONNAME = 44;
-	public static final int SQL_INVALID_ATTRIBUTENAME = 45;
+	public static final int SQL_INVALID_TABLE_NAME = 44;
+	public static final int SQL_INVALID_COLUMN_NAME = 45;
 	public static final int SQL_INVALID_ALIAS = 46;
 	public static final int SQL_INVALID_JOIN = 47;
 	public static final int MAPPING_RESOURCE_INSTEADOF_LITERAL = 48;
@@ -105,6 +105,7 @@ public class D2RQException extends JenaException {
 	public static final int VALIDATION_EXCEPTION = 88;
 	public static final int SQL_TABLE_NOT_FOUND = 89;
 	public static final int NOT_YET_IMPLEMENTED = 90;	
+	public static final int SQL_INVALID_IDENTIFIER = 91;
 	
 	/**
 	 * Returns the name of one of the D2RQException.XXX error constants
