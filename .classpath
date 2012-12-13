@@ -4,16 +4,6 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="etc"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/servlet-api-3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-server-8.1.1.v20120215.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-util-8.1.1.v20120215.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-webapp-8.1.1.v20120215.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-servlet-8.1.1.v20120215.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-continuation-8.1.1.v20120215.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-http-8.1.1.v20120215.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-io-8.1.1.v20120215.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-security-8.1.1.v20120215.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-xml-8.1.1.v20120215.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/logging/slf4j-api-1.6.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/logging/slf4j-log4j12-1.6.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/velocity-1.7/commons-collections-3.2.1.jar"/>
@@ -24,9 +14,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/logging/log4j-1.2.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/db-drivers/commons-dbcp-1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/db-drivers/commons-pool-1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.18-bin.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/db-drivers/postgresql-9.1-901.jdbc3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/db-drivers/sdb-1.3.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="lib/jena-2.7.4/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/jena-2.7.4/httpclient-4.1.2.jar"/>
@@ -38,5 +25,17 @@
 	<classpathentry kind="lib" path="lib/jena-2.7.4/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="lib" path="lib/logging/jcl-over-slf4j-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/hsqldb-2.2.9/hsqldb.jar"/>
+	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.22-bin.jar"/>
+	<classpathentry kind="lib" path="lib/db-drivers/postgresql-9.2-1002.jdbc4.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-continuation-8.1.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-http-8.1.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-io-8.1.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-security-8.1.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-server-8.1.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-servlet-8.1.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-util-8.1.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-webapp-8.1.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-xml-8.1.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-8.1.8/servlet-api-3.0.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
