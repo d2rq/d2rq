@@ -5,6 +5,7 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.d2rq.SystemLoader;
+import org.eclipse.jetty.security.DefaultIdentityService;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -39,6 +40,12 @@ public class JettyLauncher {
 		// see http://jira.codehaus.org/browse/JETTY-331 and http://docs.codehaus.org/display/JETTY/Connectors+slow+to+startup
 		jetty.setSessionIdManager(new HashSessionIdManager(new Random()));
 		WebAppContext context = new WebAppContext(jetty, "webapp", "");
+
+		// Wave a chicken at Jetty to make some annoying System.err.println noise go away
+		context.getSecurityHandler().setIdentityService(new DefaultIdentityService());
+		context.getSecurityHandler().setAuthenticator(null);
+		context.getSecurityHandler().setAuthenticatorFactory(null);
+		
 		// Place the system loader into the servlet context. The webapp init
 		// listener will find it there and create the D2RServer instance.
 		D2RServer.storeSystemLoader(loader, context.getServletContext());
