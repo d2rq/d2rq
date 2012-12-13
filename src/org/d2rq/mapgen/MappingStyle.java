@@ -57,7 +57,7 @@ public interface MappingStyle {
 	/**
 	 * Returns a list of columns to be used to form blank node identifiers
 	 * for the records in a table that has no suitable unique/primary key
-	 * @param table The table definition
+	 * @param columns The column definition
 	 * @return A column list
 	 */
 	List<Identifier> getEntityPseudoKeyColumns(List<ColumnDef> columns);
@@ -87,7 +87,7 @@ public interface MappingStyle {
 	/**
 	 * Creates a property for a foreign key relationship between two tables.
 	 * @param tableName The source table
-	 * @param foreginKey A foreign key defines on the source table
+	 * @param foreignKey A foreign key defines on the source table
 	 * @return A property representing the relationship
 	 */
 	Property getForeignKeyProperty(TableName tableName, ForeignKey foreignKey);

@@ -19,6 +19,7 @@ import com.hp.hpl.jena.shared.Lock;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
+import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.util.iterator.NullIterator;
 
 
@@ -109,6 +110,10 @@ public class AutoReloadableDataset implements Dataset {
 
 	public boolean containsNamedModel(String uri) {
 		return false;
+	}
+
+	public Context getContext() {
+		return loader.getMapping().getContext();
 	}
 
 	public Lock getLock() {

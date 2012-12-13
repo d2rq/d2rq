@@ -385,7 +385,7 @@ public class SQL92 implements Vendor {
 		 * following character classes: upper-case letter, lower-case letter, 
 		 * title-case letter, modifier letter, other letter, or letter number.
 		 * 
-		 * @see http://www.w3.org/TR/r2rml/#dfn-sql-identifier
+		 * @see <a href="http://www.w3.org/TR/r2rml/#dfn-sql-identifier">R2RML: SQL identifier</a>
 		 */
 		protected boolean isIdentifierStartChar(char c) {
 			int category = Character.getType(c);
@@ -405,7 +405,7 @@ public class SQL92 implements Vendor {
 		 * spacing combining mark, decimal number, connector punctuation, 
 		 * and formatting code.
 		 * 
-		 * @see http://www.w3.org/TR/r2rml/#dfn-sql-identifier
+		 * @see <a href="http://www.w3.org/TR/r2rml/#dfn-sql-identifier">R2RML: SQL identifier</a>
 		 */
 		protected boolean isIdentifierBodyChar(char c) {
 			if (isIdentifierStartChar(c)) return true;

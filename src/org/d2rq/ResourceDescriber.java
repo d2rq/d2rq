@@ -1,5 +1,7 @@
 package org.d2rq;
 
+import java.util.Iterator;
+
 import org.d2rq.db.op.LimitOp;
 import org.d2rq.find.FindQuery;
 import org.d2rq.find.TripleQueryIter;
@@ -68,7 +70,10 @@ public class ResourceDescriber {
 					mapping.getTripleRelations(), limit, context);
 			qIter.add(triples.iterator());
 		}
-		result.getBulkUpdateHandler().add(TripleQueryIter.create(qIter));
+		Iterator<Triple> it = TripleQueryIter.create(qIter);
+		while (it.hasNext()) {
+			result.add(it.next());
+		}
 		
 		if (pingback != null) {
 			AlarmClock.get().cancel(pingback);

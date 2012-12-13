@@ -9,13 +9,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.d2rq.SystemLoader;
+import org.apache.jena.iri.IRI;
+import org.apache.jena.iri.IRIFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.hp.hpl.jena.iri.IRI;
-import com.hp.hpl.jena.iri.IRIFactory;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;

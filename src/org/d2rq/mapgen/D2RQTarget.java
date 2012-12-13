@@ -49,12 +49,6 @@ public class D2RQTarget implements Target {
 		mapping.addDatabase(database);
 	}
 	
-	/**
-	 * Writes the D2RQ mapping to a writer. Note that the calling code is
-	 * responsible for closing the writers after use.
-	 * 
-	 * @param out Stream for writing data to the file or console
-	 */
 	public Mapping getMapping() {
 		return mapping;
 	}

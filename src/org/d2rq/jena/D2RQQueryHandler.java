@@ -10,7 +10,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.query.BindingQueryPlan;
 import com.hp.hpl.jena.graph.query.Domain;
-import com.hp.hpl.jena.graph.query.Query;
+import com.hp.hpl.jena.graph.query.GraphQuery;
 import com.hp.hpl.jena.graph.query.QueryHandler;
 import com.hp.hpl.jena.graph.query.SimpleQueryHandler;
 import com.hp.hpl.jena.graph.query.TreeQueryPlan;
@@ -50,7 +50,7 @@ public class D2RQQueryHandler extends SimpleQueryHandler {
 		throw new RuntimeException("prepareTree - Andy says Chris says this will not be called");
 	}
 
-	public BindingQueryPlan prepareBindings(Query q, Node[] variables) {   
+	public BindingQueryPlan prepareBindings(GraphQuery q, Node[] variables) {   
 		this.variables = variables;
 		this.indexes = new HashMap<Node,Integer>();
 		for (int i = 0; i < variables.length; i++) {

@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="etc"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="lib/logging/commons-logging-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/servlet-api-3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-server-8.1.1.v20120215.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jetty-8.1.1/jetty-util-8.1.1.v20120215.jar"/>
@@ -27,18 +26,17 @@
 	<classpathentry exported="true" kind="lib" path="lib/db-drivers/commons-pool-1.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.18-bin.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/db-drivers/postgresql-9.1-901.jdbc3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/arq-2.9/commons-codec-1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/arq-2.9/httpclient-4.1.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/arq-2.9/httpcore-4.1.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/arq-2.9/jena-arq-2.9.0-incubating.jar" sourcepath="/Users/RichardCyganiak/Eclipse/arq/src"/>
-	<classpathentry exported="true" kind="lib" path="lib/arq-2.9/jena-core-2.7.0-incubating-tests.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/arq-2.9/jena-core-2.7.0-incubating.jar" sourcepath="/Users/RichardCyganiak/Eclipse/jena/src/main/java"/>
-	<classpathentry exported="true" kind="lib" path="lib/arq-2.9/jena-iri-0.9.0-incubating.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/arq-2.9/xercesImpl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/db-drivers/sdb-1.3.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/arq-2.9/icu4j-3.4.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/arq-2.9/xml-apis.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hsqldb-2.2.8/hsqldb.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.7.4/commons-codec-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.7.4/httpclient-4.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.7.4/httpcore-4.1.3.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.7.4/jena-arq-2.9.4.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.7.4/jena-core-2.7.4.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.7.4/jena-iri-0.9.4.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.7.4/xercesImpl-2.10.0.jar"/>
+	<classpathentry kind="lib" path="lib/jena-2.7.4/xml-apis-1.4.01.jar"/>
+	<classpathentry kind="lib" path="lib/logging/jcl-over-slf4j-1.6.4.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

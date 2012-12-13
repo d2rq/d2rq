@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.apache.jena.iri.Violation;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
@@ -26,7 +27,6 @@ import org.d2rq.validation.Message.Problem;
 import org.d2rq.validation.Report;
 import org.d2rq.vocab.RR;
 
-import com.hp.hpl.jena.iri.Violation;
 import com.hp.hpl.jena.rdf.arp.lang.LanguageTagSyntaxException;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;

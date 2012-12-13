@@ -3,6 +3,7 @@ package org.d2rq;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -11,8 +12,8 @@ import org.d2rq.algebra.NodeRelation;
 import org.d2rq.algebra.NodeRelationUtil;
 import org.d2rq.algebra.TripleRelation;
 import org.d2rq.db.SQLConnection;
-import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.op.DatabaseOp;
+import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.op.util.OpUtil;
 import org.d2rq.find.FindQuery;
 import org.d2rq.find.TripleQueryIter;
@@ -73,7 +74,10 @@ public class ResourceCollection {
 		result.setNsPrefixes(mapping.getPrefixes());
 		FindQuery query = new FindQuery(Triple.ANY, inventory, limit, 
 				new ExecutionContext(mapping.getContext(), null, null, null));
-		result.getGraph().getBulkUpdateHandler().add(TripleQueryIter.create(query.iterator()));
+		Iterator<Triple> it = TripleQueryIter.create(query.iterator());
+		while (it.hasNext()) {
+			result.getGraph().add(it.next());
+		}
 		return result;
 	}
 
