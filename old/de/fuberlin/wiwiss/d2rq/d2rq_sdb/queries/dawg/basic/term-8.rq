@@ -1,9 +1,0 @@
-PREFIX :<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/>
-PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
-
-# DOT is part of the decimal.
-SELECT * 
-{ 
-	:Review19 ?p +5 
-}
-# Node: SDB delivers only an entry when querying for 5 and not for +5 ?????
