@@ -29,6 +29,7 @@
 	<path id="project.class.path">
 		<fileset dir="${lib}">
 			<include name="**/*.jar"/>
+			<exclude name="sources/**"/>
 		</fileset>
 		<pathelement path="${java.class.path}"/>
 	</path>
@@ -47,6 +48,7 @@
 		<exclude name=".settings/**"/>
 		<exclude name=".gitignore"/>
 		<exclude name="velocity.log"/>
+		<exclude name="lib/sources/**"/>
 	</patternset>
 
 	<property name="execfiles" value="dump-rdf generate-mapping d2r-server d2r-query validate"/>
