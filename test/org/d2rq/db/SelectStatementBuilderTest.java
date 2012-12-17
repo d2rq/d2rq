@@ -94,21 +94,21 @@ public class SelectStatementBuilderTest {
 	@Test
 	public void testExpressionOnly() {
 		assertEquals("SELECT 5 AS EXPR FROM (VALUES(NULL))",
-				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR[0-9a-f]*", "EXPR"));
+				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR_[0-9A-F]*", "EXPR"));
 	}
 	
 	@Test
 	public void testExpressionOnlyMySQL() {
 		db.setVendor(Vendor.MySQL);
 		assertEquals("SELECT 5 AS EXPR",
-				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR[0-9a-f]*", "EXPR"));
+				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR_[0-9A-F]*", "EXPR"));
 	}
 	
 	@Test
 	public void testExpressionOnlyOracle() {
 		db.setVendor(Vendor.Oracle);
 		assertEquals("SELECT 5 EXPR FROM DUAL",
-				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR[0-9a-f]*", "EXPR"));
+				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR_[0-9A-F]*", "EXPR"));
 	}
 	
 	@Test
@@ -180,11 +180,22 @@ public class SelectStatementBuilderTest {
 	}
 	
 	@Test
-	public void testReturnedProjectionSpecIsExpression() {
+	public void testReturnedProjectionSpecIsColumn() {
 		Expression expr = Microsyntax.parseSQLExpression("t1.foo>0", GenericType.BOOLEAN);
 		DatabaseOp projection = ProjectOp.create(table1, ProjectionSpec.create(expr, db.vendor()));
 		assertEquals(
-				Collections.singletonList(ProjectionSpec.create(expr, db.vendor())),
+				Collections.singletonList(ProjectionSpec.create(ProjectionSpec.createColumnNameFor(expr))),
 				new SelectStatementBuilder(projection, db.vendor()).getColumnSpecs());
+	}
+	
+	@Test
+	public void testNestedProjections() {
+		Expression expr = Constant.create("bar", GenericType.CHARACTER);
+		DatabaseOp projection = ProjectOp.extend(table1, 
+				Collections.singletonMap(ColumnName.parse("EXPR"), expr), db.vendor());
+		projection = ProjectOp.create(projection, 
+				ProjectionSpec.createFromColumns(projection.getColumns()));
+		assertEquals("SELECT table1.foo, 'bar' AS EXPR FROM table1",
+				new SelectStatementBuilder(projection, db.vendor()).getSQL());
 	}
 }

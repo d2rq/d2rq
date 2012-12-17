@@ -18,6 +18,7 @@ import org.d2rq.algebra.TripleRelation;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.SQLScriptLoader;
 import org.d2rq.db.expr.ColumnListEquality;
+import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.LimitOp;
@@ -55,7 +56,7 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 	private Map<ColumnName,GenericType> overriddenColumnTypes = null;
 	private NodeMaker currentSubjects = null;
 	private SQLConnection currentSQLConnection = null;
-	private TabularBuilder currentClassMapRelationBuilder = null;
+	private OpBuilder currentClassMapOpBuilder = null;
 	private boolean done = false;
 	
 	public D2RQCompiler(Mapping mapping) {
@@ -166,13 +167,20 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		currentClassMapTripleRelations.clear();
 		currentSQLConnection = sqlConnections.get(classMap.getDatabase().resource());
 		currentSubjects = createNodeMaker(classMap);
-		currentClassMapRelationBuilder = createRelationBuilder(classMap);
-		currentClassMapRelationBuilder.addProjections(currentSubjects.projectionSpecs());
+		currentClassMapOpBuilder = createOpBuilder(classMap);
+		currentClassMapOpBuilder.addProjections(currentSubjects.projectionSpecs());
+		if (classMap.getUriSQLExpression() != null) {
+			Expression parsed = Microsyntax.parseSQLExpression(
+					classMap.getUriSQLExpression(), 
+					GenericType.CHARACTER);
+			currentClassMapOpBuilder.addExtension(
+					ProjectionSpec.createColumnNameFor(parsed), parsed);
+		}
 		return true;
 	}
 
 	public void visitLeave(ClassMap classMap) {
-		DatabaseOp tabular = currentClassMapRelationBuilder.getTabular();
+		DatabaseOp tabular = currentClassMapOpBuilder.getOp();
 		for (Resource class_: classMap.getClasses()) {
 			NodeMaker predicates = new FixedNodeMaker(RDF.type.asNode());
 			NodeMaker objects = new FixedNodeMaker(class_.asNode());
@@ -188,11 +196,11 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 	}
 
 	public void visit(PropertyBridge propertyBridge) {
-		TabularBuilder builder = createRelationBuilder(propertyBridge);
+		OpBuilder builder = createOpBuilder(propertyBridge);
 		if (propertyBridge.getRefersToClassMap() != null) {
-			builder.addAliasedRelationBuilder(createRelationBuilder(propertyBridge.getRefersToClassMap()));
+			builder.addAliasedOpBuilder(createOpBuilder(propertyBridge.getRefersToClassMap()));
 		}
-		builder.addRelationBuilder(currentClassMapRelationBuilder);
+		builder.addOpBuilder(currentClassMapOpBuilder);
 		if (propertyBridge.getLimit() != LimitOp.NO_LIMIT) {
 			builder.setLimit(propertyBridge.getLimit());
 		}
@@ -203,9 +211,21 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 			builder.setOrderColumn(Microsyntax.parseColumn(propertyBridge.getOrder())); 
 			builder.setOrderDesc(propertyBridge.getOrderDesc().booleanValue());
 		}
+		if (propertyBridge.getSQLExpression() != null) {
+			Expression parsed = Microsyntax.parseSQLExpression(
+					propertyBridge.getSQLExpression(), 
+					GenericType.CHARACTER);
+			builder.addExtension(ProjectionSpec.createColumnNameFor(parsed), parsed);
+		}
+		if (propertyBridge.getUriSQLExpression() != null) {
+			Expression parsed = Microsyntax.parseSQLExpression(
+					propertyBridge.getUriSQLExpression(), 
+					GenericType.CHARACTER);
+			builder.addExtension(ProjectionSpec.createColumnNameFor(parsed), parsed);
+		}
 		NodeMaker objects = createNodeMaker(propertyBridge);
 		builder.addProjections(objects.projectionSpecs());
-		DatabaseOp tabular = builder.getTabular();
+		DatabaseOp tabular = builder.getOp();
 		for (Resource property: propertyBridge.getProperties()) {
 			NodeMaker predicates = new FixedNodeMaker(property.asNode());
 			currentClassMapTripleRelations.add(new TripleRelation(
@@ -215,12 +235,12 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		for (String pattern: propertyBridge.getDynamicPropertyPatterns()) {
 			NodeMaker predicates = new TypedNodeMaker(
 					TypedNodeMaker.URI, Microsyntax.parsePattern(pattern));
-			TabularBuilder dynamicBuilder = new TabularBuilder(
+			OpBuilder dynamicBuilder = new OpBuilder(
 					currentSQLConnection, overriddenColumnTypes);
-			dynamicBuilder.addRelationBuilder(builder);
+			dynamicBuilder.addOpBuilder(builder);
 			dynamicBuilder.addProjections(predicates.projectionSpecs());
 			currentClassMapTripleRelations.add(new TripleRelation(
-					currentSQLConnection, dynamicBuilder.getTabular(), 
+					currentSQLConnection, dynamicBuilder.getOp(), 
 					currentSubjects, predicates, objects));
 		}
 	}
@@ -231,17 +251,17 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		String mediaType = downloadMap.getMediaType();
 		ValueMaker mediaTypeMaker = mediaType == null ? ValueMaker.NULL : Microsyntax.parsePattern(mediaType);
 		NodeMaker nodeMaker = createNodeMaker(downloadMap);
-		TabularBuilder builder = createRelationBuilder(downloadMap);
+		OpBuilder builder = createOpBuilder(downloadMap);
 		builder.addProjections(nodeMaker.projectionSpecs());
 		builder.addProjection(ColumnProjectionSpec.create(
 				downloadMap.getContentDownloadColumn()));
 		builder.addProjections(mediaTypeMaker.projectionSpecs());
 		if (downloadMap.getBelongsToClassMap() != null) {
-			builder.addRelationBuilder(createRelationBuilder(downloadMap.getBelongsToClassMap()));
+			builder.addOpBuilder(createOpBuilder(downloadMap.getBelongsToClassMap()));
 		}
 		result.addDownloadRelation(new DownloadRelation(
 				currentSQLConnection,
-				builder.getTabular(),
+				builder.getOp(),
 				nodeMaker,
 				mediaTypeMaker,
 				downloadMap.getContentDownloadColumn()));
@@ -251,8 +271,8 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		// Translation tables don't need compiling.
 	}
 
-	private TabularBuilder createRelationBuilder(ResourceMap resourceMap) {
-		TabularBuilder result = new TabularBuilder(
+	private OpBuilder createOpBuilder(ResourceMap resourceMap) {
+		OpBuilder result = new OpBuilder(
 				currentSQLConnection, overriddenColumnTypes);
 		result.addJoinExpressions(resourceMap.getJoins());
 		result.addConditions(resourceMap.getConditions());
@@ -262,7 +282,7 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 	}
 	
 	private NodeMaker createNodeMaker(ResourceMap map) {
-		return new NodeMakerFactory(currentSQLConnection, mapping.getBaseIRI()).createFrom(map);
+		return new NodeMakerFactory(mapping.getBaseIRI()).createFrom(map);
 	}
 	
 	private void checkColumns(final DatabaseOp op) {

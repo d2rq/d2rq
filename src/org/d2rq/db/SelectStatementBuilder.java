@@ -17,6 +17,7 @@ import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.op.OrderOp;
 import org.d2rq.db.op.OrderOp.OrderSpec;
 import org.d2rq.db.op.ProjectOp;
+import org.d2rq.db.op.ProjectionSpec.ExprProjectionSpec;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.op.TableOp;
@@ -72,7 +73,8 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 
 	public List<ProjectionSpec> getColumnSpecs() {
 		run();
-		return queryStack.peek().toProjectionSpecs(input.getColumns());
+		return ProjectionSpec.createFromColumns(input.getColumns());
+//		return queryStack.peek().toProjectionSpecs(input.getColumns());
 	}
 	
 	@Override
@@ -93,7 +95,9 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 	@Override
 	public void visitLeave(ProjectOp table) {
 		for (ProjectionSpec spec: table.getProjections()) {
-			queryStack.peek().projections.put(spec.getColumn(), spec);
+			if (spec instanceof ExprProjectionSpec) {
+				queryStack.peek().projections.put(spec.getColumn(), spec);
+			}
 		}
 	}
 	

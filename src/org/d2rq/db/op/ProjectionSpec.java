@@ -61,7 +61,11 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 	 * @return A matching projection spec
 	 */
 	public static ProjectionSpec create(Expression expression, Vendor vendor) {
-		return new ExprProjectionSpec(expression, vendor);
+		return new ExprProjectionSpec(createColumnNameFor(expression), expression, vendor);
+	}
+
+	public static ProjectionSpec create(ColumnName column, Expression expression, Vendor vendor) {
+		return new ExprProjectionSpec(column, expression, vendor);
 	}
 
 	public static class ColumnProjectionSpec extends ProjectionSpec {
@@ -116,14 +120,13 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 		private final Vendor vendor;
 		private final ColumnName name;
 		private final Set<TableName> tables = new HashSet<TableName>();
-		private ExprProjectionSpec(Expression expression, Vendor vendor) {
+		private ExprProjectionSpec(ColumnName column, Expression expression, Vendor vendor) {
 			this.expression = expression;
 			this.vendor = vendor;
-			this.name = ColumnName.create(Identifier.createUndelimited(
-					"EXPR" + Integer.toHexString(expression.hashCode())));
-			for (ColumnName column: expression.getColumns()) {
-				if (column.isQualified()) {
-					tables.add(column.getQualifier());
+			this.name = column;
+			for (ColumnName col: expression.getColumns()) {
+				if (col.isQualified()) {
+					tables.add(col.getQualifier());
 				}
 			}
 		}
@@ -131,7 +134,8 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 			return expression;
 		}
 		public ProjectionSpec rename(Renamer renamer) {
-			return new ExprProjectionSpec(renamer.applyTo(expression), vendor);
+			return new ExprProjectionSpec(renamer.applyTo(name), 
+					renamer.applyTo(expression), vendor);
 		}
 		public ColumnName getColumn() {
 			return name;
@@ -149,13 +153,14 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 			return expression.getColumns();
 		}
 		@Override
-		public boolean equals(Object other) {
-			return (other instanceof ExprProjectionSpec) 
-					&& expression.equals(((ExprProjectionSpec) other).expression);
+		public boolean equals(Object o) {
+			if (!(o instanceof ExprProjectionSpec)) return false;
+			ExprProjectionSpec other = (ExprProjectionSpec) o;
+			return name.equals(other.name) && expression.equals(other.expression);
 		}
 		@Override
 		public int hashCode() {
-			return expression.hashCode() ^ 684036;
+			return name.hashCode() ^ expression.hashCode() ^ 684036;
 		}
 		@Override
 		public String toString() {
@@ -168,5 +173,14 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 			ExprProjectionSpec otherExpr = (ExprProjectionSpec) other;
 			return name.compareTo(otherExpr.name);
 		}
+	}
+	
+	/**
+	 * Returns a column name guaranteed to be unique to the given expression.
+	 * Subsequent invocations with the same expression return the same name.
+	 */
+	public static ColumnName createColumnNameFor(Expression expression) {
+		return ColumnName.create(Identifier.createUndelimited(
+				"EXPR_" + Integer.toHexString(expression.hashCode()).toUpperCase()));
 	}
 }

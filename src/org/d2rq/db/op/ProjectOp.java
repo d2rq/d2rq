@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
+import org.d2rq.db.expr.Expression;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Key;
 import org.d2rq.db.types.DataType;
+import org.d2rq.db.vendor.Vendor;
 
 
 /**
@@ -28,6 +31,17 @@ public class ProjectOp extends DatabaseOp.Wrapper {
 	
 	public static ProjectOp create(DatabaseOp wrapped, ProjectionSpec... specs) {
 		return new ProjectOp(Arrays.asList(specs), wrapped);
+	}
+	
+	public static DatabaseOp extend(DatabaseOp wrapped, 
+			Map<ColumnName,Expression> extensions, Vendor vendor) {
+		if (extensions.isEmpty()) return wrapped;
+		List<ProjectionSpec> specs = ProjectionSpec.createFromColumns(
+				wrapped.getColumns());
+		for (ColumnName column: extensions.keySet()) {
+			specs.add(ProjectionSpec.create(column, extensions.get(column), vendor));
+		}
+		return ProjectOp.create(wrapped, specs); 
 	}
 	
 	private final List<ProjectionSpec> projections = new ArrayList<ProjectionSpec>();

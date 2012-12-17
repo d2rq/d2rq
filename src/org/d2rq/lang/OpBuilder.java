@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,7 +49,7 @@ import org.d2rq.db.types.DataType.GenericType;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class TabularBuilder {
+public class OpBuilder {
 	private final SQLConnection sqlConnection;
 	private final Map<ColumnName,GenericType> overriddenColumnTypes;
 	private Set<TableName> mentionedTableNames = new HashSet<TableName>();
@@ -56,6 +57,7 @@ public class TabularBuilder {
 	private Set<ColumnListEquality> joinConditions = new HashSet<ColumnListEquality>();
 	private Map<ForeignKey,TableName> assertedForeignKeys = new HashMap<ForeignKey,TableName>();
 	private Map<TableName,AliasDeclaration> aliasDeclarations = new HashMap<TableName,AliasDeclaration>();
+	private final Map<ColumnName,Expression> extensions = new LinkedHashMap<ColumnName,Expression>();
 	private final List<ProjectionSpec> projections = new ArrayList<ProjectionSpec>();
 	private boolean containsDuplicates = true;
 	private ColumnName orderColumn = null;
@@ -63,7 +65,7 @@ public class TabularBuilder {
 	private int limit = LimitOp.NO_LIMIT;
 	private int limitInverse = LimitOp.NO_LIMIT;
 		
-	public TabularBuilder(SQLConnection database, 
+	public OpBuilder(SQLConnection database, 
 			Map<ColumnName,GenericType> overriddenColumnTypes) {
 		this.sqlConnection = database;
 		this.overriddenColumnTypes = overriddenColumnTypes;
@@ -108,6 +110,11 @@ public class TabularBuilder {
 		assertedForeignKeys.putAll(parsedJoins.getAssertedForeignKeys());
 	}
 	
+	public void addExtension(ColumnName column, Expression value) {
+		extensions.put(column, value);
+		registerColumns(value.getColumns());
+	}
+	
 	public void addProjection(ProjectionSpec projection) {
 		if (projections.contains(projection)) return;
 		projections.add(projection);
@@ -121,11 +128,12 @@ public class TabularBuilder {
 		}
 	}
 	
-	public void addRelationBuilder(TabularBuilder other) {
+	public void addOpBuilder(OpBuilder other) {
 		addCondition(other.condition);
 		addJoins(other.joinConditions);
 		assertedForeignKeys.putAll(other.assertedForeignKeys);
 		addAliasDeclarations(other.aliasDeclarations.values());
+		extensions.putAll(other.extensions);
 		addProjections(other.projections);
 		setContainsDuplicates(containsDuplicates && other.containsDuplicates);
 		if (other.orderColumn != null) {
@@ -138,12 +146,12 @@ public class TabularBuilder {
 	}
 	
 	/**
-	 * Adds information from another relation builder to this one,
+	 * Adds information from another op builder to this one,
 	 * applying this builder's alias mappings to the other one.
 	 *  
-	 * @param other A relation builder that potentially uses aliases declared in this builder
+	 * @param other An op builder that potentially uses aliases declared in this builder
 	 */
-	public void addAliasedRelationBuilder(TabularBuilder other) {
+	public void addAliasedOpBuilder(OpBuilder other) {
 		Renamer renamer = TableRenamer.create(createAliases(aliasDeclarations));
 		addCondition(renamer.applyTo(other.condition));
 		addJoins(renamer.applyToJoinConditions(other.joinConditions));
@@ -151,6 +159,10 @@ public class TabularBuilder {
 			assertedForeignKeys.put(
 					renamer.applyTo(entry.getValue(), entry.getKey()), 
 					entry.getValue());
+		}
+		for (Entry<ColumnName,Expression> entry: other.extensions.entrySet()) {
+			extensions.put(renamer.applyTo(entry.getKey()), 
+					renamer.applyTo(entry.getValue()));
 		}
 		addProjections(renamer.applyToProjections(other.projections));
 		if (other.orderColumn != null) {
@@ -253,7 +265,7 @@ public class TabularBuilder {
 				original.getTableDefinition().getForeignKeys()));
 	}
 	
-	public DatabaseOp getTabular() {
+	public DatabaseOp getOp() {
 		Collection<NamedOp> tables = new ArrayList<NamedOp>();
 		for (TableName name: mentionedTableNames) {
 			NamedOp t = getBaseTableOrAlias(name);
@@ -269,6 +281,7 @@ public class TabularBuilder {
 					new OrderSpec(new ColumnExpr(orderColumn), orderDesc));
 			result = new OrderOp(order, result);
 		}
+		result = ProjectOp.extend(result, extensions, sqlConnection.vendor());
 		result = ProjectOp.create(result, projections);
 		if (!containsDuplicates && result.getUniqueKeys().isEmpty()) {
 			List<Identifier> columns = new ArrayList<Identifier>();

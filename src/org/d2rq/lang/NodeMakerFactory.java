@@ -3,7 +3,7 @@ package org.d2rq.lang;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.d2rq.db.SQLConnection;
+import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.types.DataType.GenericType;
 import org.d2rq.nodes.FixedNodeMaker;
 import org.d2rq.nodes.NodeMaker;
@@ -13,9 +13,8 @@ import org.d2rq.pp.PrettyPrinter;
 import org.d2rq.values.BlankNodeIDValueMaker;
 import org.d2rq.values.ColumnValueMaker;
 import org.d2rq.values.DecoratingValueMaker;
-import org.d2rq.values.SQLExpressionValueMaker;
-import org.d2rq.values.ValueMaker;
 import org.d2rq.values.DecoratingValueMaker.ValueConstraint;
+import org.d2rq.values.ValueMaker;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
@@ -28,11 +27,9 @@ import com.hp.hpl.jena.datatypes.TypeMapper;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class NodeMakerFactory {
-	private final SQLConnection sqlConnection;
 	private final String baseURI;
 	
-	public NodeMakerFactory(SQLConnection sqlConnection, String baseURI) {
-		this.sqlConnection = sqlConnection;
+	public NodeMakerFactory(String baseURI) {
 		this.baseURI = baseURI;
 	}
 
@@ -98,10 +95,11 @@ public class NodeMakerFactory {
 				return Microsyntax.parsePattern(ensureIsAbsolute(map.getURIPattern()));
 			}
 			if (map.getUriSQLExpression() != null) {
-				return new SQLExpressionValueMaker(
-						Microsyntax.parseSQLExpression(
-								map.getUriSQLExpression(), 
-								GenericType.CHARACTER), sqlConnection.vendor());
+				return new ColumnValueMaker(
+						ProjectionSpec.createColumnNameFor(
+							Microsyntax.parseSQLExpression(
+									map.getUriSQLExpression(), 
+									GenericType.CHARACTER)));
 			}
 			return null;
 		}
@@ -154,10 +152,11 @@ public class NodeMakerFactory {
 			} else if (map.getPattern() != null) {
 				return Microsyntax.parsePattern(map.getPattern());
 			} else if (map.getSQLExpression() != null) {
-				return new SQLExpressionValueMaker(
-						Microsyntax.parseSQLExpression(
-								map.getSQLExpression(), 
-								GenericType.CHARACTER), sqlConnection.vendor());
+				return new ColumnValueMaker(
+						ProjectionSpec.createColumnNameFor(
+							Microsyntax.parseSQLExpression(
+									map.getSQLExpression(), 
+									GenericType.CHARACTER)));
 			} else {
 				return super.createRawValueMaker();
 			}
