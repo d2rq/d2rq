@@ -2,6 +2,8 @@ package de.fuberlin.wiwiss.d2rq.sql.vendor;
 
 import java.sql.Types;
 
+import de.fuberlin.wiwiss.d2rq.expr.BooleanToIntegerCaseExpression;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
