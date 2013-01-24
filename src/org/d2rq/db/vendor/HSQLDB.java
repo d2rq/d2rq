@@ -9,7 +9,7 @@ import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.SQLApproximateNumeric;
 import org.d2rq.db.types.SQLBinary;
-import org.d2rq.db.types.SQLCharacterString;
+import org.d2rq.db.types.SQLCharacterStringVarying;
 import org.d2rq.db.types.SQLInterval;
 import org.d2rq.db.types.UnsupportedDataType;
 
@@ -24,7 +24,7 @@ public class HSQLDB extends SQL92 {
 	public DataType getDataType(int jdbcType, String name, int size) {
 		// Doesn't support DISTINCT over LOB types
 		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
-			return new SQLCharacterString(name, false);
+			return new SQLCharacterStringVarying(name, false);
 		}
 		if (jdbcType == Types.BLOB) {
 			return new SQLBinary(name, false);

@@ -22,7 +22,7 @@ import org.d2rq.db.expr.SQLExpression;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.SQLApproximateNumeric;
 import org.d2rq.db.types.SQLBinary;
-import org.d2rq.db.types.SQLCharacterString;
+import org.d2rq.db.types.SQLCharacterStringVarying;
 import org.d2rq.db.types.SQLTimestamp;
 import org.d2rq.db.types.UnsupportedDataType;
 import org.d2rq.db.types.DataType.GenericType;
@@ -66,7 +66,7 @@ public class Oracle extends SQL92 {
 		
 		// Doesn't support DISTINCT over LOB types
 		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
-			return new SQLCharacterString(name, false);
+			return new SQLCharacterStringVarying(name, false);
 		}
 		if (jdbcType == Types.BLOB) {
 			return new SQLBinary(name, false);
@@ -87,7 +87,7 @@ public class Oracle extends SQL92 {
 		
 		// Oracle-specific character string types
 		if ("VARCHAR2".equals(name) || "NVARCHAR2".equals(name)) {
-			return new SQLCharacterString(name, true);
+			return new SQLCharacterStringVarying(name, true);
 		}
 
 		// Oracle-specific floating point types
