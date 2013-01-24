@@ -509,6 +509,8 @@ public class SystemLoader {
 		dataModel = null;
 		if (dataGraph != null) dataGraph.close();
 		dataGraph = null;
+		r2rmlReader = null;
+		d2rqReader = null;
 	}
 
 	/**
