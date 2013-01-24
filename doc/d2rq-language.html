@@ -983,6 +983,20 @@ map:ParentTopic a d2rq:PropertyBridge;
   aliased table. This pattern is typical for hierarchical
   or graph-style relationships.</p>
 
+<p>Note that the choice of alias name is arbitrary. The example
+  above would work on the same database schema
+  if <code>alias1</code> was used instead of
+  <code>ParentTopic</code>.</p>
+
+<p>Note: If the class map's definition contains multiple joined tables,
+  then typically a <code>d2rq:alias</code> has to be created for
+  each of these tables. For example, if the <code>map:Topic</code>
+  class map has a <code>d2rq:join</code> between tables <code>Topic</code>
+  and <code>TopicDetails</code>, then a second alias would be needed
+  in the example, like <code>"TopicDetails AS ParentTopicDetails"</code>.
+  The exception is if parent and child are supposed to both join to
+  the same record of the additional table.</p>
+
 
 <h3 id="example-constant">6.10 Example: Adding a constant property-value pair to each instance of a class map</h3>
 
