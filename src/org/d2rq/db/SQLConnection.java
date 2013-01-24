@@ -370,6 +370,10 @@ public class SQLConnection {
 				this.vendor = Vendor.SQLServer;
 			} else if (productName.indexOf("access") >= 0) {
 				this.vendor = Vendor.MSAccess;
+			} else if (productName.contains("sybase") || 
+					productName.contains("adaptive server enterprise") ||
+					"ase".equals(productName)) {
+				this.vendor = Vendor.Sybase;
 			} else if (productName.indexOf("hsql") >= 0) {
 				this.vendor = Vendor.HSQLDB;
 			} else {
