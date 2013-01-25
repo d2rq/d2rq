@@ -1,8 +1,6 @@
 package org.d2rq.lang;
 
-import java.io.IOException;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -135,16 +133,9 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 					database.getJDBCDriver(), database.getUsername(),
 					database.getPassword(), database.getConnectionProperties());
 			if (database.getStartupSQLScript() != null) {
-				try {
-					URI url = URI.create(database.getStartupSQLScript());
-					SQLScriptLoader.loadURI(url, sqlConnection.connection());
-				} catch (IOException ex) {
-					sqlConnection.close();
-					throw new D2RQException(ex);
-				} catch (SQLException ex) {
-					sqlConnection.close();
-					throw new D2RQException(ex);
-				}
+				SQLScriptLoader.loadURI(
+						URI.create(database.getStartupSQLScript()), 
+						sqlConnection.connection());
 			}
 		}
 		sqlConnection.setFetchSize(database.getFetchSize());

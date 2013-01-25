@@ -1,11 +1,9 @@
 package org.d2rq;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.MalformedInputException;
-import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -257,19 +255,7 @@ public class SystemLoader {
 			}
 			sqlConnection = new SQLConnection(jdbcURL, jdbcDriverClass, username, password);
 			if (sqlScript != null) {
-				try {
-					SQLScriptLoader.loadFile(new File(sqlScript), sqlConnection.connection());
-				} catch (IOException ex) {
-					sqlConnection.close();
-					throw new D2RQException(
-							"Error accessing SQL startup script: " + sqlScript,
-							D2RQException.STARTUP_SQL_SCRIPT_ACCESS);
-				} catch (SQLException ex) {
-					sqlConnection.close();
-					throw new D2RQException(
-							"Error importing " + sqlScript + " " + ex.getMessage(),
-							D2RQException.STARTUP_SQL_SCRIPT_SYNTAX);
-				}
+				SQLScriptLoader.loadFile(new File(sqlScript), sqlConnection.connection());
 			}
 		}
 		return sqlConnection;

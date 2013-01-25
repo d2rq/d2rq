@@ -1,7 +1,6 @@
 package org.d2rq;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -60,11 +59,7 @@ public class HSQLDatabase {
 	}
 	
 	public void executeSQL(String sql) {
-		try {
-			new SQLScriptLoader(new StringReader(sql), conn).execute();
-		} catch (SQLException ex) {
-			throw new RuntimeException(ex);
-		}
+		new SQLScriptLoader(new StringReader(sql), conn).execute();
 	}
 	
 	/**
@@ -80,11 +75,7 @@ public class HSQLDatabase {
 			} else {
 				SQLScriptLoader.loadFile(new File(filename), conn);
 			}
-		} catch (IOException ex) {
-			throw new RuntimeException(ex);
 		} catch (URISyntaxException ex) {
-			throw new RuntimeException(ex);
-		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
