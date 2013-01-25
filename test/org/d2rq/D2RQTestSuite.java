@@ -71,7 +71,11 @@ public class D2RQTestSuite {
 		// of the Direct Mapping, so are allowed to skip these:
 		// http://www.w3.org/TR/r2rml/#dfn-duplicate-row-preservation
 		"D005-1table3columns3rows2duplicates", 
-		"D012-2tables2duplicates0nulls"
+		"D012-2tables2duplicates0nulls",
+		// We strip trailing spaces from CHAR columns on retrieval.
+		// We assume that this is almost always what users want, and
+		// we don't want to expose this detail of SQL in the RDF.
+		"D018-1table1primarykey2columns3rows",
 	};
 	
 	public static final String[] SKIPPED_R2RML_TESTS = {
@@ -94,6 +98,10 @@ public class D2RQTestSuite {
 		"tc0007f",
 		"tc0008a",
 		"tc0009b",
+		// We strip trailing spaces from CHAR columns on retrieval.
+		// We assume that this is almost always what users want, and
+		// we don't want to expose this detail of SQL in the RDF.
+		"tc0018a",
 	};
 	
 	public static void main(String[] args) {

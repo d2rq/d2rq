@@ -125,14 +125,14 @@ public class HSQLDBDatatypeTest extends DatatypeTestBase {
 	public void testChar_3() {
 		createMapping("CHAR_3");
 		assertMappedType("xsd:string");
-		assertValues(new String[]{"   ", "AOU", "\u00C4\u00D6\u00DC"});
+		assertValues(new String[]{"", "AOU", "\u00C4\u00D6\u00DC"});
 	}
 	
 	@Test
 	public void testChar() {
 		createMapping("CHAR");
 		assertMappedType("xsd:string");
-		assertValues(new String[]{" ", "A", "\u00C4"});
+		assertValues(new String[]{"", "A", "\u00C4"});
 	}
 	
 	private final static String[] VARCHAR_VALUES = 

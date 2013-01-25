@@ -31,6 +31,7 @@ public class SQLCharacterString extends DataType {
 	@Override
 	public String value(ResultSet resultSet, int column) throws SQLException {
 		String value = super.value(resultSet, column);
+		if (value == null) return null;
 		// Strip trailing spaces
 		int i = value.length() - 1;
 		while (i >= 0 && value.charAt(i) == ' ') {
