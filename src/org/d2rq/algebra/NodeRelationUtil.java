@@ -98,6 +98,11 @@ public class NodeRelationUtil {
 			if (!original.getBindingMaker().has(var)) continue;
 			projections.addAll(original.nodeMaker(var).projectionSpecs());
 		}
+		if (new HashSet<ProjectionSpec>(ProjectionSpec.createFromColumns(
+				original.getBaseTabular().getColumns())).equals(projections)) {
+			// The original already has exactly the columns we need, no need to project
+			return original;
+		}
 		return new NodeRelationProjecter(original, projections).getNodeRelation();
 	}
 	

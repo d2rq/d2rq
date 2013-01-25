@@ -5,19 +5,18 @@ import java.util.Collection;
 import java.util.List;
 
 import org.d2rq.db.SQLConnection;
-import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.AliasOp;
+import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.EmptyOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.LimitOp;
+import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.OrderOp;
 import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.util.OpMutator;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.op.TableOp;
-import org.d2rq.db.op.DatabaseOp;
-import org.d2rq.db.renamer.TableRenamer;
+import org.d2rq.db.op.util.OpMutator;
 import org.d2rq.nodes.BindingMaker;
 
 
@@ -109,13 +108,11 @@ public class NodeRelationOrderer extends OpMutator {
 	 * ordering is done before LIMIT in SQL. So we have to wrap the entire
 	 * thing into a sub-SELECT, order the results of that sub-SELECT, and
 	 * rename everything in the node makers to use the new table name.
-	 * 
-	 * FIXME: Handle column name clashes like TABLE1.COL, TABLE2.COL which has to become ALIAS.TABLE1_COL, ALIAS.TABLE2_COL or something like that
 	 */
 	@Override
 	public DatabaseOp visitLeave(LimitOp original, DatabaseOp child) {
 		AliasOp alias = AliasOp.createWithUniqueName(original, "LIMIT");
-		bindingMaker = bindingMaker.rename(TableRenamer.create(alias));
+		bindingMaker = bindingMaker.rename(alias.getRenamer());
 		return new OrderOp(orderSpecs, alias);
 	}
 	

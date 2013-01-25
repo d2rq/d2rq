@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.d2rq.db.renamer.TableRenamer;
+import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.schema.Key;
@@ -12,7 +12,9 @@ import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 
 
-
+/**
+ * FIXME: Handle column name clashes like TABLE1.COL, TABLE2.COL which have to be made unique (e.g., ALIAS.TABLE1_COL, ALIAS.TABLE2_COL)
+ */
 public class AliasOp extends NamedOp {
 	private final Identifier name;
 	private final DatabaseOp original;
@@ -66,7 +68,8 @@ public class AliasOp extends NamedOp {
 			columns.add(ColumnName.create(getTableName(), column.getColumn()));
 		}
 		for (Key key: original.getUniqueKeys()) {
-			uniqueKeys.add(TableRenamer.create(this).applyTo(original.getTableName(), key));
+			// FIXME: This works only because we don't handle column name clashes
+			uniqueKeys.add(key);
 		}
 	}
 	
@@ -80,6 +83,24 @@ public class AliasOp extends NamedOp {
 	public ColumnName getOriginalColumnName(ColumnName aliasedName) {
 		if (!hasColumn(aliasedName)) return null;
 		return ColumnName.create(original.getTableName(), aliasedName.getColumn());
+	}
+	
+	/**
+	 * Returns a {@link Renamer} that replaces references in the original
+	 * {@link Op} with the aliased versions of these references.
+	 */
+	public Renamer getRenamer() {
+		// FIXME: This just ignores the old column name and uses the alias name instead. That works only because we don't handle column clashes.
+		return new Renamer() {
+			@Override
+			public ColumnName applyTo(ColumnName original) {
+				return getTableName().qualifyColumn(original);
+			}
+			@Override
+			public TableName applyTo(TableName original) {
+				return getTableName();
+			}
+		};
 	}
 	
 	public List<ColumnName> getColumns() {

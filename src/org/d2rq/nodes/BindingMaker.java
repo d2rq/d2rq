@@ -97,8 +97,10 @@ public class BindingMaker {
 	}
 
 	public BindingMaker rename(Renamer renamer) {
-		Map<Var,NodeMaker> renamedNodeMakers = new HashMap<Var,NodeMaker>(nodeMakers);
-		renamer.applyToNodeMakers(nodeMakers);
+		Map<Var,NodeMaker> renamedNodeMakers = new HashMap<Var,NodeMaker>();
+		for (Var var: nodeMakers.keySet()) {
+			renamedNodeMakers.put(var, renamer.applyTo(nodeMakers.get(var)));
+		}
 		return new BindingMaker(renamedNodeMakers, 
 				condition == null ? null : renamer.applyTo(condition));
 	}

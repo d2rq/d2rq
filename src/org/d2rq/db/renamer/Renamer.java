@@ -1,17 +1,17 @@
 package org.d2rq.db.renamer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.d2rq.db.expr.ColumnListEquality;
 import org.d2rq.db.expr.Expression;
-import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.util.OpRenamer;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.DatabaseOp;
+import org.d2rq.db.op.OrderOp.OrderSpec;
+import org.d2rq.db.op.ProjectionSpec;
+import org.d2rq.db.op.util.OpRenamer;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
@@ -19,11 +19,9 @@ import org.d2rq.db.schema.Key;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.nodes.FixedNodeMaker;
 import org.d2rq.nodes.NodeMaker;
+import org.d2rq.nodes.NodeMaker.EmptyNodeMaker;
 import org.d2rq.nodes.NodeMakerVisitor;
 import org.d2rq.nodes.TypedNodeMaker;
-import org.d2rq.nodes.NodeMaker.EmptyNodeMaker;
-
-import com.hp.hpl.jena.sparql.core.Var;
 
 
 /**
@@ -102,7 +100,7 @@ public abstract class Renamer {
 		return original.rename(this);
 	}
 	
-	public List<ProjectionSpec> applyToProjections(List<ProjectionSpec> projections) {
+	public Collection<ProjectionSpec> applyToProjections(Collection<ProjectionSpec> projections) {
 		List<ProjectionSpec> result = new ArrayList<ProjectionSpec>();
 		for (ProjectionSpec projection: projections) {
 			result.add(applyTo(projection));
@@ -129,22 +127,14 @@ public abstract class Renamer {
 	public NodeMaker applyTo(final NodeMaker nodeMaker) {
 		return new NodeMakerVisitor() {
 			private NodeMaker result = nodeMaker;
+			public NodeMaker getResult() { nodeMaker.accept(this); return result; }
 			public void visit(TypedNodeMaker nodeMaker) {
 				result = new TypedNodeMaker(nodeMaker.getNodeType(), 
 							nodeMaker.getValueMaker().rename(Renamer.this));
 			}
 			public void visit(FixedNodeMaker nodeMaker) {}
 			public void visit(EmptyNodeMaker nodeMaker) {}
-		}.result;
-	}
-	
-	/**
-	 * Replaces the node makers in the map with renamed versions.
-	 */
-	public void applyToNodeMakers(Map<Var,NodeMaker> nodeMakers) {
-		for (Var var: nodeMakers.keySet()) {
-			nodeMakers.put(var, applyTo(nodeMakers.get(var)));
-		}
+		}.getResult();
 	}
 	
 	public List<ColumnName> applyToColumns(List<ColumnName> columns) {

@@ -1,5 +1,6 @@
 package org.d2rq.db.expr;
 
+import static org.d2rq.db.schema.TableName.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -10,10 +11,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.d2rq.db.DummyDB;
-import org.d2rq.db.expr.Expression;
-import org.d2rq.db.expr.SQLExpression;
-import org.d2rq.db.op.AliasOp;
 import org.d2rq.db.renamer.ColumnRenamer;
 import org.d2rq.db.renamer.TableRenamer;
 import org.d2rq.db.schema.ColumnName;
@@ -73,10 +70,9 @@ public class SQLExpressionTest {
 	
 	@Test
 	public void testRenameColumnsWithAliasMap() {
-		AliasOp a = AliasOp.create(DummyDB.createTable("FOO"), "BAR");
 		assertEquals(Microsyntax.parseSQLExpression("BAR.col1 = BAZ.col1", GenericType.BOOLEAN),
 				Microsyntax.parseSQLExpression("FOO.col1 = BAZ.col1", GenericType.BOOLEAN).rename(
-						TableRenamer.create(a)));
+						TableRenamer.create(parse("FOO"), parse("BAR"))));
 	}
 	
 	@Test

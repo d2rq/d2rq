@@ -6,11 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.d2rq.db.DummyDB;
 import org.d2rq.db.DummyDB.DummyTable;
-import org.d2rq.db.expr.Constant;
-import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.AliasOp;
 import org.d2rq.db.op.DatabaseOp;
-import org.d2rq.db.renamer.TableRenamer;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType.GenericType;
@@ -60,7 +57,7 @@ public class ExpressionTest {
 		assertTrue(expr.getColumns().isEmpty());
 		assertFalse(expr.isFalse());
 		assertFalse(expr.isTrue());
-		assertEquals(expr, expr.rename(TableRenamer.create(alias)));
+		assertEquals(expr, expr.rename(alias.getRenamer()));
 	}
 	
 	@Test

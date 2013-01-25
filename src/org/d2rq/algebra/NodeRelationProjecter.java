@@ -5,21 +5,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.d2rq.db.SQLConnection;
-import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.AliasOp;
+import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.DistinctOp;
 import org.d2rq.db.op.EmptyOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.LimitOp;
+import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.OrderOp;
 import org.d2rq.db.op.ProjectOp;
+import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.op.TableOp;
-import org.d2rq.db.op.ProjectionSpec;
-import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.util.OpMutator;
-import org.d2rq.db.renamer.TableRenamer;
 import org.d2rq.nodes.BindingMaker;
 
 
@@ -34,9 +33,9 @@ import org.d2rq.nodes.BindingMaker;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class NodeRelationProjecter extends OpMutator {
-	private final Set<ProjectionSpec> projections;
-	private BindingMaker bindingMaker;
 	private final SQLConnection sqlConnection;
+	private Set<ProjectionSpec> projections;
+	private BindingMaker bindingMaker;
 	
 	public NodeRelationProjecter(NodeRelation original, Set<ProjectionSpec> projections) {
 		super(original.getBaseTabular());
@@ -139,13 +138,12 @@ public class NodeRelationProjecter extends OpMutator {
 	 * result. So we have to wrap the entire
 	 * thing into a sub-SELECT, apply DISTINCT on the sub-SELECT, and
 	 * rename everything in the node makers to use the new table name.
-	 * 
-	 * FIXME: Handle column name clashes like TABLE1.COL, TABLE2.COL which has to become ALIAS.TABLE1_COL, ALIAS.TABLE2_COL or something like that
 	 */
 	@Override
 	public DatabaseOp visitLeave(DistinctOp original, DatabaseOp child) {
 		AliasOp alias = AliasOp.createWithUniqueName(original, "PROJECT");
-		bindingMaker = bindingMaker.rename(TableRenamer.create(alias));
+		bindingMaker = bindingMaker.rename(alias.getRenamer());
+		projections = new HashSet<ProjectionSpec>(alias.getRenamer().applyToProjections(projections));
 		return ProjectOp.create(alias, projections);
 	}
 
