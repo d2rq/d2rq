@@ -19,6 +19,7 @@ import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.op.TableOp;
 import org.d2rq.db.op.util.OpMutator;
+import org.d2rq.db.op.util.OpUtil;
 import org.d2rq.nodes.BindingMaker;
 
 
@@ -90,14 +91,18 @@ public class NodeRelationProjecter extends OpMutator {
 	}
 
 	/**
-	 * Merge the projection lists.
+	 * Intersect the projection lists.
 	 */
 	@Override
 	public DatabaseOp visitLeave(ProjectOp original, DatabaseOp child) {
-		Set<ProjectionSpec> mergedProjections = 
-			new HashSet<ProjectionSpec>(projections);
-		projections.addAll(original.getProjections());
-		return ProjectOp.create(original.getWrapped(), mergedProjections);
+		Set<ProjectionSpec> intersectedProjections = 
+			new HashSet<ProjectionSpec>();
+		for (ProjectionSpec p: projections) {
+			if (original.getProjections().contains(p)) {
+				intersectedProjections.add(p);
+			}
+		}
+		return ProjectOp.create(original.getWrapped(), intersectedProjections);
 	}
 
 	@Override
@@ -128,19 +133,51 @@ public class NodeRelationProjecter extends OpMutator {
 		return wrap(original);
 	}
 
-	@Override
-	public boolean visitEnter(DistinctOp original) {
-		return false;
-	}
-
 	/**
-	 * We have a DISTINCT clause; adding or removing columns would change the
-	 * result. So we have to wrap the entire
-	 * thing into a sub-SELECT, apply DISTINCT on the sub-SELECT, and
+	 * We have a DISTINCT clause. Doing the projection inside the DISTINCT
+	 * clause (that is, adding or removing columns inside the DISTNCT) is
+	 * preferrable, but only possible if all we do is adding new derived
+	 * columns, or removing columns known to be constant throughout the
+	 * table. Otherwise, pushing the projection down would change the result
+	 * and is invalid.
+	 * 
+	 * If we can't push down, then we have to wrap the original DISTINCT
+	 * into a sub-SELECT, apply the projection on the sub-SELECT, and
 	 * rename everything in the node makers to use the new table name.
 	 */
 	@Override
+	public boolean visitEnter(DistinctOp original) {
+		Set<ProjectionSpec> discardedColumns = new HashSet<ProjectionSpec>(
+				ProjectionSpec.createFromColumns(original.getColumns()));
+		for (ProjectionSpec requiredProjection: projections) {
+			discardedColumns.remove(requiredProjection);
+		}
+		// discardedColumns now contains all columns in the original
+		// that we don't need in the projection
+		for (ProjectionSpec discardedSpec: discardedColumns) {
+			if (!OpUtil.isConstantColumn(original, discardedSpec.getColumn())) {
+				// We are dropping a non-constant column. This cannot be
+				// pushed down into the DISTINCT, so stop recursion, and
+				// wrap the DISTINCT into a PROJECT op on the way out.
+				return false;
+			}
+		}
+		// Recurse and apply the projection inside the DISTINCT
+		return true;
+	}
+
+	@Override
 	public DatabaseOp visitLeave(DistinctOp original, DatabaseOp child) {
+		if (new HashSet<ProjectionSpec>(ProjectionSpec.createFromColumns(
+				child.getColumns())).equals(projections)) {
+			// The child already has exactly the right columns, so evidently
+			// we have recursed and applied the projection inside the child.
+			// Just create a new DISTINCT wrapping the child.
+			return super.visitLeave(original, child);
+		}
+
+		// We did not recurse, and need to apply the projection around the
+		// DISTINCT, creating an alias (SQL subquery) first.
 		AliasOp alias = AliasOp.createWithUniqueName(original, "PROJECT");
 		bindingMaker = bindingMaker.rename(alias.getRenamer());
 		projections = new HashSet<ProjectionSpec>(alias.getRenamer().applyToProjections(projections));

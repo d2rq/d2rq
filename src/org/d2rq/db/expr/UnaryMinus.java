@@ -34,6 +34,18 @@ public class UnaryMinus extends Expression {
 		return false;
 	}
 
+	public boolean isConstant() {
+		return base.isConstant();
+	}
+
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
+			boolean constIfFalse, boolean constIfConstantValue) {
+		if (constIfConstantValue) {
+			return base.isConstantColumn(column, false, false, true);
+		}
+		return false;
+	}
+
 	public Expression rename(Renamer columnRenamer) {
 		return new UnaryMinus(base.rename(columnRenamer));
 	}

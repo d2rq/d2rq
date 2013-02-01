@@ -57,6 +57,19 @@ public class Equality extends BinaryOperator {
 		return expr1.equals(expr2);
 	}
 
+	@Override
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue,
+			boolean constIfFalse, boolean constIfConstantValue) {
+		if (!constIfTrue) return false;
+		if (expr1.isConstant()) {
+			return (expr2.isConstantColumn(column, false, false, true));
+		}
+		if (expr2.isConstant()) {
+			return (expr1.isConstantColumn(column, false, false, true));
+		}
+		return false;
+	}
+
 	public Expression rename(Renamer columnRenamer) {
 		return new Equality(
 				expr1.rename(columnRenamer), 

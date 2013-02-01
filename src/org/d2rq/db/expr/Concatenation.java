@@ -59,6 +59,24 @@ public class Concatenation extends Expression {
 		return false;
 	}
 
+	public boolean isConstant() {
+		for (Expression expression: parts) {
+			if (!expression.isConstant()) return false;
+		}
+		return true;
+	}
+
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
+			boolean constIfFalse, boolean constIfConstantValue) {
+		if (!constIfConstantValue) return false;
+		for (Expression expression: parts) {
+			if (expression.isConstant()) continue;
+			if (expression.isConstantColumn(column, false, false, true)) continue;
+			return false;
+		}
+		return true;
+	}
+
 	public Expression rename(Renamer columnRenamer) {
 		Expression[] renamedExpressions = new Expression[parts.length];
 		for (int i = 0; i < parts.length; i++) {

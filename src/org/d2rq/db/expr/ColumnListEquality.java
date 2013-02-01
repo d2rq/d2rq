@@ -103,6 +103,17 @@ public class ColumnListEquality extends Expression {
 	}
 
 	@Override
+	public boolean isConstant() {
+		return false;
+	}
+
+	@Override
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
+			boolean constIfFalse, boolean constIfConstantValue) {
+		return false;
+	}
+
+	@Override
 	public Set<ColumnName> getColumns() {
 		return otherSide.keySet();
 	}

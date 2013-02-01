@@ -79,6 +79,17 @@ public class SQLExpression extends Expression {
 		return false;
 	}
 	
+	public boolean isConstant() {
+		// As far as we know, the SQL expression may involve some columns,
+		// and therefore not be constant throughout the table
+		return false;
+	}
+	
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
+			boolean constIfFalse, boolean constIfConstantValue) {
+		return false;
+	}
+
 	public Set<ColumnName> getColumns() {
 		return this.columnsAsSet;
 	}

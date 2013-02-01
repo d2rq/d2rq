@@ -56,11 +56,11 @@ public class Key implements Iterable<Identifier>, Comparable<Key> {
 		for (Identifier ourColumn: this) {
 			boolean found = false;
 			for (ColumnName theirColumn: columns) {
-				if (found) {
-					// Ambiguous column
-					return false;
-				}
 				if (theirColumn.getColumn().equals(ourColumn)) {
+					if (found) {
+						// Ambiguous column
+						return false;
+					}
 					found = true;
 				}
 			}

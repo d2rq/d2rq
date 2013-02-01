@@ -39,6 +39,15 @@ public class BooleanToIntegerCaseExpression extends Expression {
 		return base.isTrue();
 	}
 
+	public boolean isConstant() {
+		return base.isConstant();
+	}
+
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue,
+			boolean constIfFalse, boolean constIfConstantValue) {
+		return base.isConstantColumn(column, constIfTrue, constIfFalse, constIfConstantValue);
+	}
+
 	public Expression rename(Renamer columnRenamer) {
 		return new BooleanToIntegerCaseExpression(base.rename(columnRenamer));
 	}

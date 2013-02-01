@@ -29,6 +29,19 @@ public class ColumnExpr extends Expression {
 		return false;
 	}
 
+	public boolean isConstant() {
+		return false;
+	}
+
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
+			boolean constIfFalse, boolean constIfConstantValue) {
+		if (constIfConstantValue) {
+			return this.column.equals(column);
+		}
+		// TODO: If it's a boolean column (and not some other column implicitly cast to boolean), then we can answer true
+		return false;
+	}
+
 	public Expression rename(Renamer columnRenamer) {
 		return new ColumnExpr(columnRenamer.applyTo(column));
 	}

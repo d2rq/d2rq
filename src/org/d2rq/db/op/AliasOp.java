@@ -87,7 +87,7 @@ public class AliasOp extends NamedOp {
 	
 	/**
 	 * Returns a {@link Renamer} that replaces references in the original
-	 * {@link Op} with the aliased versions of these references.
+	 * {@link DatabaseOp} with the aliased versions of these references.
 	 */
 	public Renamer getRenamer() {
 		// FIXME: This just ignores the old column name and uses the alias name instead. That works only because we don't handle column clashes.

@@ -42,6 +42,22 @@ public abstract class BinaryOperator extends Expression {
 		return false;
 	}
 
+	public boolean isConstant() {
+		return expr1.isConstant() && expr2.isConstant();
+	}
+
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
+			boolean constIfFalse, boolean constIfConstantValue) {
+		if (!constIfConstantValue) return false;
+		if (expr1.isConstant()) {
+			return expr2.isConstantColumn(column, false, false, true);
+		}
+		if (expr2.isConstant()) {
+			return expr1.isConstantColumn(column, false, false, true);
+		}
+		return false;
+	}
+
 	public DataType getDataType(DatabaseOp table, Vendor vendor) {
 		return dataType.dataTypeFor(vendor);
 	}

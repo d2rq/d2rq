@@ -74,6 +74,24 @@ public class Disjunction extends Expression {
 		return false;
 	}
 	
+	public boolean isConstant() {
+		boolean onlyConstants = true;
+		for (Expression expression: expressions) {
+			if (!expression.isConstant()) onlyConstants = false;
+			if (expression.isTrue()) return true;
+		}
+		return onlyConstants;
+	}
+
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue,
+			boolean constIfFalse, boolean constIfConstantValue) {
+		if (!constIfFalse) return false;
+		for (Expression expression: expressions) {
+			if (expression.isConstantColumn(column, false, true, false)) return true;
+		}
+		return false;
+	}
+
 	public Set<ColumnName> getColumns() {
 		return this.columns;
 	}

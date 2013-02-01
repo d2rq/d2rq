@@ -27,10 +27,22 @@ public class NotNull extends Expression {
 	}
 
 	public boolean isFalse() {
+		// TODO: If we knew the DatabaseOp here, we could answer precisely
 		return false;
 	}
 
 	public boolean isTrue() {
+		// TODO: If we knew the DatabaseOp here, we could answer precisely
+		return false;
+	}
+
+	public boolean isConstant() {
+		// TODO: If we knew the DatabaseOp here, we could answer precisely
+		return expr.isConstant();
+	}
+	
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue,
+			boolean constIfFalse, boolean constIfConstantValue) {
 		return false;
 	}
 

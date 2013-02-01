@@ -38,6 +38,8 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 	
 	public abstract Set<ColumnName> getColumns();
 	
+	public abstract boolean isConstant();
+	
 	public static ProjectionSpec create(ColumnName column) {
 		return new ColumnProjectionSpec(column);
 	}
@@ -92,6 +94,9 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 		}
 		public Set<ColumnName> getColumns() {
 			return Collections.singleton(column);
+		}
+		public boolean isConstant() {
+			return false;
 		}
 		@Override
 		public String toString() {
@@ -151,6 +156,9 @@ public abstract class ProjectionSpec implements Comparable<ProjectionSpec> {
 		}
 		public Set<ColumnName> getColumns() {
 			return expression.getColumns();
+		}
+		public boolean isConstant() {
+			return expression.isConstant();
 		}
 		@Override
 		public boolean equals(Object o) {

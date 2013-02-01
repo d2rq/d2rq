@@ -38,6 +38,21 @@ public class Negation extends Expression {
 		return base.isFalse();
 	}
 
+	public boolean isConstant() {
+		return base.isConstant();
+	}
+	
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
+			boolean constIfFalse, boolean constIfConstantValue) {
+		if (constIfTrue) {
+			return base.isConstantColumn(column, false, true, false);
+		}
+		if (constIfFalse) {
+			return base.isConstantColumn(column, true, false, false);
+		}
+		return base.isConstantColumn(column, false, false, true);
+	}
+
 	public Expression rename(Renamer columnRenamer) {
 		return new Negation(base.rename(columnRenamer));
 	}
