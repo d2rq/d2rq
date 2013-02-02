@@ -110,6 +110,11 @@ public class Constant extends Expression {
 		return this;
 	}
 
+	@Override
+	public Expression substitute(ColumnName column, Expression substitution) {
+		return this;
+	}
+
 	public String toSQL(DatabaseOp table, Vendor vendor) {
 		return getDataType(table, vendor).toSQLLiteral(value, vendor);
 	}

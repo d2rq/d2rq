@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.lang.AliasDeclaration;
@@ -139,7 +139,7 @@ public class D2RQTarget implements Target {
 
 	public void generateRefProperty(Property property, 
 			TableName table, ForeignKey foreignKey) {
-		Key localColumns = foreignKey.getLocalColumns();
+		IdentifierList localColumns = foreignKey.getLocalColumns();
 		TableName referencedTable = foreignKey.getReferencedTable();
 		PropertyBridge bridge = new PropertyBridge(
 				getPropertyBridgeResource(table, localColumns));
@@ -226,7 +226,7 @@ public class D2RQTarget implements Target {
 				IRIEncoder.encode(stringMaker.toString(table, column)));
 	}
 	
-	private Resource getPropertyBridgeResource(TableName table, Key columns) {
+	private Resource getPropertyBridgeResource(TableName table, IdentifierList columns) {
 		return model.createResource(mapNamespaceURI + 
 				IRIEncoder.encode(stringMaker.toString(table, columns) + "__ref"));
 	}

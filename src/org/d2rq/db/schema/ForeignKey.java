@@ -8,21 +8,21 @@ package org.d2rq.db.schema;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class ForeignKey {	
-	private final Key localKey;
-	private final Key referencedKey;
+	private final IdentifierList localKey;
+	private final IdentifierList referencedKey;
 	private final TableName referencedTable;
 	
-	public ForeignKey(Key localColumns, Key referencedColumns, TableName referencedTable) {
+	public ForeignKey(IdentifierList localColumns, IdentifierList referencedColumns, TableName referencedTable) {
 		this.localKey = localColumns;
 		this.referencedKey = referencedColumns;
 		this.referencedTable = referencedTable;
 	}
 	
-	public Key getLocalColumns() {
+	public IdentifierList getLocalColumns() {
 		return localKey;
 	}
 	
-	public Key getReferencedColumns() {
+	public IdentifierList getReferencedColumns() {
 		return referencedKey;
 	}
 	

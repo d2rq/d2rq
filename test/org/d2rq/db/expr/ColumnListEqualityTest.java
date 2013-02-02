@@ -8,7 +8,7 @@ import java.util.Collections;
 import org.d2rq.db.renamer.ColumnRenamer;
 import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.schema.ColumnName;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +44,7 @@ public class ColumnListEqualityTest {
 
 	@Test
 	public void testToStringRetainsAttributeOrder() {
-		ColumnListEquality join = ColumnListEquality.create(t1, Key.create(t1foo, t1bar), t2, Key.create(t2bar, t2foo));
+		ColumnListEquality join = ColumnListEquality.create(t1, IdentifierList.create(t1foo, t1bar), t2, IdentifierList.create(t2bar, t2foo));
 		assertEquals("(t1.foo=t2.bar AND t1.bar=t2.foo)", join.toString());
 	}
 

@@ -10,7 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.d2rq.db.op.ProjectionSpec;
+import org.d2rq.db.schema.ColumnList;
+import org.d2rq.db.schema.ColumnName;
 
 
 /**
@@ -21,19 +22,19 @@ import org.d2rq.db.op.ProjectionSpec;
  */
 public class ResultRow {
 	public static final ResultRow NO_ATTRIBUTES = 
-			new ResultRow(Collections.<ProjectionSpec,String>emptyMap());
+			new ResultRow(Collections.<ColumnName,String>emptyMap());
 
-	public static ResultRow createOne(ProjectionSpec column, String value) {
+	public static ResultRow createOne(ColumnName column, String value) {
 		return new ResultRow(Collections.singletonMap(column, value));
 	}
 	
 	public static ResultRow fromResultSet(ResultSet resultSet, 
-			List<ProjectionSpec> projectionSpecs, SQLConnection database) 
+			ColumnList columns, SQLConnection database) 
 	throws SQLException {
-		Map<ProjectionSpec,String> result = new HashMap<ProjectionSpec,String>();
+		Map<ColumnName,String> result = new HashMap<ColumnName,String>();
 		ResultSetMetaData metaData = resultSet.getMetaData();
-		for (int i = 0; i < projectionSpecs.size(); i++) {
-			ProjectionSpec key = projectionSpecs.get(i);
+		for (int i = 0; i < columns.size(); i++) {
+			ColumnName key = columns.get(i);
 			int jdbcType = metaData == null ? Integer.MIN_VALUE : metaData.getColumnType(i + 1);
 			String name = metaData == null ? "UNKNOWN" : metaData.getColumnTypeName(i + 1);
 			result.put(key, database.vendor().getDataType(jdbcType, name.toUpperCase(), -1).value(resultSet, i + 1));
@@ -41,26 +42,26 @@ public class ResultRow {
 		return new ResultRow(result);
 	}
 	
-	private final Map<ProjectionSpec,String> projectionsToValues;
+	private final Map<ColumnName,String> columnsToValues;
 	
-	public ResultRow(Map<ProjectionSpec,String> projectionsToValues) {
-		this.projectionsToValues = projectionsToValues;
+	public ResultRow(Map<ColumnName,String> columnsToValues) {
+		this.columnsToValues = columnsToValues;
 	}
 	
-	public String get(ProjectionSpec projection) {
-		return (String) this.projectionsToValues.get(projection);
+	public String get(ColumnName column) {
+		return (String) this.columnsToValues.get(column);
 	}
 
 	public String toString() {
-		List<ProjectionSpec> columns = new ArrayList<ProjectionSpec>(this.projectionsToValues.keySet());
+		List<ColumnName> columns = new ArrayList<ColumnName>(this.columnsToValues.keySet());
 		Collections.sort(columns);
 		StringBuffer result = new StringBuffer("{");
-		Iterator<ProjectionSpec> it = columns.iterator();
+		Iterator<ColumnName> it = columns.iterator();
 		while (it.hasNext()) {
-			ProjectionSpec projection = (ProjectionSpec) it.next();
-			result.append(projection.toString());
+			ColumnName column = (ColumnName) it.next();
+			result.append(column.toString());
 			result.append(" => '");
-			result.append(this.projectionsToValues.get(projection));
+			result.append(this.columnsToValues.get(column));
 			result.append("'");
 			if (it.hasNext()) {
 				result.append(", ");

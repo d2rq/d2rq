@@ -11,8 +11,9 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.d2rq.db.expr.ColumnListEquality;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 
@@ -33,7 +34,7 @@ import org.d2rq.db.types.DataType;
 public class InnerJoinOp implements DatabaseOp {
 	
 	public static DatabaseOp join(NamedOp table1, NamedOp table2, 
-			Key key1, Key key2) {
+			IdentifierList key1, IdentifierList key2) {
 		Collection<NamedOp> tables = new HashSet<NamedOp>();
 		tables.add(table1);
 		tables.add(table2);
@@ -60,13 +61,16 @@ public class InnerJoinOp implements DatabaseOp {
 		new TreeMap<TableName,NamedOp>();
 	private final Map<ColumnName,NamedOp> byColumn =
 		new HashMap<ColumnName,NamedOp>();
-	private final List<ColumnName> columns = new ArrayList<ColumnName>();
+	private final ColumnList columns;
 	private final Set<ColumnListEquality> joins;
 
 	private InnerJoinOp(Collection<NamedOp> tables, Set<ColumnListEquality> joins) {
 		this.joins = joins;
+		List<ColumnName> columns = new ArrayList<ColumnName>();
 		for (NamedOp table: tables) {
-			columns.addAll(table.getColumns());
+			for (ColumnName column: table.getColumns()) {
+				columns.add(column);
+			}
 			tablesByName.put(table.getTableName(), table);
 			for (ColumnName column: table.getColumns()) {
 				if (column.isQualified()) {
@@ -79,6 +83,7 @@ public class InnerJoinOp implements DatabaseOp {
 				}
 			}
 		}
+		this.columns = ColumnList.create(columns);
 	}
 	
 	public Collection<NamedOp> getTables() {
@@ -101,7 +106,7 @@ public class InnerJoinOp implements DatabaseOp {
 		return byColumn.containsKey(column) && byColumn.get(column) != null;
 	}
 	
-	public List<ColumnName> getColumns() {
+	public ColumnList getColumns() {
 		return columns;
 	}
 
@@ -113,7 +118,7 @@ public class InnerJoinOp implements DatabaseOp {
 		return byColumn.containsKey(column) ? byColumn.get(column).getColumnType(column) : null;
 	}
 
-	public Collection<Key> getUniqueKeys() {
+	public Collection<ColumnList> getUniqueKeys() {
 		if (tablesByName.size() == 1) {
 			return tablesByName.values().iterator().next().getUniqueKeys();
 		}

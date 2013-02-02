@@ -8,14 +8,14 @@ public class TableDef {
 	private final TableName name;
 	private final List<ColumnDef> columns;
 	private final List<Identifier> columnNameList;
-	private final Key primaryKey;
-	private final Set<Key> uniqueKeys;
+	private final IdentifierList primaryKey;
+	private final Set<IdentifierList> uniqueKeys;
 	private final Set<ForeignKey> foreignKeys;
 	
 	public TableDef(TableName name,
 			List<ColumnDef> columns, 
-			Key primaryKey, 
-			Set<Key> uniqueKeys,
+			IdentifierList primaryKey, 
+			Set<IdentifierList> uniqueKeys,
 			Set<ForeignKey> foreignKeys) {
 		this.name = name;
 		this.columns = columns;
@@ -49,11 +49,11 @@ public class TableDef {
 		return null;
 	}
 	
-	public Key getPrimaryKey() {
+	public IdentifierList getPrimaryKey() {
 		return primaryKey;
 	}
 
-	public Set<Key> getUniqueKeys() {
+	public Set<IdentifierList> getUniqueKeys() {
 		return uniqueKeys;
 	}
 

@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.d2rq.db.renamer.Renamer;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 
@@ -18,8 +18,8 @@ import org.d2rq.db.types.DataType;
 public class AliasOp extends NamedOp {
 	private final Identifier name;
 	private final DatabaseOp original;
-	private final List<ColumnName> columns = new ArrayList<ColumnName>();
-	private final Collection<Key> uniqueKeys = new ArrayList<Key>();
+	private final ColumnList columns;
+	private final Collection<ColumnList> uniqueKeys = new ArrayList<ColumnList>();
 	
 	public static AliasOp create(DatabaseOp original, TableName alias) {
 		return new AliasOp(new OpVisitor.Default(false) {
@@ -64,12 +64,17 @@ public class AliasOp extends NamedOp {
 			original = ((AliasOp) original).getOriginal();
 		}
 		this.original = original;
+		List<ColumnName> aliasedColumns = new ArrayList<ColumnName>();
 		for (ColumnName column: original.getColumns()) {
-			columns.add(ColumnName.create(getTableName(), column.getColumn()));
+			aliasedColumns.add(getTableName().qualifyColumn(column));
 		}
-		for (Key key: original.getUniqueKeys()) {
-			// FIXME: This works only because we don't handle column name clashes
-			uniqueKeys.add(key);
+		columns = ColumnList.create(aliasedColumns);
+		for (ColumnList key: original.getUniqueKeys()) {
+			aliasedColumns.clear();
+			for (ColumnName column: key) {
+				aliasedColumns.add(getTableName().qualifyColumn(column));
+			}
+			uniqueKeys.add(ColumnList.create(aliasedColumns));
 		}
 	}
 	
@@ -103,7 +108,7 @@ public class AliasOp extends NamedOp {
 		};
 	}
 	
-	public List<ColumnName> getColumns() {
+	public ColumnList getColumns() {
 		return columns;
 	}
 
@@ -117,7 +122,7 @@ public class AliasOp extends NamedOp {
 		return original.getColumnType(ColumnName.create(column.getColumn()));
 	}
 
-	public Collection<Key> getUniqueKeys() {
+	public Collection<ColumnList> getUniqueKeys() {
 		return uniqueKeys;
 	}
 

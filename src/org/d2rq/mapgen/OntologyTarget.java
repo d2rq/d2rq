@@ -7,7 +7,7 @@ import java.util.Map;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.values.TemplateValueMaker;
@@ -153,7 +153,7 @@ public class OntologyTarget implements Target {
 		return table.getTable().getName() + " " + column.getName();		
 	}
 	
-	private String getLabel(TableName table, Key columns) {
+	private String getLabel(TableName table, IdentifierList columns) {
 		StringBuilder s = new StringBuilder(table.getTable().getName());
 		for (Identifier column: columns) {
 			s.append(" ");

@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.d2rq.db.op.DatabaseOp;
+import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.DataType.GenericType;
@@ -29,6 +30,8 @@ public abstract class BinaryOperator extends Expression {
 		columns.addAll(expr1.getColumns());
 		columns.addAll(expr2.getColumns());
 	}
+	
+	protected abstract Expression clone(Expression newOperand1, Expression newOperand2);
 	
 	public Set<ColumnName> getColumns() {
 		return columns;
@@ -58,6 +61,15 @@ public abstract class BinaryOperator extends Expression {
 		return false;
 	}
 
+	@Override
+	public Expression rename(Renamer columnRenamer) {
+		return clone(expr1.rename(columnRenamer), expr2.rename(columnRenamer));
+	}
+	
+	public Expression substitute(ColumnName column, Expression substitution) {
+		return clone(expr1.substitute(column, substitution), expr2.substitute(column, substitution));
+	}
+	
 	public DataType getDataType(DatabaseOp table, Vendor vendor) {
 		return dataType.dataTypeFor(vendor);
 	}
@@ -86,6 +98,6 @@ public abstract class BinaryOperator extends Expression {
 	}
 	
 	public int hashCode() {
-		return operator.hashCode() ^ expr1.hashCode() ^ expr2.hashCode();
+		return operator.hashCode() ^ expr1.hashCode() ^ (expr2.hashCode() + (isCommutative ? 0 : 1));
 	}
 }

@@ -43,9 +43,14 @@ public class ColumnExpr extends Expression {
 	}
 
 	public Expression rename(Renamer columnRenamer) {
-		return new ColumnExpr(columnRenamer.applyTo(column));
+		ColumnName renamed = columnRenamer.applyTo(column);
+		return renamed.equals(column) ? this : new ColumnExpr(renamed);
 	}
 
+	public Expression substitute(ColumnName column, Expression substitution) {
+		return column.equals(this.column) ? substitution : this;
+	}
+	
 	public String toSQL(DatabaseOp table, Vendor vendor) {
 		return vendor.toString(column);
 	}

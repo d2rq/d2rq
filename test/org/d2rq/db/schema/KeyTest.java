@@ -16,37 +16,37 @@ public class KeyTest {
 
 	@Test
 	public void testCompareUnequalLength() {
-		assertEquals(-1, Key.create(colA).compareTo(Key.create(colA, colB)));
-		assertEquals(-1, Key.create(colB).compareTo(Key.create(colA, colB)));
-		assertEquals(-1, Key.create(colA).compareTo(Key.create(colB, colA)));
-		assertEquals(-1, Key.create(colA).compareTo(Key.create(colA, colA)));
-		assertEquals(1, Key.create(colA, colB).compareTo(Key.create(colA)));
-		assertEquals(1, Key.create(colA, colB).compareTo(Key.create(colB)));
-		assertEquals(1, Key.create(colB, colA).compareTo(Key.create(colA)));
-		assertEquals(1, Key.create(colA, colA).compareTo(Key.create(colA)));
+		assertEquals(-1, IdentifierList.create(colA).compareTo(IdentifierList.create(colA, colB)));
+		assertEquals(-1, IdentifierList.create(colB).compareTo(IdentifierList.create(colA, colB)));
+		assertEquals(-1, IdentifierList.create(colA).compareTo(IdentifierList.create(colB, colA)));
+		assertEquals(-1, IdentifierList.create(colA).compareTo(IdentifierList.create(colA, colA)));
+		assertEquals(1, IdentifierList.create(colA, colB).compareTo(IdentifierList.create(colA)));
+		assertEquals(1, IdentifierList.create(colA, colB).compareTo(IdentifierList.create(colB)));
+		assertEquals(1, IdentifierList.create(colB, colA).compareTo(IdentifierList.create(colA)));
+		assertEquals(1, IdentifierList.create(colA, colA).compareTo(IdentifierList.create(colA)));
 	}
 
 	@Test
 	public void testCompareLength1() {
-		assertEquals(0, Key.create(colA).compareTo(Key.create(colA)));
-		assertEquals(-1, Key.create(colA).compareTo(Key.create(colB)));
-		assertEquals(1, Key.create(colB).compareTo(Key.create(colA)));
+		assertEquals(0, IdentifierList.create(colA).compareTo(IdentifierList.create(colA)));
+		assertEquals(-1, IdentifierList.create(colA).compareTo(IdentifierList.create(colB)));
+		assertEquals(1, IdentifierList.create(colB).compareTo(IdentifierList.create(colA)));
 	}
 	
 	@Test
 	public void testCompareLength2() {
-		assertEquals(0, Key.create(colA, colB).compareTo(Key.create(colA, colB)));
-		assertEquals(0, Key.create(colB, colA).compareTo(Key.create(colB, colA)));
-		assertEquals(-1, Key.create(colA, colB).compareTo(Key.create(colB, colA)));
-		assertEquals(-1, Key.create(colA, colA).compareTo(Key.create(colA, colB)));
-		assertEquals(1, Key.create(colB, colA).compareTo(Key.create(colA, colB)));
-		assertEquals(1, Key.create(colA, colB).compareTo(Key.create(colA, colA)));
+		assertEquals(0, IdentifierList.create(colA, colB).compareTo(IdentifierList.create(colA, colB)));
+		assertEquals(0, IdentifierList.create(colB, colA).compareTo(IdentifierList.create(colB, colA)));
+		assertEquals(-1, IdentifierList.create(colA, colB).compareTo(IdentifierList.create(colB, colA)));
+		assertEquals(-1, IdentifierList.create(colA, colA).compareTo(IdentifierList.create(colA, colB)));
+		assertEquals(1, IdentifierList.create(colB, colA).compareTo(IdentifierList.create(colA, colB)));
+		assertEquals(1, IdentifierList.create(colA, colB).compareTo(IdentifierList.create(colA, colA)));
 	}
 	
 	@Test
 	public void testCompareHasIdentifierSemantics() {
 		assertEquals(0, 
-				Key.create(Identifier.createUndelimited("aaa")).compareTo(
-						Key.create(Identifier.createUndelimited("AAA"))));
+				IdentifierList.create(Identifier.createUndelimited("aaa")).compareTo(
+						IdentifierList.create(Identifier.createUndelimited("AAA"))));
 	}
 }

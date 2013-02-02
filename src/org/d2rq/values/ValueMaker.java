@@ -6,10 +6,10 @@ import java.util.Set;
 
 import org.d2rq.db.ResultRow;
 import org.d2rq.db.expr.Expression;
-import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.DatabaseOp;
+import org.d2rq.db.op.OrderOp.OrderSpec;
 import org.d2rq.db.renamer.Renamer;
+import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.vendor.Vendor;
 import org.d2rq.lang.TranslationTable;
 import org.d2rq.nodes.NodeSetFilter;
@@ -47,8 +47,8 @@ public interface ValueMaker {
 		public Expression valueExpression(String value, DatabaseOp tabular, Vendor vendor) {
 			return Expression.FALSE;
 		} 
-		public Set<ProjectionSpec> projectionSpecs() {
-			return Collections.emptySet();
+		public Set<ColumnName> getRequiredColumns() { 
+			return Collections.<ColumnName>emptySet(); 
 		}
 		public String makeValue(ResultRow row) {return null;}
 		public void describeSelf(NodeSetFilter c) {c.limitToEmptySet();}
@@ -79,12 +79,10 @@ public interface ValueMaker {
 	Expression valueExpression(String value, DatabaseOp tabular, Vendor vendor);
 
 	/**
-	 * Returns a set of all {@link ProjectionSpec}s containing data necessary
-	 * for this ValueSource.
-	 * @return a set of {@link ProjectionSpec}s
+	 * Returns any column names used by the value maker.
 	 */
-	Set<ProjectionSpec> projectionSpecs();
-
+	Set<ColumnName> getRequiredColumns();
+	
 	/**
 	 * Retrieves a value from a database row according to some rule or pattern.
 	 * @param row the database row

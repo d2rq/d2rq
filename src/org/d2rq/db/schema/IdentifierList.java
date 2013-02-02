@@ -11,37 +11,37 @@ import java.util.List;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public class Key implements Iterable<Identifier>, Comparable<Key> {
+public class IdentifierList implements Iterable<Identifier>, Comparable<IdentifierList> {
 	
 	/**
-	 * Creates an instance from a list of columns, ignoring identifiers.
+	 * Creates an instance from a list of columns, ignoring qualifiers.
 	 */
-	public static Key create(ColumnName... columns) {
+	public static IdentifierList create(ColumnName... columns) {
 		List<Identifier> unqualifiedColumns = new ArrayList<Identifier>();
 		for (ColumnName column: columns) {
 			unqualifiedColumns.add(column.getColumn());
 		}
-		return new Key(unqualifiedColumns);
+		return new IdentifierList(unqualifiedColumns);
 	}
 
 	/**
 	 * Creates an instance from a list of columns, ignoring identifiers.
 	 */
-	public static Key createFromColumns(List<ColumnName> columns) {
-		return Key.create(columns.toArray(new ColumnName[columns.size()]));
+	public static IdentifierList createFromColumns(List<ColumnName> columns) {
+		return IdentifierList.create(columns.toArray(new ColumnName[columns.size()]));
 	}
 
-	public static Key create(Identifier... columns) {
-		return new Key(Arrays.asList(columns));
+	public static IdentifierList create(Identifier... columns) {
+		return new IdentifierList(Arrays.asList(columns));
 	}
 	
-	public static Key createFromIdentifiers(List<Identifier> columns) {
-		return new Key(columns);
+	public static IdentifierList createFromIdentifiers(List<Identifier> columns) {
+		return new IdentifierList(columns);
 	}
 	
 	private final List<Identifier> columns;
 	
-	private Key(List<Identifier> columns) {
+	private IdentifierList(List<Identifier> columns) {
 		this.columns = columns;
 	}
 	
@@ -87,7 +87,7 @@ public class Key implements Iterable<Identifier>, Comparable<Key> {
 	
 	@Override
 	public String toString() {
-		return "Key" + columns;
+		return columns.toString();
 	}
 	
 	@Override
@@ -97,10 +97,10 @@ public class Key implements Iterable<Identifier>, Comparable<Key> {
 	
 	@Override
 	public boolean equals(Object o) {
-		return (o instanceof Key) && columns.equals(((Key) o).columns);
+		return (o instanceof IdentifierList) && columns.equals(((IdentifierList) o).columns);
 	}
 
-	public int compareTo(Key o) {
+	public int compareTo(IdentifierList o) {
 		if (size() < o.size()) return -1;
 		if (size() > o.size()) return 1;
 		for (int i = 0; i < size(); i++) {

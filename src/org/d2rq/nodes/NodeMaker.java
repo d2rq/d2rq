@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.d2rq.db.ResultRow;
 import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectionSpec;
+import org.d2rq.db.schema.ColumnName;
 
 import com.hp.hpl.jena.graph.Node;
 
@@ -19,9 +19,18 @@ import com.hp.hpl.jena.graph.Node;
  */
 public interface NodeMaker {
 
-	public static NodeMaker EMPTY = new EmptyNodeMaker();
+	public static final NodeMaker EMPTY = new NodeMaker() {
+		public Node makeNode(ResultRow tuple) { return null; }
+		public void describeSelf(NodeSetFilter c) { c.limitToEmptySet(); }
+		public Set<ColumnName> getRequiredColumns() { return Collections.emptySet(); }
+		public List<OrderSpec> orderSpecs(boolean ascending) { return Collections.emptyList(); }
+		public void accept(NodeMakerVisitor visitor) { visitor.visitEmpty(); }
+	};
 	
-	Set<ProjectionSpec> projectionSpecs();
+	/**
+	 * Returns any column names used by the node maker.
+	 */
+	Set<ColumnName> getRequiredColumns();
 
 	void describeSelf(NodeSetFilter c);
 	
@@ -35,14 +44,4 @@ public interface NodeMaker {
 	List<OrderSpec> orderSpecs(boolean ascending);
 	
 	void accept(NodeMakerVisitor visitor);
-	
-	public static class EmptyNodeMaker implements NodeMaker {
-		/** Use {@link NodeMaker#EMPTY} instead */
-		private EmptyNodeMaker() {}
-		public Node makeNode(ResultRow tuple) { return null; }
-		public void describeSelf(NodeSetFilter c) { c.limitToEmptySet(); }
-		public Set<ProjectionSpec> projectionSpecs() { return Collections.<ProjectionSpec>emptySet(); }
-		public List<OrderSpec> orderSpecs(boolean ascending) { return Collections.<OrderSpec>emptyList(); }
-		public void accept(NodeMakerVisitor visitor) { visitor.visit(this); }
-	};
 }

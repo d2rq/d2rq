@@ -145,7 +145,7 @@ public class Inspector {
 		}
 	}
 	
-	private Set<Key> getUniqueKeys(TableName table) {
+	private Set<IdentifierList> getUniqueKeys(TableName table) {
 		Map<String,List<Identifier>> indexColumns = 
 			new HashMap<String,List<Identifier>>();
 		try {
@@ -174,9 +174,9 @@ public class Inspector {
 					indexColumns.get(indexName).add(
 							Identifier.createDelimited(rs.getString("COLUMN_NAME")));
 				}
-				Set<Key> result = new HashSet<Key>();
+				Set<IdentifierList> result = new HashSet<IdentifierList>();
 				for (List<Identifier> key: indexColumns.values()) {
-					result.add(Key.createFromIdentifiers(key));
+					result.add(IdentifierList.createFromIdentifiers(key));
 				}
 				return result;
 			} finally {
@@ -188,7 +188,7 @@ public class Inspector {
 		
 	}
 
-	private Key getPrimaryKey(TableName table) {
+	private IdentifierList getPrimaryKey(TableName table) {
 		List<Identifier> result = new ArrayList<Identifier>();
 		try {
 			ResultSet rs = this.metadata.getPrimaryKeys(
@@ -200,7 +200,7 @@ public class Inspector {
 					result.add(Identifier.createDelimited(rs.getString("COLUMN_NAME")));
 				}
 				if (result.isEmpty()) return null;
-				return Key.createFromIdentifiers(result);
+				return IdentifierList.createFromIdentifiers(result);
 			} finally {
 				rs.close();
 			}
@@ -290,8 +290,8 @@ public class Inspector {
 		}
 		private ForeignKey toForeignKey() {
 			return new ForeignKey(
-					Key.createFromIdentifiers(new ArrayList<Identifier>(foreignKeyColumns.values())),
-					Key.createFromIdentifiers(new ArrayList<Identifier>(primaryKeyColumns.values())), 
+					IdentifierList.createFromIdentifiers(new ArrayList<Identifier>(foreignKeyColumns.values())),
+					IdentifierList.createFromIdentifiers(new ArrayList<Identifier>(primaryKeyColumns.values())), 
 					referencedTable);
 		}
 	}

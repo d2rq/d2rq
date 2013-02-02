@@ -55,15 +55,15 @@ public class InspectorTest {
 	@Test
 	public void testGetPrimaryKey() {
 		db.executeSQL("CREATE TABLE T1 (COL1 INT PRIMARY KEY)");
-		assertEquals(Key.create(col1), inspector.describeTableOrView(t1).getPrimaryKey());
+		assertEquals(IdentifierList.create(col1), inspector.describeTableOrView(t1).getPrimaryKey());
 	}
 	
 	@Test
 	public void testGetUniqueKey() {
 		db.executeSQL("CREATE TABLE T1 (COL1 INT, UNIQUE (COL1))");
-		Set<Key> uks = inspector.describeTableOrView(t1).getUniqueKeys();
+		Set<IdentifierList> uks = inspector.describeTableOrView(t1).getUniqueKeys();
 		assertEquals(1, uks.size());
-		assertEquals(Key.create(col1), uks.iterator().next());
+		assertEquals(IdentifierList.create(col1), uks.iterator().next());
 	}
 	
 	@Test
@@ -73,8 +73,8 @@ public class InspectorTest {
 		Set<ForeignKey> fks = inspector.describeTableOrView(t2).getForeignKeys();
 		assertEquals(1, fks.size());
 		ForeignKey fk = fks.iterator().next();
-		assertEquals(Key.create(col2), fk.getLocalColumns());
+		assertEquals(IdentifierList.create(col2), fk.getLocalColumns());
 		assertEquals(t1, fk.getReferencedTable());
-		assertEquals(Key.create(col1), fk.getReferencedColumns());
+		assertEquals(IdentifierList.create(col1), fk.getReferencedColumns());
 	}
 }

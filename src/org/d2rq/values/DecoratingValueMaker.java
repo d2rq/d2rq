@@ -7,10 +7,10 @@ import java.util.regex.Pattern;
 
 import org.d2rq.db.ResultRow;
 import org.d2rq.db.expr.Expression;
-import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.DatabaseOp;
+import org.d2rq.db.op.OrderOp.OrderSpec;
 import org.d2rq.db.renamer.Renamer;
+import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.vendor.Vendor;
 import org.d2rq.nodes.NodeSetFilter;
 
@@ -92,8 +92,8 @@ public class DecoratingValueMaker implements ValueMaker {
 		return base.valueExpression(translator.toDBValue(value), table, vendor);
 	}
 
-	public Set<ProjectionSpec> projectionSpecs() {
-		return this.base.projectionSpecs();
+	public Set<ColumnName> getRequiredColumns() { 
+		return base.getRequiredColumns();
 	}
 	
 	public ValueMaker rename(Renamer renamer) {

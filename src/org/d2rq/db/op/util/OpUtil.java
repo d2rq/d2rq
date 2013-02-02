@@ -6,12 +6,10 @@ import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.AliasOp;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.EmptyOp;
+import org.d2rq.db.op.ExtendOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.op.OpVisitor;
-import org.d2rq.db.op.ProjectOp;
-import org.d2rq.db.op.ProjectionSpec;
-import org.d2rq.db.op.ProjectionSpec.ExprProjectionSpec;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.op.TableOp;
@@ -77,8 +75,9 @@ public class OpUtil {
 				resultStack.push(resultStack.pop() && table.getCondition().isTrue());
 			}
 			@Override
-			public void visitLeave(ProjectOp table) {
-				resultStack.push(resultStack.pop() && table.getProjections().isEmpty());
+			public void visitLeave(ExtendOp table) {
+				resultStack.pop();
+				resultStack.push(false);
 			}
 			@Override
 			public void visitLeave(EmptyOp table) {
@@ -109,13 +108,10 @@ public class OpUtil {
 				return result;
 			}
 			@Override
-			public boolean visitEnter(ProjectOp table) {
-				for (ProjectionSpec spec: table.getProjections()) {
-					// TODO: instanceof is ugly
-					if (spec.getColumn().equals(column) && spec instanceof ExprProjectionSpec) {
-						result = ((ExprProjectionSpec) spec).getExpression();
-						return false;
-					}
+			public boolean visitEnter(ExtendOp table) {
+				if (table.getNewColumn().equals(column.getColumn())) {
+					result = table.getExpression();
+					return false;
 				}
 				return true;
 			}
@@ -152,12 +148,11 @@ public class OpUtil {
 				return result;
 			}
 			@Override
-			public boolean visitEnter(ProjectOp table) {
+			public boolean visitEnter(ExtendOp table) {
 				// Is our column a derived column defined for the SELECT clause,
 				// rather than a table column? If so, check if the expression
 				// is constant
-				Expression colExpression = getDerivedColumnExpression(op, column);
-				if (colExpression != null && colExpression.isConstant()) {
+				if (table.getExpression().isConstant()) {
 					result = true;
 					return false;
 				}

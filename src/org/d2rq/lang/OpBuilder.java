@@ -16,26 +16,26 @@ import org.d2rq.db.SQLConnection;
 import org.d2rq.db.expr.ColumnExpr;
 import org.d2rq.db.expr.ColumnListEquality;
 import org.d2rq.db.expr.Expression;
-import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.AliasOp;
 import org.d2rq.db.op.AssertUniqueKeyOp;
+import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.DistinctOp;
+import org.d2rq.db.op.ExtendOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.LimitOp;
+import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.OrderOp;
 import org.d2rq.db.op.OrderOp.OrderSpec;
 import org.d2rq.db.op.ProjectOp;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.op.TableOp;
-import org.d2rq.db.op.ProjectionSpec;
-import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.renamer.TableRenamer;
 import org.d2rq.db.schema.ColumnDef;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
 import org.d2rq.db.schema.TableDef;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType.GenericType;
@@ -57,8 +57,8 @@ public class OpBuilder {
 	private Set<ColumnListEquality> joinConditions = new HashSet<ColumnListEquality>();
 	private Map<ForeignKey,TableName> assertedForeignKeys = new HashMap<ForeignKey,TableName>();
 	private Map<TableName,AliasDeclaration> aliasDeclarations = new HashMap<TableName,AliasDeclaration>();
-	private final Map<ColumnName,Expression> extensions = new LinkedHashMap<ColumnName,Expression>();
-	private final List<ProjectionSpec> projections = new ArrayList<ProjectionSpec>();
+	private final Map<Identifier,Expression> extensions = new LinkedHashMap<Identifier,Expression>();
+	private final List<ColumnName> requiredColumns = new ArrayList<ColumnName>();
 	private boolean containsDuplicates = true;
 	private ColumnName orderColumn = null;
 	private boolean orderDesc = false;
@@ -110,21 +110,20 @@ public class OpBuilder {
 		assertedForeignKeys.putAll(parsedJoins.getAssertedForeignKeys());
 	}
 	
-	public void addExtension(ColumnName column, Expression value) {
+	public void addExtension(Identifier column, Expression value) {
 		extensions.put(column, value);
 		registerColumns(value.getColumns());
 	}
 	
-	public void addProjection(ProjectionSpec projection) {
-		if (projections.contains(projection)) return;
-		projections.add(projection);
-		registerTables(projection.getTableNames());
-		registerColumn(projection.getColumn());
+	public void addRequiredColumn(ColumnName column) {
+		if (requiredColumns.contains(column)) return;
+		requiredColumns.add(column);
+		registerColumn(column);
 	}
 	
-	public void addProjections(Collection<ProjectionSpec> projections) {
-		for (ProjectionSpec projection: projections) {
-			addProjection(projection);
+	public void addRequiredColumns(Collection<ColumnName> columns) {
+		for (ColumnName column: columns) {
+			addRequiredColumn(column);
 		}
 	}
 	
@@ -134,7 +133,7 @@ public class OpBuilder {
 		assertedForeignKeys.putAll(other.assertedForeignKeys);
 		addAliasDeclarations(other.aliasDeclarations.values());
 		extensions.putAll(other.extensions);
-		addProjections(other.projections);
+		addRequiredColumns(other.requiredColumns);
 		setContainsDuplicates(containsDuplicates && other.containsDuplicates);
 		if (other.orderColumn != null) {
 			// Overwrite our ordering if the other builder is ordered 
@@ -160,11 +159,11 @@ public class OpBuilder {
 					renamer.applyTo(entry.getValue(), entry.getKey()), 
 					entry.getValue());
 		}
-		for (Entry<ColumnName,Expression> entry: other.extensions.entrySet()) {
-			extensions.put(renamer.applyTo(entry.getKey()), 
+		for (Entry<Identifier,Expression> entry: other.extensions.entrySet()) {
+			extensions.put(entry.getKey(), 
 					renamer.applyTo(entry.getValue()));
 		}
-		addProjections(renamer.applyToProjections(other.projections));
+		addRequiredColumns(renamer.applyToColumns(other.requiredColumns));
 		if (other.orderColumn != null) {
 			// Overwrite our ordering if the other builder is ordered 
 			setOrderColumn(renamer.applyTo(other.orderColumn));
@@ -281,15 +280,15 @@ public class OpBuilder {
 					new OrderSpec(new ColumnExpr(orderColumn), orderDesc));
 			result = new OrderOp(order, result);
 		}
-		result = ProjectOp.extend(result, extensions, sqlConnection.vendor());
-		result = ProjectOp.create(result, projections);
+		result = ExtendOp.extend(result, extensions, sqlConnection.vendor());
+		result = ProjectOp.project(result, requiredColumns);
 		if (!containsDuplicates && result.getUniqueKeys().isEmpty()) {
-			List<Identifier> columns = new ArrayList<Identifier>();
-			for (ProjectionSpec projection: projections) {
-				if (columns.contains(projection.getColumn())) continue;
-				columns.add(projection.getColumn().getColumn());
+			List<ColumnName> columns = new ArrayList<ColumnName>();
+			for (ColumnName column: requiredColumns) {
+				if (columns.contains(column.getColumn())) continue;
+				columns.add(column);
 			}
-			result = new AssertUniqueKeyOp(result, Key.createFromIdentifiers(columns));
+			result = new AssertUniqueKeyOp(result, ColumnList.create(columns));
 		}
 		if (result.getUniqueKeys().isEmpty()) {
 			result = new DistinctOp(result);
@@ -308,10 +307,6 @@ public class OpBuilder {
 		registerTable(columnName.getQualifier());
 	}
 
-	private void registerTables(Collection<TableName> tables) {
-		mentionedTableNames.addAll(tables);
-	}
-	
 	private void registerTable(TableName table) {
 		if (table == null) return;
 		mentionedTableNames.add(table);

@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 
 
@@ -62,7 +62,7 @@ public abstract class Filter {
 		return true;
 	}
 	
-	public boolean matchesAll(TableName table, Key columns) {
+	public boolean matchesAll(TableName table, IdentifierList columns) {
 		return matchesAll(table, columns.getColumns());
 	}
 	

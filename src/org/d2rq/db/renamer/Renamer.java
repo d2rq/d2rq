@@ -1,7 +1,6 @@
 package org.d2rq.db.renamer;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,16 +9,15 @@ import org.d2rq.db.expr.ColumnListEquality;
 import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.util.OpRenamer;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.nodes.FixedNodeMaker;
 import org.d2rq.nodes.NodeMaker;
-import org.d2rq.nodes.NodeMaker.EmptyNodeMaker;
 import org.d2rq.nodes.NodeMakerVisitor;
 import org.d2rq.nodes.TypedNodeMaker;
 
@@ -88,24 +86,12 @@ public abstract class Renamer {
 		return result;
 	}
 
-	public Key applyTo(TableName table, Key key) {
+	public IdentifierList applyTo(TableName table, IdentifierList key) {
 		List<Identifier> result = new ArrayList<Identifier>();
 		for (Identifier column: key) {
 			result.add(applyTo(table, column));
 		}
-		return Key.createFromIdentifiers(result);
-	}
-	
-	public ProjectionSpec applyTo(ProjectionSpec original) {
-		return original.rename(this);
-	}
-	
-	public Collection<ProjectionSpec> applyToProjections(Collection<ProjectionSpec> projections) {
-		List<ProjectionSpec> result = new ArrayList<ProjectionSpec>();
-		for (ProjectionSpec projection: projections) {
-			result.add(applyTo(projection));
-		}
-		return result;
+		return IdentifierList.createFromIdentifiers(result);
 	}
 	
 	public List<OrderSpec> applyTo(List<OrderSpec> orderSpecs) {
@@ -133,7 +119,7 @@ public abstract class Renamer {
 							nodeMaker.getValueMaker().rename(Renamer.this));
 			}
 			public void visit(FixedNodeMaker nodeMaker) {}
-			public void visit(EmptyNodeMaker nodeMaker) {}
+			public void visitEmpty() {}
 		}.getResult();
 	}
 	
@@ -143,5 +129,13 @@ public abstract class Renamer {
 			result.add(applyTo(column));
 		}
 		return result;
+	}
+	
+	public ColumnList applyTo(ColumnList columns) {
+		List<ColumnName> renamed = new ArrayList<ColumnName>();
+		for (ColumnName column: columns) {
+			renamed.add(applyTo(column));
+		}
+		return ColumnList.create(renamed);
 	}
 }

@@ -7,7 +7,7 @@ import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ColumnDef;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableDef;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.values.TemplateValueMaker;
@@ -61,7 +61,7 @@ public class D2RQMappingStyle implements MappingStyle {
 		return model;
 	}
 	
-	public TemplateValueMaker getEntityIRITemplate(TableDef table, Key columns) {
+	public TemplateValueMaker getEntityIRITemplate(TableDef table, IdentifierList columns) {
 		TemplateValueMaker.Builder builder = TemplateValueMaker.builder();
 		// We don't use the base IRI here, so the template will produce relative IRIs
 		if (table.getName().getSchema() != null) {
@@ -110,7 +110,7 @@ public class D2RQMappingStyle implements MappingStyle {
 				IRIEncoder.encode(stringMaker.toString(linkTable)));
 	}
 	
-	public TemplateValueMaker getEntityLabelTemplate(TableName tableName, Key columns) {
+	public TemplateValueMaker getEntityLabelTemplate(TableName tableName, IdentifierList columns) {
 		TemplateValueMaker.Builder builder = TemplateValueMaker.builder();
 		builder.add(tableName.getTable().getName());
 		builder.add(" #");

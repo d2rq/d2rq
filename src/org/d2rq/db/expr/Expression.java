@@ -21,7 +21,7 @@ import org.d2rq.db.vendor.Vendor;
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
-public abstract class Expression {
+public abstract class Expression implements Comparable<Expression> {
 	public static final Expression TRUE = new Expression() {
 		public Set<ColumnName> getColumns() { return Collections.<ColumnName>emptySet(); }
 		public boolean isFalse() { return false; }
@@ -30,6 +30,7 @@ public abstract class Expression {
 		public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
 				boolean constIfFalse, boolean constIfConstantValue) { return false; }
 		public Expression rename(Renamer columnRenamer) { return this; }
+		public Expression substitute(ColumnName column, Expression substitution) { return this; }
 		public DataType getDataType(DatabaseOp table, Vendor vendor) { return GenericType.BOOLEAN.dataTypeFor(vendor); }
 		public String toSQL(DatabaseOp table, Vendor vendor) { return "1"; }
 		public String toString() { return "TRUE"; }
@@ -42,6 +43,7 @@ public abstract class Expression {
 		public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
 				boolean constIfFalse, boolean constIfConstantValue) { return false; }
 		public Expression rename(Renamer columnRenamer) { return this; }
+		public Expression substitute(ColumnName column, Expression substitution) { return this; }
 		public DataType getDataType(DatabaseOp table, Vendor vendor) { return GenericType.BOOLEAN.dataTypeFor(vendor); }
 		public String toSQL(DatabaseOp table, Vendor vendor) { return "0"; }
 		public String toString() { return "FALSE"; }
@@ -73,6 +75,12 @@ public abstract class Expression {
 	
 	public abstract Expression rename(Renamer columnRenamer);
 	
+	/**
+	 * Returns an expression where all occurrences of a column name have been
+	 * replaced with a substitution expression.
+	 */
+	public abstract Expression substitute(ColumnName column, Expression substitution);
+	
 	public abstract DataType getDataType(DatabaseOp table, Vendor vendor);
 
 	public abstract String toSQL(DatabaseOp table, Vendor vendor);
@@ -89,5 +97,9 @@ public abstract class Expression {
 		list.add(this);
 		list.add(other);
 		return Disjunction.create(list);
+	}
+
+	public int compareTo(Expression other) {
+		return toString().compareTo(other.toString());
 	}
 }

@@ -3,7 +3,8 @@ package org.d2rq.lang;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.d2rq.db.op.ProjectionSpec;
+import org.d2rq.db.op.ExtendOp;
+import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.types.DataType.GenericType;
 import org.d2rq.nodes.FixedNodeMaker;
 import org.d2rq.nodes.NodeMaker;
@@ -96,10 +97,11 @@ public class NodeMakerFactory {
 			}
 			if (map.getUriSQLExpression() != null) {
 				return new ColumnValueMaker(
-						ProjectionSpec.createColumnNameFor(
-							Microsyntax.parseSQLExpression(
-									map.getUriSQLExpression(), 
-									GenericType.CHARACTER)));
+						ColumnName.create(
+							ExtendOp.createUniqueIdentifierFor(
+								Microsyntax.parseSQLExpression(
+										map.getUriSQLExpression(), 
+										GenericType.CHARACTER))));
 			}
 			return null;
 		}
@@ -153,10 +155,11 @@ public class NodeMakerFactory {
 				return Microsyntax.parsePattern(map.getPattern());
 			} else if (map.getSQLExpression() != null) {
 				return new ColumnValueMaker(
-						ProjectionSpec.createColumnNameFor(
-							Microsyntax.parseSQLExpression(
-									map.getSQLExpression(), 
-									GenericType.CHARACTER)));
+					ColumnName.create(
+							ExtendOp.createUniqueIdentifierFor(
+									Microsyntax.parseSQLExpression(
+											map.getSQLExpression(), 
+											GenericType.CHARACTER))));
 			} else {
 				return super.createRawValueMaker();
 			}

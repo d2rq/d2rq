@@ -18,8 +18,6 @@ import org.d2rq.db.expr.Conjunction;
 import org.d2rq.db.expr.Constant;
 import org.d2rq.db.expr.Equality;
 import org.d2rq.db.expr.Expression;
-import org.d2rq.db.op.ProjectionSpec;
-import org.d2rq.db.op.ProjectionSpec.ColumnProjectionSpec;
 import org.d2rq.db.op.TableOp;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.types.DataType.GenericType;
@@ -369,9 +367,9 @@ public class PatternTest {
 	private ResultRow row(String spec) {
 		String[] parts = spec.split("\\|", -1);
 		ColumnName[] columns = {col1, col2, col3, col4, col5};
-		Map<ProjectionSpec,String> result = new HashMap<ProjectionSpec,String>();
+		Map<ColumnName,String> result = new HashMap<ColumnName,String>();
 		for (int i = 0; i < parts.length && i < columns.length; i++) {
-			result.put(ColumnProjectionSpec.create(columns[i]), parts[i]);
+			result.put(columns[i], parts[i]);
 		}
 		return new ResultRow(result);
 	}

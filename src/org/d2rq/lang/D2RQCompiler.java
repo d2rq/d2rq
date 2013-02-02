@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,12 +17,11 @@ import org.d2rq.db.SQLScriptLoader;
 import org.d2rq.db.expr.ColumnListEquality;
 import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.DatabaseOp;
+import org.d2rq.db.op.ExtendOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.op.OpVisitor;
 import org.d2rq.db.op.ProjectOp;
-import org.d2rq.db.op.ProjectionSpec;
-import org.d2rq.db.op.ProjectionSpec.ColumnProjectionSpec;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.op.TableOp;
 import org.d2rq.db.schema.ColumnName;
@@ -159,13 +157,13 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		currentSQLConnection = sqlConnections.get(classMap.getDatabase().resource());
 		currentSubjects = createNodeMaker(classMap);
 		currentClassMapOpBuilder = createOpBuilder(classMap);
-		currentClassMapOpBuilder.addProjections(currentSubjects.projectionSpecs());
+		currentClassMapOpBuilder.addRequiredColumns(currentSubjects.getRequiredColumns());
 		if (classMap.getUriSQLExpression() != null) {
 			Expression parsed = Microsyntax.parseSQLExpression(
 					classMap.getUriSQLExpression(), 
 					GenericType.CHARACTER);
 			currentClassMapOpBuilder.addExtension(
-					ProjectionSpec.createColumnNameFor(parsed), parsed);
+					ExtendOp.createUniqueIdentifierFor(parsed), parsed);
 		}
 		return true;
 	}
@@ -206,16 +204,16 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 			Expression parsed = Microsyntax.parseSQLExpression(
 					propertyBridge.getSQLExpression(), 
 					GenericType.CHARACTER);
-			builder.addExtension(ProjectionSpec.createColumnNameFor(parsed), parsed);
+			builder.addExtension(ExtendOp.createUniqueIdentifierFor(parsed), parsed);
 		}
 		if (propertyBridge.getUriSQLExpression() != null) {
 			Expression parsed = Microsyntax.parseSQLExpression(
 					propertyBridge.getUriSQLExpression(), 
 					GenericType.CHARACTER);
-			builder.addExtension(ProjectionSpec.createColumnNameFor(parsed), parsed);
+			builder.addExtension(ExtendOp.createUniqueIdentifierFor(parsed), parsed);
 		}
 		NodeMaker objects = createNodeMaker(propertyBridge);
-		builder.addProjections(objects.projectionSpecs());
+		builder.addRequiredColumns(objects.getRequiredColumns());
 		DatabaseOp tabular = builder.getOp();
 		for (Resource property: propertyBridge.getProperties()) {
 			NodeMaker predicates = new FixedNodeMaker(property.asNode());
@@ -229,7 +227,7 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 			OpBuilder dynamicBuilder = new OpBuilder(
 					currentSQLConnection, overriddenColumnTypes);
 			dynamicBuilder.addOpBuilder(builder);
-			dynamicBuilder.addProjections(predicates.projectionSpecs());
+			dynamicBuilder.addRequiredColumns(predicates.getRequiredColumns());
 			currentClassMapTripleRelations.add(new TripleRelation(
 					currentSQLConnection, dynamicBuilder.getOp(), 
 					currentSubjects, predicates, objects));
@@ -243,10 +241,9 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 		ValueMaker mediaTypeMaker = mediaType == null ? ValueMaker.NULL : Microsyntax.parsePattern(mediaType);
 		NodeMaker nodeMaker = createNodeMaker(downloadMap);
 		OpBuilder builder = createOpBuilder(downloadMap);
-		builder.addProjections(nodeMaker.projectionSpecs());
-		builder.addProjection(ColumnProjectionSpec.create(
-				downloadMap.getContentDownloadColumn()));
-		builder.addProjections(mediaTypeMaker.projectionSpecs());
+		builder.addRequiredColumns(nodeMaker.getRequiredColumns());
+		builder.addRequiredColumn(downloadMap.getContentDownloadColumn());
+		builder.addRequiredColumns(mediaTypeMaker.getRequiredColumns());
 		if (downloadMap.getBelongsToClassMap() != null) {
 			builder.addOpBuilder(createOpBuilder(downloadMap.getBelongsToClassMap()));
 		}
@@ -292,25 +289,15 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 			}
 			@Override
 			public boolean visitEnter(ProjectOp table) {
-				for (ProjectionSpec p: table.getProjections()) {
-					check(p.getColumns(), table.getWrapped());
-					for (ColumnName column: p.getColumns()) {
-						DataType datatype = table.getWrapped().getColumnType(column);
-						if (datatype == null) {
-							throw new D2RQException(
-									"Column " + column + " has unknown datatye. Use d2rq:xxxColumn to override its type.",
-									D2RQException.DATATYPE_UNKNOWN);
-						}
-						if (datatype.isUnsupported()) {
-							throw new D2RQException(
-									"Column " + column + " has unsupported datatype: " + datatype,
-									D2RQException.DATATYPE_UNMAPPABLE);
-						}						
-					}
-				}
+				check(table.getColumns().asList(), table.getWrapped());
 				return true;
 			}
-			private void check(Set<ColumnName> columns, DatabaseOp op) {
+			@Override
+			public boolean visitEnter(ExtendOp table) {
+				check(table.getExpression().getColumns(), table.getWrapped());
+				return true;
+			}
+			private void check(Collection<ColumnName> columns, DatabaseOp op) {
 				for (ColumnName column: columns) {
 					if (!op.hasColumn(column)) {
 						throw new D2RQException(
@@ -320,5 +307,18 @@ public class D2RQCompiler implements D2RQMappingVisitor {
 				}
 			}
 		});
+		for (ColumnName column: op.getColumns()) {
+			DataType datatype = op.getColumnType(column);
+			if (datatype == null) {
+				throw new D2RQException(
+						"Column " + column + " has unknown datatye. Use d2rq:xxxColumn to override its type.",
+						D2RQException.DATATYPE_UNKNOWN);
+			}
+			if (datatype.isUnsupported()) {
+				throw new D2RQException(
+						"Column " + column + " has unsupported datatype: " + datatype,
+						D2RQException.DATATYPE_UNMAPPABLE);
+			}						
+		}
 	}
 }

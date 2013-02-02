@@ -10,6 +10,7 @@ import org.d2rq.db.op.AssertUniqueKeyOp;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.DistinctOp;
 import org.d2rq.db.op.EmptyOp;
+import org.d2rq.db.op.ExtendOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.op.NamedOp;
@@ -75,6 +76,18 @@ public abstract class OpMutator {
 				}
 			}
 			public void visitLeave(ProjectOp table) {
+				resultStack.push(OpMutator.this.visitLeave(
+						table, resultStack.pop()));
+			}
+			public boolean visitEnter(ExtendOp table) {
+				if (OpMutator.this.visitEnter(table)) {
+					return true;
+				} else {
+					resultStack.push(table.getWrapped());
+					return false;
+				}
+			}
+			public void visitLeave(ExtendOp table) {
 				resultStack.push(OpMutator.this.visitLeave(
 						table, resultStack.pop()));
 			}
@@ -185,7 +198,16 @@ public abstract class OpMutator {
 	}
 
 	public DatabaseOp visitLeave(ProjectOp original, DatabaseOp child) {
-		return ProjectOp.create(child, original.getProjections());
+		return ProjectOp.project(child, original.getColumns());
+	}
+	
+	public boolean visitEnter(ExtendOp original) {
+		return true;
+	}
+
+	public DatabaseOp visitLeave(ExtendOp original, DatabaseOp child) {
+		return ExtendOp.extend(child, original.getNewColumn(), 
+				original.getExpression(), original.getVendor());
 	}
 	
 	public boolean visitEnter(AliasOp original) {

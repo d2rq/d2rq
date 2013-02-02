@@ -8,11 +8,10 @@ import org.d2rq.db.ResultRow;
 import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.renamer.Renamer;
+import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.vendor.Vendor;
 import org.d2rq.nodes.NodeSetFilter;
-import org.d2rq.values.ValueMaker;
 
 
 /**
@@ -22,7 +21,7 @@ import org.d2rq.values.ValueMaker;
  */
 public class DummyValueMaker implements ValueMaker {
 	private String returnValue = null;
-	private Set<ProjectionSpec> projectionSpecs;
+	private Set<ColumnName> columns;
 	private Expression selectCondition = Expression.TRUE;
  
 	public DummyValueMaker(String value) {
@@ -36,8 +35,8 @@ public class DummyValueMaker implements ValueMaker {
 		this.returnValue = value;
 	}
 
-	public void setProjectionSpecs(Set<ProjectionSpec> columns) {
-		this.projectionSpecs = columns;
+	public void setColumns(Set<ColumnName> columns) {
+		this.columns = columns;
 	}
 
 	public void setSelectCondition(Expression selectCondition) {
@@ -48,10 +47,10 @@ public class DummyValueMaker implements ValueMaker {
 		return true;
 	}
 
-	public Set<ProjectionSpec> projectionSpecs() {
-		return this.projectionSpecs;
+	public Set<ColumnName> getRequiredColumns() {
+		return columns;
 	}
-
+	
 	public Expression valueExpression(String value, DatabaseOp tabular, Vendor vendor) {
 		return selectCondition;
 	}

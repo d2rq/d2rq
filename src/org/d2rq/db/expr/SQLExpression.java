@@ -98,6 +98,12 @@ public class SQLExpression extends Expression {
 		return new SQLExpression(literalParts, renamer.applyToColumns(columns), dataType);
 	}
 	
+	public Expression substitute(ColumnName column, Expression substitution) {
+		if (!columns.contains(column)) return this;
+		throw new UnsupportedOperationException("Substitution of columns (" + 
+				column + ") in SQLExpressions not implemented: " + this.toString());
+	}
+	
 	public String toSQL(DatabaseOp table, Vendor vendor) {
 		StringBuffer result = new StringBuffer("(");
 		for (int i = 0; i < columns.size(); i++) {

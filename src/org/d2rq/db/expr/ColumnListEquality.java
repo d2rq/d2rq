@@ -1,13 +1,15 @@
 package org.d2rq.db.expr;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.schema.ColumnName;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.DataType.GenericType;
@@ -24,23 +26,23 @@ import org.d2rq.db.vendor.Vendor;
 public class ColumnListEquality extends Expression {
 	
 	public static ColumnListEquality create(ColumnName oneSide, ColumnName otherSide) {
-		return new ColumnListEquality(oneSide.getQualifier(), Key.create(oneSide), 
-				otherSide.getQualifier(), Key.create(otherSide));
+		return new ColumnListEquality(oneSide.getQualifier(), IdentifierList.create(oneSide), 
+				otherSide.getQualifier(), IdentifierList.create(otherSide));
 	}
 	
-	public static ColumnListEquality create(TableName oneTable, Key oneColumnList,
-			TableName otherTable, Key otherColumnList) {
+	public static ColumnListEquality create(TableName oneTable, IdentifierList oneColumnList,
+			TableName otherTable, IdentifierList otherColumnList) {
 		return new ColumnListEquality(oneTable, oneColumnList, otherTable, otherColumnList);
 	}
 	
-	private final Key columns1;
-	private final Key columns2;
+	private final IdentifierList columns1;
+	private final IdentifierList columns2;
 	private final TableName table1;
 	private final TableName table2;
 	private final Map<ColumnName,ColumnName> otherSide = new HashMap<ColumnName,ColumnName>();
 	
-	private ColumnListEquality(TableName oneTable, Key oneColumnList,
-			TableName otherTable, Key otherColumnList) {
+	private ColumnListEquality(TableName oneTable, IdentifierList oneColumnList,
+			TableName otherTable, IdentifierList otherColumnList) {
 		boolean oneGoesFirst = false;
 		if (oneTable.compareTo(otherTable) < 0) {
 			oneGoesFirst = true;
@@ -80,11 +82,11 @@ public class ColumnListEquality extends Expression {
 		return table2;
 	}
 	
-	public Key getColumns1() {
+	public IdentifierList getColumns1() {
 		return columns1;
 	}
 	
-	public Key getColumns2() {
+	public IdentifierList getColumns2() {
 		return columns2;
 	}
 	
@@ -123,6 +125,22 @@ public class ColumnListEquality extends Expression {
 		return new ColumnListEquality(
 				renamer.applyTo(table1), renamer.applyTo(table1, columns1),
 				renamer.applyTo(table2), renamer.applyTo(table2, columns2));
+	}
+
+	public Expression toSimpleExpression() {
+		List<Expression> eqs = new ArrayList<Expression>();
+		for (int i = 0; i < columns1.size(); i++) {
+			eqs.add(Equality.createColumnEquality(
+					table1.qualifyIdentifier(columns1.get(i)),
+					table2.qualifyIdentifier(columns1.get(i))));
+		}
+		return Conjunction.create(eqs);
+	}
+	
+	public Expression substitute(ColumnName column, Expression substitution) {
+		Expression simple = toSimpleExpression();
+		Expression substituted = simple.substitute(column, substitution);
+		return simple.equals(substituted) ? this : substituted;
 	}
 
 	@Override

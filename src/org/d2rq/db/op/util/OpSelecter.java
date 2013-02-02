@@ -6,11 +6,13 @@ import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.AliasOp;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.EmptyOp;
+import org.d2rq.db.op.ExtendOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.op.TableOp;
+import org.d2rq.db.schema.ColumnName;
 
 
 /**
@@ -24,8 +26,7 @@ import org.d2rq.db.op.TableOp;
 public class OpSelecter extends OpMutator {
 	private final Expression expression;
 	
-	public OpSelecter(DatabaseOp table,
-			Expression expression) {
+	public OpSelecter(DatabaseOp table, Expression expression) {
 		super(table);
 		this.expression = expression;
 	}
@@ -54,6 +55,25 @@ public class OpSelecter extends OpMutator {
 	@Override
 	public DatabaseOp visitLeave(SelectOp original, DatabaseOp child) {
 		return SelectOp.select(original, expression.and(original.getCondition()));
+	}
+
+	/**
+	 * We can recurse into extensions if the expression doesn't use the
+	 * extension column. Otherwise we need to stop and wrap.
+	 */
+	@Override
+	public boolean visitEnter(ExtendOp original) {
+		return !expression.getColumns().contains(
+				ColumnName.create(original.getNewColumn()));
+	}
+
+	@Override
+	public DatabaseOp visitLeave(ExtendOp original, DatabaseOp child) {
+		if (expression.getColumns().contains(
+				ColumnName.create(original.getNewColumn()))) {
+			return wrap(original);
+		}
+		return super.visitLeave(original, child);
 	}
 
 	@Override

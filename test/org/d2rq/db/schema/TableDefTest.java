@@ -15,7 +15,7 @@ public class TableDefTest {
 	private TableName t1, t2;
 	private Identifier col1, col2, col3;
 	private List<ColumnDef> cols12, cols13;
-	private Key key1;
+	private IdentifierList key1;
 	private ForeignKey fk2;
 	
 	@Before
@@ -33,8 +33,8 @@ public class TableDefTest {
 				new ColumnDef(col1, DataType.GenericType.NUMERIC.dataTypeFor(Vendor.SQL92), false),
 				new ColumnDef(col3, DataType.GenericType.NUMERIC.dataTypeFor(Vendor.SQL92), false),
 		});
-		key1 = Key.create(col1);
-		fk2 = new ForeignKey(Key.create(col2), Key.create(col1), t2);
+		key1 = IdentifierList.create(col1);
+		fk2 = new ForeignKey(IdentifierList.create(col2), IdentifierList.create(col1), t2);
 	}
 
 	@Test
@@ -47,16 +47,16 @@ public class TableDefTest {
 	
 	@Test
 	public void testDifferentTableNamesNotEqual() {
-		TableDef def1 = new TableDef(t1, cols12, null, Collections.<Key>emptySet(), Collections.<ForeignKey>emptySet());
-		TableDef def2 = new TableDef(t2, cols12, null, Collections.<Key>emptySet(), Collections.<ForeignKey>emptySet());
+		TableDef def1 = new TableDef(t1, cols12, null, Collections.<IdentifierList>emptySet(), Collections.<ForeignKey>emptySet());
+		TableDef def2 = new TableDef(t2, cols12, null, Collections.<IdentifierList>emptySet(), Collections.<ForeignKey>emptySet());
 		assertFalse(def1.equals(def2));
 		assertFalse(def1.hashCode() == def2.hashCode());
 	}
 	
 	@Test
 	public void testDifferentColumnListsNotEqual() {
-		TableDef def1 = new TableDef(t1, cols12, null, Collections.<Key>emptySet(), Collections.<ForeignKey>emptySet());
-		TableDef def2 = new TableDef(t1, cols13, null, Collections.<Key>emptySet(), Collections.<ForeignKey>emptySet());
+		TableDef def1 = new TableDef(t1, cols12, null, Collections.<IdentifierList>emptySet(), Collections.<ForeignKey>emptySet());
+		TableDef def2 = new TableDef(t1, cols13, null, Collections.<IdentifierList>emptySet(), Collections.<ForeignKey>emptySet());
 		assertFalse(def1.equals(def2));
 		assertFalse(def1.hashCode() == def2.hashCode());
 	}

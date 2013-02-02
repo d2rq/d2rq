@@ -10,8 +10,8 @@ import org.d2rq.db.expr.Constant;
 import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.renamer.Renamer;
+import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.types.DataType.GenericType;
 import org.d2rq.db.vendor.Vendor;
 import org.d2rq.nodes.NodeSetFilter;
@@ -51,10 +51,10 @@ public class BaseIRIValueMaker implements ValueMaker {
 						wrapped.valueExpression(value, tabular, vendor));
 	}
 
-	public Set<ProjectionSpec> projectionSpecs() {
-		return wrapped.projectionSpecs();
+	public Set<ColumnName> getRequiredColumns() { 
+		return wrapped.getRequiredColumns();
 	}
-
+	
 	public String makeValue(ResultRow row) {
 		String s = wrapped.makeValue(row);
 		return URI.create(s).isAbsolute() ? s : baseIRI + s;

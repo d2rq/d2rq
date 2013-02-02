@@ -8,9 +8,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.d2rq.db.DummyDB;
 import org.d2rq.db.DummyDB.DummyTable;
-import org.d2rq.db.op.AliasOp;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
-import org.d2rq.db.schema.Key;
 import org.d2rq.db.schema.TableName;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,7 +65,7 @@ public class AliasOpTest {
 		DummyTable t = DummyDB.createTable("table", "col");
 		t.setUniqueKey("col");
 		AliasOp alias = AliasOp.create(t, "alias");
-		assertEquals(Key.create(ColumnName.parse("alias.col")),
+		assertEquals(ColumnList.create(ColumnName.parse("alias.col")),
 				alias.getUniqueKeys().iterator().next());
 	}
 

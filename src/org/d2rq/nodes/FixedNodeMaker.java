@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.d2rq.db.ResultRow;
 import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectionSpec;
+import org.d2rq.db.schema.ColumnName;
 import org.d2rq.pp.PrettyPrinter;
 
 import com.hp.hpl.jena.graph.Node;
@@ -31,8 +31,8 @@ public class FixedNodeMaker implements NodeMaker {
 		c.limitTo(this.node);
 	}
 
-	public Set<ProjectionSpec> projectionSpecs() {
-		return Collections.<ProjectionSpec>emptySet();
+	public Set<ColumnName> getRequiredColumns() {
+		return Collections.<ColumnName>emptySet();
 	}
 
 	public String toString() {

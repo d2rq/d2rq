@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.d2rq.db.ResultRow;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.renamer.Renamer;
+import org.d2rq.db.schema.ColumnName;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Var;
@@ -17,7 +17,7 @@ import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 
 /**
  * Produces {@link Binding}s from {@link ResultRow}s. A map from {@link Var}s
- * to {@link NodeMaker}s, plus an optional condition (a {@link ProjectionSpec})
+ * to {@link NodeMaker}s, plus an optional reference to a column
  * that must be true in the {@link ResultRow} or no binding will be produced
  * from the row.
  * 
@@ -25,20 +25,20 @@ import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
  */
 public class BindingMaker {
 	private final Map<Var,NodeMaker> nodeMakers;
-	private final ProjectionSpec condition;
+	private final ColumnName conditionColumn;
 
 	public BindingMaker(Map<Var,NodeMaker> nodeMakers) {
 		this(nodeMakers, null);
 	}
 	
-	public BindingMaker(Map<Var,NodeMaker> nodeMakers, ProjectionSpec condition) {
+	public BindingMaker(Map<Var,NodeMaker> nodeMakers, ColumnName conditionColumn) {
 		this.nodeMakers = nodeMakers;
-		this.condition = condition;
+		this.conditionColumn = conditionColumn;
 	}
 
 	public Binding makeBinding(ResultRow row) {
-		if (condition != null) {
-			String value = row.get(condition);
+		if (conditionColumn != null) {
+			String value = row.get(conditionColumn);
 			if (value == null || "false".equals(value) || "0".equals(value) || "".equals(value)) {
 				return null;
 			}
@@ -74,8 +74,8 @@ public class BindingMaker {
 	/**
 	 * @return <code>null</code> if the binding maker is not conditional
 	 */
-	public ProjectionSpec getCondition() {
-		return condition;
+	public ColumnName getConditionColumn() {
+		return conditionColumn;
 	}
 	
 	@Override
@@ -89,9 +89,9 @@ public class BindingMaker {
 			result.append("\n");
 		}
 		result.append(")");
-		if (condition != null) {
+		if (conditionColumn != null) {
 			result.append(" WHERE ");
-			result.append(condition);
+			result.append(conditionColumn);
 		}
 		return result.toString();
 	}
@@ -102,10 +102,10 @@ public class BindingMaker {
 			renamedNodeMakers.put(var, renamer.applyTo(nodeMakers.get(var)));
 		}
 		return new BindingMaker(renamedNodeMakers, 
-				condition == null ? null : renamer.applyTo(condition));
+				conditionColumn == null ? null : renamer.applyTo(conditionColumn));
 	}
 	
-	public BindingMaker makeConditional(ProjectionSpec condition) {
-		return new BindingMaker(nodeMakers, condition);
+	public BindingMaker makeConditional(ColumnName conditionColumn) {
+		return new BindingMaker(nodeMakers, conditionColumn);
 	}
 }
