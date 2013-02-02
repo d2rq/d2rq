@@ -24,6 +24,9 @@ public interface OpVisitor {
 	boolean visitEnter(ProjectOp table);
 	void visitLeave(ProjectOp table);
 	
+	boolean visitEnter(ExtendOp table);
+	void visitLeave(ExtendOp table);
+	
 	boolean visitEnter(AliasOp table);
 	void visitLeave(AliasOp table);
 	
@@ -55,6 +58,8 @@ public interface OpVisitor {
 		public void visitLeave(SelectOp table) {}
 		public boolean visitEnter(ProjectOp table) { return recurse; }
 		public void visitLeave(ProjectOp table) {}
+		public boolean visitEnter(ExtendOp table) { return recurse; }
+		public void visitLeave(ExtendOp table) {}
 		public boolean visitEnter(AliasOp table) { return recurse; }
 		public void visitLeave(AliasOp table) {}
 		public boolean visitEnter(OrderOp table) { return recurse; }

@@ -20,6 +20,7 @@ import org.d2rq.db.types.SQLBinary;
 import org.d2rq.db.types.SQLBit;
 import org.d2rq.db.types.SQLBoolean;
 import org.d2rq.db.types.SQLCharacterString;
+import org.d2rq.db.types.SQLCharacterStringVarying;
 import org.d2rq.db.types.SQLDate;
 import org.d2rq.db.types.SQLExactNumeric;
 import org.d2rq.db.types.SQLTime;
@@ -142,16 +143,18 @@ public class SQL92 implements Vendor {
 	public DataType getDataType(int jdbcType, String name, int size) {
 		// TODO: These are in java.sql.Types as of Java 6 but not yet in Java 1.5
 		if ("NCHAR".equals(name) || "NVARCHAR".equals(name) || "NCLOB".equals(name)) {
-			return new SQLCharacterString(name, true);
+			return new SQLCharacterStringVarying(name, true);
 		}
 
 		
 		switch (jdbcType) {
 		case Types.CHAR:
+			return new SQLCharacterString(name, true);
+
 		case Types.VARCHAR:
 		case Types.LONGVARCHAR:
 		case Types.CLOB:
-			return new SQLCharacterString(name, true);
+			return new SQLCharacterStringVarying(name, true);
 			
 		case Types.BOOLEAN:
 			return new SQLBoolean(name);

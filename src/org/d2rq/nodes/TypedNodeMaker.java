@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.d2rq.db.ResultRow;
 import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectionSpec;
+import org.d2rq.db.schema.ColumnName;
 import org.d2rq.pp.PrettyPrinter;
 import org.d2rq.values.ValueMaker;
 
@@ -52,8 +52,8 @@ public class TypedNodeMaker implements NodeMaker {
 		return new LiteralNodeType("", datatype);
 	}
 	
-	private NodeType nodeType;
-	private ValueMaker valueMaker;
+	private final NodeType nodeType;
+	private final ValueMaker valueMaker;
 	
 	public TypedNodeMaker(NodeType nodeType, ValueMaker valueMaker) {
 		this.nodeType = nodeType;
@@ -68,8 +68,8 @@ public class TypedNodeMaker implements NodeMaker {
 		return valueMaker;
 	}
 	
-	public Set<ProjectionSpec> projectionSpecs() {
-		return this.valueMaker.projectionSpecs();
+	public Set<ColumnName> getRequiredColumns() {
+		return valueMaker.getRequiredColumns();
 	}
 	
 	public void describeSelf(NodeSetFilter c) {

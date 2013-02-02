@@ -29,10 +29,28 @@ public class ColumnExpr extends Expression {
 		return false;
 	}
 
-	public Expression rename(Renamer columnRenamer) {
-		return new ColumnExpr(columnRenamer.applyTo(column));
+	public boolean isConstant() {
+		return false;
 	}
 
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
+			boolean constIfFalse, boolean constIfConstantValue) {
+		if (constIfConstantValue) {
+			return this.column.equals(column);
+		}
+		// TODO: If it's a boolean column (and not some other column implicitly cast to boolean), then we can answer true
+		return false;
+	}
+
+	public Expression rename(Renamer columnRenamer) {
+		ColumnName renamed = columnRenamer.applyTo(column);
+		return renamed.equals(column) ? this : new ColumnExpr(renamed);
+	}
+
+	public Expression substitute(ColumnName column, Expression substitution) {
+		return column.equals(this.column) ? substitution : this;
+	}
+	
 	public String toSQL(DatabaseOp table, Vendor vendor) {
 		return vendor.toString(column);
 	}

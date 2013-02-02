@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 
 /**
@@ -63,7 +63,7 @@ public class UniqueLocalNameGenerator {
 	}
 
 	// TODO: UniqueNameGenerator.toString(TableName, Key) does not yet guarantee uniqueness
-	public String toString(TableName tableName, Key columns) {
+	public String toString(TableName tableName, IdentifierList columns) {
 		StringBuffer result = new StringBuffer();
 		result.append(toString(tableName));
 		for (Identifier column: columns.getColumns()) {

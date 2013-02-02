@@ -1,6 +1,5 @@
 package org.d2rq.db.expr;
 
-import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.types.DataType.GenericType;
 
 
@@ -11,8 +10,8 @@ public class GreaterThanOrEqual extends BinaryOperator {
 		super(expr1, expr2, ">=", false, GenericType.BOOLEAN);
 	}
 
-	public Expression rename(Renamer columnRenamer) {
-		return new GreaterThanOrEqual(expr1.rename(columnRenamer), expr2.rename(columnRenamer));
+	@Override
+	protected Expression clone(Expression newOperand1, Expression newOperand2) {
+		return new GreaterThanOrEqual(newOperand1, newOperand2);
 	}
-
 }

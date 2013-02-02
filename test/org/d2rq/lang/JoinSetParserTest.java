@@ -15,7 +15,7 @@ import org.d2rq.db.expr.ColumnListEquality;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 import org.junit.Test;
 
@@ -90,8 +90,8 @@ public class JoinSetParserTest {
 				"foo.col1 <= bar.col1", "foo.col1 => baz.col1", 
 				"bar.col1 = baz.col1").getAssertedForeignKeys();
 		Map<ForeignKey,TableName> expected = new HashMap<ForeignKey,TableName>();
-		expected.put(new ForeignKey(Key.create(bar_col1), Key.create(foo_col1), foo_col1.getQualifier()), bar_col1.getQualifier());
-		expected.put(new ForeignKey(Key.create(foo_col1), Key.create(baz_col1), baz_col1.getQualifier()), foo_col1.getQualifier());
+		expected.put(new ForeignKey(IdentifierList.create(bar_col1), IdentifierList.create(foo_col1), foo_col1.getQualifier()), bar_col1.getQualifier());
+		expected.put(new ForeignKey(IdentifierList.create(foo_col1), IdentifierList.create(baz_col1), baz_col1.getQualifier()), foo_col1.getQualifier());
 		assertEquals(actual, expected);
 	}
 }

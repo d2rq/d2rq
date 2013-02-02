@@ -1,9 +1,5 @@
 package org.d2rq.db.expr;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.DataType.GenericType;
@@ -40,26 +36,36 @@ public class Equality extends BinaryOperator {
 		return create(expression, Constant.create(value, dataType));
 	}
 	
-	private final Set<ColumnName> columns = new HashSet<ColumnName>();
-	
 	private Equality(Expression expr1, Expression expr2) {
 		super(expr1, expr2, "=", true, GenericType.BOOLEAN);
-		columns.addAll(expr1.getColumns());
-		columns.addAll(expr2.getColumns());
 	}
-	
+
+	@Override
+	protected Expression clone(Expression newOperand1, Expression newOperand2) {
+		return new Equality(newOperand1, newOperand2);
+	}
+
+	@Override
 	public boolean isFalse() {
 		return (expr1.isFalse() && expr2.isTrue())
 				|| (expr1.isTrue() && expr2.isFalse());
 	}
 
+	@Override
 	public boolean isTrue() {
 		return expr1.equals(expr2);
 	}
 
-	public Expression rename(Renamer columnRenamer) {
-		return new Equality(
-				expr1.rename(columnRenamer), 
-				expr2.rename(columnRenamer));
+	@Override
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue,
+			boolean constIfFalse, boolean constIfConstantValue) {
+		if (!constIfTrue) return false;
+		if (expr1.isConstant()) {
+			return (expr2.isConstantColumn(column, false, false, true));
+		}
+		if (expr2.isConstant()) {
+			return (expr1.isConstantColumn(column, false, false, true));
+		}
+		return false;
 	}
 }

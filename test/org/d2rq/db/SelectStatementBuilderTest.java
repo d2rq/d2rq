@@ -14,16 +14,17 @@ import org.d2rq.db.op.AliasOp;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.DistinctOp;
 import org.d2rq.db.op.EmptyOp;
+import org.d2rq.db.op.ExtendOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.OrderOp;
 import org.d2rq.db.op.OrderOp.OrderSpec;
 import org.d2rq.db.op.ProjectOp;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.schema.ColumnDef;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.types.DataType.GenericType;
@@ -50,8 +51,10 @@ public class SelectStatementBuilderTest {
 		table2Bar = ColumnName.parse("table2.bar");
 		table3Foo = ColumnName.parse("table3.foo");
 		table100 = LimitOp.limit(table1, 100, LimitOp.NO_LIMIT);
-		simpleExpression = ProjectOp.create(DatabaseOp.TRUE, Collections.singleton(
-				ProjectionSpec.create(Constant.create("5", GenericType.NUMERIC), db.vendor())));
+		simpleExpression = ExtendOp.extend(DatabaseOp.TRUE, 
+				Identifier.createUndelimited("EXPR"),
+				Constant.create("5", GenericType.NUMERIC), 
+				db.vendor());
 		selectStatement = new SQLOp(db, "SELECT table.foo FROM table",
 				Collections.singletonList(
 						new ColumnDef(Identifier.createUndelimited("foo"), 
@@ -94,21 +97,21 @@ public class SelectStatementBuilderTest {
 	@Test
 	public void testExpressionOnly() {
 		assertEquals("SELECT 5 AS EXPR FROM (VALUES(NULL))",
-				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR[0-9a-f]*", "EXPR"));
+				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR_[0-9A-F]*", "EXPR"));
 	}
 	
 	@Test
 	public void testExpressionOnlyMySQL() {
 		db.setVendor(Vendor.MySQL);
 		assertEquals("SELECT 5 AS EXPR",
-				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR[0-9a-f]*", "EXPR"));
+				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR_[0-9A-F]*", "EXPR"));
 	}
 	
 	@Test
 	public void testExpressionOnlyOracle() {
 		db.setVendor(Vendor.Oracle);
 		assertEquals("SELECT 5 EXPR FROM DUAL",
-				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR[0-9a-f]*", "EXPR"));
+				new SelectStatementBuilder(simpleExpression, db.vendor()).getSQL().replaceAll("EXPR_[0-9A-F]*", "EXPR"));
 	}
 	
 	@Test
@@ -180,11 +183,22 @@ public class SelectStatementBuilderTest {
 	}
 	
 	@Test
-	public void testReturnedProjectionSpecIsExpression() {
+	public void testReturnedProjectionSpecIsColumn() {
 		Expression expr = Microsyntax.parseSQLExpression("t1.foo>0", GenericType.BOOLEAN);
-		DatabaseOp projection = ProjectOp.create(table1, ProjectionSpec.create(expr, db.vendor()));
-		assertEquals(
-				Collections.singletonList(ProjectionSpec.create(expr, db.vendor())),
-				new SelectStatementBuilder(projection, db.vendor()).getColumnSpecs());
+		Identifier col = ExtendOp.createUniqueIdentifierFor(expr);
+		DatabaseOp projection = ExtendOp.extend(table1, col, expr, db.vendor());
+		ColumnList columns = new SelectStatementBuilder(
+				projection, db.vendor()).getColumns();
+		assertEquals(ColumnList.create(table1Foo, ColumnName.create(col)), columns);
+	}
+	
+	@Test
+	public void testNestedProjections() {
+		Expression expr = Constant.create("bar", GenericType.CHARACTER);
+		DatabaseOp projection = ExtendOp.extend(table1, 
+				Identifier.createUndelimited("EXPR"), expr, db.vendor());
+		projection = ProjectOp.project(projection, projection.getColumns());
+		assertEquals("SELECT table1.foo, 'bar' AS EXPR FROM table1",
+				new SelectStatementBuilder(projection, db.vendor()).getSQL());
 	}
 }

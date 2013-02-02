@@ -1,5 +1,6 @@
 package org.d2rq.lang;
 
+import static org.d2rq.db.schema.TableName.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -10,17 +11,13 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import org.d2rq.D2RQException;
-import org.d2rq.db.DummyDB;
 import org.d2rq.db.expr.Expression;
-import org.d2rq.db.op.AliasOp;
 import org.d2rq.db.renamer.ColumnRenamer;
 import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.renamer.TableRenamer;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType.GenericType;
-import org.d2rq.lang.AliasDeclaration;
-import org.d2rq.lang.Microsyntax;
 import org.junit.Test;
 
 
@@ -133,7 +130,7 @@ public class MicrosyntaxTest {
 	
 	@Test
 	public void testReplaceColumnsInExpressionWithTableRenamer() {
-		Renamer renamer = TableRenamer.create(AliasOp.create(new DummyDB().table("\"foo\""), "\"bar\""));
+		Renamer renamer = TableRenamer.create(parse("\"foo\""), parse("\"bar\""));
 		assertEquals("SQL(\"bar\".\"col1\")", 
 				renamer.applyTo(parseSQL("foo.col1")).toString());
 		assertEquals("SQL(LEN(\"bar\".\"col1\") > 0)", 

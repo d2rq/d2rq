@@ -85,7 +85,7 @@ public class QueryIterTableSQL extends QueryIter {
 		this.bindingMakers = bindingMakers;
 		SelectStatementBuilder builder = new SelectStatementBuilder(table, sqlConnection.vendor());
 		wrapped = new SQLIterator(
-				builder.getSQL(), builder.getColumnSpecs(), sqlConnection);
+				builder.getSQL(), builder.getColumns(), sqlConnection);
 	}
 	
 	@Override

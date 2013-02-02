@@ -7,7 +7,7 @@ import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ColumnDef;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableDef;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
@@ -58,7 +58,7 @@ public class DirectMappingStyle implements MappingStyle {
 		return model;
 	}
 	
-	public TemplateValueMaker getEntityIRITemplate(TableDef table, Key columns) {
+	public TemplateValueMaker getEntityIRITemplate(TableDef table, IdentifierList columns) {
 		TemplateValueMaker.Builder builder = TemplateValueMaker.builder();
 		// We don't use baseIRI here, so the template will produce relative IRIs.
 		builder.add(encodeTableName(table.getName()));
@@ -91,7 +91,7 @@ public class DirectMappingStyle implements MappingStyle {
 		return result;
 	}
 	
-	public TemplateValueMaker getEntityLabelTemplate(TableName tableName, Key columns) {
+	public TemplateValueMaker getEntityLabelTemplate(TableName tableName, IdentifierList columns) {
 		// Direct Mapping doesn't do label templates, so we don't need this
 		return null;
 	}

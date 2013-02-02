@@ -12,7 +12,7 @@ import org.d2rq.D2RQException;
 import org.d2rq.db.expr.ColumnListEquality;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.lang.Join.Direction;
 
@@ -126,8 +126,8 @@ public class JoinSetParser {
 		}
 		ColumnListEquality getExpression() {
 			return ColumnListEquality.create(
-					table1, Key.createFromIdentifiers(columns1), 
-					table2, Key.createFromIdentifiers(columns2));
+					table1, IdentifierList.createFromIdentifiers(columns1), 
+					table2, IdentifierList.createFromIdentifiers(columns2));
 		}
 		TableName getForeignKeyTable() {
 			if (operator == Direction.RIGHT) {
@@ -140,12 +140,12 @@ public class JoinSetParser {
 		}
 		ForeignKey getForeignKeyDefinition() {
 			if (operator == Direction.RIGHT) {
-				return new ForeignKey(Key.createFromIdentifiers(columns1), 
-						Key.createFromIdentifiers(columns2), table2);
+				return new ForeignKey(IdentifierList.createFromIdentifiers(columns1), 
+						IdentifierList.createFromIdentifiers(columns2), table2);
 			}
 			if (operator == Direction.LEFT) {
-				return new ForeignKey(Key.createFromIdentifiers(columns2), 
-						Key.createFromIdentifiers(columns1), table1);
+				return new ForeignKey(IdentifierList.createFromIdentifiers(columns2), 
+						IdentifierList.createFromIdentifiers(columns1), table1);
 			}
 			return null;
 		}

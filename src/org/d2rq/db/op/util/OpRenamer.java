@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.d2rq.db.op.AliasOp;
 import org.d2rq.db.op.DatabaseOp;
+import org.d2rq.db.op.ExtendOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.OrderOp;
@@ -41,8 +42,15 @@ public class OpRenamer extends OpMutator {
 
 	@Override
 	public DatabaseOp visitLeave(ProjectOp table, DatabaseOp child) {
-		return ProjectOp.create(child,
-				renamer.applyToProjections(table.getProjections()));
+		return ProjectOp.project(child, renamer.applyTo(table.getColumns()));
+	}
+
+	@Override
+	public DatabaseOp visitLeave(ExtendOp table, DatabaseOp child) {
+		return ExtendOp.extend(child,
+				table.getNewColumn(),
+				renamer.applyTo(table.getExpression()),
+				table.getVendor());
 	}
 
 	@Override

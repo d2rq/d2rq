@@ -2,15 +2,18 @@ package org.d2rq.db.op.util;
 
 import java.util.Stack;
 
+import org.d2rq.db.expr.Expression;
+import org.d2rq.db.op.AliasOp;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.EmptyOp;
+import org.d2rq.db.op.ExtendOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.op.OpVisitor;
-import org.d2rq.db.op.ProjectOp;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.op.TableOp;
+import org.d2rq.db.schema.ColumnName;
 
 /**
  * Various utility functions for working with {@link DatabaseOp} instances.
@@ -72,8 +75,9 @@ public class OpUtil {
 				resultStack.push(resultStack.pop() && table.getCondition().isTrue());
 			}
 			@Override
-			public void visitLeave(ProjectOp table) {
-				resultStack.push(resultStack.pop() && table.getProjections().isEmpty());
+			public void visitLeave(ExtendOp table) {
+				resultStack.pop();
+				resultStack.push(false);
 			}
 			@Override
 			public void visitLeave(EmptyOp table) {
@@ -95,6 +99,84 @@ public class OpUtil {
 		}.getResult();
 	}
 
+	public static Expression getDerivedColumnExpression(final DatabaseOp op, final ColumnName column) {
+		if (!op.hasColumn(column)) return null;
+		return new OpVisitor.Default(true) {
+			private Expression result = null;
+			Expression getResult() {
+				op.accept(this);
+				return result;
+			}
+			@Override
+			public boolean visitEnter(ExtendOp table) {
+				if (table.getNewColumn().equals(column.getColumn())) {
+					result = table.getExpression();
+					return false;
+				}
+				return true;
+			}
+			@Override
+			public boolean visitEnter(AliasOp table) {
+				// Doesn't count as computed column
+				result = null;
+				return false;
+			}
+		}.getResult();
+	}
+	
+	/**
+	 * Check if the column is known to have the same value in all rows.
+	 * This is the case for column X in queries like this:
+	 * 
+	 * SELECT X FROM T WHERE X=5 AND Y>0
+	 * SELECT 5 AS X
+	 * 
+	 * The implementation walks through the operator tree, assuming by default
+	 * that columns are not constant, and looking for possible reasons why they
+	 * might. If such a reason is found, further recursion is stopped.
+	 * 
+	 * @param op
+	 * @param column
+	 * @return
+	 */
+	public static boolean isConstantColumn(final DatabaseOp op, final ColumnName column) {
+		if (!op.hasColumn(column)) return true;	// by logic that it's safe to assume constant NULL
+		return new OpVisitor.Default(true) {
+			private boolean result = false;
+			boolean getResult() {
+				op.accept(this);
+				return result;
+			}
+			@Override
+			public boolean visitEnter(ExtendOp table) {
+				// Is our column a derived column defined for the SELECT clause,
+				// rather than a table column? If so, check if the expression
+				// is constant
+				if (table.getExpression().isConstant()) {
+					result = true;
+					return false;
+				}
+				return true;
+			}
+			@Override
+			public boolean visitEnter(SelectOp table) {
+				// Does the condition force our column to be constant?
+				if (table.getCondition().isConstantColumn(column, true, false, false)) {
+					result = true;
+					return false;
+				}
+				return true;
+			}
+			@Override
+			public boolean visitEnter(AliasOp table) {
+				// Check the original column
+				result = isConstantColumn(table.getOriginal(), 
+						table.getOriginalColumnName(column));
+				return false;
+			}
+		}.getResult();
+	}
+	
 	/**
 	 * Cannot be instantiated, just static methods.
 	 */

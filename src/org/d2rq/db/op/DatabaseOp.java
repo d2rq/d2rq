@@ -2,10 +2,9 @@ package org.d2rq.db.op;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
-import org.d2rq.db.schema.Key;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 
@@ -32,13 +31,27 @@ public interface DatabaseOp {
 	/**
 	 * @return Fully qualified column names if possible, no duplicates
 	 */
-	List<ColumnName> getColumns();
+	ColumnList getColumns();
 
+	/**
+	 * Indicates whether a column may contain <code>NULL</code> values.
+	 * @param column A qualified or unqualified column name
+	 * @return <code>false</code> for non-existing columns or ambiguous unqualified names
+	 */
 	boolean isNullable(ColumnName column);
 
+	/**
+	 * Indicates the datatype of a column.
+	 * @param column A qualified or unqualified column name
+	 * @return <code>null</code> for non-existing columns or ambiguous unqualified names
+	 */
 	DataType getColumnType(ColumnName column);
 
-	Collection<Key> getUniqueKeys();
+	/**
+	 * A unique key is a list of columns whose combined values are guaranteed
+	 * to be unique within the table.
+	 */
+	Collection<ColumnList> getUniqueKeys();
 	
 	void accept(OpVisitor visitor);
 
@@ -55,8 +68,8 @@ public interface DatabaseOp {
 		public boolean hasColumn(ColumnName column) {
 			return false;
 		}
-		public List<ColumnName> getColumns() {
-			return Collections.emptyList();
+		public ColumnList getColumns() {
+			return ColumnList.EMPTY;
 		}
 		public boolean isNullable(ColumnName column) {
 			return false;
@@ -64,7 +77,7 @@ public interface DatabaseOp {
 		public DataType getColumnType(ColumnName column) {
 			return null;
 		}
-		public Collection<Key> getUniqueKeys() {
+		public Collection<ColumnList> getUniqueKeys() {
 			return Collections.emptySet();
 		}
 		public void accept(OpVisitor visitor) {
@@ -89,7 +102,7 @@ public interface DatabaseOp {
 		public boolean hasColumn(ColumnName column) {
 			return wrapped.hasColumn(column);
 		}
-		public List<ColumnName> getColumns() {
+		public ColumnList getColumns() {
 			return wrapped.getColumns();
 		}
 		public boolean isNullable(ColumnName column) {
@@ -98,7 +111,7 @@ public interface DatabaseOp {
 		public DataType getColumnType(ColumnName column) {
 			return wrapped.getColumnType(column);
 		}
-		public Collection<Key> getUniqueKeys() {
+		public Collection<ColumnList> getUniqueKeys() {
 			return wrapped.getUniqueKeys();
 		}
 	}

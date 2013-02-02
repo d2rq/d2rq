@@ -17,7 +17,6 @@ import org.d2rq.algebra.NodeRelationUtil;
 import org.d2rq.db.ResultRow;
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.SelectStatementBuilder;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.util.OpUtil;
 
 import com.hp.hpl.jena.graph.Node;
@@ -101,7 +100,7 @@ public class DownloadContentQuery {
 		SQLConnection db = r.getSQLConnection();
 		SelectStatementBuilder builder = new SelectStatementBuilder(r.getBaseTabular(), db.vendor());
 		String sql = builder.getSQL();
-		int contentColumn = builder.getColumnSpecs().indexOf(ProjectionSpec.create(downloadRelation.getContentDownloadColumn())) + 1;
+		int contentColumn = builder.getColumns().indexOf(downloadRelation.getContentDownloadColumn()) + 1;
 		Connection conn = db.connection();
 		try {
 			statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -125,7 +124,7 @@ public class DownloadContentQuery {
 				}
 			}
 			Binding row = r.getBindingMaker().makeBinding(
-					ResultRow.fromResultSet(resultSet, builder.getColumnSpecs(), db));
+					ResultRow.fromResultSet(resultSet, builder.getColumns(), db));
 			if (row != null) {
 				mediaType = row.get(DownloadRelation.MEDIA_TYPE).getLiteralLexicalForm();
 			}

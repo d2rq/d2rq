@@ -36,3 +36,7 @@ Test cases for a D2RQ mapping language processor.
 <mappings/additional-definition-properties.ttl> a :ProcessorTestCase;
     rdfs:comment "Just exercises the reader and writer.";
     :schema <schemas/empty-table1.sql>.
+
+<mappings/contains-duplicates-with-join.ttl> a :ProcessorTestCase;
+    :schema <schemas/multicol-pk.sql>;
+    :triple (ex:B_1_100 rdf:type ex:B), (ex:B_1_101 rdf:type ex:B).

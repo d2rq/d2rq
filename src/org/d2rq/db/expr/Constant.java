@@ -88,14 +88,30 @@ public class Constant extends Expression {
 	}
 
 	public boolean isFalse() {
+		// TODO: Check if this is a boolean constant
 		return false;
 	}
 
 	public boolean isTrue() {
+		// TODO: Check if this is a boolean constant
+		return false;
+	}
+
+	public boolean isConstant() {
+		return true;
+	}
+	
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
+			boolean constIfFalse, boolean constIfConstantValue) {
 		return false;
 	}
 
 	public Expression rename(Renamer columnRenamer) {
+		return this;
+	}
+
+	@Override
+	public Expression substitute(ColumnName column, Expression substitution) {
 		return this;
 	}
 

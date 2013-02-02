@@ -16,7 +16,6 @@ import org.d2rq.nodes.NodeMaker;
 import org.d2rq.nodes.NodeMakerVisitor;
 import org.d2rq.nodes.NodeSetFilter;
 import org.d2rq.nodes.TypedNodeMaker;
-import org.d2rq.nodes.NodeMaker.EmptyNodeMaker;
 import org.d2rq.values.BlankNodeIDValueMaker;
 import org.d2rq.values.TemplateValueMaker;
 import org.d2rq.values.Translator;
@@ -130,7 +129,7 @@ public class URIMakerRule implements Comparator<TripleRelation> {
 		public void addPotentialMatch(NodeMaker nodeMaker) {
 			if (!uriMakerIdentifier(nodeMaker).isURIPattern()) return;
 			nodeMaker.accept(new NodeMakerVisitor() {
-				public void visit(EmptyNodeMaker nodeMaker) {}
+				public void visitEmpty() {}
 				public void visit(FixedNodeMaker nodeMaker) {
 					if (nodeMaker.getFixedNode().equals(node)) {
 						canMatchURIColumn = false;

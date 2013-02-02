@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.d2rq.db.op.DatabaseOp.Wrapper;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.ColumnList;
 
 /**
  * Asserts that a certain combination of columns is unique in the
@@ -13,22 +13,22 @@ import org.d2rq.db.schema.Key;
  * TODO: Remove this class and handle this as a modification to the underlying base table(s)'s definition(s) in RelationBuilder 
  */
 public class AssertUniqueKeyOp extends Wrapper {
-	private final Key key;
-	private final Collection<Key> uniqueKeys = new ArrayList<Key>();
+	private final ColumnList key;
+	private final Collection<ColumnList> uniqueKeys = new ArrayList<ColumnList>();
 	
-	public AssertUniqueKeyOp(DatabaseOp wrapped, Key uniqueKey) {
+	public AssertUniqueKeyOp(DatabaseOp wrapped, ColumnList uniqueKey) {
 		super(wrapped);
 		uniqueKeys.addAll(wrapped.getUniqueKeys());
 		uniqueKeys.add(uniqueKey);
 		key = uniqueKey;
 	}
 
-	public Key getKey() {
+	public ColumnList getKey() {
 		return key;
 	}
 	
 	@Override
-	public Collection<Key> getUniqueKeys() {
+	public Collection<ColumnList> getUniqueKeys() {
 		return uniqueKeys;
 	}
 

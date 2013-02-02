@@ -8,7 +8,7 @@ import java.util.Stack;
 
 import org.apache.jena.iri.Violation;
 import org.d2rq.db.SQLConnection;
-import org.d2rq.db.schema.ColumnName;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.schema.Identifier.ViolationType;
@@ -418,7 +418,7 @@ public class MappingValidator extends MappingVisitor.TreeWalkerImplementation {
 		if (sqlConnection != null) {
 			String error = sqlConnection.getParseError(sqlQuery.toString());
 			if (error == null) {
-				List<ColumnName> columns = sqlConnection.getSelectStatement(sqlQuery.toString()).getColumns();
+				ColumnList columns = sqlConnection.getSelectStatement(sqlQuery.toString()).getColumns();
 				if (columns != null) {
 					for (int i = 0; i < columns.size() - 1; i++) {
 						for (int j = i + 1; j < columns.size(); j++) {

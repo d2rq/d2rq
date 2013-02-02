@@ -5,7 +5,7 @@ import java.util.List;
 import org.d2rq.db.schema.ColumnDef;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableDef;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.values.TemplateValueMaker;
@@ -52,7 +52,7 @@ public interface MappingStyle {
 	 * @param columns The primary or unique key to be used, or null
 	 * @return An IRI template
 	 */
-	TemplateValueMaker getEntityIRITemplate(TableDef table, Key columns);
+	TemplateValueMaker getEntityIRITemplate(TableDef table, IdentifierList columns);
 
 	/**
 	 * Returns a list of columns to be used to form blank node identifiers
@@ -106,5 +106,5 @@ public interface MappingStyle {
 	 * @param columns A list of columns in the table 
 	 * @return A template for generating labels for the records
 	 */
-	TemplateValueMaker getEntityLabelTemplate(TableName tableName, Key columns);
+	TemplateValueMaker getEntityLabelTemplate(TableName tableName, IdentifierList columns);
 }

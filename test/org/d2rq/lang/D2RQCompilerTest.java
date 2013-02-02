@@ -6,27 +6,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 import org.d2rq.D2RQException;
 import org.d2rq.HSQLDatabase;
 import org.d2rq.algebra.DownloadRelation;
 import org.d2rq.algebra.TripleRelation;
 import org.d2rq.db.ResultRow;
 import org.d2rq.db.op.DistinctOp;
-import org.d2rq.db.op.ProjectionSpec;
-import org.d2rq.db.op.TableOp;
 import org.d2rq.db.op.OpVisitor;
+import org.d2rq.db.op.TableOp;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
-import org.d2rq.lang.ClassMap;
-import org.d2rq.lang.CompiledD2RQMapping;
-import org.d2rq.lang.D2RQCompiler;
-import org.d2rq.lang.Database;
-import org.d2rq.lang.DownloadMap;
-import org.d2rq.lang.Mapping;
-import org.d2rq.lang.Microsyntax;
-import org.d2rq.lang.PropertyBridge;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -125,8 +114,7 @@ public class D2RQCompilerTest {
 		ClassMap cm1 = ClassMap.create(null, pattern1, mapping);
 		cm1.setContainsDuplicates(true);
 		PropertyBridge.create(null, RDF.type, cm1).setConstantValue(class1);
-		assertEquals(
-				Collections.singletonList(t_id), 
+		assertEquals(ColumnList.create(t_id), 
 				firstTripleRelation().getBaseTabular().getColumns());
 	}
 	
@@ -200,14 +188,14 @@ public class D2RQCompilerTest {
 		assertNotNull(d);
 		assertEquals(Node.createLiteral("image/png"), 
 				d.nodeMaker(DownloadRelation.MEDIA_TYPE).makeNode(
-						new ResultRow(null) {public String get(ProjectionSpec column) {return null;}}));
+						new ResultRow(null) {public String get(ColumnName column) {return null;}}));
 		assertEquals(Microsyntax.parseColumn("People.pic"), d.getContentDownloadColumn());
 		assertEquals("URI(http://example.org/downloads/{\"People\".\"ID\"})", 
 				d.nodeMaker(DownloadRelation.RESOURCE).toString());
 		assertFalse(d.getBaseTabular().getUniqueKeys().isEmpty());
-		assertEquals(Arrays.asList(new ColumnName[]{
+		assertEquals(ColumnList.create(
 					Microsyntax.parseColumn("People.ID"),
-					Microsyntax.parseColumn("People.pic")}), 
+					Microsyntax.parseColumn("People.pic")), 
 				d.getBaseTabular().getColumns());
 	}
 	

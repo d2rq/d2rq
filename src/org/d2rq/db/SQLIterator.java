@@ -4,13 +4,12 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.d2rq.D2RQException;
-import org.d2rq.db.op.ProjectionSpec;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.lang.Database;
 
 import com.hp.hpl.jena.query.QueryCancelledException;
@@ -27,7 +26,7 @@ import com.hp.hpl.jena.util.iterator.ClosableIterator;
 public class SQLIterator implements ClosableIterator<ResultRow> {
 	private final static Log log = LogFactory.getLog(SQLIterator.class);
 	private String sql;
-	private List<ProjectionSpec> columns;
+	private ColumnList columns;
 	private SQLConnection database;
 	private Statement statement = null;
 	private ResultSet resultSet = null;
@@ -36,7 +35,7 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 	private boolean explicitlyClosed = false;
 	private boolean cancelled = false;
 
-	public SQLIterator(String sql, List<ProjectionSpec> columns, SQLConnection db) {
+	public SQLIterator(String sql, ColumnList columns, SQLConnection db) {
 		this.sql = sql;
 		this.columns = columns;
 		this.database = db;

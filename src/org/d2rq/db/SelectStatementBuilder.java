@@ -7,23 +7,24 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.TreeMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.d2rq.db.expr.ColumnListEquality;
 import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.AliasOp;
+import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.DistinctOp;
 import org.d2rq.db.op.EmptyOp;
+import org.d2rq.db.op.ExtendOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.LimitOp;
+import org.d2rq.db.op.OpVisitor;
 import org.d2rq.db.op.OrderOp;
 import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectOp;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.op.SelectOp;
 import org.d2rq.db.op.TableOp;
-import org.d2rq.db.op.ProjectionSpec;
-import org.d2rq.db.op.ProjectionSpec.ColumnProjectionSpec;
-import org.d2rq.db.op.DatabaseOp;
-import org.d2rq.db.op.OpVisitor;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.vendor.Vendor;
@@ -47,6 +48,8 @@ import org.d2rq.db.vendor.Vendor;
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class SelectStatementBuilder extends OpVisitor.Default {
+	private final static Log log = LogFactory.getLog(SelectStatementBuilder.class);
+	
 	private final DatabaseOp input;
 	private final Vendor vendor;
 	private final Stack<SimpleQuery> queryStack = new Stack<SimpleQuery>();
@@ -60,6 +63,7 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 
 	private void run() {
 		if (done) return;
+		log.debug("Input: " + input);
 		done = true;
 		queryStack.push(new SimpleQuery());
 		input.accept(this);
@@ -70,9 +74,10 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 		return queryStack.peek().getSQL(input, vendor, input.getColumns());
 	}
 
-	public List<ProjectionSpec> getColumnSpecs() {
+	public ColumnList getColumns() {
 		run();
-		return queryStack.peek().toProjectionSpecs(input.getColumns());
+		return input.getColumns();
+//		return queryStack.peek().toProjectionSpecs(input.getColumns());
 	}
 	
 	@Override
@@ -91,10 +96,9 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 	}
 
 	@Override
-	public void visitLeave(ProjectOp table) {
-		for (ProjectionSpec spec: table.getProjections()) {
-			queryStack.peek().projections.put(spec.getColumn(), spec);
-		}
+	public void visitLeave(ExtendOp table) {
+		queryStack.peek().extensions.put(
+				ColumnName.create(table.getNewColumn()), table.getExpression());
 	}
 	
 	@Override
@@ -165,7 +169,7 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 	 */
 	private class SimpleQuery {
 		String rawSQL;
-		Map<ColumnName,ProjectionSpec> projections;
+		Map<ColumnName,Expression> extensions;
 		Map<TableName,String> fromClauses;
 		int limit;
 		Expression whereClause;
@@ -178,7 +182,7 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 		
 		private void reset() {
 			rawSQL = null;
-			projections = new TreeMap<ColumnName,ProjectionSpec>();
+			extensions = new TreeMap<ColumnName,Expression>();
 			fromClauses = new TreeMap<TableName,String>();
 			limit = LimitOp.NO_LIMIT;
 			whereClause = Expression.TRUE;
@@ -187,27 +191,18 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 		}
 		
 		boolean isSimpleTable() {
-			return rawSQL == null && projections.isEmpty() && limit == LimitOp.NO_LIMIT
+			return rawSQL == null && extensions.isEmpty() && limit == LimitOp.NO_LIMIT
 					&& whereClause.isTrue() && !distinct && orderByClauses.isEmpty()
 					&& fromClauses.size() == 1 && fromClauses.entrySet().iterator().next().getValue() == null;
 		}
 		
-		void buildSQL(DatabaseOp table, Vendor vendor, List<ColumnName> columns) {
+		void buildSQL(DatabaseOp table, Vendor vendor, ColumnList columns) {
 			String tmp = getSQL(table, vendor, columns);
 			reset();
 			rawSQL = tmp;
 		}
 		
-		private List<ProjectionSpec> toProjectionSpecs(List<ColumnName> columns) {
-			List<ProjectionSpec> result = new ArrayList<ProjectionSpec>();
-			for (ColumnName column: columns) {
-				result.add(projections.containsKey(column) ? 
-						projections.get(column) : ColumnProjectionSpec.create(column));
-			}
-			return result;
-		}
-		
-		String getSQL(DatabaseOp table, Vendor vendor, List<ColumnName> columns) {
+		String getSQL(DatabaseOp table, Vendor vendor, ColumnList columns) {
 			if (rawSQL != null) return rawSQL;
 			StringBuffer result = new StringBuffer("SELECT ");
 			if (distinct) {
@@ -223,9 +218,14 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 			if (columns.isEmpty()) {
 				result.append("1");
 			} else {
-				Iterator<ProjectionSpec> columnsIt = toProjectionSpecs(columns).iterator();
+				Iterator<ColumnName> columnsIt = columns.iterator();
 				while (columnsIt.hasNext()) {
-					result.append(columnsIt.next().toSQL(table, vendor));
+					ColumnName col = columnsIt.next();
+					if (extensions.containsKey(col)) {
+						result.append(extensions.get(col).toSQL(table, vendor));
+						result.append(vendor.getAliasOperator());
+					}
+					result.append(vendor.toString(col));
 					if (columnsIt.hasNext()) {
 						result.append(", ");
 					}
@@ -252,8 +252,15 @@ public class SelectStatementBuilder extends OpVisitor.Default {
 			}
 			whereClause = whereClause.and(vendor.getRowNumLimitAsExpression(limit));
 			if (!whereClause.isTrue()) {
+				Expression expr = whereClause;
+				// This doesn't work: SELECT COL AS ALIAS WHERE ALIAS > 0
+				// The ALIAS in the WHERE clause has to be substituted with the
+				// defining expression, COL in this case.
+				for (ColumnName col: extensions.keySet()) {
+					expr = expr.substitute(col, extensions.get(col));
+				}
 				result.append(" WHERE ");
-				result.append(whereClause.toSQL(table, vendor));
+				result.append(expr.toSQL(table, vendor));
 			}
 			Iterator<OrderSpec> orderIt = orderByClauses.iterator();
 			if (orderIt.hasNext()) {

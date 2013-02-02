@@ -7,7 +7,7 @@ import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.SQLBinary;
 import org.d2rq.db.types.SQLBit;
-import org.d2rq.db.types.SQLCharacterString;
+import org.d2rq.db.types.SQLCharacterStringVarying;
 import org.d2rq.db.types.SQLDate;
 import org.d2rq.lang.Database;
 
@@ -80,7 +80,7 @@ public class SQLServer extends SQL92 {
 
 		// Doesn't support DISTINCT over LOB types
 		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
-			return new SQLCharacterString(name, false);
+			return new SQLCharacterStringVarying(name, false);
 		}
 		if (jdbcType == Types.BLOB) {
 			return new SQLBinary(name, false);

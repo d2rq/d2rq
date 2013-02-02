@@ -9,9 +9,9 @@ import java.util.Map;
 
 import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ColumnDef;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 
@@ -26,20 +26,22 @@ public class SQLOp implements DatabaseOp {
 	private final SQLConnection sqlConnection;
 	private final String sql;
 	private final List<Identifier> columnIDs;
-	private final List<ColumnName> columnNames = new ArrayList<ColumnName>();
+	private final ColumnList columnNames;
 	private final Map<Identifier,ColumnDef> columnMetadata = 
 		new HashMap<Identifier,ColumnDef>();
 	
 	public SQLOp(SQLConnection sqlConnection, String sql,
-			List<ColumnDef> columns) {
+			List<ColumnDef> columnDefs) {
 		this.sqlConnection = sqlConnection;
 		this.sql = sql;
-		columnIDs = new ArrayList<Identifier>(columns.size());
-		for (ColumnDef column: columns) {
+		columnIDs = new ArrayList<Identifier>(columnDefs.size());
+		List<ColumnName> columns = new ArrayList<ColumnName>(columnDefs.size());
+		for (ColumnDef column: columnDefs) {
 			columnIDs.add(column.getName());
 			columnMetadata.put(column.getName(), column);
-			columnNames.add(ColumnName.create(column.getName()));
+			columns.add(ColumnName.create(column.getName()));
 		}
+		this.columnNames = ColumnList.create(columns);
 	}
 	
 	public String getSQL() {
@@ -55,7 +57,7 @@ public class SQLOp implements DatabaseOp {
 		return columnIDs.contains(column.getColumn());
 	}
 	
-	public List<ColumnName> getColumns() {
+	public ColumnList getColumns() {
 		return columnNames;
 	}
 	
@@ -69,7 +71,7 @@ public class SQLOp implements DatabaseOp {
 		return columnMetadata.get(column.getColumn()).getDataType();
 	}
 
-	public Collection<Key> getUniqueKeys() {
+	public Collection<ColumnList> getUniqueKeys() {
 		// TODO: Can we do something smarter?
 		return Collections.emptySet();
 	}

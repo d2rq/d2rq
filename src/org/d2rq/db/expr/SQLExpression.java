@@ -79,12 +79,29 @@ public class SQLExpression extends Expression {
 		return false;
 	}
 	
+	public boolean isConstant() {
+		// As far as we know, the SQL expression may involve some columns,
+		// and therefore not be constant throughout the table
+		return false;
+	}
+	
+	public boolean isConstantColumn(ColumnName column, boolean constIfTrue, 
+			boolean constIfFalse, boolean constIfConstantValue) {
+		return false;
+	}
+
 	public Set<ColumnName> getColumns() {
 		return this.columnsAsSet;
 	}
 	
 	public Expression rename(Renamer renamer) {
 		return new SQLExpression(literalParts, renamer.applyToColumns(columns), dataType);
+	}
+	
+	public Expression substitute(ColumnName column, Expression substitution) {
+		if (!columns.contains(column)) return this;
+		throw new UnsupportedOperationException("Substitution of columns (" + 
+				column + ") in SQLExpressions not implemented: " + this.toString());
 	}
 	
 	public String toSQL(DatabaseOp table, Vendor vendor) {

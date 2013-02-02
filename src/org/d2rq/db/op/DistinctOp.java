@@ -3,22 +3,22 @@ package org.d2rq.db.op;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.ColumnList;
 
 /**
  * Removes duplicates from the wrapped {@link DatabaseOp}.
  */
 public class DistinctOp extends DatabaseOp.Wrapper {
-	private final Collection<Key> uniqueKeys = new ArrayList<Key>();
+	private final Collection<ColumnList> uniqueKeys = new ArrayList<ColumnList>();
 	
 	public DistinctOp(DatabaseOp wrapped) {
 		super(wrapped);
 		uniqueKeys.addAll(wrapped.getUniqueKeys());
-		uniqueKeys.add(Key.createFromColumns(getColumns()));
+		uniqueKeys.add(getColumns());
 	}
 
 	@Override
-	public Collection<Key> getUniqueKeys() {
+	public Collection<ColumnList> getUniqueKeys() {
 		return uniqueKeys;
 	}
 

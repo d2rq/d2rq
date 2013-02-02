@@ -10,7 +10,7 @@ import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ColumnDef;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableDef;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
@@ -158,7 +158,7 @@ public class MappingGenerator {
 						style.getTableClass(tableName) : null;
 				TemplateValueMaker iriTemplate = null;
 				List<Identifier> blankNodeColumns = null;
-				Key key = findBestKey(table);
+				IdentifierList key = findBestKey(table);
 				if (key == null) {
 					List<ColumnDef> filteredColumns = new ArrayList<ColumnDef>();
 					for (ColumnDef columnDef: table.getColumns()) {
@@ -264,14 +264,14 @@ public class MappingGenerator {
 		}
 	}
 
-	private Key findBestKey(TableDef table) {
+	private IdentifierList findBestKey(TableDef table) {
 		if (table.getPrimaryKey() != null) {
 			if (!isExcluded(table, table.getPrimaryKey(), true)) {
 				return table.getPrimaryKey();
 			}
 		}
 		if (!useUniqueKeysAsEntityID) return null;
-		for (Key uniqueKey: table.getUniqueKeys()) {
+		for (IdentifierList uniqueKey: table.getUniqueKeys()) {
 			if (!isExcluded(table, uniqueKey, true)) {
 				return uniqueKey;
 			}
@@ -279,7 +279,7 @@ public class MappingGenerator {
 		return null;
 	}
 	
-	private boolean isExcluded(TableDef table, Key columns, boolean requireDistinct) {
+	private boolean isExcluded(TableDef table, IdentifierList columns, boolean requireDistinct) {
 		for (Identifier column: columns) {
 			if (isExcluded(table, column, requireDistinct)) return true;
 		}

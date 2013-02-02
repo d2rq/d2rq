@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.d2rq.db.schema.ColumnDef;
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableDef;
 import org.d2rq.db.types.DataType;
 
@@ -17,19 +18,24 @@ import org.d2rq.db.types.DataType;
 public class TableOp extends NamedOp {
 	private final TableDef def;
 	private final List<Identifier> columnIDs;
-	private final List<ColumnName> columnNames;
+	private final ColumnList columnNames;
 	private final Map<Identifier,ColumnDef> columnMetadata =
 		new HashMap<Identifier,ColumnDef>();
-
+	private final Collection<ColumnList> uniqueKeys = new ArrayList<ColumnList>();
+	
 	public TableOp(TableDef tableDefinition) {
 		super(tableDefinition.getName());
 		this.def = tableDefinition;
 		columnIDs = new ArrayList<Identifier>(tableDefinition.getColumns().size());
-		columnNames = new ArrayList<ColumnName>(tableDefinition.getColumns().size());
-		for (ColumnDef column: tableDefinition.getColumns()) {
-			columnIDs.add(column.getName());
-			columnMetadata.put(column.getName(), column);
-			columnNames.add(ColumnName.create(getTableName(), column.getName()));
+		ArrayList<ColumnName> columns = new ArrayList<ColumnName>(tableDefinition.getColumns().size());
+		for (ColumnDef columnDef: tableDefinition.getColumns()) {
+			columnIDs.add(columnDef.getName());
+			columnMetadata.put(columnDef.getName(), columnDef);
+			columns.add(getTableName().qualifyIdentifier(columnDef.getName()));
+		}
+		columnNames = ColumnList.create(columns);
+		for (IdentifierList key: def.getUniqueKeys()) {
+			uniqueKeys.add(ColumnList.create(getTableName(), key));
 		}
 	}
 
@@ -37,7 +43,7 @@ public class TableOp extends NamedOp {
 		return def;
 	}
 	
-	public List<ColumnName> getColumns() {
+	public ColumnList getColumns() {
 		return columnNames;
 	}
 	
@@ -51,8 +57,8 @@ public class TableOp extends NamedOp {
 		return columnMetadata.get(column.getColumn()).getDataType();
 	}
 	
-	public Collection<Key> getUniqueKeys() {
-		return def.getUniqueKeys();
+	public Collection<ColumnList> getUniqueKeys() {
+		return uniqueKeys;
 	}
 
 	public void accept(OpVisitor visitor) {

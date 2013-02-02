@@ -4,108 +4,69 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.TreeMap;
 
+import org.d2rq.db.schema.ColumnList;
 import org.d2rq.db.schema.ColumnName;
-import org.d2rq.db.schema.Key;
 import org.d2rq.db.types.DataType;
 
 
 /**
- * Also forces all projected columns and expression to be not null.
+ * Retains a subset of columns, discarding the rest.
  * 
  * @author Richard Cyganiak (richard@cyganiak.de)
  */
 public class ProjectOp extends DatabaseOp.Wrapper {
 	
-	public static ProjectOp create(DatabaseOp wrapped, ColumnName... columns) {
-		return new ProjectOp(ProjectionSpec.createFromColumns(columns), wrapped);
+	public static ProjectOp project(DatabaseOp wrapped, ColumnName... columns) {
+		return project(wrapped, Arrays.asList(columns));
 	}
 	
-	public static ProjectOp create(DatabaseOp wrapped, Collection<ProjectionSpec> specs) {
-		return new ProjectOp(new ArrayList<ProjectionSpec>(specs), wrapped);
+	public static ProjectOp project(DatabaseOp wrapped, List<ColumnName> columns) {
+		return new ProjectOp(columns, wrapped);
 	}
 	
-	public static ProjectOp create(DatabaseOp wrapped, ProjectionSpec... specs) {
-		return new ProjectOp(Arrays.asList(specs), wrapped);
+	public static ProjectOp project(DatabaseOp wrapped, ColumnList columns) {
+		return new ProjectOp(columns.asList(), wrapped);
 	}
 	
-	private final List<ProjectionSpec> projections = new ArrayList<ProjectionSpec>();
-	private final List<ColumnName> columnList = new ArrayList<ColumnName>();
-	private final TreeMap<ColumnName,ProjectionSpec> columns =
-		new TreeMap<ColumnName,ProjectionSpec>();
-	private final Collection<Key> uniqueKeys =
-		new ArrayList<Key>();
-		
-	private ProjectOp(List<ProjectionSpec> projections, DatabaseOp wrapped) {
+	private final ColumnList columns;
+	private final Collection<ColumnList> uniqueKeys = new ArrayList<ColumnList>();
+	
+	private ProjectOp(List<ColumnName> projections, DatabaseOp wrapped) {
 		super(wrapped);
-		for (ProjectionSpec spec: projections) {
-			if (!spec.getColumn().isQualified()) {
-				// See if there is a qualified version of this column in the wrapped
-				for (ColumnName wrappedColumn: wrapped.getColumns()) {
-					if (wrappedColumn.isQualified() && wrappedColumn.getColumn().equals(spec.getColumn().getColumn())) {
-						spec = ProjectionSpec.create(wrappedColumn);
-					}
-				}
-			}
-			this.projections.add(spec);
-			columnList.add(spec.getColumn());
+		List<ColumnName> columns = new ArrayList<ColumnName>();
+		for (ColumnName column: projections) {
+			// See if there is a qualified version of this column in the wrapped
+			ColumnName wrappedColumn = wrapped.getColumns().get(column);
+			columns.add(wrappedColumn == null ? column : wrappedColumn);
 		}
-		// Build columns map
-		for (ProjectionSpec spec: this.projections) {
-			// Qualified names only
-			if (!spec.getColumn().isQualified()) continue;
-			if (columns.containsKey(spec.getColumn())) {
-				throw new IllegalArgumentException("Duplicate column name " + spec.getColumn() + " in projection list: " + projections);
-			}
-			columns.put(spec.getColumn(), spec);
-			if (columns.containsKey(spec.getColumn().getUnqualified())) {
-				// Mark unqualified name as ambiguous
-				columns.put(spec.getColumn().getUnqualified(), null);
-			} else {
-				columns.put(spec.getColumn().getUnqualified(), spec);
-			}
-		}
-		for (ProjectionSpec spec: this.projections) {
-			// Unqualified names only
-			if (spec.getColumn().isQualified()) continue;
-			if (columns.containsKey(spec.getColumn())) {
-				throw new IllegalArgumentException("Duplicate column name " + spec.getColumn() + " in projection list: " + projections);
-			}
-			columns.put(spec.getColumn(), spec);
-		}
-		for (Key key: wrapped.getUniqueKeys()) {
-			if (key.isContainedIn(columnList)) {
+		this.columns = ColumnList.create(columns);
+		for (ColumnList key: wrapped.getUniqueKeys()) {
+			if (this.columns.containsAll(key)) {
 				uniqueKeys.add(key);
 			}
 		}
 	}
 	
-	public List<ProjectionSpec> getProjections() {
-		return projections;
-	}
-	
 	public boolean hasColumn(ColumnName column) {
-		if (columns.get(column) == null) {
-			return false;	// Ambiguous unqualified name -- pretend it's not there
-		}
-		return columns.containsKey(column);
+		if (columns.isAmbiguous(column)) return false;
+		return columns.contains(column);
 	}
 	
-	public List<ColumnName> getColumns() {
-		return columnList;
+	public ColumnList getColumns() {
+		return columns;
 	}
 
 	public boolean isNullable(ColumnName column) {
-		return false;
+		return columns.contains(column) && getWrapped().isNullable(column);
 	}
 
 	public DataType getColumnType(ColumnName column) {
-		if (!hasColumn(column)) return null;
-		return columns.get(column).getDataType(getWrapped());
+		if (!columns.contains(column)) return null;
+		return getWrapped().getColumnType(column);
 	}
 
-	public Collection<Key> getUniqueKeys() {
+	public Collection<ColumnList> getUniqueKeys() {
 		return uniqueKeys;
 	}
 
@@ -118,12 +79,12 @@ public class ProjectOp extends DatabaseOp.Wrapper {
 	
 	@Override
 	public String toString() {
-		return "Project(" + getWrapped() + "," + projections + ")";
+		return "Project(" + columns + ", " + getWrapped() + ")";
 	}
 	
 	@Override
 	public int hashCode() {
-		return getWrapped().hashCode() ^ projections.hashCode() ^ 70;
+		return getWrapped().hashCode() ^ columns.hashCode() ^ 70;
 	}
 	
 	@Override
@@ -131,6 +92,6 @@ public class ProjectOp extends DatabaseOp.Wrapper {
 		if (!(o instanceof ProjectOp)) return false;
 		ProjectOp other = (ProjectOp) o;
 		if (!getWrapped().equals(other.getWrapped())) return false;
-		return projections.equals(other.projections);
+		return columns.equals(other.columns);
 	}
 }

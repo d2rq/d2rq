@@ -1,0 +1,15 @@
+@prefix map: <#> .
+@prefix ex: <http://example.com/> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#>.
+
+map:db a d2rq:Database.
+map:config a d2rq:Configuration; d2rq:serveVocabulary false.
+
+map:B a d2rq:ClassMap;
+    d2rq:dataStorage map:db;
+    d2rq:uriPattern "http://example.com/B_@@B.A_ID@@_@@B.B_ID@@";
+    d2rq:class ex:B;
+    d2rq:join "B.A_ID = A.ID";    
+    # Not needed, but should be harmless
+    d2rq:containsDuplicates true;
+    .

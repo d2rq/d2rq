@@ -7,7 +7,7 @@ import java.sql.Types;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.SQLBinary;
-import org.d2rq.db.types.SQLCharacterString;
+import org.d2rq.db.types.SQLCharacterStringVarying;
 
 
 public class PostgreSQL extends SQL92 {
@@ -35,7 +35,7 @@ public class PostgreSQL extends SQL92 {
 		if (standard != null) return standard;
 
 		if ("UUID".equals(name)) {
-			return new SQLCharacterString(name, true);
+			return new SQLCharacterStringVarying(name, true);
 		}
 		
 		// As postGis jdbc is only a wrapper of the org.postgresql.Driver,
@@ -43,7 +43,7 @@ public class PostgreSQL extends SQL92 {
 		// Thus Postgis field as geometry are handled here
 		if ((jdbcType == Types.OTHER) && ("GEOMETRY".equals(name))) {
 			// let try the simpliest version
-			return new SQLCharacterString(name, true);
+			return new SQLCharacterStringVarying(name, true);
 		}
 
 		return null;

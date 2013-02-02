@@ -9,7 +9,7 @@ import org.d2rq.db.SQLConnection;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.ForeignKey;
 import org.d2rq.db.schema.Identifier;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.vendor.Vendor;
@@ -236,7 +236,7 @@ public class R2RMLTarget implements Target {
 	}
 
 	private TemplateValueMaker substituteColumns(TemplateValueMaker template,
-			TableName newTable, Key newColumns) {
+			TableName newTable, IdentifierList newColumns) {
 		return new TemplateValueMaker(
 				template.literalParts(), 
 				newTable.qualifyIdentifiers(newColumns.getColumns()).toArray(new ColumnName[newColumns.size()]), 

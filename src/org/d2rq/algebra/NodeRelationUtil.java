@@ -13,17 +13,17 @@ import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.LimitOp;
 import org.d2rq.db.op.OpVisitor;
 import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.TableOp;
+import org.d2rq.db.op.util.OpProjecter;
 import org.d2rq.db.op.util.OpRenamer;
 import org.d2rq.db.op.util.OpSelecter;
 import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.renamer.TableRenamer;
+import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.TableName;
 import org.d2rq.nodes.BindingMaker;
 import org.d2rq.nodes.FixedNodeMaker;
 import org.d2rq.nodes.NodeMaker;
-import org.d2rq.nodes.NodeMaker.EmptyNodeMaker;
 import org.d2rq.nodes.NodeMakerVisitor;
 import org.d2rq.nodes.TypedNodeMaker;
 
@@ -68,7 +68,7 @@ public class NodeRelationUtil {
 		if (!extraVars.isEmpty()) {
 			extraVars.putAll(result.getBindingMaker().getNodeMakers());
 			result = new NodeRelation(result.getSQLConnection(), result.getBaseTabular(), 
-					new BindingMaker(extraVars, result.getBindingMaker().getCondition()));
+					new BindingMaker(extraVars, result.getBindingMaker().getConditionColumn()));
 		}
 		return result;
 	}
@@ -93,12 +93,21 @@ public class NodeRelationUtil {
 	}
 	
 	public static NodeRelation project(NodeRelation original, Set<Var> vars) {
-		Set<ProjectionSpec> projections = new HashSet<ProjectionSpec>();
+		Set<ColumnName> projections = new HashSet<ColumnName>();
 		for (Var var: vars) {
 			if (!original.getBindingMaker().has(var)) continue;
-			projections.addAll(original.nodeMaker(var).projectionSpecs());
+			projections.addAll(original.nodeMaker(var).getRequiredColumns());
 		}
-		return new NodeRelationProjecter(original, projections).getNodeRelation();
+		Set<ColumnName> originalColumns = new HashSet<ColumnName>(
+				original.getBaseTabular().getColumns().asList());
+		if (originalColumns.equals(projections)) {
+			// The original already has exactly the columns we need, no need to project
+			return original;
+		}
+		OpProjecter projecter = new OpProjecter(original.getBaseTabular(), projections);
+		return new NodeRelation(original.getSQLConnection(), 
+				projecter.getResult(), 
+				original.getBindingMaker().rename(projecter.getRenamer()));
 	}
 	
 	public static NodeRelation renameWithPrefix(NodeRelation table, final int index) {
@@ -162,7 +171,7 @@ public class NodeRelationUtil {
 				original.nodeMaker(var).accept(this);
 				return result;
 			}
-			public void visit(EmptyNodeMaker nodeMaker) {
+			public void visitEmpty() {
 				result = NodeRelation.createEmpty(original);
 			}
 			public void visit(FixedNodeMaker nodeMaker) {
@@ -192,7 +201,7 @@ public class NodeRelationUtil {
 				result = new NodeRelation(
 						result.getSQLConnection(),
 						new OpSelecter(original.getBaseTabular(), expr).getResult(), 
-						new BindingMaker(nodeMakers, original.getBindingMaker().getCondition()));
+						new BindingMaker(nodeMakers, original.getBindingMaker().getConditionColumn()));
 			}
 		}.getResult();
 	}

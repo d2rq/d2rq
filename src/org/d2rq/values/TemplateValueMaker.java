@@ -20,8 +20,6 @@ import org.d2rq.db.expr.Equality;
 import org.d2rq.db.expr.Expression;
 import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.OrderOp.OrderSpec;
-import org.d2rq.db.op.ProjectionSpec;
-import org.d2rq.db.op.ProjectionSpec.ColumnProjectionSpec;
 import org.d2rq.db.renamer.Renamer;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.types.DataType.GenericType;
@@ -94,8 +92,7 @@ public class TemplateValueMaker implements ValueMaker {
 	private final String[] literalParts;	// size n + 1
 	private final ColumnName[] columns;		// size n
 	private final ColumnFunction[] functions;	// size n
-	private final ProjectionSpec[] projections;
-	private final Set<ProjectionSpec> columnsAsSet;
+	private final Set<ColumnName> columnsAsSet;
 	private final java.util.regex.Pattern regex;
 	
 	public TemplateValueMaker(String[] literalParts, ColumnName[] columns, ColumnFunction[] functions) {
@@ -107,11 +104,7 @@ public class TemplateValueMaker implements ValueMaker {
 		this.literalParts = literalParts;
 		this.columns = columns;
 		this.functions = functions;
-		projections = new ProjectionSpec[columns.length];
-		for (int i = 0; i < columns.length; i++) { 
-			projections[i] = ColumnProjectionSpec.create(columns[i]);
-		}
-		columnsAsSet = new HashSet<ProjectionSpec>(Arrays.asList(projections));
+		columnsAsSet = new HashSet<ColumnName>(Arrays.asList(columns));
 		regex = toRegex();
 	}
 	
@@ -190,10 +183,10 @@ public class TemplateValueMaker implements ValueMaker {
 		return Conjunction.create(expressions);
 	}
 
-	public Set<ProjectionSpec> projectionSpecs() {
+	public Set<ColumnName> getRequiredColumns() { 
 		return columnsAsSet;
 	}
-
+	
 	/**
 	 * Constructs a String from the pattern using the given database row.
 	 * @param row a database row
@@ -203,7 +196,7 @@ public class TemplateValueMaker implements ValueMaker {
 		int index = 0;
 		StringBuilder result = new StringBuilder(literalParts[0]);
 		while (index < columns.length) {
-			String value = row.get(projections[index]);
+			String value = row.get(columns[index]);
 			if (value == null) {
 				return null;
 			}

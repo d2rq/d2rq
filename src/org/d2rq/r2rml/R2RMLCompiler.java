@@ -23,12 +23,11 @@ import org.d2rq.db.op.DatabaseOp;
 import org.d2rq.db.op.InnerJoinOp;
 import org.d2rq.db.op.NamedOp;
 import org.d2rq.db.op.ProjectOp;
-import org.d2rq.db.op.ProjectionSpec;
 import org.d2rq.db.op.SQLOp;
 import org.d2rq.db.schema.ColumnName;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.schema.Identifier.IdentifierParseException;
-import org.d2rq.db.schema.Key;
+import org.d2rq.db.schema.IdentifierList;
 import org.d2rq.db.types.DataType;
 import org.d2rq.db.types.DataType.GenericType;
 import org.d2rq.nodes.FixedNodeMaker;
@@ -184,27 +183,27 @@ public class R2RMLCompiler implements CompiledMapping {
 		} else {
 			resourceCollections.put(getTriplesMapName(), 
 					new ResourceCollection(this, sqlConnection, subjectMaker, 
-							createTabular(currentTable, subjectMaker.projectionSpecs()), 
+							createDatabaseOp(currentTable, subjectMaker.getRequiredColumns()), 
 							currentTripleRelations));
 		}
 		tripleRelations.addAll(currentTripleRelations);
 		currentTripleRelations.clear();
 	}
 	
-	private Key getChildKey(List<Join> joins) {
+	private IdentifierList getChildKey(List<Join> joins) {
 		List<Identifier> result = new ArrayList<Identifier>();
 		for (Join join: joins) {
 			result.add(join.getChild().asIdentifier(sqlConnection.vendor()));
 		}
-		return Key.createFromIdentifiers(result);
+		return IdentifierList.createFromIdentifiers(result);
 	}
 	
-	private Key getParentKey(List<Join> joins) {
+	private IdentifierList getParentKey(List<Join> joins) {
 		List<Identifier> result = new ArrayList<Identifier>();
 		for (Join join: joins) {
 			result.add(join.getParent().asIdentifier(sqlConnection.vendor()));
 		}
-		return Key.createFromIdentifiers(result);
+		return IdentifierList.createFromIdentifiers(result);
 	}
 	
 	private void visitComponent(PredicateObjectMap poMap) {
@@ -260,16 +259,16 @@ public class R2RMLCompiler implements CompiledMapping {
 			log.warn("null term map");
 			return null;
 		}
-		Set<ProjectionSpec> columns = new HashSet<ProjectionSpec>();
-		columns.addAll(subjectMaker.projectionSpecs());
-		columns.addAll(predicateMaker.projectionSpecs());
-		columns.addAll(objectMaker.projectionSpecs());
-		return new TripleRelation(sqlConnection, createTabular(baseOp, columns), 
+		Set<ColumnName> columns = new HashSet<ColumnName>();
+		columns.addAll(subjectMaker.getRequiredColumns());
+		columns.addAll(predicateMaker.getRequiredColumns());
+		columns.addAll(objectMaker.getRequiredColumns());
+		return new TripleRelation(sqlConnection, createDatabaseOp(baseOp, columns), 
 				subjectMaker, predicateMaker, objectMaker);
 	}
 	
-	private DatabaseOp createTabular(DatabaseOp baseOp, Set<ProjectionSpec> columns) {
-		return ProjectOp.create(baseOp, columns);
+	private DatabaseOp createDatabaseOp(DatabaseOp baseOp, Set<ColumnName> columns) {
+		return ProjectOp.project(baseOp, new ArrayList<ColumnName>(columns));
 	}
 	
 	private NamedOp createTabular(TriplesMap triplesMap) {
