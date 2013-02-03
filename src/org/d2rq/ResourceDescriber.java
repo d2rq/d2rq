@@ -2,6 +2,8 @@ package org.d2rq;
 
 import java.util.Iterator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.d2rq.db.op.LimitOp;
 import org.d2rq.find.FindQuery;
 import org.d2rq.find.TripleQueryIter;
@@ -18,6 +20,8 @@ import com.hp.hpl.jena.sparql.engine.iterator.QueryIterConcat;
 
 
 public class ResourceDescriber {
+	private static final Log log = LogFactory.getLog(ResourceDescriber.class);
+
 	private final CompiledMapping mapping;
 	private final Node node;
 	private final boolean onlyOutgoing;
@@ -41,6 +45,8 @@ public class ResourceDescriber {
 	public Graph description() {
 		if (executed) return result;
 		executed = true;
+
+		log.info("Describing resource: " + node);
 
 		ExecutionContext context = new ExecutionContext(
 				mapping.getContext(), null, null, null);
