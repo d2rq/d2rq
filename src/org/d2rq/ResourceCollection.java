@@ -89,19 +89,19 @@ public class ResourceCollection {
 		List<TripleRelation> result = new ArrayList<TripleRelation>();
 		for (TripleRelation triples: entityDescription) {
 			triples = triples.orderBy(TripleRelation.SUBJECT, true);
-			if (triples.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)) != null) {
+			if (!OpUtil.isEmpty(triples.selectTriple(new Triple(Node.ANY, RDF.Nodes.type, Node.ANY)).getBaseTabular())) {
 				result.add(triples);
 			}
 			// TODO: The list of label properties is redundantly specified in PageServlet
-			if (triples.selectTriple(new Triple(Node.ANY, RDFS.label.asNode(), Node.ANY)) != null) {
+			if (!OpUtil.isEmpty(triples.selectTriple(new Triple(Node.ANY, RDFS.label.asNode(), Node.ANY)).getBaseTabular())) {
 				result.add(triples);
-			} else if (triples.selectTriple(new Triple(Node.ANY, SKOS.prefLabel.asNode(), Node.ANY)) != null) {
+			} else if (!OpUtil.isEmpty(triples.selectTriple(new Triple(Node.ANY, SKOS.prefLabel.asNode(), Node.ANY)).getBaseTabular())) {
 				result.add(triples);
-			} else if (triples.selectTriple(new Triple(Node.ANY, DC.title.asNode(), Node.ANY)) != null) {
+			} else if (!OpUtil.isEmpty(triples.selectTriple(new Triple(Node.ANY, DC.title.asNode(), Node.ANY)).getBaseTabular())) {
 				result.add(triples);					
-			} else if (triples.selectTriple(new Triple(Node.ANY, DCTerms.title.asNode(), Node.ANY)) != null) {
+			} else if (!OpUtil.isEmpty(triples.selectTriple(new Triple(Node.ANY, DCTerms.title.asNode(), Node.ANY)).getBaseTabular())) {
 				result.add(triples);					
-			} else if (triples.selectTriple(new Triple(Node.ANY, FOAF.name.asNode(), Node.ANY)) != null) {
+			} else if (!OpUtil.isEmpty(triples.selectTriple(new Triple(Node.ANY, FOAF.name.asNode(), Node.ANY)).getBaseTabular())) {
 				result.add(triples);					
 			}
 		}
