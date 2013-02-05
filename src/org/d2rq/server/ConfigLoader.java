@@ -86,13 +86,13 @@ public class ConfigLoader {
 		} else {
 			if (configURL.startsWith("file://")) {
 				isLocalMappingFile = true;
-				mappingFilename = configURL.substring(7);
+				mappingFilename = configURL.substring(7).replace("%20", " ");
 			} else if (configURL.startsWith("file:")) {
 				isLocalMappingFile = true;
-				mappingFilename = configURL.substring(5);
+				mappingFilename = configURL.substring(5).replace("%20", " ");
 			} else if (configURL.indexOf(":") == -1) {
 				isLocalMappingFile = true;
-				mappingFilename = configURL;
+				mappingFilename = configURL.replace("%20", " ");
 			}
 		}
 	}
@@ -234,10 +234,16 @@ public class ConfigLoader {
 		return this.autoReloadMapping;
 	}
 
+	/**
+	 * @return Timeout in seconds
+	 */
 	public double getPageTimeout() {
 		return pageTimeout;
 	}
 	
+	/**
+	 * @return Timeout in seconds
+	 */
 	public double getSPARQLTimeout() {
 		return sparqlTimeout;
 	}
