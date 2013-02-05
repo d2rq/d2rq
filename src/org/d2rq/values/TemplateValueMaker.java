@@ -330,6 +330,9 @@ public class TemplateValueMaker implements ValueMaker {
 	static class URLifyFunction implements ColumnFunction {
 		public String encode(String s) {
 			try {
+				// Note, replacing _ with %5F causes trouble in some browsers
+				// (Chrome) because they decode %5F back to _ before requesting
+				// the URL.
 				return URLEncoder.encode(s, "utf-8")
 						.replaceAll("_", "%5F").replace('+', '_');
 			} catch (UnsupportedEncodingException ex) {
