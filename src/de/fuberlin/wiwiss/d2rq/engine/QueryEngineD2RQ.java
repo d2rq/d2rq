@@ -35,16 +35,16 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 	private final Mapping mapping;
 
 	public QueryEngineD2RQ(GraphD2RQ graph, Query query) {
-		this(graph, query, null);
+		this(graph, query, BindingRoot.create(), null);
 	}
 
-	public QueryEngineD2RQ(GraphD2RQ graph, Query query, Context context) {
-		super(query, DatasetGraphFactory.createOneGraph(graph), BindingRoot.create(), context);
+	public QueryEngineD2RQ(GraphD2RQ graph, Query query, Binding input, Context context) {
+		super(query, DatasetGraphFactory.createOneGraph(graph), input, context);
 		this.mapping = graph.getMapping();
 	}
 
-	public QueryEngineD2RQ(GraphD2RQ graph, Op op, Context context) {
-		super(op, DatasetGraphFactory.createOneGraph(graph), BindingRoot.create(), context);
+	public QueryEngineD2RQ(GraphD2RQ graph, Op op, Binding input, Context context) {
+		super(op, DatasetGraphFactory.createOneGraph(graph), input, context);
 		this.mapping = graph.getMapping();
 	}
 
@@ -108,7 +108,7 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 		public Plan create(Query query, DatasetGraph dataset,
 				Binding inputBinding, Context context) {
 			return new QueryEngineD2RQ((GraphD2RQ) dataset.getDefaultGraph(),
-					query, context).getPlan();
+					query, inputBinding, context).getPlan();
 		}
 
 		public boolean accept(Op op, DatasetGraph dataset, Context context) {
@@ -118,7 +118,7 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 		public Plan create(Op op, DatasetGraph dataset, Binding inputBinding,
 				Context context) {
 			return new QueryEngineD2RQ((GraphD2RQ) dataset.getDefaultGraph(),
-					op, context).getPlan();
+					op, inputBinding, context).getPlan();
 		}
 	}
 }
