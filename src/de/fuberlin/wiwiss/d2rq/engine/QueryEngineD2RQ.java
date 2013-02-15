@@ -71,13 +71,13 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 		}
 		// Shape filter expressions to maximize opportunities for pushing them
 		// down
-		op = Transformer.transform(new TransformFilterCNF(), op);
+		op = Transformer.transformSkipService(new TransformFilterCNF(), op);
 		// Try to move any filters as far down as possible
 		op = PushDownOpFilterVisitor.transform(op);
 		// Translate BGPs that have a filter immediately above them
-		op = Transformer.transform(new TransformOpBGP(mapping, true), op);
+		op = Transformer.transformSkipService(new TransformOpBGP(mapping, true), op);
 		// Translate BGPs that don't have a filter
-		op = Transformer.transform(new TransformOpBGP(mapping, false), op);
+		op = Transformer.transformSkipService(new TransformOpBGP(mapping, false), op);
 
 		if (log.isDebugEnabled()) {
 			log.debug("After translation:\n" + PrintUtils.toString(op));
