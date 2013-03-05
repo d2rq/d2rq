@@ -19,6 +19,10 @@ public class AttributeExpr extends Expression {
 		return Collections.singleton(attribute);
 	}
 
+	public Attribute attribute() {
+		return this.attribute;
+	}
+
 	public boolean isFalse() {
 		return false;
 	}
@@ -27,7 +31,7 @@ public class AttributeExpr extends Expression {
 		return false;
 	}
 
-	public Expression renameAttributes(ColumnRenamer columnRenamer) {
+	public AttributeExpr renameAttributes(ColumnRenamer columnRenamer) {
 		return new AttributeExpr(columnRenamer.applyTo(attribute));
 	}
 

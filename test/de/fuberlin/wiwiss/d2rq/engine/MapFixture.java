@@ -11,8 +11,11 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.algebra.TripleRelation;
+import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 import de.fuberlin.wiwiss.d2rq.parser.MapParser;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.DummyDB;
 import de.fuberlin.wiwiss.d2rq.vocab.D2RQ;
 import de.fuberlin.wiwiss.d2rq.vocab.Test;
 
@@ -36,11 +39,18 @@ public class MapFixture {
 	}
 	
 	public static Collection<TripleRelation> loadPropertyBridges(String mappingFileName) {
+		return loadPropertyBridges(mappingFileName, new DummyDB());
+	}
+
+	public static Collection<TripleRelation> loadPropertyBridges(String mappingFileName, ConnectedDB database) {
 		Model m = ModelFactory.createDefaultModel();
 		Resource dummyDB = m.getResource(Test.DummyDatabase.getURI());
 		dummyDB.addProperty(RDF.type, D2RQ.Database);
 		m.read(D2RQTestSuite.class.getResourceAsStream(mappingFileName), null, "TURTLE");
 		Mapping mapping = new MapParser(m, null).parse();
+		for (Database db: mapping.databases()) {
+			db.useConnectedDB(database);
+		}
 		return mapping.compiledPropertyBridges();
 	}
 }

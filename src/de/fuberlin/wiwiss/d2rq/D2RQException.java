@@ -99,6 +99,7 @@ public class D2RQException extends JenaException {
 	public static final int PROPERTYBRIDGE_MISSING_PREDICATESPEC = 85;
 	public static final int SQL_COLUMN_NOT_FOUND = 86;
 	public static final int STARTUP_UNKNOWN_FORMAT = 87;
+	public static final int DATABASE_DOES_NOT_SUPPORT_FREE_TEXT_SEARCH = 88;
 	
 	private int code;
 	

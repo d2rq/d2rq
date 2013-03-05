@@ -124,4 +124,32 @@ public class SQLBuildingTest extends TestCase {
 		assertEquals("SELECT DISTINCT \"table\".\"foo\" FROM \"table\" WHERE (ROWNUM <= 100)",
 				new SelectStatementBuilder(r).getSQLStatement());
 	}
+
+	public void testFreeTextExpressionPostreSQL() {
+		Vendor db = Vendor.PostgreSQL;
+		assertEquals("to_tsvector('english', some attribute sql) @@ plainto_tsquery('english', some query)",
+				db.freeTextExpression("some attribute sql", "some query"));
+	}
+
+	public void testFreeTextExpressionOracle() {
+		Vendor db = Vendor.Oracle;
+		assertEquals("CATSEARCH(some attribute sql, some query, '') > 0",
+				db.freeTextExpression("some attribute sql", "some query"));
+	}
+
+	public void testFreeTextExpressionMySQL() {
+		Vendor db = Vendor.MySQL;
+		assertEquals("MATCH (some attribute sql) AGAINST (some query)",
+				db.freeTextExpression("some attribute sql", "some query"));
+	}
+
+	public void testFreeTextExpressionSQL92() {
+		Vendor db = Vendor.SQL92;
+		try {
+			db.freeTextExpression("some attribute sql", "some query");
+			fail("Should fail because free text search not in standard SQL92");
+		} catch (UnsupportedOperationException e) {
+			// expected
+		}
+	}
 }

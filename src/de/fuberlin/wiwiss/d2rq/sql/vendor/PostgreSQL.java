@@ -23,6 +23,16 @@ public class PostgreSQL extends SQL92 {
 	}
 
 	@Override
+	public Boolean supportsFreeTextSearch() {
+		return true;
+	}
+
+	@Override
+	public String freeTextExpression(String textExpr, String query) {
+		return "to_tsvector('english', " + textExpr + ") @@ plainto_tsquery('english', " + query + ")";
+	}
+
+	@Override
 	public DataType getDataType(int jdbcType, String name, int size) {
 		DataType standard = super.getDataType(jdbcType, name, size);
 		if (standard != null) return standard;

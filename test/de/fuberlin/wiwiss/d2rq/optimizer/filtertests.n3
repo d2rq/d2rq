@@ -50,3 +50,8 @@ map:Bridge5 a d2rq:PropertyBridge;
 	d2rq:column "table2.value";
 	.
 	
+map:Bridge6 a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:Table2;
+	d2rq:property ex:computed;
+	d2rq:sqlExpression "table2.value + 1";
+	.
