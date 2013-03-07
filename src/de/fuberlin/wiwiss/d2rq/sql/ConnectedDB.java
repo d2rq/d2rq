@@ -30,12 +30,12 @@ import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
  */
 public class ConnectedDB {
 	private static final Log log = LogFactory.getLog(ConnectedDB.class);
-	
+
 	public static final String KEEP_ALIVE_PROPERTY = "keepAlive"; // interval property, value in seconds
 	public static final int DEFAULT_KEEP_ALIVE_INTERVAL = 60*60; // hourly
 	public static final String KEEP_ALIVE_QUERY_PROPERTY = "keepAliveQuery"; // override default keep alive query
 	public static final String DEFAULT_KEEP_ALIVE_QUERY = "SELECT 1"; // may not work for some DBMS
-	
+
 	{
 		ConnectedDB.registerJDBCDriverIfPresent("com.mysql.jdbc.Driver");
 		ConnectedDB.registerJDBCDriverIfPresent("org.postgresql.Driver");
@@ -53,10 +53,10 @@ public class ConnectedDB {
 		new HashMap<Attribute,GenericType>();
 	private Connection connection = null;
 	private DatabaseSchemaInspector schemaInspector = null;
-	
+
 	// Lazy initialization -- use vendor() for access!
 	private Vendor vendor = null;
-	
+
 	private int limit;
 	private int fetchSize;
 	private int defaultFetchSize = Database.NO_FETCH_SIZE;
@@ -69,7 +69,7 @@ public class ConnectedDB {
 		private final int interval;
 		private final String query;
 		volatile boolean shutdown = false;
-		
+
 		/**
 		 * @param interval in seconds
 		 * @param query the noop query to execute
@@ -79,14 +79,14 @@ public class ConnectedDB {
 			this.interval = interval;
 			this.query = query;
 		}
-		
+
 		public void run() {
 			Connection c;
 			Statement s = null;
 			while (!shutdown) {
 				try { Thread.sleep(interval*1000); }
 				catch (InterruptedException e) { if (shutdown) break; }
-				
+
 				try {
 					if (log.isDebugEnabled())
 						log.debug("Keep alive agent is executing noop query '" + query + "'...");
@@ -96,14 +96,18 @@ public class ConnectedDB {
 					s.close();
 				} catch (Throwable e) { // may throw D2RQException at runtime
 					log.error("Keep alive connection test failed: " + e.getMessage());
+					
+					log.info("Connection will be reset since a failure is detected by keep alive agent.");
+					if (s != null) { try { s.close(); } catch (Exception ignore) {} } 
+					resetConnection();
 				} finally {
 					if (s != null) try { s.close(); } catch (Exception ignore) {}
 				}
 			}
-			
+
 			log.debug("Keep alive agent terminated.");
 		}
-		
+
 		public void shutdown() {
 			log.debug("shutting down");
 			shutdown = true;
@@ -111,14 +115,28 @@ public class ConnectedDB {
 		}
 	};
 	
+	private void resetConnection() {
+		if (this.connection!=null) {
+			try {
+				this.connection.close();
+			} catch (SQLException sqlExc) {
+				// ignore...
+				log.error("Error while closing current connection: "
+						+ sqlExc.getMessage());
+			} finally {
+				this.connection = null;
+			}
+		}
+	}
+
 	private final KeepAliveAgent keepAliveAgent;
-	
+
 	public ConnectedDB(String jdbcURL, String username, String password) {
 		this(jdbcURL, username, password,
 				Collections.<String,GenericType>emptyMap(),
 				Database.NO_LIMIT, Database.NO_FETCH_SIZE, null);
 	}
-	
+
 	public ConnectedDB(String jdbcURL, String username, String password, 
 			Map<String,GenericType> columnTypes,
 			int limit, int fetchSize, Properties connectionProperties) {
@@ -129,7 +147,7 @@ public class ConnectedDB {
 		this.limit = limit;
 		this.fetchSize = fetchSize;
 		this.connectionProperties = connectionProperties;
-		
+
 		for (String columnName: columnTypes.keySet()) {
 			overriddenColumnTypes.put(SQL.parseAttribute(columnName), 
 					columnTypes.get(columnName));
@@ -145,41 +163,41 @@ public class ConnectedDB {
 			} catch (NumberFormatException ignore) {	} // use default
 			if (connectionProperties.containsKey(KEEP_ALIVE_QUERY_PROPERTY))
 				query = connectionProperties.getProperty(KEEP_ALIVE_QUERY_PROPERTY);
-			
+
 			this.keepAliveAgent = new KeepAliveAgent(interval, query);
 			this.keepAliveAgent.start();
 			log.debug("Keep alive agent is enabled (interval: " + interval + " seconds, noop query: '" + query + "').");
 		} else
 			this.keepAliveAgent = null;
 	}
-	
+
 	public String getJdbcURL() {
 		return jdbcURL;
 	}
-	
+
 	public String getUsername() {
 		return username;
 	}
-	
+
 	public String getPassword() {
 		return password;
 	}
-	
+
 	public Connection connection() {
 		if (this.connection == null) {
 			connect();
 		}
 		return this.connection;
 	}
-	
+
 	public int limit() {
 		return this.limit;
 	}
-	
+
 	public void setDefaultFetchSize(int value) {
 		defaultFetchSize = value;
 	}
-	
+
 	public int fetchSize() {
 		if (fetchSize == Database.NO_FETCH_SIZE) {
 			if (vendorIs(Vendor.MySQL)) {
@@ -212,7 +230,7 @@ public class ConnectedDB {
 					D2RQException.D2RQ_DB_CONNECTION_FAILED);
 		}
 	}
-	
+
 	private Properties getConnectionProperties() {
 		Properties result = (connectionProperties == null)
 				? new Properties()
@@ -223,7 +241,7 @@ public class ConnectedDB {
 		if (password != null) {
 			result.setProperty("password", password);
 		}
-		
+
 		/* 
 		 * Enable cursor support in MySQL
 		 * Note that the implementation is buggy in early MySQL 5.0 releases such
@@ -234,10 +252,10 @@ public class ConnectedDB {
 			result.setProperty("useCursorFetch", "true");
 			result.setProperty("useServerPrepStmts", "true"); /* prerequisite */
 		}
-		
+
 		return result;
 	}
-	
+
 	public DatabaseSchemaInspector schemaInspector() {
 		if (schemaInspector == null && jdbcURL != null) {
 			schemaInspector = new DatabaseSchemaInspector(this);
@@ -262,7 +280,7 @@ public class ConnectedDB {
 		}
 		return cachedColumnTypes.get(column);
 	}
-	
+
 	public boolean isNullable(Attribute column) {
 		if (!cachedColumnNullability.containsKey(column)) {
 			cachedColumnNullability.put(column, 
@@ -270,7 +288,7 @@ public class ConnectedDB {
 		}
 		return cachedColumnNullability.get(column);
 	}
-	
+
 	/**
 	 * Reports the brand of RDBMS.
 	 * @return <tt>true</tt> if this database is of the given brand
@@ -281,7 +299,7 @@ public class ConnectedDB {
 	public boolean vendorIs(Vendor vendor) {
 		return this.vendor.equals(vendor);
 	}
-	
+
 	/**
 	 * @return A helper for generating SQL statements conforming to the syntax
 	 * of the database engine used in this connection
@@ -294,7 +312,7 @@ public class ConnectedDB {
 	protected String getDatabaseProductType() throws SQLException {
 		return connection().getMetaData().getDatabaseProductName();
 	}
-	
+
 	private void ensureVendorInitialized() {
 		if (vendor != null) return;
 		try {
@@ -323,7 +341,7 @@ public class ConnectedDB {
 			throw new D2RQException("Database exception", ex);
 		}
 	}
-	
+
 	/**
 	 * <p>Checks if two columns are formatted by the database in a compatible
 	 * fashion.</p>
@@ -351,7 +369,7 @@ public class ConnectedDB {
 		// TODO Right now we only catch the ZEROFILL case. There are many more!
 		return !isZerofillColumn(column1) && !isZerofillColumn(column2);
 	}
-	
+
 	private boolean isZerofillColumn(Attribute column) {
 		if (!vendorIs(Vendor.MySQL)) return false;
 		if (!zerofillCache.containsKey(column)) {
@@ -359,7 +377,7 @@ public class ConnectedDB {
 		}
 		return zerofillCache.get(column);
 	}
-	
+
 	public Map<String,List<String>> getUniqueKeyColumns(RelationName tableName) {
 		if (!uniqueIndexCache.containsKey(tableName) && schemaInspector() != null)
 			uniqueIndexCache.put(tableName, schemaInspector().uniqueColumns(tableName));
@@ -380,14 +398,14 @@ public class ConnectedDB {
 		else
 			return false;
 	}
-	
+
 	/**
 	 * Closes the database connection and shuts down the keep alive agent.
 	 */
 	public void close() {
 		if (keepAliveAgent != null)
 			keepAliveAgent.shutdown();
-		
+
 		if (connection != null) try {
 			log.info("Closing connection to " + jdbcURL);
 			this.connection.close();
@@ -395,7 +413,7 @@ public class ConnectedDB {
 			throw new D2RQException(ex);
 		}
 	}
-	
+
     public boolean equals(Object otherObject) {
     	if (!(otherObject instanceof ConnectedDB)) {
     		return false;
