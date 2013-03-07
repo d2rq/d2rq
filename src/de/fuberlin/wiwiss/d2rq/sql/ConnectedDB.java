@@ -116,13 +116,13 @@ public class ConnectedDB {
 	};
 	
 	private void resetConnection() {
-		if (this.connection!=null) {
+		if (this.connection != null) {
 			try {
 				this.connection.close();
 			} catch (SQLException sqlExc) {
 				// ignore...
 				log.error("Error while closing current connection: "
-						+ sqlExc.getMessage());
+						+ sqlExc.getMessage(), sqlExc);
 			} finally {
 				this.connection = null;
 			}
@@ -216,6 +216,7 @@ public class ConnectedDB {
 			log.info("Establishing JDBC connection to " + jdbcURL);
 			this.connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
 		} catch (SQLException ex) {
+			close();
 			throw new D2RQException(
 					"Database connection to " + jdbcURL + " failed " +
 					"(user: " + username + "): " + ex.getMessage(), 
@@ -225,6 +226,7 @@ public class ConnectedDB {
 		try {
 			vendor().initializeConnection(connection);
 		} catch (SQLException ex) {
+			close();
 			throw new D2RQException(
 					"Database initialization failed: " + ex.getMessage(), 
 					D2RQException.D2RQ_DB_CONNECTION_FAILED);
@@ -409,8 +411,12 @@ public class ConnectedDB {
 		if (connection != null) try {
 			log.info("Closing connection to " + jdbcURL);
 			this.connection.close();
-		} catch (SQLException ex) {
-			throw new D2RQException(ex);
+		} catch (SQLException sqlExc) {
+			// ignore...
+			log.error("Error while closing current connection: "
+					+ sqlExc.getMessage(), sqlExc);
+		} finally {
+			connection = null;
 		}
 	}
 
