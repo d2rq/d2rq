@@ -2,6 +2,8 @@ package de.fuberlin.wiwiss.d2rq.sql.vendor;
 
 import java.sql.Types;
 
+import de.fuberlin.wiwiss.d2rq.expr.BooleanToIntegerCaseExpression;
+import de.fuberlin.wiwiss.d2rq.expr.Expression;
 import de.fuberlin.wiwiss.d2rq.map.Database;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
@@ -81,7 +83,17 @@ public class SQLServer extends SQL92 {
 
 		return super.getDataType(jdbcType, name, size);
 	}
-
+	
+	/**
+	* Expressions can not return true or false in Microsoft SQL 
+	* Server. (No boolean type) But, the entire expression can be 
+	* moved inside a CASE WHEN statement to return an int for the 
+	* boolean result. 
+	*/
+	public Expression booleanExpressionToSimpleExpression(Expression expression) {
+	    return new BooleanToIntegerCaseExpression(expression);
+	}
+	
 	@Override
 	public boolean isIgnoredTable(String schema, String table) {
 		// MS SQL Server has schemas "sys" and "information_schema" in every DB
