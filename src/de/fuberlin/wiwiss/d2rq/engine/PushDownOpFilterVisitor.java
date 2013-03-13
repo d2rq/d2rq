@@ -613,18 +613,18 @@ public class PushDownOpFilterVisitor implements OpVisitor {
 		notMoveableFilterExpr = new ArrayList<Expr>(filterExprBeforeOpLeftJoin);
 		notMoveableFilterExpr.removeAll(filterExprAfterOpLeftJoin);
 
+		newOp = OpLeftJoin.create(left, right, opLeftJoin.getExprs());
+
 		// if there are some filterexpressions which could not be moved down,
 		// an opFilter must be inserted that contains this filterexpressions
 		if (!notMoveableFilterExpr.isEmpty()) {
 			// create the filter for an opleftjoin
-			newOp = OpFilter.filter(OpLeftJoin.create(left, right,
-					opLeftJoin.getExprs()));
+			newOp = OpFilter.filter(newOp);
 			// add the conditions
 			((OpFilter) newOp).getExprs().getList()
 					.addAll(notMoveableFilterExpr);
 		} else {
 			// nothing must be done
-			newOp = opLeftJoin;
 		}
 
 		// restore filterexpressions
