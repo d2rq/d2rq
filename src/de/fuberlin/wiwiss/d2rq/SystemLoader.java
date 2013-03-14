@@ -298,7 +298,9 @@ public class SystemLoader {
 	public Mapping getMapping() {
 		if (mapping == null) {
 			mapping = new MapParser(getMappingModel(), getResourceBaseURI()).parse();
-			mapping.configuration().setUseAllOptimizations(fastMode);
+			if (fastMode) {
+				mapping.configuration().setUseAllOptimizations(true);
+			}
 			if (connectedDB != null) {
 				// Hack! We don't want the Database to open another ConnectedDB,
 				// so we check if it's connected to the same DB, and in that case
