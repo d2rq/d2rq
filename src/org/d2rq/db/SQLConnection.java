@@ -93,6 +93,9 @@ public class SQLConnection {
 					s.close();
 				} catch (Throwable e) { // may throw D2RQException at runtime
 					log.error("Keep alive connection test failed: " + e.getMessage());
+					log.info("Connection will be reset since a failure is detected by keep alive agent.");
+					if (s != null) { try { s.close(); } catch (Exception ignore) {} } 
+					resetConnection();
 				} finally {
 					if (s != null) try { s.close(); } catch (Exception ignore) {}
 				}
@@ -107,7 +110,21 @@ public class SQLConnection {
 			this.interrupt();
 		}
 	};
-	
+
+	private void resetConnection() {
+		if (this.connection != null) {
+			try {
+				this.connection.close();
+			} catch (SQLException sqlExc) {
+				// ignore...
+				log.error("Error while closing current connection: "
+						+ sqlExc.getMessage(), sqlExc);
+			} finally {
+				this.connection = null;
+			}
+		}
+	}
+
 	private final KeepAliveAgent keepAliveAgent;
 
 	public SQLConnection(String jdbcURL, String jdbcDriver, String username, String password) {
@@ -292,6 +309,7 @@ public class SQLConnection {
 			}
 			this.connection = DriverManager.getConnection(this.jdbcURL, getConnectionProperties());
 		} catch (SQLException ex) {
+			close();
 			throw new D2RQException(
 					"Database connection to " + jdbcURL + " failed " +
 					"(user: " + username + "): " + ex.getMessage(), 
@@ -301,6 +319,7 @@ public class SQLConnection {
 		try {
 			vendor().initializeConnection(connection);
 		} catch (SQLException ex) {
+			close();
 			throw new D2RQException(
 					"Database initialization failed: " + ex.getMessage(), 
 					D2RQException.D2RQ_DB_CONNECTION_FAILED);
@@ -450,8 +469,12 @@ public class SQLConnection {
 		if (connection != null) try {
 			log.info("Closing connection to " + jdbcURL);
 			this.connection.close();
-		} catch (SQLException ex) {
-			throw new D2RQException(ex);
+		} catch (SQLException sqlExc) {
+			// ignore...
+			log.error("Error while closing current connection: "
+					+ sqlExc.getMessage(), sqlExc);
+		} finally {
+			connection = null;
 		}
 	}
 	
