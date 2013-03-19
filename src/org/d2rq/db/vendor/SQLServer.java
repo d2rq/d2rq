@@ -2,6 +2,8 @@ package org.d2rq.db.vendor;
 
 import java.sql.Types;
 
+import org.d2rq.db.expr.BooleanToIntegerCaseExpression;
+import org.d2rq.db.expr.Expression;
 import org.d2rq.db.schema.Identifier;
 import org.d2rq.db.schema.Identifier.IdentifierParseException;
 import org.d2rq.db.types.DataType;
@@ -89,6 +91,14 @@ public class SQLServer extends SQL92 {
 		return super.getDataType(jdbcType, name, size);
 	}
 
+	/**
+	* SQL Server doesn't actually support booolean expressions, except in
+	* a few places. Turn the boolean into an int using a CASE statement
+	*/
+	public Expression booleanExpressionToSimpleExpression(Expression expression) {
+	    return new BooleanToIntegerCaseExpression(expression);
+	}
+	
 	@Override
 	public boolean isIgnoredTable(String catalog, String schema, String table) {
 		// MS SQL Server has schemas "sys" and "information_schema" in every DB
