@@ -216,7 +216,7 @@ public class D2RServer {
 						adder.add(new ResourceDescriber(getMapping(), resource
 								.asNode(), outgoingTriplesOnly,
 								Relation.NO_LIMIT, 
-								Math.round(config.getSPARQLTimeout())).description());
+								Math.round(config.getSPARQLTimeout() * 1000)).description());
 					}
 
 					public void finish() {
