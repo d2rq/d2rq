@@ -56,7 +56,7 @@ public class DirectoryServlet extends HttpServlet {
 		context.put("classmap", classMapName);
 		context.put("classmap_links", classMapLinks);
 		context.put("resources", resources);
-		context.put("limit_per_class_map", server.getConfig().getLimitPerClassMap());
+		context.put("limit_per_class_map", limit > 0 ? limit : null);
 		velocity.mergeTemplateXHTML("directory_page.vm");
 	}
 
