@@ -29,9 +29,10 @@ public class DirectoryServlet extends HttpServlet {
 			response.sendError(404);
 			return;
 		}
+		int limit = server.getConfig().getLimitPerClassMap();
 		String classMapName = request.getPathInfo().substring(1);
 		Model resourceList = getClassMapLister().classMapInventory(
-				classMapName, server.getConfig().getLimitPerClassMap());
+				classMapName, limit);
 		if (resourceList == null) {
 			response.sendError(404, "Sorry, class map '" + classMapName + "' not found.");
 			return;
@@ -58,7 +59,7 @@ public class DirectoryServlet extends HttpServlet {
 		context.put("classmap", classMapName);
 		context.put("classmap_links", classMapLinks);
 		context.put("resources", resources);
-		context.put("limit_per_class_map", server.getConfig().getLimitPerClassMap());
+		context.put("limit_per_class_map", limit > 0 ? limit : null);
 		velocity.mergeTemplateXHTML("directory_page.vm");
 	}
 
