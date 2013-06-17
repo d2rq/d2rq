@@ -196,7 +196,7 @@ function Snorql() {
         } else {
             var show = '#named-graph-section';
             var hide = '#default-graph-section';
-            jQuery('#selected-named-graph').update(this._graph);
+            jQuery('#selected-named-graph').text(this._graph);
             var uri = this._graph;
             jQuery('a.graph-link').each(function(index,link) {
                 match = link.href.match(/^(.*)[&?]graph=/);
