@@ -27,7 +27,7 @@ public class server extends CommandLineTool {
 		printStandardArguments(true, false);
 		System.err.println();
 		System.err.println("  Server options:");
-		System.err.println("    -p port         Port where to start up the server (default: 2020)");
+		System.err.println("    --port number   Port where to start up the server (default: 2020)");
 		System.err.println("    -b baseURI      Server's base URI (default: " + SystemLoader.DEFAULT_BASE_URI + ")");
 		System.err.println("    --fast          Use all engine optimizations (recommended)");
 		System.err.println("    --verbose       Print debug information");
@@ -37,7 +37,7 @@ public class server extends CommandLineTool {
 		System.err.println();
 	}
 	
-	private ArgDecl portArg = new ArgDecl(true, "p", "port");
+	private ArgDecl portArg = new ArgDecl(true, "port");
 	private ArgDecl baseArg = new ArgDecl(true, "b", "base");
 	private ArgDecl fastArg = new ArgDecl(false, "fast");
 
