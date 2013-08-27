@@ -116,7 +116,7 @@ or <a href="http://jetty.codehaus.org/jetty/">Jetty</a>.</p>
 <p>D2R Server can be run as a stand-alone server application that includes
 its own web server. This is recommended for testing and development.</p>
 
-<pre>d2r-server <a href="#arg-p">[-p <em>port</em>]</a> <a href="#arg-b">[-b <em>serverBaseURI</em>]</a>
+<pre>d2r-server <a href="#arg-port">[--port <em>port</em>]</a> <a href="#arg-b">[-b <em>serverBaseURI</em>]</a>
       <a href="#arg-fast">[--fast]</a> <a href="#arg-verbose">[--verbose]</a> <a href="#arg-debug">[--debug]</a>
       <a href="#arg-mapping-file"><em>mapping-file.ttl</em></a></pre>
 
@@ -130,7 +130,7 @@ parameters</a> as for the <code>generate-mapping</code> tool,
 and a default mapping will be used.</p>
 </dd>
 
-<dt id="arg-p"><code>-p <em>port</em></code></dt>
+<dt id="arg-port"><code>--port <em>port</em></code></dt>
 <dd>D2R Server will be started on this port. Defaults to 2020.</dd>
 
 <dt id="arg-b"><code>-b <em>serverBaseURI</em></code></dt>
@@ -219,7 +219,7 @@ configuration properties. An example follows:</p>
     <th id="d2r:baseURI">d2r:baseURI</th><td>Base URI of the server. Same as <code>-b</code> command line parameter.</td>
   </tr>
   <tr>
-    <th id="d2r:port">d2r:port</th><td>Port of the server. Same as <code>-p</code> command line parameter.</td>
+    <th id="d2r:port">d2r:port</th><td>Port of the server. Same as <code>--port</code> command line parameter.</td>
   </tr>
   <tr>
     <th id="d2r:vocabularyIncludeInstances">d2r:vocabularyIncludeInstances</th>
