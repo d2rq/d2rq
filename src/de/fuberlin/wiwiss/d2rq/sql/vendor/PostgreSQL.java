@@ -6,6 +6,7 @@ import java.sql.Types;
 
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType;
+import de.fuberlin.wiwiss.d2rq.sql.types.SQLBoolean;
 import de.fuberlin.wiwiss.d2rq.sql.types.SQLCharacterString;
 
 public class PostgreSQL extends SQL92 {
@@ -24,6 +25,14 @@ public class PostgreSQL extends SQL92 {
 
 	@Override
 	public DataType getDataType(int jdbcType, String name, int size) {
+		// The PostgreSQL JDBC driver reports boolean types as BIT(1),
+		// but the type name is still BOOL. We don't check the size here
+		// to also catch the case of a SELECT query result, where column
+		// size isn't reported.
+		if (jdbcType == Types.BIT && "BOOL".equals(name)) {
+			return new SQLBoolean(this, name);
+		}
+
 		DataType standard = super.getDataType(jdbcType, name, size);
 		if (standard != null) return standard;
 
