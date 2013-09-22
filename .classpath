@@ -34,7 +34,6 @@
 	<classpathentry kind="lib" path="lib/logging/jcl-over-slf4j-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/hsqldb-2.2.9/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/mysql-connector-java-5.1.22-bin.jar"/>
-	<classpathentry kind="lib" path="lib/db-drivers/postgresql-9.2-1002.jdbc4.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-continuation-8.1.8.v20121106.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-http-8.1.8.v20121106.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-io-8.1.8.v20121106.jar"/>
@@ -45,5 +44,6 @@
 	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-webapp-8.1.8.v20121106.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.8/jetty-xml-8.1.8.v20121106.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-8.1.8/servlet-api-3.0.jar"/>
+	<classpathentry kind="lib" path="lib/db-drivers/postgresql-9.2-1003.jdbc4.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
