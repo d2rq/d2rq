@@ -79,6 +79,7 @@ public class Inspector {
 	}
 
 	public List<ColumnDef> describeSelectStatement(String sqlQuery) {
+		log.debug("Inspecting query: " + sqlQuery);
 		List<ColumnDef> result = new ArrayList<ColumnDef>();
 		try {
 			PreparedStatement stmt = connection.prepareStatement(sqlQuery);
@@ -96,6 +97,14 @@ public class Inspector {
 								"' (" + type + ")");
 					}
 					boolean isNullable = meta.isNullable(i) != ResultSetMetaData.columnNoNulls;
+					if (log.isDebugEnabled()) {
+						log.debug("  " + name + " " + 
+								typeName + (size == 0 ? "" : "(" + size + ")") + " " +
+								(isNullable ? "" : "NOT ") + "NULL " +
+								"=> JDBC type: " + type + " " + 
+								"=> " + (dataType == null ? "???" : dataType) 
+						);
+					}
 					result.add(new ColumnDef(
 							Identifier.createDelimited(name), dataType, isNullable));
 				}
@@ -111,6 +120,7 @@ public class Inspector {
 	public TableDef describeTableOrView(TableName table) {
 		List<ColumnDef> columns = new ArrayList<ColumnDef>();
 		try {
+			log.debug("Inspecting table " + table.toString());
 			ResultSet rs = metadata.getColumns(
 					name(table.getCatalog()),
 					name(table.getSchema()),
@@ -130,6 +140,14 @@ public class Inspector {
 						log.warn("Unknown datatype '" + 
 								(size == 0 ? typeName : (typeName + "(" + size + ")")) + 
 								"' (" + type + ")");
+					}
+					if (log.isDebugEnabled()) {
+						log.debug("  " + identifier + " " + 
+								typeName + (size == 0 ? "" : "(" + size + ")") + " " +
+								(isNullable ? "" : "NOT ") + "NULL " +
+								"=> JDBC type: " + type + " " + 
+								"=> " + (dataType == null ? "???" : dataType) 
+						);
 					}
 					columns.add(new ColumnDef(identifier, dataType, isNullable));
 				}
