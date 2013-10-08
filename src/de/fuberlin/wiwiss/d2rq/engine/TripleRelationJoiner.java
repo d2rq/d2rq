@@ -67,9 +67,20 @@ class TripleRelationJoiner {
 			Set<String> attributeNames)
 	{
 		Map<String,List<String>> uniqueKeys = database.getUniqueKeyColumns(originalName);
-		if (uniqueKeys == null) return false;
+		if (uniqueKeys != null) {
 		for (List<String> indexColumns: uniqueKeys.values()) {
-			if (attributeNames.containsAll(indexColumns)) return true;
+				if (attributeNames.containsAll(indexColumns)) {
+					return true;
+				}
+			}
+		}
+		List<Attribute> primaryKeys = database.schemaInspector().primaryKeyColumns(originalName);
+		if (primaryKeys != null) {
+			for (Attribute attr: primaryKeys) {
+				if (!attributeNames.contains(attr.attributeName()))
+					return false;
+			}
+			return true;
 		}
 		return false;
 	}
@@ -163,7 +174,8 @@ class TripleRelationJoiner {
 					names.add(t.getObject().getName());
 	
 				for (String name: names) {
-					NodeMaker n = (NodeMaker) nodeSets.toMap().get(name);
+					Var nameVar = Var.alloc(name);
+					NodeMaker n = (NodeMaker) nodeSets.toMap().get(nameVar);
 					if (n != null/* && n instanceof TypedNodeMaker*/) {
 
 						AttributeSet attributes = AttributeSet.createFrom(n);
@@ -171,7 +183,8 @@ class TripleRelationJoiner {
 						 * If we would set an alias to this table...
 						 */
 						if (attributes != null) {
-							RelationName originalName = ((AliasMap)nodeSets.relationAliases().get(name)).originalOf(attributes.relationName);
+							AliasMap amap = (AliasMap)(nodeSets.relationAliases().get(nameVar));
+							RelationName originalName = amap.originalOf(attributes.relationName);
 							if (r.baseRelation().aliases().hasAlias(originalName)) { 
 
 								/*
