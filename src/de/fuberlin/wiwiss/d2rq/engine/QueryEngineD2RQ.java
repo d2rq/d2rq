@@ -21,6 +21,8 @@ import com.hp.hpl.jena.sparql.util.Context;
 import de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ;
 import de.fuberlin.wiwiss.d2rq.map.Mapping;
 
+import com.hp.hpl.jena.sparql.core.Substitute;
+
 /**
  * An ARQ query engine for D2RQ-mapped graphs. Allows evaluation of SPARQL
  * queries (or programmatically created operator trees) over a D2RQ-mapped
@@ -33,6 +35,7 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 	private static final Log log = LogFactory.getLog(QueryEngineD2RQ.class);
 
 	private final Mapping mapping;
+	private final Binding inputBinding;
 
 	public QueryEngineD2RQ(GraphD2RQ graph, Query query) {
 		this(graph, query, BindingRoot.create(), null);
@@ -41,11 +44,13 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 	public QueryEngineD2RQ(GraphD2RQ graph, Query query, Binding input, Context context) {
 		super(query, DatasetGraphFactory.createOneGraph(graph), input, context);
 		this.mapping = graph.getMapping();
+		this.inputBinding = input;
 	}
 
 	public QueryEngineD2RQ(GraphD2RQ graph, Op op, Binding input, Context context) {
 		super(op, DatasetGraphFactory.createOneGraph(graph), input, context);
 		this.mapping = graph.getMapping();
+		this.inputBinding = input;
 	}
 
 	@Override
@@ -53,6 +58,9 @@ public class QueryEngineD2RQ extends QueryEngineMain {
 		// According to ARQ's {@link Optimize#rewrite()} source code,
 		// this has to be done if no other ARQ optimizations are applied
 		op = TransformScopeRename.transform(op);
+		// ARQ is supposed to do this for us
+		// but it happens too late -- we need it now
+		op = Substitute.substitute(op, this.inputBinding);
 
 		// TODO: Apply all or some of ARQ's standard transforms?
 		// op = super.modifyOp(op);
