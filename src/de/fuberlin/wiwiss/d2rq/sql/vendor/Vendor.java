@@ -165,4 +165,52 @@ public interface Vendor {
 	 * @param connection
 	 */
 	void initializeConnection(Connection connection) throws SQLException;
+
+	/**
+	 * Vendor-specific code to execute prior to query execution. 
+	 * Note: only one query can be "active" at a time per connection
+	 * 
+	 * @param connection
+	 */
+	void beforeQuery(Connection connection) throws SQLException;
+
+	/**
+	 * Vendor-specific code to execute after query execution.
+	 * Note: only one query can be "active" at a time per connection
+	 * 
+	 * @param connection
+	 */
+	void afterQuery(Connection connection) throws SQLException;
+
+	/**
+	 * Vendor-specific cleanup code to execute prior to statement close. 
+	 * Note: only one query can be "active" at a time per connection
+	 * 
+	 * @param connection
+	 */
+	void beforeClose(Connection connection) throws SQLException;
+
+	/**
+	 * Vendor-specific cleanup code to execute after statement close. 
+	 * Note: only one query can be "active" at a time per connection
+	 * 
+	 * @param connection
+	 */
+	void afterClose(Connection connection) throws SQLException;
+
+	/**
+	 * Vendor-specific cleanup code to execute prior to statement cancel. 
+	 * Note: only one query can be "active" at a time per connection
+	 * 
+	 * @param connection
+	 */
+	void beforeCancel(Connection connection) throws SQLException;
+
+	/**
+	 * Vendor-specific cleanup code to execute after statement cancel. 
+	 * Note: only one query can be "active" at a time per connection
+	 * 
+	 * @param connection
+	 */
+	void afterCancel(Connection connection) throws SQLException;
 }
