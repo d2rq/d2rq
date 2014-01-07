@@ -110,9 +110,24 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 			}
 	    }
 	    
+	    if (this.database != null) {
+			try {
+				this.database.vendor().beforeClose(this.database.connection());
+			} catch (SQLException ex) {
+				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
+			}
+	    }
 	    if (this.statement != null) {
 			try {
 				this.statement.close();
+			} catch (SQLException ex) {
+				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
+			}
+	    }
+
+	    if (this.database != null) {
+			try {
+				this.database.vendor().afterClose(this.database.connection());
 			} catch (SQLException ex) {
 				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
 			}
@@ -123,7 +138,9 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 		cancelled = true;
 		if (statement != null) {
 			try {
+				database.vendor().beforeCancel(database.connection());
 				statement.cancel();
+				database.vendor().afterCancel(database.connection());
 			} catch (SQLException ex) {
 				throw new RuntimeException(ex);
 			}
