@@ -171,7 +171,9 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 				}
 				catch (SQLException e) {} /* Some drivers don't support fetch sizes, e.g. JDBC-ODBC */
 			}
+			database.vendor().beforeQuery(database.connection());
 			this.resultSet = this.statement.executeQuery(this.sql);
+			database.vendor().afterQuery(database.connection());
 			log.debug("SQL result set created");
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {

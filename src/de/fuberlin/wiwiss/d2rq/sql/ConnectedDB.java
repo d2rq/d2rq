@@ -83,6 +83,7 @@ public class ConnectedDB {
 		public void run() {
 			Connection c;
 			Statement s = null;
+			Vendor v = null;
 			while (!shutdown) {
 				try { Thread.sleep(interval*1000); }
 				catch (InterruptedException e) { if (shutdown) break; }
@@ -91,9 +92,17 @@ public class ConnectedDB {
 					if (log.isDebugEnabled())
 						log.debug("Keep alive agent is executing noop query '" + query + "'...");
 					c = connection();
+					v = vendor();
 					s = c.createStatement();
+
+					v.beforeQuery(c);
 					s.execute(query);
+					v.afterQuery(c);
+					
+					v.beforeClose(c);
 					s.close();
+					v.afterClose(c);
+					
 				} catch (Throwable e) { // may throw D2RQException at runtime
 					log.error("Keep alive connection test failed: " + e.getMessage());
 					
