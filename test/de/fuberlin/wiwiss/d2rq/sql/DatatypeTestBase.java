@@ -67,7 +67,9 @@ public abstract class DatatypeTestBase extends TestCase {
 					stmt.execute("DROP TABLE " + table);
 				}
 			} finally {
+				db.vendor().beforeClose(db.connection());
 				stmt.close();
+				db.vendor().afterClose(db.connection());
 			}
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);

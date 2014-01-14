@@ -40,5 +40,6 @@
 	<classpathentry kind="lib" path="lib/arq-2.9/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/hsqldb-2.2.8/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/db-drivers/postgresql-9.2-1003.jdbc4.jar"/>
+	<classpathentry kind="lib" path="webapp/log4j.properties"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

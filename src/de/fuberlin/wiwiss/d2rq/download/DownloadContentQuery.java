@@ -114,9 +114,11 @@ public class DownloadContentQuery {
 		try {
 			statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			log.debug(sql);
+
 			db.vendor().beforeQuery(conn);
 			resultSet = statement.executeQuery(sql);
 			db.vendor().afterQuery(conn);
+			
 			if (!resultSet.next()) {
 				close();
 				return;	// 0 results
@@ -138,8 +140,6 @@ public class DownloadContentQuery {
 					ResultRowMap.fromResultSet(resultSet, builder.getColumnSpecs(), db));
 		} catch (SQLException ex) {
 			throw new D2RQException(ex);
-		} finally {
-			
 		}
 	}
 }

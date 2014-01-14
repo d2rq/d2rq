@@ -8,7 +8,7 @@
        Will be ignored if the server is started from the command line. -->
   <context-param>
     <param-name>configFile</param-name>
-    <param-value>config-example.ttl</param-value>
+    <param-value>dbsnp-mapping.ttl</param-value>
   </context-param>
 
   <listener>
