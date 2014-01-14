@@ -114,9 +114,24 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 			}
 	    }
 	    
+	    if (this.database != null) {
+			try {
+				this.database.vendor().beforeClose(this.database.connection());
+			} catch (SQLException ex) {
+				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
+			}
+	    }
 	    if (this.statement != null) {
 			try {
 				this.statement.close();
+			} catch (SQLException ex) {
+				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
+			}
+	    }
+
+	    if (this.database != null) {
+			try {
+				this.database.vendor().afterClose(this.database.connection());
 			} catch (SQLException ex) {
 				throw new D2RQException(ex.getMessage() + "; query was: " + this.sql);
 			}
@@ -127,7 +142,9 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 		cancelled = true;
 		if (statement != null) {
 			try {
+				database.vendor().beforeCancel(database.connection());
 				statement.cancel();
+				database.vendor().afterCancel(database.connection());
 			} catch (SQLException ex) {
 				throw new RuntimeException(ex);
 			}
@@ -154,7 +171,10 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 				}
 				catch (SQLException e) {} /* Some drivers don't support fetch sizes, e.g. JDBC-ODBC */
 			}
+			database.vendor().beforeQuery(database.connection());
 			this.resultSet = this.statement.executeQuery(this.sql);
+			database.vendor().afterQuery(database.connection());
+
 			log.debug("SQL result set created");
 			this.numCols = this.resultSet.getMetaData().getColumnCount();
         } catch (SQLException ex) {

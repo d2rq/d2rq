@@ -49,6 +49,7 @@ public class DownloadContentQuery {
 	private ResultSet resultSet = null;
 	private InputStream resultStream = null;
 	private String mediaType = null;
+	private ConnectedDB db = null;
 	
 	/**
 	 * @param downloadMap The download map to be queried
@@ -75,9 +76,15 @@ public class DownloadContentQuery {
 	
 	public void close() {
 		try {
+			if (this.db != null) {
+				this.db.vendor().beforeClose(db.connection());
+			}
 			if (this.statement != null) {
 				this.statement.close();
 				this.statement = null;
+			}
+			if (this.db != null) {
+				this.db.vendor().afterClose(db.connection());
 			}
 			if (this.resultSet != null) {
 				this.resultSet.close();
@@ -102,12 +109,16 @@ public class DownloadContentQuery {
 		SelectStatementBuilder builder = new SelectStatementBuilder(filteredRelation);
 		String sql = builder.getSQLStatement();
 		int contentColumn = builder.getColumnSpecs().indexOf(downloadMap.getContentDownloadColumn()) + 1;
-    	ConnectedDB db = filteredRelation.database();
+    	db = filteredRelation.database();
 		Connection conn = db.connection();
 		try {
 			statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			log.debug(sql);
+
+			db.vendor().beforeQuery(conn);
 			resultSet = statement.executeQuery(sql);
+			db.vendor().afterQuery(conn);
+			
 			if (!resultSet.next()) {
 				close();
 				return;	// 0 results
