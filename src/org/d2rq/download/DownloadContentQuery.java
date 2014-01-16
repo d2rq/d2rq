@@ -112,9 +112,9 @@ public class DownloadContentQuery {
 		try {
 			statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			log.debug(sql);
-			db.vendor().beforeQuery(conn);
+			db.vendor().beforeExecuteQuery(conn);
 			resultSet = statement.executeQuery(sql);
-			db.vendor().afterQuery(conn);
+			db.vendor().afterExecuteQuery(conn);
 			if (!resultSet.next()) {
 				close();
 				return;	// 0 results
