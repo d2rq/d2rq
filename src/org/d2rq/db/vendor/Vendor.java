@@ -216,7 +216,7 @@ public interface Vendor {
 	 * 
 	 * @param connection
 	 */
-	void beforeQuery(Connection connection) throws SQLException;
+	void beforeExecuteQuery(Connection connection) throws SQLException;
 
 	/**
 	 * Vendor-specific code to execute after query execution.
@@ -224,7 +224,23 @@ public interface Vendor {
 	 * 
 	 * @param connection
 	 */
-	void afterQuery(Connection connection) throws SQLException;
+	void afterExecuteQuery(Connection connection) throws SQLException;
+
+	/**
+	 * Vendor-specific code to execute prior to statement.execute(). 
+	 * Note: only one query can be "active" at a time per connection
+	 * 
+	 * @param connection
+	 */
+	void beforeExecute(Connection connection) throws SQLException;
+
+	/**
+	 * Vendor-specific code to execute after statement.execute().
+	 * Note: only one query can be "active" at a time per connection
+	 * 
+	 * @param connection
+	 */
+	void afterExecute(Connection connection) throws SQLException;
 
 	/**
 	 * Vendor-specific cleanup code to execute prior to statement close. 

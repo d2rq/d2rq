@@ -424,11 +424,20 @@ public class SQL92 implements Vendor {
 				Character.FORMAT
 		};
 	}
-	public void beforeQuery(Connection connection) throws SQLException {
+
+	public void beforeExecuteQuery(Connection connection) throws SQLException {
 		// Do nothing for standard SQL 92. Subclasses can override.
 	}
 
-	public void afterQuery(Connection connection) throws SQLException {
+	public void afterExecuteQuery(Connection connection) throws SQLException {
+		// Do nothing for standard SQL 92. Subclasses can override.
+	}
+
+	public void beforeExecute(Connection connection) throws SQLException {
+		// Do nothing for standard SQL 92. Subclasses can override.
+	}
+
+	public void afterExecute(Connection connection) throws SQLException {
 		// Do nothing for standard SQL 92. Subclasses can override.
 	}
 

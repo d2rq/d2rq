@@ -166,7 +166,11 @@ public class SQLIterator implements ClosableIterator<ResultRow> {
 				}
 				catch (SQLException e) {} /* Some drivers don't support fetch sizes, e.g. JDBC-ODBC */
 			}
+
+			database.vendor().beforeExecuteQuery(con);
 			this.resultSet = this.statement.executeQuery(this.sql);
+			database.vendor().afterExecuteQuery(con);
+
 			log.debug("SQL result set created");
         } catch (SQLException ex) {
         	if (cancelled) {
