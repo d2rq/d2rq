@@ -79,5 +79,28 @@ public class PostgreSQL extends SQL92 {
 		// Disable auto-commit in PostgreSQL to support cursors
 		// @see http://jdbc.postgresql.org/documentation/83/query.html
 		connection.setAutoCommit(false);
+		
+		// Doing setAutoCommit actually opens a transaction -- commit/close it now
+		// @see https://github.com/d2rq/d2rq/issues/166
+		connection.commit();		
 	}
+
+	@Override
+	public void afterClose(Connection connection) throws SQLException {
+		// In Postgres, must explicitly commit/close the transaction
+		// @see http://stackoverflow.com/questions/10399727/psqlexception-current-transaction-is-aborted-commands-ignored-until-end-of-tra
+		if (connection != null) {
+			connection.commit();
+		}
+	}
+
+	@Override
+	public void afterCancel(Connection connection) throws SQLException {
+		// In Postgres, must explicitly commit/close the transaction
+		// @see http://stackoverflow.com/questions/10399727/psqlexception-current-transaction-is-aborted-commands-ignored-until-end-of-tra
+		if (connection != null) {
+			connection.commit();
+		}
+	}
+
 }
