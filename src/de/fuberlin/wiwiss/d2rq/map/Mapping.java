@@ -18,6 +18,7 @@ import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.shared.impl.PrefixMappingImpl;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
@@ -258,7 +259,42 @@ public class Mapping {
 		Statement s = vocabularyModel.createStatement(targetResource, RDF.type, map instanceof ClassMap ? RDFS.Class : RDF.Property);
 		if (!this.vocabularyModel.contains(s))
 			this.vocabularyModel.add(s);
-		
+
+                if (map instanceof PropertyBridge) {
+                    PropertyBridge pb = (PropertyBridge)map;
+
+                    /* Infer rdfs:range */
+                    if (pb.getDatatype() != null) {
+                        Resource dt = this.vocabularyModel.createResource(pb.getDatatype());
+                        Statement r = vocabularyModel.createStatement(targetResource, RDFS.range, dt);
+                        if (!this.vocabularyModel.contains(r))
+                            this.vocabularyModel.add(r);
+                    } else if (map.isURIcolumn()) {
+                        Resource dt = this.vocabularyModel.createResource(XSDDatatype.XSDanyURI.getURI());
+                        Statement r = vocabularyModel.createStatement(targetResource, RDFS.range, dt);
+                        if (!this.vocabularyModel.contains(r))
+                            this.vocabularyModel.add(r);
+                    }
+
+                    /* Infer rdfs:domain if not specified */
+                    if (pb.getBelongsToClassMap() != null) {
+                        boolean infer = true;
+                        for (Resource additionalProperty: map.getAdditionalDefinitionProperties()) {
+                            if (additionalProperty.getProperty(D2RQ.propertyName).getResource().equals(RDFS.domain)) {
+                                infer = false;
+                            }
+                        }
+
+                        if (infer) {
+                            for (Resource class_: pb.getBelongsToClassMap().getClasses()) {
+                                Statement r = vocabularyModel.createStatement(targetResource, RDFS.domain, class_);
+                                if (!this.vocabularyModel.contains(r))
+                                    this.vocabularyModel.add(r);
+                            }
+                        }
+                    }
+                }
+
 		/* Apply labels */
 		for (Literal propertyLabel: map.getDefinitionLabels()) {
 			s = vocabularyModel.createStatement(targetResource, RDFS.label, propertyLabel);

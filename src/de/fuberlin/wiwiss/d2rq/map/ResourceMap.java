@@ -262,11 +262,15 @@ public abstract class ResourceMap extends MapObject {
 		}
 		return new ValueDecorator(values, constraints, this.translateWith.translator());
 	}
-	
+
 	private NodeMaker buildNodeMaker(ValueMaker values, boolean isUnique) {
 		return new TypedNodeMaker(nodeType(), values, isUnique);
 	}
-	
+
+    public boolean isURIcolumn() {
+        return (this.uriColumn != null || this.uriPattern != null || this.uriSqlExpression != null);
+    }
+
 	private NodeType nodeType() {
 		if (this.bNodeIdColumns != null) {
 			return TypedNodeMaker.BLANK;
