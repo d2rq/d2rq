@@ -105,9 +105,12 @@ function Snorql() {
         
    	    var exp = /^\s*(?:PREFIX\s+\w*:\s+<[^>]*>\s*)*(\w+)\s*.*/i;
    	    var match = exp.exec(querytext);
+   	    var doAsk = false;
    	    if (match) {
 	        if (match[1].toUpperCase() == 'ASK') {
-	        	service.setOutput('boolean');
+	        	service.setRequestHeader('Accept', 'application/sparql-results+json,*/*');
+	        	service.setOutput('json');
+	        	doAsk = true;
 	        	var successFunc = function(value) {
 	                dummy.displayBooleanResult(value, resultTitle);
 	            };
@@ -125,7 +128,7 @@ function Snorql() {
 	        }
    	    }
    	    
-        service.query(query, {
+        var queryConf = {
             success: successFunc,
             failure: function(report) {
                 var message = report.responseText.match(/<pre>([\s\S]*)<\/pre>/);
@@ -143,7 +146,12 @@ function Snorql() {
                     }
                 }
             }
-        });
+        };
+        if (doAsk) {
+            service.ask(query, queryConf);
+        } else {
+            service.query(query, queryConf);
+        }
     }
 
     this.setBrowserBase = function(url) {
