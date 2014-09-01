@@ -1,2 +1,4 @@
 Options MultiViews
 Redirect 302 /download https://github.com/d2rq/d2rq/downloads
+AddType text/turtle;charset=utf-8 .ttl
+AddType application/rdf+xml .rdf
