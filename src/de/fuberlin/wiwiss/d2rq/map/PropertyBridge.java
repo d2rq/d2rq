@@ -174,7 +174,8 @@ public class PropertyBridge extends ResourceMap {
 					"or d2rq:sqlExpression at " + this,
 					D2RQException.PROPERTYBRIDGE_NONLITERAL_WITH_DATATYPE);
 		}
-		if (this.lang != null && this.column == null && this.pattern == null) {
+		if (this.lang != null && this.column == null && this.pattern == null
+				&& this.sqlExpression == null) {
 			throw new D2RQException("d2rq:lang can only be used with d2rq:column, d2rq:pattern " +
 					"or d2rq:sqlExpression at " + this,
 					D2RQException.PROPERTYBRIDGE_NONLITERAL_WITH_LANG);
