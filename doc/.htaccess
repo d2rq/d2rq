@@ -1,2 +1,2 @@
-Options MultiViews
-Redirect 302 /download https://github.com/d2rq/d2rq/downloads
+Options MultiViews FollowSymLinks
+Redirect 302 /download http://download.d2rq.org
