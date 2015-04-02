@@ -92,7 +92,11 @@ public interface Vendor {
 	String quoteTimeLiteral(String time);
 	
 	String quoteTimestampLiteral(String timestamp);
+
+	Boolean supportsFreeTextSearch();
 	
+	String freeTextExpression(String textExpr, String query);
+
 	/**
 	 * Returns an expression for limiting the number of returned rows
 	 * for engines that support this (<code>ROWNUM &lt;= n</code>)

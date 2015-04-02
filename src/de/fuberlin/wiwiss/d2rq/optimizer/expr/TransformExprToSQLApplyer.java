@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.QueryBuildException;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.E_Add;
 import com.hp.hpl.jena.sparql.expr.E_Datatype;
@@ -35,6 +36,7 @@ import com.hp.hpl.jena.sparql.expr.E_Str;
 import com.hp.hpl.jena.sparql.expr.E_Subtract;
 import com.hp.hpl.jena.sparql.expr.E_UnaryMinus;
 import com.hp.hpl.jena.sparql.expr.E_UnaryPlus;
+import com.hp.hpl.jena.sparql.expr.E_Function;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprAggregator;
 import com.hp.hpl.jena.sparql.expr.ExprEvalException;
@@ -51,13 +53,17 @@ import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeFunctions;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueBoolean;
 
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.algebra.Attribute;
 import de.fuberlin.wiwiss.d2rq.algebra.ExpressionProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.NodeRelation;
 import de.fuberlin.wiwiss.d2rq.algebra.ProjectionSpec;
 import de.fuberlin.wiwiss.d2rq.algebra.RelationalOperators;
+import de.fuberlin.wiwiss.d2rq.algebra.Relation;
 import de.fuberlin.wiwiss.d2rq.expr.Add;
+import de.fuberlin.wiwiss.d2rq.expr.AttributeExpr;
 import de.fuberlin.wiwiss.d2rq.expr.Constant;
+import de.fuberlin.wiwiss.d2rq.expr.TextMatches;
 import de.fuberlin.wiwiss.d2rq.expr.Divide;
 import de.fuberlin.wiwiss.d2rq.expr.Equality;
 import de.fuberlin.wiwiss.d2rq.expr.Expression;
@@ -76,6 +82,8 @@ import de.fuberlin.wiwiss.d2rq.nodes.NodeMaker;
 import de.fuberlin.wiwiss.d2rq.nodes.NodeSetConstraintBuilder;
 import de.fuberlin.wiwiss.d2rq.nodes.TypedNodeMaker;
 import de.fuberlin.wiwiss.d2rq.values.ValueMaker;
+import de.fuberlin.wiwiss.d2rq.sql.ConnectedDB;
+import de.fuberlin.wiwiss.d2rq.sql.types.SQLCharacterString;
 
 /**
  * Attempts to transform a SPARQL FILTER Expr to a SQL Expression
@@ -109,6 +117,8 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	// TODO Expression.FALSE and Expression.TRUE are not constants
 	private static final Expression CONSTANT_FALSE = new ConstantEx("false", NodeValueBoolean.FALSE.asNode());
 	private static final Expression CONSTANT_TRUE  = new ConstantEx("true", NodeValueBoolean.TRUE.asNode());
+
+	private static final String TEXT_MATCHES_IRI = "http://d2rq.org/function#textMatches";
 	
 	private final NodeRelation nodeRelation;
 	private final Stack<Expression> expression = new Stack<Expression>();
@@ -186,7 +196,13 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 	}
 
 	public void visit(ExprFunctionN func) {
-		visitExprFunction(func);		
+		logger.debug("visit ExprFunction " + func);
+		
+		if (!convertable) {
+			expression.push(Expression.FALSE); // prevent stack empty exceptions when conversion
+			return;                            // fails in the middle of a multi-arg operator conversion
+		}
+		convertFunction(func);
 	}
 
 	public void visit(ExprFunctionOp funcOp) {
@@ -427,6 +443,21 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 			args.add(e2);
 			
 			extensionConvert(expr, args);
+		} else {
+			conversionFailed(expr);
+		}
+	}
+
+	private void convertFunction(ExprFunctionN expr)
+	{
+		logger.debug("convertFunction " + expr.toString());
+
+		if (expr instanceof E_Function) {
+			if (expr.getFunctionIRI().equals(TEXT_MATCHES_IRI)) {
+				convertTextMatches((E_Function) expr);
+			} else {
+				conversionFailed(expr);
+			}
 		} else {
 			conversionFailed(expr);
 		}
@@ -1082,6 +1113,47 @@ public final class TransformExprToSQLApplyer implements ExprVisitor {
 		}
 	}
 	
+	private void convertTextMatches(E_Function expr)
+	{
+		logger.debug("convertTextMatches " + expr.toString());
+
+		if (expr.numArgs() != 2) {
+			throw new QueryBuildException("Function 'textMatches' takes two arguments");
+		}
+
+		Expr varArg = expr.getArg(1);
+		Expr txtArg = expr.getArg(2);
+
+		if (!(varArg instanceof ExprVar && txtArg instanceof NodeValue && ((NodeValue)txtArg).isString())) {
+			throw new QueryBuildException("Function 'textMatches' takes a variable and a string");
+		}
+
+		varArg.visit(this);
+		txtArg.visit(this);
+		Expression text = expression.pop();
+		Expression attr = expression.pop();
+
+		Relation relation = this.nodeRelation.baseRelation();
+		ConnectedDB database = relation.database();
+
+		if (!database.vendor().supportsFreeTextSearch()) {
+			throw new D2RQException("Database does not support free text search",
+					D2RQException.DATABASE_DOES_NOT_SUPPORT_FREE_TEXT_SEARCH);
+		} else if (!(attr instanceof AttributeExpr && text instanceof ConstantEx)) {
+			logger.warn("Function 'textMatches' does not work for " + attr.toString() + ", " + text.toString());
+			expression.push(Expression.FALSE);
+		} else {
+			// If an attribute knew its datatype, this code would be simpler.
+			AttributeExpr attributeExpr = (AttributeExpr) attr;
+			Attribute originalAttribute = relation.aliases().originalOf(attributeExpr.attribute());
+
+			if (database.columnType(originalAttribute) instanceof SQLCharacterString) {
+				expression.push(new TextMatches(attributeExpr, text));
+			} else {
+				expression.push(Expression.FALSE);
+			}
+		}
+	}
 	
 	private void conversionFailed(Expr unconvertableExpr)
 	{

@@ -64,6 +64,16 @@ public class MySQL extends SQL92 {
 	}
 
 	@Override
+	public Boolean supportsFreeTextSearch() {
+		return true;
+	}
+
+	@Override
+	public String freeTextExpression(String textExpr, String query) {
+		return "MATCH (" + textExpr + ") AGAINST (" + query + ")";
+	}
+
+	@Override
 	// TODO: The MySQL JDBC driver reports TINYINT(1) as BIT, should be handled as xsd:boolean?
 	public DataType getDataType(int jdbcType, String name, int size) {
 

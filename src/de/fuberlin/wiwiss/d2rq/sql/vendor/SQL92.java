@@ -98,6 +98,14 @@ public class SQL92 implements Vendor {
 		return "TIMESTAMP " + quoteStringLiteral(timestamp);
 	}
 
+	public Boolean supportsFreeTextSearch() {
+		return false;
+	}
+
+	public String freeTextExpression(String textExpr, String query) {
+		throw new UnsupportedOperationException("Database does not support free text search");
+	}
+
 	public Expression getRowNumLimitAsExpression(int limit) {
 		return Expression.TRUE;
 	}

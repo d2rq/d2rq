@@ -9,6 +9,7 @@ import de.fuberlin.wiwiss.d2rq.algebra.RelationName;
 import de.fuberlin.wiwiss.d2rq.sql.DummyDB;
 import de.fuberlin.wiwiss.d2rq.sql.SQL;
 import de.fuberlin.wiwiss.d2rq.sql.types.DataType.GenericType;
+import de.fuberlin.wiwiss.d2rq.sql.vendor.Vendor;
 
 /**
  * @author Richard Cyganiak (richard@cyganiak.de)
@@ -82,5 +83,14 @@ public class ExpressionTest extends TestCase {
 		Attribute attribute = SQL.parseAttribute("table.col1");
 		assertEquals("Constant(42@alias.col1)", 
 				new Constant("42", attribute).renameAttributes(aliases).toString());
+	}
+
+	public void testTextMatchesToSQL() {
+		TextMatches expr = new TextMatches(
+				new AttributeExpr(SQL.parseAttribute("table.col1")),
+			   	new Constant("some text"));
+		DummyDB db = new DummyDB(Vendor.PostgreSQL);
+		assertEquals("to_tsvector('english', \"table\".\"col1\") @@ plainto_tsquery('english', 'some text')",
+			   	expr.toSQL(db, AliasMap.NO_ALIASES));
 	}
 }
