@@ -71,6 +71,13 @@ public class ResourceDescriber {
 		}
 		result.getBulkUpdateHandler().add(TripleQueryIter.create(qIter));
 		
+		result.getBulkUpdateHandler().add(mapping.getVocabularyModel().getGraph().find(Triple.create(node, Node.ANY, Node.ANY)));
+
+		if (!onlyOutgoing) {
+			result.getBulkUpdateHandler().add(mapping.getVocabularyModel().getGraph().find(Triple.create(Node.ANY, Node.ANY, node)));
+			result.getBulkUpdateHandler().add(mapping.getVocabularyModel().getGraph().find(Triple.create(Node.ANY, node, Node.ANY)));
+		}
+		
 		if (pingback != null) {
 			AlarmClock.get().cancel(pingback);
 		}
