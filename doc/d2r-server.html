@@ -164,7 +164,8 @@ for production use.</p>
   described in the <a href="#configuration">server configuration section</a>.
   Set the base
   URI to something like <code>http://<em>servername</em>/<em>webappname</em>/</code>.</li>
-<li>Change the <code>configFile</code> param in <code>/webapp/WEB-INF/web.xml</code>
+<li>Change the <code>param-value</code> of the <code>configFile</code> param
+  in <code>/webapp/WEB-INF/web.xml</code>
   to the name of your configuration file. For deployment, we recommend placing
   the mapping file into the <code>/webapp/WEB-INF/</code> directory.</li>
 <li>In D2R Server's main directory, Run <code>ant war</code>. This creates the
