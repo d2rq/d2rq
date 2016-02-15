@@ -10,7 +10,6 @@ import org.apache.commons.logging.LogFactory;
 import org.openjena.atlas.AtlasException;
 import org.openjena.riot.RiotException;
 
-import com.hp.hpl.jena.n3.turtle.TurtleParseException;
 import com.hp.hpl.jena.query.ARQ;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.shared.JenaException;
@@ -265,11 +264,6 @@ public class SystemLoader {
 						// if the type is known then let Jena auto-detect it and load the appropriate parser
 						mapModel = FileManager.get().loadModel(mappingFile, getResourceBaseURI(), null);
 					}
-				} catch (TurtleParseException ex) {
-					// We have wired RIOT into Jena in the static initializer above,
-					// so this should never happen (it's for the old Jena Turtle/N3 parser)
-					throw new D2RQException(
-							"Error parsing " + mappingFile + ": " + ex.getMessage(), ex, 77);
 				} catch (JenaException ex) {
 					if (ex.getCause() != null && ex.getCause() instanceof RiotException) {
 						throw new D2RQException(

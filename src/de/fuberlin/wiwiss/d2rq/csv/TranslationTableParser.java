@@ -14,8 +14,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.hp.hpl.jena.n3.IRIResolver;
+import org.openjena.riot.RiotException;
+import org.openjena.riot.system.IRIResolver;
 
 import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
@@ -40,11 +40,12 @@ public class TranslationTableParser {
 	
 	public TranslationTableParser(String url) {
 		try {
-			this.url = new IRIResolver().resolve(url);;
+			this.url = url;
+			this.url = IRIResolver.create().resolveToString(this.url);
 			this.reader = new BufferedReader(new FileReader(new File(new URI(this.url))));
 		} catch (FileNotFoundException fnfex) {
 			throw new D2RQException("File not found at URL: " + this.url);
-		} catch (URISyntaxException usynex) {
+		} catch (RiotException|URISyntaxException usynex) {
 			throw new D2RQException("Malformed URI: " + this.url);
 		}
 	}

@@ -10,8 +10,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openjena.riot.system.IRIResolver;
 
-import com.hp.hpl.jena.n3.IRIResolver;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
@@ -67,9 +67,9 @@ public class MapParser {
 		if (uri == null) {
 			return null;
 		}
-		return resolver.resolve(uri);
+		return resolver.resolveToString(uri);
 	}
-	private final static IRIResolver resolver = new IRIResolver();
+	private final static IRIResolver resolver = IRIResolver.create();
 
 	private OntModel model;
 	private String baseURI;

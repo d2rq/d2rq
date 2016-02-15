@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import junit.framework.TestCase;
+import de.fuberlin.wiwiss.d2rq.D2RQException;
 import de.fuberlin.wiwiss.d2rq.D2RQTestSuite;
 import de.fuberlin.wiwiss.d2rq.map.TranslationTable.Translation;
 
@@ -56,5 +57,16 @@ public class TranslationTableParserTest extends TestCase {
 		Collection<Translation> translations = new TranslationTableParser(
 				D2RQTestSuite.DIRECTORY_URL + "csv/translationtable.csv").parseTranslations();
 		assertEquals(this.simpleTranslations, new HashSet<Translation>(translations));
+	}
+
+	public void testThrowExceptionOnMalformedURL() {
+		try {
+			new TranslationTableParser("Not a URL").parseTranslations();
+			fail("Should have thrown D2RQException due to malformed URI");
+		} catch (D2RQException ex) {
+			assertTrue("Actual was: " + ex.getMessage(),
+					ex.getMessage().contains("Malformed URI") &&
+					ex.getMessage().contains("Not a URL"));
+		}
 	}
 }
