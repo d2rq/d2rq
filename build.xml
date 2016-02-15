@@ -69,8 +69,8 @@
 		<javac srcdir="${src}"
 				destdir="${build}"
 				debug="on"
-				source="1.5"
-				target="1.5"
+				source="1.8"
+				target="1.8"
 				includeAntRuntime="false">
 			<classpath refid="project.class.path"/>
 		</javac>
@@ -84,8 +84,8 @@
 		<javac srcdir="${src.tests}"
 				destdir="${build.tests}"
 				debug="on"
-				source="1.5"
-				target="1.5"
+				source="1.8"
+				target="1.8"
 				includeAntRuntime="false">
 			<classpath>
 				<path refid="project.class.path"/>
@@ -131,7 +131,7 @@
 				windowtitle="D2RQ"
 				doctitle="D2RQ">
 			<link href="http://incubator.apache.org/jena/documentation/javadoc/jena/"/>
-			<link href="http://docs.oracle.com/javase/1.5.0/docs/api/"/>
+			<link href="http://docs.oracle.com/javase/8/docs/api/"/>
 			<link href="http://incubator.apache.org/jena/documentation/javadoc/arq/"/>
 		</javadoc>
 	</target>
