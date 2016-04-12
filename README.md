@@ -18,10 +18,7 @@ http://www.apache.org/licenses/LICENSE-2.0.html
 
 ## Contact, feedback, discussion
 
-The project's mailing list is here:
-https://lists.sourceforge.net/lists/listinfo/d2rq-map-devel
-
-Also check the open issues here on GitHub for feature/bug discussion.
+Please use the issue tracker here on GitHub for feature/bug discussion and support requests.
 
 ## Building from source
 

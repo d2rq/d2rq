@@ -100,7 +100,10 @@ public class DatabaseSchemaInspector {
 		try {
 			if (db.vendor() != Vendor.MySQL) return false;
 			Statement stmt = db.connection().createStatement();
+
+			db.vendor().beforeQuery(db.connection());
 			ResultSet rs = stmt.executeQuery("DESCRIBE " + db.vendor().quoteRelationName(column.relationName()));		
+			db.vendor().afterQuery(db.connection());
 
 			while (rs.next()) {
 				// MySQL names are case insensitive, so we normalize to lower case
