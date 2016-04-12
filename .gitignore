@@ -6,3 +6,7 @@ d2rq-*.tar.gz
 d2rq-*.zip
 doc/javadoc
 lib/d2rq-*.jar
+*.iml
+.idea/
+
+
