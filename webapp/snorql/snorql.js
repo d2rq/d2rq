@@ -189,16 +189,16 @@ function Snorql() {
         if (this._graph == null) {
             var show = '#default-graph-section';
             var hide = '#named-graph-section';
-            jQuery('a.graph-link').each(function(link) {
+            jQuery('a.graph-link').each(function(index,link) {
                 match = link.href.match(/^(.*)[&?]graph=/);
                 if (match) link.href = match[1];
             });
         } else {
             var show = '#named-graph-section';
             var hide = '#default-graph-section';
-            jQuery('#selected-named-graph').update(this._graph);
+            jQuery('#selected-named-graph').text(this._graph);
             var uri = this._graph;
-            jQuery('a.graph-link').each(function(link) {
+            jQuery('a.graph-link').each(function(index,link) {
                 match = link.href.match(/^(.*)[&?]graph=/);
                 if (!match) link.href = link.href + '&graph=' + uri;
             });
