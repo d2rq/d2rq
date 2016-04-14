@@ -77,6 +77,9 @@ public class SQLServer extends SQL92 {
 		if (jdbcType == Types.CLOB || "NCLOB".equals(name)) {
 			return new SQLCharacterString(this, name, false);
 		}
+		if (jdbcType == Types.LONGNVARCHAR && "NTEXT".equals(name)) {
+			return new SQLCharacterString(this, name, false);
+		}
 		if (jdbcType == Types.BLOB) {
 			return new SQLBinary(this, name, false);
 		}

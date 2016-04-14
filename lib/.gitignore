@@ -1,0 +1,6 @@
+#
+# Do not include Microsoft SQL Server JDBC Driver
+# since their license doesn't allow for that
+#
+sqljdbc_*/
+
