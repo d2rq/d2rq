@@ -105,6 +105,9 @@ public class d2r_query extends CommandLineTool {
 		log.info("Query:\n" + query);
 		
 		try {
+			Object objStartTime=System.currentTimeMillis();	
+			Long startTime=(objStartTime==null)?0:(Long)objStartTime;
+
 			QueryEngineD2RQ.register();
 			Query q = QueryFactory.create(query, loader.getResourceBaseURI());
 			QueryExecution qe = QueryExecutionFactory.create(q, d2rqModel);
@@ -112,6 +115,13 @@ public class d2r_query extends CommandLineTool {
 				qe.setTimeout(Math.round(timeout * 1000));
 			}
 			QueryExecUtils.executeQuery(q, qe, ResultsFormat.lookup(format));
+		
+			Object objEndTime=System.currentTimeMillis();
+			Long endTime=(objEndTime==null)?0:(Long)objEndTime;
+			Long totalTime = endTime - startTime;
+			System.out.println("============================================");
+			System.out.println("Response time : "+totalTime+" ms ");
+			System.out.println("============================================");
 		} catch(QueryCancelledException ex) {
 			throw new D2RQException("Query timeout", ex, D2RQException.QUERY_TIMEOUT);
 		} finally {
